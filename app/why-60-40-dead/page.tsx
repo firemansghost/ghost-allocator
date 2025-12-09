@@ -16,7 +16,7 @@ export default function Why6040Page() {
 
         <section className="space-y-2">
           <h2 className="text-lg font-semibold">What is 60/40?</h2>
-          <p className="text-sm text-slate-200">
+          <p className="text-sm sm:text-base text-slate-200 leading-relaxed">
             The 60/40 portfolio is a classic investment strategy: 60% stocks and 40% bonds. It became
             the default recommendation for millions of investors because it offered a simple balance
             between growth (stocks) and stability (bonds).
@@ -25,7 +25,7 @@ export default function Why6040Page() {
 
         <section className="space-y-2">
           <h2 className="text-lg font-semibold">Why it worked (1982–2021)</h2>
-          <p className="text-sm text-slate-200">
+          <p className="text-sm sm:text-base text-slate-200 leading-relaxed">
             For nearly four decades, 60/40 delivered strong returns with manageable risk. Several
             tailwinds made this possible:
           </p>
@@ -48,7 +48,7 @@ export default function Why6040Page() {
 
         <section className="space-y-2">
           <h2 className="text-lg font-semibold">Why the regime changed</h2>
-          <p className="text-sm text-slate-200">
+          <p className="text-sm sm:text-base text-slate-200 leading-relaxed">
             The environment that made 60/40 successful has shifted:
           </p>
           <ul className="list-disc space-y-1 pl-5 text-sm text-slate-200">
@@ -102,7 +102,7 @@ export default function Why6040Page() {
 
         <section className="space-y-2">
           <h2 className="text-lg font-semibold">A high-level alternative</h2>
-          <p className="text-sm text-slate-200">
+          <p className="text-sm sm:text-base text-slate-200 leading-relaxed">
             Modern portfolio construction needs more sleeves than just stocks and bonds:
           </p>
           <ul className="list-disc space-y-1 pl-5 text-sm text-slate-200">

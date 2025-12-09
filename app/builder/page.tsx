@@ -102,7 +102,7 @@ export default function Builder() {
         <div className="space-y-4">
           {/* You told us summary */}
           <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
-            <h2 className="text-sm font-semibold">You told us</h2>
+            <h2 className="text-sm font-semibold text-slate-50">You told us</h2>
             <div className="grid gap-2 text-xs">
               <div>
                 <span className="text-slate-400">Age: </span>
@@ -133,7 +133,7 @@ export default function Builder() {
           {/* Pension callout */}
           {answers.hasPension && answers.pensionCoverage !== 'none' && (
             <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
-              <h2 className="text-sm font-semibold">Income Floor Detected</h2>
+              <h2 className="text-sm font-semibold text-slate-50">Income Floor Detected</h2>
               <p className="text-xs text-slate-300 leading-relaxed">
                 You told us you&apos;ll have pension and other guaranteed income
                 covering{' '}
@@ -158,7 +158,7 @@ export default function Builder() {
         <div className="space-y-4">
           {/* Allocation chart */}
           <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
-            <h2 className="text-sm font-semibold">Allocation Breakdown</h2>
+            <h2 className="text-sm font-semibold text-slate-50">Allocation Breakdown</h2>
             <div>
               <AllocationChart sleeves={portfolio.sleeves} />
             </div>
@@ -166,7 +166,7 @@ export default function Builder() {
 
           {/* Sleeve breakdown */}
           <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
-            <h2 className="text-sm font-semibold">Sleeve Details</h2>
+            <h2 className="text-sm font-semibold text-slate-50">Sleeve Details</h2>
             <div>
               <SleeveBreakdown sleeves={portfolio.sleeves} />
             </div>
@@ -176,12 +176,12 @@ export default function Builder() {
 
       {/* Example ETF lineup */}
       <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4 space-y-3">
-        <h2 className="text-sm font-semibold">Example ETF Lineup</h2>
+        <h2 className="text-sm font-semibold text-slate-50">Example ETF Lineup</h2>
         <p className="text-xs text-slate-300 leading-relaxed">
           These are example ETFs you could use in a full brokerage account. This
           is for illustration only, not a recommendation.
         </p>
-        <div className="space-y-4">
+        <div className="mt-2 space-y-1 text-xs text-slate-300 leading-relaxed">
           {portfolio.sleeves
             .filter((s) => s.weight > 0)
             .map((sleeve) => {

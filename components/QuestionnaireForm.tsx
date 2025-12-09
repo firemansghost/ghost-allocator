@@ -427,7 +427,7 @@ export default function QuestionnaireForm() {
 
       <button
         type="submit"
-        className="w-full rounded-md bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:bg-emerald-400 transition shadow-md shadow-emerald-500/25"
+        className="w-full rounded-md bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:bg-emerald-400 transition shadow-md shadow-emerald-500/25 transform hover:-translate-y-[1px]"
       >
         Build My Portfolio
       </button>
