@@ -8,6 +8,8 @@ export type PensionCoverage =
   | 'about_half'
   | 'most_or_all';
 
+export type PlatformType = 'voya_only' | 'voya_and_schwab';
+
 export type SleeveId =
   | 'core_equity'
   | 'convex_equity'
@@ -17,6 +19,12 @@ export type SleeveId =
   | 'managed_futures'
   | 'rate_hedge'
   | 'cash';
+
+export interface CurrentVoyaHolding {
+  fundId: string;
+  fundName: string;
+  allocationPct: number; // percent of the Voya slice, should sum ~100
+}
 
 export interface QuestionnaireAnswers {
   age: number;
@@ -28,6 +36,10 @@ export interface QuestionnaireAnswers {
   complexityPreference: 'simple' | 'moderate' | 'advanced';
   hasPension: boolean;
   pensionCoverage: PensionCoverage;
+  platform: PlatformType;
+  currentSchwabPct?: number; // 0–75, only relevant when platform === "voya_and_schwab"
+  schwabPreference?: 'stay_low' | 'use_full_75';
+  currentVoyaHoldings?: CurrentVoyaHolding[];
 }
 
 export interface Sleeve {
@@ -55,6 +67,45 @@ export interface ModelPortfolio {
 export interface QuestionnaireResult {
   answers: QuestionnaireAnswers;
   riskLevel: RiskLevel;
+}
+
+export interface PlatformSplit {
+  platform: PlatformType; // 'voya_only' | 'voya_and_schwab'
+  targetVoyaPct: number;   // percent of the total 457 balance
+  targetSchwabPct: number; // percent of the total 457 balance (0–75 for voya_and_schwab)
+}
+
+export type VoyaImplementationStyle = 'simple_target_date' | 'core_mix';
+
+export interface VoyaFundMixItem {
+  id: string;
+  name: string;
+  role: string;          // short description e.g. "US large-cap core", "international equity"
+  allocationPct: number; // percent of the Voya slice (not of total 457)
+}
+
+export interface VoyaImplementation {
+  style: VoyaImplementationStyle;
+  description: string;
+  targetDateFundName?: string;
+  mix?: VoyaFundMixItem[];
+}
+
+export interface VoyaFundDelta {
+  id: string;
+  name: string;
+  role?: string;
+  currentPct: number; // % of the Voya portion today (0–100)
+  targetPct: number;  // % of the Voya portion in the suggested mix (0–100)
+  deltaPct: number;   // targetPct - currentPct (positive = increase)
+}
+
+export interface VoyaDeltaPlan {
+  hasData: boolean;          // false if user didn't enter current mix
+  totalCurrentPct: number;   // sum of currentPct values (for sanity display)
+  deltas: VoyaFundDelta[];
+  overweight: VoyaFundDelta[];  // deltaPct < -1
+  underweight: VoyaFundDelta[]; // deltaPct > 1
 }
 
 

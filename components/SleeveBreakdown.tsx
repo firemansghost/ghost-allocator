@@ -15,17 +15,17 @@ export default function SleeveBreakdown({ sleeves }: SleeveBreakdownProps) {
       {sortedSleeves.map((sleeve) => (
         <div
           key={sleeve.id}
-          className="rounded-lg border border-slate-800 bg-slate-900/40 p-4"
+          className="rounded-lg border border-zinc-800 bg-black/40 p-4"
         >
           <div className="flex justify-between items-start mb-2">
-            <h3 className="text-sm font-semibold text-slate-200">
+            <h3 className="text-sm font-semibold text-zinc-200">
               {sleeve.name}
             </h3>
-            <span className="text-sm font-bold text-slate-200">
+            <span className="text-sm font-bold text-zinc-200">
               {formatPercent(sleeve.weight)}
             </span>
           </div>
-          <p className="text-xs text-slate-300">{sleeve.description}</p>
+          <p className="text-xs text-zinc-300">{sleeve.description}</p>
         </div>
       ))}
     </div>

@@ -4,8 +4,10 @@ import type {
   ModelPortfolio,
   ExampleETF,
   RegimeScenario,
+  PlatformSplit,
 } from './types';
 import { modelPortfolios, exampleETFs } from './sleeves';
+import { buildVoyaImplementation } from './voya';
 
 /**
  * Computes risk level from questionnaire answers using a numeric scoring system
@@ -116,5 +118,45 @@ export function suggestExampleEtfs(
 
   return suggested;
 }
+
+/**
+ * Computes the platform split between Voya and Schwab based on questionnaire answers
+ */
+export function computePlatformSplit(answers: QuestionnaireAnswers): PlatformSplit {
+  if (answers.platform === 'voya_only') {
+    return {
+      platform: 'voya_only',
+      targetVoyaPct: 100,
+      targetSchwabPct: 0,
+    };
+  }
+
+  // default starting point
+  const current =
+    typeof answers.currentSchwabPct === 'number' ? answers.currentSchwabPct : 50;
+  const pref = answers.schwabPreference ?? 'stay_low';
+
+  let targetSchwabPct = Math.min(75, Math.max(0, current));
+
+  if (pref === 'use_full_75') {
+    targetSchwabPct = 75;
+  } else {
+    // stay_low: keep near current, but gently clamp into [25, 60]
+    targetSchwabPct = Math.min(60, Math.max(25, targetSchwabPct));
+  }
+
+  const targetVoyaPct = Math.max(0, 100 - targetSchwabPct);
+
+  return {
+    platform: 'voya_and_schwab',
+    targetVoyaPct,
+    targetSchwabPct,
+  };
+}
+
+// Re-export buildVoyaImplementation for convenience
+export { buildVoyaImplementation } from './voya';
+// Re-export computeVoyaDeltaPlan and getVoyaDeltaSummary for convenience
+export { computeVoyaDeltaPlan, getVoyaDeltaSummary } from './voyaDelta';
 
 

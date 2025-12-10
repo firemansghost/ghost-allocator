@@ -1,31 +1,31 @@
 import Link from 'next/link';
+import { GlassCard } from '@/components/GlassCard';
 
 export default function HomePage() {
   return (
     <div className="relative space-y-16">
       <div className="pointer-events-none absolute inset-x-0 -top-24 -z-10 flex justify-center">
-        <div className="h-64 w-[28rem] rounded-full bg-emerald-500/25 blur-3xl opacity-70" />
+        <div className="h-64 w-[28rem] rounded-full bg-amber-400/25 blur-3xl opacity-80" />
       </div>
       <section className="flex flex-col items-center text-center pt-8 sm:pt-12 pb-4">
         <div className="max-w-3xl space-y-5">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight leading-tight">
             Build a modern portfolio for a post-60/40 world.
           </h1>
-          <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-            ETF-based portfolio building. No options trading required. Designed for choppy,
-            inflationary, high-volatility markets — especially if you&apos;ve got a pension and a 457.
+          <p className="text-sm sm:text-base text-zinc-300 leading-relaxed">
+            Pension-aware portfolio templates for your 457. Works with Voya core funds and Schwab ETFs — no options chains, no jargon.
           </p>
         </div>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
           <Link
             href="/onboarding"
-            className="rounded-full bg-emerald-500 px-6 py-2.5 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/25 hover:bg-emerald-400 transition"
+            className="rounded-full bg-amber-400 px-6 py-2.5 text-sm font-semibold text-black shadow-lg shadow-amber-400/40 hover:bg-amber-300 transition"
           >
             Build My Portfolio
           </Link>
           <Link
             href="/why-60-40-dead"
-            className="text-sm font-medium text-slate-300 hover:text-white underline-offset-4 hover:underline"
+            className="text-sm font-medium text-zinc-300 hover:text-zinc-100 underline-offset-4 hover:underline"
           >
             Why 60/40 Might Be Dead
           </Link>
@@ -37,27 +37,27 @@ export default function HomePage() {
           How it works
         </h2>
         <div className="mt-4 grid gap-6 sm:grid-cols-3">
-          <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4 shadow-sm transition transform hover:-translate-y-1 hover:border-emerald-500/60 hover:shadow-lg hover:shadow-emerald-500/20">
-            <p className="text-xs font-semibold text-emerald-400 uppercase tracking-wide">Step 1</p>
-            <h3 className="mt-2 text-sm font-semibold text-slate-50">Answer a few questions</h3>
-            <p className="mt-2 text-xs text-slate-300 leading-relaxed">
+          <GlassCard className="p-4 sm:p-5 transition transform hover:-translate-y-1 hover:border-amber-400/60 hover:shadow-[0_20px_60px_rgba(0,0,0,0.9)]">
+            <p className="text-[11px] font-semibold text-amber-300 uppercase tracking-wide">Step 1</p>
+            <h3 className="mt-2 text-sm font-semibold text-zinc-50">Answer a few questions</h3>
+            <p className="mt-2 text-xs text-zinc-300 leading-relaxed">
               Tell us about your situation, risk tolerance, and whether you have a pension or other income floor.
             </p>
-          </div>
-          <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4 shadow-sm transition transform hover:-translate-y-1 hover:border-emerald-500/60 hover:shadow-lg hover:shadow-emerald-500/20">
-            <p className="text-xs font-semibold text-emerald-400 uppercase tracking-wide">Step 2</p>
-            <h3 className="mt-2 text-sm font-semibold text-slate-50">Get your allocation</h3>
-            <p className="mt-2 text-xs text-slate-300 leading-relaxed">
-              Ghost Allocator designs a Cem-inspired, ETF-only allocation tailored to your risk band and regime.
+          </GlassCard>
+          <GlassCard className="p-4 sm:p-5 transition transform hover:-translate-y-1 hover:border-amber-400/60 hover:shadow-[0_20px_60px_rgba(0,0,0,0.9)]">
+            <p className="text-[11px] font-semibold text-amber-300 uppercase tracking-wide">Step 2</p>
+            <h3 className="mt-2 text-sm font-semibold text-zinc-50">Get your allocation</h3>
+            <p className="mt-2 text-xs text-zinc-300 leading-relaxed">
+              Ghost Allocator designs a post-60/40 Ghost sleeve allocation tailored to your risk band and regime.
             </p>
-          </div>
-          <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4 shadow-sm transition transform hover:-translate-y-1 hover:border-emerald-500/60 hover:shadow-lg hover:shadow-emerald-500/20">
-            <p className="text-xs font-semibold text-emerald-400 uppercase tracking-wide">Step 3</p>
-            <h3 className="mt-2 text-sm font-semibold text-slate-50">See example ETFs</h3>
-            <p className="mt-2 text-xs text-slate-300 leading-relaxed">
-              Review sleeves and example ETFs you could use in a full brokerage account. No options chains required.
+          </GlassCard>
+          <GlassCard className="p-4 sm:p-5 transition transform hover:-translate-y-1 hover:border-amber-400/60 hover:shadow-[0_20px_60px_rgba(0,0,0,0.9)]">
+            <p className="text-[11px] font-semibold text-amber-300 uppercase tracking-wide">Step 3</p>
+            <h3 className="mt-2 text-sm font-semibold text-zinc-50">See example funds</h3>
+            <p className="mt-2 text-xs text-zinc-300 leading-relaxed">
+              Review sleeves and example funds/ETFs mapped to your plan. No options chains required.
             </p>
-          </div>
+          </GlassCard>
         </div>
       </section>
     </div>

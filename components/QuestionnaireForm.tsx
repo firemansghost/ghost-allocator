@@ -15,6 +15,7 @@ export default function QuestionnaireForm() {
     behaviorInCrash: 'hold',
     incomeStability: 'medium',
     complexityPreference: 'simple',
+    platform: 'voya_only',
     hasPension: false,
     pensionCoverage: 'none',
   });
@@ -45,6 +46,17 @@ export default function QuestionnaireForm() {
     if (!formData.complexityPreference) {
       errors.complexityPreference = 'Please select an option';
     }
+    if (!formData.platform) {
+      errors.platform = 'Please select an option';
+    }
+    if (formData.platform === 'voya_and_schwab') {
+      if (formData.currentSchwabPct === undefined || formData.currentSchwabPct < 0 || formData.currentSchwabPct > 75) {
+        errors.currentSchwabPct = 'Please enter a valid percentage (0-75)';
+      }
+      if (!formData.schwabPreference) {
+        errors.schwabPreference = 'Please select an option';
+      }
+    }
     if (formData.hasPension === undefined) {
       errors.hasPension = 'Please select an option';
     }
@@ -58,9 +70,12 @@ export default function QuestionnaireForm() {
     }
 
     // Ensure pensionCoverage is set to 'none' if hasPension is false
+    // Clean up Schwab fields if platform is voya_only
     const finalFormData = {
       ...formData,
       pensionCoverage: formData.hasPension ? formData.pensionCoverage : 'none',
+      currentSchwabPct: formData.platform === 'voya_and_schwab' ? formData.currentSchwabPct : undefined,
+      schwabPreference: formData.platform === 'voya_and_schwab' ? formData.schwabPreference : undefined,
     } as QuestionnaireAnswers;
 
     const answers = finalFormData;
@@ -75,14 +90,14 @@ export default function QuestionnaireForm() {
     <form onSubmit={handleSubmit} className="space-y-5 text-sm">
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1">
-          <label className="text-xs font-medium text-slate-300 leading-snug">Age</label>
+          <label className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">Age</label>
           <input
             type="number"
             value={formData.age || ''}
             onChange={(e) =>
               setFormData({ ...formData, age: parseInt(e.target.value) })
             }
-            className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+            className="w-full rounded-md border border-zinc-700 bg-black/40 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-amber-400 focus:outline-none focus:ring-0"
             min="18"
             max="100"
           />
@@ -92,7 +107,7 @@ export default function QuestionnaireForm() {
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs font-medium text-slate-300 leading-snug">
+          <label className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">
             Years to goal / retirement
           </label>
           <input
@@ -104,7 +119,7 @@ export default function QuestionnaireForm() {
                 yearsToGoal: parseInt(e.target.value),
               })
             }
-            className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+            className="w-full rounded-md border border-zinc-700 bg-black/40 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-amber-400 focus:outline-none focus:ring-0"
             min="0"
           />
           {errors.yearsToGoal && (
@@ -114,7 +129,7 @@ export default function QuestionnaireForm() {
       </div>
 
       <div className="space-y-1">
-        <label className="text-xs font-medium text-slate-300 leading-snug">
+        <label className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">
           Are you currently retired?
         </label>
         <div className="space-y-2">
@@ -127,7 +142,7 @@ export default function QuestionnaireForm() {
               onChange={() => setFormData({ ...formData, isRetired: true })}
               className="mr-2"
             />
-            <span className="text-sm text-slate-300">Yes</span>
+            <span className="text-sm text-zinc-300">Yes</span>
           </label>
           <label className="flex items-center">
             <input
@@ -138,7 +153,7 @@ export default function QuestionnaireForm() {
               onChange={() => setFormData({ ...formData, isRetired: false })}
               className="mr-2"
             />
-            <span className="text-sm text-slate-300">No</span>
+            <span className="text-sm text-zinc-300">No</span>
           </label>
         </div>
         {errors.isRetired && (
@@ -147,7 +162,7 @@ export default function QuestionnaireForm() {
       </div>
 
       <div className="space-y-1">
-        <label className="text-xs font-medium text-slate-300 leading-snug">
+        <label className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">
           Drawdown tolerance
         </label>
         <select
@@ -158,7 +173,7 @@ export default function QuestionnaireForm() {
               drawdownTolerance: e.target.value as 'low' | 'medium' | 'high',
             })
           }
-          className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+          className="w-full rounded-md border border-zinc-700 bg-black/40 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-amber-400 focus:outline-none focus:ring-0"
         >
           <option value="low">Low</option>
           <option value="medium">Medium</option>
@@ -172,7 +187,7 @@ export default function QuestionnaireForm() {
       </div>
 
       <div className="space-y-1">
-        <label className="text-xs font-medium text-slate-300 leading-snug">
+        <label className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">
           Behavior in a big crash (like 2020/2022)
         </label>
         <div className="space-y-2">
@@ -187,7 +202,7 @@ export default function QuestionnaireForm() {
               }
               className="mr-2"
             />
-            <span className="text-sm text-slate-300">
+            <span className="text-sm text-zinc-300">
               I&apos;d probably panic sell
             </span>
           </label>
@@ -202,7 +217,7 @@ export default function QuestionnaireForm() {
               }
               className="mr-2"
             />
-            <span className="text-sm text-slate-300">I&apos;d probably hold</span>
+            <span className="text-sm text-zinc-300">I&apos;d probably hold</span>
           </label>
           <label className="flex items-center">
             <input
@@ -215,7 +230,7 @@ export default function QuestionnaireForm() {
               }
               className="mr-2"
             />
-            <span className="text-sm text-slate-300">
+            <span className="text-sm text-zinc-300">
               I&apos;d probably buy more
             </span>
           </label>
@@ -226,7 +241,7 @@ export default function QuestionnaireForm() {
       </div>
 
       <div className="space-y-1">
-        <label className="text-xs font-medium text-slate-300 leading-snug">
+        <label className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">
           Income stability
         </label>
         <select
@@ -237,7 +252,7 @@ export default function QuestionnaireForm() {
               incomeStability: e.target.value as 'low' | 'medium' | 'high',
             })
           }
-          className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+          className="w-full rounded-md border border-zinc-700 bg-black/40 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-amber-400 focus:outline-none focus:ring-0"
         >
           <option value="low">Low</option>
           <option value="medium">Medium</option>
@@ -251,7 +266,7 @@ export default function QuestionnaireForm() {
       </div>
 
       <div className="space-y-1">
-        <label className="text-xs font-medium text-slate-300 leading-snug">
+        <label className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">
           Preference for complexity
         </label>
         <div className="space-y-2">
@@ -266,7 +281,7 @@ export default function QuestionnaireForm() {
               }
               className="mr-2"
             />
-            <span className="text-sm text-slate-300">Keep it simple</span>
+            <span className="text-sm text-zinc-300">Keep it simple</span>
           </label>
           <label className="flex items-center">
             <input
@@ -282,7 +297,7 @@ export default function QuestionnaireForm() {
               }
               className="mr-2"
             />
-            <span className="text-sm text-slate-300">
+            <span className="text-sm text-zinc-300">
               I&apos;m okay with some complexity
             </span>
           </label>
@@ -297,7 +312,7 @@ export default function QuestionnaireForm() {
               }
               className="mr-2"
             />
-            <span className="text-sm text-slate-300">
+            <span className="text-sm text-zinc-300">
               Give me the advanced stuff
             </span>
           </label>
@@ -309,8 +324,127 @@ export default function QuestionnaireForm() {
         )}
       </div>
 
+      {/* Platform / account structure */}
+      <div className="space-y-2">
+        <p className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">
+          Where is your 457 invested today?
+        </p>
+        <div className="space-y-1.5 text-sm text-zinc-200">
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="platform"
+              value="voya_only"
+              checked={formData.platform === 'voya_only'}
+              onChange={() =>
+                setFormData({
+                  ...formData,
+                  platform: 'voya_only',
+                  currentSchwabPct: undefined,
+                  schwabPreference: undefined,
+                })
+              }
+              className="h-3.5 w-3.5 accent-amber-400"
+            />
+            <span>Voya core menu only (no Schwab BrokerageLink)</span>
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="platform"
+              value="voya_and_schwab"
+              checked={formData.platform === 'voya_and_schwab'}
+              onChange={() =>
+                setFormData({
+                  ...formData,
+                  platform: 'voya_and_schwab',
+                  currentSchwabPct: formData.currentSchwabPct ?? 50,
+                  schwabPreference: formData.schwabPreference ?? 'stay_low',
+                })
+              }
+              className="h-3.5 w-3.5 accent-amber-400"
+            />
+            <span>Mix of Voya core menu and Schwab BrokerageLink</span>
+          </label>
+        </div>
+        {errors.platform && (
+          <p className="mt-1 text-xs text-red-400">{errors.platform}</p>
+        )}
+
+        {formData.platform === 'voya_and_schwab' && (
+          <div className="mt-2 space-y-3">
+            <div className="space-y-1">
+              <label className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">
+                Roughly what % is in Schwab now? (max 75%)
+              </label>
+              <input
+                type="number"
+                min={0}
+                max={75}
+                value={formData.currentSchwabPct ?? ''}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    currentSchwabPct: Number(e.target.value || 0),
+                  })
+                }
+                className="w-full rounded-md border border-zinc-700 bg-black/40 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-amber-400 focus:outline-none focus:ring-0"
+                placeholder="e.g. 50"
+              />
+              {errors.currentSchwabPct && (
+                <p className="mt-1 text-xs text-red-400">
+                  {errors.currentSchwabPct}
+                </p>
+              )}
+            </div>
+            <div className="space-y-1 text-sm text-zinc-200">
+              <p className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">
+                Schwab allocation preference
+              </p>
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="schwabPreference"
+                  value="stay_low"
+                  checked={formData.schwabPreference === 'stay_low'}
+                  onChange={() =>
+                    setFormData({
+                      ...formData,
+                      schwabPreference: 'stay_low',
+                    })
+                  }
+                  className="h-3.5 w-3.5 accent-amber-400"
+                />
+                <span>I&apos;d rather keep it closer to where it is</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="schwabPreference"
+                  value="use_full_75"
+                  checked={formData.schwabPreference === 'use_full_75'}
+                  onChange={() =>
+                    setFormData({
+                      ...formData,
+                      schwabPreference: 'use_full_75',
+                    })
+                  }
+                  className="h-3.5 w-3.5 accent-amber-400"
+                />
+                <span>I&apos;m fine going up to the 75% cap for more flexibility</span>
+              </label>
+            </div>
+            {errors.schwabPreference && (
+              <p className="mt-1 text-xs text-red-400">
+                {errors.schwabPreference}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
       <div className="space-y-1">
-        <label className="text-xs font-medium text-slate-300 leading-snug">
+        <label className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">
           Do you have (or expect) a pension that will pay you a monthly benefit
           in retirement?
         </label>
@@ -324,7 +458,7 @@ export default function QuestionnaireForm() {
               onChange={() => setFormData({ ...formData, hasPension: true })}
               className="mr-2"
             />
-            <span className="text-sm text-slate-300">Yes</span>
+            <span className="text-sm text-zinc-300">Yes</span>
           </label>
           <label className="flex items-center">
             <input
@@ -341,7 +475,7 @@ export default function QuestionnaireForm() {
               }
               className="mr-2"
             />
-            <span className="text-sm text-slate-300">No</span>
+            <span className="text-sm text-zinc-300">No</span>
           </label>
         </div>
         {errors.hasPension && (
@@ -351,7 +485,7 @@ export default function QuestionnaireForm() {
 
       {formData.hasPension && (
         <div className="space-y-1">
-          <label className="text-xs font-medium text-slate-300 leading-snug">
+          <label className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">
             How much of your basic retirement expenses (housing, utilities,
             groceries, basic insurance) will be covered by guaranteed income like
             pension + Social Security?
@@ -368,7 +502,7 @@ export default function QuestionnaireForm() {
                 }
                 className="mr-2"
               />
-              <span className="text-sm text-slate-300">
+              <span className="text-sm text-zinc-300">
                 None or almost none
               </span>
             </label>
@@ -386,7 +520,7 @@ export default function QuestionnaireForm() {
                 }
                 className="mr-2"
               />
-              <span className="text-sm text-slate-300">Less than half</span>
+              <span className="text-sm text-zinc-300">Less than half</span>
             </label>
             <label className="flex items-center">
               <input
@@ -399,7 +533,7 @@ export default function QuestionnaireForm() {
                 }
                 className="mr-2"
               />
-              <span className="text-sm text-slate-300">About half</span>
+              <span className="text-sm text-zinc-300">About half</span>
             </label>
             <label className="flex items-center">
               <input
@@ -412,7 +546,7 @@ export default function QuestionnaireForm() {
                 }
                 className="mr-2"
               />
-              <span className="text-sm text-slate-300">
+              <span className="text-sm text-zinc-300">
                 Most or all of my basics are covered
               </span>
             </label>
@@ -427,7 +561,7 @@ export default function QuestionnaireForm() {
 
       <button
         type="submit"
-        className="w-full rounded-md bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:bg-emerald-400 transition shadow-md shadow-emerald-500/25 transform hover:-translate-y-[1px]"
+        className="w-full rounded-md bg-amber-400 px-4 py-2.5 text-sm font-semibold text-black hover:bg-amber-300 transition shadow-md shadow-amber-400/40 transform hover:-translate-y-[1px]"
       >
         Build My Portfolio
       </button>
