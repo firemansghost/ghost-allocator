@@ -60,6 +60,38 @@ export default function HomePage() {
           </GlassCard>
         </div>
       </section>
+
+      <section className="space-y-4">
+        <h2 className="text-center text-lg font-semibold tracking-tight">
+          Tools
+        </h2>
+        <div className="mt-4 grid gap-6 sm:grid-cols-2">
+          <GlassCard className="p-4 sm:p-5 transition transform hover:-translate-y-1 hover:border-amber-400/60 hover:shadow-[0_20px_60px_rgba(0,0,0,0.9)]">
+            <h3 className="text-sm font-semibold text-zinc-50">Ghost Allocator</h3>
+            <p className="mt-2 text-xs text-zinc-300 leading-relaxed">
+              Build a personalized portfolio allocation for your 457 plan using Voya core funds and Schwab ETFs.
+            </p>
+            <Link
+              href="/onboarding"
+              className="mt-4 inline-flex items-center text-xs font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
+            >
+              Build My Portfolio →
+            </Link>
+          </GlassCard>
+          <GlassCard className="p-4 sm:p-5 transition transform hover:-translate-y-1 hover:border-amber-400/60 hover:shadow-[0_20px_60px_rgba(0,0,0,0.9)]">
+            <h3 className="text-sm font-semibold text-zinc-50">GhostRegime</h3>
+            <p className="mt-2 text-xs text-zinc-300 leading-relaxed">
+              Macro regime classification and real-time allocation system based on market conditions.
+            </p>
+            <Link
+              href="/ghostregime"
+              className="mt-4 inline-flex items-center text-xs font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
+            >
+              Open GhostRegime →
+            </Link>
+          </GlassCard>
+        </div>
+      </section>
     </div>
   );
 }

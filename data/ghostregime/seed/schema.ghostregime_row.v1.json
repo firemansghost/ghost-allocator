@@ -1,0 +1,132 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GhostRegimeRow",
+  "type": "object",
+  "description": "Schema for GhostRegime row data (v1)",
+  "properties": {
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "ISO date string (YYYY-MM-DD)"
+    },
+    "regime": {
+      "type": "string",
+      "enum": ["GOLDILOCKS", "REFLATION", "INFLATION", "DEFLATION"]
+    },
+    "risk_regime": {
+      "type": "string",
+      "enum": ["RISK ON", "RISK OFF"]
+    },
+    "risk_score": {
+      "type": "number"
+    },
+    "infl_score": {
+      "type": "number"
+    },
+    "infl_core_score": {
+      "type": "number"
+    },
+    "infl_sat_score": {
+      "type": "number"
+    },
+    "stocks_vams_state": {
+      "type": "number",
+      "enum": [-2, 0, 2]
+    },
+    "gold_vams_state": {
+      "type": "number",
+      "enum": [-2, 0, 2]
+    },
+    "btc_vams_state": {
+      "type": "number",
+      "enum": [-2, 0, 2]
+    },
+    "stocks_target": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "gold_target": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "btc_target": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "stocks_scale": {
+      "type": "number",
+      "enum": [0, 0.5, 1]
+    },
+    "gold_scale": {
+      "type": "number",
+      "enum": [0, 0.5, 1]
+    },
+    "btc_scale": {
+      "type": "number",
+      "enum": [0, 0.5, 1]
+    },
+    "stocks_actual": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "gold_actual": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "btc_actual": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "cash": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "flip_watch_status": {
+      "type": "string",
+      "enum": ["NONE", "BREWING", "PENDING_CONFIRMATION", "STRONG_FLIP"]
+    },
+    "source": {
+      "type": "string",
+      "enum": ["replay", "computed"]
+    },
+    "stale": {
+      "type": "boolean",
+      "default": false
+    },
+    "stale_reason": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "date",
+    "regime",
+    "risk_regime",
+    "risk_score",
+    "infl_score",
+    "infl_core_score",
+    "infl_sat_score",
+    "stocks_vams_state",
+    "gold_vams_state",
+    "btc_vams_state",
+    "stocks_target",
+    "gold_target",
+    "btc_target",
+    "stocks_scale",
+    "gold_scale",
+    "btc_scale",
+    "stocks_actual",
+    "gold_actual",
+    "btc_actual",
+    "cash",
+    "flip_watch_status",
+    "source"
+  ]
+}
+
