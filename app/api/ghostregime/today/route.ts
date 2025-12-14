@@ -25,6 +25,18 @@ export async function GET() {
     return NextResponse.json(row);
   } catch (error) {
     console.error('Error in /api/ghostregime/today:', error);
+    
+    // Handle NOT_READY error
+    if (error instanceof Error && error.message === 'GHOSTREGIME_NOT_READY') {
+      return NextResponse.json(
+        {
+          error: 'GHOSTREGIME_NOT_READY',
+          message: 'Insufficient market data to compute regime',
+        },
+        { status: 503 }
+      );
+    }
+    
     return NextResponse.json(
       {
         error: 'INTERNAL_ERROR',

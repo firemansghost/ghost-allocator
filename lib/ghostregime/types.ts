@@ -40,14 +40,22 @@ export interface AllocationOutput {
   cash: number;
 }
 
+export type RiskAxis = 'RiskOn' | 'RiskOff';
+export type InflAxis = 'Inflation' | 'Disinflation';
+
 export interface GhostRegimeRow {
-  date: string; // ISO date string (UTC)
+  date: string; // ISO date string (UTC) - asof_date (latest common market close)
+  run_date_utc?: string; // ISO date string (UTC) - actual server date when computed
   regime: RegimeType;
   risk_regime: RiskRegime;
   risk_score: number;
   infl_score: number;
   infl_core_score: number;
   infl_sat_score: number;
+  risk_axis: RiskAxis;
+  infl_axis: InflAxis;
+  risk_tiebreaker_used: boolean;
+  infl_tiebreaker_used: boolean;
   stocks_vams_state: VamsState;
   gold_vams_state: VamsState;
   btc_vams_state: VamsState;

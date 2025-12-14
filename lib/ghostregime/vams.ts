@@ -12,24 +12,31 @@ import { getDataForSymbol, calculateTR, getReturnsForWindow, calculateStdDev, TR
  * mom = 0.6 * TR_126 + 0.4 * TR_252
  * vol = stdev(daily_returns, 63) * sqrt(252)
  * score = mom / vol
+ * @param asofDate Optional date to compute as-of (filters data to this date)
  */
 export function computeVamsScore(
   marketData: MarketDataPoint[],
-  symbol: string
+  symbol: string,
+  asofDate?: Date
 ): number {
   const symbolData = getDataForSymbol(marketData, symbol);
   
-  if (symbolData.length < TR_252) {
+  let filtered = symbolData;
+  if (asofDate) {
+    filtered = symbolData.filter(d => d.date <= asofDate);
+  }
+  
+  if (filtered.length < TR_252) {
     return 0; // Not enough data
   }
 
   // Calculate momentum: 0.6 * TR_126 + 0.4 * TR_252
-  const tr126 = calculateTR(symbolData, TR_126);
-  const tr252 = calculateTR(symbolData, TR_252);
+  const tr126 = calculateTR(filtered, TR_126, asofDate);
+  const tr252 = calculateTR(filtered, TR_252, asofDate);
   const mom = 0.6 * tr126 + 0.4 * tr252;
 
   // Calculate volatility: stdev(daily_returns, 63) * sqrt(252)
-  const returns = getReturnsForWindow(symbolData, symbol, 63);
+  const returns = getReturnsForWindow(symbolData, symbol, 63, asofDate);
   if (returns.length < 63) {
     return 0; // Not enough returns
   }
@@ -72,18 +79,20 @@ export function vamsStateToScale(state: VamsState): number {
 
 /**
  * Compute VAMS for all three drivers (stocks, gold, BTC)
+ * @param asofDate Optional date to compute as-of (filters data to this date)
  */
 export function computeAllVamsStates(
   marketData: MarketDataPoint[],
-  btcSymbol: string = 'BTC-USD'
+  btcSymbol: string = 'BTC-USD',
+  asofDate?: Date
 ): {
   stocks: VamsState;
   gold: VamsState;
   btc: VamsState;
 } {
-  const stocksScore = computeVamsScore(marketData, 'SPY');
-  const goldScore = computeVamsScore(marketData, 'GLD');
-  const btcScore = computeVamsScore(marketData, btcSymbol);
+  const stocksScore = computeVamsScore(marketData, 'SPY', asofDate);
+  const goldScore = computeVamsScore(marketData, 'GLD', asofDate);
+  const btcScore = computeVamsScore(marketData, btcSymbol, asofDate);
 
   return {
     stocks: vamsScoreToState(stocksScore),

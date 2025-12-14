@@ -28,6 +28,11 @@ export default function GhostRegimePage() {
             setLoading(false);
             return;
           }
+          if (json.error === 'GHOSTREGIME_NOT_READY') {
+            setError('Insufficient market data to compute regime. Please try again later.');
+            setLoading(false);
+            return;
+          }
         }
 
         if (!response.ok) {
@@ -115,12 +120,43 @@ export default function GhostRegimePage() {
           <h2 className="text-sm font-semibold text-zinc-50">Regime Classification</h2>
           <div className="space-y-2">
             <div>
+              <p className="text-xs text-zinc-400 uppercase tracking-wide">As-of</p>
+              <p className="text-sm font-medium text-zinc-200">{data.date}</p>
+              {data.run_date_utc && data.run_date_utc !== data.date && (
+                <p className="text-[11px] text-zinc-500 mt-0.5">
+                  Computed: {data.run_date_utc}
+                </p>
+              )}
+            </div>
+            <div>
               <p className="text-xs text-zinc-400 uppercase tracking-wide">Regime</p>
               <p className="text-lg font-semibold text-amber-300">{data.regime}</p>
             </div>
             <div>
               <p className="text-xs text-zinc-400 uppercase tracking-wide">Risk Regime</p>
               <p className="text-sm font-medium text-zinc-200">{data.risk_regime}</p>
+            </div>
+            <div>
+              <p className="text-xs text-zinc-400 uppercase tracking-wide">Risk Axis</p>
+              <p className="text-sm font-medium text-zinc-200">
+                {data.risk_axis}
+                {data.risk_tiebreaker_used && (
+                  <span className="ml-2 inline-flex items-center rounded-full border border-amber-400/60 bg-amber-400/10 px-2 py-0.5 text-[10px] font-medium text-amber-300">
+                    Tie-breaker used
+                  </span>
+                )}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-zinc-400 uppercase tracking-wide">Inflation Axis</p>
+              <p className="text-sm font-medium text-zinc-200">
+                {data.infl_axis}
+                {data.infl_tiebreaker_used && (
+                  <span className="ml-2 inline-flex items-center rounded-full border border-amber-400/60 bg-amber-400/10 px-2 py-0.5 text-[10px] font-medium text-amber-300">
+                    Tie-breaker used
+                  </span>
+                )}
+              </p>
             </div>
             <div>
               <p className="text-xs text-zinc-400 uppercase tracking-wide">Flip Watch</p>

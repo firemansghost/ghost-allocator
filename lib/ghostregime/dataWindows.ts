@@ -24,12 +24,18 @@ export function getLastNObservations(
 /**
  * Calculate close-to-close return over a window
  * Returns the total return from first to last observation
+ * If asofDate is provided, only uses data up to and including that date
  */
 export function calculateTR(
   data: MarketDataPoint[],
-  windowDays: number
+  windowDays: number,
+  asofDate?: Date
 ): number {
-  const window = getLastNObservations(data, windowDays);
+  let filtered = data;
+  if (asofDate) {
+    filtered = data.filter(d => d.date <= asofDate);
+  }
+  const window = getLastNObservations(filtered, windowDays);
   if (window.length < 2) return 0;
 
   const first = window[0];
@@ -41,14 +47,24 @@ export function calculateTR(
 
 /**
  * Calculate ratio return (dataA / dataB) over a window
+ * If asofDate is provided, only uses data up to and including that date
+ * Note: dataA and dataB should already be filtered to asofDate before calling
  */
 export function calculateRatioTR(
   dataA: MarketDataPoint[],
   dataB: MarketDataPoint[],
-  windowDays: number
+  windowDays: number,
+  asofDate?: Date
 ): number {
-  const windowA = getLastNObservations(dataA, windowDays);
-  const windowB = getLastNObservations(dataB, windowDays);
+  // Data should already be filtered in regimeCore, but filter here too for safety
+  let filteredA = dataA;
+  let filteredB = dataB;
+  if (asofDate) {
+    filteredA = dataA.filter(d => d.date <= asofDate);
+    filteredB = dataB.filter(d => d.date <= asofDate);
+  }
+  const windowA = getLastNObservations(filteredA, windowDays);
+  const windowB = getLastNObservations(filteredB, windowDays);
 
   if (windowA.length < 2 || windowB.length < 2) return 0;
 
@@ -107,15 +123,68 @@ export function calculateStdDev(returns: number[]): number {
 
 /**
  * Get returns array for a symbol over a window
+ * If asofDate is provided, only uses data up to and including that date
  */
 export function getReturnsForWindow(
   data: MarketDataPoint[],
   symbol: string,
-  windowDays: number
+  windowDays: number,
+  asofDate?: Date
 ): number[] {
   const symbolData = getDataForSymbol(data, symbol);
-  const window = getLastNObservations(symbolData, windowDays);
+  let filtered = symbolData;
+  if (asofDate) {
+    filtered = symbolData.filter(d => d.date <= asofDate);
+  }
+  const window = getLastNObservations(filtered, windowDays);
   return window.map((d) => d.returns || 0).filter((r) => !isNaN(r));
+}
+
+/**
+ * Get the latest available date for a symbol
+ */
+export function getLatestDate(data: MarketDataPoint[], symbol: string): Date | null {
+  const symbolData = getDataForSymbol(data, symbol);
+  if (symbolData.length === 0) return null;
+  return symbolData[symbolData.length - 1].date;
+}
+
+/**
+ * Compute asof_date as the minimum of last available dates across core instruments
+ */
+export function computeAsofDate(marketData: MarketDataPoint[], coreSymbols: string[]): Date | null {
+  const dates: Date[] = [];
+  
+  for (const symbol of coreSymbols) {
+    const latest = getLatestDate(marketData, symbol);
+    if (latest) {
+      dates.push(latest);
+    }
+  }
+  
+  if (dates.length === 0) return null;
+  
+  // Return the minimum (earliest) date
+  return new Date(Math.min(...dates.map(d => d.getTime())));
+}
+
+/**
+ * Check if data is sufficient for TR windows at asof_date
+ */
+export function hasSufficientData(
+  data: MarketDataPoint[],
+  symbol: string,
+  asofDate: Date,
+  windowDays: number
+): boolean {
+  const symbolData = getDataForSymbol(data, symbol);
+  if (symbolData.length === 0) return false;
+  
+  // Filter data up to and including asof_date
+  const filtered = symbolData.filter(d => d.date <= asofDate);
+  if (filtered.length < windowDays) return false;
+  
+  return true;
 }
 
 // Export window constants for convenience

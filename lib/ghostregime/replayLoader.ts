@@ -38,14 +38,25 @@ export function loadReplayHistory(): GhostRegimeRow[] {
 
       const rowDate = parseISO(record.date);
       if (isBefore(rowDate, cutoverDate) || isEqual(rowDate, cutoverDate)) {
+        // Determine risk_axis and infl_axis from scores
+        const riskScore = record.risk_score ?? 0;
+        const inflScore = record.infl_score ?? 0;
+        const riskAxis = riskScore > 0 ? 'RiskOn' : 'RiskOff';
+        const inflAxis = inflScore > 0 ? 'Inflation' : 'Disinflation';
+
         const row: GhostRegimeRow = {
           date: record.date,
+          run_date_utc: record.run_date_utc,
           regime: record.regime,
           risk_regime: record.risk_regime,
-          risk_score: record.risk_score ?? 0,
-          infl_score: record.infl_score ?? 0,
+          risk_score: riskScore,
+          infl_score: inflScore,
           infl_core_score: record.infl_core_score ?? 0,
           infl_sat_score: record.infl_sat_score ?? 0,
+          risk_axis: record.risk_axis ?? riskAxis,
+          infl_axis: record.infl_axis ?? inflAxis,
+          risk_tiebreaker_used: record.risk_tiebreaker_used ?? false,
+          infl_tiebreaker_used: record.infl_tiebreaker_used ?? false,
           stocks_vams_state: record.stocks_vams_state ?? 0,
           gold_vams_state: record.gold_vams_state ?? 0,
           btc_vams_state: record.btc_vams_state ?? 0,
