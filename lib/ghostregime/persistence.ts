@@ -84,6 +84,7 @@ export class BlobStorageAdapter implements StorageAdapter {
         access: 'public',
         token: this.token,
         addRandomSuffix: false,
+        allowOverwrite: true,
       });
     } catch (error) {
       console.error('Error appending to history:', error);
@@ -97,6 +98,7 @@ export class BlobStorageAdapter implements StorageAdapter {
         access: 'public',
         token: this.token,
         addRandomSuffix: false,
+        allowOverwrite: true,
       });
     } catch (error) {
       console.error('Error writing latest:', error);
@@ -116,6 +118,7 @@ export class BlobStorageAdapter implements StorageAdapter {
           access: 'public',
           token: this.token,
           addRandomSuffix: false,
+          allowOverwrite: true,
         }
       );
     } catch (error) {
