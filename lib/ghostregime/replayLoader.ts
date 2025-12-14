@@ -46,7 +46,7 @@ export function loadReplayHistory(): GhostRegimeRow[] {
 
         const row: GhostRegimeRow = {
           date: record.date,
-          run_date_utc: record.run_date_utc,
+          run_date_utc: record.run_date_utc ?? record.date, // Default to date if not present
           regime: record.regime,
           risk_regime: record.risk_regime,
           risk_score: riskScore,
@@ -74,6 +74,8 @@ export function loadReplayHistory(): GhostRegimeRow[] {
           source: 'replay',
           stale: record.stale ?? false,
           stale_reason: record.stale_reason,
+          missing_core_symbols: record.missing_core_symbols,
+          core_symbol_status: record.core_symbol_status,
         };
         replayRows.push(row);
       }

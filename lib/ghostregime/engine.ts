@@ -28,6 +28,7 @@ import {
   TR_63,
 } from './dataWindows';
 import type { RiskAxis, InflAxis } from './types';
+import { checkCoreSymbolStatus } from './diagnostics';
 
 /**
  * Compute GhostRegime for a specific date (asof_date)
@@ -111,7 +112,7 @@ export async function computeGhostRegime(
   // Build row
   const row: GhostRegimeRow = {
     date: formatISO(asofDate, { representation: 'date' }),
-    run_date_utc: runDateUtc ? formatISO(runDateUtc, { representation: 'date' }) : undefined,
+    run_date_utc: runDateUtc ? formatISO(runDateUtc, { representation: 'date' }) : formatISO(new Date(), { representation: 'date' }),
     regime,
     risk_regime: riskRegime,
     risk_score: riskScore,
@@ -164,6 +165,18 @@ export async function getGhostRegimeToday(): Promise<GhostRegimeRow> {
   const storage = getStorageAdapter();
   const latest = await storage.readLatest();
 
+  // Core symbols for diagnostics
+  const coreSymbols = [
+    MARKET_SYMBOLS.SPY,
+    MARKET_SYMBOLS.HYG,
+    MARKET_SYMBOLS.IEF,
+    MARKET_SYMBOLS.EEM,
+    MARKET_SYMBOLS.PDBC,
+    MARKET_SYMBOLS.TLT,
+    MARKET_SYMBOLS.UUP,
+    MARKET_SYMBOLS.VIX,
+  ];
+
   // Compute for today
   try {
     // Fetch market data
@@ -181,53 +194,34 @@ export async function getGhostRegimeToday(): Promise<GhostRegimeRow> {
     if (marketData.length === 0) {
       // Return stale data if available, or 503
       if (latest) {
-        return { ...latest, stale: true, stale_reason: 'MARKET_DATA_UNAVAILABLE' };
+        return {
+          ...latest,
+          run_date_utc: formatISO(runDateUtc, { representation: 'date' }),
+          stale: true,
+          stale_reason: 'MARKET_DATA_UNAVAILABLE',
+          missing_core_symbols: coreSymbols,
+          core_symbol_status: {},
+        };
       }
       throw new Error('GHOSTREGIME_NOT_READY');
     }
 
     // Compute asof_date as minimum of last available dates across core instruments
-    const coreSymbols = [
-      MARKET_SYMBOLS.SPY,
-      MARKET_SYMBOLS.HYG,
-      MARKET_SYMBOLS.IEF,
-      MARKET_SYMBOLS.EEM,
-      MARKET_SYMBOLS.PDBC,
-      MARKET_SYMBOLS.TLT,
-      MARKET_SYMBOLS.UUP,
-      MARKET_SYMBOLS.VIX,
-    ];
-    
     const asofDate = computeAsofDate(marketData, coreSymbols);
     
-    if (!asofDate) {
-      // No data for any core instrument
-      if (latest) {
-        return { ...latest, stale: true, stale_reason: 'MISSING_CORE_SERIES' };
-      }
-      throw new Error('GHOSTREGIME_NOT_READY');
-    }
-
-    // Validate data sufficiency for TR windows at asof_date
-    const requiredWindows = [TR_21, TR_63];
-    let missingSeries: string[] = [];
+    // Check core symbol status and build diagnostics
+    const diagnostics = checkCoreSymbolStatus(marketData, asofDate);
     
-    for (const symbol of coreSymbols) {
-      for (const window of requiredWindows) {
-        if (!hasSufficientData(marketData, symbol, asofDate, window)) {
-          missingSeries.push(`${symbol} (TR_${window})`);
-          break;
-        }
-      }
-    }
-
-    if (missingSeries.length > 0) {
-      // Insufficient data - return stale
+    if (!asofDate || !diagnostics.allOk) {
+      // Missing or insufficient core data - return last persisted row with diagnostics
       if (latest) {
         return {
           ...latest,
+          run_date_utc: formatISO(runDateUtc, { representation: 'date' }),
           stale: true,
-          stale_reason: `INSUFFICIENT_HISTORY: ${missingSeries.join(', ')}`,
+          stale_reason: !asofDate ? 'MISSING_CORE_SERIES' : 'INSUFFICIENT_HISTORY',
+          missing_core_symbols: diagnostics.missingSymbols,
+          core_symbol_status: diagnostics.status,
         };
       }
       throw new Error('GHOSTREGIME_NOT_READY');
@@ -239,9 +233,12 @@ export async function getGhostRegimeToday(): Promise<GhostRegimeRow> {
       const asofDateStr = formatISO(asofDate, { representation: 'date' });
       const latestStr = formatISO(latestDate, { representation: 'date' });
       
-      // If we have data for this asof_date and it's not stale, return it
+      // If we have data for this asof_date and it's not stale, return it with updated run_date_utc
       if (latestStr === asofDateStr && !latest.stale) {
-        return latest;
+        return {
+          ...latest,
+          run_date_utc: formatISO(runDateUtc, { representation: 'date' }),
+        };
       }
     }
 
@@ -275,12 +272,35 @@ export async function getGhostRegimeToday(): Promise<GhostRegimeRow> {
   } catch (error) {
     console.error('Error computing GhostRegime:', error);
     
-    // Return stale data if available
+    // Return stale data if available with diagnostics
     if (latest) {
+      // Try to get diagnostics if we have market data
+      let diagnostics: { missingSymbols: string[]; status: Record<string, any> } | null = null;
+      try {
+        const endDate = new Date();
+        const startDate = new Date(endDate);
+        startDate.setDate(startDate.getDate() - 300);
+        const allSymbols = Object.values(MARKET_SYMBOLS);
+        const marketData = await defaultMarketDataProvider.getHistoricalPrices(
+          allSymbols,
+          startDate,
+          endDate
+        );
+        if (marketData.length > 0) {
+          const asofDate = computeAsofDate(marketData, coreSymbols);
+          diagnostics = checkCoreSymbolStatus(marketData, asofDate);
+        }
+      } catch {
+        // Diagnostics failed, use basic error info
+      }
+
       return {
         ...latest,
+        run_date_utc: formatISO(runDateUtc, { representation: 'date' }),
         stale: true,
         stale_reason: error instanceof Error ? error.message : 'FETCH_ERROR',
+        missing_core_symbols: diagnostics?.missingSymbols || [],
+        core_symbol_status: diagnostics?.status || {},
       };
     }
     

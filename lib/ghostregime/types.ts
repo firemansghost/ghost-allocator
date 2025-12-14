@@ -43,9 +43,17 @@ export interface AllocationOutput {
 export type RiskAxis = 'RiskOn' | 'RiskOff';
 export type InflAxis = 'Inflation' | 'Disinflation';
 
+export interface CoreSymbolStatus {
+  provider: string;
+  last_date: string | null;
+  obs: number;
+  ok: boolean;
+  note?: string;
+}
+
 export interface GhostRegimeRow {
   date: string; // ISO date string (UTC) - asof_date (latest common market close)
-  run_date_utc?: string; // ISO date string (UTC) - actual server date when computed
+  run_date_utc: string; // ISO date string (UTC) - actual server date when computed
   regime: RegimeType;
   risk_regime: RiskRegime;
   risk_score: number;
@@ -73,6 +81,8 @@ export interface GhostRegimeRow {
   source: SourceType;
   stale?: boolean;
   stale_reason?: string;
+  missing_core_symbols?: string[];
+  core_symbol_status?: Record<string, CoreSymbolStatus>;
 }
 
 export interface SeedStatus {

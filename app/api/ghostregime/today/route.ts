@@ -7,6 +7,9 @@ import { NextResponse } from 'next/server';
 import { getGhostRegimeToday } from '@/lib/ghostregime/engine';
 import { checkSeedStatus } from '@/lib/ghostregime/seedStatus';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET() {
   // Check seed status first
   const seedStatus = checkSeedStatus();
@@ -22,7 +25,11 @@ export async function GET() {
 
   try {
     const row = await getGhostRegimeToday();
-    return NextResponse.json(row);
+    return NextResponse.json(row, {
+      headers: {
+        'Cache-Control': 'no-store, max-age=0',
+      },
+    });
   } catch (error) {
     console.error('Error in /api/ghostregime/today:', error);
     

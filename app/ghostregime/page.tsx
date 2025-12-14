@@ -163,10 +163,36 @@ export default function GhostRegimePage() {
               <p className="text-sm font-medium text-zinc-200">{data.flip_watch_status}</p>
             </div>
             {data.stale && (
-              <div>
+              <div className="space-y-2">
                 <p className="text-[11px] text-amber-300">
                   Stale data: {data.stale_reason || 'Unknown reason'}
                 </p>
+                {data.missing_core_symbols && data.missing_core_symbols.length > 0 && (
+                  <div>
+                    <p className="text-[10px] text-zinc-400 uppercase tracking-wide">Missing symbols</p>
+                    <p className="text-[11px] text-zinc-300">
+                      {data.missing_core_symbols.join(', ')}
+                    </p>
+                  </div>
+                )}
+                {data.core_symbol_status && Object.keys(data.core_symbol_status).length > 0 && (
+                  <details className="text-[10px]">
+                    <summary className="text-zinc-400 cursor-pointer hover:text-zinc-300">
+                      Core symbol status
+                    </summary>
+                    <div className="mt-2 space-y-1 text-[10px] text-zinc-400">
+                      {Object.entries(data.core_symbol_status).map(([symbol, status]) => (
+                        <div key={symbol} className="flex justify-between gap-2">
+                          <span>{symbol}</span>
+                          <span className={status.ok ? 'text-green-400' : 'text-red-400'}>
+                            {status.ok ? '✓' : '✗'} {status.last_date || 'N/A'} ({status.obs} obs)
+                            {status.note && ` - ${status.note}`}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                )}
               </div>
             )}
           </div>
