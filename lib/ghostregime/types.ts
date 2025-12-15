@@ -88,9 +88,14 @@ export interface GhostRegimeRow {
   core_proxy_used?: Record<string, string>; // Map of original symbol -> proxy symbol (e.g., "PDBC" -> "DBC")
   debug_votes?: DebugVotes; // Vote breakdown (only included when debug=1)
   debug_enabled?: boolean; // True when debug mode was used
-  engine_version?: string; // Model version (e.g., ghostregime-v1.0.2)
-  build_commit?: string; // Git commit hash or build identifier
-  data_source?: 'persisted' | 'computed' | 'computed_debug'; // How this row was obtained
+  engine_version?: string; // Model version (e.g., ghostregime-v1.0.2) - served-time (current deploy)
+  build_commit?: string; // Git commit hash or build identifier - served-time (current deploy)
+  data_source?: 'persisted' | 'computed' | 'computed_debug' | 'computed_forced' | 'persisted_outdated'; // How this row was obtained
+  force_enabled?: boolean; // True when force=1 was used
+  // Row metadata (persisted at compute time, not overwritten on serve)
+  row_computed_at_utc?: string; // ISO timestamp when row was computed
+  row_build_commit?: string; // Git commit hash when row was computed
+  row_engine_version?: string; // Engine version when row was computed
 }
 
 export interface DebugVotes {

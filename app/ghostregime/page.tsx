@@ -122,12 +122,58 @@ export default function GhostRegimePage() {
             <div>
               <p className="text-xs text-zinc-400 uppercase tracking-wide">As-of</p>
               <p className="text-sm font-medium text-zinc-200">{data.date}</p>
-              {data.run_date_utc && data.run_date_utc !== data.date && (
-                <p className="text-[11px] text-zinc-500 mt-0.5">
-                  Computed: {data.run_date_utc}
-                </p>
-              )}
             </div>
+            {data.data_source && (
+              <div>
+                <p className="text-xs text-zinc-400 uppercase tracking-wide">Source</p>
+                <p className="text-sm font-medium text-zinc-200">
+                  {data.data_source}
+                  {data.force_enabled && (
+                    <span className="ml-2 text-[10px] text-amber-300">(forced)</span>
+                  )}
+                  {data.debug_enabled && (
+                    <span className="ml-2 text-[10px] text-amber-300">(debug)</span>
+                  )}
+                </p>
+              </div>
+            )}
+            {data.row_computed_at_utc && (
+              <div>
+                <p className="text-xs text-zinc-400 uppercase tracking-wide">Row Computed</p>
+                <p className="text-[11px] text-zinc-300">
+                  {new Date(data.row_computed_at_utc).toLocaleString()}
+                </p>
+              </div>
+            )}
+            {data.run_date_utc && (
+              <div>
+                <p className="text-xs text-zinc-400 uppercase tracking-wide">Served</p>
+                <p className="text-[11px] text-zinc-300">
+                  {new Date(data.run_date_utc).toLocaleString()}
+                </p>
+              </div>
+            )}
+            {(data.row_build_commit || data.build_commit) && (
+              <div>
+                <p className="text-xs text-zinc-400 uppercase tracking-wide">Build Commits</p>
+                {data.row_build_commit && (
+                  <p className="text-[10px] text-zinc-400">
+                    Row: {data.row_build_commit.substring(0, 7)}
+                  </p>
+                )}
+                {data.build_commit && (
+                  <p className="text-[10px] text-zinc-400">
+                    Server: {data.build_commit.substring(0, 7)}
+                  </p>
+                )}
+              </div>
+            )}
+            {data.row_engine_version && (
+              <div>
+                <p className="text-xs text-zinc-400 uppercase tracking-wide">Engine Version</p>
+                <p className="text-[11px] text-zinc-300">{data.row_engine_version}</p>
+              </div>
+            )}
             <div>
               <p className="text-xs text-zinc-400 uppercase tracking-wide">Regime</p>
               <p className="text-lg font-semibold text-amber-300">{data.regime}</p>

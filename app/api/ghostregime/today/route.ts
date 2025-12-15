@@ -15,6 +15,10 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const debugParam = searchParams.get('debug')?.toLowerCase();
   const debug = debugParam === '1' || debugParam === 'true' || debugParam === 'yes';
+  
+  // Check for force parameter (accepts: force=1, force=true, force=yes)
+  const forceParam = searchParams.get('force')?.toLowerCase();
+  const force = forceParam === '1' || forceParam === 'true' || forceParam === 'yes';
 
   // Check seed status first
   const seedStatus = checkSeedStatus();
@@ -29,7 +33,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const row = await getGhostRegimeToday(debug);
+    const row = await getGhostRegimeToday(debug, force);
     return NextResponse.json(row, {
       headers: {
         'Cache-Control': 'no-store, max-age=0',

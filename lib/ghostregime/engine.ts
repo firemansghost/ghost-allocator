@@ -236,7 +236,7 @@ export async function computeGhostRegime(
 /**
  * Get GhostRegime for today
  */
-export async function getGhostRegimeToday(includeDebug: boolean = false): Promise<GhostRegimeRow> {
+export async function getGhostRegimeToday(includeDebug: boolean = false, force: boolean = false): Promise<GhostRegimeRow> {
   const runDateUtc = new Date();
   const cutoverDate = CUTOVER_DATE_UTC;
 
@@ -340,6 +340,10 @@ export async function getGhostRegimeToday(includeDebug: boolean = false): Promis
           missing_core_symbols: diagnostics.missingSymbols,
           core_symbol_status: diagnostics.status,
           core_proxy_used: diagnostics.proxies,
+          data_source: 'persisted', // Stale persisted row
+          engine_version: MODEL_VERSION, // Current deploy version
+          build_commit: process.env.VERCEL_GIT_COMMIT_SHA || process.env.NEXT_PUBLIC_BUILD_COMMIT || 'unknown', // Current deploy commit
+          // Preserve row metadata from latest
         };
       }
       // No latest available - throw error with diagnostics attached
@@ -360,23 +364,41 @@ export async function getGhostRegimeToday(includeDebug: boolean = false): Promis
       throw notReadyError;
     }
 
+    // Schema guard: Check if persisted row is outdated (missing required modern fields)
+    const isRowOutdated = (row: GhostRegimeRow | null): boolean => {
+      if (!row) return false;
+      // Check for required modern fields
+      return !row.infl_total_score_pre_tiebreak || 
+             !row.row_computed_at_utc || 
+             !row.row_build_commit || 
+             !row.row_engine_version;
+    };
+
     // Check if we already have data for this asof_date
-    // Skip persisted rows if debug mode is enabled (force fresh computation)
-    if (!includeDebug && latest) {
-      const latestDate = parseISO(latest.date);
-      const asofDateStr = formatISO(asofDate, { representation: 'date' });
-      const latestStr = formatISO(latestDate, { representation: 'date' });
-      
-      // If we have data for this asof_date and it's not stale, return it with updated run_date_utc
-      if (latestStr === asofDateStr && !latest.stale) {
-        return {
-          ...latest,
-          run_date_utc: formatISO(runDateUtc, { representation: 'date' }),
-          core_proxy_used: diagnostics.proxies, // Update proxy info
-          data_source: 'persisted',
-          engine_version: MODEL_VERSION,
-          build_commit: process.env.VERCEL_GIT_COMMIT_SHA || process.env.NEXT_PUBLIC_BUILD_COMMIT || 'unknown',
-        };
+    // Skip persisted rows if debug mode or force mode is enabled (force fresh computation)
+    if (!includeDebug && !force && latest) {
+      // Check if row is outdated
+      if (isRowOutdated(latest)) {
+        // Row is outdated - will recompute below
+      } else {
+        const latestDate = parseISO(latest.date);
+        const asofDateStr = formatISO(asofDate, { representation: 'date' });
+        const latestStr = formatISO(latestDate, { representation: 'date' });
+        
+        // If we have data for this asof_date and it's not stale, return it
+        // Preserve row metadata (do not overwrite with current deploy info)
+        if (latestStr === asofDateStr && !latest.stale) {
+          return {
+            ...latest,
+            run_date_utc: formatISO(runDateUtc, { representation: 'date' }), // Update served timestamp
+            core_proxy_used: diagnostics.proxies, // Update proxy info if changed
+            data_source: 'persisted',
+            // Preserve row metadata (row_computed_at_utc, row_build_commit, row_engine_version)
+            // Add served-time metadata
+            engine_version: MODEL_VERSION, // Current deploy version
+            build_commit: process.env.VERCEL_GIT_COMMIT_SHA || process.env.NEXT_PUBLIC_BUILD_COMMIT || 'unknown', // Current deploy commit
+          };
+        }
       }
     }
 
@@ -404,27 +426,36 @@ export async function getGhostRegimeToday(includeDebug: boolean = false): Promis
       _proxyUsed: diagnostics.proxies,
     });
 
+    // If row was outdated, we need to recompute
+    // If force mode, we always recompute
+    // If debug mode, we always recompute (handled above)
     // Compute using asof_date
     let row: GhostRegimeRow;
     try {
       row = await computeGhostRegime(asofDate, marketData, satelliteData, previousRegime, runDateWithDebug);
+      
+      // If we're recomputing due to outdated row, mark data_source accordingly
+      if (!includeDebug && !force && latest && isRowOutdated(latest)) {
+        row.data_source = 'persisted_outdated'; // Indicates we recomputed due to outdated schema
+      }
     } catch (error) {
       // Handle MISSING_TIEBREAK_INPUT error - mark as stale
       if (error instanceof Error && error.message === 'MISSING_TIEBREAK_INPUT') {
         // Return stale row with diagnostics
         if (latest) {
-          return {
-            ...latest,
-            run_date_utc: formatISO(runDateUtc, { representation: 'date' }),
-            stale: true,
-            stale_reason: 'MISSING_TIEBREAK_INPUT',
-            missing_core_symbols: ['PDBC'], // PDBC needed for tie-break
-            core_symbol_status: diagnostics.status,
-            core_proxy_used: diagnostics.proxies,
-            data_source: includeDebug ? 'computed_debug' : 'computed',
-            engine_version: MODEL_VERSION,
-            build_commit: process.env.VERCEL_GIT_COMMIT_SHA || process.env.NEXT_PUBLIC_BUILD_COMMIT || 'unknown',
-          };
+        return {
+          ...latest,
+          run_date_utc: formatISO(runDateUtc, { representation: 'date' }),
+          stale: true,
+          stale_reason: 'MISSING_TIEBREAK_INPUT',
+          missing_core_symbols: ['PDBC'], // PDBC needed for tie-break
+          core_symbol_status: diagnostics.status,
+          core_proxy_used: diagnostics.proxies,
+          data_source: includeDebug ? 'computed_debug' : (force ? 'computed_forced' : 'computed'),
+          engine_version: MODEL_VERSION, // Current deploy version
+          build_commit: process.env.VERCEL_GIT_COMMIT_SHA || process.env.NEXT_PUBLIC_BUILD_COMMIT || 'unknown', // Current deploy commit
+          // Preserve row metadata from latest
+        };
         }
         throw new Error('GHOSTREGIME_NOT_READY');
       }
@@ -436,12 +467,25 @@ export async function getGhostRegimeToday(includeDebug: boolean = false): Promis
       row.core_proxy_used = diagnostics.proxies;
     }
 
-    // Add build/version stamp
+    // Add row metadata (persisted at compute time)
+    const computeTimestamp = new Date();
+    row.row_computed_at_utc = formatISO(computeTimestamp);
+    row.row_build_commit = process.env.VERCEL_GIT_COMMIT_SHA || process.env.NEXT_PUBLIC_BUILD_COMMIT || 'unknown';
+    row.row_engine_version = MODEL_VERSION;
+    
+    // Add served-time metadata (current deploy info)
     row.engine_version = MODEL_VERSION;
     row.build_commit = process.env.VERCEL_GIT_COMMIT_SHA || process.env.NEXT_PUBLIC_BUILD_COMMIT || 'unknown';
-    row.data_source = includeDebug ? 'computed_debug' : 'computed';
+    
+    // Set data source
     if (includeDebug) {
+      row.data_source = 'computed_debug';
       row.debug_enabled = true;
+    } else if (force) {
+      row.data_source = 'computed_forced';
+      row.force_enabled = true;
+    } else {
+      row.data_source = 'computed';
     }
 
     // Only persist if not stale AND not debug mode (debug responses should not pollute history)
