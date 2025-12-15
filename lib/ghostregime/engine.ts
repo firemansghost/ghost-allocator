@@ -431,13 +431,9 @@ export async function getGhostRegimeToday(includeDebug: boolean = false, force: 
     // If debug mode, we always recompute (handled above)
     // Compute using asof_date
     let row: GhostRegimeRow;
+    const wasOutdated = !includeDebug && !force && latest && isRowOutdated(latest);
     try {
       row = await computeGhostRegime(asofDate, marketData, satelliteData, previousRegime, runDateWithDebug);
-      
-      // If we're recomputing due to outdated row, mark data_source accordingly
-      if (!includeDebug && !force && latest && isRowOutdated(latest)) {
-        row.data_source = 'persisted_outdated'; // Indicates we recomputed due to outdated schema
-      }
     } catch (error) {
       // Handle MISSING_TIEBREAK_INPUT error - mark as stale
       if (error instanceof Error && error.message === 'MISSING_TIEBREAK_INPUT') {
@@ -478,7 +474,10 @@ export async function getGhostRegimeToday(includeDebug: boolean = false, force: 
     row.build_commit = process.env.VERCEL_GIT_COMMIT_SHA || process.env.NEXT_PUBLIC_BUILD_COMMIT || 'unknown';
     
     // Set data source
-    if (includeDebug) {
+    // If we're recomputing due to outdated row, mark as persisted_outdated (preserve this)
+    if (wasOutdated) {
+      row.data_source = 'persisted_outdated'; // Indicates we recomputed due to outdated schema
+    } else if (includeDebug) {
       row.data_source = 'computed_debug';
       row.debug_enabled = true;
     } else if (force) {
