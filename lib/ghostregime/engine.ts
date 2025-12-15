@@ -340,7 +340,7 @@ export async function getGhostRegimeToday(includeDebug: boolean = false, force: 
           missing_core_symbols: diagnostics.missingSymbols,
           core_symbol_status: diagnostics.status,
           core_proxy_used: diagnostics.proxies,
-          data_source: 'persisted', // Stale persisted row
+          data_source: 'persisted', // Serve-time field: served from persisted storage (but stale)
           engine_version: MODEL_VERSION, // Current deploy version
           build_commit: process.env.VERCEL_GIT_COMMIT_SHA || process.env.NEXT_PUBLIC_BUILD_COMMIT || 'unknown', // Current deploy commit
           // Preserve row metadata from latest
@@ -447,7 +447,7 @@ export async function getGhostRegimeToday(includeDebug: boolean = false, force: 
           missing_core_symbols: ['PDBC'], // PDBC needed for tie-break
           core_symbol_status: diagnostics.status,
           core_proxy_used: diagnostics.proxies,
-          data_source: includeDebug ? 'computed_debug' : (force ? 'computed_forced' : 'computed'),
+          data_source: 'persisted', // Serve-time field: served from persisted storage (but stale)
           engine_version: MODEL_VERSION, // Current deploy version
           build_commit: process.env.VERCEL_GIT_COMMIT_SHA || process.env.NEXT_PUBLIC_BUILD_COMMIT || 'unknown', // Current deploy commit
           // Preserve row metadata from latest
@@ -473,10 +473,10 @@ export async function getGhostRegimeToday(includeDebug: boolean = false, force: 
     row.engine_version = MODEL_VERSION;
     row.build_commit = process.env.VERCEL_GIT_COMMIT_SHA || process.env.NEXT_PUBLIC_BUILD_COMMIT || 'unknown';
     
-    // Set data source
-    // If we're recomputing due to outdated row, mark as persisted_outdated (preserve this)
+    // Set data source for THIS response (serve-time field, not persisted)
+    // If we're recomputing due to outdated row, mark as computed_autofix for this response only
     if (wasOutdated) {
-      row.data_source = 'persisted_outdated'; // Indicates we recomputed due to outdated schema
+      row.data_source = 'computed_autofix'; // Indicates we recomputed due to outdated schema (this response only)
     } else if (includeDebug) {
       row.data_source = 'computed_debug';
       row.debug_enabled = true;
@@ -489,8 +489,13 @@ export async function getGhostRegimeToday(includeDebug: boolean = false, force: 
 
     // Only persist if not stale AND not debug mode (debug responses should not pollute history)
     if (!row.stale && !includeDebug) {
-      await storage.writeLatest(row);
-      await storage.appendToHistory(row);
+      // Strip serve-time-only fields before persisting (data_source, force_enabled, debug_enabled, build_commit, engine_version)
+      // These are computed at serve-time, not stored
+      // Note: run_date_utc is persisted (it's when the row was computed), but we update it when serving
+      const { data_source, force_enabled, debug_enabled, build_commit, engine_version, ...persistableRow } = row;
+      
+      await storage.writeLatest(persistableRow);
+      await storage.appendToHistory(persistableRow);
       await storage.writeMeta({
         version: MODEL_VERSION,
         lastUpdated: runDateUtc,

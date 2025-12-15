@@ -90,7 +90,7 @@ export interface GhostRegimeRow {
   debug_enabled?: boolean; // True when debug mode was used
   engine_version?: string; // Model version (e.g., ghostregime-v1.0.2) - served-time (current deploy)
   build_commit?: string; // Git commit hash or build identifier - served-time (current deploy)
-  data_source?: 'persisted' | 'computed' | 'computed_debug' | 'computed_forced' | 'persisted_outdated'; // How this row was obtained
+  data_source?: 'persisted' | 'computed' | 'computed_debug' | 'computed_forced' | 'computed_autofix' | 'persisted_outdated'; // How this row was obtained (serve-time field, not persisted)
   force_enabled?: boolean; // True when force=1 was used
   // Row metadata (persisted at compute time, not overwritten on serve)
   row_computed_at_utc?: string; // ISO timestamp when row was computed
