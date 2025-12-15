@@ -11,9 +11,10 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function GET(request: Request) {
-  // Check for debug parameter
+  // Check for debug parameter (accepts: debug=1, debug=true, debug=yes)
   const { searchParams } = new URL(request.url);
-  const debug = searchParams.get('debug') === '1' || searchParams.get('debug') === 'true';
+  const debugParam = searchParams.get('debug')?.toLowerCase();
+  const debug = debugParam === '1' || debugParam === 'true' || debugParam === 'yes';
 
   // Check seed status first
   const seedStatus = checkSeedStatus();

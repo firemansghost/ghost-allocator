@@ -60,6 +60,8 @@ export interface GhostRegimeRow {
   infl_score: number;
   infl_core_score: number;
   infl_sat_score: number;
+  infl_total_score_pre_tiebreak?: number; // Core + satellites before tie-breaker
+  risk_total_score_pre_tiebreak?: number; // Risk score before tie-breaker (for consistency)
   risk_axis: RiskAxis;
   infl_axis: InflAxis;
   risk_tiebreaker_used: boolean;
@@ -85,6 +87,10 @@ export interface GhostRegimeRow {
   core_symbol_status?: Record<string, CoreSymbolStatus>;
   core_proxy_used?: Record<string, string>; // Map of original symbol -> proxy symbol (e.g., "PDBC" -> "DBC")
   debug_votes?: DebugVotes; // Vote breakdown (only included when debug=1)
+  debug_enabled?: boolean; // True when debug mode was used
+  engine_version?: string; // Model version (e.g., ghostregime-v1.0.2)
+  build_commit?: string; // Git commit hash or build identifier
+  data_source?: 'persisted' | 'computed' | 'computed_debug'; // How this row was obtained
 }
 
 export interface DebugVotes {

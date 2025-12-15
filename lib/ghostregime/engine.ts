@@ -54,6 +54,9 @@ export async function computeGhostRegime(
   const includeDebug = (runDateUtc as any)?._includeDebug || false;
   const proxyUsed = (runDateUtc as any)?._proxyUsed;
   const votes = computeOptionBVotes(marketData, asofDate, includeDebug, proxyUsed);
+  // Capture pre-tiebreak scores (risk tie-breaker is applied in computeOptionBVotes)
+  // If tie-breaker was used, pre-tiebreak score was 0
+  const riskTotalScorePreTiebreak = votes.risk_tiebreaker_used ? 0 : votes.risk_score;
   let riskScore = votes.risk_score;
   let inflCoreScore = votes.infl_score;
   
@@ -150,6 +153,8 @@ export async function computeGhostRegime(
     infl_score: inflTotalScore,
     infl_core_score: inflCoreScore,
     infl_sat_score: inflSatScore,
+    infl_total_score_pre_tiebreak: inflTotalScorePreTiebreak,
+    risk_total_score_pre_tiebreak: riskTotalScorePreTiebreak,
     risk_axis: riskAxis,
     infl_axis: finalInflAxis,
     risk_tiebreaker_used: votes.risk_tiebreaker_used,
@@ -311,7 +316,8 @@ export async function getGhostRegimeToday(includeDebug: boolean = false): Promis
     }
 
     // Check if we already have data for this asof_date
-    if (latest) {
+    // Skip persisted rows if debug mode is enabled (force fresh computation)
+    if (!includeDebug && latest) {
       const latestDate = parseISO(latest.date);
       const asofDateStr = formatISO(asofDate, { representation: 'date' });
       const latestStr = formatISO(latestDate, { representation: 'date' });
@@ -322,6 +328,9 @@ export async function getGhostRegimeToday(includeDebug: boolean = false): Promis
           ...latest,
           run_date_utc: formatISO(runDateUtc, { representation: 'date' }),
           core_proxy_used: diagnostics.proxies, // Update proxy info
+          data_source: 'persisted',
+          engine_version: MODEL_VERSION,
+          build_commit: process.env.VERCEL_GIT_COMMIT_SHA || process.env.NEXT_PUBLIC_BUILD_COMMIT || 'unknown',
         };
       }
     }
@@ -358,8 +367,16 @@ export async function getGhostRegimeToday(includeDebug: boolean = false): Promis
       row.core_proxy_used = diagnostics.proxies;
     }
 
-    // Only persist if not stale
-    if (!row.stale) {
+    // Add build/version stamp
+    row.engine_version = MODEL_VERSION;
+    row.build_commit = process.env.VERCEL_GIT_COMMIT_SHA || process.env.NEXT_PUBLIC_BUILD_COMMIT || 'unknown';
+    row.data_source = includeDebug ? 'computed_debug' : 'computed';
+    if (includeDebug) {
+      row.debug_enabled = true;
+    }
+
+    // Only persist if not stale AND not debug mode (debug responses should not pollute history)
+    if (!row.stale && !includeDebug) {
       await storage.writeLatest(row);
       await storage.appendToHistory(row);
       await storage.writeMeta({
