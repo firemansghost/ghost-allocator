@@ -44,10 +44,12 @@ export const VOTE_THRESHOLDS = {
   PDBC_DISINFLATION: -0.02,
   TIP_IEF_INFLATION: 0.005,
   TIP_IEF_DISINFLATION: -0.005,
-  TLT_INFLATION: -0.01,
-  TLT_DISINFLATION: 0.01,
-  UUP_INFLATION: -0.01,
-  UUP_DISINFLATION: 0.01,
+  // TLT: >= +0.01 → Disinflation (+1), <= -0.01 → Inflation (-1)
+  TLT_DISINFLATION_THRESHOLD: 0.01, // When TR >= this, vote Disinflation (+1)
+  TLT_INFLATION_THRESHOLD: -0.01, // When TR <= this, vote Inflation (-1)
+  // UUP: >= +0.01 → Disinflation (+1), <= -0.01 → Inflation (-1)
+  UUP_DISINFLATION_THRESHOLD: 0.01, // When TR >= this, vote Disinflation (+1)
+  UUP_INFLATION_THRESHOLD: -0.01, // When TR <= this, vote Inflation (-1)
 };
 
 // Allocation targets
@@ -91,6 +93,7 @@ export const MARKET_SYMBOLS = {
   PDBC: 'PDBC',
   TLT: 'TLT',
   UUP: 'UUP',
+  TIP: 'TIP', // TIP ETF for TIP/IEF ratio
   VIX: 'VIX',
   BTC_USD: 'BTC-USD',
 } as const;

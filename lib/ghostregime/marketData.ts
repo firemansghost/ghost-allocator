@@ -18,6 +18,7 @@ const STOOQ_SYMBOL_MAP: Record<string, string> = {
   [MARKET_SYMBOLS.EEM]: 'eem.us',
   [MARKET_SYMBOLS.TLT]: 'tlt.us',
   [MARKET_SYMBOLS.UUP]: 'uup.us',
+  [MARKET_SYMBOLS.TIP]: 'tip.us', // TIP ETF from Stooq
   [MARKET_SYMBOLS.BTC_USD]: 'btcusd', // BTC-USD from Stooq
   // VIX is now fetched from CBOE CSV (not Stooq)
   // PDBC fallback: DBC (Stooq proxy)

@@ -74,20 +74,37 @@ export async function computeGhostRegime(
   let inflTiebreakDetail: any = undefined;
   
   if (inflTotalScorePreTiebreak === 0) {
+    // Tie-breaker: use sign of TR_21(PDBC)
+    // If PDBC is proxied to DBC, use DBC data but label as PDBC
     const pdbcData = getDataForSymbol(marketData, MARKET_SYMBOLS.PDBC);
     const filteredPdbcData = asofDate ? pdbcData.filter(d => d.date <= asofDate) : pdbcData;
+    
     if (filteredPdbcData.length >= TR_21) {
       const pdbcTR21 = calculateTR(filteredPdbcData, TR_21, asofDate);
-      inflTotalScore = pdbcTR21 >= 0 ? 1 : -1;
-      inflTiebreakerUsed = true;
-      if (includeDebug && votes.debug_votes) {
-        inflTiebreakDetail = {
-          reason: 'score_zero',
-          input_value: pdbcTR21,
-          input_sign: pdbcTR21 >= 0 ? 1 : -1,
-        };
-        votes.debug_votes.inflation.tiebreak = inflTiebreakDetail;
+      
+      // Ensure TR_21 is actually computed (not silently 0 due to missing data)
+      // If we have sufficient data points, pdbcTR21 should be a real number
+      // Check that we have at least TR_21 observations with valid closes
+      const validDataPoints = filteredPdbcData.filter(d => d.close > 0 && !isNaN(d.close));
+      if (validDataPoints.length >= TR_21 && !isNaN(pdbcTR21)) {
+        inflTotalScore = pdbcTR21 >= 0 ? 1 : -1;
+        inflTiebreakerUsed = true;
+        if (includeDebug && votes.debug_votes) {
+          inflTiebreakDetail = {
+            reason: 'score_zero',
+            input_value: pdbcTR21,
+            input_sign: pdbcTR21 >= 0 ? 1 : -1,
+          };
+          votes.debug_votes.inflation.tiebreak = inflTiebreakDetail;
+        }
+      } else {
+        // Insufficient valid data for tie-break - mark as stale
+        // This will be handled by the caller
+        throw new Error('MISSING_TIEBREAK_INPUT');
       }
+    } else {
+      // Insufficient data for tie-break - mark as stale
+      throw new Error('MISSING_TIEBREAK_INPUT');
     }
   } else if (includeDebug && votes.debug_votes) {
     inflTiebreakDetail = { reason: 'not_applicable' };
@@ -217,6 +234,7 @@ export async function getGhostRegimeToday(includeDebug: boolean = false): Promis
     MARKET_SYMBOLS.IEF,
     MARKET_SYMBOLS.EEM,
     MARKET_SYMBOLS.PDBC,
+    MARKET_SYMBOLS.TIP, // TIP needed for TIP/IEF ratio
     MARKET_SYMBOLS.TLT,
     MARKET_SYMBOLS.UUP,
     MARKET_SYMBOLS.VIX,
@@ -360,7 +378,31 @@ export async function getGhostRegimeToday(includeDebug: boolean = false): Promis
     });
 
     // Compute using asof_date
-    const row = await computeGhostRegime(asofDate, marketData, satelliteData, previousRegime, runDateWithDebug);
+    let row: GhostRegimeRow;
+    try {
+      row = await computeGhostRegime(asofDate, marketData, satelliteData, previousRegime, runDateWithDebug);
+    } catch (error) {
+      // Handle MISSING_TIEBREAK_INPUT error - mark as stale
+      if (error instanceof Error && error.message === 'MISSING_TIEBREAK_INPUT') {
+        // Return stale row with diagnostics
+        if (latest) {
+          return {
+            ...latest,
+            run_date_utc: formatISO(runDateUtc, { representation: 'date' }),
+            stale: true,
+            stale_reason: 'MISSING_TIEBREAK_INPUT',
+            missing_core_symbols: ['PDBC'], // PDBC needed for tie-break
+            core_symbol_status: diagnostics.status,
+            core_proxy_used: diagnostics.proxies,
+            data_source: includeDebug ? 'computed_debug' : 'computed',
+            engine_version: MODEL_VERSION,
+            build_commit: process.env.VERCEL_GIT_COMMIT_SHA || process.env.NEXT_PUBLIC_BUILD_COMMIT || 'unknown',
+          };
+        }
+        throw new Error('GHOSTREGIME_NOT_READY');
+      }
+      throw error;
+    }
 
     // Add proxy info if any proxies were used
     if (Object.keys(diagnostics.proxies).length > 0) {

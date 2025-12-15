@@ -38,11 +38,13 @@ GhostRegime v1 is a market regime classifier + allocation system that operates i
    - ≥ +0.02 → Inflation (+1)
    - ≤ −0.02 → Disinflation (-1)
    - else 0
+   - (Proxy allowed: DBC from Stooq)
 
 2. **TIP/IEF ratio TR_63**:
    - ≥ +0.005 → Inflation (+1)
    - ≤ −0.005 → Disinflation (-1)
    - else 0
+   - (TIP ETF from Stooq, IEF from Stooq)
 
 3. **TLT TR_63**:
    - ≥ +0.01 → Disinflation (+1)
@@ -54,7 +56,11 @@ GhostRegime v1 is a market regime classifier + allocation system that operates i
    - ≤ −0.01 → Inflation (-1)
    - else 0
 
-**Tie-breaker**: If infl_score (after satellites + cap) == 0, use sign of TR_21(PDBC): (≥0 Inflationary else Disinflationary)
+**Tie-breaker**: If infl_total_score_pre_tiebreak (core + satellites) == 0, use sign of TR_21(PDBC):
+- If PDBC is proxied to DBC, compute TR_21 on DBC data but label as PDBC
+- ≥0 → Inflation (+1)
+- <0 → Disinflation (-1)
+- If TR_21 cannot be computed (insufficient data), mark row as stale=true with stale_reason="MISSING_TIEBREAK_INPUT" (do not substitute 0)
 
 ### Regime Mapping
 

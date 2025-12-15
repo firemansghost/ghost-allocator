@@ -181,18 +181,22 @@ export function computeOptionBVotes(
 
   // Inflation axis votes
   const pdbcData = getDataForSymbol(marketData, MARKET_SYMBOLS.PDBC);
+  const tipData = getDataForSymbol(marketData, MARKET_SYMBOLS.TIP);
+  const iefDataInfl = getDataForSymbol(marketData, MARKET_SYMBOLS.IEF); // Reuse IEF for TIP/IEF ratio
   const tltData = getDataForSymbol(marketData, MARKET_SYMBOLS.TLT);
   const uupData = getDataForSymbol(marketData, MARKET_SYMBOLS.UUP);
-  // Note: TIP data would be needed for TIP/IEF ratio, but we'll use available data
-  // For now, we'll skip TIP/IEF if TIP is not available
 
   // Filter data to asofDate if provided
   let filteredPdbcData = pdbcData;
+  let filteredTipData = tipData;
+  let filteredIefDataInfl = iefDataInfl;
   let filteredTltData = tltData;
   let filteredUupData = uupData;
   
   if (asofDate) {
     filteredPdbcData = pdbcData.filter(d => d.date <= asofDate);
+    filteredTipData = tipData.filter(d => d.date <= asofDate);
+    filteredIefDataInfl = iefDataInfl.filter(d => d.date <= asofDate);
     filteredTltData = tltData.filter(d => d.date <= asofDate);
     filteredUupData = uupData.filter(d => d.date <= asofDate);
   }
@@ -226,23 +230,40 @@ export function computeOptionBVotes(
   }
 
   // Inflation axis vote 2: TIP/IEF ratio TR_63
-  // Note: TIP may not be available in default provider, so this vote may be skipped
-  // In a full implementation, TIP would be fetched separately
+  let tipIefRatio = 0;
+  let tipIefVote = 0;
+  let tipIefThreshold = '';
+  if (filteredTipData.length >= TR_63 && filteredIefDataInfl.length >= TR_63) {
+    tipIefRatio = calculateRatioTR(filteredTipData, filteredIefDataInfl, TR_63, asofDate);
+    if (tipIefRatio >= VOTE_THRESHOLDS.TIP_IEF_INFLATION) {
+      inflScore += 1;
+      tipIefVote = 1;
+      tipIefThreshold = `>= ${VOTE_THRESHOLDS.TIP_IEF_INFLATION} (Inflation)`;
+    } else if (tipIefRatio <= VOTE_THRESHOLDS.TIP_IEF_DISINFLATION) {
+      inflScore -= 1;
+      tipIefVote = -1;
+      tipIefThreshold = `<= ${VOTE_THRESHOLDS.TIP_IEF_DISINFLATION} (Disinflation)`;
+    }
+  }
+  if (includeDebug) {
+    debugInfl.tip_ief = { tr_63: tipIefRatio, vote: tipIefVote, threshold_hit: tipIefThreshold || 'none' };
+  }
 
   // Inflation axis vote 3: TLT TR_63
+  // Spec: TR_63 >= +0.01 → Disinflation (+1), TR_63 <= -0.01 → Inflation (-1)
   let tltTR = 0;
   let tltVote = 0;
   let tltThreshold = '';
   if (filteredTltData.length >= TR_63) {
     tltTR = calculateTR(filteredTltData, TR_63, asofDate);
-    if (tltTR >= VOTE_THRESHOLDS.TLT_INFLATION) {
-      inflScore += 1;
+    if (tltTR >= VOTE_THRESHOLDS.TLT_DISINFLATION_THRESHOLD) {
+      inflScore += 1; // Disinflation vote (+1)
       tltVote = 1;
-      tltThreshold = `>= ${VOTE_THRESHOLDS.TLT_INFLATION} (Inflation)`;
-    } else if (tltTR <= VOTE_THRESHOLDS.TLT_DISINFLATION) {
-      inflScore -= 1;
+      tltThreshold = `>= ${VOTE_THRESHOLDS.TLT_DISINFLATION_THRESHOLD} (Disinflation)`;
+    } else if (tltTR <= VOTE_THRESHOLDS.TLT_INFLATION_THRESHOLD) {
+      inflScore -= 1; // Inflation vote (-1)
       tltVote = -1;
-      tltThreshold = `<= ${VOTE_THRESHOLDS.TLT_DISINFLATION} (Disinflation)`;
+      tltThreshold = `<= ${VOTE_THRESHOLDS.TLT_INFLATION_THRESHOLD} (Inflation)`;
     }
   }
   if (includeDebug) {
@@ -250,19 +271,20 @@ export function computeOptionBVotes(
   }
 
   // Inflation axis vote 4: UUP TR_63
+  // Spec: TR_63 >= +0.01 → Disinflation (+1), TR_63 <= -0.01 → Inflation (-1)
   let uupTR = 0;
   let uupVote = 0;
   let uupThreshold = '';
   if (filteredUupData.length >= TR_63) {
     uupTR = calculateTR(filteredUupData, TR_63, asofDate);
-    if (uupTR >= VOTE_THRESHOLDS.UUP_INFLATION) {
-      inflScore += 1;
+    if (uupTR >= VOTE_THRESHOLDS.UUP_DISINFLATION_THRESHOLD) {
+      inflScore += 1; // Disinflation vote (+1)
       uupVote = 1;
-      uupThreshold = `>= ${VOTE_THRESHOLDS.UUP_INFLATION} (Inflation)`;
-    } else if (uupTR <= VOTE_THRESHOLDS.UUP_DISINFLATION) {
-      inflScore -= 1;
+      uupThreshold = `>= ${VOTE_THRESHOLDS.UUP_DISINFLATION_THRESHOLD} (Disinflation)`;
+    } else if (uupTR <= VOTE_THRESHOLDS.UUP_INFLATION_THRESHOLD) {
+      inflScore -= 1; // Inflation vote (-1)
       uupVote = -1;
-      uupThreshold = `<= ${VOTE_THRESHOLDS.UUP_DISINFLATION} (Disinflation)`;
+      uupThreshold = `<= ${VOTE_THRESHOLDS.UUP_INFLATION_THRESHOLD} (Inflation)`;
     }
   }
   if (includeDebug) {
