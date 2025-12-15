@@ -57,10 +57,12 @@ GhostRegime v1 is a market regime classifier + allocation system that operates i
    - else 0
 
 **Tie-breaker**: If infl_total_score_pre_tiebreak (core + satellites) == 0, use sign of TR_21(PDBC):
+- Compute TR_21 from close-to-close returns on PDBC (or DBC proxy if PDBC unavailable)
 - If PDBC is proxied to DBC, compute TR_21 on DBC data but label as PDBC
-- ≥0 → Inflation (+1)
-- <0 → Disinflation (-1)
+- Rule: `>= 0` → Inflation (+1), `< 0` → Disinflation (-1) (configurable via `TIEBREAK_RULE`: `GTE_ZERO` or `GT_ZERO`)
+- If `TIEBREAK_RULE=GT_ZERO`, then exact 0 → Disinflation (for workbook parity)
 - If TR_21 cannot be computed (insufficient data), mark row as stale=true with stale_reason="MISSING_TIEBREAK_INPUT" (do not substitute 0)
+- Debug output includes: series_used, window, start_date, end_date, start_close, end_close, input_value (full precision), input_value_display (6 decimals)
 
 ### Regime Mapping
 
@@ -258,15 +260,17 @@ satellite_combine_rules:
 
 ## Market Data Providers
 
-**Default v1.0.1 provider stack**:
-- **ETFs (SPY, GLD, HYG, IEF, EEM, TLT, UUP)**: Stooq daily CSV
+**Default v1.0.2 provider stack**:
+- **ETFs (SPY, GLD, HYG, IEF, EEM, TLT, UUP, TIP)**: Stooq daily CSV
 - **VIX**: CBOE VIX History CSV (https://cdn.cboe.com/api/global/us_indices/daily_prices/VIX_History.csv)
 - **BTC spot**: Stooq (btcusd)
-- **PDBC**: AlphaVantage (with DBC/Stooq fallback proxy)
+- **PDBC**: AlphaVantage compact mode (last ~100 trading days, sufficient for TR_63/TR_21) with DBC/Stooq fallback proxy
 
 **Provider Notes**:
 - VIX provider is CBOE CSV (not Stooq, not FRED) for reliable daily close data
-- All core symbols fetch >= 400 observations for VAMS calculations
+- PDBC uses AlphaVantage `outputsize=compact` to avoid premium tier requirement (free tier supports compact)
+- All core symbols fetch >= 400 observations for VAMS calculations (SPY, GLD, BTC)
+- PDBC only needs ~70+ observations for TR_63/TR_21, so compact mode is sufficient
 - If any source is down/rate-limited: return `stale=true` and keep serving `ghostregime_latest.json`
 
 

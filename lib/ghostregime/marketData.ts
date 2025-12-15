@@ -216,7 +216,9 @@ async function fetchAlphaVantagePdbc(
     }
 
     // AlphaVantage TIME_SERIES_DAILY endpoint
-    const url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=PDBC&apikey=${apiKey}&outputsize=full&datatype=json`;
+    // Use outputsize=compact (last ~100 trading days) to avoid premium tier requirement
+    // This is sufficient for TR_63 and TR_21 calculations
+    const url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=PDBC&apikey=${apiKey}&outputsize=compact&datatype=json`;
 
     const response = await fetch(url);
     if (!response.ok) {

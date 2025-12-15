@@ -120,8 +120,17 @@ export interface VoteDetail {
 
 export interface TieBreakDetail {
   reason: 'score_zero' | 'not_applicable';
-  input_value?: number; // TR_21 value used for tie-break
+  input_value?: number; // TR_21 value used for tie-break (full precision)
+  input_value_display?: string; // Rounded to 6 decimals for display
   input_sign?: number; // Sign result (+1 or -1)
+  series_used?: string; // "PDBC" or "DBC" (proxy)
+  window?: number; // Window size (21 for TR_21)
+  start_date?: string; // ISO date string of first observation
+  end_date?: string; // ISO date string of last observation
+  start_close?: number; // Close price at start
+  end_close?: number; // Close price at end
+  computed_from?: string; // "close_to_close" (explicit)
+  tie_rule?: 'GTE_ZERO' | 'GT_ZERO'; // Rule used: >=0 or >0
 }
 
 export interface SeedStatus {

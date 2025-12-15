@@ -101,5 +101,9 @@ export const MARKET_SYMBOLS = {
 // Allocation math tolerance
 export const ALLOCATION_TOLERANCE = 1e-6;
 
+// Tie-break rule: 'GTE_ZERO' means >=0 → Inflation, 'GT_ZERO' means >0 → Inflation (exact 0 → Disinflation)
+export const TIEBREAK_RULE: 'GTE_ZERO' | 'GT_ZERO' =
+  (process.env.NEXT_PUBLIC_GHOSTREGIME_TIEBREAK_RULE as 'GTE_ZERO' | 'GT_ZERO') || 'GTE_ZERO';
+
 
 

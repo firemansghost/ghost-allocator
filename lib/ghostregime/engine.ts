@@ -5,7 +5,7 @@
 
 import { formatISO, parseISO, isBefore, differenceInDays } from 'date-fns';
 import type { GhostRegimeRow, MarketDataPoint, SatelliteData, RegimeType } from './types';
-import { CUTOVER_DATE_UTC, MARKET_SYMBOLS, MODEL_VERSION } from './config';
+import { CUTOVER_DATE_UTC, MARKET_SYMBOLS, MODEL_VERSION, TIEBREAK_RULE } from './config';
 import { loadReplayHistory } from './replayLoader';
 import { defaultMarketDataProvider } from './marketData';
 import { computeOptionBVotes, classifyRegime, mapToRiskRegime, applyStressOverride } from './regimeCore';
@@ -25,6 +25,7 @@ import {
   calculateRatioTR,
   computeAsofDate,
   hasSufficientData,
+  getLastNObservations,
   TR_21,
   TR_63,
 } from './dataWindows';
@@ -79,27 +80,53 @@ export async function computeGhostRegime(
     const pdbcData = getDataForSymbol(marketData, MARKET_SYMBOLS.PDBC);
     const filteredPdbcData = asofDate ? pdbcData.filter(d => d.date <= asofDate) : pdbcData;
     
+    // Determine which series was actually used (PDBC or DBC proxy)
+    const pdbcProxy = proxyUsed?.[MARKET_SYMBOLS.PDBC];
+    const seriesUsed = pdbcProxy || MARKET_SYMBOLS.PDBC;
+    
     if (filteredPdbcData.length >= TR_21) {
-      const pdbcTR21 = calculateTR(filteredPdbcData, TR_21, asofDate);
+      // Get window for TR_21 calculation
+      const window = getLastNObservations(filteredPdbcData, TR_21);
+      if (window.length < 2) {
+        throw new Error('MISSING_TIEBREAK_INPUT');
+      }
+      
+      const first = window[0];
+      const last = window[window.length - 1];
+      
+      if (first.close === 0) {
+        throw new Error('MISSING_TIEBREAK_INPUT');
+      }
+      
+      const pdbcTR21 = (last.close - first.close) / first.close;
       
       // Ensure TR_21 is actually computed (not silently 0 due to missing data)
-      // If we have sufficient data points, pdbcTR21 should be a real number
-      // Check that we have at least TR_21 observations with valid closes
       const validDataPoints = filteredPdbcData.filter(d => d.close > 0 && !isNaN(d.close));
-      if (validDataPoints.length >= TR_21 && !isNaN(pdbcTR21)) {
-        inflTotalScore = pdbcTR21 >= 0 ? 1 : -1;
+      if (validDataPoints.length >= TR_21 && !isNaN(pdbcTR21) && isFinite(pdbcTR21)) {
+        // Apply tie-break rule (GTE_ZERO or GT_ZERO)
+        const isInflationary = TIEBREAK_RULE === 'GT_ZERO' ? pdbcTR21 > 0 : pdbcTR21 >= 0;
+        inflTotalScore = isInflationary ? 1 : -1;
         inflTiebreakerUsed = true;
+        
         if (includeDebug && votes.debug_votes) {
           inflTiebreakDetail = {
             reason: 'score_zero',
-            input_value: pdbcTR21,
-            input_sign: pdbcTR21 >= 0 ? 1 : -1,
+            input_value: pdbcTR21, // Full precision
+            input_value_display: pdbcTR21.toFixed(6), // Rounded to 6 decimals
+            input_sign: isInflationary ? 1 : -1,
+            series_used: seriesUsed,
+            window: TR_21,
+            start_date: formatISO(first.date, { representation: 'date' }),
+            end_date: formatISO(last.date, { representation: 'date' }),
+            start_close: first.close,
+            end_close: last.close,
+            computed_from: 'close_to_close',
+            tie_rule: TIEBREAK_RULE,
           };
           votes.debug_votes.inflation.tiebreak = inflTiebreakDetail;
         }
       } else {
         // Insufficient valid data for tie-break - mark as stale
-        // This will be handled by the caller
         throw new Error('MISSING_TIEBREAK_INPUT');
       }
     } else {

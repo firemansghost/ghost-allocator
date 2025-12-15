@@ -3,6 +3,7 @@
  * Implements the 8-market vote rules for regime classification
  */
 
+import { formatISO } from 'date-fns';
 import type { MarketDataPoint, RegimeType, RiskRegime } from './types';
 import {
   VOTE_THRESHOLDS,
@@ -13,6 +14,7 @@ import {
   getDataForSymbol,
   calculateTR,
   calculateRatioTR,
+  getLastNObservations,
   TR_21,
   TR_63,
 } from './dataWindows';
@@ -162,15 +164,33 @@ export function computeOptionBVotes(
   let riskTiebreakerUsed = false;
   let riskTiebreakDetail: any = undefined;
   if (riskScore === 0 && filteredSpyData.length >= TR_21) {
-    const spyTR21 = calculateTR(filteredSpyData, TR_21, asofDate);
-    riskScore = spyTR21 >= 0 ? 1 : -1;
-    riskTiebreakerUsed = true;
-    if (includeDebug) {
-      riskTiebreakDetail = {
-        reason: 'score_zero',
-        input_value: spyTR21,
-        input_sign: spyTR21 >= 0 ? 1 : -1,
-      };
+    // Get window for TR_21 calculation
+    const window = getLastNObservations(filteredSpyData, TR_21);
+    if (window.length >= 2) {
+      const first = window[0];
+      const last = window[window.length - 1];
+      if (first.close > 0) {
+        const spyTR21 = (last.close - first.close) / first.close;
+        const isRiskOn = spyTR21 >= 0;
+        riskScore = isRiskOn ? 1 : -1;
+        riskTiebreakerUsed = true;
+        if (includeDebug) {
+          riskTiebreakDetail = {
+            reason: 'score_zero',
+            input_value: spyTR21,
+            input_value_display: spyTR21.toFixed(6),
+            input_sign: isRiskOn ? 1 : -1,
+            series_used: MARKET_SYMBOLS.SPY,
+            window: TR_21,
+            start_date: formatISO(first.date, { representation: 'date' }),
+            end_date: formatISO(last.date, { representation: 'date' }),
+            start_close: first.close,
+            end_close: last.close,
+            computed_from: 'close_to_close',
+            tie_rule: 'GTE_ZERO', // Risk tie-break always uses >=0
+          };
+        }
+      }
     }
   } else if (includeDebug) {
     riskTiebreakDetail = { reason: 'not_applicable' };
