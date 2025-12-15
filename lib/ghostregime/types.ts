@@ -84,6 +84,38 @@ export interface GhostRegimeRow {
   missing_core_symbols?: string[];
   core_symbol_status?: Record<string, CoreSymbolStatus>;
   core_proxy_used?: Record<string, string>; // Map of original symbol -> proxy symbol (e.g., "PDBC" -> "DBC")
+  debug_votes?: DebugVotes; // Vote breakdown (only included when debug=1)
+}
+
+export interface DebugVotes {
+  risk: {
+    spy: VoteDetail;
+    hyg_ief: VoteDetail;
+    vix: VoteDetail;
+    eem_spy: VoteDetail;
+    tiebreak?: TieBreakDetail;
+  };
+  inflation: {
+    pdbc: VoteDetail & { proxy_used?: string };
+    tip_ief?: VoteDetail; // May be missing if TIP not available
+    tlt: VoteDetail;
+    uup: VoteDetail;
+    tiebreak?: TieBreakDetail;
+  };
+  infl_total_score_pre_tiebreak: number;
+}
+
+export interface VoteDetail {
+  tr_63?: number; // TR_63 value (or TR_21 for VIX)
+  tr_21?: number; // TR_21 value (for tie-breakers)
+  vote: number; // +1, -1, or 0
+  threshold_hit?: string; // Description of which threshold was hit
+}
+
+export interface TieBreakDetail {
+  reason: 'score_zero' | 'not_applicable';
+  input_value?: number; // TR_21 value used for tie-break
+  input_sign?: number; // Sign result (+1 or -1)
 }
 
 export interface SeedStatus {

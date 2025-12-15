@@ -21,6 +21,7 @@ import { detectFlipWatch } from './flipWatch';
 import { getStorageAdapter } from './persistence';
 import {
   getDataForSymbol,
+  calculateTR,
   calculateRatioTR,
   computeAsofDate,
   hasSufficientData,
@@ -49,7 +50,10 @@ export async function computeGhostRegime(
   }
 
   // Compute Option B votes with asof_date
-  const votes = computeOptionBVotes(marketData, asofDate);
+  // Note: includeDebug is passed from getGhostRegimeToday via computeGhostRegime parameter
+  const includeDebug = (runDateUtc as any)?._includeDebug || false;
+  const proxyUsed = (runDateUtc as any)?._proxyUsed;
+  const votes = computeOptionBVotes(marketData, asofDate, includeDebug, proxyUsed);
   let riskScore = votes.risk_score;
   let inflCoreScore = votes.infl_score;
   
@@ -59,9 +63,35 @@ export async function computeGhostRegime(
 
   // Process satellites and combine with core inflation score
   const inflSatScore = processSatellites(satelliteData, SATELLITE_CONFIGS, asofDate);
-  const inflTotalScore = inflCoreScore + inflSatScore;
+  const inflTotalScorePreTiebreak = inflCoreScore + inflSatScore;
   
-  // Update infl_axis after satellites
+  // Tie-breaker for inflation: if infl_total_score_pre_tiebreak == 0, use sign of TR_21(PDBC)
+  let inflTotalScore = inflTotalScorePreTiebreak;
+  let inflTiebreakerUsed = false;
+  let inflTiebreakDetail: any = undefined;
+  
+  if (inflTotalScorePreTiebreak === 0) {
+    const pdbcData = getDataForSymbol(marketData, MARKET_SYMBOLS.PDBC);
+    const filteredPdbcData = asofDate ? pdbcData.filter(d => d.date <= asofDate) : pdbcData;
+    if (filteredPdbcData.length >= TR_21) {
+      const pdbcTR21 = calculateTR(filteredPdbcData, TR_21, asofDate);
+      inflTotalScore = pdbcTR21 >= 0 ? 1 : -1;
+      inflTiebreakerUsed = true;
+      if (includeDebug && votes.debug_votes) {
+        inflTiebreakDetail = {
+          reason: 'score_zero',
+          input_value: pdbcTR21,
+          input_sign: pdbcTR21 >= 0 ? 1 : -1,
+        };
+        votes.debug_votes.inflation.tiebreak = inflTiebreakDetail;
+      }
+    }
+  } else if (includeDebug && votes.debug_votes) {
+    inflTiebreakDetail = { reason: 'not_applicable' };
+    votes.debug_votes.inflation.tiebreak = inflTiebreakDetail;
+  }
+  
+  // Update infl_axis after satellites and tie-breaker
   const finalInflAxis: InflAxis = inflTotalScore > 0 ? 'Inflation' : 'Disinflation';
 
   // Classify regime
@@ -123,7 +153,7 @@ export async function computeGhostRegime(
     risk_axis: riskAxis,
     infl_axis: finalInflAxis,
     risk_tiebreaker_used: votes.risk_tiebreaker_used,
-    infl_tiebreaker_used: votes.infl_tiebreaker_used,
+    infl_tiebreaker_used: inflTiebreakerUsed,
     stocks_vams_state: vamsStates.stocks,
     gold_vams_state: vamsStates.gold,
     btc_vams_state: vamsStates.btc,
@@ -142,13 +172,22 @@ export async function computeGhostRegime(
     stale: false,
   };
 
+  // Add debug votes if requested
+  if (includeDebug && votes.debug_votes) {
+    row.debug_votes = {
+      risk: votes.debug_votes.risk,
+      inflation: votes.debug_votes.inflation,
+      infl_total_score_pre_tiebreak: inflTotalScorePreTiebreak,
+    } as any; // Type assertion needed due to structure differences
+  }
+
   return row;
 }
 
 /**
  * Get GhostRegime for today
  */
-export async function getGhostRegimeToday(): Promise<GhostRegimeRow> {
+export async function getGhostRegimeToday(includeDebug: boolean = false): Promise<GhostRegimeRow> {
   const runDateUtc = new Date();
   const cutoverDate = CUTOVER_DATE_UTC;
 
@@ -302,8 +341,17 @@ export async function getGhostRegimeToday(): Promise<GhostRegimeRow> {
     // Get previous regime for flip watch
     const previousRegime = latest?.regime || null;
 
+    // Pass debug flag and proxy info via runDateUtc extension
+    const runDateWithDebug = runDateUtc ? Object.assign(new Date(runDateUtc), {
+      _includeDebug: includeDebug,
+      _proxyUsed: diagnostics.proxies,
+    }) : Object.assign(new Date(), {
+      _includeDebug: includeDebug,
+      _proxyUsed: diagnostics.proxies,
+    });
+
     // Compute using asof_date
-    const row = await computeGhostRegime(asofDate, marketData, satelliteData, previousRegime, runDateUtc);
+    const row = await computeGhostRegime(asofDate, marketData, satelliteData, previousRegime, runDateWithDebug);
 
     // Add proxy info if any proxies were used
     if (Object.keys(diagnostics.proxies).length > 0) {

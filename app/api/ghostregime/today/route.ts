@@ -10,7 +10,11 @@ import { checkSeedStatus } from '@/lib/ghostregime/seedStatus';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export async function GET() {
+export async function GET(request: Request) {
+  // Check for debug parameter
+  const { searchParams } = new URL(request.url);
+  const debug = searchParams.get('debug') === '1' || searchParams.get('debug') === 'true';
+
   // Check seed status first
   const seedStatus = checkSeedStatus();
   if (!seedStatus.exists || seedStatus.isEmpty) {
@@ -24,7 +28,7 @@ export async function GET() {
   }
 
   try {
-    const row = await getGhostRegimeToday();
+    const row = await getGhostRegimeToday(debug);
     return NextResponse.json(row, {
       headers: {
         'Cache-Control': 'no-store, max-age=0',
