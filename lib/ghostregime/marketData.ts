@@ -1,6 +1,6 @@
 /**
  * GhostRegime Market Data Provider
- * Working default implementation using Stooq (ETFs), FRED (VIX), CoinGecko (BTC), AlphaVantage (PDBC)
+ * Working default implementation using Stooq (ETFs, VIX, BTC), AlphaVantage (PDBC with DBC fallback)
  */
 
 import type { MarketDataPoint } from './types';
@@ -18,6 +18,8 @@ const STOOQ_SYMBOL_MAP: Record<string, string> = {
   [MARKET_SYMBOLS.EEM]: 'eem.us',
   [MARKET_SYMBOLS.TLT]: 'tlt.us',
   [MARKET_SYMBOLS.UUP]: 'uup.us',
+  [MARKET_SYMBOLS.BTC_USD]: 'btcusd', // BTC-USD from Stooq
+  [MARKET_SYMBOLS.VIX]: 'vi.f', // VIX futures from Stooq (VI.F)
   // PDBC fallback: DBC (Stooq proxy)
   'DBC': 'dbc.us',
 };
@@ -367,23 +369,7 @@ export class DefaultMarketDataProvider implements MarketDataProvider {
     for (const symbol of symbols) {
       let symbolData: MarketDataPoint[] = [];
 
-      if (symbol === MARKET_SYMBOLS.VIX) {
-        const result = await fetchFredVix(startDate, endDate);
-        symbolData = result.data;
-        if (result.error) {
-          this.diagnostics.errors[symbol] = result.error;
-        }
-      } else if (symbol === MARKET_SYMBOLS.BTC_USD) {
-        try {
-          symbolData = await fetchCoinGeckoBtc(startDate, endDate);
-          if (symbolData.length === 0) {
-            this.diagnostics.errors[symbol] = 'No BTC data returned from CoinGecko';
-          }
-        } catch (error) {
-          this.diagnostics.errors[symbol] = (error as Error).message;
-          symbolData = [];
-        }
-      } else if (symbol === MARKET_SYMBOLS.PDBC) {
+      if (symbol === MARKET_SYMBOLS.PDBC) {
         // PDBC: Try AlphaVantage first, fall back to DBC (Stooq) if AV fails
         const avResult = await fetchAlphaVantagePdbc(startDate, endDate);
         if (avResult.data.length > 0) {

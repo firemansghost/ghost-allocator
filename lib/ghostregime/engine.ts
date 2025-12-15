@@ -29,6 +29,7 @@ import {
 } from './dataWindows';
 import type { RiskAxis, InflAxis } from './types';
 import { checkCoreSymbolStatus } from './diagnostics';
+import type { ProviderDiagnostics } from './marketData';
 
 /**
  * Compute GhostRegime for a specific date (asof_date)
@@ -209,7 +210,23 @@ export async function getGhostRegimeToday(): Promise<GhostRegimeRow> {
           core_symbol_status: diagnostics.status,
         };
       }
-      throw new Error('GHOSTREGIME_NOT_READY');
+      // No latest available - throw error with diagnostics attached
+      const diagnostics = checkCoreSymbolStatus(marketData, null, providerDiagnostics);
+      const notReadyError = new Error('GHOSTREGIME_NOT_READY') as Error & {
+        diagnostics?: {
+          asof_date_attempted: string | null;
+          missing_core_symbols: string[];
+          core_symbol_status: Record<string, any>;
+          provider_diagnostics?: ProviderDiagnostics;
+        };
+      };
+      notReadyError.diagnostics = {
+        asof_date_attempted: null,
+        missing_core_symbols: diagnostics.missingSymbols.length > 0 ? diagnostics.missingSymbols : coreSymbols,
+        core_symbol_status: diagnostics.status,
+        provider_diagnostics: providerDiagnostics,
+      };
+      throw notReadyError;
     }
 
     // Compute asof_date as minimum of last available dates across core instruments
@@ -236,7 +253,22 @@ export async function getGhostRegimeToday(): Promise<GhostRegimeRow> {
           core_proxy_used: diagnostics.proxies,
         };
       }
-      throw new Error('GHOSTREGIME_NOT_READY');
+      // No latest available - throw error with diagnostics attached
+      const notReadyError = new Error('GHOSTREGIME_NOT_READY') as Error & {
+        diagnostics?: {
+          asof_date_attempted: string | null;
+          missing_core_symbols: string[];
+          core_symbol_status: Record<string, any>;
+          provider_diagnostics?: ProviderDiagnostics;
+        };
+      };
+      notReadyError.diagnostics = {
+        asof_date_attempted: asofDate ? formatISO(asofDate, { representation: 'date' }) : null,
+        missing_core_symbols: diagnostics.missingSymbols,
+        core_symbol_status: diagnostics.status,
+        provider_diagnostics: providerDiagnostics,
+      };
+      throw notReadyError;
     }
 
     // Check if we already have data for this asof_date
