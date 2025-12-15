@@ -191,16 +191,21 @@ export async function getGhostRegimeToday(): Promise<GhostRegimeRow> {
       endDate
     );
 
+    // Get provider diagnostics (resolved IDs, errors)
+    const providerDiagnostics = defaultMarketDataProvider.getDiagnostics();
+
     if (marketData.length === 0) {
       // Return stale data if available, or 503
       if (latest) {
+        // Build diagnostics even with no data
+        const diagnostics = checkCoreSymbolStatus(marketData, null, providerDiagnostics);
         return {
           ...latest,
           run_date_utc: formatISO(runDateUtc, { representation: 'date' }),
           stale: true,
           stale_reason: 'MARKET_DATA_UNAVAILABLE',
-          missing_core_symbols: coreSymbols,
-          core_symbol_status: {},
+          missing_core_symbols: diagnostics.missingSymbols.length > 0 ? diagnostics.missingSymbols : coreSymbols,
+          core_symbol_status: diagnostics.status,
         };
       }
       throw new Error('GHOSTREGIME_NOT_READY');
@@ -210,7 +215,7 @@ export async function getGhostRegimeToday(): Promise<GhostRegimeRow> {
     const asofDate = computeAsofDate(marketData, coreSymbols);
     
     // Check core symbol status and build diagnostics
-    const diagnostics = checkCoreSymbolStatus(marketData, asofDate);
+    const diagnostics = checkCoreSymbolStatus(marketData, asofDate, providerDiagnostics);
     
     if (!asofDate || !diagnostics.allOk) {
       // Missing or insufficient core data - return last persisted row with diagnostics

@@ -1,11 +1,25 @@
 /**
  * GhostRegime Market Data Provider
- * Working default implementation using Stooq (ETFs), FRED (VIX), CoinGecko (BTC)
- * No API keys required
+ * Working default implementation using Stooq (ETFs), FRED (VIX), CoinGecko (BTC), AlphaVantage (PDBC)
  */
 
 import type { MarketDataPoint } from './types';
 import { MARKET_SYMBOLS } from './config';
+
+/**
+ * Stooq symbol mapping (ticker -> Stooq ID)
+ * Stooq uses lowercase ticker with .us suffix for US ETFs
+ */
+const STOOQ_SYMBOL_MAP: Record<string, string> = {
+  [MARKET_SYMBOLS.SPY]: 'spy.us',
+  [MARKET_SYMBOLS.GLD]: 'gld.us',
+  [MARKET_SYMBOLS.HYG]: 'hyg.us',
+  [MARKET_SYMBOLS.IEF]: 'ief.us',
+  [MARKET_SYMBOLS.EEM]: 'eem.us',
+  [MARKET_SYMBOLS.TLT]: 'tlt.us',
+  [MARKET_SYMBOLS.UUP]: 'uup.us',
+  // PDBC is NOT in Stooq - use AlphaVantage instead
+};
 
 export interface MarketDataProvider {
   getHistoricalPrices(
@@ -27,17 +41,20 @@ function calculateReturn(prevClose: number, currentClose: number): number {
 /**
  * Fetch ETF data from Stooq
  * Stooq CSV format: Date,Open,High,Low,Close,Volume
+ * @param symbol - Original ticker symbol (e.g., "SPY")
+ * @param stooqId - Resolved Stooq ID (e.g., "spy.us")
  */
 async function fetchStooqData(
   symbol: string,
+  stooqId: string,
   startDate: Date,
   endDate: Date
-): Promise<MarketDataPoint[]> {
+): Promise<{ data: MarketDataPoint[]; resolvedId: string }> {
   try {
-    // Stooq CSV URL format: https://stooq.com/q/d/l/?s={symbol}&d1={start}&d2={end}&i=d
+    // Stooq CSV URL format: https://stooq.com/q/d/l/?s={stooqId}&d1={start}&d2={end}&i=d
     const startStr = startDate.toISOString().split('T')[0].replace(/-/g, '');
     const endStr = endDate.toISOString().split('T')[0].replace(/-/g, '');
-    const url = `https://stooq.com/q/d/l/?s=${symbol}&d1=${startStr}&d2=${endStr}&i=d`;
+    const url = `https://stooq.com/q/d/l/?s=${stooqId}&d1=${startStr}&d2=${endStr}&i=d`;
 
     const response = await fetch(url);
     if (!response.ok) {
@@ -46,7 +63,9 @@ async function fetchStooqData(
 
     const text = await response.text();
     const lines = text.trim().split('\n');
-    if (lines.length < 2) return []; // Header only
+    if (lines.length < 2) {
+      return { data: [], resolvedId: stooqId };
+    }
 
     const data: MarketDataPoint[] = [];
     let prevClose: number | null = null;
@@ -65,7 +84,7 @@ async function fetchStooqData(
       const returns = prevClose !== null ? calculateReturn(prevClose, close) : 0;
 
       data.push({
-        symbol,
+        symbol, // Keep original symbol for consistency
         date,
         close,
         returns,
@@ -74,22 +93,37 @@ async function fetchStooqData(
       prevClose = close;
     }
 
-    return data.sort((a, b) => a.date.getTime() - b.date.getTime());
+    return {
+      data: data.sort((a, b) => a.date.getTime() - b.date.getTime()),
+      resolvedId: stooqId,
+    };
   } catch (error) {
-    console.error(`Error fetching Stooq data for ${symbol}:`, error);
-    return [];
+    console.error(`Error fetching Stooq data for ${symbol} (${stooqId}):`, error);
+    return { data: [], resolvedId: stooqId };
   }
 }
 
 /**
  * Fetch VIX data from FRED (VIXCLS series)
+ * @returns Object with data and error info if API key is missing
  */
-async function fetchFredVix(startDate: Date, endDate: Date): Promise<MarketDataPoint[]> {
+async function fetchFredVix(
+  startDate: Date,
+  endDate: Date
+): Promise<{ data: MarketDataPoint[]; error?: string }> {
   try {
-    // FRED API (public, no key required for basic usage)
+    const fredApiKey = process.env.FRED_API_KEY;
+    if (!fredApiKey) {
+      return {
+        data: [],
+        error: 'Missing FRED_API_KEY in env',
+      };
+    }
+
+    // FRED API requires API key for reliable access
     const startStr = startDate.toISOString().split('T')[0];
     const endStr = endDate.toISOString().split('T')[0];
-    const url = `https://api.stlouisfed.org/fred/series/observations?series_id=VIXCLS&observation_start=${startStr}&observation_end=${endStr}&file_type=json&api_key=`;
+    const url = `https://api.stlouisfed.org/fred/series/observations?series_id=VIXCLS&observation_start=${startStr}&observation_end=${endStr}&file_type=json&api_key=${fredApiKey}`;
 
     const response = await fetch(url);
     if (!response.ok) {
@@ -121,10 +155,95 @@ async function fetchFredVix(startDate: Date, endDate: Date): Promise<MarketDataP
       prevClose = close;
     }
 
-    return data.sort((a, b) => a.date.getTime() - b.date.getTime());
+    return {
+      data: data.sort((a, b) => a.date.getTime() - b.date.getTime()),
+    };
   } catch (error) {
     console.error('Error fetching FRED VIX data:', error);
-    return [];
+    return {
+      data: [],
+      error: (error as Error).message,
+    };
+  }
+}
+
+/**
+ * Fetch PDBC data from AlphaVantage
+ * AlphaVantage requires API key
+ */
+async function fetchAlphaVantagePdbc(
+  startDate: Date,
+  endDate: Date
+): Promise<{ data: MarketDataPoint[]; error?: string }> {
+  try {
+    const apiKey = process.env.ALPHAVANTAGE_API_KEY;
+    if (!apiKey) {
+      return {
+        data: [],
+        error: 'Missing ALPHAVANTAGE_API_KEY in env',
+      };
+    }
+
+    // AlphaVantage TIME_SERIES_DAILY endpoint
+    const url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=PDBC&apikey=${apiKey}&outputsize=full&datatype=json`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`AlphaVantage fetch failed: ${response.statusText}`);
+    }
+
+    const json = await response.json();
+    
+    // Check for API error messages
+    if (json['Error Message']) {
+      throw new Error(json['Error Message']);
+    }
+    if (json['Note']) {
+      throw new Error('AlphaVantage rate limit exceeded');
+    }
+
+    const timeSeries = json['Time Series (Daily)'];
+    if (!timeSeries) {
+      throw new Error('No time series data in response');
+    }
+
+    const data: MarketDataPoint[] = [];
+    let prevClose: number | null = null;
+
+    // Convert object to array and filter by date range
+    const entries = Object.entries(timeSeries)
+      .map(([dateStr, values]: [string, any]) => ({
+        date: new Date(dateStr),
+        close: parseFloat(values['4. close']),
+      }))
+      .filter((item) => {
+        const date = item.date;
+        return date >= startDate && date <= endDate && !isNaN(item.close);
+      })
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+    for (const item of entries) {
+      const returns = prevClose !== null ? calculateReturn(prevClose, item.close) : 0;
+
+      data.push({
+        symbol: MARKET_SYMBOLS.PDBC,
+        date: item.date,
+        close: item.close,
+        returns,
+      });
+
+      prevClose = item.close;
+    }
+
+    return {
+      data: data.sort((a, b) => a.date.getTime() - b.date.getTime()),
+    };
+  } catch (error) {
+    console.error('Error fetching AlphaVantage PDBC data:', error);
+    return {
+      data: [],
+      error: (error as Error).message,
+    };
   }
 }
 
@@ -177,26 +296,78 @@ async function fetchCoinGeckoBtc(
 }
 
 /**
+ * Provider diagnostics: resolved IDs and error messages per symbol
+ */
+export interface ProviderDiagnostics {
+  resolvedIds: Record<string, string>; // symbol -> resolved provider ID
+  errors: Record<string, string>; // symbol -> error message
+}
+
+/**
  * Default Market Data Provider Implementation
  */
 export class DefaultMarketDataProvider implements MarketDataProvider {
+  private diagnostics: ProviderDiagnostics = {
+    resolvedIds: {},
+    errors: {},
+  };
+
+  /**
+   * Get provider diagnostics (resolved IDs and errors)
+   */
+  getDiagnostics(): ProviderDiagnostics {
+    return { ...this.diagnostics };
+  }
+
+  /**
+   * Clear diagnostics (call before new fetch)
+   */
+  clearDiagnostics(): void {
+    this.diagnostics = {
+      resolvedIds: {},
+      errors: {},
+    };
+  }
+
   async getHistoricalPrices(
     symbols: string[],
     startDate: Date,
     endDate: Date
   ): Promise<MarketDataPoint[]> {
+    this.clearDiagnostics();
     const allData: MarketDataPoint[] = [];
 
     for (const symbol of symbols) {
       let symbolData: MarketDataPoint[] = [];
 
       if (symbol === MARKET_SYMBOLS.VIX) {
-        symbolData = await fetchFredVix(startDate, endDate);
+        const result = await fetchFredVix(startDate, endDate);
+        symbolData = result.data;
+        if (result.error) {
+          this.diagnostics.errors[symbol] = result.error;
+        }
       } else if (symbol === MARKET_SYMBOLS.BTC_USD) {
         symbolData = await fetchCoinGeckoBtc(startDate, endDate);
+      } else if (symbol === MARKET_SYMBOLS.PDBC) {
+        // PDBC uses AlphaVantage
+        const result = await fetchAlphaVantagePdbc(startDate, endDate);
+        symbolData = result.data;
+        if (result.error) {
+          this.diagnostics.errors[symbol] = result.error;
+        }
       } else {
-        // ETF from Stooq
-        symbolData = await fetchStooqData(symbol, startDate, endDate);
+        // ETF from Stooq - use mapped ID
+        const stooqId = STOOQ_SYMBOL_MAP[symbol];
+        if (!stooqId) {
+          this.diagnostics.errors[symbol] = `No Stooq mapping for ${symbol}`;
+        } else {
+          const result = await fetchStooqData(symbol, stooqId, startDate, endDate);
+          symbolData = result.data;
+          this.diagnostics.resolvedIds[symbol] = result.resolvedId;
+          if (symbolData.length === 0) {
+            this.diagnostics.errors[symbol] = `No data returned from Stooq for ${stooqId}`;
+          }
+        }
       }
 
       allData.push(...symbolData);

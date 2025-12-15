@@ -6,6 +6,7 @@
 import type { MarketDataPoint, CoreSymbolStatus } from './types';
 import { getDataForSymbol, getLatestDate, hasSufficientData, TR_21, TR_63 } from './dataWindows';
 import { MARKET_SYMBOLS } from './config';
+import type { ProviderDiagnostics } from './marketData';
 
 const CORE_SYMBOLS = [
   MARKET_SYMBOLS.SPY,
@@ -26,6 +27,8 @@ function getProviderName(symbol: string): string {
     return 'FRED';
   } else if (symbol === MARKET_SYMBOLS.BTC_USD) {
     return 'CoinGecko';
+  } else if (symbol === MARKET_SYMBOLS.PDBC) {
+    return 'AlphaVantage';
   } else {
     return 'Stooq';
   }
@@ -36,7 +39,8 @@ function getProviderName(symbol: string): string {
  */
 export function checkCoreSymbolStatus(
   marketData: MarketDataPoint[],
-  asofDate: Date | null
+  asofDate: Date | null,
+  providerDiagnostics?: ProviderDiagnostics
 ): {
   allOk: boolean;
   missingSymbols: string[];
@@ -53,9 +57,25 @@ export function checkCoreSymbolStatus(
     let ok = true;
     let note: string | undefined;
 
+    // Add provider-specific diagnostics
+    if (providerDiagnostics) {
+      const resolvedId = providerDiagnostics.resolvedIds[symbol];
+      const error = providerDiagnostics.errors[symbol];
+
+      if (error) {
+        note = error;
+        ok = false;
+      } else if (resolvedId && provider === 'Stooq') {
+        // Include resolved Stooq ID in note for successful fetches
+        note = `Stooq ID: ${resolvedId}`;
+      }
+    }
+
     if (symbolData.length === 0) {
       ok = false;
-      note = 'No data available';
+      if (!note) {
+        note = 'No data available';
+      }
       missingSymbols.push(symbol);
     } else if (asofDate) {
       // Check if we have sufficient data for TR_21 and TR_63
@@ -67,7 +87,8 @@ export function checkCoreSymbolStatus(
         const missingWindows: string[] = [];
         if (!hasTR21) missingWindows.push('TR_21');
         if (!hasTR63) missingWindows.push('TR_63');
-        note = `Insufficient data for ${missingWindows.join(', ')}`;
+        const windowNote = `Insufficient data for ${missingWindows.join(', ')}`;
+        note = note ? `${note}; ${windowNote}` : windowNote;
         missingSymbols.push(symbol);
       }
     }
