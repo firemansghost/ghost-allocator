@@ -19,6 +19,12 @@ const CORE_SYMBOLS = [
   MARKET_SYMBOLS.VIX,
 ] as const;
 
+const VAMS_SYMBOLS = [
+  MARKET_SYMBOLS.SPY,
+  MARKET_SYMBOLS.GLD,
+  MARKET_SYMBOLS.BTC_USD,
+] as const;
+
 /**
  * Get provider name for a symbol
  */
@@ -109,10 +115,66 @@ export function checkCoreSymbolStatus(
     };
   }
 
+  // Also check VAMS symbols (SPY, GLD, BTC) for VAMS history requirements
+  const vamsStatus: Record<string, CoreSymbolStatus> = {};
+  const vamsMissing: string[] = [];
+  
+  for (const symbol of VAMS_SYMBOLS) {
+    // Skip if already in core status
+    if (status[symbol]) {
+      continue;
+    }
+    
+    const symbolData = getDataForSymbol(marketData, symbol);
+    const latestDate = getLatestDate(marketData, symbol);
+    const provider = getProviderName(symbol);
+    
+    let ok = true;
+    let note: string | undefined;
+    
+    // Add provider-specific diagnostics
+    if (providerDiagnostics) {
+      const error = providerDiagnostics.errors[symbol];
+      if (error) {
+        note = error;
+        ok = false;
+      }
+    }
+    
+    // VAMS requires ≥ 400 observations for TR_252 + vol_63
+    if (symbolData.length === 0) {
+      ok = false;
+      if (!note) {
+        note = 'No data available';
+      }
+      vamsMissing.push(symbol);
+    } else if (asofDate) {
+      const filteredData = symbolData.filter((d) => d.date <= asofDate);
+      if (filteredData.length < 400) {
+        ok = false;
+        const windowNote = `Insufficient data for VAMS (need ≥400 obs, have ${filteredData.length})`;
+        note = note ? `${note}; ${windowNote}` : windowNote;
+        vamsMissing.push(symbol);
+      }
+    }
+    
+    vamsStatus[symbol] = {
+      provider,
+      last_date: latestDate ? latestDate.toISOString().split('T')[0] : null,
+      obs: symbolData.length,
+      ok,
+      note,
+    };
+  }
+  
+  // Merge VAMS status into main status
+  const mergedStatus = { ...status, ...vamsStatus };
+  const allMissing = [...missingSymbols, ...vamsMissing];
+  
   return {
-    allOk: missingSymbols.length === 0,
-    missingSymbols,
-    status,
+    allOk: allMissing.length === 0,
+    missingSymbols: allMissing,
+    status: mergedStatus,
     proxies,
   };
 }

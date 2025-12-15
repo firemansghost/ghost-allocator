@@ -278,14 +278,28 @@ async function fetchCoinGeckoBtc(
     const json = await response.json();
     const prices = json.prices || [];
 
-    const data: MarketDataPoint[] = [];
-    let prevClose: number | null = null;
-
+    // CoinGecko returns hourly data - aggregate to daily closes (last price of each day UTC)
+    const dailyCloses = new Map<string, number>();
     for (const [timestamp, price] of prices) {
       const close = price as number;
       if (isNaN(close)) continue;
 
       const date = new Date(timestamp);
+      // Use UTC date string as key (YYYY-MM-DD)
+      const dateKey = date.toISOString().split('T')[0];
+      
+      // Keep the last price for each day (CoinGecko data is sorted by timestamp)
+      dailyCloses.set(dateKey, close);
+    }
+
+    // Convert to MarketDataPoint array, sorted by date
+    const data: MarketDataPoint[] = [];
+    const sortedDates = Array.from(dailyCloses.keys()).sort();
+    let prevClose: number | null = null;
+
+    for (const dateKey of sortedDates) {
+      const close = dailyCloses.get(dateKey)!;
+      const date = new Date(dateKey + 'T00:00:00Z');
       const returns = prevClose !== null ? calculateReturn(prevClose, close) : 0;
 
       data.push({
@@ -298,7 +312,7 @@ async function fetchCoinGeckoBtc(
       prevClose = close;
     }
 
-    return data.sort((a, b) => a.date.getTime() - b.date.getTime());
+    return data;
   } catch (error) {
     console.error('Error fetching CoinGecko BTC data:', error);
     return [];
@@ -360,7 +374,15 @@ export class DefaultMarketDataProvider implements MarketDataProvider {
           this.diagnostics.errors[symbol] = result.error;
         }
       } else if (symbol === MARKET_SYMBOLS.BTC_USD) {
-        symbolData = await fetchCoinGeckoBtc(startDate, endDate);
+        try {
+          symbolData = await fetchCoinGeckoBtc(startDate, endDate);
+          if (symbolData.length === 0) {
+            this.diagnostics.errors[symbol] = 'No BTC data returned from CoinGecko';
+          }
+        } catch (error) {
+          this.diagnostics.errors[symbol] = (error as Error).message;
+          symbolData = [];
+        }
       } else if (symbol === MARKET_SYMBOLS.PDBC) {
         // PDBC: Try AlphaVantage first, fall back to DBC (Stooq) if AV fails
         const avResult = await fetchAlphaVantagePdbc(startDate, endDate);

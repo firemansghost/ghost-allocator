@@ -9,6 +9,13 @@ import { join } from 'path';
 import type { GhostRegimeRow, StorageMeta } from './types';
 import { BLOB_KEYS, MODEL_VERSION } from './config';
 
+/**
+ * Get blob key with model version prefix
+ */
+function getBlobKey(key: string): string {
+  return `${MODEL_VERSION}/${key}`;
+}
+
 export interface StorageAdapter {
   readHistory(): Promise<GhostRegimeRow[]>;
   readLatest(): Promise<GhostRegimeRow | null>;
@@ -30,7 +37,8 @@ export class BlobStorageAdapter implements StorageAdapter {
 
   async readHistory(): Promise<GhostRegimeRow[]> {
     try {
-      const blob = await head(BLOB_KEYS.HISTORY, { token: this.token });
+      const blobKey = getBlobKey(BLOB_KEYS.HISTORY);
+      const blob = await head(blobKey, { token: this.token });
       const response = await fetch(blob.url);
       if (!response.ok) return [];
 
@@ -45,7 +53,8 @@ export class BlobStorageAdapter implements StorageAdapter {
 
   async readLatest(): Promise<GhostRegimeRow | null> {
     try {
-      const blob = await head(BLOB_KEYS.LATEST, { token: this.token });
+      const blobKey = getBlobKey(BLOB_KEYS.LATEST);
+      const blob = await head(blobKey, { token: this.token });
       const response = await fetch(blob.url);
       if (!response.ok) return null;
 
@@ -59,7 +68,8 @@ export class BlobStorageAdapter implements StorageAdapter {
 
   async readMeta(): Promise<StorageMeta | null> {
     try {
-      const blob = await head(BLOB_KEYS.META, { token: this.token });
+      const blobKey = getBlobKey(BLOB_KEYS.META);
+      const blob = await head(blobKey, { token: this.token });
       const response = await fetch(blob.url);
       if (!response.ok) return null;
 
@@ -76,11 +86,12 @@ export class BlobStorageAdapter implements StorageAdapter {
 
   async appendToHistory(row: GhostRegimeRow): Promise<void> {
     try {
+      const blobKey = getBlobKey(BLOB_KEYS.HISTORY);
       const existing = await this.readHistory();
       const updated = [...existing, row];
       const content = updated.map((r) => JSON.stringify(r)).join('\n') + '\n';
 
-      await put(BLOB_KEYS.HISTORY, content, {
+      await put(blobKey, content, {
         access: 'public',
         token: this.token,
         addRandomSuffix: false,
@@ -94,7 +105,8 @@ export class BlobStorageAdapter implements StorageAdapter {
 
   async writeLatest(row: GhostRegimeRow): Promise<void> {
     try {
-      await put(BLOB_KEYS.LATEST, JSON.stringify(row, null, 2), {
+      const blobKey = getBlobKey(BLOB_KEYS.LATEST);
+      await put(blobKey, JSON.stringify(row, null, 2), {
         access: 'public',
         token: this.token,
         addRandomSuffix: false,
@@ -108,8 +120,9 @@ export class BlobStorageAdapter implements StorageAdapter {
 
   async writeMeta(meta: StorageMeta): Promise<void> {
     try {
+      const blobKey = getBlobKey(BLOB_KEYS.META);
       await put(
-        BLOB_KEYS.META,
+        blobKey,
         JSON.stringify({
           version: meta.version,
           lastUpdated: meta.lastUpdated.toISOString(),

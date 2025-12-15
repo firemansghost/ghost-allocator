@@ -218,32 +218,20 @@ export async function getGhostRegimeToday(): Promise<GhostRegimeRow> {
     // Check core symbol status and build diagnostics
     const diagnostics = checkCoreSymbolStatus(marketData, asofDate, providerDiagnostics);
     
-    // Check VAMS history requirements (SPY, GLD, BTC need ≥ 300 obs for TR_252 + vol_63)
-    const vamsSymbols = [MARKET_SYMBOLS.SPY, MARKET_SYMBOLS.GLD, MARKET_SYMBOLS.BTC_USD];
-    const vamsInsufficient: string[] = [];
-    if (asofDate) {
-      for (const symbol of vamsSymbols) {
-        const symbolData = getDataForSymbol(marketData, symbol).filter((d) => d.date <= asofDate);
-        if (symbolData.length < 300) {
-          vamsInsufficient.push(symbol);
-        }
-      }
-    }
+    // VAMS history check is now handled in checkCoreSymbolStatus (requires ≥400 obs)
     
-    if (!asofDate || !diagnostics.allOk || vamsInsufficient.length > 0) {
-      // Missing or insufficient core data - return last persisted row with diagnostics
+    if (!asofDate || !diagnostics.allOk) {
+      // Missing or insufficient core/VAMS data - return last persisted row with diagnostics
       if (latest) {
         const staleReason = !asofDate 
           ? 'MISSING_CORE_SERIES' 
-          : vamsInsufficient.length > 0 
-          ? 'INSUFFICIENT_HISTORY_VAMS' 
           : 'INSUFFICIENT_HISTORY';
         return {
           ...latest,
           run_date_utc: formatISO(runDateUtc, { representation: 'date' }),
           stale: true,
           stale_reason: staleReason,
-          missing_core_symbols: vamsInsufficient.length > 0 ? vamsInsufficient : diagnostics.missingSymbols,
+          missing_core_symbols: diagnostics.missingSymbols,
           core_symbol_status: diagnostics.status,
           core_proxy_used: diagnostics.proxies,
         };
@@ -290,13 +278,15 @@ export async function getGhostRegimeToday(): Promise<GhostRegimeRow> {
       row.core_proxy_used = diagnostics.proxies;
     }
 
-    // Persist
-    await storage.writeLatest(row);
-    await storage.appendToHistory(row);
-    await storage.writeMeta({
-      version: MODEL_VERSION,
-      lastUpdated: runDateUtc,
-    });
+    // Only persist if not stale
+    if (!row.stale) {
+      await storage.writeLatest(row);
+      await storage.appendToHistory(row);
+      await storage.writeMeta({
+        version: MODEL_VERSION,
+        lastUpdated: runDateUtc,
+      });
+    }
 
     return row;
   } catch (error) {

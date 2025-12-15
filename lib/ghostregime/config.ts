@@ -5,7 +5,7 @@
 
 // Environment variables
 export const MODEL_VERSION =
-  process.env.NEXT_PUBLIC_GHOSTREGIME_MODEL_VERSION || 'ghostregime-v1.0';
+  process.env.NEXT_PUBLIC_GHOSTREGIME_MODEL_VERSION || 'ghostregime-v1.0.1';
 
 export const CUTOVER_DATE_UTC = new Date(
   process.env.NEXT_PUBLIC_GHOSTREGIME_CUTOVER_DATE_UTC || '2025-11-28T00:00:00Z'
@@ -97,4 +97,6 @@ export const MARKET_SYMBOLS = {
 
 // Allocation math tolerance
 export const ALLOCATION_TOLERANCE = 1e-6;
+
+
 
