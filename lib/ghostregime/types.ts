@@ -83,6 +83,7 @@ export interface GhostRegimeRow {
   stale_reason?: string;
   missing_core_symbols?: string[];
   core_symbol_status?: Record<string, CoreSymbolStatus>;
+  core_proxy_used?: Record<string, string>; // Map of original symbol -> proxy symbol (e.g., "PDBC" -> "DBC")
 }
 
 export interface SeedStatus {

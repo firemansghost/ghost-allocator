@@ -18,7 +18,8 @@ const STOOQ_SYMBOL_MAP: Record<string, string> = {
   [MARKET_SYMBOLS.EEM]: 'eem.us',
   [MARKET_SYMBOLS.TLT]: 'tlt.us',
   [MARKET_SYMBOLS.UUP]: 'uup.us',
-  // PDBC is NOT in Stooq - use AlphaVantage instead
+  // PDBC fallback: DBC (Stooq proxy)
+  'DBC': 'dbc.us',
 };
 
 export interface MarketDataProvider {
@@ -194,18 +195,27 @@ async function fetchAlphaVantagePdbc(
 
     const json = await response.json();
     
-    // Check for API error messages
-    if (json['Error Message']) {
-      throw new Error(json['Error Message']);
-    }
-    if (json['Note']) {
-      throw new Error('AlphaVantage rate limit exceeded');
+    // Check for API error messages - capture all error fields
+    const errorMessage = json['Error Message'];
+    const note = json['Note'];
+    const information = json['Information'];
+    
+    if (errorMessage || note || information || !json['Time Series (Daily)']) {
+      // Build comprehensive error message
+      const errorParts: string[] = [];
+      if (errorMessage) errorParts.push(`Error Message: ${errorMessage}`);
+      if (note) errorParts.push(`Note: ${note}`);
+      if (information) errorParts.push(`Information: ${information}`);
+      if (!json['Time Series (Daily)']) {
+        errorParts.push('No time series data in response');
+      }
+      return {
+        data: [],
+        error: errorParts.join('; '),
+      };
     }
 
     const timeSeries = json['Time Series (Daily)'];
-    if (!timeSeries) {
-      throw new Error('No time series data in response');
-    }
 
     const data: MarketDataPoint[] = [];
     let prevClose: number | null = null;
@@ -296,11 +306,12 @@ async function fetchCoinGeckoBtc(
 }
 
 /**
- * Provider diagnostics: resolved IDs and error messages per symbol
+ * Provider diagnostics: resolved IDs, error messages, and proxy usage per symbol
  */
 export interface ProviderDiagnostics {
   resolvedIds: Record<string, string>; // symbol -> resolved provider ID
   errors: Record<string, string>; // symbol -> error message
+  proxies: Record<string, string>; // original symbol -> proxy symbol (e.g., "PDBC" -> "DBC")
 }
 
 /**
@@ -310,10 +321,11 @@ export class DefaultMarketDataProvider implements MarketDataProvider {
   private diagnostics: ProviderDiagnostics = {
     resolvedIds: {},
     errors: {},
+    proxies: {},
   };
 
   /**
-   * Get provider diagnostics (resolved IDs and errors)
+   * Get provider diagnostics (resolved IDs, errors, and proxies)
    */
   getDiagnostics(): ProviderDiagnostics {
     return { ...this.diagnostics };
@@ -326,6 +338,7 @@ export class DefaultMarketDataProvider implements MarketDataProvider {
     this.diagnostics = {
       resolvedIds: {},
       errors: {},
+      proxies: {},
     };
   }
 
@@ -349,11 +362,31 @@ export class DefaultMarketDataProvider implements MarketDataProvider {
       } else if (symbol === MARKET_SYMBOLS.BTC_USD) {
         symbolData = await fetchCoinGeckoBtc(startDate, endDate);
       } else if (symbol === MARKET_SYMBOLS.PDBC) {
-        // PDBC uses AlphaVantage
-        const result = await fetchAlphaVantagePdbc(startDate, endDate);
-        symbolData = result.data;
-        if (result.error) {
-          this.diagnostics.errors[symbol] = result.error;
+        // PDBC: Try AlphaVantage first, fall back to DBC (Stooq) if AV fails
+        const avResult = await fetchAlphaVantagePdbc(startDate, endDate);
+        if (avResult.data.length > 0) {
+          symbolData = avResult.data;
+        } else {
+          // Fallback to DBC from Stooq
+          const dbcStooqId = STOOQ_SYMBOL_MAP['DBC'];
+          if (dbcStooqId) {
+            const dbcResult = await fetchStooqData('DBC', dbcStooqId, startDate, endDate);
+            symbolData = dbcResult.data.map((point) => ({
+              ...point,
+              symbol: MARKET_SYMBOLS.PDBC, // Map DBC data to PDBC symbol
+            }));
+            this.diagnostics.proxies[MARKET_SYMBOLS.PDBC] = 'DBC';
+            this.diagnostics.resolvedIds[MARKET_SYMBOLS.PDBC] = dbcResult.resolvedId;
+            if (symbolData.length === 0) {
+              this.diagnostics.errors[symbol] = `AlphaVantage failed (${avResult.error || 'no data'}), DBC fallback also failed`;
+            } else {
+              // Note that we're using a proxy
+              this.diagnostics.errors[symbol] = `Using DBC proxy (AlphaVantage: ${avResult.error || 'no data'})`;
+            }
+          } else {
+            symbolData = [];
+            this.diagnostics.errors[symbol] = `AlphaVantage failed (${avResult.error || 'no data'}), DBC fallback unavailable`;
+          }
         }
       } else {
         // ETF from Stooq - use mapped ID

@@ -179,10 +179,11 @@ export async function getGhostRegimeToday(): Promise<GhostRegimeRow> {
 
   // Compute for today
   try {
-    // Fetch market data
+    // Fetch market data - need at least 400 trading days for VAMS (TR_252 + vol_63)
+    // 400 trading days ≈ 1.6 years, so fetch 600 calendar days to ensure coverage
     const endDate = new Date();
     const startDate = new Date(endDate);
-    startDate.setDate(startDate.getDate() - 300); // Get enough history
+    startDate.setDate(startDate.getDate() - 600); // ~600 calendar days = ~400+ trading days
 
     const allSymbols = Object.values(MARKET_SYMBOLS);
     const marketData = await defaultMarketDataProvider.getHistoricalPrices(
@@ -217,16 +218,34 @@ export async function getGhostRegimeToday(): Promise<GhostRegimeRow> {
     // Check core symbol status and build diagnostics
     const diagnostics = checkCoreSymbolStatus(marketData, asofDate, providerDiagnostics);
     
-    if (!asofDate || !diagnostics.allOk) {
+    // Check VAMS history requirements (SPY, GLD, BTC need ≥ 300 obs for TR_252 + vol_63)
+    const vamsSymbols = [MARKET_SYMBOLS.SPY, MARKET_SYMBOLS.GLD, MARKET_SYMBOLS.BTC_USD];
+    const vamsInsufficient: string[] = [];
+    if (asofDate) {
+      for (const symbol of vamsSymbols) {
+        const symbolData = getDataForSymbol(marketData, symbol).filter((d) => d.date <= asofDate);
+        if (symbolData.length < 300) {
+          vamsInsufficient.push(symbol);
+        }
+      }
+    }
+    
+    if (!asofDate || !diagnostics.allOk || vamsInsufficient.length > 0) {
       // Missing or insufficient core data - return last persisted row with diagnostics
       if (latest) {
+        const staleReason = !asofDate 
+          ? 'MISSING_CORE_SERIES' 
+          : vamsInsufficient.length > 0 
+          ? 'INSUFFICIENT_HISTORY_VAMS' 
+          : 'INSUFFICIENT_HISTORY';
         return {
           ...latest,
           run_date_utc: formatISO(runDateUtc, { representation: 'date' }),
           stale: true,
-          stale_reason: !asofDate ? 'MISSING_CORE_SERIES' : 'INSUFFICIENT_HISTORY',
-          missing_core_symbols: diagnostics.missingSymbols,
+          stale_reason: staleReason,
+          missing_core_symbols: vamsInsufficient.length > 0 ? vamsInsufficient : diagnostics.missingSymbols,
           core_symbol_status: diagnostics.status,
+          core_proxy_used: diagnostics.proxies,
         };
       }
       throw new Error('GHOSTREGIME_NOT_READY');
@@ -243,6 +262,7 @@ export async function getGhostRegimeToday(): Promise<GhostRegimeRow> {
         return {
           ...latest,
           run_date_utc: formatISO(runDateUtc, { representation: 'date' }),
+          core_proxy_used: diagnostics.proxies, // Update proxy info
         };
       }
     }
@@ -265,6 +285,11 @@ export async function getGhostRegimeToday(): Promise<GhostRegimeRow> {
     // Compute using asof_date
     const row = await computeGhostRegime(asofDate, marketData, satelliteData, previousRegime, runDateUtc);
 
+    // Add proxy info if any proxies were used
+    if (Object.keys(diagnostics.proxies).length > 0) {
+      row.core_proxy_used = diagnostics.proxies;
+    }
+
     // Persist
     await storage.writeLatest(row);
     await storage.appendToHistory(row);
@@ -280,11 +305,11 @@ export async function getGhostRegimeToday(): Promise<GhostRegimeRow> {
     // Return stale data if available with diagnostics
     if (latest) {
       // Try to get diagnostics if we have market data
-      let diagnostics: { missingSymbols: string[]; status: Record<string, any> } | null = null;
+      let diagnostics: { missingSymbols: string[]; status: Record<string, any>; proxies: Record<string, string> } | null = null;
       try {
         const endDate = new Date();
         const startDate = new Date(endDate);
-        startDate.setDate(startDate.getDate() - 300);
+        startDate.setDate(startDate.getDate() - 600); // Match main fetch window
         const allSymbols = Object.values(MARKET_SYMBOLS);
         const marketData = await defaultMarketDataProvider.getHistoricalPrices(
           allSymbols,
@@ -293,7 +318,8 @@ export async function getGhostRegimeToday(): Promise<GhostRegimeRow> {
         );
         if (marketData.length > 0) {
           const asofDate = computeAsofDate(marketData, coreSymbols);
-          diagnostics = checkCoreSymbolStatus(marketData, asofDate);
+          const providerDiagnostics = defaultMarketDataProvider.getDiagnostics();
+          diagnostics = checkCoreSymbolStatus(marketData, asofDate, providerDiagnostics);
         }
       } catch {
         // Diagnostics failed, use basic error info
@@ -306,6 +332,7 @@ export async function getGhostRegimeToday(): Promise<GhostRegimeRow> {
         stale_reason: error instanceof Error ? error.message : 'FETCH_ERROR',
         missing_core_symbols: diagnostics?.missingSymbols || [],
         core_symbol_status: diagnostics?.status || {},
+        core_proxy_used: diagnostics?.proxies || latest.core_proxy_used,
       };
     }
     

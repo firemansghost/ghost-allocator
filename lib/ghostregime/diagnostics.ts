@@ -45,9 +45,11 @@ export function checkCoreSymbolStatus(
   allOk: boolean;
   missingSymbols: string[];
   status: Record<string, CoreSymbolStatus>;
+  proxies: Record<string, string>; // Return proxy mapping
 } {
   const status: Record<string, CoreSymbolStatus> = {};
   const missingSymbols: string[] = [];
+  const proxies: Record<string, string> = {};
 
   for (const symbol of CORE_SYMBOLS) {
     const symbolData = getDataForSymbol(marketData, symbol);
@@ -61,8 +63,13 @@ export function checkCoreSymbolStatus(
     if (providerDiagnostics) {
       const resolvedId = providerDiagnostics.resolvedIds[symbol];
       const error = providerDiagnostics.errors[symbol];
+      const proxy = providerDiagnostics.proxies[symbol];
 
-      if (error) {
+      if (proxy) {
+        // Track proxy usage
+        proxies[symbol] = proxy;
+        note = `Proxy used: ${proxy}${error ? ` (${error})` : ''}`;
+      } else if (error) {
         note = error;
         ok = false;
       } else if (resolvedId && provider === 'Stooq') {
@@ -106,6 +113,7 @@ export function checkCoreSymbolStatus(
     allOk: missingSymbols.length === 0,
     missingSymbols,
     status,
+    proxies,
   };
 }
 

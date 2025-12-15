@@ -162,6 +162,18 @@ export default function GhostRegimePage() {
               <p className="text-xs text-zinc-400 uppercase tracking-wide">Flip Watch</p>
               <p className="text-sm font-medium text-zinc-200">{data.flip_watch_status}</p>
             </div>
+            {data.core_proxy_used && Object.keys(data.core_proxy_used).length > 0 && (
+              <div className="space-y-1 rounded-md border border-amber-400/30 bg-amber-400/10 p-2">
+                <p className="text-[10px] font-semibold text-amber-300 uppercase tracking-wide">
+                  Proxy Used
+                </p>
+                {Object.entries(data.core_proxy_used).map(([original, proxy]) => (
+                  <p key={original} className="text-[11px] text-amber-200">
+                    {original} → {proxy}
+                  </p>
+                ))}
+              </div>
+            )}
             {data.stale && (
               <div className="space-y-2">
                 <p className="text-[11px] text-amber-300">
