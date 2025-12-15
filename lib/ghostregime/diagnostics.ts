@@ -29,10 +29,12 @@ const VAMS_SYMBOLS = [
  * Get provider name for a symbol
  */
 function getProviderName(symbol: string): string {
-  if (symbol === MARKET_SYMBOLS.PDBC) {
+  if (symbol === MARKET_SYMBOLS.VIX) {
+    return 'CBOE';
+  } else if (symbol === MARKET_SYMBOLS.PDBC) {
     return 'AlphaVantage'; // May use DBC proxy from Stooq
   } else {
-    return 'Stooq'; // All other symbols (ETFs, VIX, BTC) use Stooq
+    return 'Stooq'; // All other symbols (ETFs, BTC) use Stooq
   }
 }
 

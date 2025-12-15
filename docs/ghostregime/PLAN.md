@@ -224,15 +224,20 @@ satellite_combine_rules:
 
 ## Blob Storage
 
-**Keys**:
-- `ghostregime/ghostregime_history.jsonl` (append-only)
-- `ghostregime/ghostregime_latest.json` (snapshot)
-- `ghostregime/ghostregime_meta.json` (integrity/version)
+**Keys** (versioned by model version):
+- `{MODEL_VERSION}/ghostregime_history.jsonl` (append-only)
+- `{MODEL_VERSION}/ghostregime_latest.json` (snapshot)
+- `{MODEL_VERSION}/ghostregime_meta.json` (integrity/version)
 
 **Environment Variables**:
 - `BLOB_READ_WRITE_TOKEN` (required)
-- `NEXT_PUBLIC_GHOSTREGIME_MODEL_VERSION="ghostregime-v1.0"`
+- `NEXT_PUBLIC_GHOSTREGIME_MODEL_VERSION="ghostregime-v1.0.1"` (default)
 - `NEXT_PUBLIC_GHOSTREGIME_CUTOVER_DATE_UTC="2025-11-28"`
+
+**Persistence Rules**:
+- Only persist rows when `stale=false`
+- Stale rows are returned but not written to Blob storage
+- First successful non-stale run creates versioned Blob objects
 
 **Atomic Update Rules**:
 - Single-writer behavior: If concurrent writes occur, return latest row with `stale=true` rather than corrupting history
@@ -247,12 +252,16 @@ satellite_combine_rules:
 
 ## Market Data Providers
 
-**Default v1 provider stack** (no API keys):
-- **ETFs (SPY, GLD, HYG, IEF, EEM, PDBC, TLT, UUP)**: Stooq daily CSV
-- **VIX**: FRED series VIXCLS (daily close)
-- **BTC spot**: CoinGecko (public endpoint)
+**Default v1.0.1 provider stack**:
+- **ETFs (SPY, GLD, HYG, IEF, EEM, TLT, UUP)**: Stooq daily CSV
+- **VIX**: CBOE VIX History CSV (https://cdn.cboe.com/api/global/us_indices/daily_prices/VIX_History.csv)
+- **BTC spot**: Stooq (btcusd)
+- **PDBC**: AlphaVantage (with DBC/Stooq fallback proxy)
 
-If any source is down/rate-limited: return `stale=true` and keep serving `ghostregime_latest.json`.
+**Provider Notes**:
+- VIX provider is CBOE CSV (not Stooq, not FRED) for reliable daily close data
+- All core symbols fetch >= 400 observations for VAMS calculations
+- If any source is down/rate-limited: return `stale=true` and keep serving `ghostregime_latest.json`
 
 
 

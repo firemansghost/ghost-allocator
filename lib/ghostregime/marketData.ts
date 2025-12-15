@@ -1,6 +1,6 @@
 /**
  * GhostRegime Market Data Provider
- * Working default implementation using Stooq (ETFs, VIX, BTC), AlphaVantage (PDBC with DBC fallback)
+ * Working default implementation using Stooq (ETFs, BTC), CBOE (VIX), AlphaVantage (PDBC with DBC fallback)
  */
 
 import type { MarketDataPoint } from './types';
@@ -19,7 +19,7 @@ const STOOQ_SYMBOL_MAP: Record<string, string> = {
   [MARKET_SYMBOLS.TLT]: 'tlt.us',
   [MARKET_SYMBOLS.UUP]: 'uup.us',
   [MARKET_SYMBOLS.BTC_USD]: 'btcusd', // BTC-USD from Stooq
-  [MARKET_SYMBOLS.VIX]: 'vi.f', // VIX futures from Stooq (VI.F)
+  // VIX is now fetched from CBOE CSV (not Stooq)
   // PDBC fallback: DBC (Stooq proxy)
   'DBC': 'dbc.us',
 };
@@ -107,45 +107,69 @@ async function fetchStooqData(
 }
 
 /**
- * Fetch VIX data from FRED (VIXCLS series)
- * @returns Object with data and error info if API key is missing
+ * Fetch VIX data from CBOE CSV
+ * Downloads and parses the CBOE VIX History CSV file
+ * @returns Object with data and error info
  */
-async function fetchFredVix(
+async function fetchCboeVix(
   startDate: Date,
   endDate: Date
 ): Promise<{ data: MarketDataPoint[]; error?: string }> {
   try {
-    const fredApiKey = process.env.FRED_API_KEY;
-    if (!fredApiKey) {
-      return {
-        data: [],
-        error: 'Missing FRED_API_KEY in env',
-      };
-    }
-
-    // FRED API requires API key for reliable access
-    const startStr = startDate.toISOString().split('T')[0];
-    const endStr = endDate.toISOString().split('T')[0];
-    const url = `https://api.stlouisfed.org/fred/series/observations?series_id=VIXCLS&observation_start=${startStr}&observation_end=${endStr}&file_type=json&api_key=${fredApiKey}`;
+    const url = 'https://cdn.cboe.com/api/global/us_indices/daily_prices/VIX_History.csv';
 
     const response = await fetch(url);
     if (!response.ok) {
-      throw new Error(`FRED fetch failed: ${response.statusText}`);
+      throw new Error(`CBOE fetch failed: ${response.statusText}`);
     }
 
-    const json = await response.json();
-    const observations = json.observations || [];
+    const csvText = await response.text();
+    if (!csvText || csvText.trim().length === 0) {
+      throw new Error('CBOE CSV is empty');
+    }
+
+    // Parse CSV manually (simple format: Date,Open,High,Low,Close)
+    const lines = csvText.trim().split('\n');
+    if (lines.length < 2) {
+      throw new Error('CBOE CSV has insufficient lines');
+    }
+
+    // Find header row and determine column indices
+    const headerLine = lines[0].toLowerCase();
+    const dateColIndex = headerLine.split(',').findIndex((col) => col.includes('date'));
+    const closeColIndex = headerLine.split(',').findIndex((col) => col.includes('close'));
+
+    if (dateColIndex === -1 || closeColIndex === -1) {
+      throw new Error('CBOE CSV missing required columns (Date, Close)');
+    }
 
     const data: MarketDataPoint[] = [];
     let prevClose: number | null = null;
 
-    for (const obs of observations) {
-      if (obs.value === '.' || obs.value === null) continue;
+    // Parse data rows (skip header)
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
 
-      const close = parseFloat(obs.value);
+      const columns = line.split(',');
+      if (columns.length <= Math.max(dateColIndex, closeColIndex)) continue;
+
+      // Parse date (format: MM/DD/YYYY)
+      const dateStr = columns[dateColIndex].trim();
+      const [month, day, year] = dateStr.split('/');
+      if (!month || !day || !year) continue;
+
+      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      if (isNaN(date.getTime())) continue;
+
+      // Filter by date range
+      if (date < startDate || date > endDate) continue;
+
+      // Parse close price
+      const closeStr = columns[closeColIndex].trim();
+      const close = parseFloat(closeStr);
       if (isNaN(close)) continue;
 
-      const date = new Date(obs.date);
       const returns = prevClose !== null ? calculateReturn(prevClose, close) : 0;
 
       data.push({
@@ -158,11 +182,14 @@ async function fetchFredVix(
       prevClose = close;
     }
 
+    // Sort by date ascending
+    const sortedData = data.sort((a, b) => a.date.getTime() - b.date.getTime());
+
     return {
-      data: data.sort((a, b) => a.date.getTime() - b.date.getTime()),
+      data: sortedData,
     };
   } catch (error) {
-    console.error('Error fetching FRED VIX data:', error);
+    console.error('Error fetching CBOE VIX data:', error);
     return {
       data: [],
       error: (error as Error).message,
@@ -369,7 +396,14 @@ export class DefaultMarketDataProvider implements MarketDataProvider {
     for (const symbol of symbols) {
       let symbolData: MarketDataPoint[] = [];
 
-      if (symbol === MARKET_SYMBOLS.PDBC) {
+      if (symbol === MARKET_SYMBOLS.VIX) {
+        // VIX from CBOE CSV
+        const result = await fetchCboeVix(startDate, endDate);
+        symbolData = result.data;
+        if (result.error) {
+          this.diagnostics.errors[symbol] = result.error;
+        }
+      } else if (symbol === MARKET_SYMBOLS.PDBC) {
         // PDBC: Try AlphaVantage first, fall back to DBC (Stooq) if AV fails
         const avResult = await fetchAlphaVantagePdbc(startDate, endDate);
         if (avResult.data.length > 0) {

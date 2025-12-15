@@ -63,6 +63,23 @@ Anchor date: 2025-11-28 (e.g., BG7283/BH7283 and A2068 in workbook)
 - ✅ Missing market data returns stale=true with MARKET_DATA_UNAVAILABLE
 - ✅ Rate-limited data sources return stale=true gracefully
 - ✅ Concurrent writes return stale=true rather than corrupting history
+- ✅ GHOSTREGIME_NOT_READY includes diagnostics (asof_date_attempted, missing_core_symbols, core_symbol_status, provider_diagnostics)
+
+## Market Data Provider Validation
+
+- ✅ VIX provider is CBOE (not Stooq, not FRED)
+- ✅ `core_symbol_status.VIX.provider === "CBOE"`
+- ✅ `core_symbol_status.VIX.obs >= 300` (ideally 400+)
+- ✅ `core_symbol_status.VIX.ok === true` on normal trading days
+- ✅ All core symbols have sufficient history (>= 400 obs for VAMS symbols)
+
+## As-of Date Validation
+
+- ✅ `date` field equals computed `asof_date` (latest common market close across core instruments)
+- ✅ `run_date_utc` field equals server date in UTC
+- ✅ `date` is always a trading day (not weekend)
+- ✅ On weekends, returns last trading day's data with `stale=true` (if available) or `GHOSTREGIME_NOT_READY`
+- ✅ No new rows are persisted with weekend dates
 
 ## Storage
 
