@@ -34,3 +34,29 @@ jobs:
           print(f"✅ OK - Date: {data.get('date')}, Regime: {data.get('regime')}, Source: {data.get('data_source')}")
           PY
 
+      - name: Check GhostRegime health
+        env:
+          HEALTH_URL: https://ghost-allocator.vercel.app/api/ghostregime/health
+        run: |
+          set -euo pipefail
+          HEALTH_RESP="$(curl -sS --fail --retry 2 --retry-delay 3 "${HEALTH_URL}?cb=$(date +%s)")"
+          echo "$HEALTH_RESP"
+
+          python3 - <<PY
+          import json
+          import sys
+          
+          health = json.loads("""$HEALTH_RESP""")
+
+          if not health.get("ok"):
+              print(f"❌ Health check failed: {health.get('status')} - {health.get('message','')}")
+              sys.exit(1)
+
+          freshness = health.get("freshness", {})
+          if freshness.get("is_fresh"):
+              print(f"✅ Health OK - Latest: {freshness.get('latest_date')}, Age: {freshness.get('age_days')} days, Status: {health.get('status')}")
+          else:
+              print(f"⚠️  Health WARN - Latest: {freshness.get('latest_date')}, Age: {freshness.get('age_days')} days (max: {freshness.get('max_age_days')}), Status: {health.get('status')}")
+              # Don't fail on WARN (weekends/holidays are expected)
+          PY
+

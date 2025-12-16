@@ -251,6 +251,29 @@ satellite_combine_rules:
 - Single-writer behavior: If concurrent writes occur, return latest row with `stale=true` rather than corrupting history
 - Stale behavior: If market data missing, return latest with `stale=true`, `stale_reason="MARKET_DATA_UNAVAILABLE"`
 
+## API Endpoints
+
+### `/api/ghostregime/today`
+Returns today's GhostRegime data. Supports:
+- `?debug=1` - Fresh compute with debug votes (not persisted)
+- `?force=1` - Force fresh compute and persist (if not stale)
+
+### `/api/ghostregime/history`
+Returns full GhostRegime history from replay seed + computed history.
+
+### `/api/ghostregime/explain?date=YYYY-MM-DD`
+Returns historical GhostRegime data with debug information for a specific date.
+
+### `/api/ghostregime/health`
+Health monitoring endpoint. Returns:
+- `200 OK` - Latest row exists (may be `status: "WARN"` if data is >4 days old)
+- `503 NOT_READY` - No persisted latest row available
+
+Health response includes:
+- `latest` - Full persisted row with metadata
+- `freshness` - Age in days, max_age_days (4), is_fresh flag
+- `status` - "OK" (fresh), "WARN" (old but service up), "NOT_READY" (no data)
+
 ## Data Windows
 
 **Trading-day windows**: 21/63/126/252 are trading-day windows using close-to-close returns (NOT total return).
