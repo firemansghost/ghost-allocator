@@ -99,7 +99,7 @@ export default function HomePage() {
               </span>
             </div>
             <p className="mt-2 text-xs text-zinc-300 leading-relaxed">
-              Curated templates that combine Ghost Allocator planning with GhostRegime signals for automated rebalancing.
+              Curated templates that combine Ghost Allocator planning with GhostRegime signals for simple rebalance guidance.
             </p>
             <Link
               href="/models"
@@ -115,8 +115,8 @@ export default function HomePage() {
       <GlassCard className="p-6 border-amber-400/30 bg-amber-400/5">
         <p className="text-sm text-zinc-200 leading-relaxed">
           <span className="font-semibold text-amber-300">Not a crystal ball.</span>{' '}
-          We're not trying to nail the exact top or bottom. We're trying to avoid the worst of bear markets
-          and catch most of bull markets through rules-based trend signals.
+          We're not trying to nail the exact top or bottom. Also: this isn't designed to save you from every little 2–5% market faceplant. 
+          It's built for the bigger stuff — the 20% corrections — and to help you catch most of the bull market with rules-based trend signals.
         </p>
       </GlassCard>
     </div>

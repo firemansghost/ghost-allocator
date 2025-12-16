@@ -24,7 +24,7 @@ export default function ModelsPage() {
           <p className="text-xs text-zinc-300 leading-relaxed">
             Model portfolios are templates that automatically map GhostRegime signals to your 457 plan.
             You'll be able to pick a template, map it to your Voya core funds and optional Schwab ETFs,
-            and get simple rebalance guidance based on target vs actual exposures.
+            and get simple rebalance guidance based on targets vs actual exposures.
           </p>
         </div>
       </GlassCard>

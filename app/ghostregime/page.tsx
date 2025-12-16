@@ -132,9 +132,11 @@ export default function GhostRegimePage() {
     return null;
   }
 
-  // Format date for display
+  // Format date for display (treat as calendar date, not UTC)
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
+    // Parse YYYY-MM-DD as local calendar date to avoid timezone shift
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const date = new Date(y, m - 1, d);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
@@ -152,7 +154,7 @@ export default function GhostRegimePage() {
       <header className="space-y-2">
         <h1 className="text-2xl font-semibold tracking-tight">GhostRegime</h1>
         <p className="text-sm text-zinc-300">
-          Rules-based trend signals for portfolio exposure
+          Rules-based signals for adjusting portfolio exposure
         </p>
       </header>
 
@@ -178,7 +180,7 @@ export default function GhostRegimePage() {
           </div>
           <div>
             <p className="text-[10px] text-zinc-400 uppercase tracking-wide">
-              <Tooltip content="Current conditions bucket (one of four). Not a prediction — a classification based on market signals.">
+              <Tooltip content="The model's read on the market &quot;weather&quot; (Goldilocks / Reflation / Inflation / Deflation). Not a prediction — a label for the lane we're driving in right now.">
                 Regime
               </Tooltip>
             </p>
@@ -186,12 +188,12 @@ export default function GhostRegimePage() {
           </div>
           <div>
             <p className="text-[10px] text-zinc-400 uppercase tracking-wide">
-              <Tooltip content="Risk On = carry more exposure. Risk Off = cut exposure. It's a dimmer switch, not an on/off panic button.">
+              <Tooltip content="Risk On: we give growth assets more leash. Risk Off: we cut exposure and play defense. Seatbelt, not bubble wrap.">
                 Risk
               </Tooltip>
             </p>
             <p className="text-sm font-medium text-zinc-200 mt-1">
-              <Tooltip content="Risk On = carry more exposure. Risk Off = cut exposure. It's a dimmer switch, not an on/off panic button.">
+              <Tooltip content="Risk On: we give growth assets more leash. Risk Off: we cut exposure and play defense. Seatbelt, not bubble wrap.">
                 {data.risk_regime}
               </Tooltip>
             </p>
@@ -225,11 +227,11 @@ export default function GhostRegimePage() {
             <span className="text-amber-400 mt-0.5">•</span>
             <span>
               <strong className="text-zinc-200">
-                <Tooltip content="Targets come from the regime overlay. Actuals are targets adjusted by VAMS (100% / 50% / 0%). Cash is what's left when exposure gets reduced.">
+                <Tooltip content="Targets = the plan (top-down, based on regime). Actuals = what we hold after VAMS scales things to 100% / 50% / 0%. The gap usually shows up as cash.">
                   Targets (top-down)
                 </Tooltip>
               </strong>: Stocks and BTC scale up/down based on{' '}
-              <Tooltip content="Risk On = carry more exposure. Risk Off = cut exposure. It's a dimmer switch, not an on/off panic button.">
+              <Tooltip content="Risk On: we give growth assets more leash. Risk Off: we cut exposure and play defense. Seatbelt, not bubble wrap.">
                 Risk On/Off
               </Tooltip>
             </span>
@@ -238,11 +240,11 @@ export default function GhostRegimePage() {
             <span className="text-amber-400 mt-0.5">•</span>
             <span>
               <strong className="text-zinc-200">
-                <Tooltip content="Targets come from the regime overlay. Actuals are targets adjusted by VAMS (100% / 50% / 0%). Cash is what's left when exposure gets reduced.">
+                <Tooltip content="Targets = the plan (top-down, based on regime). Actuals = what we hold after VAMS scales things to 100% / 50% / 0%. The gap usually shows up as cash.">
                   Actuals (bottom-up)
                 </Tooltip>
               </strong>:{' '}
-              <Tooltip content="Volatility-Adjusted Momentum Signal. Translation: trend + 'is it getting dangerously choppy?' Bullish = 100% of target. Neutral = 50%. Bearish = 0%.">
+              <Tooltip content="Volatility-Adjusted Momentum Signal. Trend + a volatility filter. Bullish = 100% of target, Neutral = 50%, Bearish = 0%. It's how we avoid overreacting to every tiny wiggle.">
                 VAMS
               </Tooltip> can reduce exposure to 50% or 0% when volatility is high
             </span>
@@ -250,6 +252,10 @@ export default function GhostRegimePage() {
           <li className="flex items-start gap-2">
             <span className="text-amber-400 mt-0.5">•</span>
             <span><strong className="text-zinc-200">Cash:</strong> What's left when exposure is reduced</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-amber-400 mt-0.5">•</span>
+            <span>Reality check: This won't protect you from every 2–5% wobble. It's built to help sidestep the 20% train wrecks — and get you back in when the trend turns.</span>
           </li>
         </ul>
       </GlassCard>
@@ -311,8 +317,8 @@ export default function GhostRegimePage() {
         </button>
         <p className="text-[11px] text-zinc-500 ml-6">
           {showAdvanced 
-            ? "Nothing here changes the signal. It just shows you the receipts."
-            : "If you read commit hashes for fun, this part's for you. Raw guts: targets, actuals, VAMS states, and the 'what ran when' metadata."}
+            ? "Receipts only: targets, actuals, VAMS states, and the 'what ran when' metadata. No new magic, just the paper trail."
+            : "If you read commit hashes for fun, welcome home. If not, nothing down here changes the signal."}
         </p>
       </div>
 
@@ -379,7 +385,7 @@ export default function GhostRegimePage() {
             )}
             <div>
               <p className="text-xs text-zinc-400 uppercase tracking-wide">
-                <Tooltip content="Current conditions bucket (one of four). Not a prediction — a classification based on market signals.">
+                <Tooltip content="The model's read on the market &quot;weather&quot; (Goldilocks / Reflation / Inflation / Deflation). Not a prediction — a label for the lane we're driving in right now.">
                   Regime
                 </Tooltip>
               </p>
@@ -387,7 +393,7 @@ export default function GhostRegimePage() {
             </div>
             <div>
               <p className="text-xs text-zinc-400 uppercase tracking-wide">
-                <Tooltip content="Risk On = carry more exposure. Risk Off = cut exposure. It's a dimmer switch, not an on/off panic button.">
+                <Tooltip content="Risk On: we give growth assets more leash. Risk Off: we cut exposure and play defense. Seatbelt, not bubble wrap.">
                   Risk Regime
                 </Tooltip>
               </p>
@@ -395,7 +401,7 @@ export default function GhostRegimePage() {
             </div>
             <div>
               <p className="text-xs text-zinc-400 uppercase tracking-wide">
-                <Tooltip content="Risk On = carry more exposure. Risk Off = cut exposure. It's a dimmer switch, not an on/off panic button.">
+                <Tooltip content="Risk On: we give growth assets more leash. Risk Off: we cut exposure and play defense. Seatbelt, not bubble wrap.">
                   Risk Axis
                 </Tooltip>
               </p>
@@ -474,7 +480,7 @@ export default function GhostRegimePage() {
           {/* Advanced: Allocations */}
           <GlassCard className="p-4 sm:p-5 space-y-3">
             <h2 className="text-sm font-semibold text-zinc-50">
-              <Tooltip content="Targets come from the regime overlay. Actuals are targets adjusted by VAMS (100% / 50% / 0%). Cash is what's left when exposure gets reduced.">
+              <Tooltip content="Targets = the plan (top-down, based on regime). Actuals = what we hold after VAMS scales things to 100% / 50% / 0%. The gap usually shows up as cash.">
                 Allocations
               </Tooltip>
             </h2>
@@ -530,7 +536,7 @@ export default function GhostRegimePage() {
           {/* Advanced: VAMS States */}
           <GlassCard className="p-4 sm:p-5 space-y-3">
             <h2 className="text-sm font-semibold text-zinc-50">
-              <Tooltip content="Volatility-Adjusted Momentum Signal. Translation: trend + 'is it getting dangerously choppy?' Bullish = 100% of target. Neutral = 50%. Bearish = 0%.">
+              <Tooltip content="Volatility-Adjusted Momentum Signal. Trend + a volatility filter. Bullish = 100% of target, Neutral = 50%, Bearish = 0%. It's how we avoid overreacting to every tiny wiggle.">
                 VAMS States
               </Tooltip>
             </h2>
