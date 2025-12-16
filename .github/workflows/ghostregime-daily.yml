@@ -1,0 +1,36 @@
+name: GhostRegime Daily Refresh
+
+on:
+  schedule:
+    - cron: "30 3 * * 1-5"  # 3:30 AM UTC, Monday-Friday (after US market close)
+  workflow_dispatch: {}  # Allow manual trigger
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Force refresh GhostRegime (persist latest)
+        env:
+          URL: https://ghost-allocator.vercel.app/api/ghostregime/today?force=1
+        run: |
+          set -euo pipefail
+          RESP="$(curl -sS --fail --retry 3 --retry-delay 5 "${URL}&cb=$(date +%s)")"
+          echo "$RESP"
+
+          python3 - <<PY
+          import json
+          import sys
+          
+          data = json.loads("""$RESP""")
+
+          if "error" in data:
+              print(f"❌ API error: {data['error']} - {data.get('message','')}")
+              sys.exit(1)
+
+          if data.get("stale") is True:
+              print(f"❌ Stale=true: {data.get('stale_reason','(no reason)')}")
+              sys.exit(1)
+
+          print(f"✅ OK - Date: {data.get('date')}, Regime: {data.get('regime')}, Source: {data.get('data_source')}")
+          PY
+

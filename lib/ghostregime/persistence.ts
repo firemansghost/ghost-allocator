@@ -88,6 +88,18 @@ export class BlobStorageAdapter implements StorageAdapter {
     try {
       const blobKey = getBlobKey(BLOB_KEYS.HISTORY);
       const existing = await this.readHistory();
+      
+      // Dedupe guard: Check if the last row has the same date as the new row
+      // If same date, skip append (but still update latest via writeLatest)
+      if (existing.length > 0) {
+        const lastRow = existing[existing.length - 1];
+        if (lastRow.date === row.date && lastRow.row_engine_version === row.row_engine_version) {
+          // Same date and engine version - skip append to avoid duplicate
+          console.log(`Skipping history append: row for date ${row.date} already exists`);
+          return;
+        }
+      }
+      
       const updated = [...existing, row];
       const content = updated.map((r) => JSON.stringify(r)).join('\n') + '\n';
 
@@ -214,6 +226,18 @@ export class LocalFileAdapter implements StorageAdapter {
   async appendToHistory(row: GhostRegimeRow): Promise<void> {
     try {
       const existing = await this.readHistory();
+      
+      // Dedupe guard: Check if the last row has the same date as the new row
+      // If same date, skip append (but still update latest via writeLatest)
+      if (existing.length > 0) {
+        const lastRow = existing[existing.length - 1];
+        if (lastRow.date === row.date && lastRow.row_engine_version === row.row_engine_version) {
+          // Same date and engine version - skip append to avoid duplicate
+          console.log(`Skipping history append: row for date ${row.date} already exists`);
+          return;
+        }
+      }
+      
       const updated = [...existing, row];
       const content = updated.map((r) => JSON.stringify(r)).join('\n') + '\n';
       writeFileSync(this.getHistoryPath(), content, 'utf-8');
