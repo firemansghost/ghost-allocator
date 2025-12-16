@@ -12,9 +12,14 @@ jobs:
       - name: Force refresh GhostRegime (persist latest)
         env:
           URL: https://ghost-allocator.vercel.app/api/ghostregime/today?force=1
+          CRON_SECRET: ${{ secrets.GHOSTREGIME_CRON_SECRET }}
         run: |
           set -euo pipefail
-          RESP="$(curl -sS --fail --retry 3 --retry-delay 5 "${URL}&cb=$(date +%s)")"
+          if [ -z "$CRON_SECRET" ]; then
+            echo "❌ GHOSTREGIME_CRON_SECRET not set in GitHub Actions secrets"
+            exit 1
+          fi
+          RESP="$(curl -sS --fail --retry 3 --retry-delay 5 -H "x-ghostregime-cron: ${CRON_SECRET}" "${URL}&cb=$(date +%s)")"
           echo "$RESP"
 
           python3 - <<PY
@@ -53,10 +58,15 @@ jobs:
               sys.exit(1)
 
           freshness = health.get("freshness", {})
-          if freshness.get("is_fresh"):
-              print(f"✅ Health OK - Latest: {freshness.get('latest_date')}, Age: {freshness.get('age_days')} days, Status: {health.get('status')}")
+          warnings = health.get("warnings", [])
+          
+          if health.get("status") == "OK":
+              print(f"✅ Health OK - Latest: {freshness.get('latest_date')}, Age: {freshness.get('age_days')} days")
           else:
               print(f"⚠️  Health WARN - Latest: {freshness.get('latest_date')}, Age: {freshness.get('age_days')} days (max: {freshness.get('max_age_days')}), Status: {health.get('status')}")
+              if warnings:
+                  for warning in warnings:
+                      print(f"   ⚠️  {warning}")
               # Don't fail on WARN (weekends/holidays are expected)
           PY
 

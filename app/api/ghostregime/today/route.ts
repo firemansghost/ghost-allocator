@@ -20,6 +20,35 @@ export async function GET(request: Request) {
   const forceParam = searchParams.get('force')?.toLowerCase();
   const force = forceParam === '1' || forceParam === 'true' || forceParam === 'yes';
 
+  // Security: force mode requires secret
+  if (force) {
+    const cronSecret = process.env.GHOSTREGIME_CRON_SECRET;
+    if (!cronSecret) {
+      return NextResponse.json(
+        {
+          error: 'UNAUTHORIZED',
+          message: 'force mode requires GHOSTREGIME_CRON_SECRET to be configured',
+        },
+        { status: 401 }
+      );
+    }
+
+    // Check secret from header (preferred) or query param (fallback)
+    const headerSecret = request.headers.get('x-ghostregime-cron');
+    const querySecret = searchParams.get('cron_secret');
+    const providedSecret = headerSecret || querySecret;
+
+    if (!providedSecret || providedSecret !== cronSecret) {
+      return NextResponse.json(
+        {
+          error: 'UNAUTHORIZED',
+          message: 'force mode requires valid cron secret',
+        },
+        { status: 401 }
+      );
+    }
+  }
+
   // Check seed status first
   const seedStatus = checkSeedStatus();
   if (!seedStatus.exists || seedStatus.isEmpty) {

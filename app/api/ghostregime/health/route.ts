@@ -26,6 +26,7 @@ interface HealthResponse {
     max_age_days: number;
     is_fresh: boolean;
   };
+  warnings?: string[];
   error?: string;
   message?: string;
 }
@@ -69,7 +70,22 @@ export async function GET(request: Request) {
     const ageDays = differenceInDays(todayUtc, latestDateUtc);
     const maxAgeDays = 4;
     const isFresh = ageDays <= maxAgeDays;
-    const status: 'OK' | 'WARN' = isFresh ? 'OK' : 'WARN';
+    
+    // Check for warnings
+    const warnings: string[] = [];
+    let status: 'OK' | 'WARN' = 'OK';
+    
+    // Check if latest row is stale
+    if (latest.stale === true) {
+      status = 'WARN';
+      warnings.push(`LATEST_ROW_STALE: ${latest.stale_reason || '(no reason provided)'}`);
+    }
+    
+    // Check if latest row is old
+    if (!isFresh) {
+      status = 'WARN';
+      warnings.push(`LATEST_ROW_OLD: age_days=${ageDays} max_age_days=${maxAgeDays}`);
+    }
 
     const response: HealthResponse = {
       ok: true,
@@ -85,6 +101,7 @@ export async function GET(request: Request) {
         max_age_days: maxAgeDays,
         is_fresh: isFresh,
       },
+      warnings: warnings.length > 0 ? warnings : undefined,
     };
 
     // Return 200 even if WARN (service is up, just data is old)
