@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Force refresh GhostRegime (persist latest)
+        id: refresh
         env:
           URL: https://ghost-allocator.vercel.app/api/ghostregime/today?force=1
           CRON_SECRET: ${{ secrets.GHOSTREGIME_CRON_SECRET }}
@@ -20,53 +21,217 @@ jobs:
             exit 1
           fi
           RESP="$(curl -sS --fail --retry 3 --retry-delay 5 -H "x-ghostregime-cron: ${CRON_SECRET}" "${URL}&cb=$(date +%s)")"
-          echo "$RESP"
+          echo "$RESP" > /tmp/refresh_response.json
 
           python3 - <<PY
           import json
           import sys
+          import os
           
-          data = json.loads("""$RESP""")
+          with open('/tmp/refresh_response.json', 'r') as f:
+              data = json.load(f)
 
+          summary_lines = []
+          summary_lines.append("## GhostRegime Daily Refresh")
+          summary_lines.append("")
+          
           if "error" in data:
-              print(f"❌ API error: {data['error']} - {data.get('message','')}")
+              error_msg = f"❌ API error: {data['error']} - {data.get('message','')}"
+              print(error_msg)
+              summary_lines.append(f"### ❌ Failed: {data['error']}")
+              summary_lines.append(f"**Message**: {data.get('message','')}")
+              
+              # Include diagnostics if present
+              if "missing_core_symbols" in data:
+                  summary_lines.append(f"**Missing symbols**: {', '.join(data['missing_core_symbols'])}")
+              if "core_symbol_status" in data:
+                  failed_symbols = [s for s, status in data['core_symbol_status'].items() if not status.get('ok', False)]
+                  if failed_symbols:
+                      summary_lines.append(f"**Failed symbols**: {', '.join(failed_symbols)}")
+              
+              with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+                  f.write('\n'.join(summary_lines))
               sys.exit(1)
 
           if data.get("stale") is True:
-              print(f"❌ Stale=true: {data.get('stale_reason','(no reason)')}")
+              stale_reason = data.get('stale_reason','(no reason)')
+              error_msg = f"❌ Stale=true: {stale_reason}"
+              print(error_msg)
+              summary_lines.append(f"### ❌ Stale Data")
+              summary_lines.append(f"**Reason**: {stale_reason}")
+              
+              if "missing_core_symbols" in data:
+                  summary_lines.append(f"**Missing symbols**: {', '.join(data['missing_core_symbols'])}")
+              if "core_symbol_status" in data:
+                  failed_symbols = [s for s, status in data['core_symbol_status'].items() if not status.get('ok', False)]
+                  if failed_symbols:
+                      summary_lines.append(f"**Failed symbols**: {', '.join(failed_symbols)}")
+              
+              with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+                  f.write('\n'.join(summary_lines))
               sys.exit(1)
 
-          print(f"✅ OK - Date: {data.get('date')}, Regime: {data.get('regime')}, Source: {data.get('data_source')}")
+          success_msg = f"✅ OK - Date: {data.get('date')}, Regime: {data.get('regime')}, Source: {data.get('data_source')}"
+          print(success_msg)
+          summary_lines.append("### ✅ Success")
+          summary_lines.append(f"**Date**: {data.get('date')}")
+          summary_lines.append(f"**Regime**: {data.get('regime')}")
+          summary_lines.append(f"**Source**: {data.get('data_source')}")
+          summary_lines.append(f"**Risk Score**: {data.get('risk_score', 'N/A')}")
+          summary_lines.append(f"**Inflation Score**: {data.get('infl_score', 'N/A')}")
+          
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+              f.write('\n'.join(summary_lines))
           PY
 
       - name: Check GhostRegime health
+        id: health
         env:
           HEALTH_URL: https://ghost-allocator.vercel.app/api/ghostregime/health
         run: |
           set -euo pipefail
           HEALTH_RESP="$(curl -sS --fail --retry 2 --retry-delay 3 "${HEALTH_URL}?cb=$(date +%s)")"
-          echo "$HEALTH_RESP"
+          echo "$HEALTH_RESP" > /tmp/health_response.json
 
           python3 - <<PY
           import json
           import sys
+          import os
           
-          health = json.loads("""$HEALTH_RESP""")
+          with open('/tmp/health_response.json', 'r') as f:
+              health = json.load(f)
+
+          summary_lines = []
+          summary_lines.append("## Health Check")
+          summary_lines.append("")
 
           if not health.get("ok"):
-              print(f"❌ Health check failed: {health.get('status')} - {health.get('message','')}")
+              error_msg = f"❌ Health check failed: {health.get('status')} - {health.get('message','')}"
+              print(error_msg)
+              summary_lines.append(f"### ❌ {health.get('status')}")
+              summary_lines.append(f"**Message**: {health.get('message','')}")
+              
+              with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+                  f.write('\n'.join(summary_lines))
               sys.exit(1)
 
           freshness = health.get("freshness", {})
           warnings = health.get("warnings", [])
           
           if health.get("status") == "OK":
-              print(f"✅ Health OK - Latest: {freshness.get('latest_date')}, Age: {freshness.get('age_days')} days")
+              msg = f"✅ Health OK - Latest: {freshness.get('latest_date')}, Age: {freshness.get('age_days')} days"
+              print(msg)
+              summary_lines.append("### ✅ Health OK")
+              summary_lines.append(f"**Latest Date**: {freshness.get('latest_date')}")
+              summary_lines.append(f"**Age**: {freshness.get('age_days')} days")
           else:
-              print(f"⚠️  Health WARN - Latest: {freshness.get('latest_date')}, Age: {freshness.get('age_days')} days (max: {freshness.get('max_age_days')}), Status: {health.get('status')}")
+              msg = f"⚠️  Health WARN - Latest: {freshness.get('latest_date')}, Age: {freshness.get('age_days')} days (max: {freshness.get('max_age_days')}), Status: {health.get('status')}"
+              print(msg)
+              summary_lines.append("### ⚠️ Health WARN")
+              summary_lines.append(f"**Latest Date**: {freshness.get('latest_date')}")
+              summary_lines.append(f"**Age**: {freshness.get('age_days')} days (max: {freshness.get('max_age_days')})")
               if warnings:
+                  summary_lines.append("**Warnings**:")
                   for warning in warnings:
                       print(f"   ⚠️  {warning}")
+                      summary_lines.append(f"- {warning}")
               # Don't fail on WARN (weekends/holidays are expected)
+          
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+              f.write('\n'.join(summary_lines))
+          PY
+
+      - name: Notify Slack on failure
+        if: failure() && secrets.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          python3 - <<PY
+          import json
+          import os
+          import urllib.request
+          
+          webhook_url = os.environ.get('SLACK_WEBHOOK_URL')
+          if not webhook_url:
+              exit(0)
+          
+          # Read responses if available
+          refresh_data = {}
+          health_data = {}
+          
+          try:
+              with open('/tmp/refresh_response.json', 'r') as f:
+                  refresh_data = json.load(f)
+          except:
+              pass
+          
+          try:
+              with open('/tmp/health_response.json', 'r') as f:
+                  health_data = json.load(f)
+          except:
+              pass
+          
+          # Build message
+          message = {
+              "text": "🚨 GhostRegime Daily Refresh Failed",
+              "blocks": [
+                  {
+                      "type": "header",
+                      "text": {
+                          "type": "plain_text",
+                          "text": "🚨 GhostRegime Daily Refresh Failed"
+                      }
+                  }
+              ]
+          }
+          
+          if refresh_data.get("error"):
+              message["blocks"].append({
+                  "type": "section",
+                  "text": {
+                      "type": "mrkdwn",
+                      "text": f"*Error*: {refresh_data.get('error')}\n*Message*: {refresh_data.get('message', 'N/A')}"
+                  }
+              })
+              if refresh_data.get("missing_core_symbols"):
+                  message["blocks"].append({
+                      "type": "section",
+                      "text": {
+                          "type": "mrkdwn",
+                          "text": f"*Missing Symbols*: {', '.join(refresh_data['missing_core_symbols'])}"
+                      }
+                  })
+          elif refresh_data.get("stale"):
+              message["blocks"].append({
+                  "type": "section",
+                  "text": {
+                      "type": "mrkdwn",
+                      "text": f"*Stale Data*\n*Reason*: {refresh_data.get('stale_reason', 'N/A')}"
+                  }
+              })
+          
+          if health_data.get("status") == "NOT_READY":
+              message["blocks"].append({
+                  "type": "section",
+                  "text": {
+                      "type": "mrkdwn",
+                      "text": f"*Health Status*: {health_data.get('status')}\n*Message*: {health_data.get('message', 'N/A')}"
+                  }
+              })
+          
+          message["blocks"].append({
+              "type": "section",
+              "text": {
+                  "type": "mrkdwn",
+                  "text": f"<https://github.com/firemansghost/ghost-allocator/actions|View Workflow>"
+              }
+          })
+          
+          req = urllib.request.Request(
+              webhook_url,
+              data=json.dumps(message).encode('utf-8'),
+              headers={'Content-Type': 'application/json'}
+          )
+          urllib.request.urlopen(req)
           PY
 
