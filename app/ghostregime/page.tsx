@@ -8,21 +8,47 @@
 import { useEffect, useState } from 'react';
 import { GlassCard } from '@/components/GlassCard';
 import type { GhostRegimeRow } from '@/lib/ghostregime/types';
+import Link from 'next/link';
+
+interface HealthStatus {
+  ok: boolean;
+  status: 'OK' | 'WARN' | 'NOT_READY';
+  freshness?: {
+    latest_date: string;
+    age_days: number;
+    max_age_days: number;
+    is_fresh: boolean;
+  };
+  warnings?: string[];
+  message?: string;
+}
 
 export default function GhostRegimePage() {
   const [data, setData] = useState<GhostRegimeRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [notSeeded, setNotSeeded] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [healthStatus, setHealthStatus] = useState<HealthStatus | null>(null);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        // Check seed status (client-side check is limited, but we can try)
-        const response = await fetch('/api/ghostregime/today');
+        // Fetch both today's data and health status
+        const [todayResponse, healthResponse] = await Promise.all([
+          fetch('/api/ghostregime/today'),
+          fetch('/api/ghostregime/health'),
+        ]);
         
-        if (response.status === 503) {
-          const json = await response.json();
+        // Handle health status
+        if (healthResponse.ok) {
+          const health = await healthResponse.json();
+          setHealthStatus(health);
+        }
+        
+        // Handle today's data
+        if (todayResponse.status === 503) {
+          const json = await todayResponse.json();
           if (json.error === 'GHOSTREGIME_NOT_SEEDED') {
             setNotSeeded(true);
             setLoading(false);
@@ -35,11 +61,11 @@ export default function GhostRegimePage() {
           }
         }
 
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
+        if (!todayResponse.ok) {
+          throw new Error(`HTTP ${todayResponse.status}`);
         }
 
-        const row = await response.json();
+        const row = await todayResponse.json();
         setData(row);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error');
@@ -105,16 +131,157 @@ export default function GhostRegimePage() {
     return null;
   }
 
+  // Format date for display
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
+  // Format timestamp for display
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  };
+
+  // Check if data is stale or old
+  const isStaleOrOld = data?.stale || (healthStatus?.status === 'WARN' && !healthStatus?.freshness?.is_fresh);
+
   return (
     <div className="space-y-6">
       <header className="space-y-2">
         <h1 className="text-2xl font-semibold tracking-tight">GhostRegime</h1>
         <p className="text-sm text-zinc-300">
-          Market regime classification and allocation system
+          Rules-based trend signals for portfolio exposure
         </p>
       </header>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      {/* Stale/Old Data Banner */}
+      {isStaleOrOld && (
+        <GlassCard className="p-4 border-amber-400/30 bg-amber-400/10">
+          <p className="text-xs text-amber-300">
+            ⚠️ Heads up: The latest signal may be stale or old (weekends/holidays happen). 
+            {data?.stale && data.stale_reason && ` Reason: ${data.stale_reason}`}
+            {healthStatus?.freshness && !healthStatus.freshness.is_fresh && 
+              ` Data is ${healthStatus.freshness.age_days} days old.`}
+          </p>
+        </GlassCard>
+      )}
+
+      {/* Today's Signal - Beginner View */}
+      <GlassCard className="p-6">
+        <h2 className="text-sm font-semibold text-zinc-50 mb-4">Today's Signal</h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <p className="text-[10px] text-zinc-400 uppercase tracking-wide">As-of Date</p>
+            <p className="text-sm font-medium text-zinc-200 mt-1">{formatDate(data.date)}</p>
+          </div>
+          <div>
+            <p className="text-[10px] text-zinc-400 uppercase tracking-wide">Regime</p>
+            <p className="text-lg font-semibold text-amber-300 mt-1">{data.regime}</p>
+          </div>
+          <div>
+            <p className="text-[10px] text-zinc-400 uppercase tracking-wide">Risk</p>
+            <p className="text-sm font-medium text-zinc-200 mt-1">{data.risk_regime}</p>
+          </div>
+          <div>
+            <p className="text-[10px] text-zinc-400 uppercase tracking-wide">Inflation Axis</p>
+            <p className="text-sm font-medium text-zinc-200 mt-1">{data.infl_axis}</p>
+          </div>
+        </div>
+        <div className="mt-4 pt-4 border-t border-zinc-800 grid gap-2 sm:grid-cols-2 text-[11px] text-zinc-400">
+          {data.row_computed_at_utc && (
+            <div>
+              <span className="text-zinc-500">Last updated: </span>
+              <span>{formatTimestamp(data.row_computed_at_utc)}</span>
+            </div>
+          )}
+          {data.run_date_utc && (
+            <div>
+              <span className="text-zinc-500">Served: </span>
+              <span>{formatTimestamp(data.run_date_utc)}</span>
+            </div>
+          )}
+        </div>
+      </GlassCard>
+
+      {/* What This Means */}
+      <GlassCard className="p-6">
+        <h2 className="text-sm font-semibold text-zinc-50 mb-3">What This Means</h2>
+        <ul className="space-y-2 text-xs text-zinc-300">
+          <li className="flex items-start gap-2">
+            <span className="text-amber-400 mt-0.5">•</span>
+            <span><strong className="text-zinc-200">Targets (top-down):</strong> Stocks and BTC scale up/down based on Risk On/Off</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-amber-400 mt-0.5">•</span>
+            <span><strong className="text-zinc-200">Actuals (bottom-up):</strong> VAMS can reduce exposure to 50% or 0% when volatility is high</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-amber-400 mt-0.5">•</span>
+            <span><strong className="text-zinc-200">Cash:</strong> What's left when exposure is reduced</span>
+          </li>
+        </ul>
+      </GlassCard>
+
+      {/* System Status */}
+      {healthStatus && (
+        <GlassCard className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[10px] text-zinc-400 uppercase tracking-wide">System Status</p>
+              {healthStatus.status === 'OK' && (
+                <p className="text-xs text-green-400 mt-1">✓ Data is fresh</p>
+              )}
+              {healthStatus.status === 'WARN' && (
+                <div className="mt-1">
+                  <p className="text-xs text-amber-300">⚠️ Warning</p>
+                  {healthStatus.warnings && healthStatus.warnings.length > 0 && (
+                    <ul className="mt-1 space-y-0.5 text-[11px] text-amber-200">
+                      {healthStatus.warnings.map((warning, i) => (
+                        <li key={i}>• {warning}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+              {healthStatus.status === 'NOT_READY' && (
+                <p className="text-xs text-red-300 mt-1">
+                  ✗ System not ready. Run force refresh via workflow.
+                </p>
+              )}
+            </div>
+          </div>
+        </GlassCard>
+      )}
+
+      {/* Use This Signal in Portfolio - Coming Soon */}
+      <GlassCard className="p-6 border-amber-400/30 bg-amber-400/5">
+        <h2 className="text-sm font-semibold text-zinc-50 mb-3">Use This Signal in Your Portfolio</h2>
+        <p className="text-xs text-zinc-300 leading-relaxed mb-4">
+          Soon you'll be able to apply GhostRegime signals to model portfolios. Pick a template, 
+          map it to your 457 fund menu, and follow the target/actual exposures with simple rebalance steps.
+        </p>
+        <button
+          disabled
+          className="rounded-md bg-zinc-800 text-zinc-500 px-4 py-2 text-xs font-medium cursor-not-allowed"
+        >
+          Apply to a Model Portfolio (Coming Soon)
+        </button>
+      </GlassCard>
+
+      {/* Advanced Details Toggle */}
+      <div>
+        <button
+          onClick={() => setShowAdvanced(!showAdvanced)}
+          className="flex items-center gap-2 text-sm font-medium text-amber-400 hover:text-amber-300 transition"
+        >
+          <span>{showAdvanced ? '▼' : '▶'}</span>
+          <span>Advanced Details</span>
+        </button>
+      </div>
+
+      {showAdvanced && (
+        <div className="grid gap-6 md:grid-cols-2">
         {/* Regime Classification */}
         <GlassCard className="p-4 sm:p-5 space-y-3">
           <h2 className="text-sm font-semibold text-zinc-50">Regime Classification</h2>
@@ -256,85 +423,92 @@ export default function GhostRegimePage() {
           </div>
         </GlassCard>
 
-        {/* Allocations */}
-        <GlassCard className="p-4 sm:p-5 space-y-3">
-          <h2 className="text-sm font-semibold text-zinc-50">Allocations</h2>
-          <div className="space-y-2 text-xs">
-            <div className="flex justify-between">
-              <span className="text-zinc-300">Stocks</span>
-              <span className="text-zinc-100">
-                {(data.stocks_actual * 100).toFixed(1)}% (target: {(data.stocks_target * 100).toFixed(1)}%, scale: {(data.stocks_scale * 100).toFixed(0)}%)
-              </span>
+          {/* Advanced: Allocations */}
+          <GlassCard className="p-4 sm:p-5 space-y-3">
+            <h2 className="text-sm font-semibold text-zinc-50">Allocations</h2>
+            <div className="space-y-2 text-xs">
+              <div className="flex justify-between">
+                <span className="text-zinc-300">Stocks</span>
+                <span className="text-zinc-100">
+                  {(data.stocks_actual * 100).toFixed(1)}% (target: {(data.stocks_target * 100).toFixed(1)}%, scale: {(data.stocks_scale * 100).toFixed(0)}%)
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-300">Gold</span>
+                <span className="text-zinc-100">
+                  {(data.gold_actual * 100).toFixed(1)}% (target: {(data.gold_target * 100).toFixed(1)}%, scale: {(data.gold_scale * 100).toFixed(0)}%)
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-300">BTC</span>
+                <span className="text-zinc-100">
+                  {(data.btc_actual * 100).toFixed(1)}% (target: {(data.btc_target * 100).toFixed(1)}%, scale: {(data.btc_scale * 100).toFixed(0)}%)
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-300">Cash</span>
+                <span className="text-zinc-100">{(data.cash * 100).toFixed(1)}%</span>
+              </div>
             </div>
-            <div className="flex justify-between">
-              <span className="text-zinc-300">Gold</span>
-              <span className="text-zinc-100">
-                {(data.gold_actual * 100).toFixed(1)}% (target: {(data.gold_target * 100).toFixed(1)}%, scale: {(data.gold_scale * 100).toFixed(0)}%)
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-zinc-300">BTC</span>
-              <span className="text-zinc-100">
-                {(data.btc_actual * 100).toFixed(1)}% (target: {(data.btc_target * 100).toFixed(1)}%, scale: {(data.btc_scale * 100).toFixed(0)}%)
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-zinc-300">Cash</span>
-              <span className="text-zinc-100">{(data.cash * 100).toFixed(1)}%</span>
-            </div>
-          </div>
-        </GlassCard>
+          </GlassCard>
 
-        {/* Scores */}
-        <GlassCard className="p-4 sm:p-5 space-y-3">
-          <h2 className="text-sm font-semibold text-zinc-50">Scores</h2>
-          <div className="space-y-2 text-xs">
-            <div className="flex justify-between">
-              <span className="text-zinc-300">Risk Score</span>
-              <span className="text-zinc-100">{data.risk_score}</span>
+          {/* Advanced: Scores */}
+          <GlassCard className="p-4 sm:p-5 space-y-3">
+            <h2 className="text-sm font-semibold text-zinc-50">Scores</h2>
+            <div className="space-y-2 text-xs">
+              <div className="flex justify-between">
+                <span className="text-zinc-300">Risk Score</span>
+                <span className="text-zinc-100">{data.risk_score}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-300">Inflation Score (Total)</span>
+                <span className="text-zinc-100">{data.infl_score.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-300">Inflation Core</span>
+                <span className="text-zinc-100">{data.infl_core_score.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-300">Inflation Satellites</span>
+                <span className="text-zinc-100">{data.infl_sat_score.toFixed(2)}</span>
+              </div>
             </div>
-            <div className="flex justify-between">
-              <span className="text-zinc-300">Inflation Score (Total)</span>
-              <span className="text-zinc-100">{data.infl_score.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-zinc-300">Inflation Core</span>
-              <span className="text-zinc-100">{data.infl_core_score.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-zinc-300">Inflation Satellites</span>
-              <span className="text-zinc-100">{data.infl_sat_score.toFixed(2)}</span>
-            </div>
-          </div>
-        </GlassCard>
+          </GlassCard>
 
-        {/* VAMS States */}
-        <GlassCard className="p-4 sm:p-5 space-y-3">
-          <h2 className="text-sm font-semibold text-zinc-50">VAMS States</h2>
-          <div className="space-y-2 text-xs">
-            <div className="flex justify-between">
-              <span className="text-zinc-300">Stocks</span>
-              <span className="text-zinc-100">{data.stocks_vams_state}</span>
+          {/* Advanced: VAMS States */}
+          <GlassCard className="p-4 sm:p-5 space-y-3">
+            <h2 className="text-sm font-semibold text-zinc-50">VAMS States</h2>
+            <div className="space-y-2 text-xs">
+              <div className="flex justify-between">
+                <span className="text-zinc-300">Stocks</span>
+                <span className="text-zinc-100">{data.stocks_vams_state}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-300">Gold</span>
+                <span className="text-zinc-100">{data.gold_vams_state}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-300">BTC</span>
+                <span className="text-zinc-100">{data.btc_vams_state}</span>
+              </div>
             </div>
-            <div className="flex justify-between">
-              <span className="text-zinc-300">Gold</span>
-              <span className="text-zinc-100">{data.gold_vams_state}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-zinc-300">BTC</span>
-              <span className="text-zinc-100">{data.btc_vams_state}</span>
-            </div>
-          </div>
-        </GlassCard>
-      </div>
+          </GlassCard>
+        </div>
+      )}
 
-      <div className="pt-4">
-        <a
-          href="/ghostregime/methodology"
+      <div className="pt-4 flex gap-4">
+        <Link
+          href="/ghostregime/how-it-works"
           className="text-sm font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
         >
-          View Methodology →
-        </a>
+          How It Works →
+        </Link>
+        <Link
+          href="/models"
+          className="text-sm font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
+        >
+          Model Portfolios →
+        </Link>
       </div>
     </div>
   );

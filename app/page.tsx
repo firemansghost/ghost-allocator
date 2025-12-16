@@ -13,7 +13,8 @@ export default function HomePage() {
             Build a modern portfolio for a post-60/40 world.
           </h1>
           <p className="text-sm sm:text-base text-zinc-300 leading-relaxed">
-            Pension-aware portfolio templates for your 457. Works with Voya core funds and Schwab ETFs — no options chains, no jargon.
+            Pension-aware portfolio templates for your 457. Works with Voya core funds and Schwab ETFs — 
+            no options chains, no jargon. We're trying to be roughly right, not perfectly wrong.
           </p>
         </div>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
@@ -65,11 +66,11 @@ export default function HomePage() {
         <h2 className="text-center text-lg font-semibold tracking-tight">
           Tools
         </h2>
-        <div className="mt-4 grid gap-6 sm:grid-cols-2">
+        <div className="mt-4 grid gap-6 sm:grid-cols-3">
           <GlassCard className="p-4 sm:p-5 transition transform hover:-translate-y-1 hover:border-amber-400/60 hover:shadow-[0_20px_60px_rgba(0,0,0,0.9)]">
             <h3 className="text-sm font-semibold text-zinc-50">Ghost Allocator</h3>
             <p className="mt-2 text-xs text-zinc-300 leading-relaxed">
-              Build a personalized portfolio allocation for your 457 plan using Voya core funds and Schwab ETFs.
+              Build a plan-aware allocation using your 457 options. Works with Voya core funds and Schwab ETFs.
             </p>
             <Link
               href="/onboarding"
@@ -81,7 +82,7 @@ export default function HomePage() {
           <GlassCard className="p-4 sm:p-5 transition transform hover:-translate-y-1 hover:border-amber-400/60 hover:shadow-[0_20px_60px_rgba(0,0,0,0.9)]">
             <h3 className="text-sm font-semibold text-zinc-50">GhostRegime</h3>
             <p className="mt-2 text-xs text-zinc-300 leading-relaxed">
-              Macro regime classification and real-time allocation system based on market conditions.
+              Daily regime classification and rules-based exposure overlay. Shows targets vs actuals based on market conditions.
             </p>
             <Link
               href="/ghostregime"
@@ -90,8 +91,34 @@ export default function HomePage() {
               Open GhostRegime →
             </Link>
           </GlassCard>
+          <GlassCard className="p-4 sm:p-5 transition transform hover:-translate-y-1 hover:border-amber-400/60 hover:shadow-[0_20px_60px_rgba(0,0,0,0.9)]">
+            <div className="flex items-start justify-between">
+              <h3 className="text-sm font-semibold text-zinc-50">Model Portfolios</h3>
+              <span className="inline-flex items-center rounded-full border border-amber-400/60 bg-amber-400/10 px-2 py-0.5 text-[10px] font-medium text-amber-300">
+                Coming Soon
+              </span>
+            </div>
+            <p className="mt-2 text-xs text-zinc-300 leading-relaxed">
+              Curated templates that combine Ghost Allocator planning with GhostRegime signals for automated rebalancing.
+            </p>
+            <Link
+              href="/models"
+              className="mt-4 inline-flex items-center text-xs font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
+            >
+              View Models →
+            </Link>
+          </GlassCard>
         </div>
       </section>
+
+      {/* Not a Crystal Ball Callout */}
+      <GlassCard className="p-6 border-amber-400/30 bg-amber-400/5">
+        <p className="text-sm text-zinc-200 leading-relaxed">
+          <span className="font-semibold text-amber-300">Not a crystal ball.</span>{' '}
+          We're not trying to nail the exact top or bottom. We're trying to avoid the worst of bear markets
+          and catch most of bull markets through rules-based trend signals.
+        </p>
+      </GlassCard>
     </div>
   );
 }

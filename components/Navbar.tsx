@@ -27,6 +27,12 @@ export function Navbar() {
             GhostRegime
           </Link>
           <Link
+            href="/models"
+            className="text-zinc-300 hover:text-zinc-100"
+          >
+            Models
+          </Link>
+          <Link
             href="/onboarding"
             className="rounded-full bg-amber-400 px-5 py-2 text-xs font-semibold text-black shadow-md shadow-amber-400/40 hover:bg-amber-300 transition"
           >
