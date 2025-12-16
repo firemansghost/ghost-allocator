@@ -7,6 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { GlassCard } from '@/components/GlassCard';
+import { Tooltip } from '@/components/Tooltip';
 import type { GhostRegimeRow } from '@/lib/ghostregime/types';
 import Link from 'next/link';
 
@@ -176,12 +177,24 @@ export default function GhostRegimePage() {
             <p className="text-sm font-medium text-zinc-200 mt-1">{formatDate(data.date)}</p>
           </div>
           <div>
-            <p className="text-[10px] text-zinc-400 uppercase tracking-wide">Regime</p>
+            <p className="text-[10px] text-zinc-400 uppercase tracking-wide">
+              <Tooltip content="Current conditions bucket (one of four). Not a prediction — a classification based on market signals.">
+                Regime
+              </Tooltip>
+            </p>
             <p className="text-lg font-semibold text-amber-300 mt-1">{data.regime}</p>
           </div>
           <div>
-            <p className="text-[10px] text-zinc-400 uppercase tracking-wide">Risk</p>
-            <p className="text-sm font-medium text-zinc-200 mt-1">{data.risk_regime}</p>
+            <p className="text-[10px] text-zinc-400 uppercase tracking-wide">
+              <Tooltip content="Risk On = carry more exposure. Risk Off = cut exposure. It's a dimmer switch, not an on/off panic button.">
+                Risk
+              </Tooltip>
+            </p>
+            <p className="text-sm font-medium text-zinc-200 mt-1">
+              <Tooltip content="Risk On = carry more exposure. Risk Off = cut exposure. It's a dimmer switch, not an on/off panic button.">
+                {data.risk_regime}
+              </Tooltip>
+            </p>
           </div>
           <div>
             <p className="text-[10px] text-zinc-400 uppercase tracking-wide">Inflation Axis</p>
@@ -210,11 +223,29 @@ export default function GhostRegimePage() {
         <ul className="space-y-2 text-xs text-zinc-300">
           <li className="flex items-start gap-2">
             <span className="text-amber-400 mt-0.5">•</span>
-            <span><strong className="text-zinc-200">Targets (top-down):</strong> Stocks and BTC scale up/down based on Risk On/Off</span>
+            <span>
+              <strong className="text-zinc-200">
+                <Tooltip content="Targets come from the regime overlay. Actuals are targets adjusted by VAMS (100% / 50% / 0%). Cash is what's left when exposure gets reduced.">
+                  Targets (top-down)
+                </Tooltip>
+              </strong>: Stocks and BTC scale up/down based on{' '}
+              <Tooltip content="Risk On = carry more exposure. Risk Off = cut exposure. It's a dimmer switch, not an on/off panic button.">
+                Risk On/Off
+              </Tooltip>
+            </span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-amber-400 mt-0.5">•</span>
-            <span><strong className="text-zinc-200">Actuals (bottom-up):</strong> VAMS can reduce exposure to 50% or 0% when volatility is high</span>
+            <span>
+              <strong className="text-zinc-200">
+                <Tooltip content="Targets come from the regime overlay. Actuals are targets adjusted by VAMS (100% / 50% / 0%). Cash is what's left when exposure gets reduced.">
+                  Actuals (bottom-up)
+                </Tooltip>
+              </strong>:{' '}
+              <Tooltip content="Volatility-Adjusted Momentum Signal. Translation: trend + 'is it getting dangerously choppy?' Bullish = 100% of target. Neutral = 50%. Bearish = 0%.">
+                VAMS
+              </Tooltip> can reduce exposure to 50% or 0% when volatility is high
+            </span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-amber-400 mt-0.5">•</span>
@@ -270,14 +301,19 @@ export default function GhostRegimePage() {
       </GlassCard>
 
       {/* Advanced Details Toggle */}
-      <div>
+      <div className="space-y-1">
         <button
           onClick={() => setShowAdvanced(!showAdvanced)}
           className="flex items-center gap-2 text-sm font-medium text-amber-400 hover:text-amber-300 transition"
         >
           <span>{showAdvanced ? '▼' : '▶'}</span>
-          <span>Advanced Details</span>
+          <span>Advanced Details (Nerd Mode)</span>
         </button>
+        <p className="text-[11px] text-zinc-500 ml-6">
+          {showAdvanced 
+            ? "Nothing here changes the signal. It just shows you the receipts."
+            : "If you read commit hashes for fun, this part's for you. Raw guts: targets, actuals, VAMS states, and the 'what ran when' metadata."}
+        </p>
       </div>
 
       {showAdvanced && (
@@ -342,15 +378,27 @@ export default function GhostRegimePage() {
               </div>
             )}
             <div>
-              <p className="text-xs text-zinc-400 uppercase tracking-wide">Regime</p>
+              <p className="text-xs text-zinc-400 uppercase tracking-wide">
+                <Tooltip content="Current conditions bucket (one of four). Not a prediction — a classification based on market signals.">
+                  Regime
+                </Tooltip>
+              </p>
               <p className="text-lg font-semibold text-amber-300">{data.regime}</p>
             </div>
             <div>
-              <p className="text-xs text-zinc-400 uppercase tracking-wide">Risk Regime</p>
+              <p className="text-xs text-zinc-400 uppercase tracking-wide">
+                <Tooltip content="Risk On = carry more exposure. Risk Off = cut exposure. It's a dimmer switch, not an on/off panic button.">
+                  Risk Regime
+                </Tooltip>
+              </p>
               <p className="text-sm font-medium text-zinc-200">{data.risk_regime}</p>
             </div>
             <div>
-              <p className="text-xs text-zinc-400 uppercase tracking-wide">Risk Axis</p>
+              <p className="text-xs text-zinc-400 uppercase tracking-wide">
+                <Tooltip content="Risk On = carry more exposure. Risk Off = cut exposure. It's a dimmer switch, not an on/off panic button.">
+                  Risk Axis
+                </Tooltip>
+              </p>
               <p className="text-sm font-medium text-zinc-200">
                 {data.risk_axis}
                 {data.risk_tiebreaker_used && (
@@ -425,7 +473,11 @@ export default function GhostRegimePage() {
 
           {/* Advanced: Allocations */}
           <GlassCard className="p-4 sm:p-5 space-y-3">
-            <h2 className="text-sm font-semibold text-zinc-50">Allocations</h2>
+            <h2 className="text-sm font-semibold text-zinc-50">
+              <Tooltip content="Targets come from the regime overlay. Actuals are targets adjusted by VAMS (100% / 50% / 0%). Cash is what's left when exposure gets reduced.">
+                Allocations
+              </Tooltip>
+            </h2>
             <div className="space-y-2 text-xs">
               <div className="flex justify-between">
                 <span className="text-zinc-300">Stocks</span>
@@ -477,7 +529,11 @@ export default function GhostRegimePage() {
 
           {/* Advanced: VAMS States */}
           <GlassCard className="p-4 sm:p-5 space-y-3">
-            <h2 className="text-sm font-semibold text-zinc-50">VAMS States</h2>
+            <h2 className="text-sm font-semibold text-zinc-50">
+              <Tooltip content="Volatility-Adjusted Momentum Signal. Translation: trend + 'is it getting dangerously choppy?' Bullish = 100% of target. Neutral = 50%. Bearish = 0%.">
+                VAMS States
+              </Tooltip>
+            </h2>
             <div className="space-y-2 text-xs">
               <div className="flex justify-between">
                 <span className="text-zinc-300">Stocks</span>
