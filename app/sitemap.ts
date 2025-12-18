@@ -12,18 +12,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
     },
     {
-      url: `${SITE_URL}/onboarding`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.9,
-    },
-    {
-      url: `${SITE_URL}/builder`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
       url: `${SITE_URL}/ghostregime`,
       lastModified: now,
       changeFrequency: 'daily',
@@ -55,4 +43,3 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 }
-
