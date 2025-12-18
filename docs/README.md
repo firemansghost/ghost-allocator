@@ -2,6 +2,22 @@
 
 This directory contains documentation for the Ghost Allocator repository.
 
+## Start Here
+
+**I want to understand the app quickly:**
+- Read the [root README](../README.md) for a high-level overview
+- Then read [flows.md](flows.md) to understand the two user paths (Voya-only vs Voya + Schwab)
+
+**I want to change portfolio logic:**
+- Start with [ghost-sleeve-overview.md](ghost-sleeve-overview.md) to understand how sleeves map to funds
+- Then read [flows.md](flows.md) to see where the computation functions live
+- Key files: `lib/portfolioEngine.ts`, `lib/voya.ts`, `lib/voyaDelta.ts`, `lib/sleeves.ts`
+
+**I'm working on GhostRegime:**
+- Start with [ghostregime/RUNBOOK.md](ghostregime/RUNBOOK.md) for operations
+- See [ghostregime/PLAN.md](ghostregime/PLAN.md) for architecture
+- Check [ghostregime/IMPORT_SPEC.md](ghostregime/IMPORT_SPEC.md) for data format
+
 ## Ghost Allocator Docs
 
 ### User Flows
@@ -23,4 +39,3 @@ This directory contains documentation for the Ghost Allocator repository.
 ## Seed Data Docs
 
 - **[../data/ghostregime/seed/README.md](../data/ghostregime/seed/README.md)** - GhostRegime seed CSV format, file status, expected schema, and validation checks.
-

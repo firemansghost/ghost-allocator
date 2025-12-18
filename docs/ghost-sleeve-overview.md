@@ -17,7 +17,7 @@ Sleeves are defined in `lib/sleeves.ts` and are used to construct model portfoli
 ### 1. Core Equity (Value & Quality)
 - **Role**: Broad market equity exposure with a focus on value and quality factors
 - **Typical ETF mapping (Schwab)**: SPYV (SPDR Portfolio S&P 500 Value ETF), QUAL (iShares MSCI USA Quality Factor ETF)
-- **Voya mapping**: Northern Trust S&P 500 Index Fund, SSGA Russell Small/Mid Cap Index Fund
+- **Voya mapping**: Northern Trust S&P 500 Index Fund, SSgA Russell Small/Mid Cap Index Fund
 
 ### 2. Convex Equity (Options-Overlay ETFs)
 - **Role**: Equity ETFs that embed options strategies for downside protection
@@ -54,13 +54,30 @@ Sleeves are defined in `lib/sleeves.ts` and are used to construct model portfoli
 - **Typical ETF mapping (Schwab)**: Cash position (not an ETF)
 - **Voya mapping**: Stable Value Option Fund (approximate)
 
+## Mapping Cheat Sheet (Sleeve → Role → Implementation)
+
+| Ghost Sleeve | Role | Voya-Only Implementation (examples) | Voya + Schwab Implementation |
+|--------------|------|-------------------------------------|------------------------------|
+| **Core Equity** | Broad market equity (value & quality) | Northern Trust S&P 500 Index Fund<br>SSgA Russell Small/Mid Cap Index Fund<br>SSgA All Country World ex-US Index Fund | **Schwab:** Example ETFs (SPYV, QUAL)<br>See `lib/sleeves.ts` → `exampleETFs` |
+| **Convex Equity** | Equity with options overlay (downside protection) | Approximated by Core Equity funds (not directly available) | **Schwab:** Example ETFs (SPYC)<br>See `lib/sleeves.ts` → `exampleETFs` |
+| **Real Assets** | Gold, commodities, inflation protection | PIMCO Diversified Real Assets Fund | **Voya:** PIMCO Diversified Real Assets Fund<br>**Schwab:** Example ETFs (GLD, DBC)<br>See `lib/sleeves.ts` → `exampleETFs` |
+| **T-Bills / Short Duration** | Short-term Treasuries, liquidity | Stable Value Option Fund (approximate) | **Voya:** Stable Value Option Fund<br>**Schwab:** Example ETFs (SHV, BIL)<br>See `lib/sleeves.ts` → `exampleETFs` |
+| **Core Bonds** | Traditional bond exposure | JPMorgan Core Bond Fund | **Voya:** JPMorgan Core Bond Fund<br>**Schwab:** Example ETFs (AGG)<br>See `lib/sleeves.ts` → `exampleETFs` |
+| **Managed Futures** | Trend-following strategies | Approximated by other diversification sleeves (not directly available) | **Schwab:** Example ETFs (DBMF, KMLM)<br>See `lib/sleeves.ts` → `exampleETFs` |
+| **Rate Hedge / Crisis Protection** | Rate/crisis hedging | Pioneer Multi-Sector Fixed Income Fund CL R1 (approximate) | **Voya:** Pioneer Multi-Sector Fixed Income Fund CL R1<br>**Schwab:** Example ETFs (SHY)<br>See `lib/sleeves.ts` → `exampleETFs` |
+| **Cash** | Cash reserves, optionality | Stable Value Option Fund (approximate) | **Voya:** Stable Value Option Fund<br>**Schwab:** Cash position |
+
+**Note:** For Schwab ETF examples, see `lib/sleeves.ts` → `exampleETFs` array. The table above shows example tickers only; the actual list in code may include additional options.
+
+**Important:** In Voya + Schwab mode, Voya is used as the **defensive + inflation bucket** to avoid duplicating equity exposure. Schwab handles most of the equity risk (Core Equity, Convex Equity, Managed Futures), while Voya focuses on bonds, stable value, and real assets.
+
 ## How Sleeves Map to Funds
 
 ### For Voya-Only Users
 
 When a user chooses Voya-only, the app builds a "core mix" that approximates the Ghost sleeves using available Voya funds. The mapping is role-based, not 1:1:
 
-- **Core Equity + Convex Equity** → Northern Trust S&P 500 Index Fund, SSGA Russell Small/Mid Cap Index Fund, SSGA All Country World ex-US Index Fund
+- **Core Equity + Convex Equity** → Northern Trust S&P 500 Index Fund, SSgA Russell Small/Mid Cap Index Fund, SSgA All Country World ex-US Index Fund
 - **Real Assets** → PIMCO Diversified Real Assets Fund
 - **T-Bills + Cash** → Stable Value Option Fund
 - **Core Bonds** → JPMorgan Core Bond Fund
@@ -96,4 +113,3 @@ Model portfolios are defined for different risk levels:
 - **Risk Level 5** (Very Aggressive): Maximum equity allocation
 
 Each risk level has different sleeve weights. See `lib/sleeves.ts` for the exact percentages.
-

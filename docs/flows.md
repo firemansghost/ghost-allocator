@@ -27,6 +27,15 @@ Both flows start with the **questionnaire** (`app/onboarding/page.tsx` → `comp
   - Otherwise: Returns a core-fund mix via `getCoreMixForRisk(riskLevel)`
 - **Platform split**: `lib/portfolioEngine.ts` → `computePlatformSplit(answers)` → Returns `{ platform: 'voya_only', targetVoyaPct: 100, targetSchwabPct: 0 }`
 
+### OKC 457 Reality
+
+**Important**: In the OKC 457 plan, **every paycheck lands in Voya first.** The plan cannot route contributions directly to Schwab from payroll.
+
+For Voya-only users:
+- All contributions go directly into Voya core funds
+- Users update their contribution allocation in Voya to match the target mix
+- No manual transfers needed (everything stays in Voya)
+
 ### Current Mix + Delta Plan
 
 - **Current mix input**: `components/CurrentVoyaForm.tsx` allows users to enter their current Voya holdings (percentages per fund).
@@ -81,7 +90,13 @@ Both flows start with the **questionnaire** (`app/onboarding/page.tsx` → `comp
 
 ### OKC 457 Reality: Contributions → Voya First
 
-**Important**: In the OKC 457 plan, every paycheck lands in Voya first. Users cannot route contributions directly to Schwab from payroll.
+**Important**: In the OKC 457 plan, **every paycheck lands in Voya first.** Users cannot route contributions directly to Schwab from payroll.
+
+For Voya + Schwab users:
+- **Keep contribution allocation 100% into Voya core funds** (the plan can't send money straight to Schwab from payroll)
+- **Manually move money from Voya → Schwab monthly or quarterly** when rebalancing
+- **Schwab BrokerageLink is funded by manual sweeps** (monthly/quarterly is typical, not every paycheck)
+- Aim to maintain roughly the target split over time (close enough is good enough)
 
 The app explicitly calls this out in the action plan:
 - Step 4 instructs users to keep their contribution allocation 100% into Voya core funds
@@ -91,7 +106,9 @@ The app explicitly calls this out in the action plan:
 ### Current Mix + Delta Plan
 
 - Same as Voya-only flow: `components/CurrentVoyaForm.tsx` + `lib/voyaDelta.ts`
-- Delta plan only applies to the Voya slice (percentages are of the Voya portion, not the whole 457)
+- **Important**: Delta plan only applies to the **Voya slice** (percentages are of the Voya portion, not the whole 457)
+  - If the target split is 50% Voya / 50% Schwab, the delta percentages are relative to the 50% Voya portion
+  - For example: "Move 10% out of Fund X" means 10% of the Voya slice, not 10% of the total 457
 
 ### UI Display (`app/builder/page.tsx`)
 
@@ -100,6 +117,30 @@ The app explicitly calls this out in the action plan:
 - **Right column**: "Voya core funds (X% of 457)" card (defensive mix)
 - **Schwab ETF sleeve lineup** card: Shows ETFs grouped by sleeve for the growth portion
 - **Details section**: Allocation breakdown chart, Sleeve Details
+
+## What Happens When You Edit Current Voya Mix
+
+The Current Voya mix form (`components/CurrentVoyaForm.tsx`) allows users to enter their current Voya holdings as percentages per fund.
+
+### Live Delta Recomputation
+
+- **No submit button**: Edits trigger delta recomputation **live** as the user types
+- The delta plan updates immediately when holdings change
+- Changes are automatically saved to `localStorage` as part of the questionnaire result
+
+### Tolerance and Warnings
+
+- **1% tolerance**: Deltas smaller than 1 percentage point are ignored (not shown in the reduce/add lists)
+- **Sum validation**: If current holdings don't sum to ~100% (within 95–105%), the app shows a warning:
+  - "Heads up: your current Voya percentages add up to about X%. That's okay for a rough pass, but the moves below assume they're 'about right'."
+- **Delta percentages**: All percentages in the delta plan are relative to the **Voya slice only**, not the whole 457 account
+
+### For Voya + Schwab Users
+
+When editing current Voya mix in combo mode:
+- The percentages you enter are for the **Voya portion only** (e.g., if you're 50% Voya / 50% Schwab, enter percentages that sum to 100% of the Voya slice)
+- The delta plan shows moves within the Voya slice
+- The Schwab portion is handled separately and doesn't affect the Voya delta calculation
 
 ## Key Functions Reference
 
@@ -147,4 +188,3 @@ computeVoyaDeltaPlan() → VoyaDeltaPlan (if current mix provided)
   ↓
 UI Rendering (action plan, implementation cards, details)
 ```
-
