@@ -65,3 +65,4 @@ export function getModelPortfolio(id: string): ModelPortfolio | undefined {
   return MODEL_PORTFOLIOS.find((m) => m.id === id);
 }
 
+

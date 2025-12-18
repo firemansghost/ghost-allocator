@@ -270,3 +270,4 @@ curl "https://ghost-allocator.vercel.app/api/ghostregime/today?debug=1"
 curl https://ghost-allocator.vercel.app/api/ghostregime/today
 ```
 
+
