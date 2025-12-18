@@ -1,5 +1,13 @@
 import QuestionnaireForm from '@/components/QuestionnaireForm';
 import { GlassCard } from '@/components/GlassCard';
+import { buildMetadata } from '@/lib/seo';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = buildMetadata({
+  title: 'Build Your Portfolio - Ghost Allocator',
+  description: 'Answer a few questions about your situation and risk tolerance. We\'ll design a modern, ETF-based allocation tailored to you.',
+  path: '/onboarding',
+});
 
 export default function OnboardingPage() {
   return (

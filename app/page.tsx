@@ -1,5 +1,13 @@
 import Link from 'next/link';
 import { GlassCard } from '@/components/GlassCard';
+import { buildMetadata } from '@/lib/seo';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = buildMetadata({
+  title: 'Ghost Allocator - Build a Modern Portfolio for a Post-60/40 World',
+  description: 'Pension-aware portfolio templates for your 457. Works with Voya core funds and Schwab ETFs — no options chains, no jargon.',
+  path: '/',
+});
 
 export default function HomePage() {
   return (
@@ -20,13 +28,13 @@ export default function HomePage() {
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
           <Link
             href="/onboarding"
-            className="rounded-full bg-amber-400 px-6 py-2.5 text-sm font-semibold text-black shadow-lg shadow-amber-400/40 hover:bg-amber-300 transition"
+            className="rounded-full bg-amber-400 px-6 py-2.5 text-sm font-semibold text-black shadow-lg shadow-amber-400/40 hover:bg-amber-300 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 min-h-[44px] flex items-center"
           >
             Build My Portfolio
           </Link>
           <Link
             href="/why-60-40-dead"
-            className="text-sm font-medium text-zinc-300 hover:text-zinc-100 underline-offset-4 hover:underline"
+            className="text-sm font-medium text-zinc-300 hover:text-zinc-100 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-2 py-1 min-h-[44px] flex items-center"
           >
             Why 60/40 Might Be Dead
           </Link>
@@ -74,7 +82,7 @@ export default function HomePage() {
             </p>
             <Link
               href="/onboarding"
-              className="mt-4 inline-flex items-center text-xs font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
+              className="mt-4 inline-flex items-center text-xs font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-2 py-1"
             >
               Build My Portfolio →
             </Link>
@@ -86,7 +94,7 @@ export default function HomePage() {
             </p>
             <Link
               href="/ghostregime"
-              className="mt-4 inline-flex items-center text-xs font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
+              className="mt-4 inline-flex items-center text-xs font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-2 py-1"
             >
               Open GhostRegime →
             </Link>
@@ -103,7 +111,7 @@ export default function HomePage() {
             </p>
             <Link
               href="/models"
-              className="mt-4 inline-flex items-center text-xs font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
+              className="mt-4 inline-flex items-center text-xs font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-2 py-1"
             >
               View Models →
             </Link>

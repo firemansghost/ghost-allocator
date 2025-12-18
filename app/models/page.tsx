@@ -6,6 +6,14 @@
 import Link from 'next/link';
 import { GlassCard } from '@/components/GlassCard';
 import { MODEL_PORTFOLIOS } from '@/lib/models/modelCatalog';
+import { buildMetadata } from '@/lib/seo';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = buildMetadata({
+  title: 'Model Portfolios - Ghost Allocator',
+  description: 'Curated templates that combine Ghost Allocator planning with GhostRegime signals for simple rebalance guidance.',
+  path: '/models',
+});
 
 export default function ModelsPage() {
   return (
@@ -58,10 +66,10 @@ export default function ModelsPage() {
             </div>
             <button
               disabled={model.comingSoon}
-              className={`mt-4 w-full rounded-md px-4 py-2 text-xs font-medium transition ${
+              className={`mt-4 w-full rounded-md px-4 py-2 text-xs font-medium transition min-h-[44px] ${
                 model.comingSoon
                   ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
-                  : 'bg-amber-400 text-black hover:bg-amber-300'
+                  : 'bg-amber-400 text-black hover:bg-amber-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950'
               }`}
             >
               {model.comingSoon ? 'Coming Soon' : 'Select Template'}

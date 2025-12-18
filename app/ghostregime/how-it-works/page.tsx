@@ -5,6 +5,14 @@
 
 import Link from 'next/link';
 import { GlassCard } from '@/components/GlassCard';
+import { buildMetadata } from '@/lib/seo';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = buildMetadata({
+  title: 'How GhostRegime Works - Ghost Allocator',
+  description: 'A rules-based, long-only system that adjusts exposure when conditions change — without pretending we can predict the exact top or bottom.',
+  path: '/ghostregime/how-it-works',
+});
 
 export default function HowItWorksPage() {
   return (

@@ -1,5 +1,13 @@
 import Link from 'next/link';
 import { GlassCard } from '@/components/GlassCard';
+import { buildMetadata } from '@/lib/seo';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = buildMetadata({
+  title: 'Why 60/40 Might Be Dead - Ghost Allocator',
+  description: 'The classic 60% stocks / 40% bonds playbook was built for a world of falling interest rates. That world has changed.',
+  path: '/why-60-40-dead',
+});
 
 export default function Why6040Page() {
   return (
@@ -111,7 +119,7 @@ export default function Why6040Page() {
           <div className="mt-4">
             <Link
               href="/onboarding"
-              className="inline-flex items-center rounded-full bg-amber-400 px-5 py-2 text-sm font-semibold text-black hover:bg-amber-300 transition shadow-md shadow-amber-400/40"
+              className="inline-flex items-center rounded-full bg-amber-400 px-5 py-2 text-sm font-semibold text-black hover:bg-amber-300 transition shadow-md shadow-amber-400/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 min-h-[44px]"
             >
               See your modern allocation
             </Link>

@@ -2,12 +2,13 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
-import { siteConfig } from '@/lib/siteConfig';
+import { buildMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: siteConfig.name,
-  description: siteConfig.tagline,
-};
+export const metadata: Metadata = buildMetadata({
+  title: 'Ghost Allocator',
+  description: 'Build a modern portfolio for a post-60/40 world. Pension-aware portfolio templates for your 457 using Voya core funds and Schwab ETFs.',
+  path: '/',
+});
 
 export default function RootLayout({
   children,
@@ -16,6 +17,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <meta name="theme-color" content="#000000" />
+      </head>
       <body className="min-h-screen bg-black text-zinc-100 antialiased">
         <div className="flex min-h-screen flex-col">
           <Navbar />
@@ -30,4 +34,3 @@ export default function RootLayout({
     </html>
   );
 }
-

@@ -3,6 +3,15 @@
  * Documentation stub for Option B voting, VAMS, satellites, etc.
  */
 
+import { buildMetadata } from '@/lib/seo';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = buildMetadata({
+  title: 'GhostRegime Methodology - Ghost Allocator',
+  description: 'Documentation for regime classification and allocation system, including Option B voting, VAMS, and satellite signals.',
+  path: '/ghostregime/methodology',
+});
+
 export default function MethodologyPage() {
   return (
     <div className="space-y-6">
@@ -41,6 +50,8 @@ export default function MethodologyPage() {
     </div>
   );
 }
+
+
 
 
 

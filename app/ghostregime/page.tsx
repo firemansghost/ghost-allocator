@@ -300,7 +300,8 @@ export default function GhostRegimePage() {
         </p>
         <button
           disabled
-          className="rounded-md bg-zinc-800 text-zinc-500 px-4 py-2 text-xs font-medium cursor-not-allowed"
+          className="rounded-md bg-zinc-800 text-zinc-500 px-4 py-2 text-xs font-medium cursor-not-allowed min-h-[44px]"
+          aria-label="Apply to a Model Portfolio (Coming Soon)"
         >
           Apply to a Model Portfolio (Coming Soon)
         </button>
@@ -310,7 +311,8 @@ export default function GhostRegimePage() {
       <div className="space-y-1">
         <button
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className="flex items-center gap-2 text-sm font-medium text-amber-400 hover:text-amber-300 transition"
+          className="flex items-center gap-2 text-sm font-medium text-amber-400 hover:text-amber-300 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-2 py-1 min-h-[44px]"
+          aria-label={showAdvanced ? 'Hide advanced details' : 'Show advanced details'}
         >
           <span>{showAdvanced ? '▼' : '▶'}</span>
           <span>Advanced Details (Nerd Mode)</span>

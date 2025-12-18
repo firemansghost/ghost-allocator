@@ -109,7 +109,8 @@ export default function CurrentVoyaForm({
               <button
                 type="button"
                 onClick={() => handleRemoveFund(index)}
-                className="text-xs text-zinc-400 hover:text-zinc-200 px-2"
+                className="text-xs text-zinc-400 hover:text-zinc-200 px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded min-h-[44px]"
+                aria-label={`Remove ${holdings[index]?.fundName || 'fund'}`}
               >
                 Remove
               </button>
@@ -119,7 +120,8 @@ export default function CurrentVoyaForm({
         <button
           type="button"
           onClick={handleAddFund}
-          className="text-xs text-amber-300 hover:text-amber-200 underline"
+          className="text-xs text-amber-300 hover:text-amber-200 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-2 py-1 min-h-[44px]"
+          aria-label="Add another fund"
         >
           + Add another fund
         </button>
@@ -133,6 +135,8 @@ export default function CurrentVoyaForm({
     </GlassCard>
   );
 }
+
+
 
 
 
