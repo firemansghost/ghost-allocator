@@ -181,6 +181,14 @@ export default function Builder() {
           >
             Jump to Target mix
           </Link>
+          {voyaDeltaPlan.hasData && (
+            <Link
+              href="#move-steps"
+              className="text-zinc-400 hover:text-zinc-200 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-1"
+            >
+              Jump to Move steps
+            </Link>
+          )}
         </div>
       </GlassCard>
 
@@ -428,24 +436,55 @@ export default function Builder() {
 
           {/* Step 2 – Adjust your current Voya mix */}
           {voyaDeltaPlan.hasData ? (
-            <GlassCard className="p-4 sm:p-5 space-y-3">
-              <h2 className="text-sm font-semibold text-zinc-50">
-                Step 2 – Adjust your current Voya mix
-              </h2>
-              {voyaImplementation.style === 'core_mix' && voyaImplementation.mix && (
-                <>
-                  <p className="text-xs text-zinc-300 leading-relaxed">
-                    Based on what you told us about your current Voya holdings, here&apos;s how to
-                    get closer to the target mix.
-                    {platformSplit.platform === 'voya_and_schwab' && (
-                      <> Numbers are percentages of the Voya slice of your 457, not the whole account.</>
-                    )}
-                  </p>
-                  {voyaDeltaSummary && (
-                    <p className="mt-2 text-xs font-medium text-amber-300">
-                      {voyaDeltaSummary}
+            <div id="move-steps">
+              <GlassCard className="p-4 sm:p-5 space-y-3">
+                <h2 className="text-sm font-semibold text-zinc-50">
+                  Step 2 – Adjust your current Voya mix
+                </h2>
+                {voyaImplementation.style === 'core_mix' && voyaImplementation.mix && (
+                  <>
+                    <p className="text-xs text-zinc-300 leading-relaxed">
+                      Based on what you told us about your current Voya holdings, here&apos;s how to
+                      get closer to the target mix.
+                      {platformSplit.platform === 'voya_and_schwab' && (
+                        <> Numbers are percentages of the Voya slice of your 457, not the whole account.</>
+                      )}
                     </p>
-                  )}
+                    {voyaDeltaPlan.overweight.length > 0 || voyaDeltaPlan.underweight.length > 0 ? (
+                      <div className="mt-3 space-y-2">
+                        <p className="text-xs text-zinc-400 font-medium">
+                          Net changes to reach the target mix:
+                        </p>
+                        <div className="grid gap-2 sm:grid-cols-2 text-xs">
+                          {voyaDeltaPlan.overweight.length > 0 && (
+                            <div>
+                              <span className="text-zinc-400 font-medium">Reduce: </span>
+                              <span className="text-zinc-200">
+                                {voyaDeltaPlan.overweight.map((f, idx) => (
+                                  <span key={f.id}>
+                                    {f.name} -{Math.round(Math.abs(f.deltaPct))}%
+                                    {idx < voyaDeltaPlan.overweight.length - 1 ? ', ' : ''}
+                                  </span>
+                                ))}
+                              </span>
+                            </div>
+                          )}
+                          {voyaDeltaPlan.underweight.length > 0 && (
+                            <div>
+                              <span className="text-zinc-400 font-medium">Add: </span>
+                              <span className="text-zinc-200">
+                                {voyaDeltaPlan.underweight.map((f, idx) => (
+                                  <span key={f.id}>
+                                    {f.name} +{Math.round(f.deltaPct)}%
+                                    {idx < voyaDeltaPlan.underweight.length - 1 ? ', ' : ''}
+                                  </span>
+                                ))}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ) : null}
                   {voyaDeltaPlan.totalCurrentPct > 105 ||
                   voyaDeltaPlan.totalCurrentPct < 95 ? (
                     <p className="text-[11px] text-amber-300">
@@ -516,7 +555,8 @@ export default function Builder() {
                   </p>
                 </>
               )}
-            </GlassCard>
+              </GlassCard>
+            </div>
           ) : (
             <GlassCard className="p-4 sm:p-5 space-y-3 opacity-75">
               <h2 className="text-sm font-semibold text-zinc-50">
