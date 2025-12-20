@@ -704,8 +704,8 @@ export default function Builder() {
       {/* Optional ETF lineup for Voya-only */}
       {platformSplit.platform === 'voya_only' && (
         <details className="group">
-          <summary className="cursor-pointer list-none">
-            <GlassCard className="p-4 sm:p-5 space-y-3">
+          <summary className="cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded">
+            <GlassCard className="p-4 sm:p-5 space-y-3 hover:bg-black/50 transition-colors">
               <h2 className="text-sm font-semibold text-zinc-50 inline-flex items-center gap-2">
                 <span className="text-xs text-zinc-400 group-open:rotate-90 transition-transform">
                   ▶
