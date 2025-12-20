@@ -331,7 +331,7 @@ export default function Builder() {
           />
 
           {/* Step 2 – Adjust your current Voya mix */}
-          {voyaDeltaPlan.hasData && (
+          {voyaDeltaPlan.hasData ? (
             <GlassCard className="p-4 sm:p-5 space-y-3">
               <h2 className="text-sm font-semibold text-zinc-50">
                 Step 2 – Adjust your current Voya mix
@@ -340,8 +340,10 @@ export default function Builder() {
                 <>
                   <p className="text-xs text-zinc-300 leading-relaxed">
                     Based on what you told us about your current Voya holdings, here&apos;s how to
-                    get closer to the target mix. Numbers are percentages of the Voya slice of your
-                    457, not the whole account.
+                    get closer to the target mix.
+                    {platformSplit.platform === 'voya_and_schwab' && (
+                      <> Numbers are percentages of the Voya slice of your 457, not the whole account.</>
+                    )}
                   </p>
                   {voyaDeltaSummary && (
                     <p className="mt-2 text-xs font-medium text-amber-300">
@@ -419,56 +421,17 @@ export default function Builder() {
                 </>
               )}
             </GlassCard>
-          )}
-
-          {/* Voya-only implementation */}
-          {platformSplit.platform === 'voya_only' && (
-            <GlassCard className="p-4 sm:p-5 space-y-3">
+          ) : (
+            <GlassCard className="p-4 sm:p-5 space-y-3 opacity-75">
               <h2 className="text-sm font-semibold text-zinc-50">
-                Voya-only implementation
+                Step 2 – Adjust your current Voya mix
               </h2>
-              {voyaImplementation.style === 'simple_target_date' ? (
-                <>
-                  <p className="text-xs text-zinc-300 leading-relaxed">
-                    To keep things simple in the Voya core menu, this uses a single Vanguard Target
-                    Retirement fund as a stand-in for your Ghost sleeve mix. The sleeves still
-                    describe the risk/return profile; this fund is the implementation.
-                  </p>
-                  <p className="text-sm font-medium text-amber-300">
-                    {voyaImplementation.targetDateFundName}
-                  </p>
-                  <p className="text-[11px] text-zinc-400">
-                    This would represent ~100% of your 457 balance in this plan.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p className="text-xs text-zinc-300 leading-relaxed">
-                    Here&apos;s a Voya core-fund mix that plays the same roles as your Ghost sleeves
-                    using the funds available in your plan. It&apos;s matched on growth vs defensive
-                    balance and risk band, not exact sleeve percentages.
-                  </p>
-                  <ul className="mt-2 space-y-1.5 text-xs text-zinc-200">
-                    {voyaImplementation.mix?.map((item) => (
-                      <li
-                        key={item.id}
-                        className="flex items-baseline justify-between gap-3"
-                      >
-                        <div>
-                          <p className="font-medium">{item.name}</p>
-                          <p className="text-[11px] text-zinc-400">{item.role}</p>
-                        </div>
-                        <span className="text-[11px] font-semibold text-amber-300">
-                          {item.allocationPct}% of Voya portion
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                  <p className="mt-1 text-[11px] text-zinc-500">
-                    Since you&apos;re Voya-only, this mix would represent ~100% of your 457.
-                  </p>
-                </>
-              )}
+              <p className="text-xs text-zinc-300 leading-relaxed">
+                Enter your current Voya holdings in the &quot;Current Voya mix&quot; section above to
+                get exact &quot;move money from X to Y&quot; instructions. Once you add your current
+                mix (percentages should add up to ~100% of your 457), we&apos;ll show you exactly how
+                to shift your holdings to match the recommended mix.
+              </p>
             </GlassCard>
           )}
         </div>
@@ -513,14 +476,18 @@ export default function Builder() {
                           <p className="text-[11px] text-zinc-400">{item.role}</p>
                         </div>
                         <span className="text-[11px] font-semibold text-amber-300">
-                          {item.allocationPct}% of Voya portion
+                          {platformSplit.platform === 'voya_only'
+                            ? `${item.allocationPct}% of your 457`
+                            : `${item.allocationPct}% of Voya portion`}
                         </span>
                       </li>
                     ))}
                   </ul>
-                  <p className="mt-1 text-[11px] text-zinc-500">
-                    Since you&apos;re Voya-only, this mix would represent ~100% of your 457.
-                  </p>
+                  {platformSplit.platform === 'voya_only' && (
+                    <p className="mt-1 text-[11px] text-zinc-500">
+                      This mix represents ~100% of your 457 balance.
+                    </p>
+                  )}
                 </>
               )}
             </GlassCard>
@@ -683,16 +650,24 @@ export default function Builder() {
 
       {/* Optional ETF lineup for Voya-only */}
       {platformSplit.platform === 'voya_only' && (
-        <GlassCard className="p-4 sm:p-5 space-y-3">
-          <h2 className="text-sm font-semibold text-zinc-50">
-            Optional ETF lineup (if you ever use Schwab or another brokerage)
-          </h2>
-          <p className="text-xs text-zinc-300 leading-relaxed">
-            These are example ETFs you could use in a full brokerage account (like Schwab or an
-            IRA) if you ever decide to open one. They&apos;re not available directly in the Voya
-            core menu, but they follow the same Ghost sleeves shown above.
-          </p>
-          <div className="mt-2 space-y-1 text-xs text-zinc-300 leading-relaxed">
+        <details className="group">
+          <summary className="cursor-pointer list-none">
+            <GlassCard className="p-4 sm:p-5 space-y-3">
+              <h2 className="text-sm font-semibold text-zinc-50 inline-flex items-center gap-2">
+                <span className="text-xs text-zinc-400 group-open:rotate-90 transition-transform">
+                  ▶
+                </span>
+                Optional ETF lineup (if you ever add Schwab or an IRA later)
+              </h2>
+              <p className="text-xs text-zinc-300 leading-relaxed">
+                These are example ETFs you could use in a full brokerage account (like Schwab or an
+                IRA) if you ever decide to open one. They&apos;re not available directly in the Voya
+                core menu, but they follow the same Ghost sleeves shown above.
+              </p>
+            </GlassCard>
+          </summary>
+          <GlassCard className="p-4 sm:p-5 space-y-3 mt-2">
+            <div className="mt-2 space-y-1 text-xs text-zinc-300 leading-relaxed">
             {portfolio.sleeves
               .filter((s) => s.weight > 0)
               .map((sleeve) => {
@@ -727,9 +702,10 @@ export default function Builder() {
                     </div>
                   </div>
                 );
-              })}
-          </div>
-        </GlassCard>
+                })}
+            </div>
+          </GlassCard>
+        </details>
       )}
     </div>
   );
