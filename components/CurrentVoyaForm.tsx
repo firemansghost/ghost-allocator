@@ -144,11 +144,26 @@ export default function CurrentVoyaForm({
           + Add another fund
         </button>
       </div>
-      <div className="pt-2 border-t border-zinc-800">
+      <div className="pt-2 border-t border-zinc-800 space-y-1">
         <p className="text-xs text-zinc-400">
           Total: {total.toFixed(1)}%{' '}
           {isVoyaOnly ? 'of 457' : 'of Voya slice'}
         </p>
+        {total < 100 && total > 0 && (
+          <p className="text-xs text-amber-300">
+            Add up to 100% to unlock exact &quot;move money from X to Y&quot; steps.
+          </p>
+        )}
+        {total === 100 && (
+          <p className="text-xs text-green-400">
+            Perfect — showing exact move steps below.
+          </p>
+        )}
+        {total > 100 && (
+          <p className="text-xs text-amber-300">
+            Over 100% — fix percentages.
+          </p>
+        )}
       </div>
     </GlassCard>
   );

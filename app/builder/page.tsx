@@ -146,7 +146,16 @@ export default function Builder() {
         <h2 className="text-sm font-semibold text-zinc-50 mb-3">Start here</h2>
         <ol className="space-y-2 text-xs text-zinc-300 leading-relaxed list-decimal list-inside">
           <li>
-            Pick your path: Voya-only or Voya + Schwab.
+            Your path:{' '}
+            {platformSplit.platform === 'voya_only'
+              ? 'Voya-only (OKC Voya core menu).'
+              : 'Voya + Schwab (balance split + manual sweep).'}{' '}
+            <Link
+              href="/onboarding"
+              className="text-xs text-zinc-400 hover:text-zinc-200 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-1"
+            >
+              Change answers
+            </Link>
           </li>
           <li>
             If you know your current mix, add it below (optional) for exact &quot;move money from X to Y&quot; steps.
@@ -158,6 +167,20 @@ export default function Builder() {
               : '— then sweep to Schwab monthly/quarterly when you rebalance (payroll can&apos;t send it there).'}
           </li>
         </ol>
+        <div className="mt-3 pt-3 border-t border-zinc-800 flex flex-wrap gap-3 text-xs">
+          <Link
+            href="#current-voya-mix"
+            className="text-zinc-400 hover:text-zinc-200 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-1"
+          >
+            Jump to Current Voya mix
+          </Link>
+          <Link
+            href="#target-mix"
+            className="text-zinc-400 hover:text-zinc-200 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-1"
+          >
+            Jump to Target mix
+          </Link>
+        </div>
       </GlassCard>
 
       {/* Action Plan */}
@@ -343,11 +366,13 @@ export default function Builder() {
           )}
 
           {/* Current Voya mix form */}
-          <CurrentVoyaForm
-            value={currentVoyaHoldings}
-            onChange={handleVoyaHoldingsChange}
-            isVoyaOnly={platformSplit.platform === 'voya_only'}
-          />
+          <div id="current-voya-mix">
+            <CurrentVoyaForm
+              value={currentVoyaHoldings}
+              onChange={handleVoyaHoldingsChange}
+              isVoyaOnly={platformSplit.platform === 'voya_only'}
+            />
+          </div>
 
           {/* Step 2 – Adjust your current Voya mix */}
           {voyaDeltaPlan.hasData ? (
@@ -459,10 +484,11 @@ export default function Builder() {
         <div className="space-y-4">
           {/* Voya-only implementation */}
           {platformSplit.platform === 'voya_only' && (
-            <GlassCard className="p-4 sm:p-5 space-y-3">
-              <h2 className="text-sm font-semibold text-zinc-50">
-                Voya-only implementation
-              </h2>
+            <div id="target-mix">
+              <GlassCard className="p-4 sm:p-5 space-y-3">
+                <h2 className="text-sm font-semibold text-zinc-50">
+                  Voya-only implementation
+                </h2>
               {voyaImplementation.style === 'simple_target_date' ? (
                 <>
                   <p className="text-xs text-zinc-300 leading-relaxed">
@@ -509,15 +535,17 @@ export default function Builder() {
                   )}
                 </>
               )}
-            </GlassCard>
+              </GlassCard>
+            </div>
           )}
 
           {/* Voya core funds for Voya + Schwab */}
           {platformSplit.platform === 'voya_and_schwab' && (
-            <GlassCard className="p-4 sm:p-5 space-y-3">
-              <h2 className="text-sm font-semibold text-zinc-50">
-                Voya core funds ({platformSplit.targetVoyaPct}% of 457)
-              </h2>
+            <div id="target-mix">
+              <GlassCard className="p-4 sm:p-5 space-y-3">
+                <h2 className="text-sm font-semibold text-zinc-50">
+                  Voya core funds ({platformSplit.targetVoyaPct}% of 457)
+                </h2>
               {voyaImplementation.style === 'simple_target_date' ? (
                 <>
                   <p className="text-xs text-zinc-300 leading-relaxed">
@@ -560,7 +588,8 @@ export default function Builder() {
                   </ul>
                 </>
               )}
-            </GlassCard>
+              </GlassCard>
+            </div>
           )}
         </div>
       </div>
@@ -623,11 +652,16 @@ export default function Builder() {
       )}
 
       {/* Details section */}
-      <div className="pt-4">
-        <h2 className="text-sm font-semibold text-zinc-400 mb-4">
-          Details behind the plan
-        </h2>
-        <div className="grid gap-4 md:grid-cols-2 md:gap-6">
+      <details className="pt-4 group">
+        <summary className="cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded mb-4">
+          <h2 className="text-sm font-semibold text-zinc-400 inline-flex items-center gap-2 hover:text-zinc-300 transition-colors">
+            <span className="text-xs text-zinc-500 group-open:rotate-90 transition-transform">
+              ▶
+            </span>
+            Details behind the plan (optional)
+          </h2>
+        </summary>
+        <div className="grid gap-4 md:grid-cols-2 md:gap-6 mt-4">
           {/* Allocation chart */}
           <GlassCard className="p-4 sm:p-5 space-y-3">
             <div>
@@ -665,7 +699,7 @@ export default function Builder() {
             </div>
           </GlassCard>
         </div>
-      </div>
+      </details>
 
       {/* Optional ETF lineup for Voya-only */}
       {platformSplit.platform === 'voya_only' && (
