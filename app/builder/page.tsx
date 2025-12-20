@@ -149,7 +149,8 @@ export default function Builder() {
             Your path:{' '}
             {platformSplit.platform === 'voya_only'
               ? 'Voya-only (OKC Voya core menu).'
-              : 'Voya + Schwab (balance split + manual sweep).'}{' '}
+              : 'Voya + Schwab (balance split + manual sweep).'}
+            {' '}
             <Link
               href="/onboarding"
               className="text-xs text-zinc-400 hover:text-zinc-200 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-1"
@@ -284,6 +285,57 @@ export default function Builder() {
           </div>
         )}
       </GlassCard>
+
+      {/* Target Voya mix - Voya-only (appears right after Action plan) */}
+      {platformSplit.platform === 'voya_only' && (
+        <div id="target-mix">
+          <GlassCard className="p-4 sm:p-5 space-y-3">
+            <h2 className="text-sm font-semibold text-zinc-50">
+              Target Voya mix (set this in Voya)
+            </h2>
+            {voyaImplementation.style === 'simple_target_date' ? (
+              <>
+                <p className="text-xs text-zinc-300 leading-relaxed">
+                  Set your Voya contribution allocation to match this target mix. This is the simplest way to implement your Ghost sleeves using the OKC Voya core menu.
+                </p>
+                <p className="text-sm font-medium text-amber-300">
+                  {voyaImplementation.targetDateFundName}
+                </p>
+                <p className="text-[11px] text-zinc-400">
+                  This would represent ~100% of your 457 balance in this plan.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-xs text-zinc-300 leading-relaxed">
+                  Set your Voya contribution allocation to match this target mix. This is the simplest way to implement your Ghost sleeves using the OKC Voya core menu.
+                </p>
+                <ul className="mt-2 space-y-1.5 text-xs text-zinc-200">
+                  {voyaImplementation.mix?.map((item) => (
+                    <li
+                      key={item.id}
+                      className="flex items-baseline justify-between gap-3"
+                    >
+                      <div>
+                        <p className="font-medium">{item.name}</p>
+                        <p className="text-[11px] text-zinc-400">{item.role}</p>
+                      </div>
+                      <span className="text-[11px] font-semibold text-amber-300">
+                        {platformSplit.platform === 'voya_only'
+                          ? `${item.allocationPct}% of your 457`
+                          : `${item.allocationPct}% of Voya portion`}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-1 text-[11px] text-zinc-500">
+                  This mix represents ~100% of your 457 balance. Percentages are matched on role (growth vs defensive), not exact sleeve labels.
+                </p>
+              </>
+            )}
+          </GlassCard>
+        </div>
+      )}
 
       <div className="grid gap-4 md:grid-cols-2 md:gap-6">
         {/* Left column */}
@@ -482,63 +534,6 @@ export default function Builder() {
 
         {/* Right column - Voya implementation cards */}
         <div className="space-y-4">
-          {/* Voya-only implementation */}
-          {platformSplit.platform === 'voya_only' && (
-            <div id="target-mix">
-              <GlassCard className="p-4 sm:p-5 space-y-3">
-                <h2 className="text-sm font-semibold text-zinc-50">
-                  Voya-only implementation
-                </h2>
-              {voyaImplementation.style === 'simple_target_date' ? (
-                <>
-                  <p className="text-xs text-zinc-300 leading-relaxed">
-                    To keep things simple in the Voya core menu, this uses a single Vanguard Target
-                    Retirement fund as a stand-in for your Ghost sleeve mix. The sleeves still
-                    describe the risk/return profile; this fund is the implementation.
-                  </p>
-                  <p className="text-sm font-medium text-amber-300">
-                    {voyaImplementation.targetDateFundName}
-                  </p>
-                  <p className="text-[11px] text-zinc-400">
-                    This would represent ~100% of your 457 balance in this plan.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p className="text-xs text-zinc-300 leading-relaxed">
-                    Here&apos;s a Voya core-fund mix that plays the same roles as your Ghost sleeves
-                    using the funds available in your plan. It&apos;s matched on growth vs defensive
-                    balance and risk band, not exact sleeve percentages.
-                  </p>
-                  <ul className="mt-2 space-y-1.5 text-xs text-zinc-200">
-                    {voyaImplementation.mix?.map((item) => (
-                      <li
-                        key={item.id}
-                        className="flex items-baseline justify-between gap-3"
-                      >
-                        <div>
-                          <p className="font-medium">{item.name}</p>
-                          <p className="text-[11px] text-zinc-400">{item.role}</p>
-                        </div>
-                        <span className="text-[11px] font-semibold text-amber-300">
-                          {platformSplit.platform === 'voya_only'
-                            ? `${item.allocationPct}% of your 457`
-                            : `${item.allocationPct}% of Voya portion`}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                  {platformSplit.platform === 'voya_only' && (
-                    <p className="mt-1 text-[11px] text-zinc-500">
-                      This mix represents ~100% of your 457 balance.
-                    </p>
-                  )}
-                </>
-              )}
-              </GlassCard>
-            </div>
-          )}
-
           {/* Voya core funds for Voya + Schwab */}
           {platformSplit.platform === 'voya_and_schwab' && (
             <div id="target-mix">
@@ -699,67 +694,58 @@ export default function Builder() {
             </div>
           </GlassCard>
         </div>
-      </details>
 
-      {/* Optional ETF lineup for Voya-only */}
-      {platformSplit.platform === 'voya_only' && (
-        <details className="group">
-          <summary className="cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded">
-            <GlassCard className="p-4 sm:p-5 space-y-3 hover:bg-black/50 transition-colors">
-              <h2 className="text-sm font-semibold text-zinc-50 inline-flex items-center gap-2">
-                <span className="text-xs text-zinc-400 group-open:rotate-90 transition-transform">
-                  ▶
-                </span>
-                Optional ETF lineup (if you ever add Schwab or an IRA later)
-              </h2>
-              <p className="text-xs text-zinc-300 leading-relaxed">
-                These are example ETFs you could use in a full brokerage account (like Schwab or an
-                IRA) if you ever decide to open one. They&apos;re not available directly in the Voya
-                core menu, but they follow the same Ghost sleeves shown above.
-              </p>
-            </GlassCard>
-          </summary>
-          <GlassCard className="p-4 sm:p-5 space-y-3 mt-2">
-            <div className="mt-2 space-y-1 text-xs text-zinc-300 leading-relaxed">
-            {portfolio.sleeves
-              .filter((s) => s.weight > 0)
-              .map((sleeve) => {
-                const sleeveEtfs = etfsBySleeve[sleeve.id] || [];
-                if (sleeveEtfs.length === 0) return null;
+        {/* Optional ETF lineup for Voya-only (nested under Details) */}
+        {platformSplit.platform === 'voya_only' && (
+          <div className="mt-4">
+            <h3 className="text-sm font-semibold text-zinc-50 mb-3">
+              Optional ETF lineup (if you ever add Schwab or an IRA later)
+            </h3>
+            <p className="text-xs text-zinc-300 leading-relaxed mb-3">
+              These are example ETFs you could use in a full brokerage account (like Schwab or an
+              IRA) if you ever decide to open one. They&apos;re not available directly in the Voya
+              core menu, but they follow the same Ghost sleeves shown above.
+            </p>
+            <div className="space-y-1 text-xs text-zinc-300 leading-relaxed">
+              {portfolio.sleeves
+                .filter((s) => s.weight > 0)
+                .map((sleeve) => {
+                  const sleeveEtfs = etfsBySleeve[sleeve.id] || [];
+                  if (sleeveEtfs.length === 0) return null;
 
-                return (
-                  <div
-                    key={sleeve.id}
-                    className="rounded-lg border border-zinc-800 bg-black/40 p-4"
-                  >
-                    <h3 className="text-sm font-semibold mb-3">
-                      {sleeve.name} ({formatPercent(sleeve.weight)})
-                    </h3>
-                    <div className="space-y-3">
-                      {sleeveEtfs.map((etf, idx) => (
-                        <div
-                          key={idx}
-                          className="pl-3 border-l-2 border-zinc-700"
-                        >
-                          <div className="flex items-baseline gap-2 mb-1">
-                            <span className="font-mono text-xs font-semibold">
-                              {etf.ticker}
-                            </span>
-                            <span className="text-xs text-zinc-400">{etf.name}</span>
+                  return (
+                    <div
+                      key={sleeve.id}
+                      className="rounded-lg border border-zinc-800 bg-black/40 p-4"
+                    >
+                      <h4 className="text-sm font-semibold mb-3">
+                        {sleeve.name} ({formatPercent(sleeve.weight)})
+                      </h4>
+                      <div className="space-y-3">
+                        {sleeveEtfs.map((etf, idx) => (
+                          <div
+                            key={idx}
+                            className="pl-3 border-l-2 border-zinc-700"
+                          >
+                            <div className="flex items-baseline gap-2 mb-1">
+                              <span className="font-mono text-xs font-semibold">
+                                {etf.ticker}
+                              </span>
+                              <span className="text-xs text-zinc-400">{etf.name}</span>
+                            </div>
+                            <p className="text-xs text-zinc-300 leading-relaxed">
+                              {etf.description}
+                            </p>
                           </div>
-                          <p className="text-xs text-zinc-300 leading-relaxed">
-                            {etf.description}
-                          </p>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                );
+                  );
                 })}
             </div>
-          </GlassCard>
-        </details>
-      )}
+          </div>
+        )}
+      </details>
     </div>
   );
 }

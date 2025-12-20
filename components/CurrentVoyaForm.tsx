@@ -149,7 +149,7 @@ export default function CurrentVoyaForm({
           Total: {total.toFixed(1)}%{' '}
           {isVoyaOnly ? 'of 457' : 'of Voya slice'}
         </p>
-        {total < 100 && total > 0 && (
+        {total < 100 && (
           <p className="text-xs text-amber-300">
             Add up to 100% to unlock exact &quot;move money from X to Y&quot; steps.
           </p>
