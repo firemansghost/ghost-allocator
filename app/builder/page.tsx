@@ -141,6 +141,25 @@ export default function Builder() {
         </span>
       </header>
 
+      {/* Start here strip */}
+      <GlassCard className="p-4 sm:p-5">
+        <h2 className="text-sm font-semibold text-zinc-50 mb-3">Start here</h2>
+        <ol className="space-y-2 text-xs text-zinc-300 leading-relaxed list-decimal list-inside">
+          <li>
+            Pick your path: Voya-only or Voya + Schwab.
+          </li>
+          <li>
+            If you know your current mix, add it below (optional) for exact &quot;move money from X to Y&quot; steps.
+          </li>
+          <li>
+            Set your future contributions to match the target mix{' '}
+            {platformSplit.platform === 'voya_only'
+              ? '— then let contributions do most of the work.'
+              : '— then sweep to Schwab monthly/quarterly when you rebalance (payroll can&apos;t send it there).'}
+          </li>
+        </ol>
+      </GlassCard>
+
       {/* Action Plan */}
       <GlassCard className="p-5 sm:p-6 space-y-4">
         <h2 className="text-lg font-semibold text-zinc-50">Action plan</h2>
