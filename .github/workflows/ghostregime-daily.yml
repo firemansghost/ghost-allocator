@@ -4,22 +4,51 @@ on:
   schedule:
     - cron: "30 3 * * 1-5"  # 3:30 AM UTC, Monday-Friday (after US market close)
   workflow_dispatch: {}  # Allow manual trigger
+  # NOTE: No push/pull_request triggers - this workflow should only run on schedule or manual dispatch
 
 jobs:
   refresh:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Guard: seed file and secrets
+        id: guard
+        run: |
+          set -euo pipefail
+          
+          # Check if seed file exists and is not empty
+          SEED_FILE="data/ghostregime/seed/ghostregime_replay_history.csv"
+          if [ ! -f "$SEED_FILE" ]; then
+            echo "::warning::Seed file missing; skipping daily job."
+            echo "skip=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          if [ ! -s "$SEED_FILE" ]; then
+            echo "::warning::Seed file empty; skipping daily job."
+            echo "skip=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Check required secret
+          if [ -z "${{ secrets.GHOSTREGIME_CRON_SECRET }}" ]; then
+            echo "::warning::GHOSTREGIME_CRON_SECRET not set; skipping daily job."
+            echo "skip=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          echo "skip=false" >> $GITHUB_OUTPUT
+
       - name: Force refresh GhostRegime (persist latest)
         id: refresh
+        if: steps.guard.outputs.skip != 'true'
         env:
           URL: https://ghost-allocator.vercel.app/api/ghostregime/today?force=1
           CRON_SECRET: ${{ secrets.GHOSTREGIME_CRON_SECRET }}
         run: |
           set -euo pipefail
-          if [ -z "$CRON_SECRET" ]; then
-            echo "❌ GHOSTREGIME_CRON_SECRET not set in GitHub Actions secrets"
-            exit 1
-          fi
           RESP="$(curl -sS --fail --retry 3 --retry-delay 5 -H "x-ghostregime-cron: ${CRON_SECRET}" "${URL}&cb=$(date +%s)")"
           echo "$RESP" > /tmp/refresh_response.json
 
@@ -86,6 +115,7 @@ jobs:
 
       - name: Check GhostRegime health
         id: health
+        if: steps.guard.outputs.skip != 'true'
         env:
           HEALTH_URL: https://ghost-allocator.vercel.app/api/ghostregime/health
         run: |
@@ -142,7 +172,7 @@ jobs:
           PY
 
       - name: Notify Slack on failure
-        if: failure() && secrets.SLACK_WEBHOOK_URL != ''
+        if: failure() && steps.guard.outputs.skip != 'true' && secrets.SLACK_WEBHOOK_URL != ''
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |

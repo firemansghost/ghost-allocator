@@ -186,7 +186,7 @@ export default function Builder() {
               href="#move-steps"
               className="text-zinc-400 hover:text-zinc-200 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-1"
             >
-              Jump to Move steps
+              Jump to one-time rebalance
             </Link>
           )}
         </div>
@@ -210,8 +210,7 @@ export default function Builder() {
                 Step 2 – Clean up your Voya mix
               </h3>
               <p className="text-xs text-zinc-300 leading-relaxed">
-                Use the &quot;Current Voya mix&quot; and &quot;Step 2 – Adjust your current Voya
-                mix&quot; cards below to move money out of what&apos;s overweight and into
+                Use the &quot;Current Voya mix&quot; and &quot;One-time rebalance (optional)&quot; cards below to move money out of what&apos;s overweight and into
                 what&apos;s missing.
               </p>
             </div>
@@ -251,7 +250,7 @@ export default function Builder() {
               </p>
               <p className="text-[11px] text-zinc-400 mt-1">
                 If your current Voya funds are different, use the &quot;Current Voya mix&quot; and
-                &quot;Step 2 – Adjust your current Voya mix&quot; cards below to see how to shift.
+                &quot;One-time rebalance (optional)&quot; cards below to see how to shift.
               </p>
             </div>
             <div>
@@ -434,12 +433,12 @@ export default function Builder() {
             />
           </div>
 
-          {/* Step 2 – Adjust your current Voya mix */}
+          {/* One-time rebalance (optional) */}
           {voyaDeltaPlan.hasData ? (
             <div id="move-steps">
               <GlassCard className="p-4 sm:p-5 space-y-3">
                 <h2 className="text-sm font-semibold text-zinc-50">
-                  Step 2 – Adjust your current Voya mix
+                  One-time rebalance (optional)
                 </h2>
                 {voyaImplementation.style === 'core_mix' && voyaImplementation.mix && (
                   <>
@@ -560,7 +559,7 @@ export default function Builder() {
           ) : (
             <GlassCard className="p-4 sm:p-5 space-y-3 opacity-75">
               <h2 className="text-sm font-semibold text-zinc-50">
-                Step 2 – Adjust your current Voya mix
+                One-time rebalance (optional)
               </h2>
               <p className="text-xs text-zinc-300 leading-relaxed">
                 Enter your current Voya holdings in the &quot;Current Voya mix&quot; section above to
