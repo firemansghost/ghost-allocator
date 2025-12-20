@@ -168,10 +168,17 @@ jobs:
           PY
 
       - name: Notify Slack on failure
-        if: failure() && steps.guard.outputs.skip != 'true' && secrets.SLACK_WEBHOOK_URL != ''
+        if: failure() && steps.guard.outputs.skip != 'true'
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
+          set -euo pipefail
+          
+          # Exit cleanly if webhook URL is not configured
+          if [ -z "${SLACK_WEBHOOK_URL:-}" ]; then
+            echo "::notice::SLACK_WEBHOOK_URL not set; skipping Slack notification."
+            exit 0
+          fi
           python3 - <<PY
           import json
           import os
