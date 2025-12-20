@@ -100,6 +100,7 @@ This avoids duplicating S&P/small-mid/international equity in Voya since Schwab 
 - **Example ETFs**: `lib/sleeves.ts` → `exampleETFs` array
 - **Model portfolios**: `lib/sleeves.ts` → `modelPortfolios` array (maps risk levels to sleeve weights)
 - **Voya fund mappings**: `lib/voya.ts` → `getCoreMixForRisk()` (Voya-only) and `getComplementaryMixForRisk()` (Voya + Schwab)
+- **Voya fund menu**: `lib/voyaFunds.ts` → `VOYA_FUNDS` array (canonical source for all OKC Voya 457 funds). See [voya-menu.md](voya-menu.md) for the complete listing.
 - **Risk level computation**: `lib/portfolioEngine.ts` → `computeRiskLevel()`
 
 ## Risk Band Variations

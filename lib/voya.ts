@@ -4,25 +4,16 @@ import type {
   VoyaFundMixItem,
   RiskLevel,
 } from './types';
-
-// All fund names taken from the OKCFD Voya 457 menu.
-const TARGET_DATE_FUNDS = [
-  'Vanguard Target Retirement Income Fund',
-  'Vanguard Target Retirement 2020 Fund',
-  'Vanguard Target Retirement 2025 Fund',
-  'Vanguard Target Retirement 2030 Fund',
-  'Vanguard Target Retirement 2035 Fund',
-  'Vanguard Target Retirement 2040 Fund',
-  'Vanguard Target Retirement 2045 Fund',
-  'Vanguard Target Retirement 2050 Fund',
-  'Vanguard Target Retirement 2055 Fund',
-  'Vanguard Target Retirement 2060 Fund',
-  'Vanguard Target Retirement 2065 Fund',
-  'Vanguard Target Retirement 2070 Fund',
-];
+import {
+  getFundById,
+  getFundName,
+  VOYA_TDF_FUNDS,
+  validateFundMix,
+} from './voyaFunds';
 
 /**
- * Selects a target-date fund based on years to goal and risk level
+ * Selects a target-date fund based on years to goal and risk level.
+ * Returns the canonical fund name from VOYA_FUNDS.
  */
 function pickTargetDateFund(
   yearsToGoal: number | null | undefined,
@@ -31,29 +22,33 @@ function pickTargetDateFund(
   // Use coarse bands; no need to be perfect.
   const y = yearsToGoal ?? 20;
 
+  let fundId: string;
   if (y <= 5) {
-    return 'Vanguard Target Retirement Income Fund';
+    fundId = 'vanguard_target_retirement_income';
   } else if (y <= 10) {
-    return 'Vanguard Target Retirement 2025 Fund';
+    fundId = 'vanguard_target_retirement_2025';
   } else if (y <= 15) {
-    return 'Vanguard Target Retirement 2030 Fund';
+    fundId = 'vanguard_target_retirement_2030';
   } else if (y <= 20) {
-    return 'Vanguard Target Retirement 2035 Fund';
+    fundId = 'vanguard_target_retirement_2035';
   } else if (y <= 25) {
-    return 'Vanguard Target Retirement 2040 Fund';
+    fundId = 'vanguard_target_retirement_2040';
   } else if (y <= 30) {
-    return 'Vanguard Target Retirement 2045 Fund';
+    fundId = 'vanguard_target_retirement_2045';
   } else if (y <= 35) {
-    return 'Vanguard Target Retirement 2050 Fund';
+    fundId = 'vanguard_target_retirement_2050';
   } else if (y <= 40) {
-    return 'Vanguard Target Retirement 2055 Fund';
+    fundId = 'vanguard_target_retirement_2055';
   } else if (y <= 45) {
-    return 'Vanguard Target Retirement 2060 Fund';
+    fundId = 'vanguard_target_retirement_2060';
   } else if (y <= 50) {
-    return 'Vanguard Target Retirement 2065 Fund';
+    fundId = 'vanguard_target_retirement_2065';
   } else {
-    return 'Vanguard Target Retirement 2070 Fund';
+    fundId = 'vanguard_target_retirement_2070';
   }
+
+  // Return canonical name from VOYA_FUNDS
+  return getFundName(fundId);
 }
 
 /**
@@ -62,30 +57,43 @@ function pickTargetDateFund(
  * since Schwab handles the equity risk
  */
 function getComplementaryMixForRisk(riskLevel: RiskLevel): VoyaFundMixItem[] {
+  // Dev-time validation: ensure all fund IDs are valid
+  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+    const mix = _getComplementaryMixForRiskInternal(riskLevel);
+    const errors = validateFundMix(mix);
+    if (errors.length > 0) {
+      console.error('[voya.ts] Invalid fund IDs in complementary mix:', errors);
+    }
+    return mix;
+  }
+  return _getComplementaryMixForRiskInternal(riskLevel);
+}
+
+function _getComplementaryMixForRiskInternal(riskLevel: RiskLevel): VoyaFundMixItem[] {
   switch (riskLevel) {
     case 1: // very conservative / retirement
       return [
         {
-          id: 'stable-value',
-          name: 'Stable Value Option Fund',
+          id: 'stable_value_option',
+          name: getFundName('stable_value_option'),
           role: 'Capital preservation / cash-like',
           allocationPct: 45,
         },
         {
-          id: 'core-bond',
-          name: 'JPMorgan Core Bond Fund',
+          id: 'jpmorgan_core_bond',
+          name: getFundName('jpmorgan_core_bond'),
           role: 'Core bond exposure',
           allocationPct: 35,
         },
         {
-          id: 'multi-sector',
-          name: 'Pioneer Multi-Sector Fixed Income Fund CL R1',
+          id: 'pioneer_multi_sector_fixed_income_r1',
+          name: getFundName('pioneer_multi_sector_fixed_income_r1'),
           role: 'Diversified fixed income',
           allocationPct: 10,
         },
         {
-          id: 'real-assets',
-          name: 'PIMCO Diversified Real Assets Fund',
+          id: 'pimco_diversified_real_assets',
+          name: getFundName('pimco_diversified_real_assets'),
           role: 'Real assets / inflation protection',
           allocationPct: 10,
         },
@@ -94,26 +102,26 @@ function getComplementaryMixForRisk(riskLevel: RiskLevel): VoyaFundMixItem[] {
     case 2: // conservative
       return [
         {
-          id: 'stable-value',
-          name: 'Stable Value Option Fund',
+          id: 'stable_value_option',
+          name: getFundName('stable_value_option'),
           role: 'Capital preservation / cash-like',
           allocationPct: 35,
         },
         {
-          id: 'core-bond',
-          name: 'JPMorgan Core Bond Fund',
+          id: 'jpmorgan_core_bond',
+          name: getFundName('jpmorgan_core_bond'),
           role: 'Core bond exposure',
           allocationPct: 35,
         },
         {
-          id: 'multi-sector',
-          name: 'Pioneer Multi-Sector Fixed Income Fund CL R1',
+          id: 'pioneer_multi_sector_fixed_income_r1',
+          name: getFundName('pioneer_multi_sector_fixed_income_r1'),
           role: 'Diversified fixed income',
           allocationPct: 15,
         },
         {
-          id: 'real-assets',
-          name: 'PIMCO Diversified Real Assets Fund',
+          id: 'pimco_diversified_real_assets',
+          name: getFundName('pimco_diversified_real_assets'),
           role: 'Real assets / inflation protection',
           allocationPct: 15,
         },
@@ -122,26 +130,26 @@ function getComplementaryMixForRisk(riskLevel: RiskLevel): VoyaFundMixItem[] {
     case 4: // aggressive
       return [
         {
-          id: 'stable-value',
-          name: 'Stable Value Option Fund',
+          id: 'stable_value_option',
+          name: getFundName('stable_value_option'),
           role: 'Capital preservation / cash-like',
           allocationPct: 20,
         },
         {
-          id: 'core-bond',
-          name: 'JPMorgan Core Bond Fund',
+          id: 'jpmorgan_core_bond',
+          name: getFundName('jpmorgan_core_bond'),
           role: 'Core bond exposure',
           allocationPct: 30,
         },
         {
-          id: 'multi-sector',
-          name: 'Pioneer Multi-Sector Fixed Income Fund CL R1',
+          id: 'pioneer_multi_sector_fixed_income_r1',
+          name: getFundName('pioneer_multi_sector_fixed_income_r1'),
           role: 'Diversified fixed income',
           allocationPct: 20,
         },
         {
-          id: 'real-assets',
-          name: 'PIMCO Diversified Real Assets Fund',
+          id: 'pimco_diversified_real_assets',
+          name: getFundName('pimco_diversified_real_assets'),
           role: 'Real assets / inflation protection',
           allocationPct: 30,
         },
@@ -150,26 +158,26 @@ function getComplementaryMixForRisk(riskLevel: RiskLevel): VoyaFundMixItem[] {
     case 5: // very aggressive
       return [
         {
-          id: 'stable-value',
-          name: 'Stable Value Option Fund',
+          id: 'stable_value_option',
+          name: getFundName('stable_value_option'),
           role: 'Capital preservation / cash-like',
           allocationPct: 15,
         },
         {
-          id: 'core-bond',
-          name: 'JPMorgan Core Bond Fund',
+          id: 'jpmorgan_core_bond',
+          name: getFundName('jpmorgan_core_bond'),
           role: 'Core bond exposure',
           allocationPct: 25,
         },
         {
-          id: 'multi-sector',
-          name: 'Pioneer Multi-Sector Fixed Income Fund CL R1',
+          id: 'pioneer_multi_sector_fixed_income_r1',
+          name: getFundName('pioneer_multi_sector_fixed_income_r1'),
           role: 'Diversified fixed income',
           allocationPct: 20,
         },
         {
-          id: 'real-assets',
-          name: 'PIMCO Diversified Real Assets Fund',
+          id: 'pimco_diversified_real_assets',
+          name: getFundName('pimco_diversified_real_assets'),
           role: 'Real assets / inflation protection',
           allocationPct: 40,
         },
@@ -178,26 +186,26 @@ function getComplementaryMixForRisk(riskLevel: RiskLevel): VoyaFundMixItem[] {
     default: // 3 = moderate
       return [
         {
-          id: 'stable-value',
-          name: 'Stable Value Option Fund',
+          id: 'stable_value_option',
+          name: getFundName('stable_value_option'),
           role: 'Capital preservation / cash-like',
           allocationPct: 25,
         },
         {
-          id: 'core-bond',
-          name: 'JPMorgan Core Bond Fund',
+          id: 'jpmorgan_core_bond',
+          name: getFundName('jpmorgan_core_bond'),
           role: 'Core bond exposure',
           allocationPct: 35,
         },
         {
-          id: 'multi-sector',
-          name: 'Pioneer Multi-Sector Fixed Income Fund CL R1',
+          id: 'pioneer_multi_sector_fixed_income_r1',
+          name: getFundName('pioneer_multi_sector_fixed_income_r1'),
           role: 'Diversified fixed income',
           allocationPct: 15,
         },
         {
-          id: 'real-assets',
-          name: 'PIMCO Diversified Real Assets Fund',
+          id: 'pimco_diversified_real_assets',
+          name: getFundName('pimco_diversified_real_assets'),
           role: 'Real assets / inflation protection',
           allocationPct: 25,
         },
@@ -210,36 +218,49 @@ function getComplementaryMixForRisk(riskLevel: RiskLevel): VoyaFundMixItem[] {
  * riskLevel mapping: 1=very conservative, 2=conservative, 3=moderate, 4=aggressive, 5=very aggressive
  */
 function getCoreMixForRisk(riskLevel: RiskLevel): VoyaFundMixItem[] {
+  // Dev-time validation: ensure all fund IDs are valid
+  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+    const mix = _getCoreMixForRiskInternal(riskLevel);
+    const errors = validateFundMix(mix);
+    if (errors.length > 0) {
+      console.error('[voya.ts] Invalid fund IDs in core mix:', errors);
+    }
+    return mix;
+  }
+  return _getCoreMixForRiskInternal(riskLevel);
+}
+
+function _getCoreMixForRiskInternal(riskLevel: RiskLevel): VoyaFundMixItem[] {
   switch (riskLevel) {
     case 1: // very conservative / retirement
       return [
         {
-          id: 'stable-value',
-          name: 'Stable Value Option Fund',
+          id: 'stable_value_option',
+          name: getFundName('stable_value_option'),
           role: 'Capital preservation / cash-like',
           allocationPct: 30,
         },
         {
-          id: 'core-bond',
-          name: 'JPMorgan Core Bond Fund',
+          id: 'jpmorgan_core_bond',
+          name: getFundName('jpmorgan_core_bond'),
           role: 'Core bond exposure',
           allocationPct: 30,
         },
         {
-          id: 'pioneer-multi-sector',
-          name: 'Pioneer Multi-Sector Fixed Income Fund CL R1',
+          id: 'pioneer_multi_sector_fixed_income_r1',
+          name: getFundName('pioneer_multi_sector_fixed_income_r1'),
           role: 'Diversified fixed income',
           allocationPct: 10,
         },
         {
-          id: 'sp500',
-          name: 'Northern Trust S&P 500 Index Fund',
+          id: 'northern_trust_sp500_index',
+          name: getFundName('northern_trust_sp500_index'),
           role: 'US large-cap equity',
           allocationPct: 20,
         },
         {
-          id: 'real-assets',
-          name: 'PIMCO Diversified Real Assets Fund',
+          id: 'pimco_diversified_real_assets',
+          name: getFundName('pimco_diversified_real_assets'),
           role: 'Real assets / inflation protection',
           allocationPct: 10,
         },
@@ -248,38 +269,38 @@ function getCoreMixForRisk(riskLevel: RiskLevel): VoyaFundMixItem[] {
     case 2: // conservative
       return [
         {
-          id: 'stable-value',
-          name: 'Stable Value Option Fund',
+          id: 'stable_value_option',
+          name: getFundName('stable_value_option'),
           role: 'Capital preservation / cash-like',
           allocationPct: 20,
         },
         {
-          id: 'core-bond',
-          name: 'JPMorgan Core Bond Fund',
+          id: 'jpmorgan_core_bond',
+          name: getFundName('jpmorgan_core_bond'),
           role: 'Core bond exposure',
           allocationPct: 25,
         },
         {
-          id: 'sp500',
-          name: 'Northern Trust S&P 500 Index Fund',
+          id: 'northern_trust_sp500_index',
+          name: getFundName('northern_trust_sp500_index'),
           role: 'US large-cap equity',
           allocationPct: 25,
         },
         {
-          id: 'smallmid-index',
-          name: 'SSgA Russell Small/Mid Cap Index Fund',
+          id: 'ssga_russell_smallmid_cap_index',
+          name: getFundName('ssga_russell_smallmid_cap_index'),
           role: 'US small/mid-cap equity',
           allocationPct: 10,
         },
         {
-          id: 'intl-equity',
-          name: 'SSgA All Country World ex-US Index Fund',
+          id: 'ssga_all_country_world_exus_index',
+          name: getFundName('ssga_all_country_world_exus_index'),
           role: 'International equity',
           allocationPct: 10,
         },
         {
-          id: 'real-assets',
-          name: 'PIMCO Diversified Real Assets Fund',
+          id: 'pimco_diversified_real_assets',
+          name: getFundName('pimco_diversified_real_assets'),
           role: 'Real assets / inflation protection',
           allocationPct: 10,
         },
@@ -289,32 +310,32 @@ function getCoreMixForRisk(riskLevel: RiskLevel): VoyaFundMixItem[] {
     case 5: // very aggressive
       return [
         {
-          id: 'sp500',
-          name: 'Northern Trust S&P 500 Index Fund',
+          id: 'northern_trust_sp500_index',
+          name: getFundName('northern_trust_sp500_index'),
           role: 'US large-cap equity',
           allocationPct: 40,
         },
         {
-          id: 'smallmid-index',
-          name: 'SSgA Russell Small/Mid Cap Index Fund',
+          id: 'ssga_russell_smallmid_cap_index',
+          name: getFundName('ssga_russell_smallmid_cap_index'),
           role: 'US small/mid-cap equity',
           allocationPct: 15,
         },
         {
-          id: 'intl-equity',
-          name: 'SSgA All Country World ex-US Index Fund',
+          id: 'ssga_all_country_world_exus_index',
+          name: getFundName('ssga_all_country_world_exus_index'),
           role: 'International equity',
           allocationPct: 15,
         },
         {
-          id: 'real-assets',
-          name: 'PIMCO Diversified Real Assets Fund',
+          id: 'pimco_diversified_real_assets',
+          name: getFundName('pimco_diversified_real_assets'),
           role: 'Real assets / inflation protection',
           allocationPct: 15,
         },
         {
-          id: 'core-bond',
-          name: 'JPMorgan Core Bond Fund',
+          id: 'jpmorgan_core_bond',
+          name: getFundName('jpmorgan_core_bond'),
           role: 'Core bond exposure',
           allocationPct: 15,
         },
@@ -323,38 +344,38 @@ function getCoreMixForRisk(riskLevel: RiskLevel): VoyaFundMixItem[] {
     default: // 3 moderate
       return [
         {
-          id: 'sp500',
-          name: 'Northern Trust S&P 500 Index Fund',
+          id: 'northern_trust_sp500_index',
+          name: getFundName('northern_trust_sp500_index'),
           role: 'US large-cap equity',
           allocationPct: 35,
         },
         {
-          id: 'smallmid-index',
-          name: 'SSgA Russell Small/Mid Cap Index Fund',
+          id: 'ssga_russell_smallmid_cap_index',
+          name: getFundName('ssga_russell_smallmid_cap_index'),
           role: 'US small/mid-cap equity',
           allocationPct: 10,
         },
         {
-          id: 'intl-equity',
-          name: 'SSgA All Country World ex-US Index Fund',
+          id: 'ssga_all_country_world_exus_index',
+          name: getFundName('ssga_all_country_world_exus_index'),
           role: 'International equity',
           allocationPct: 10,
         },
         {
-          id: 'real-assets',
-          name: 'PIMCO Diversified Real Assets Fund',
+          id: 'pimco_diversified_real_assets',
+          name: getFundName('pimco_diversified_real_assets'),
           role: 'Real assets / inflation protection',
           allocationPct: 15,
         },
         {
-          id: 'core-bond',
-          name: 'JPMorgan Core Bond Fund',
+          id: 'jpmorgan_core_bond',
+          name: getFundName('jpmorgan_core_bond'),
           role: 'Core bond exposure',
           allocationPct: 20,
         },
         {
-          id: 'stable-value',
-          name: 'Stable Value Option Fund',
+          id: 'stable_value_option',
+          name: getFundName('stable_value_option'),
           role: 'Capital preservation / cash-like',
           allocationPct: 10,
         },

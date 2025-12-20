@@ -15,3 +15,5 @@ export const EXTERNAL_URLS = {
   SIMPLIFY: "https://www.simplify.us/",
 } as const;
 
+
+

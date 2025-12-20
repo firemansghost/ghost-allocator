@@ -6,3 +6,5 @@ For now, you can use any placeholder image. The metadata system will reference i
 
 Recommended: A simple branded image with "Ghost Allocator" text and the tagline.
 
+
+

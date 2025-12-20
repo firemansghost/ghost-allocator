@@ -3,23 +3,19 @@
 import { useState } from 'react';
 import type { CurrentVoyaHolding } from '@/lib/types';
 import { GlassCard } from '@/components/GlassCard';
+import {
+  VOYA_CORE_FUNDS,
+  VOYA_TDF_FUNDS,
+  getFundById,
+  formatFundForDisplay,
+  resolveFundId,
+} from '@/lib/voyaFunds';
 
 interface CurrentVoyaFormProps {
   value: CurrentVoyaHolding[] | undefined;
   onChange: (value: CurrentVoyaHolding[]) => void;
   isVoyaOnly?: boolean;
 }
-
-const VOYA_FUND_OPTIONS = [
-  { id: 'stable-value', name: 'Stable Value Option Fund' },
-  { id: 'core-bond', name: 'JPMorgan Core Bond Fund' },
-  { id: 'multi-sector', name: 'Pioneer Multi-Sector Fixed Income Fund CL R1' },
-  { id: 'real-assets', name: 'PIMCO Diversified Real Assets Fund' },
-  { id: 'sp500', name: 'Northern Trust S&P 500 Index Fund' },
-  { id: 'smallmid-index', name: 'SSgA Russell Small/Mid Cap Index Fund' },
-  { id: 'intl-equity', name: 'SSgA All Country World ex-US Index Fund' },
-  { id: 'other', name: 'Other fund' },
-];
 
 export default function CurrentVoyaForm({
   value,
@@ -36,11 +32,24 @@ export default function CurrentVoyaForm({
   };
 
   const handleFundChange = (index: number, fundId: string) => {
-    const fund = VOYA_FUND_OPTIONS.find((f) => f.id === fundId);
+    if (!fundId) {
+      // Empty selection
+      const newHoldings = [...holdings];
+      newHoldings[index] = {
+        ...newHoldings[index],
+        fundId: '',
+        fundName: '',
+      };
+      updateHoldings(newHoldings);
+      return;
+    }
+
+    const fund = getFundById(fundId);
+    const canonicalId = resolveFundId(fundId);
     const newHoldings = [...holdings];
     newHoldings[index] = {
       ...newHoldings[index],
-      fundId,
+      fundId: canonicalId, // Store canonical ID
       fundName: fund?.name || '',
     };
     updateHoldings(newHoldings);
@@ -88,11 +97,20 @@ export default function CurrentVoyaForm({
               className="flex-1 rounded-md border border-zinc-700 bg-black/40 px-3 py-2 text-sm text-zinc-100 focus:border-amber-400 focus:outline-none focus:ring-0"
             >
               <option value="">Select fund...</option>
-              {VOYA_FUND_OPTIONS.map((fund) => (
-                <option key={fund.id} value={fund.id}>
-                  {fund.name}
-                </option>
-              ))}
+              <optgroup label="Core funds">
+                {VOYA_CORE_FUNDS.map((fund) => (
+                  <option key={fund.id} value={fund.id}>
+                    {formatFundForDisplay(fund)}
+                  </option>
+                ))}
+              </optgroup>
+              <optgroup label="Target date funds">
+                {VOYA_TDF_FUNDS.map((fund) => (
+                  <option key={fund.id} value={fund.id}>
+                    {formatFundForDisplay(fund)}
+                  </option>
+                ))}
+              </optgroup>
             </select>
             <input
               type="number"

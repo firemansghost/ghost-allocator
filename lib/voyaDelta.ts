@@ -4,6 +4,7 @@ import type {
   VoyaDeltaPlan,
   VoyaFundDelta,
 } from './types';
+import { resolveFundId, getFundName } from './voyaFunds';
 
 const DELTA_EPS = 1; // 1 percentage point tolerance
 
@@ -38,25 +39,27 @@ export function computeVoyaDeltaPlan(
 
   const mix = implementation.mix;
 
-  // Map target mix by id for quick lookups
+  // Map target mix by id for quick lookups (use canonical IDs)
   const targetById = new Map<
     string,
     { name: string; role?: string; allocationPct: number }
   >();
   mix.forEach((item) => {
-    targetById.set(item.id, {
+    const canonicalId = resolveFundId(item.id);
+    targetById.set(canonicalId, {
       name: item.name,
       role: item.role,
       allocationPct: item.allocationPct,
     });
   });
 
-  // Map current holdings by id
+  // Map current holdings by id (resolve legacy IDs to canonical)
   const currentById = new Map<string, { name: string; allocationPct: number }>();
   currentHoldings.forEach((holding) => {
     if (holding.fundId && holding.fundId !== 'other') {
-      currentById.set(holding.fundId, {
-        name: holding.fundName,
+      const canonicalId = resolveFundId(holding.fundId);
+      currentById.set(canonicalId, {
+        name: holding.fundName || getFundName(canonicalId),
         allocationPct: holding.allocationPct ?? 0,
       });
     }
@@ -83,7 +86,7 @@ export function computeVoyaDeltaPlan(
 
     deltas.push({
       id,
-      name: (current?.name ?? target?.name) ?? id,
+      name: (current?.name ?? target?.name) ?? getFundName(id),
       role: target?.role,
       currentPct,
       targetPct,

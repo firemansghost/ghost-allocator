@@ -26,6 +26,9 @@ This directory contains documentation for the Ghost Allocator repository.
 ### Ghost Sleeves
 - **[ghost-sleeve-overview.md](ghost-sleeve-overview.md)** - Dev-focused explanation of Ghost sleeves, their roles, and how they map to actual funds/ETFs (Schwab vs Voya). Includes where the config lives in code.
 
+### Voya Fund Menu
+- **[voya-menu.md](voya-menu.md)** - Complete listing of all OKC Voya 457 funds with tickers, vehicle types, and canonical IDs. Canonical source is `lib/voyaFunds.ts`.
+
 ## GhostRegime Docs
 
 ### Operations

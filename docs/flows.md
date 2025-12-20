@@ -154,6 +154,7 @@ When editing current Voya mix in combo mode:
 - `buildVoyaImplementation(answers, riskLevel)`: Builds Voya fund mix based on platform choice and complexity preference
 - `getCoreMixForRisk(riskLevel)`: Returns Voya core-fund mix for Voya-only users
 - `getComplementaryMixForRisk(riskLevel)`: Returns defensive Voya mix for Voya + Schwab users
+- **Voya fund menu**: All fund names and IDs come from `lib/voyaFunds.ts`. See [voya-menu.md](voya-menu.md) for the complete list.
 
 ### `lib/voyaDelta.ts`
 - `computeVoyaDeltaPlan(implementation, currentHoldings)`: Computes delta between current and target Voya mix
