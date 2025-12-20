@@ -3,7 +3,7 @@ name: GhostRegime Daily Refresh
 on:
   schedule:
     - cron: "30 3 * * 1-5"  # 3:30 AM UTC, Monday-Friday (after US market close)
-  workflow_dispatch: {}  # Allow manual trigger
+  workflow_dispatch:  # Allow manual trigger
   # NOTE: No push/pull_request triggers - this workflow should only run on schedule or manual dispatch
 
 jobs:
@@ -13,33 +13,29 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Guard: seed file and secrets
+      - name: "Guard - seed file and secrets"
         id: guard
+        shell: bash
+        env:
+          GHOSTREGIME_CRON_SECRET: ${{ secrets.GHOSTREGIME_CRON_SECRET }}
         run: |
-          set -euo pipefail
-          
-          # Check if seed file exists and is not empty
-          SEED_FILE="data/ghostregime/seed/ghostregime_replay_history.csv"
-          if [ ! -f "$SEED_FILE" ]; then
-            echo "::warning::Seed file missing; skipping daily job."
-            echo "skip=true" >> $GITHUB_OUTPUT
-            exit 0
+          SEED="data/ghostregime/seed/ghostregime_replay_history.csv"
+          SKIP="false"
+
+          if [ ! -f "$SEED" ]; then
+            echo "::warning::Seed file missing ($SEED); skipping daily job."
+            SKIP="true"
+          elif [ ! -s "$SEED" ]; then
+            echo "::warning::Seed file empty ($SEED); skipping daily job."
+            SKIP="true"
           fi
-          
-          if [ ! -s "$SEED_FILE" ]; then
-            echo "::warning::Seed file empty; skipping daily job."
-            echo "skip=true" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-          
-          # Check required secret
-          if [ -z "${{ secrets.GHOSTREGIME_CRON_SECRET }}" ]; then
+
+          if [ -z "${GHOSTREGIME_CRON_SECRET:-}" ]; then
             echo "::warning::GHOSTREGIME_CRON_SECRET not set; skipping daily job."
-            echo "skip=true" >> $GITHUB_OUTPUT
-            exit 0
+            SKIP="true"
           fi
-          
-          echo "skip=false" >> $GITHUB_OUTPUT
+
+          echo "skip=$SKIP" >> "$GITHUB_OUTPUT"
 
       - name: Force refresh GhostRegime (persist latest)
         id: refresh
