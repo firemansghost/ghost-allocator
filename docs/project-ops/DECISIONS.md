@@ -24,5 +24,10 @@ Why: Prevents drift, enables validation, supports future expansions.
 ## 2025-12-15 — Builder UX optimized for action, not reading
 Choice: "Start here" strip + Action Plan first; details collapsed by default.
 Why: Firefighters want a checklist, not a whitepaper.
+
+## 2025-12-22 — Define V1 vs V1.1 scope
+Choice: V1 is MVP Foundation; V1.1 is model portfolio validation + GhostRegime visual polish.
+Why: Keeps a stable shipping milestone while allowing iterative refinement.
+Alternatives: "V1 never ends" (rejected)
 ---
 

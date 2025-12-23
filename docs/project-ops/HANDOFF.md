@@ -9,9 +9,9 @@ Ghost Allocator V1 is in a strong place: platform-aware builder flow, Voya fund 
 - Remaining work is mostly: verification, deployment, and deciding the next feature slice.
 
 ## Priority for Next Session
-1) Run CHECKS.md end-to-end and confirm GitHub Actions are green.
-2) Deploy to staging (Vercel) and set NEXT_PUBLIC_SITE_URL.
-3) Collect user feedback from 1–3 coworkers and log it as issues.
+1) Model portfolios: define final set + sleeve weights + ETF examples (spec first)
+2) Build a quick output review checklist across risk bands + platform types
+3) GhostRegime UI polish plan (cards/layout/hierarchy)
 
 ## Open Questions
 - Do we capture Schwab holdings next (like CurrentVoyaForm) or do PWA/perf first?

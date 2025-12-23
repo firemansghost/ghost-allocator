@@ -37,6 +37,11 @@
 - Workflow does not fail on pushes
 - Workflow skips cleanly if seed file or secrets missing
 
+## V1.1 verification
+- Confirm model portfolios render correctly on /models
+- Confirm builder outputs match chosen model definitions
+- Confirm GhostRegime pages have improved visual hierarchy and key info is scannable
+
 ## Known Failure Modes
 - Delta calculations look "wrong" if current holdings don't sum to ~100%
 - Confusion between "Target mix" (what to set) vs "Ghost sleeves" (concept)
