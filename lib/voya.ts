@@ -4,6 +4,7 @@ import type {
   VoyaFundMixItem,
   RiskLevel,
 } from './types';
+import { isHousePreset } from './houseModels';
 import {
   getFundById,
   getFundName,
@@ -49,6 +50,117 @@ function pickTargetDateFund(
 
   // Return canonical name from VOYA_FUNDS
   return getFundName(fundId);
+}
+
+/**
+ * Returns a defensive-only Voya mix for house preset users (Voya+Schwab)
+ * No real assets fund here because Gold is already doing that job on the Schwab side
+ * This avoids "real assets in both places" confusion
+ */
+function getDefensiveOnlyMixForRisk(riskLevel: RiskLevel): VoyaFundMixItem[] {
+  // Dev-time validation: ensure all fund IDs are valid
+  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+    const mix = _getDefensiveOnlyMixForRiskInternal(riskLevel);
+    const errors = validateFundMix(mix);
+    if (errors.length > 0) {
+      console.error('[voya.ts] Invalid fund IDs in defensive-only mix:', errors);
+    }
+    return mix;
+  }
+  return _getDefensiveOnlyMixForRiskInternal(riskLevel);
+}
+
+function _getDefensiveOnlyMixForRiskInternal(riskLevel: RiskLevel): VoyaFundMixItem[] {
+  switch (riskLevel) {
+    case 1: // very conservative / retirement
+      return [
+        {
+          id: 'stable_value_option',
+          name: getFundName('stable_value_option'),
+          role: 'Capital preservation / cash-like',
+          allocationPct: 50,
+        },
+        {
+          id: 'jpmorgan_core_bond',
+          name: getFundName('jpmorgan_core_bond'),
+          role: 'Core bond exposure',
+          allocationPct: 40,
+        },
+        {
+          id: 'pioneer_multi_sector_fixed_income_r1',
+          name: getFundName('pioneer_multi_sector_fixed_income_r1'),
+          role: 'Diversified fixed income',
+          allocationPct: 10,
+        },
+      ];
+
+    case 2: // conservative
+      return [
+        {
+          id: 'stable_value_option',
+          name: getFundName('stable_value_option'),
+          role: 'Capital preservation / cash-like',
+          allocationPct: 40,
+        },
+        {
+          id: 'jpmorgan_core_bond',
+          name: getFundName('jpmorgan_core_bond'),
+          role: 'Core bond exposure',
+          allocationPct: 40,
+        },
+        {
+          id: 'pioneer_multi_sector_fixed_income_r1',
+          name: getFundName('pioneer_multi_sector_fixed_income_r1'),
+          role: 'Diversified fixed income',
+          allocationPct: 20,
+        },
+      ];
+
+    case 4: // aggressive
+    case 5: // very aggressive
+      return [
+        {
+          id: 'jpmorgan_core_bond',
+          name: getFundName('jpmorgan_core_bond'),
+          role: 'Core bond exposure',
+          allocationPct: 50,
+        },
+        {
+          id: 'pioneer_multi_sector_fixed_income_r1',
+          name: getFundName('pioneer_multi_sector_fixed_income_r1'),
+          role: 'Diversified fixed income',
+          allocationPct: 30,
+        },
+        {
+          id: 'stable_value_option',
+          name: getFundName('stable_value_option'),
+          role: 'Capital preservation / cash-like',
+          allocationPct: 20,
+        },
+      ];
+
+    default: // 3 moderate
+      return [
+        {
+          id: 'stable_value_option',
+          name: getFundName('stable_value_option'),
+          role: 'Capital preservation / cash-like',
+          allocationPct: 35,
+        },
+        {
+          id: 'jpmorgan_core_bond',
+          name: getFundName('jpmorgan_core_bond'),
+          role: 'Core bond exposure',
+          allocationPct: 40,
+        },
+        {
+          id: 'pioneer_multi_sector_fixed_income_r1',
+          name: getFundName('pioneer_multi_sector_fixed_income_r1'),
+          role: 'Diversified fixed income',
+          allocationPct: 25,
+        },
+      ];
+  }
 }
 
 /**
@@ -415,7 +527,21 @@ export function buildVoyaImplementation(
     };
   }
 
-  // Voya + Schwab: Schwab handles most of the equity risk; Voya is the safety + inflation bucket.
+  // Voya + Schwab: Check if house preset is selected
+  const preset = answers.portfolioPreset ?? 'standard';
+  const isHouseModel = isHousePreset(preset);
+
+  if (isHouseModel) {
+    // House preset: Voya stays defensive-only (no real assets) because Gold is already on Schwab side
+    return {
+      style: 'core_mix',
+      description:
+        'Because your Schwab preset already includes Gold, the Voya portion stays defensive (stable value + bonds).',
+      mix: getDefensiveOnlyMixForRisk(riskLevel),
+    };
+  }
+
+  // Standard preset: Schwab handles most of the equity risk; Voya is the safety + inflation bucket.
   return {
     style: 'core_mix',
     description:

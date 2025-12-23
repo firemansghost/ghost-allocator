@@ -29,6 +29,9 @@ This directory contains documentation for the Ghost Allocator repository.
 ### Voya Fund Menu
 - **[voya-menu.md](voya-menu.md)** - Complete listing of all OKC Voya 457 funds with tickers, vehicle types, and canonical IDs. Canonical source is `lib/voyaFunds.ts`.
 
+### Model Portfolios
+- **[model-portfolios.md](model-portfolios.md)** - Specification for model portfolios (risk level → sleeve allocations). Single source of truth for target allocations. Code config is in `lib/modelPortfolios.ts`.
+
 ## GhostRegime Docs
 
 ### Operations

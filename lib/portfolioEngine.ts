@@ -5,8 +5,10 @@ import type {
   ExampleETF,
   RegimeScenario,
   PlatformSplit,
+  Sleeve,
 } from './types';
-import { modelPortfolios, exampleETFs } from './sleeves';
+import { exampleETFs, sleeveDefinitions } from './sleeves';
+import { MODEL_PORTFOLIOS, RISK_TO_MODEL } from './modelPortfolios';
 import { buildVoyaImplementation } from './voya';
 
 /**
@@ -69,26 +71,39 @@ export function computeRiskLevel(answers: QuestionnaireAnswers): RiskLevel {
 /**
  * Selects a model portfolio based on risk level and regime scenario
  * Defaults to 'stagflationary' scenario
+ * 
+ * TODO: In the future, scenario could influence the selection (e.g., different allocations for stagflationary vs deflationary regimes)
  */
 export function selectModelPortfolio(
   riskLevel: RiskLevel,
   scenario: RegimeScenario = 'stagflationary'
 ): ModelPortfolio {
-  // For now, we map risk levels directly to portfolios
-  // In the future, scenario could influence the selection
-  if (riskLevel <= 1) {
-    return modelPortfolios.find((p) => p.id === 'conservative')!;
-  } else if (riskLevel === 2) {
-    // Check if user is retired to use retirement portfolio
-    // For now, default to conservative for level 2
-    return modelPortfolios.find((p) => p.id === 'conservative')!;
-  } else if (riskLevel === 3) {
-    return modelPortfolios.find((p) => p.id === 'moderate')!;
-  } else if (riskLevel >= 4) {
-    return modelPortfolios.find((p) => p.id === 'aggressive')!;
-  }
-  // Default fallback
-  return modelPortfolios.find((p) => p.id === 'moderate')!;
+  // Map risk level to model ID using the single source of truth
+  const modelId = RISK_TO_MODEL[riskLevel];
+  const spec = MODEL_PORTFOLIOS[modelId];
+
+  // Convert ModelPortfolioSpec to ModelPortfolio format
+  // Build sleeves array from spec.sleeves Record
+  const sleeves: Sleeve[] = Object.entries(spec.sleeves)
+    .map(([sleeveId, weight]) => {
+      const sleeveDef = sleeveDefinitions[sleeveId];
+      if (!sleeveDef) {
+        throw new Error(`Sleeve definition not found for ID: ${sleeveId}`);
+      }
+      return {
+        ...sleeveDef,
+        weight,
+      };
+    })
+    .filter((s) => s.weight > 0); // Only include sleeves with non-zero weight
+
+  return {
+    id: spec.id,
+    name: spec.name,
+    description: spec.description,
+    riskLevel: spec.riskLevel,
+    sleeves,
+  };
 }
 
 /**

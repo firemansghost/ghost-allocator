@@ -112,72 +112,10 @@ export const exampleETFs: ExampleETF[] = [
   },
 ];
 
-export const modelPortfolios: ModelPortfolio[] = [
-  {
-    id: 'conservative',
-    name: 'Conservative',
-    description: 'Lower risk, higher allocation to defensive assets and cash. Suitable for those near retirement or with low risk tolerance.',
-    riskLevel: 1,
-    sleeves: [
-      { ...sleeveDefinitions.core_equity, weight: 0.20 },
-      { ...sleeveDefinitions.convex_equity, weight: 0.10 },
-      { ...sleeveDefinitions.real_assets, weight: 0.15 },
-      { ...sleeveDefinitions.t_bills, weight: 0.20 },
-      { ...sleeveDefinitions.core_bonds, weight: 0.15 },
-      { ...sleeveDefinitions.managed_futures, weight: 0.10 },
-      { ...sleeveDefinitions.rate_hedge, weight: 0.05 },
-      { ...sleeveDefinitions.cash, weight: 0.05 },
-    ],
-  },
-  {
-    id: 'moderate',
-    name: 'Moderate',
-    description: 'Balanced allocation across asset classes. Designed for investors with medium-term horizons and moderate risk tolerance.',
-    riskLevel: 3,
-    sleeves: [
-      { ...sleeveDefinitions.core_equity, weight: 0.30 },
-      { ...sleeveDefinitions.convex_equity, weight: 0.15 },
-      { ...sleeveDefinitions.real_assets, weight: 0.15 },
-      { ...sleeveDefinitions.t_bills, weight: 0.10 },
-      { ...sleeveDefinitions.core_bonds, weight: 0.10 },
-      { ...sleeveDefinitions.managed_futures, weight: 0.12 },
-      { ...sleeveDefinitions.rate_hedge, weight: 0.05 },
-      { ...sleeveDefinitions.cash, weight: 0.03 },
-    ],
-  },
-  {
-    id: 'aggressive',
-    name: 'Aggressive',
-    description: 'Higher equity allocation with strategic use of convexity and real assets. For investors with longer horizons and higher risk tolerance.',
-    riskLevel: 5,
-    sleeves: [
-      { ...sleeveDefinitions.core_equity, weight: 0.35 },
-      { ...sleeveDefinitions.convex_equity, weight: 0.20 },
-      { ...sleeveDefinitions.real_assets, weight: 0.15 },
-      { ...sleeveDefinitions.t_bills, weight: 0.05 },
-      { ...sleeveDefinitions.core_bonds, weight: 0.05 },
-      { ...sleeveDefinitions.managed_futures, weight: 0.15 },
-      { ...sleeveDefinitions.rate_hedge, weight: 0.03 },
-      { ...sleeveDefinitions.cash, weight: 0.02 },
-    ],
-  },
-  {
-    id: 'retirement',
-    name: 'Retirement / Capital Preservation',
-    description: 'Designed for retirees focused on capital preservation with income generation. Higher allocation to defensive assets and income-producing sleeves.',
-    riskLevel: 2,
-    sleeves: [
-      { ...sleeveDefinitions.core_equity, weight: 0.15 },
-      { ...sleeveDefinitions.convex_equity, weight: 0.10 },
-      { ...sleeveDefinitions.real_assets, weight: 0.15 },
-      { ...sleeveDefinitions.t_bills, weight: 0.25 },
-      { ...sleeveDefinitions.core_bonds, weight: 0.20 },
-      { ...sleeveDefinitions.managed_futures, weight: 0.08 },
-      { ...sleeveDefinitions.rate_hedge, weight: 0.05 },
-      { ...sleeveDefinitions.cash, weight: 0.07 },
-    ],
-  },
-];
+// Model portfolios have been moved to lib/modelPortfolios.ts
+// This file now only contains sleeve definitions and example ETFs.
+
+
 
 
 

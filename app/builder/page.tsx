@@ -16,6 +16,7 @@ import {
   computeVoyaDeltaPlan,
   getVoyaDeltaSummary,
 } from '@/lib/portfolioEngine';
+import { getHouseModel, isHousePreset } from '@/lib/houseModels';
 import AllocationChart from '@/components/AllocationChart';
 import SleeveBreakdown from '@/components/SleeveBreakdown';
 import { GlassCard } from '@/components/GlassCard';
@@ -95,6 +96,8 @@ export default function Builder() {
   const { answers, riskLevel } = result;
   const platformSplit = computePlatformSplit(answers);
   const voyaImplementation = buildVoyaImplementation(answers, riskLevel);
+  const preset = answers.portfolioPreset ?? 'standard';
+  const isHouseModel = isHousePreset(preset);
   const etfsBySleeve: Record<string, ExampleETF[]> = {};
   for (const etf of etfs) {
     if (!etfsBySleeve[etf.sleeveId]) {
@@ -258,8 +261,9 @@ export default function Builder() {
                 Step 3 – Inside Schwab
               </h3>
               <p className="text-xs text-zinc-300 leading-relaxed">
-                Use the Ghost ETF lineup for your risk band (see the &quot;Schwab ETF sleeve
-                lineup&quot; card below). Schwab holds most of the equity risk.
+                {isHouseModel
+                  ? `Buy the House Model lineup below (S&P + Gold + Bitcoin). See the "Schwab house model lineup" card.`
+                  : `Use the Ghost ETF lineup for your risk band (see the "Schwab ETF sleeve lineup" card below). Schwab holds most of the equity risk.`}
               </p>
             </div>
             <div>
@@ -631,57 +635,100 @@ export default function Builder() {
       {/* Schwab ETF lineup for Voya + Schwab */}
       {platformSplit.platform === 'voya_and_schwab' && (
         <>
-          {/* Schwab ETF lineup */}
-          <GlassCard className="p-4 sm:p-5 space-y-3">
-            <h2 className="text-sm font-semibold text-zinc-50">
-              Schwab ETF sleeve lineup ({platformSplit.targetSchwabPct}% of 457)
-            </h2>
-            <p className="text-xs text-zinc-300 leading-relaxed">
-              These example ETFs would apply to the Schwab portion of your account. This is for
-              illustration only, not a recommendation.
-            </p>
-            <p className="text-[11px] text-zinc-400 mt-1">
-              Pro tip: Most folks rebalance into Schwab monthly or quarterly, not every paycheck.
-              Pick a cadence you&apos;ll actually stick with.
-            </p>
-            <div className="mt-2 space-y-1 text-xs text-zinc-300 leading-relaxed">
-              {portfolio.sleeves
-                .filter((s) => s.weight > 0)
-                .map((sleeve) => {
-                  const sleeveEtfs = etfsBySleeve[sleeve.id] || [];
-                  if (sleeveEtfs.length === 0) return null;
-
-                  return (
-                    <div
-                      key={sleeve.id}
-                      className="rounded-lg border border-zinc-800 bg-black/40 p-4"
-                    >
-                      <h3 className="text-sm font-semibold mb-3">
-                        {sleeve.name} ({formatPercent(sleeve.weight)})
-                      </h3>
-                      <div className="space-y-3">
-                        {sleeveEtfs.map((etf, idx) => (
-                          <div
-                            key={idx}
-                            className="pl-3 border-l-2 border-zinc-700"
-                          >
-                            <div className="flex items-baseline gap-2 mb-1">
-                              <span className="font-mono text-xs font-semibold">
-                                {etf.ticker}
-                              </span>
-                              <span className="text-xs text-zinc-400">{etf.name}</span>
-                            </div>
-                            <p className="text-xs text-zinc-300 leading-relaxed">
-                              {etf.description}
-                            </p>
-                          </div>
-                        ))}
+          {isHouseModel ? (
+            /* House Model lineup */
+            <GlassCard className="p-4 sm:p-5 space-y-3">
+              <h2 className="text-sm font-semibold text-zinc-50">
+                Schwab house model lineup ({platformSplit.targetSchwabPct}% of 457)
+              </h2>
+              <p className="text-xs text-zinc-300 leading-relaxed">
+                This is a house preset. Percentages are of your Schwab slice. This is for
+                illustration only, not a recommendation.
+              </p>
+              <p className="text-[11px] text-zinc-400 mt-1">
+                Pro tip: Most folks rebalance into Schwab monthly or quarterly, not every paycheck.
+                Pick a cadence you&apos;ll actually stick with.
+              </p>
+              <div className="mt-2 space-y-2 text-xs text-zinc-300 leading-relaxed">
+                {getHouseModel(preset).allocations.map((alloc) => (
+                  <div
+                    key={alloc.id}
+                    className="rounded-lg border border-zinc-800 bg-black/40 p-4"
+                  >
+                    <div className="flex items-baseline justify-between mb-2">
+                      <div>
+                        <span className="font-mono text-sm font-semibold">
+                          {alloc.ticker}
+                        </span>
+                        <span className="text-xs text-zinc-400 ml-2">{alloc.label}</span>
                       </div>
+                      <span className="text-sm font-semibold text-amber-300">
+                        {alloc.pct}%
+                      </span>
                     </div>
-                  );
-                })}
-            </div>
-          </GlassCard>
+                    {alloc.notes && (
+                      <p className="text-[11px] text-zinc-400 mt-1">{alloc.notes}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <p className="text-[11px] text-zinc-400 mt-3">
+                Want the sleeve-based version instead? Change preset back to Standard in onboarding.
+              </p>
+            </GlassCard>
+          ) : (
+            /* Standard Schwab ETF lineup */
+            <GlassCard className="p-4 sm:p-5 space-y-3">
+              <h2 className="text-sm font-semibold text-zinc-50">
+                Schwab ETF sleeve lineup ({platformSplit.targetSchwabPct}% of 457)
+              </h2>
+              <p className="text-xs text-zinc-300 leading-relaxed">
+                These example ETFs would apply to the Schwab portion of your account. This is for
+                illustration only, not a recommendation.
+              </p>
+              <p className="text-[11px] text-zinc-400 mt-1">
+                Pro tip: Most folks rebalance into Schwab monthly or quarterly, not every paycheck.
+                Pick a cadence you&apos;ll actually stick with.
+              </p>
+              <div className="mt-2 space-y-1 text-xs text-zinc-300 leading-relaxed">
+                {portfolio.sleeves
+                  .filter((s) => s.weight > 0)
+                  .map((sleeve) => {
+                    const sleeveEtfs = etfsBySleeve[sleeve.id] || [];
+                    if (sleeveEtfs.length === 0) return null;
+
+                    return (
+                      <div
+                        key={sleeve.id}
+                        className="rounded-lg border border-zinc-800 bg-black/40 p-4"
+                      >
+                        <h3 className="text-sm font-semibold mb-3">
+                          {sleeve.name} ({formatPercent(sleeve.weight)})
+                        </h3>
+                        <div className="space-y-3">
+                          {sleeveEtfs.map((etf, idx) => (
+                            <div
+                              key={idx}
+                              className="pl-3 border-l-2 border-zinc-700"
+                            >
+                              <div className="flex items-baseline gap-2 mb-1">
+                                <span className="font-mono text-xs font-semibold">
+                                  {etf.ticker}
+                                </span>
+                                <span className="text-xs text-zinc-400">{etf.name}</span>
+                              </div>
+                              <p className="text-xs text-zinc-300 leading-relaxed">
+                                {etf.description}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            </GlassCard>
+          )}
         </>
       )}
 

@@ -185,3 +185,23 @@ The `/models` page displays five model portfolio templates that users can select
 
 The template definitions live in `lib/modelTemplates.ts` and are the single source of truth for the `/models` page UI.
 
+## House Presets (Schwab)
+
+House presets are an alternative to the standard Ghost sleeve-based approach for users with Schwab BrokerageLink access. They replace the Schwab ETF sleeve lineup with a simplified house model allocation.
+
+### Standard vs House Preset
+
+- **Standard preset**: Uses Ghost sleeves (core_equity, convex_equity, real_assets, etc.) mapped to example ETFs. This is the default approach.
+- **House presets**: Replace the Schwab lineup with a fixed allocation (S&P + Gold + Bitcoin). Currently available:
+  - **GhostRegime 60/30/10**: 60% SPYM (S&P 500), 30% GLDM (Gold), 10% FBTC (Bitcoin)
+  - **GhostRegime 60/25/15**: 60% SPYM (S&P 500), 25% GLDM (Gold), 15% FBTC (Bitcoin)
+
+### Important Notes
+
+- **House presets are Schwab-only**: They require `platform === "voya_and_schwab"`. Voya-only users cannot select house presets.
+- **Percentages are of Schwab slice**: The allocations (60%, 30%, 10%) are percentages of the Schwab portion of the 457, not the total 457 balance.
+- **Voya defensive-only**: When a house preset is selected, the Voya mix becomes defensive-only (stable value + bonds) with no real assets fund, because Gold is already handling inflation protection on the Schwab side. This avoids "real assets in both places" confusion.
+- **Standard behavior unchanged**: When Standard preset is selected, all existing behavior remains unchanged.
+
+The house model definitions live in `lib/houseModels.ts` and are the single source of truth for house preset allocations.
+

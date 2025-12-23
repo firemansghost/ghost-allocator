@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "tsx lib/ghostregime/__tests__/regimeCore.test.ts"
+    "test": "tsx lib/ghostregime/__tests__/regimeCore.test.ts",
+    "audit:models": "tsx scripts/audit-models.ts"
   },
   "repository": {
     "type": "git",

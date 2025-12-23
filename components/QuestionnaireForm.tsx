@@ -16,6 +16,7 @@ export default function QuestionnaireForm() {
     incomeStability: 'medium',
     complexityPreference: 'simple',
     platform: 'voya_only',
+    portfolioPreset: 'standard',
     hasPension: false,
     pensionCoverage: 'none',
   });
@@ -71,11 +72,13 @@ export default function QuestionnaireForm() {
 
     // Ensure pensionCoverage is set to 'none' if hasPension is false
     // Clean up Schwab fields if platform is voya_only
+    // Reset portfolio preset to standard if platform is voya_only
     const finalFormData = {
       ...formData,
       pensionCoverage: formData.hasPension ? formData.pensionCoverage : 'none',
       currentSchwabPct: formData.platform === 'voya_and_schwab' ? formData.currentSchwabPct : undefined,
       schwabPreference: formData.platform === 'voya_and_schwab' ? formData.schwabPreference : undefined,
+      portfolioPreset: formData.platform === 'voya_and_schwab' ? (formData.portfolioPreset ?? 'standard') : 'standard',
     } as QuestionnaireAnswers;
 
     const answers = finalFormData;
@@ -440,6 +443,82 @@ export default function QuestionnaireForm() {
               </p>
             )}
           </div>
+        )}
+      </div>
+
+      {/* Portfolio Preset Selection */}
+      <div className="space-y-2">
+        <p className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">
+          Portfolio preset
+        </p>
+        <div className="space-y-1.5 text-sm text-zinc-200">
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="portfolioPreset"
+              value="standard"
+              checked={(formData.portfolioPreset ?? 'standard') === 'standard'}
+              onChange={() =>
+                setFormData({
+                  ...formData,
+                  portfolioPreset: 'standard',
+                })
+              }
+              className="h-3.5 w-3.5 accent-amber-400"
+            />
+            <span>Standard (Ghost sleeves)</span>
+          </label>
+          <label
+            className={`flex items-center gap-2 ${
+              formData.platform !== 'voya_and_schwab'
+                ? 'opacity-50 cursor-not-allowed'
+                : ''
+            }`}
+          >
+            <input
+              type="radio"
+              name="portfolioPreset"
+              value="ghostregime_60_30_10"
+              checked={formData.portfolioPreset === 'ghostregime_60_30_10'}
+              onChange={() =>
+                setFormData({
+                  ...formData,
+                  portfolioPreset: 'ghostregime_60_30_10',
+                })
+              }
+              disabled={formData.platform !== 'voya_and_schwab'}
+              className="h-3.5 w-3.5 accent-amber-400"
+            />
+            <span>House Model: GhostRegime 60/30/10</span>
+          </label>
+          <label
+            className={`flex items-center gap-2 ${
+              formData.platform !== 'voya_and_schwab'
+                ? 'opacity-50 cursor-not-allowed'
+                : ''
+            }`}
+          >
+            <input
+              type="radio"
+              name="portfolioPreset"
+              value="ghostregime_60_25_15"
+              checked={formData.portfolioPreset === 'ghostregime_60_25_15'}
+              onChange={() =>
+                setFormData({
+                  ...formData,
+                  portfolioPreset: 'ghostregime_60_25_15',
+                })
+              }
+              disabled={formData.platform !== 'voya_and_schwab'}
+              className="h-3.5 w-3.5 accent-amber-400"
+            />
+            <span>House Model: GhostRegime 60/25/15 (optional)</span>
+          </label>
+        </div>
+        {formData.platform !== 'voya_and_schwab' && (
+          <p className="text-xs text-zinc-400 mt-1">
+            House models require Schwab (or another brokerage).
+          </p>
         )}
       </div>
 

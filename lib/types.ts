@@ -10,6 +10,11 @@ export type PensionCoverage =
 
 export type PlatformType = 'voya_only' | 'voya_and_schwab';
 
+export type PortfolioPreset =
+  | 'standard'
+  | 'ghostregime_60_30_10'
+  | 'ghostregime_60_25_15';
+
 export type SleeveId =
   | 'core_equity'
   | 'convex_equity'
@@ -39,6 +44,7 @@ export interface QuestionnaireAnswers {
   platform: PlatformType;
   currentSchwabPct?: number; // 0–75, only relevant when platform === "voya_and_schwab"
   schwabPreference?: 'stay_low' | 'use_full_75';
+  portfolioPreset?: PortfolioPreset; // default to "standard"
   currentVoyaHoldings?: CurrentVoyaHolding[];
 }
 
