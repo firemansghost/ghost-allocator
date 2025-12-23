@@ -170,18 +170,18 @@ When reviewing, focus on whether the implementation **achieves the blueprint's i
 
 ## UI Templates
 
-The `/models` page displays five model portfolio templates that users can select (or will be able to select):
+The `/models` page displays five model portfolio templates:
 
-1. **Conservative** — Lower risk, steady growth focus
-2. **Balanced** — Moderate risk with growth potential
-3. **Growth** — Higher risk, higher growth potential
-4. **Aggressive** — Maximum growth focus
-5. **GhostRegime 60/30/10** — Flagship template: 60% stocks, 30% gold, 10% BTC with regime-based scaling
+1. **Conservative** — Lower risk, steady growth focus (Coming Soon)
+2. **Balanced** — Moderate risk with growth potential (Coming Soon)
+3. **Growth** — Higher risk, higher growth potential (Coming Soon)
+4. **Aggressive** — Maximum growth focus (Coming Soon)
+5. **GhostRegime 60/30/10** — Flagship template: 60% stocks, 30% gold, 10% BTC with regime-based scaling (**Live**)
 
-### Template Purpose
+### Template Status
 
-- **GhostRegime 60/30/10** is the house template and explicitly uses Gold and Bitcoin allocations with regime-based scaling. Example implementation in Schwab: SPYM (stocks), GLDM (gold), FBTC (bitcoin).
-- **Other templates** (Conservative, Balanced, Growth, Aggressive) are risk-based and do **NOT** require Gold/BTC unless enabled later. These templates use the standard Ghost sleeve allocations (core_equity, convex_equity, real_assets, etc.) and can be implemented using Voya funds and/or Schwab ETFs.
+- **GhostRegime 60/30/10** is **Live** and available for use. It is the house template and explicitly uses Gold and Bitcoin allocations with regime-based scaling. Example implementation in Schwab: SPYM (stocks), GLDM (gold), FBTC (bitcoin). Requires Schwab/BrokerageLink.
+- **Other templates** (Conservative, Balanced, Growth, Aggressive) are **Coming Soon**. These templates are risk-based and do **NOT** require Gold/BTC unless enabled later. These templates use the standard Ghost sleeve allocations (core_equity, convex_equity, real_assets, etc.) and can be implemented using Voya funds and/or Schwab ETFs.
 
 The template definitions live in `lib/modelTemplates.ts` and are the single source of truth for the `/models` page UI.
 

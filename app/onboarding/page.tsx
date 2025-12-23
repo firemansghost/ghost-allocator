@@ -2,6 +2,7 @@ import QuestionnaireForm from '@/components/QuestionnaireForm';
 import { GlassCard } from '@/components/GlassCard';
 import { buildMetadata } from '@/lib/seo';
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 
 export const metadata: Metadata = buildMetadata({
   title: 'Build Your Portfolio - Ghost Allocator',
@@ -21,7 +22,9 @@ export default function OnboardingPage() {
           </p>
         </header>
         <GlassCard className="p-6 sm:p-7">
-          <QuestionnaireForm />
+          <Suspense fallback={<div className="text-sm text-zinc-300">Loading...</div>}>
+            <QuestionnaireForm />
+          </Suspense>
         </GlassCard>
       </div>
     </div>

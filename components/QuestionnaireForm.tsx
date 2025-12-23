@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, FormEvent, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import type { QuestionnaireAnswers } from '@/lib/types';
 import { computeRiskLevel } from '@/lib/portfolioEngine';
 import type { QuestionnaireResult } from '@/lib/types';
@@ -10,6 +10,7 @@ const STORAGE_KEY = 'ghostAllocatorQuestionnaire';
 
 export default function QuestionnaireForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [formData, setFormData] = useState<Partial<QuestionnaireAnswers>>({
     drawdownTolerance: 'medium',
     behaviorInCrash: 'hold',
@@ -21,6 +22,18 @@ export default function QuestionnaireForm() {
     pensionCoverage: 'none',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Read template query param and preselect preset if valid
+  useEffect(() => {
+    const template = searchParams.get('template');
+    // Map template IDs (with hyphens) to portfolio preset IDs (with underscores)
+    if (template === 'ghostregime-60-30-10') {
+      setFormData((prev) => ({
+        ...prev,
+        portfolioPreset: 'ghostregime_60_30_10',
+      }));
+    }
+  }, [searchParams]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
