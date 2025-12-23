@@ -205,3 +205,18 @@ House presets are an alternative to the standard Ghost sleeve-based approach for
 
 The house model definitions live in `lib/houseModels.ts` and are the single source of truth for house preset allocations.
 
+## Review Harness
+
+A lightweight output review harness is available for internal QA and sanity-checking builder outputs. It renders deterministic fixtures and computed outputs in one place.
+
+**Enable via environment variable:**
+- Set `NEXT_PUBLIC_ENABLE_REVIEW_HARNESS="true"` in your `.env.local` file
+- Navigate to `/review/builder` to view the review harness
+
+**What it shows:**
+- Fixtures for Voya-only + Standard, Voya+Schwab + Standard, and Voya+Schwab + House presets
+- Computed outputs: Voya mix, Schwab lineup, platform splits
+- Assertions: percent totals, house preset ticker validation, Voya defensive-only check for house presets
+
+**Fixtures are defined in:** `lib/reviewFixtures.ts`
+

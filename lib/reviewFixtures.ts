@@ -1,0 +1,125 @@
+/**
+ * Review Fixtures
+ * Deterministic test cases for builder output review harness
+ */
+
+import type { QuestionnaireAnswers, RiskLevel } from './types';
+
+export interface ReviewFixture {
+  id: string;
+  title: string;
+  notes?: string;
+  answers: QuestionnaireAnswers;
+  expectedRiskLevel: RiskLevel;
+}
+
+/**
+ * Review Fixtures
+ * These are deterministic test cases used by the review harness
+ */
+export const REVIEW_FIXTURES: ReviewFixture[] = [
+  {
+    id: 'voya-only-standard-moderate',
+    title: 'Voya-only + Standard + Moderate Risk',
+    notes: 'Baseline: Voya-only path with standard preset',
+    answers: {
+      age: 45,
+      yearsToGoal: 20,
+      isRetired: false,
+      drawdownTolerance: 'medium',
+      behaviorInCrash: 'hold',
+      incomeStability: 'medium',
+      complexityPreference: 'moderate',
+      hasPension: false,
+      pensionCoverage: 'none',
+      platform: 'voya_only',
+      portfolioPreset: 'standard',
+    },
+    expectedRiskLevel: 3,
+  },
+  {
+    id: 'voya-schwab-standard-moderate',
+    title: 'Voya+Schwab + Standard + Moderate Risk',
+    notes: 'Baseline: Voya+Schwab path with standard preset',
+    answers: {
+      age: 45,
+      yearsToGoal: 20,
+      isRetired: false,
+      drawdownTolerance: 'medium',
+      behaviorInCrash: 'hold',
+      incomeStability: 'medium',
+      complexityPreference: 'moderate',
+      hasPension: false,
+      pensionCoverage: 'none',
+      platform: 'voya_and_schwab',
+      currentSchwabPct: 50,
+      schwabPreference: 'stay_low',
+      portfolioPreset: 'standard',
+    },
+    expectedRiskLevel: 3,
+  },
+  {
+    id: 'voya-schwab-house-60-30-10-moderate',
+    title: 'Voya+Schwab + House 60/30/10 + Moderate Risk',
+    notes: 'House preset: 60% SPYM, 30% GLDM, 10% FBTC',
+    answers: {
+      age: 45,
+      yearsToGoal: 20,
+      isRetired: false,
+      drawdownTolerance: 'medium',
+      behaviorInCrash: 'hold',
+      incomeStability: 'medium',
+      complexityPreference: 'moderate',
+      hasPension: false,
+      pensionCoverage: 'none',
+      platform: 'voya_and_schwab',
+      currentSchwabPct: 50,
+      schwabPreference: 'stay_low',
+      portfolioPreset: 'ghostregime_60_30_10',
+    },
+    expectedRiskLevel: 3,
+  },
+  {
+    id: 'voya-schwab-house-60-25-15-moderate',
+    title: 'Voya+Schwab + House 60/25/15 + Moderate Risk',
+    notes: 'House preset: 60% SPYM, 25% GLDM, 15% FBTC',
+    answers: {
+      age: 45,
+      yearsToGoal: 20,
+      isRetired: false,
+      drawdownTolerance: 'medium',
+      behaviorInCrash: 'hold',
+      incomeStability: 'medium',
+      complexityPreference: 'moderate',
+      hasPension: false,
+      pensionCoverage: 'none',
+      platform: 'voya_and_schwab',
+      currentSchwabPct: 50,
+      schwabPreference: 'stay_low',
+      portfolioPreset: 'ghostregime_60_25_15',
+    },
+    expectedRiskLevel: 3,
+  },
+  {
+    id: 'voya-schwab-house-60-30-10-aggressive',
+    title: 'Voya+Schwab + House 60/30/10 + Aggressive Risk',
+    notes: 'House preset with higher risk level (should affect Voya defensive mix)',
+    answers: {
+      age: 35,
+      yearsToGoal: 30,
+      isRetired: false,
+      drawdownTolerance: 'high',
+      behaviorInCrash: 'buy_more',
+      incomeStability: 'high',
+      complexityPreference: 'advanced',
+      hasPension: false,
+      pensionCoverage: 'none',
+      platform: 'voya_and_schwab',
+      currentSchwabPct: 60,
+      schwabPreference: 'use_full_75',
+      portfolioPreset: 'ghostregime_60_30_10',
+    },
+    expectedRiskLevel: 5,
+  },
+];
+
