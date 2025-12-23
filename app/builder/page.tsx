@@ -10,14 +10,13 @@ import type {
 } from '@/lib/types';
 import {
   selectModelPortfolio,
-  suggestExampleEtfs,
   computePlatformSplit,
   buildVoyaImplementation,
   computeVoyaDeltaPlan,
   getVoyaDeltaSummary,
 } from '@/lib/portfolioEngine';
-import { getHouseModel, isHousePreset } from '@/lib/houseModels';
-import { applySchwabTilt } from '@/lib/schwabTilt';
+import { getHouseModel, getHouseModelWithWrappers, isHousePreset } from '@/lib/houseModels';
+import { getStandardSchwabLineup, willShowGoldBtc } from '@/lib/schwabLineups';
 import AllocationChart from '@/components/AllocationChart';
 import SleeveBreakdown from '@/components/SleeveBreakdown';
 import { GlassCard } from '@/components/GlassCard';
@@ -46,7 +45,6 @@ const riskDescriptions: Record<number, string> = {
 export default function Builder() {
   const [result, setResult] = useState<QuestionnaireResult | null>(null);
   const [portfolio, setPortfolio] = useState<ModelPortfolio | null>(null);
-  const [etfs, setEtfs] = useState<ExampleETF[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [currentVoyaHoldings, setCurrentVoyaHoldings] = useState<
     CurrentVoyaHolding[] | undefined
@@ -67,8 +65,6 @@ export default function Builder() {
       setCurrentVoyaHoldings(data.answers.currentVoyaHoldings);
       const modelPortfolio = selectModelPortfolio(data.riskLevel);
       setPortfolio(modelPortfolio);
-      const suggestedEtfs = suggestExampleEtfs(modelPortfolio);
-      setEtfs(suggestedEtfs);
     } catch (err) {
       setError('Invalid questionnaire data');
     }
@@ -100,20 +96,21 @@ export default function Builder() {
   const preset = answers.portfolioPreset ?? 'standard';
   const isHouseModel = isHousePreset(preset);
   const tilt = answers.goldBtcTilt ?? 'none';
-  const etfsBySleeve: Record<string, ExampleETF[]> = {};
-  for (const etf of etfs) {
-    if (!etfsBySleeve[etf.sleeveId]) {
-      etfsBySleeve[etf.sleeveId] = [];
-    }
-    etfsBySleeve[etf.sleeveId].push(etf);
-  }
+  const lineupStyle = answers.schwabLineupStyle ?? 'standard';
+  const goldInstrument = answers.goldInstrument ?? 'gldm';
+  const btcInstrument = answers.btcInstrument ?? 'fbtc';
 
-  // Apply tilt to Standard preset Schwab lineup if enabled
-  const tiltedSchwabLineup =
-    platformSplit.platform === 'voya_and_schwab' &&
-    !isHouseModel &&
-    tilt !== 'none'
-      ? applySchwabTilt(portfolio.sleeves, etfsBySleeve, tilt)
+  // Get Standard preset Schwab lineup (with tilt and lineup style applied)
+  const standardSchwabLineup =
+    platformSplit.platform === 'voya_and_schwab' && !isHouseModel
+      ? getStandardSchwabLineup(
+          portfolio.sleeves,
+          riskLevel,
+          lineupStyle,
+          goldInstrument,
+          btcInstrument,
+          tilt
+        )
       : null;
 
   // Compute delta plan for current vs target Voya mix
@@ -660,7 +657,7 @@ export default function Builder() {
                 Pick a cadence you&apos;ll actually stick with.
               </p>
               <div className="mt-2 space-y-2 text-xs text-zinc-300 leading-relaxed">
-                {getHouseModel(preset).allocations.map((alloc) => (
+                {getHouseModelWithWrappers(preset, goldInstrument, btcInstrument).map((alloc) => (
                   <div
                     key={alloc.id}
                     className="rounded-lg border border-zinc-800 bg-black/40 p-4"
@@ -682,6 +679,13 @@ export default function Builder() {
                   </div>
                 ))}
               </div>
+              {(goldInstrument === 'ygld' || btcInstrument === 'maxi') && (
+                <p className="text-[11px] text-amber-300 mt-2">
+                  Using income wrappers: {goldInstrument === 'ygld' ? 'YGLD' : ''}
+                  {goldInstrument === 'ygld' && btcInstrument === 'maxi' ? ' / ' : ''}
+                  {btcInstrument === 'maxi' ? 'MAXI' : ''}
+                </p>
+              )}
               <p className="text-[11px] text-zinc-400 mt-3">
                 Want the sleeve-based version instead? Change preset back to Standard in onboarding.
               </p>
@@ -689,16 +693,31 @@ export default function Builder() {
           ) : (
             /* Standard Schwab ETF lineup */
             <GlassCard className="p-4 sm:p-5 space-y-3">
-              <h2 className="text-sm font-semibold text-zinc-50">
-                Schwab ETF sleeve lineup ({platformSplit.targetSchwabPct}% of 457)
-              </h2>
+              <div className="flex items-center gap-2 mb-1">
+                <h2 className="text-sm font-semibold text-zinc-50">
+                  Schwab ETF sleeve lineup ({platformSplit.targetSchwabPct}% of 457)
+                </h2>
+                {lineupStyle === 'simplify' && (
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                    Simplify mode
+                  </span>
+                )}
+              </div>
               <p className="text-xs text-zinc-300 leading-relaxed">
                 These example ETFs would apply to the Schwab portion of your account. This is for
                 illustration only, not a recommendation.
               </p>
               {tilt !== 'none' && (
                 <p className="text-[11px] text-amber-300 mt-1">
-                  Includes Gold + Bitcoin tilt (GLDM/FBTC).
+                  Includes Gold + Bitcoin tilt.
+                </p>
+              )}
+              {(goldInstrument === 'ygld' || btcInstrument === 'maxi') && (
+                <p className="text-[11px] text-amber-300 mt-1">
+                  Using income wrappers:{' '}
+                  {goldInstrument === 'ygld' ? 'YGLD' : ''}
+                  {goldInstrument === 'ygld' && btcInstrument === 'maxi' ? ' / ' : ''}
+                  {btcInstrument === 'maxi' ? 'MAXI' : ''}
                 </p>
               )}
               <p className="text-[11px] text-zinc-400 mt-1">
@@ -706,99 +725,59 @@ export default function Builder() {
                 Pick a cadence you&apos;ll actually stick with.
               </p>
               <div className="mt-2 space-y-1 text-xs text-zinc-300 leading-relaxed">
-                {tiltedSchwabLineup ? (
-                  // Render tilted lineup
-                  tiltedSchwabLineup.map((item) => {
-                    if (item.type === 'tilt') {
-                      return (
-                        <div
-                          key={item.id}
-                          className="rounded-lg border border-amber-400/30 bg-amber-400/10 p-4"
-                        >
-                          <div className="flex items-baseline justify-between mb-2">
-                            <div>
-                              <span className="font-mono text-sm font-semibold">
-                                {item.ticker}
-                              </span>
-                              <span className="text-xs text-zinc-400 ml-2">{item.label}</span>
-                            </div>
-                            <span className="text-sm font-semibold text-amber-300">
-                              {item.weight.toFixed(1)}%
+                {standardSchwabLineup?.map((item) => {
+                  if (item.type === 'tilt') {
+                    return (
+                      <div
+                        key={item.id}
+                        className="rounded-lg border border-amber-400/30 bg-amber-400/10 p-4"
+                      >
+                        <div className="flex items-baseline justify-between mb-2">
+                          <div>
+                            <span className="font-mono text-sm font-semibold">
+                              {item.ticker}
                             </span>
+                            <span className="text-xs text-zinc-400 ml-2">{item.label}</span>
                           </div>
+                          <span className="text-sm font-semibold text-amber-300">
+                            {item.weight.toFixed(1)}%
+                          </span>
                         </div>
-                      );
-                    } else {
-                      // Render sleeve item
-                      if (!item.etfs || item.etfs.length === 0) return null;
-                      return (
-                        <div
-                          key={item.id}
-                          className="rounded-lg border border-zinc-800 bg-black/40 p-4"
-                        >
-                          <h3 className="text-sm font-semibold mb-3">
-                            {item.label} ({item.weight.toFixed(1)}%)
-                          </h3>
-                          <div className="space-y-3">
-                            {item.etfs.map((etf, idx) => (
-                              <div
-                                key={idx}
-                                className="pl-3 border-l-2 border-zinc-700"
-                              >
-                                <div className="flex items-baseline gap-2 mb-1">
-                                  <span className="font-mono text-xs font-semibold">
-                                    {etf.ticker}
-                                  </span>
-                                  <span className="text-xs text-zinc-400">{etf.name}</span>
-                                </div>
-                                <p className="text-xs text-zinc-300 leading-relaxed">
-                                  {etf.description}
-                                </p>
+                      </div>
+                    );
+                  } else {
+                    // Render sleeve item
+                    if (!item.etfs || item.etfs.length === 0) return null;
+                    return (
+                      <div
+                        key={item.id}
+                        className="rounded-lg border border-zinc-800 bg-black/40 p-4"
+                      >
+                        <h3 className="text-sm font-semibold mb-3">
+                          {item.label} ({item.weight.toFixed(1)}%)
+                        </h3>
+                        <div className="space-y-3">
+                          {item.etfs.map((etf, idx) => (
+                            <div
+                              key={idx}
+                              className="pl-3 border-l-2 border-zinc-700"
+                            >
+                              <div className="flex items-baseline gap-2 mb-1">
+                                <span className="font-mono text-xs font-semibold">
+                                  {etf.ticker}
+                                </span>
+                                <span className="text-xs text-zinc-400">{etf.name}</span>
                               </div>
-                            ))}
-                          </div>
+                              <p className="text-xs text-zinc-300 leading-relaxed">
+                                {etf.description}
+                              </p>
+                            </div>
+                          ))}
                         </div>
-                      );
-                    }
-                  })
-                ) : (
-                  // Render standard lineup (no tilt)
-                  portfolio.sleeves
-                    .filter((s) => s.weight > 0)
-                    .map((sleeve) => {
-                      const sleeveEtfs = etfsBySleeve[sleeve.id] || [];
-                      if (sleeveEtfs.length === 0) return null;
-
-                      return (
-                        <div
-                          key={sleeve.id}
-                          className="rounded-lg border border-zinc-800 bg-black/40 p-4"
-                        >
-                          <h3 className="text-sm font-semibold mb-3">
-                            {sleeve.name} ({formatPercent(sleeve.weight)})
-                          </h3>
-                          <div className="space-y-3">
-                            {sleeveEtfs.map((etf, idx) => (
-                              <div
-                                key={idx}
-                                className="pl-3 border-l-2 border-zinc-700"
-                              >
-                                <div className="flex items-baseline gap-2 mb-1">
-                                  <span className="font-mono text-xs font-semibold">
-                                    {etf.ticker}
-                                  </span>
-                                  <span className="text-xs text-zinc-400">{etf.name}</span>
-                                </div>
-                                <p className="text-xs text-zinc-300 leading-relaxed">
-                                  {etf.description}
-                                </p>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      );
-                    })
-                )}
+                      </div>
+                    );
+                  }
+                })}
               </div>
             </GlassCard>
           )}
@@ -868,39 +847,19 @@ export default function Builder() {
             <div className="space-y-1 text-xs text-zinc-300 leading-relaxed">
               {portfolio.sleeves
                 .filter((s) => s.weight > 0)
-                .map((sleeve) => {
-                  const sleeveEtfs = etfsBySleeve[sleeve.id] || [];
-                  if (sleeveEtfs.length === 0) return null;
-
-                  return (
-                    <div
-                      key={sleeve.id}
-                      className="rounded-lg border border-zinc-800 bg-black/40 p-4"
-                    >
-                      <h4 className="text-sm font-semibold mb-3">
-                        {sleeve.name} ({formatPercent(sleeve.weight)})
-                      </h4>
-                      <div className="space-y-3">
-                        {sleeveEtfs.map((etf, idx) => (
-                          <div
-                            key={idx}
-                            className="pl-3 border-l-2 border-zinc-700"
-                          >
-                            <div className="flex items-baseline gap-2 mb-1">
-                              <span className="font-mono text-xs font-semibold">
-                                {etf.ticker}
-                              </span>
-                              <span className="text-xs text-zinc-400">{etf.name}</span>
-                            </div>
-                            <p className="text-xs text-zinc-300 leading-relaxed">
-                              {etf.description}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
+                .map((sleeve) => (
+                  <div
+                    key={sleeve.id}
+                    className="rounded-lg border border-zinc-800 bg-black/40 p-4"
+                  >
+                    <h4 className="text-sm font-semibold mb-2">
+                      {sleeve.name} ({formatPercent(sleeve.weight)})
+                    </h4>
+                    <p className="text-xs text-zinc-400 leading-relaxed">
+                      {sleeve.description}
+                    </p>
+                  </div>
+                ))}
             </div>
           </div>
         )}

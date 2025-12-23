@@ -17,6 +17,12 @@ export type PortfolioPreset =
 
 export type GoldBtcTilt = 'none' | 'gold10_btc5' | 'gold15_btc5';
 
+export type SchwabLineupStyle = 'standard' | 'simplify';
+
+export type GoldInstrument = 'gldm' | 'ygld';
+
+export type BtcInstrument = 'fbtc' | 'maxi';
+
 export type SleeveId =
   | 'core_equity'
   | 'convex_equity'
@@ -48,6 +54,9 @@ export interface QuestionnaireAnswers {
   schwabPreference?: 'stay_low' | 'use_full_75';
   portfolioPreset?: PortfolioPreset; // default to "standard"
   goldBtcTilt?: GoldBtcTilt; // default "none"
+  schwabLineupStyle?: SchwabLineupStyle; // default "standard"
+  goldInstrument?: GoldInstrument; // default "gldm"
+  btcInstrument?: BtcInstrument; // default "fbtc"
   currentVoyaHoldings?: CurrentVoyaHolding[];
 }
 

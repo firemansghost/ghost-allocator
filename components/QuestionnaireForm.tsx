@@ -2,9 +2,10 @@
 
 import { useState, FormEvent, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import type { QuestionnaireAnswers } from '@/lib/types';
+import type { QuestionnaireAnswers, PortfolioPreset, GoldBtcTilt } from '@/lib/types';
 import { computeRiskLevel } from '@/lib/portfolioEngine';
 import type { QuestionnaireResult } from '@/lib/types';
+import { willShowGoldBtc } from '@/lib/schwabLineups';
 
 const STORAGE_KEY = 'ghostAllocatorQuestionnaire';
 
@@ -19,6 +20,9 @@ export default function QuestionnaireForm() {
     platform: 'voya_only',
     portfolioPreset: 'standard',
     goldBtcTilt: 'none',
+    schwabLineupStyle: 'standard',
+    goldInstrument: 'gldm',
+    btcInstrument: 'fbtc',
     hasPension: false,
     pensionCoverage: 'none',
   });
@@ -96,9 +100,17 @@ export default function QuestionnaireForm() {
       portfolioPreset: formData.platform === 'voya_and_schwab' ? (formData.portfolioPreset ?? 'standard') : 'standard',
       goldBtcTilt:
         formData.platform === 'voya_and_schwab' &&
-        (formData.portfolioPreset ?? 'standard') === 'standard'
+        (formData.portfolioPreset ?? 'standard') === 'standard' &&
+        (formData.schwabLineupStyle ?? 'standard') === 'standard'
           ? (formData.goldBtcTilt ?? 'none')
           : 'none',
+      schwabLineupStyle:
+        formData.platform === 'voya_and_schwab' &&
+        (formData.portfolioPreset ?? 'standard') === 'standard'
+          ? (formData.schwabLineupStyle ?? 'standard')
+          : 'standard',
+      goldInstrument: formData.goldInstrument ?? 'gldm',
+      btcInstrument: formData.btcInstrument ?? 'fbtc',
     } as QuestionnaireAnswers;
 
     const answers = finalFormData;
@@ -366,6 +378,9 @@ export default function QuestionnaireForm() {
                   currentSchwabPct: undefined,
                   schwabPreference: undefined,
                   goldBtcTilt: 'none', // Reset tilt when switching to Voya-only
+                  schwabLineupStyle: 'standard', // Reset lineup style
+                  goldInstrument: 'gldm', // Reset instruments
+                  btcInstrument: 'fbtc',
                 })
               }
               className="h-3.5 w-3.5 accent-amber-400"
@@ -612,6 +627,158 @@ export default function QuestionnaireForm() {
             </p>
           </div>
         )}
+
+      {/* Schwab ETF Lineup Style (Schwab only, Standard preset only) */}
+      {formData.platform === 'voya_and_schwab' &&
+        (formData.portfolioPreset ?? 'standard') === 'standard' && (
+          <div className="space-y-2">
+            <p className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">
+              Schwab ETF lineup style
+            </p>
+            <div className="space-y-1.5 text-sm text-zinc-200">
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="schwabLineupStyle"
+                  value="standard"
+                  checked={(formData.schwabLineupStyle ?? 'standard') === 'standard'}
+                  onChange={() =>
+                    setFormData({
+                      ...formData,
+                      schwabLineupStyle: 'standard',
+                    })
+                  }
+                  className="h-3.5 w-3.5 accent-amber-400"
+                />
+                <span>Standard (core index ETFs)</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="schwabLineupStyle"
+                  value="simplify"
+                  checked={formData.schwabLineupStyle === 'simplify'}
+                  onChange={() =>
+                    setFormData({
+                      ...formData,
+                      schwabLineupStyle: 'simplify',
+                      // Disable tilt when simplify mode is selected
+                      goldBtcTilt: 'none',
+                    })
+                  }
+                  className="h-3.5 w-3.5 accent-amber-400"
+                />
+                <span>Simplify mode (alts/hedges/convexity)</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                  Advanced
+                </span>
+              </label>
+            </div>
+            <p className="text-xs text-zinc-400 mt-1">
+              Simplify mode uses building-block ETFs with options overlays and alternative strategies.
+            </p>
+          </div>
+        )}
+
+      {/* Instrument Wrappers (only show when Gold/BTC will appear) */}
+      {formData.platform === 'voya_and_schwab' && (() => {
+        const preset = (formData.portfolioPreset ?? 'standard') as PortfolioPreset;
+        const tilt = (formData.goldBtcTilt ?? 'none') as GoldBtcTilt;
+        const { willShowGold, willShowBtc } = willShowGoldBtc(preset, tilt);
+        return willShowGold || willShowBtc;
+      })() && (
+        <div className="space-y-2">
+          <p className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">
+            Instrument wrappers (advanced)
+          </p>
+          {(() => {
+            const preset = (formData.portfolioPreset ?? 'standard') as PortfolioPreset;
+            const tilt = (formData.goldBtcTilt ?? 'none') as GoldBtcTilt;
+            const { willShowGold, willShowBtc } = willShowGoldBtc(preset, tilt);
+            return (
+              <>
+                {willShowGold && (
+                  <div className="space-y-1.5 text-sm text-zinc-200 mb-3">
+                    <p className="text-xs text-zinc-400 mb-1">Gold instrument:</p>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="goldInstrument"
+                        value="gldm"
+                        checked={(formData.goldInstrument ?? 'gldm') === 'gldm'}
+                        onChange={() =>
+                          setFormData({
+                            ...formData,
+                            goldInstrument: 'gldm',
+                          })
+                        }
+                        className="h-3.5 w-3.5 accent-amber-400"
+                      />
+                      <span>GLDM (spot)</span>
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="goldInstrument"
+                        value="ygld"
+                        checked={formData.goldInstrument === 'ygld'}
+                        onChange={() =>
+                          setFormData({
+                            ...formData,
+                            goldInstrument: 'ygld',
+                          })
+                        }
+                        className="h-3.5 w-3.5 accent-amber-400"
+                      />
+                      <span>YGLD (income wrapper)</span>
+                    </label>
+                  </div>
+                )}
+                {willShowBtc && (
+                  <div className="space-y-1.5 text-sm text-zinc-200">
+                    <p className="text-xs text-zinc-400 mb-1">Bitcoin instrument:</p>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="btcInstrument"
+                        value="fbtc"
+                        checked={(formData.btcInstrument ?? 'fbtc') === 'fbtc'}
+                        onChange={() =>
+                          setFormData({
+                            ...formData,
+                            btcInstrument: 'fbtc',
+                          })
+                        }
+                        className="h-3.5 w-3.5 accent-amber-400"
+                      />
+                      <span>FBTC (spot)</span>
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="btcInstrument"
+                        value="maxi"
+                        checked={formData.btcInstrument === 'maxi'}
+                        onChange={() =>
+                          setFormData({
+                            ...formData,
+                            btcInstrument: 'maxi',
+                          })
+                        }
+                        className="h-3.5 w-3.5 accent-amber-400"
+                      />
+                      <span>MAXI (income wrapper)</span>
+                    </label>
+                  </div>
+                )}
+              </>
+            );
+          })()}
+          <p className="text-xs text-zinc-400 mt-1">
+            Income wrappers (YGLD/MAXI) use options overlays and may have ROC-style distributions.
+          </p>
+        </div>
+      )}
 
       <div className="space-y-1">
         <label className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">

@@ -3,6 +3,8 @@
  * Single source of truth for GhostRegime house model allocations (Schwab lineup replacements)
  */
 
+import type { GoldInstrument, BtcInstrument } from './types';
+
 export type HouseModelId = 'ghostregime_60_30_10' | 'ghostregime_60_25_15';
 
 export interface HouseModelAllocation {
@@ -48,6 +50,34 @@ export const HOUSE_MODELS: Record<HouseModelId, HouseModelSpec> = {
  */
 export function getHouseModel(id: HouseModelId): HouseModelSpec {
   return HOUSE_MODELS[id];
+}
+
+/**
+ * Get house model allocations with instrument wrappers applied
+ */
+export function getHouseModelWithWrappers(
+  id: HouseModelId,
+  goldInstrument: GoldInstrument,
+  btcInstrument: BtcInstrument
+): HouseModelAllocation[] {
+  const model = HOUSE_MODELS[id];
+  return model.allocations.map((alloc) => {
+    if (alloc.ticker === 'GLDM' && goldInstrument === 'ygld') {
+      return {
+        ...alloc,
+        ticker: 'YGLD',
+        label: 'Gold (income wrapper)',
+      };
+    }
+    if (alloc.ticker === 'FBTC' && btcInstrument === 'maxi') {
+      return {
+        ...alloc,
+        ticker: 'MAXI',
+        label: 'Bitcoin (income wrapper)',
+      };
+    }
+    return alloc;
+  });
 }
 
 /**

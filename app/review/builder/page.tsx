@@ -9,8 +9,8 @@ import {
   computePlatformSplit,
   buildVoyaImplementation,
 } from '@/lib/portfolioEngine';
-import { getHouseModel, isHousePreset } from '@/lib/houseModels';
-import { applySchwabTilt } from '@/lib/schwabTilt';
+import { getHouseModel, getHouseModelWithWrappers, isHousePreset } from '@/lib/houseModels';
+import { getStandardSchwabLineup } from '@/lib/schwabLineups';
 import type { ExampleETF } from '@/lib/types';
 
 
@@ -62,37 +62,38 @@ function computeReviewOutput(fixture: typeof REVIEW_FIXTURES[0]): ReviewOutput {
       };
     } else {
       const portfolio = selectModelPortfolio(riskLevel);
-      const etfs = suggestExampleEtfs(portfolio);
-      const etfsBySleeve: Record<string, ExampleETF[]> = {};
-      for (const etf of etfs) {
-        if (!etfsBySleeve[etf.sleeveId]) {
-          etfsBySleeve[etf.sleeveId] = [];
-        }
-        etfsBySleeve[etf.sleeveId].push(etf);
-      }
-
+      const lineupStyle = fixture.answers.schwabLineupStyle ?? 'standard';
+      const goldInstrument = fixture.answers.goldInstrument ?? 'gldm';
+      const btcInstrument = fixture.answers.btcInstrument ?? 'fbtc';
       const tilt = fixture.answers.goldBtcTilt ?? 'none';
-      if (tilt !== 'none') {
-        // Apply tilt
-        const tiltedItems = applySchwabTilt(portfolio.sleeves, etfsBySleeve, tilt);
+
+      const standardLineup = getStandardSchwabLineup(
+        portfolio.sleeves,
+        riskLevel,
+        lineupStyle,
+        goldInstrument,
+        btcInstrument,
+        tilt
+      );
+
+      if (tilt !== 'none' || lineupStyle === 'simplify') {
         schwabLineup = {
           type: 'standard_tilted',
-          tiltedItems,
+          tiltedItems: standardLineup,
         };
       } else {
-        // Standard lineup (no tilt)
-        const standardSleeves = portfolio.sleeves
-          .filter((s) => s.weight > 0)
-          .map((sleeve) => ({
-            id: sleeve.id,
-            name: sleeve.name,
-            weight: sleeve.weight,
-            etfs: etfsBySleeve[sleeve.id] || [],
+        // Convert to old format for compatibility
+        const standardSleeves = standardLineup
+          .filter((item) => item.type === 'sleeve')
+          .map((item) => ({
+            id: item.id,
+            name: item.label,
+            weight: item.weight / 100, // convert back to decimal
+            etfs: item.etfs || [],
           }));
 
         schwabLineup = {
           type: 'standard',
-          standardEtfs: etfs,
           standardSleeves,
         };
       }
@@ -135,7 +136,11 @@ function computeReviewOutput(fixture: typeof REVIEW_FIXTURES[0]): ReviewOutput {
       .filter((item) => item.type === 'tilt')
       .map((item) => item.ticker)
       .filter((t): t is string => t !== undefined);
-    tiltHasGldmFbtc = tickers.includes('GLDM') && tickers.includes('FBTC');
+    const goldInstrument = fixture.answers.goldInstrument ?? 'gldm';
+    const btcInstrument = fixture.answers.btcInstrument ?? 'fbtc';
+    tiltHasGldmFbtc =
+      (tickers.includes('GLDM') || tickers.includes('YGLD')) &&
+      (tickers.includes('FBTC') || tickers.includes('MAXI'));
 
     // Check that standard ETFs are still present (at least one sleeve item)
     const hasSleeveItems = schwabLineup.tiltedItems.some((item) => item.type === 'sleeve');

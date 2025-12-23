@@ -228,6 +228,51 @@ For users with Schwab BrokerageLink access using the Standard preset, an optiona
 - **Voya-only users**: The tilt is not available for Voya-only users (toggle is hidden).
 - **Implementation**: The tilt logic lives in `lib/schwabTilt.ts` and is applied in the builder when rendering the Schwab lineup.
 
+## Schwab ETF Lineup Style
+
+For users with Schwab BrokerageLink access using the Standard preset, you can choose between two lineup styles:
+
+### Standard Mode (Default)
+
+- Uses core index ETFs (SPYV, QUAL, AGG, etc.)
+- Traditional, straightforward ETF suggestions
+- Same as the original Ghost Allocator lineup
+
+### Simplify Mode (Advanced)
+
+- Uses Simplify's building-block ETFs with options overlays and alternative strategies
+- **Convex equity**: Risk-based selection (SPD for conservative, SPYC for balanced, SPUC for growth/aggressive)
+- **Managed futures**: CTA (Simplify Managed Futures Strategy ETF)
+- **Rate hedge**: PFIX (Simplify Interest Rate Hedge ETF)
+- **T-bills/Cash**: SBIL (Simplify Ultra Short Term Treasury ETF)
+- **Real assets**: HARD (Simplify Commodities Strategy No K-1 ETF)
+- **Core bonds**: AGGH (Simplify Aggregate Bond ETF)
+
+**Note**: Tilt is disabled when Simplify mode is selected to avoid complex combinations.
+
+## Instrument Wrappers (Advanced)
+
+For users who want income-style distributions, optional wrappers can swap Gold and Bitcoin instruments:
+
+### Gold Instruments
+
+- **GLDM** (default): Spot gold exposure
+- **YGLD**: Gold strategy with options overlay, designed for income-style distributions
+
+### Bitcoin Instruments
+
+- **FBTC** (default): Spot Bitcoin exposure
+- **MAXI**: Bitcoin strategy with options overlay; distribution may include Return of Capital (ROC)
+
+**Important Notes**:
+
+- Wrappers only change the ticker symbol; weights remain unchanged
+- Income wrappers (YGLD/MAXI) use options overlays and may have ROC-style distributions
+- Wrappers are available for both Standard preset (with tilt) and House presets
+- Wrappers are shown in the UI only when Gold/BTC will appear in the lineup
+
+The lineup style and wrapper logic lives in `lib/schwabLineups.ts`.
+
 ## Review Harness
 
 A lightweight output review harness is available for internal QA and sanity-checking builder outputs. It renders deterministic fixtures and computed outputs in one place.
