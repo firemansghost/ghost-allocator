@@ -8,6 +8,7 @@
 import { useEffect, useState } from 'react';
 import { GlassCard } from '@/components/GlassCard';
 import { Tooltip } from '@/components/Tooltip';
+import { AllocationBar } from '@/components/AllocationBar';
 import type { GhostRegimeRow } from '@/lib/ghostregime/types';
 import Link from 'next/link';
 
@@ -88,15 +89,26 @@ export default function GhostRegimePage() {
           </p>
         </header>
 
-        <GlassCard className="p-6">
+        <GlassCard className="p-6 border-amber-400/30 bg-amber-400/10">
           <div className="space-y-3">
-            <h2 className="text-sm font-semibold text-zinc-50">
-              Seed Not Loaded
-            </h2>
-            <p className="text-xs text-zinc-300 leading-relaxed">
-              GhostRegime seed not loaded yet. Add seed CSV under{' '}
-              <code className="text-amber-300">data/ghostregime/seed/</code>.
-            </p>
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">📊</span>
+              <div className="flex-1">
+                <h2 className="text-sm font-semibold text-amber-300 mb-2">
+                  Seed Data Not Loaded
+                </h2>
+                <p className="text-xs text-amber-200 leading-relaxed mb-3">
+                  GhostRegime requires seed data to compute regime signals. Add the seed CSV file to enable the system.
+                </p>
+                <div className="rounded-md bg-black/40 p-3 border border-zinc-800">
+                  <p className="text-[10px] text-zinc-400 uppercase tracking-wide mb-1">Next Steps</p>
+                  <p className="text-xs text-zinc-300">
+                    Place your seed CSV at:{' '}
+                    <code className="text-amber-300 font-mono">data/ghostregime/seed/ghostregime_replay_history.csv</code>
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </GlassCard>
       </div>
@@ -119,10 +131,25 @@ export default function GhostRegimePage() {
       <div className="space-y-6">
         <header className="space-y-2">
           <h1 className="text-2xl font-semibold tracking-tight">GhostRegime</h1>
-          <p className="text-sm text-zinc-300">Error loading data</p>
+          <p className="text-sm text-zinc-300">
+            Market regime classification and allocation system
+          </p>
         </header>
-        <GlassCard className="p-6">
-          <p className="text-xs text-red-300">{error}</p>
+        <GlassCard className="p-6 border-red-400/30 bg-red-400/10">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl">⚠️</span>
+            <div className="flex-1">
+              <h2 className="text-sm font-semibold text-red-300 mb-2">
+                Unable to Load Data
+              </h2>
+              <p className="text-xs text-red-200 leading-relaxed mb-3">
+                {error}
+              </p>
+              <p className="text-[11px] text-zinc-400">
+                If this persists, check that the GhostRegime service is running and seed data is available.
+              </p>
+            </div>
+          </div>
         </GlassCard>
       </div>
     );
@@ -148,81 +175,162 @@ export default function GhostRegimePage() {
 
   // Check if data is stale or old
   const isStaleOrOld = data?.stale || (healthStatus?.status === 'WARN' && !healthStatus?.freshness?.is_fresh);
+  
+  // Check flip watch status
+  const flipWatchStatus = data?.flip_watch_status || 'NONE';
+  const hasFlipWatch = flipWatchStatus !== 'NONE';
 
   return (
     <div className="space-y-6">
-      <header className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight">GhostRegime</h1>
-        <p className="text-sm text-zinc-300">
-          Rules-based signals for adjusting portfolio exposure
-        </p>
-      </header>
-
-      {/* Stale/Old Data Banner */}
-      {isStaleOrOld && (
-        <GlassCard className="p-4 border-amber-400/30 bg-amber-400/10">
-          <p className="text-xs text-amber-300">
-            ⚠️ Heads up: The latest signal may be stale or old (weekends/holidays happen). 
-            {data?.stale && data.stale_reason && ` Reason: ${data.stale_reason}`}
-            {healthStatus?.freshness && !healthStatus.freshness.is_fresh && 
-              ` Data is ${healthStatus.freshness.age_days} days old.`}
+      {/* Hero Summary Strip */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">GhostRegime</h1>
+          <p className="text-sm text-zinc-300 mt-1">
+            Rules-based signals for adjusting portfolio exposure
           </p>
-        </GlassCard>
-      )}
+        </div>
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Current Regime Chip */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-amber-400/30 bg-amber-400/10">
+            <span className="text-[10px] text-zinc-400 uppercase tracking-wide">Current Regime</span>
+            <span className="text-lg font-semibold text-amber-300">{data.regime}</span>
+          </div>
+          {/* Risk Regime Chip */}
+          <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-zinc-700 bg-zinc-800/50">
+            <span className="text-[10px] text-zinc-400 uppercase tracking-wide">Risk</span>
+            <span className="text-sm font-medium text-zinc-200">{data.risk_regime}</span>
+          </div>
+        </div>
+      </div>
 
-      {/* Today's Signal - Beginner View */}
-      <GlassCard className="p-6">
-        <h2 className="text-sm font-semibold text-zinc-50 mb-4">Today's Signal</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div>
-            <p className="text-[10px] text-zinc-400 uppercase tracking-wide">As-of Date</p>
-            <p className="text-sm font-medium text-zinc-200 mt-1">{formatDate(data.date)}</p>
-          </div>
-          <div>
-            <p className="text-[10px] text-zinc-400 uppercase tracking-wide">
-              <Tooltip content="The model's read on the market &quot;weather&quot; (Goldilocks / Reflation / Inflation / Deflation). Not a prediction — a label for the lane we're driving in right now.">
-                Regime
-              </Tooltip>
-            </p>
-            <p className="text-lg font-semibold text-amber-300 mt-1">{data.regime}</p>
-          </div>
-          <div>
-            <p className="text-[10px] text-zinc-400 uppercase tracking-wide">
-              <Tooltip content="Risk On: we give growth assets more leash. Risk Off: we cut exposure and play defense. Seatbelt, not bubble wrap.">
-                Risk
-              </Tooltip>
-            </p>
-            <p className="text-sm font-medium text-zinc-200 mt-1">
-              <Tooltip content="Risk On: we give growth assets more leash. Risk Off: we cut exposure and play defense. Seatbelt, not bubble wrap.">
-                {data.risk_regime}
-              </Tooltip>
-            </p>
-          </div>
-          <div>
-            <p className="text-[10px] text-zinc-400 uppercase tracking-wide">Inflation Axis</p>
-            <p className="text-sm font-medium text-zinc-200 mt-1">{data.infl_axis}</p>
-          </div>
-        </div>
-        <div className="mt-4 pt-4 border-t border-zinc-800 grid gap-2 sm:grid-cols-2 text-[11px] text-zinc-400">
-          {data.row_computed_at_utc && (
-            <div>
-              <span className="text-zinc-500">Last updated: </span>
-              <span>{formatTimestamp(data.row_computed_at_utc)}</span>
+      {/* Timestamp & Stale Indicator */}
+      <div className="flex items-center gap-4 text-xs text-zinc-400">
+        <span>As of {formatDate(data.date)}</span>
+        {isStaleOrOld && (
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded border border-amber-400/30 bg-amber-400/10 text-amber-300">
+            <span>⚠️</span>
+            <span>Stale data</span>
+            {healthStatus?.freshness && !healthStatus.freshness.is_fresh && (
+              <span className="text-[10px]">({healthStatus.freshness.age_days} days old)</span>
+            )}
+          </span>
+        )}
+        {!isStaleOrOld && healthStatus?.status === 'OK' && (
+          <span className="inline-flex items-center gap-1 text-green-400">
+            <span>✓</span>
+            <span>Fresh</span>
+          </span>
+        )}
+      </div>
+
+      {/* Main Content Grid */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Left Column: Regime + Flip Watch */}
+        <div className="space-y-6">
+          {/* Regime Details */}
+          <GlassCard className="p-6">
+            <h2 className="text-sm font-semibold text-zinc-50 mb-4">Regime Classification</h2>
+            <div className="space-y-3">
+              <div>
+                <p className="text-[10px] text-zinc-400 uppercase tracking-wide mb-1">
+                  <Tooltip content="The model's read on the market &quot;weather&quot; (Goldilocks / Reflation / Inflation / Deflation). Not a prediction — a label for the lane we're driving in right now.">
+                    Regime
+                  </Tooltip>
+                </p>
+                <p className="text-xl font-semibold text-amber-300">{data.regime}</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-zinc-400 uppercase tracking-wide mb-1">
+                  <Tooltip content="Risk On: we give growth assets more leash. Risk Off: we cut exposure and play defense. Seatbelt, not bubble wrap.">
+                    Risk Regime
+                  </Tooltip>
+                </p>
+                <p className="text-base font-medium text-zinc-200">{data.risk_regime}</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-zinc-400 uppercase tracking-wide mb-1">Inflation Axis</p>
+                <p className="text-sm font-medium text-zinc-200">{data.infl_axis}</p>
+              </div>
             </div>
-          )}
-          {data.run_date_utc && (
-            <div>
-              <span className="text-zinc-500">Served: </span>
-              <span>{formatTimestamp(data.run_date_utc)}</span>
-            </div>
+          </GlassCard>
+
+          {/* Flip Watch Callout */}
+          {hasFlipWatch ? (
+            <GlassCard className="p-6 border-amber-400/30 bg-amber-400/10">
+              <div className="flex items-start gap-3">
+                <span className="text-2xl">⚠️</span>
+                <div className="flex-1">
+                  <h3 className="text-sm font-semibold text-amber-300 mb-1">Flip Watch</h3>
+                  <p className="text-xs text-amber-200 leading-relaxed">
+                    {flipWatchStatus === 'BREWING' && 'A regime flip may be brewing. Monitor closely.'}
+                    {flipWatchStatus === 'PENDING_CONFIRMATION' && 'A regime flip is pending confirmation. Prepare for potential changes.'}
+                    {flipWatchStatus === 'STRONG_FLIP' && 'Strong signals suggest a regime flip is imminent.'}
+                    {!['BREWING', 'PENDING_CONFIRMATION', 'STRONG_FLIP'].includes(flipWatchStatus) && `Status: ${flipWatchStatus}`}
+                  </p>
+                </div>
+              </div>
+            </GlassCard>
+          ) : (
+            <GlassCard className="p-4 border-zinc-800 bg-zinc-900/30">
+              <p className="text-xs text-zinc-500">No flip watch warning</p>
+            </GlassCard>
           )}
         </div>
-      </GlassCard>
+
+        {/* Right Column: Allocations */}
+        <div className="space-y-6">
+          <GlassCard className="p-6">
+            <h2 className="text-sm font-semibold text-zinc-50 mb-4">
+              <Tooltip content="Targets = the plan (top-down, based on regime). Actuals = what we hold after VAMS scales things to 100% / 50% / 0%. The gap usually shows up as cash.">
+                Allocations
+              </Tooltip>
+            </h2>
+            <div className="space-y-4">
+              <AllocationBar
+                label="Stocks"
+                target={data.stocks_target}
+                actual={data.stocks_actual}
+                scale={data.stocks_scale}
+                color="amber"
+                showScale={true}
+              />
+              <AllocationBar
+                label="Gold"
+                target={data.gold_target}
+                actual={data.gold_actual}
+                scale={data.gold_scale}
+                color="blue"
+                showScale={true}
+              />
+              <AllocationBar
+                label="Bitcoin"
+                target={data.btc_target}
+                actual={data.btc_actual}
+                scale={data.btc_scale}
+                color="purple"
+                showScale={true}
+              />
+              <AllocationBar
+                label="Cash"
+                target={0}
+                actual={data.cash}
+                color="zinc"
+                showValues={true}
+                showScale={false}
+              />
+            </div>
+            <p className="text-[10px] text-zinc-500 mt-4 leading-relaxed">
+              Cash represents the portfolio's "I don't trust this market" expression when VAMS reduces exposure.
+            </p>
+          </GlassCard>
+        </div>
+      </div>
 
       {/* What This Means */}
       <GlassCard className="p-6">
-        <h2 className="text-sm font-semibold text-zinc-50 mb-3">What This Means</h2>
-        <ul className="space-y-2 text-xs text-zinc-300">
+        <h2 className="text-sm font-semibold text-zinc-50 mb-3">How It Works</h2>
+        <ul className="space-y-2 text-xs text-zinc-300 leading-relaxed">
           <li className="flex items-start gap-2">
             <span className="text-amber-400 mt-0.5">•</span>
             <span>
@@ -251,7 +359,7 @@ export default function GhostRegimePage() {
           </li>
           <li className="flex items-start gap-2">
             <span className="text-amber-400 mt-0.5">•</span>
-            <span><strong className="text-zinc-200">Cash:</strong> What's left when exposure is reduced</span>
+            <span><strong className="text-zinc-200">Cash:</strong> What's left when exposure is reduced — the portfolio's "I don't trust this market" expression</span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-amber-400 mt-0.5">•</span>
@@ -259,37 +367,6 @@ export default function GhostRegimePage() {
           </li>
         </ul>
       </GlassCard>
-
-      {/* System Status */}
-      {healthStatus && (
-        <GlassCard className="p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-[10px] text-zinc-400 uppercase tracking-wide">System Status</p>
-              {healthStatus.status === 'OK' && (
-                <p className="text-xs text-green-400 mt-1">✓ Data is fresh</p>
-              )}
-              {healthStatus.status === 'WARN' && (
-                <div className="mt-1">
-                  <p className="text-xs text-amber-300">⚠️ Warning</p>
-                  {healthStatus.warnings && healthStatus.warnings.length > 0 && (
-                    <ul className="mt-1 space-y-0.5 text-[11px] text-amber-200">
-                      {healthStatus.warnings.map((warning, i) => (
-                        <li key={i}>• {warning}</li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              )}
-              {healthStatus.status === 'NOT_READY' && (
-                <p className="text-xs text-red-300 mt-1">
-                  ✗ System not ready. Run force refresh via workflow.
-                </p>
-              )}
-            </div>
-          </div>
-        </GlassCard>
-      )}
 
       {/* Use This Signal in Portfolio - Coming Soon */}
       <GlassCard className="p-6 border-amber-400/30 bg-amber-400/5">
