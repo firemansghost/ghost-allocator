@@ -18,6 +18,7 @@ export default function QuestionnaireForm() {
     complexityPreference: 'simple',
     platform: 'voya_only',
     portfolioPreset: 'standard',
+    goldBtcTilt: 'none',
     hasPension: false,
     pensionCoverage: 'none',
   });
@@ -86,12 +87,18 @@ export default function QuestionnaireForm() {
     // Ensure pensionCoverage is set to 'none' if hasPension is false
     // Clean up Schwab fields if platform is voya_only
     // Reset portfolio preset to standard if platform is voya_only
+    // Reset goldBtcTilt to none if platform is voya_only or preset is house
     const finalFormData = {
       ...formData,
       pensionCoverage: formData.hasPension ? formData.pensionCoverage : 'none',
       currentSchwabPct: formData.platform === 'voya_and_schwab' ? formData.currentSchwabPct : undefined,
       schwabPreference: formData.platform === 'voya_and_schwab' ? formData.schwabPreference : undefined,
       portfolioPreset: formData.platform === 'voya_and_schwab' ? (formData.portfolioPreset ?? 'standard') : 'standard',
+      goldBtcTilt:
+        formData.platform === 'voya_and_schwab' &&
+        (formData.portfolioPreset ?? 'standard') === 'standard'
+          ? (formData.goldBtcTilt ?? 'none')
+          : 'none',
     } as QuestionnaireAnswers;
 
     const answers = finalFormData;
@@ -358,6 +365,7 @@ export default function QuestionnaireForm() {
                   platform: 'voya_only',
                   currentSchwabPct: undefined,
                   schwabPreference: undefined,
+                  goldBtcTilt: 'none', // Reset tilt when switching to Voya-only
                 })
               }
               className="h-3.5 w-3.5 accent-amber-400"
@@ -475,6 +483,11 @@ export default function QuestionnaireForm() {
                 setFormData({
                   ...formData,
                   portfolioPreset: 'standard',
+                  // Keep tilt if platform is still Voya+Schwab, otherwise reset
+                  goldBtcTilt:
+                    formData.platform === 'voya_and_schwab'
+                      ? formData.goldBtcTilt ?? 'none'
+                      : 'none',
                 })
               }
               className="h-3.5 w-3.5 accent-amber-400"
@@ -497,6 +510,7 @@ export default function QuestionnaireForm() {
                 setFormData({
                   ...formData,
                   portfolioPreset: 'ghostregime_60_30_10',
+                  goldBtcTilt: 'none', // Reset tilt when switching to house preset
                 })
               }
               disabled={formData.platform !== 'voya_and_schwab'}
@@ -520,6 +534,7 @@ export default function QuestionnaireForm() {
                 setFormData({
                   ...formData,
                   portfolioPreset: 'ghostregime_60_25_15',
+                  goldBtcTilt: 'none', // Reset tilt when switching to house preset
                 })
               }
               disabled={formData.platform !== 'voya_and_schwab'}
@@ -534,6 +549,69 @@ export default function QuestionnaireForm() {
           </p>
         )}
       </div>
+
+      {/* Optional Gold + Bitcoin Tilt (Schwab only, Standard preset only) */}
+      {formData.platform === 'voya_and_schwab' &&
+        (formData.portfolioPreset ?? 'standard') === 'standard' && (
+          <div className="space-y-2">
+            <p className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">
+              Optional tilts (Schwab only)
+            </p>
+            <div className="space-y-1.5 text-sm text-zinc-200">
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="goldBtcTilt"
+                  value="none"
+                  checked={(formData.goldBtcTilt ?? 'none') === 'none'}
+                  onChange={() =>
+                    setFormData({
+                      ...formData,
+                      goldBtcTilt: 'none',
+                    })
+                  }
+                  className="h-3.5 w-3.5 accent-amber-400"
+                />
+                <span>None</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="goldBtcTilt"
+                  value="gold10_btc5"
+                  checked={formData.goldBtcTilt === 'gold10_btc5'}
+                  onChange={() =>
+                    setFormData({
+                      ...formData,
+                      goldBtcTilt: 'gold10_btc5',
+                    })
+                  }
+                  className="h-3.5 w-3.5 accent-amber-400"
+                />
+                <span>10% Gold / 5% Bitcoin</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="goldBtcTilt"
+                  value="gold15_btc5"
+                  checked={formData.goldBtcTilt === 'gold15_btc5'}
+                  onChange={() =>
+                    setFormData({
+                      ...formData,
+                      goldBtcTilt: 'gold15_btc5',
+                    })
+                  }
+                  className="h-3.5 w-3.5 accent-amber-400"
+                />
+                <span>15% Gold / 5% Bitcoin</span>
+              </label>
+            </div>
+            <p className="text-xs text-zinc-400 mt-1">
+              This adjusts the Schwab lineup only (percent of your Schwab slice).
+            </p>
+          </div>
+        )}
 
       <div className="space-y-1">
         <label className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">

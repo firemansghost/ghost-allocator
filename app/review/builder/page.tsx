@@ -10,6 +10,7 @@ import {
   buildVoyaImplementation,
 } from '@/lib/portfolioEngine';
 import { getHouseModel, isHousePreset } from '@/lib/houseModels';
+import { applySchwabTilt } from '@/lib/schwabTilt';
 import type { ExampleETF } from '@/lib/types';
 
 
@@ -19,10 +20,18 @@ interface ReviewOutput {
   platformSplit: ReturnType<typeof computePlatformSplit>;
   voyaImplementation: ReturnType<typeof buildVoyaImplementation>;
   schwabLineup: {
-    type: 'house' | 'standard';
+    type: 'house' | 'standard' | 'standard_tilted';
     houseModel?: ReturnType<typeof getHouseModel>;
     standardEtfs?: ExampleETF[];
     standardSleeves?: Array<{ id: string; name: string; weight: number; etfs: ExampleETF[] }>;
+    tiltedItems?: Array<{
+      type: 'sleeve' | 'tilt';
+      id: string;
+      label: string;
+      ticker?: string;
+      weight: number;
+      etfs?: ExampleETF[];
+    }>;
   };
   assertions: {
     voyaTotalValid: boolean;
@@ -30,6 +39,8 @@ interface ReviewOutput {
     housePresetHasCorrectTickers: boolean;
     housePresetVoyaNoRealAssets: boolean;
     standardPresetUnchanged: boolean;
+    tiltHasGldmFbtc: boolean;
+    tiltIncludesStandardEtfs: boolean;
   };
 }
 
@@ -60,20 +71,31 @@ function computeReviewOutput(fixture: typeof REVIEW_FIXTURES[0]): ReviewOutput {
         etfsBySleeve[etf.sleeveId].push(etf);
       }
 
-      const standardSleeves = portfolio.sleeves
-        .filter((s) => s.weight > 0)
-        .map((sleeve) => ({
-          id: sleeve.id,
-          name: sleeve.name,
-          weight: sleeve.weight,
-          etfs: etfsBySleeve[sleeve.id] || [],
-        }));
+      const tilt = fixture.answers.goldBtcTilt ?? 'none';
+      if (tilt !== 'none') {
+        // Apply tilt
+        const tiltedItems = applySchwabTilt(portfolio.sleeves, etfsBySleeve, tilt);
+        schwabLineup = {
+          type: 'standard_tilted',
+          tiltedItems,
+        };
+      } else {
+        // Standard lineup (no tilt)
+        const standardSleeves = portfolio.sleeves
+          .filter((s) => s.weight > 0)
+          .map((sleeve) => ({
+            id: sleeve.id,
+            name: sleeve.name,
+            weight: sleeve.weight,
+            etfs: etfsBySleeve[sleeve.id] || [],
+          }));
 
-      schwabLineup = {
-        type: 'standard',
-        standardEtfs: etfs,
-        standardSleeves,
-      };
+        schwabLineup = {
+          type: 'standard',
+          standardEtfs: etfs,
+          standardSleeves,
+        };
+      }
     }
   } else {
     schwabLineup = {
@@ -89,6 +111,9 @@ function computeReviewOutput(fixture: typeof REVIEW_FIXTURES[0]): ReviewOutput {
 
   let schwabTotalValid = true;
   let housePresetHasCorrectTickers = true;
+  let tiltHasGldmFbtc = true;
+  let tiltIncludesStandardEtfs = true;
+
   if (schwabLineup.type === 'house' && schwabLineup.houseModel) {
     const schwabTotal = schwabLineup.houseModel.allocations.reduce(
       (sum, alloc) => sum + alloc.pct,
@@ -102,6 +127,22 @@ function computeReviewOutput(fixture: typeof REVIEW_FIXTURES[0]): ReviewOutput {
       tickers.includes('SPYM') &&
       tickers.includes('GLDM') &&
       tickers.includes('FBTC');
+  } else if (schwabLineup.type === 'standard_tilted' && schwabLineup.tiltedItems) {
+    const schwabTotal = schwabLineup.tiltedItems.reduce((sum, item) => sum + item.weight, 0);
+    schwabTotalValid = Math.abs(schwabTotal - 100) <= 0.5;
+
+    const tickers = schwabLineup.tiltedItems
+      .filter((item) => item.type === 'tilt')
+      .map((item) => item.ticker)
+      .filter((t): t is string => t !== undefined);
+    tiltHasGldmFbtc = tickers.includes('GLDM') && tickers.includes('FBTC');
+
+    // Check that standard ETFs are still present (at least one sleeve item)
+    const hasSleeveItems = schwabLineup.tiltedItems.some((item) => item.type === 'sleeve');
+    tiltIncludesStandardEtfs = hasSleeveItems;
+  } else if (schwabLineup.type === 'standard' && schwabLineup.standardSleeves) {
+    // Standard preset without tilt - no special assertions needed
+    schwabTotalValid = true;
   }
 
   const housePresetVoyaNoRealAssets =
@@ -128,6 +169,8 @@ function computeReviewOutput(fixture: typeof REVIEW_FIXTURES[0]): ReviewOutput {
       housePresetHasCorrectTickers,
       housePresetVoyaNoRealAssets,
       standardPresetUnchanged,
+      tiltHasGldmFbtc,
+      tiltIncludesStandardEtfs,
     },
   };
 }
@@ -232,6 +275,42 @@ export default function ReviewBuilderPage() {
                         <span className="text-amber-300 font-medium">{alloc.pct}%</span>
                       </li>
                     ))}
+                  </ul>
+                ) : output.schwabLineup.type === 'standard_tilted' &&
+                  output.schwabLineup.tiltedItems ? (
+                  <ul className="space-y-1 text-xs text-zinc-300">
+                    {output.schwabLineup.tiltedItems.map((item) => {
+                      if (item.type === 'tilt') {
+                        return (
+                          <li key={item.id} className="flex justify-between text-amber-300">
+                            <span>
+                              {item.ticker} ({item.label})
+                            </span>
+                            <span className="font-medium">{item.weight.toFixed(1)}%</span>
+                          </li>
+                        );
+                      } else {
+                        return (
+                          <li key={item.id}>
+                            <div className="flex justify-between mb-0.5">
+                              <span className="font-medium">{item.label}</span>
+                              <span className="text-amber-300 font-medium">
+                                {item.weight.toFixed(1)}%
+                              </span>
+                            </div>
+                            {item.etfs && item.etfs.length > 0 && (
+                              <ul className="ml-2 space-y-0.5 text-zinc-400">
+                                {item.etfs.map((etf, idx) => (
+                                  <li key={idx} className="text-[10px]">
+                                    {etf.ticker} - {etf.name}
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </li>
+                        );
+                      }
+                    })}
                   </ul>
                 ) : (
                   <ul className="space-y-2 text-xs text-zinc-300">

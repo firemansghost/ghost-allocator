@@ -205,6 +205,29 @@ House presets are an alternative to the standard Ghost sleeve-based approach for
 
 The house model definitions live in `lib/houseModels.ts` and are the single source of truth for house preset allocations.
 
+## Optional Gold + Bitcoin Tilt (Standard preset, Schwab only)
+
+For users with Schwab BrokerageLink access using the Standard preset, an optional tilt can be applied to the Schwab lineup.
+
+### How It Works
+
+- **Applies only to Standard preset**: The tilt is not available for house presets (which already include Gold/BTC) or Voya-only users.
+- **Adjusts Schwab slice only**: Percentages are of the Schwab portion of the 457, not the total 457 balance.
+- **Proportional scaling**: When tilt is enabled, GLDM (Gold) and FBTC (Bitcoin) are added at the specified weights, and all existing Standard Schwab ETF sleeve weights are scaled down proportionally to make room.
+- **Voya mix unchanged**: The Voya mix remains the same as Standard preset (no defensive-only changes).
+
+### Tilt Options
+
+- **None** (default): No tilt applied
+- **10% Gold / 5% Bitcoin**: Adds 10% GLDM and 5% FBTC to Schwab slice
+- **15% Gold / 5% Bitcoin**: Adds 15% GLDM and 5% FBTC to Schwab slice
+
+### Important Notes
+
+- **House presets already include Gold/BTC**: The tilt toggle is hidden when a house preset is selected, as house presets already have Gold and Bitcoin allocations built in.
+- **Voya-only users**: The tilt is not available for Voya-only users (toggle is hidden).
+- **Implementation**: The tilt logic lives in `lib/schwabTilt.ts` and is applied in the builder when rendering the Schwab lineup.
+
 ## Review Harness
 
 A lightweight output review harness is available for internal QA and sanity-checking builder outputs. It renders deterministic fixtures and computed outputs in one place.

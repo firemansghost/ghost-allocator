@@ -17,6 +17,7 @@ import {
   getVoyaDeltaSummary,
 } from '@/lib/portfolioEngine';
 import { getHouseModel, isHousePreset } from '@/lib/houseModels';
+import { applySchwabTilt } from '@/lib/schwabTilt';
 import AllocationChart from '@/components/AllocationChart';
 import SleeveBreakdown from '@/components/SleeveBreakdown';
 import { GlassCard } from '@/components/GlassCard';
@@ -98,6 +99,7 @@ export default function Builder() {
   const voyaImplementation = buildVoyaImplementation(answers, riskLevel);
   const preset = answers.portfolioPreset ?? 'standard';
   const isHouseModel = isHousePreset(preset);
+  const tilt = answers.goldBtcTilt ?? 'none';
   const etfsBySleeve: Record<string, ExampleETF[]> = {};
   for (const etf of etfs) {
     if (!etfsBySleeve[etf.sleeveId]) {
@@ -105,6 +107,14 @@ export default function Builder() {
     }
     etfsBySleeve[etf.sleeveId].push(etf);
   }
+
+  // Apply tilt to Standard preset Schwab lineup if enabled
+  const tiltedSchwabLineup =
+    platformSplit.platform === 'voya_and_schwab' &&
+    !isHouseModel &&
+    tilt !== 'none'
+      ? applySchwabTilt(portfolio.sleeves, etfsBySleeve, tilt)
+      : null;
 
   // Compute delta plan for current vs target Voya mix
   const activeHoldings =
@@ -686,46 +696,109 @@ export default function Builder() {
                 These example ETFs would apply to the Schwab portion of your account. This is for
                 illustration only, not a recommendation.
               </p>
+              {tilt !== 'none' && (
+                <p className="text-[11px] text-amber-300 mt-1">
+                  Includes Gold + Bitcoin tilt (GLDM/FBTC).
+                </p>
+              )}
               <p className="text-[11px] text-zinc-400 mt-1">
                 Pro tip: Most folks rebalance into Schwab monthly or quarterly, not every paycheck.
                 Pick a cadence you&apos;ll actually stick with.
               </p>
               <div className="mt-2 space-y-1 text-xs text-zinc-300 leading-relaxed">
-                {portfolio.sleeves
-                  .filter((s) => s.weight > 0)
-                  .map((sleeve) => {
-                    const sleeveEtfs = etfsBySleeve[sleeve.id] || [];
-                    if (sleeveEtfs.length === 0) return null;
-
-                    return (
-                      <div
-                        key={sleeve.id}
-                        className="rounded-lg border border-zinc-800 bg-black/40 p-4"
-                      >
-                        <h3 className="text-sm font-semibold mb-3">
-                          {sleeve.name} ({formatPercent(sleeve.weight)})
-                        </h3>
-                        <div className="space-y-3">
-                          {sleeveEtfs.map((etf, idx) => (
-                            <div
-                              key={idx}
-                              className="pl-3 border-l-2 border-zinc-700"
-                            >
-                              <div className="flex items-baseline gap-2 mb-1">
-                                <span className="font-mono text-xs font-semibold">
-                                  {etf.ticker}
-                                </span>
-                                <span className="text-xs text-zinc-400">{etf.name}</span>
-                              </div>
-                              <p className="text-xs text-zinc-300 leading-relaxed">
-                                {etf.description}
-                              </p>
+                {tiltedSchwabLineup ? (
+                  // Render tilted lineup
+                  tiltedSchwabLineup.map((item) => {
+                    if (item.type === 'tilt') {
+                      return (
+                        <div
+                          key={item.id}
+                          className="rounded-lg border border-amber-400/30 bg-amber-400/10 p-4"
+                        >
+                          <div className="flex items-baseline justify-between mb-2">
+                            <div>
+                              <span className="font-mono text-sm font-semibold">
+                                {item.ticker}
+                              </span>
+                              <span className="text-xs text-zinc-400 ml-2">{item.label}</span>
                             </div>
-                          ))}
+                            <span className="text-sm font-semibold text-amber-300">
+                              {item.weight.toFixed(1)}%
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    } else {
+                      // Render sleeve item
+                      if (!item.etfs || item.etfs.length === 0) return null;
+                      return (
+                        <div
+                          key={item.id}
+                          className="rounded-lg border border-zinc-800 bg-black/40 p-4"
+                        >
+                          <h3 className="text-sm font-semibold mb-3">
+                            {item.label} ({item.weight.toFixed(1)}%)
+                          </h3>
+                          <div className="space-y-3">
+                            {item.etfs.map((etf, idx) => (
+                              <div
+                                key={idx}
+                                className="pl-3 border-l-2 border-zinc-700"
+                              >
+                                <div className="flex items-baseline gap-2 mb-1">
+                                  <span className="font-mono text-xs font-semibold">
+                                    {etf.ticker}
+                                  </span>
+                                  <span className="text-xs text-zinc-400">{etf.name}</span>
+                                </div>
+                                <p className="text-xs text-zinc-300 leading-relaxed">
+                                  {etf.description}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    }
+                  })
+                ) : (
+                  // Render standard lineup (no tilt)
+                  portfolio.sleeves
+                    .filter((s) => s.weight > 0)
+                    .map((sleeve) => {
+                      const sleeveEtfs = etfsBySleeve[sleeve.id] || [];
+                      if (sleeveEtfs.length === 0) return null;
+
+                      return (
+                        <div
+                          key={sleeve.id}
+                          className="rounded-lg border border-zinc-800 bg-black/40 p-4"
+                        >
+                          <h3 className="text-sm font-semibold mb-3">
+                            {sleeve.name} ({formatPercent(sleeve.weight)})
+                          </h3>
+                          <div className="space-y-3">
+                            {sleeveEtfs.map((etf, idx) => (
+                              <div
+                                key={idx}
+                                className="pl-3 border-l-2 border-zinc-700"
+                              >
+                                <div className="flex items-baseline gap-2 mb-1">
+                                  <span className="font-mono text-xs font-semibold">
+                                    {etf.ticker}
+                                  </span>
+                                  <span className="text-xs text-zinc-400">{etf.name}</span>
+                                </div>
+                                <p className="text-xs text-zinc-300 leading-relaxed">
+                                  {etf.description}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })
+                )}
               </div>
             </GlassCard>
           )}

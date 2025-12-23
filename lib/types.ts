@@ -15,6 +15,8 @@ export type PortfolioPreset =
   | 'ghostregime_60_30_10'
   | 'ghostregime_60_25_15';
 
+export type GoldBtcTilt = 'none' | 'gold10_btc5' | 'gold15_btc5';
+
 export type SleeveId =
   | 'core_equity'
   | 'convex_equity'
@@ -45,6 +47,7 @@ export interface QuestionnaireAnswers {
   currentSchwabPct?: number; // 0–75, only relevant when platform === "voya_and_schwab"
   schwabPreference?: 'stay_low' | 'use_full_75';
   portfolioPreset?: PortfolioPreset; // default to "standard"
+  goldBtcTilt?: GoldBtcTilt; // default "none"
   currentVoyaHoldings?: CurrentVoyaHolding[];
 }
 

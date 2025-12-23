@@ -121,5 +121,27 @@ export const REVIEW_FIXTURES: ReviewFixture[] = [
     },
     expectedRiskLevel: 5,
   },
+  {
+    id: 'voya-schwab-standard-tilt-moderate',
+    title: 'Voya+Schwab + Standard + Tilt 10/5 + Moderate Risk',
+    notes: 'Standard preset with Gold 10% / Bitcoin 5% tilt',
+    answers: {
+      age: 45,
+      yearsToGoal: 20,
+      isRetired: false,
+      drawdownTolerance: 'medium',
+      behaviorInCrash: 'hold',
+      incomeStability: 'medium',
+      complexityPreference: 'moderate',
+      hasPension: false,
+      pensionCoverage: 'none',
+      platform: 'voya_and_schwab',
+      currentSchwabPct: 50,
+      schwabPreference: 'stay_low',
+      portfolioPreset: 'standard',
+      goldBtcTilt: 'gold10_btc5',
+    },
+    expectedRiskLevel: 3,
+  },
 ];
 
