@@ -106,6 +106,7 @@ export interface VoyaImplementation {
   style: VoyaImplementationStyle;
   description: string;
   mix?: VoyaFundMixItem[];
+  note?: string; // Optional user-facing note (e.g., fallback message)
 }
 
 export interface VoyaFundDelta {

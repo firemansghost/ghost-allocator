@@ -318,6 +318,11 @@ export default function Builder() {
               <p className="text-[11px] text-zinc-400 mt-2 italic">
                 Note: Target-date funds are allowed as current holdings, but Ghost Allocator doesn&apos;t recommend them as the target mix.
               </p>
+              {voyaImplementation.note && (
+                <div className="mt-2 p-2 bg-amber-500/10 border border-amber-500/20 rounded text-[11px] text-amber-200">
+                  {voyaImplementation.note}
+                </div>
+              )}
               <ul className="mt-2 space-y-1.5 text-xs text-zinc-200">
                 {voyaImplementation.mix?.map((item) => (
                   <li
@@ -575,6 +580,11 @@ export default function Builder() {
                     Percentages below are of the Voya slice only (about{' '}
                     {platformSplit.targetVoyaPct}% of your 457).
                   </p>
+                  {voyaImplementation.note && (
+                    <div className="mt-2 p-2 bg-amber-500/10 border border-amber-500/20 rounded text-[11px] text-amber-200">
+                      {voyaImplementation.note}
+                    </div>
+                  )}
                   <ul className="mt-2 space-y-1.5 text-xs text-zinc-200">
                   {voyaImplementation.mix?.map((item) => (
                     <li

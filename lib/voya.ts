@@ -57,13 +57,14 @@ function pickTargetDateFund(
 }
 
 /**
- * Assert that a recommended Voya mix contains no target-date funds
+ * Check if a recommended Voya mix contains target-date funds
  * Uses redundant detection (group + ID + name patterns) to catch any TDFs
+ * Returns structured result for handling in dev vs production
  */
 function assertNoTargetDateFundsInMix(
   mix: VoyaFundMixItem[],
   contextLabel: string
-): void {
+): { ok: boolean; offenders: Array<{ id: string; name: string; reason: string }> } {
   const offenders: Array<{ id: string; name: string; reason: string }> = [];
   
   for (const item of mix) {
@@ -102,12 +103,44 @@ function assertNoTargetDateFundsInMix(
       console.error(message);
       throw new Error(message);
     } else {
-      // Production: log error but don't throw (user-facing requests)
+      // Production: log error but don't throw
       console.error(message);
-      // In production, we could filter them out here, but for now we just log
-      // The dev-time check should catch this before it reaches production
     }
   }
+  
+  return { ok: offenders.length === 0, offenders };
+}
+
+/**
+ * Sanitize a recommended Voya mix to ensure no target-date funds
+ * If TDFs are detected, replaces with a safe fallback mix
+ */
+function ensureRecommendedMixNoTdf(
+  mix: VoyaFundMixItem[],
+  riskLevel: RiskLevel,
+  contextLabel: string
+): { mix: VoyaFundMixItem[]; note: string | null } {
+  const check = assertNoTargetDateFundsInMix(mix, contextLabel);
+  
+  if (check.ok) {
+    return { mix, note: null };
+  }
+  
+  // TDFs detected: use safe fallback (core mix is guaranteed non-TDF)
+  const fallbackMix = _getCoreMixForRiskInternal(riskLevel);
+  
+  // Log error once with context
+  const offenderList = check.offenders
+    .map((o) => `  - ${o.name} (${o.id}): detected by ${o.reason}`)
+    .join('\n');
+  console.error(
+    `[voya.ts] WARNING: ${contextLabel} contained target-date fund(s), using fallback core mix:\n${offenderList}`
+  );
+  
+  return {
+    mix: fallbackMix,
+    note: 'We detected a target-date fund in the plan menu and substituted a core mix recommendation.',
+  };
 }
 
 /**
@@ -123,11 +156,17 @@ function getDefensiveOnlyMixForRisk(riskLevel: RiskLevel): VoyaFundMixItem[] {
     if (errors.length > 0) {
       console.error('[voya.ts] Invalid fund IDs in defensive-only mix:', errors);
     }
-    assertNoTargetDateFundsInMix(mix, 'defensive-only mix');
+    const check = assertNoTargetDateFundsInMix(mix, 'defensive-only mix');
+    if (!check.ok) {
+      throw new Error('Defensive-only mix must not contain target-date funds');
+    }
     return mix;
   }
   const mix = _getDefensiveOnlyMixForRiskInternal(riskLevel);
-  assertNoTargetDateFundsInMix(mix, 'defensive-only mix');
+  const check = assertNoTargetDateFundsInMix(mix, 'defensive-only mix');
+  if (!check.ok) {
+    console.error('[voya.ts] Defensive-only mix contains TDFs (unexpected)');
+  }
   return mix;
 }
 
@@ -237,11 +276,17 @@ function getComplementaryMixForRisk(riskLevel: RiskLevel): VoyaFundMixItem[] {
     if (errors.length > 0) {
       console.error('[voya.ts] Invalid fund IDs in complementary mix:', errors);
     }
-    assertNoTargetDateFundsInMix(mix, 'complementary mix');
+    const check = assertNoTargetDateFundsInMix(mix, 'complementary mix');
+    if (!check.ok) {
+      throw new Error('Complementary mix must not contain target-date funds');
+    }
     return mix;
   }
   const mix = _getComplementaryMixForRiskInternal(riskLevel);
-  assertNoTargetDateFundsInMix(mix, 'complementary mix');
+  const check = assertNoTargetDateFundsInMix(mix, 'complementary mix');
+  if (!check.ok) {
+    console.error('[voya.ts] Complementary mix contains TDFs (unexpected)');
+  }
   return mix;
 }
 
@@ -576,21 +621,19 @@ export function buildVoyaImplementation(
   const platform = answers.platform ?? 'voya_only';
   const isVoyaOnly = platform === 'voya_only';
 
-  let implementation: VoyaImplementation;
+  let rawMix: VoyaFundMixItem[];
+  let description: string;
 
   if (isVoyaOnly) {
     // Voya-only: Voya has to play all roles.
     // NOTE: We no longer recommend target-date funds as they contradict the "post-60/40" premise.
     // Even for "simple" users, we provide a core mix of individual funds.
     // Target-date funds remain available for users to enter as current holdings.
-    implementation = {
-      style: 'core_mix',
-      description:
-        complexity === 'simple'
-          ? 'Use a simple mix of core funds inside Voya that approximates your Ghost sleeve allocation.'
-          : 'Use a small mix of core funds inside Voya that approximates your Ghost sleeve allocation.',
-      mix: getCoreMixForRisk(riskLevel),
-    };
+    rawMix = getCoreMixForRisk(riskLevel);
+    description =
+      complexity === 'simple'
+        ? 'Use a simple mix of core funds inside Voya that approximates your Ghost sleeve allocation.'
+        : 'Use a small mix of core funds inside Voya that approximates your Ghost sleeve allocation.';
   } else {
     // Voya + Schwab: Check if house preset is selected
     const preset = answers.portfolioPreset ?? 'standard';
@@ -598,28 +641,29 @@ export function buildVoyaImplementation(
 
     if (isHouseModel) {
       // House preset: Voya stays defensive-only (no real assets) because Gold is already on Schwab side
-      implementation = {
-        style: 'core_mix',
-        description:
-          'Because your Schwab preset already includes Gold, the Voya portion stays defensive (stable value + bonds).',
-        mix: getDefensiveOnlyMixForRisk(riskLevel),
-      };
+      rawMix = getDefensiveOnlyMixForRisk(riskLevel);
+      description =
+        'Because your Schwab preset already includes Gold, the Voya portion stays defensive (stable value + bonds).';
     } else {
       // Standard preset: Schwab handles most of the equity risk; Voya is the safety + inflation bucket.
-      implementation = {
-        style: 'core_mix',
-        description:
-          'For your Voya slice, we tilt toward bonds, stable value, and real assets so Schwab handles most of the equity risk.',
-        mix: getComplementaryMixForRisk(riskLevel),
-      };
+      rawMix = getComplementaryMixForRisk(riskLevel);
+      description =
+        'For your Voya slice, we tilt toward bonds, stable value, and real assets so Schwab handles most of the equity risk.';
     }
   }
 
-  // Final gate: assert no TDFs in the output (redundant check)
-  if (implementation.mix) {
-    assertNoTargetDateFundsInMix(implementation.mix, 'buildVoyaImplementation output');
-  }
+  // Final gate: sanitize mix to ensure no TDFs (with fallback in production)
+  const sanitized = ensureRecommendedMixNoTdf(
+    rawMix,
+    riskLevel,
+    'buildVoyaImplementation output'
+  );
 
-  return implementation;
+  return {
+    style: 'core_mix',
+    description,
+    mix: sanitized.mix,
+    note: sanitized.note ?? undefined,
+  };
 }
 

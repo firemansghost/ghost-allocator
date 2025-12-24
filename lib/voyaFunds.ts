@@ -288,9 +288,15 @@ export function isTargetDateName(name: string): boolean {
     return true;
   }
   
-  // Pattern C: known glidepath series tokens (LifePath) + a year
+  // Pattern C: known glidepath series tokens (LifePath, Freedom) + a year
   const lifepathPattern = /\blifepath\b.*\b20\d{2}\b/;
   if (lifepathPattern.test(lower)) {
+    return true;
+  }
+  
+  // Pattern D: "freedom" + a year (Fidelity Freedom series)
+  const freedomYearPattern = /\bfreedom\b.*\b20\d{2}\b|\b20\d{2}\b.*\bfreedom\b/;
+  if (freedomYearPattern.test(lower)) {
     return true;
   }
   

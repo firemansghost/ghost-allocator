@@ -14,6 +14,57 @@ import { getStandardSchwabLineup } from '@/lib/schwabLineups';
 import { isTargetDateFund, isTargetDateName, looksLikeTargetDateFund, getFundById } from '@/lib/voyaFunds';
 import type { ExampleETF } from '@/lib/types';
 
+/**
+ * Canary self-check: validate name-based TDF detection against known samples
+ * This runs in dev/test to ensure detection patterns are working correctly
+ */
+function runCanaryChecks() {
+  if (process.env.NODE_ENV !== 'development' && process.env.NODE_ENV !== 'test') {
+    return; // Only run in dev/test
+  }
+
+  const positiveSamples = [
+    'Vanguard Target Retirement 2035 Fund',
+    'Fidelity Freedom 2040 Fund',
+    'BlackRock LifePath Index 2050',
+    'Target Date 2045',
+    'Retirement 2030 Fund',
+    'LifePath 2055 Index Fund',
+  ];
+
+  const negativeSamples = [
+    'JPMorgan Core Bond Fund',
+    'PIMCO Diversified Real Assets Fund',
+    'Northern Trust S&P 500 Index',
+    'SSGA Russell Small/Mid Cap Index',
+    'Stable Value Option',
+  ];
+
+  const failures: string[] = [];
+
+  // Check positives: should all match
+  for (const name of positiveSamples) {
+    if (!isTargetDateName(name)) {
+      failures.push(`FAIL: "${name}" should be detected as TDF but wasn't`);
+    }
+  }
+
+  // Check negatives: should NOT match
+  for (const name of negativeSamples) {
+    if (isTargetDateName(name)) {
+      failures.push(`FAIL: "${name}" should NOT be detected as TDF but was`);
+    }
+  }
+
+  if (failures.length > 0) {
+    const message = `[review/builder] Canary check FAILED:\n${failures.join('\n')}`;
+    console.error(message);
+    throw new Error(message);
+  }
+}
+
+// Canary checks will run on component mount (see ReviewBuilderPage component)
+
 
 interface ReviewOutput {
   fixtureId: string;
@@ -202,6 +253,14 @@ function computeReviewOutput(fixture: typeof REVIEW_FIXTURES[0]): ReviewOutput {
 }
 
 export default function ReviewBuilderPage() {
+  // Run canary checks on component mount (dev/test only)
+  if (typeof window !== 'undefined') {
+    try {
+      runCanaryChecks();
+    } catch (error) {
+      console.error('[review/builder] Canary check failed on mount:', error);
+    }
+  }
   // Check env var at runtime (client-side)
   const enableReviewHarness =
     typeof window !== 'undefined' &&
