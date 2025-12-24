@@ -93,7 +93,7 @@ export interface PlatformSplit {
   targetSchwabPct: number; // percent of the total 457 balance (0–75 for voya_and_schwab)
 }
 
-export type VoyaImplementationStyle = 'simple_target_date' | 'core_mix';
+export type VoyaImplementationStyle = 'core_mix';
 
 export interface VoyaFundMixItem {
   id: string;
@@ -105,7 +105,6 @@ export interface VoyaFundMixItem {
 export interface VoyaImplementation {
   style: VoyaImplementationStyle;
   description: string;
-  targetDateFundName?: string;
   mix?: VoyaFundMixItem[];
 }
 

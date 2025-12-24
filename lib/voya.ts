@@ -10,6 +10,8 @@ import {
   getFundName,
   VOYA_TDF_FUNDS,
   validateFundMix,
+  isTargetDateFund,
+  isTargetDateName,
 } from './voyaFunds';
 
 /**
@@ -328,14 +330,25 @@ function _getComplementaryMixForRiskInternal(riskLevel: RiskLevel): VoyaFundMixI
 /**
  * Returns a core-fund mix for a given risk level (for Voya-only users)
  * riskLevel mapping: 1=very conservative, 2=conservative, 3=moderate, 4=aggressive, 5=very aggressive
+ * 
+ * IMPORTANT: This function must NEVER return target-date funds in the recommended mix.
+ * Target-date funds are only allowed as current holdings (user-entered).
  */
 function getCoreMixForRisk(riskLevel: RiskLevel): VoyaFundMixItem[] {
-  // Dev-time validation: ensure all fund IDs are valid
+  // Dev-time validation: ensure all fund IDs are valid and no target-date funds
   if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
     const mix = _getCoreMixForRiskInternal(riskLevel);
     const errors = validateFundMix(mix);
     if (errors.length > 0) {
       console.error('[voya.ts] Invalid fund IDs in core mix:', errors);
+    }
+    // Assert no target-date funds in recommended mix
+    const hasTDF = mix.some(
+      (item) => isTargetDateFund(item.id) || isTargetDateName(item.name)
+    );
+    if (hasTDF) {
+      console.error('[voya.ts] ERROR: Core mix contains target-date fund!', mix);
+      throw new Error('Core mix must not contain target-date funds');
     }
     return mix;
   }
@@ -508,21 +521,15 @@ export function buildVoyaImplementation(
 
   if (isVoyaOnly) {
     // Voya-only: Voya has to play all roles.
-    if (complexity === 'simple') {
-      const name = pickTargetDateFund(answers.yearsToGoal, riskLevel);
-      return {
-        style: 'simple_target_date',
-        description:
-          'Keep it simple with a single Vanguard Target Retirement fund inside the Voya core menu.',
-        targetDateFundName: name,
-      };
-    }
-
-    // moderate / advanced → existing all-in-one core mix
+    // NOTE: We no longer recommend target-date funds as they contradict the "post-60/40" premise.
+    // Even for "simple" users, we provide a core mix of individual funds.
+    // Target-date funds remain available for users to enter as current holdings.
     return {
       style: 'core_mix',
       description:
-        'Use a small mix of core funds inside Voya that approximates your Ghost sleeve allocation.',
+        complexity === 'simple'
+          ? 'Use a simple mix of core funds inside Voya that approximates your Ghost sleeve allocation.'
+          : 'Use a small mix of core funds inside Voya that approximates your Ghost sleeve allocation.',
       mix: getCoreMixForRisk(riskLevel),
     };
   }

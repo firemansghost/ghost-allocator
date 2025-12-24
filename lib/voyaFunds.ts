@@ -236,6 +236,22 @@ export const VOYA_CORE_FUNDS = VOYA_FUNDS.filter((f) => f.group === 'Core');
 export const VOYA_TDF_FUNDS = VOYA_FUNDS.filter((f) => f.group === 'Target Date');
 
 /**
+ * Check if a fund is a target-date fund
+ */
+export function isTargetDateFund(fundId: string): boolean {
+  const fund = getFundById(fundId);
+  return fund?.group === 'Target Date';
+}
+
+/**
+ * Check if a fund name indicates it's a target-date fund
+ */
+export function isTargetDateName(name: string): boolean {
+  const lower = name.toLowerCase();
+  return lower.includes('target') || lower.includes('retirement');
+}
+
+/**
  * Legacy ID mapping for backward compatibility.
  * Maps old fund IDs used in recommended mixes to new canonical IDs.
  */

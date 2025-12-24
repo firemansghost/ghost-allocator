@@ -11,6 +11,7 @@ import {
 } from '@/lib/portfolioEngine';
 import { getHouseModel, getHouseModelWithWrappers, isHousePreset } from '@/lib/houseModels';
 import { getStandardSchwabLineup } from '@/lib/schwabLineups';
+import { isTargetDateFund, isTargetDateName } from '@/lib/voyaFunds';
 import type { ExampleETF } from '@/lib/types';
 
 
@@ -41,6 +42,7 @@ interface ReviewOutput {
     standardPresetUnchanged: boolean;
     tiltHasGldmFbtc: boolean;
     tiltIncludesStandardEtfs: boolean;
+    voyaMixNoTargetDateFunds: boolean;
   };
 }
 
@@ -162,6 +164,14 @@ function computeReviewOutput(fixture: typeof REVIEW_FIXTURES[0]): ReviewOutput {
 
   const standardPresetUnchanged = preset === 'standard';
 
+  // Assert: Voya recommended mix must not contain target-date funds
+  const voyaMixNoTargetDateFunds =
+    !voyaImplementation.mix ||
+    voyaImplementation.mix.length === 0 ||
+    !voyaImplementation.mix.some(
+      (item) => isTargetDateFund(item.id) || isTargetDateName(item.name)
+    );
+
   return {
     fixtureId: fixture.id,
     riskLevel,
@@ -176,6 +186,7 @@ function computeReviewOutput(fixture: typeof REVIEW_FIXTURES[0]): ReviewOutput {
       standardPresetUnchanged,
       tiltHasGldmFbtc,
       tiltIncludesStandardEtfs,
+      voyaMixNoTargetDateFunds,
     },
   };
 }
@@ -250,20 +261,14 @@ export default function ReviewBuilderPage() {
             {/* Voya Mix */}
             <div className="pt-2 border-t border-zinc-800">
               <h3 className="text-xs font-semibold text-zinc-300 mb-2">Voya Mix</h3>
-              {output.voyaImplementation.style === 'simple_target_date' ? (
-                <p className="text-xs text-zinc-300">
-                  {output.voyaImplementation.targetDateFundName}
-                </p>
-              ) : (
-                <ul className="space-y-1 text-xs text-zinc-300">
-                  {output.voyaImplementation.mix?.map((item) => (
-                    <li key={item.id} className="flex justify-between">
-                      <span>{item.name}</span>
-                      <span className="text-amber-300 font-medium">{item.allocationPct}%</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
+              <ul className="space-y-1 text-xs text-zinc-300">
+                {output.voyaImplementation.mix?.map((item) => (
+                  <li key={item.id} className="flex justify-between">
+                    <span>{item.name}</span>
+                    <span className="text-amber-300 font-medium">{item.allocationPct}%</span>
+                  </li>
+                ))}
+              </ul>
             </div>
 
             {/* Schwab Lineup */}
@@ -408,21 +413,44 @@ export default function ReviewBuilderPage() {
                     </li>
                   </>
                 )}
-                {fixture.answers.portfolioPreset === 'standard' && (
+                {fixture.answers.portfolioPreset === 'standard' &&
+                  (fixture.answers.goldBtcTilt ?? 'none') === 'none' && (
+                    <li className="flex items-center gap-2">
+                      <span
+                        className={`inline-block w-2 h-2 rounded-full ${
+                          output.assertions.standardPresetUnchanged
+                            ? 'bg-green-500'
+                            : 'bg-red-500'
+                        }`}
+                      />
+                      <span
+                        className={
+                          output.assertions.standardPresetUnchanged
+                            ? 'text-green-300'
+                            : 'text-red-300'
+                        }
+                      >
+                        Standard preset unchanged
+                      </span>
+                    </li>
+                  )}
+                {output.voyaImplementation.mix && output.voyaImplementation.mix.length > 0 && (
                   <li className="flex items-center gap-2">
                     <span
                       className={`inline-block w-2 h-2 rounded-full ${
-                        output.assertions.standardPresetUnchanged
+                        output.assertions.voyaMixNoTargetDateFunds
                           ? 'bg-green-500'
                           : 'bg-red-500'
                       }`}
                     />
                     <span
                       className={
-                        output.assertions.standardPresetUnchanged ? 'text-green-300' : 'text-red-300'
+                        output.assertions.voyaMixNoTargetDateFunds
+                          ? 'text-green-300'
+                          : 'text-red-300'
                       }
                     >
-                      Standard preset unchanged
+                      Voya mix: No target-date funds
                     </span>
                   </li>
                 )}

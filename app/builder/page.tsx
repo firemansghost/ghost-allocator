@@ -311,46 +311,35 @@ export default function Builder() {
             <h2 className="text-sm font-semibold text-zinc-50">
               Target Voya mix (set this in Voya)
             </h2>
-            {voyaImplementation.style === 'simple_target_date' ? (
-              <>
-                <p className="text-xs text-zinc-300 leading-relaxed">
-                  Set your Voya contribution allocation to match this target mix. This is the simplest way to implement your Ghost sleeves using the OKC Voya core menu.
-                </p>
-                <p className="text-sm font-medium text-amber-300">
-                  {voyaImplementation.targetDateFundName}
-                </p>
-                <p className="text-[11px] text-zinc-400">
-                  This would represent ~100% of your 457 balance in this plan.
-                </p>
-              </>
-            ) : (
-              <>
-                <p className="text-xs text-zinc-300 leading-relaxed">
-                  Set your Voya contribution allocation to match this target mix. This is the simplest way to implement your Ghost sleeves using the OKC Voya core menu.
-                </p>
-                <ul className="mt-2 space-y-1.5 text-xs text-zinc-200">
-                  {voyaImplementation.mix?.map((item) => (
-                    <li
-                      key={item.id}
-                      className="flex items-baseline justify-between gap-3"
-                    >
-                      <div>
-                        <p className="font-medium">{item.name}</p>
-                        <p className="text-[11px] text-zinc-400">{item.role}</p>
-                      </div>
-                      <span className="text-[11px] font-semibold text-amber-300">
-                        {platformSplit.platform === 'voya_only'
-                          ? `${item.allocationPct}% of your 457`
-                          : `${item.allocationPct}% of Voya portion`}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-                <p className="mt-1 text-[11px] text-zinc-500">
-                  This mix represents ~100% of your 457 balance. Percentages are matched on role (growth vs defensive), not exact sleeve labels.
-                </p>
-              </>
-            )}
+            <>
+              <p className="text-xs text-zinc-300 leading-relaxed">
+                Set your Voya contribution allocation to match this target mix. This implements your Ghost sleeves using the OKC Voya core menu.
+              </p>
+              <p className="text-[11px] text-zinc-400 mt-2 italic">
+                Note: Target-date funds are allowed as current holdings, but Ghost Allocator doesn&apos;t recommend them as the target mix.
+              </p>
+              <ul className="mt-2 space-y-1.5 text-xs text-zinc-200">
+                {voyaImplementation.mix?.map((item) => (
+                  <li
+                    key={item.id}
+                    className="flex items-baseline justify-between gap-3"
+                  >
+                    <div>
+                      <p className="font-medium">{item.name}</p>
+                      <p className="text-[11px] text-zinc-400">{item.role}</p>
+                    </div>
+                    <span className="text-[11px] font-semibold text-amber-300">
+                      {platformSplit.platform === 'voya_only'
+                        ? `${item.allocationPct}% of your 457`
+                        : `${item.allocationPct}% of Voya portion`}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-1 text-[11px] text-zinc-500">
+                This mix represents ~100% of your 457 balance. Percentages are matched on role (growth vs defensive), not exact sleeve labels.
+              </p>
+            </>
           </GlassCard>
         </div>
       )}
@@ -550,21 +539,6 @@ export default function Builder() {
                   )}
                 </>
               )}
-              {voyaImplementation.style === 'simple_target_date' && (
-                <>
-                  <p className="text-xs text-zinc-300 leading-relaxed">
-                    You chose the simple path using a single Vanguard Target Retirement fund. The
-                    goal is to end up with about 100% of your Voya 457 in:
-                  </p>
-                  <p className="text-sm font-medium text-amber-300">
-                    {voyaImplementation.targetDateFundName}
-                  </p>
-                  <p className="text-[11px] text-zinc-400">
-                    Redirect new contributions into this fund, and over time move money from your
-                    existing holdings into it until it&apos;s roughly your whole Voya balance.
-                  </p>
-                </>
-              )}
               </GlassCard>
             </div>
           ) : (
@@ -591,21 +565,7 @@ export default function Builder() {
                 <h2 className="text-sm font-semibold text-zinc-50">
                   Voya core funds ({platformSplit.targetVoyaPct}% of 457)
                 </h2>
-              {voyaImplementation.style === 'simple_target_date' ? (
-                <>
-                  <p className="text-xs text-zinc-300 leading-relaxed">
-                    If you prefer to keep the Voya slice simple, use a single target-date fund:
-                  </p>
-                  <p className="text-sm font-medium text-amber-300">
-                    {voyaImplementation.targetDateFundName}
-                  </p>
-                  <p className="text-[11px] text-zinc-400">
-                    This would apply to roughly {platformSplit.targetVoyaPct}% of your 457 that
-                    stays in Voya.
-                  </p>
-                </>
-              ) : (
-                <>
+              <>
                   <p className="text-xs text-zinc-300 leading-relaxed">
                     For the Voya portion of your account, we lean into bonds, stable value, and
                     real assets. Schwab handles most of the equity risk; Voya acts as your safety
@@ -616,24 +576,23 @@ export default function Builder() {
                     {platformSplit.targetVoyaPct}% of your 457).
                   </p>
                   <ul className="mt-2 space-y-1.5 text-xs text-zinc-200">
-                    {voyaImplementation.mix?.map((item) => (
-                      <li
-                        key={item.id}
-                        className="flex items-baseline justify-between gap-3"
-                      >
-                        <div>
-                          <p className="font-medium">{item.name}</p>
-                          <p className="text-[11px] text-zinc-400">{item.role}</p>
-                        </div>
-                        <span className="text-[11px] font-semibold text-amber-300">
-                          {item.allocationPct}% of Voya portion
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              )}
-              </GlassCard>
+                  {voyaImplementation.mix?.map((item) => (
+                    <li
+                      key={item.id}
+                      className="flex items-baseline justify-between gap-3"
+                    >
+                      <div>
+                        <p className="font-medium">{item.name}</p>
+                        <p className="text-[11px] text-zinc-400">{item.role}</p>
+                      </div>
+                      <span className="text-[11px] font-semibold text-amber-300">
+                        {item.allocationPct}% of Voya portion
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            </GlassCard>
             </div>
           )}
         </div>

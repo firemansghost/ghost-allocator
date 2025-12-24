@@ -212,5 +212,31 @@ export const REVIEW_FIXTURES: ReviewFixture[] = [
     },
     expectedRiskLevel: 3,
   },
+  {
+    id: 'voya-only-simple-tdf-current',
+    title: 'Voya-only + Simple + TDF Current Holdings + Moderate Risk',
+    notes: 'User has 100% in target-date fund as current holdings; should recommend non-TDF mix',
+    answers: {
+      age: 45,
+      yearsToGoal: 20,
+      isRetired: false,
+      drawdownTolerance: 'medium',
+      behaviorInCrash: 'hold',
+      incomeStability: 'medium',
+      complexityPreference: 'simple',
+      hasPension: false,
+      pensionCoverage: 'none',
+      platform: 'voya_only',
+      portfolioPreset: 'standard',
+      currentVoyaHoldings: [
+        {
+          fundId: 'vanguard_target_retirement_2035',
+          fundName: 'Vanguard Target Retirement 2035',
+          allocationPct: 100,
+        },
+      ],
+    },
+    expectedRiskLevel: 3,
+  },
 ];
 
