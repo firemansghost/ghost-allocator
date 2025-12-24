@@ -12,7 +12,9 @@ import {
   validateFundMix,
   isTargetDateFund,
   isTargetDateName,
+  looksLikeTargetDateFund,
 } from './voyaFunds';
+import type { VoyaFund } from './voyaFunds';
 
 /**
  * Selects a target-date fund based on years to goal and risk level.
@@ -55,6 +57,60 @@ function pickTargetDateFund(
 }
 
 /**
+ * Assert that a recommended Voya mix contains no target-date funds
+ * Uses redundant detection (group + ID + name patterns) to catch any TDFs
+ */
+function assertNoTargetDateFundsInMix(
+  mix: VoyaFundMixItem[],
+  contextLabel: string
+): void {
+  const offenders: Array<{ id: string; name: string; reason: string }> = [];
+  
+  for (const item of mix) {
+    const fund = getFundById(item.id);
+    if (!fund) {
+      continue; // Skip invalid funds (will be caught by validateFundMix)
+    }
+    
+    if (looksLikeTargetDateFund(fund)) {
+      const reasons: string[] = [];
+      if (fund.group === 'Target Date') {
+        reasons.push('group classification');
+      }
+      if (isTargetDateFund(fund.id)) {
+        reasons.push('ID check');
+      }
+      if (isTargetDateName(fund.name)) {
+        reasons.push('name pattern');
+      }
+      
+      offenders.push({
+        id: fund.id,
+        name: fund.name,
+        reason: reasons.join(', '),
+      });
+    }
+  }
+  
+  if (offenders.length > 0) {
+    const offenderList = offenders
+      .map((o) => `  - ${o.name} (${o.id}): detected by ${o.reason}`)
+      .join('\n');
+    const message = `[voya.ts] ERROR: ${contextLabel} contains target-date fund(s):\n${offenderList}\n\nTarget-date funds are not allowed in recommended mixes.`;
+    
+    if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+      console.error(message);
+      throw new Error(message);
+    } else {
+      // Production: log error but don't throw (user-facing requests)
+      console.error(message);
+      // In production, we could filter them out here, but for now we just log
+      // The dev-time check should catch this before it reaches production
+    }
+  }
+}
+
+/**
  * Returns a defensive-only Voya mix for house preset users (Voya+Schwab)
  * No real assets fund here because Gold is already doing that job on the Schwab side
  * This avoids "real assets in both places" confusion
@@ -67,9 +123,12 @@ function getDefensiveOnlyMixForRisk(riskLevel: RiskLevel): VoyaFundMixItem[] {
     if (errors.length > 0) {
       console.error('[voya.ts] Invalid fund IDs in defensive-only mix:', errors);
     }
+    assertNoTargetDateFundsInMix(mix, 'defensive-only mix');
     return mix;
   }
-  return _getDefensiveOnlyMixForRiskInternal(riskLevel);
+  const mix = _getDefensiveOnlyMixForRiskInternal(riskLevel);
+  assertNoTargetDateFundsInMix(mix, 'defensive-only mix');
+  return mix;
 }
 
 function _getDefensiveOnlyMixForRiskInternal(riskLevel: RiskLevel): VoyaFundMixItem[] {
@@ -178,9 +237,12 @@ function getComplementaryMixForRisk(riskLevel: RiskLevel): VoyaFundMixItem[] {
     if (errors.length > 0) {
       console.error('[voya.ts] Invalid fund IDs in complementary mix:', errors);
     }
+    assertNoTargetDateFundsInMix(mix, 'complementary mix');
     return mix;
   }
-  return _getComplementaryMixForRiskInternal(riskLevel);
+  const mix = _getComplementaryMixForRiskInternal(riskLevel);
+  assertNoTargetDateFundsInMix(mix, 'complementary mix');
+  return mix;
 }
 
 function _getComplementaryMixForRiskInternal(riskLevel: RiskLevel): VoyaFundMixItem[] {
@@ -342,17 +404,12 @@ function getCoreMixForRisk(riskLevel: RiskLevel): VoyaFundMixItem[] {
     if (errors.length > 0) {
       console.error('[voya.ts] Invalid fund IDs in core mix:', errors);
     }
-    // Assert no target-date funds in recommended mix
-    const hasTDF = mix.some(
-      (item) => isTargetDateFund(item.id) || isTargetDateName(item.name)
-    );
-    if (hasTDF) {
-      console.error('[voya.ts] ERROR: Core mix contains target-date fund!', mix);
-      throw new Error('Core mix must not contain target-date funds');
-    }
+    assertNoTargetDateFundsInMix(mix, 'core mix');
     return mix;
   }
-  return _getCoreMixForRiskInternal(riskLevel);
+  const mix = _getCoreMixForRiskInternal(riskLevel);
+  assertNoTargetDateFundsInMix(mix, 'core mix');
+  return mix;
 }
 
 function _getCoreMixForRiskInternal(riskLevel: RiskLevel): VoyaFundMixItem[] {
@@ -519,12 +576,14 @@ export function buildVoyaImplementation(
   const platform = answers.platform ?? 'voya_only';
   const isVoyaOnly = platform === 'voya_only';
 
+  let implementation: VoyaImplementation;
+
   if (isVoyaOnly) {
     // Voya-only: Voya has to play all roles.
     // NOTE: We no longer recommend target-date funds as they contradict the "post-60/40" premise.
     // Even for "simple" users, we provide a core mix of individual funds.
     // Target-date funds remain available for users to enter as current holdings.
-    return {
+    implementation = {
       style: 'core_mix',
       description:
         complexity === 'simple'
@@ -532,28 +591,35 @@ export function buildVoyaImplementation(
           : 'Use a small mix of core funds inside Voya that approximates your Ghost sleeve allocation.',
       mix: getCoreMixForRisk(riskLevel),
     };
+  } else {
+    // Voya + Schwab: Check if house preset is selected
+    const preset = answers.portfolioPreset ?? 'standard';
+    const isHouseModel = isHousePreset(preset);
+
+    if (isHouseModel) {
+      // House preset: Voya stays defensive-only (no real assets) because Gold is already on Schwab side
+      implementation = {
+        style: 'core_mix',
+        description:
+          'Because your Schwab preset already includes Gold, the Voya portion stays defensive (stable value + bonds).',
+        mix: getDefensiveOnlyMixForRisk(riskLevel),
+      };
+    } else {
+      // Standard preset: Schwab handles most of the equity risk; Voya is the safety + inflation bucket.
+      implementation = {
+        style: 'core_mix',
+        description:
+          'For your Voya slice, we tilt toward bonds, stable value, and real assets so Schwab handles most of the equity risk.',
+        mix: getComplementaryMixForRisk(riskLevel),
+      };
+    }
   }
 
-  // Voya + Schwab: Check if house preset is selected
-  const preset = answers.portfolioPreset ?? 'standard';
-  const isHouseModel = isHousePreset(preset);
-
-  if (isHouseModel) {
-    // House preset: Voya stays defensive-only (no real assets) because Gold is already on Schwab side
-    return {
-      style: 'core_mix',
-      description:
-        'Because your Schwab preset already includes Gold, the Voya portion stays defensive (stable value + bonds).',
-      mix: getDefensiveOnlyMixForRisk(riskLevel),
-    };
+  // Final gate: assert no TDFs in the output (redundant check)
+  if (implementation.mix) {
+    assertNoTargetDateFundsInMix(implementation.mix, 'buildVoyaImplementation output');
   }
 
-  // Standard preset: Schwab handles most of the equity risk; Voya is the safety + inflation bucket.
-  return {
-    style: 'core_mix',
-    description:
-      'For your Voya slice, we tilt toward bonds, stable value, and real assets so Schwab handles most of the equity risk.',
-    mix: getComplementaryMixForRisk(riskLevel),
-  };
+  return implementation;
 }
 

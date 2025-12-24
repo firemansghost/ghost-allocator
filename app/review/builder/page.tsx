@@ -11,7 +11,7 @@ import {
 } from '@/lib/portfolioEngine';
 import { getHouseModel, getHouseModelWithWrappers, isHousePreset } from '@/lib/houseModels';
 import { getStandardSchwabLineup } from '@/lib/schwabLineups';
-import { isTargetDateFund, isTargetDateName } from '@/lib/voyaFunds';
+import { isTargetDateFund, isTargetDateName, looksLikeTargetDateFund, getFundById } from '@/lib/voyaFunds';
 import type { ExampleETF } from '@/lib/types';
 
 
@@ -165,12 +165,22 @@ function computeReviewOutput(fixture: typeof REVIEW_FIXTURES[0]): ReviewOutput {
   const standardPresetUnchanged = preset === 'standard';
 
   // Assert: Voya recommended mix must not contain target-date funds
-  const voyaMixNoTargetDateFunds =
-    !voyaImplementation.mix ||
-    voyaImplementation.mix.length === 0 ||
-    !voyaImplementation.mix.some(
-      (item) => isTargetDateFund(item.id) || isTargetDateName(item.name)
-    );
+  // Use redundant detection (group + ID + name patterns) to catch any TDFs
+  let voyaMixNoTargetDateFunds = true;
+  if (voyaImplementation.mix && voyaImplementation.mix.length > 0) {
+    for (const item of voyaImplementation.mix) {
+      const fund = getFundById(item.id);
+      if (fund && looksLikeTargetDateFund(fund)) {
+        voyaMixNoTargetDateFunds = false;
+        break;
+      }
+      // Belt: also check name directly (in case fund lookup fails)
+      if (isTargetDateName(item.name)) {
+        voyaMixNoTargetDateFunds = false;
+        break;
+      }
+    }
+  }
 
   return {
     fixtureId: fixture.id,

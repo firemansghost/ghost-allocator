@@ -236,7 +236,7 @@ export const VOYA_CORE_FUNDS = VOYA_FUNDS.filter((f) => f.group === 'Core');
 export const VOYA_TDF_FUNDS = VOYA_FUNDS.filter((f) => f.group === 'Target Date');
 
 /**
- * Check if a fund is a target-date fund
+ * Check if a fund is a target-date fund by ID
  */
 export function isTargetDateFund(fundId: string): boolean {
   const fund = getFundById(fundId);
@@ -244,11 +244,57 @@ export function isTargetDateFund(fundId: string): boolean {
 }
 
 /**
+ * Canonical classifier for "recommendation blacklist"
+ * Returns true if the fund looks like a target-date fund by any detection method:
+ * - fund.group === "Target Date"
+ * - OR isTargetDateFund(fund.id)
+ * - OR isTargetDateName(fund.name)
+ */
+export function looksLikeTargetDateFund(fund: VoyaFund): boolean {
+  // Primary: group classification
+  if (fund.group === 'Target Date') {
+    return true;
+  }
+  
+  // Secondary: ID-based check
+  if (isTargetDateFund(fund.id)) {
+    return true;
+  }
+  
+  // Tertiary: name-based regex detection (catches mis-grouped funds)
+  if (isTargetDateName(fund.name)) {
+    return true;
+  }
+  
+  return false;
+}
+
+/**
  * Check if a fund name indicates it's a target-date fund
+ * Uses strict regex patterns to catch common TDF naming without false positives
  */
 export function isTargetDateName(name: string): boolean {
   const lower = name.toLowerCase();
-  return lower.includes('target') || lower.includes('retirement');
+  
+  // Pattern A: "target" near "retirement/date" (Target Retirement, Target Date)
+  const targetDatePattern = /\btarget\s*(date|retirement)\b/;
+  if (targetDatePattern.test(lower)) {
+    return true;
+  }
+  
+  // Pattern B: "retirement" + a plausible year (20xx)
+  const retirementYearPattern = /\bretirement\b.*\b20\d{2}\b|\b20\d{2}\b.*\bretirement\b/;
+  if (retirementYearPattern.test(lower)) {
+    return true;
+  }
+  
+  // Pattern C: known glidepath series tokens (LifePath) + a year
+  const lifepathPattern = /\blifepath\b.*\b20\d{2}\b/;
+  if (lifepathPattern.test(lower)) {
+    return true;
+  }
+  
+  return false;
 }
 
 /**

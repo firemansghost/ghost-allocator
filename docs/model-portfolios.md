@@ -100,10 +100,12 @@ The model portfolios are:
 
 ### Voya-Only Implementation
 For users with only Voya access, the model portfolio sleeves are translated into:
-- **Simple path**: Target date fund recommendation (based on years to goal and risk level)
+
 - **Core mix path**: Custom Voya fund mix that approximates the sleeve allocation using the available OKC Voya menu
 
 The translation is handled by `lib/voya.ts` functions (`getCoreMixForRisk`, `getComplementaryMixForRisk`).
+
+**Important**: Recommended mixes are screened for target-date funds using both classification (fund group) and name patterns. Target-date funds are not recommended as they contradict the "post-60/40" premise, but they remain available for users to enter as current holdings.
 
 ### Voya + Schwab Implementation
 For users with both platforms:
@@ -143,9 +145,9 @@ When reviewing builder outputs to ensure they match these model portfolio specif
 
 ### Voya-Only Implementation Checks
 - ✅ **Is the Voya-only target mix readable and implementable?**
-  - Target date fund path: Does the recommended TDF match the risk level and years to goal?
   - Core mix path: Does the fund mix approximate the sleeve allocations using available Voya funds?
   - Are the fund allocations clear and actionable (user can set them in Voya)?
+  - **No target-date funds in recommended mix**: The recommended mix must not include any target-date funds (screened by group classification and name patterns)
 
 ### Voya+Schwab Implementation Checks
 - ✅ **Does Voya+Schwab avoid duplicate equity exposure?**
