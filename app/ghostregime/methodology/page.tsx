@@ -48,6 +48,9 @@ export default function MethodologyPage() {
           <a href="#stale" className="block text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline">
             Stale Data
           </a>
+          <a href="#data-sources" className="block text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline">
+            Data Sources & Update Timing
+          </a>
           <a href="#faq" className="block text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline">
             FAQ
           </a>
@@ -202,6 +205,101 @@ export default function MethodologyPage() {
               This is intentional. The model degrades gracefully rather than breaking. You&apos;ll see the last computed regime
               and scales, marked as stale, until fresh data is available.
             </p>
+          </div>
+        </GlassCard>
+      </div>
+
+      {/* Data Sources & Update Timing */}
+      <div id="data-sources" className="scroll-mt-6">
+        <GlassCard className="p-4 sm:p-5">
+          <h2 className="text-lg font-semibold text-zinc-50 mb-3">Data Sources & Update Timing</h2>
+          <div className="space-y-4 text-sm text-zinc-300 leading-relaxed">
+            {/* Data Sources */}
+            <div>
+              <h3 className="text-base font-medium text-zinc-200 mb-2">Data Sources</h3>
+              <ul className="space-y-2 pl-4 list-disc">
+                <li>
+                  <strong className="text-zinc-200">ETF prices</strong> (SPY, GLD, HYG, IEF, EEM, TLT, UUP, TIP, etc.): daily close data from{' '}
+                  <a
+                    href="https://stooq.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
+                  >
+                    Stooq
+                  </a>
+                </li>
+                <li>
+                  <strong className="text-zinc-200">VIX</strong>:{' '}
+                  <a
+                    href="https://www.cboe.com/tradable_products/vix/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
+                  >
+                    CBOE
+                  </a>{' '}
+                  data
+                </li>
+                <li>
+                  <strong className="text-zinc-200">Bitcoin</strong> (BTC-USD):{' '}
+                  <a
+                    href="https://stooq.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
+                  >
+                    Stooq
+                  </a>
+                </li>
+                <li>
+                  <strong className="text-zinc-200">Commodities</strong> (PDBC): typically{' '}
+                  <a
+                    href="https://www.alphavantage.co"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
+                  >
+                    AlphaVantage
+                  </a>
+                  , with DBC fallback from Stooq
+                </li>
+              </ul>
+              <p className="text-zinc-400 text-xs mt-3">
+                <strong className="text-zinc-300">Important:</strong> GhostRegime uses close-to-close price returns, not total return —
+                so dividends can cause differences vs brokerage total-return charts.
+              </p>
+              <details className="mt-3">
+                <summary className="cursor-pointer text-amber-400 hover:text-amber-300 font-medium text-xs">
+                  Why my broker won&apos;t match perfectly
+                </summary>
+                <div className="mt-2 pl-4 space-y-1.5 text-xs text-zinc-400">
+                  <p>• Different pricing timestamps (your broker might use intraday vs. close)</p>
+                  <p>• Dividends/total return vs. price return (we use price return)</p>
+                  <p>• Holiday/weekend gaps (data might lag on non-trading days)</p>
+                  <p>• Data revisions (providers sometimes backfill corrections)</p>
+                </div>
+              </details>
+            </div>
+
+            {/* Update Timing */}
+            <div>
+              <h3 className="text-base font-medium text-zinc-200 mb-2">Update Timing</h3>
+              <p>
+                GhostRegime is designed to update once per weekday after market close. Current job runs around 03:30 UTC (Mon–Fri),
+                which is roughly evening in US Central time.
+              </p>
+              <p className="text-zinc-400 italic mt-2">
+                It&apos;s a daily model — most humans rebalance on a cadence, not every time a number twitches.
+              </p>
+            </div>
+
+            {/* Stale Behavior */}
+            <div>
+              <p className="text-zinc-400 text-xs">
+                If a data source is unavailable, we mark the snapshot stale and keep showing the last good result rather than face-planting.
+              </p>
+            </div>
           </div>
         </GlassCard>
       </div>
