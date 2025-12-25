@@ -321,6 +321,9 @@ export default function Builder() {
               <p className="text-[11px] text-zinc-400 mt-2 italic">
                 Note: Target-date funds are allowed as current holdings, but Ghost Allocator doesn&apos;t recommend them as the target mix.
               </p>
+              <p className="text-[11px] text-zinc-400 mt-1">
+                In Voya, &quot;Stable Value Option&quot; is your cash-like holding.
+              </p>
               {voyaImplementation.note && (
                 <div className="mt-2 p-2 bg-amber-500/10 border border-amber-500/20 rounded text-[11px] text-amber-200">
                   {voyaImplementation.note}
@@ -439,6 +442,11 @@ export default function Builder() {
               onChange={handleVoyaHoldingsChange}
               isVoyaOnly={platformSplit.platform === 'voya_only'}
             />
+            {platformSplit.platform === 'voya_only' && (
+              <p className="text-[11px] text-zinc-400 mt-2">
+                In Voya, &quot;Stable Value Option&quot; is your cash-like holding.
+              </p>
+            )}
           </div>
 
           {/* One-time rebalance (optional) */}
@@ -516,7 +524,10 @@ export default function Builder() {
                         <ul className="space-y-1.5 text-xs text-zinc-200">
                           {voyaDeltaPlan.overweight.map((f) => (
                             <li key={f.id}>
-                              <span className="font-medium">{f.name}</span>{' '}
+                              <span className="font-medium">
+                                {f.name}
+                                {f.id === 'stable_value_option' ? ' (cash-like)' : ''}
+                              </span>{' '}
                               <span className="text-[11px] text-zinc-400">
                                 from ~{Math.round(f.currentPct)}% down to ~
                                 {Math.round(f.targetPct)}% (move about{' '}
@@ -649,6 +660,9 @@ export default function Builder() {
                       <span>Gold ×{ghostRegimeData.gold_scale.toFixed(2)}</span>
                       <span>BTC ×{ghostRegimeData.btc_scale.toFixed(2)}</span>
                     </div>
+                    <p className="text-[10px] text-zinc-400 mt-2">
+                      Targets can change as regimes change. Most people apply changes on a simple cadence (e.g., monthly) rather than reacting daily.
+                    </p>
                   </div>
                   
                   {/* Scaled lineup */}
@@ -666,9 +680,11 @@ export default function Builder() {
                         <div className="flex items-baseline justify-between mb-2">
                           <div>
                             <span className="font-mono text-sm font-semibold">
-                              {item.ticker}
+                              {item.isCash ? 'CASH' : item.ticker}
                             </span>
-                            <span className="text-xs text-zinc-400 ml-2">{item.label}</span>
+                            <span className="text-xs text-zinc-400 ml-2">
+                              {item.isCash ? 'Schwab cash (unallocated)' : item.label}
+                            </span>
                           </div>
                           <div className="text-right">
                             {item.isCash ? (
@@ -687,6 +703,16 @@ export default function Builder() {
                             )}
                           </div>
                         </div>
+                        {item.isCash && (
+                          <div className="mt-1 space-y-1">
+                            <p className="text-[11px] text-zinc-400">
+                              This is cash sitting in your Schwab brokerage slice — not your Voya &quot;Stable Value Option&quot;.
+                            </p>
+                            <p className="text-[10px] text-zinc-500 italic">
+                              When GhostRegime scales an asset down, the difference stays as Schwab cash until you rebalance.
+                            </p>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -696,7 +722,7 @@ export default function Builder() {
                   {/* Static lineup (fallback) */}
                   {ghostRegimeError && (
                     <p className="text-[11px] text-zinc-500 mt-2 italic">
-                      GhostRegime data not available right now — showing base targets.
+                      GhostRegime data isn&apos;t available right now — showing base targets (no scaling).
                     </p>
                   )}
                   <div className="mt-2 space-y-2 text-xs text-zinc-300 leading-relaxed">
