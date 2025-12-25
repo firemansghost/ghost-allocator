@@ -17,6 +17,7 @@ import {
 } from '@/lib/portfolioEngine';
 import { getHouseModel, getHouseModelWithWrappers, isHousePreset } from '@/lib/houseModels';
 import { getStandardSchwabLineup, willShowGoldBtc } from '@/lib/schwabLineups';
+import { computeScaledHouseLineup, type GhostRegimeScaleData } from '@/lib/houseScaling';
 import AllocationChart from '@/components/AllocationChart';
 import SleeveBreakdown from '@/components/SleeveBreakdown';
 import { GlassCard } from '@/components/GlassCard';
@@ -49,6 +50,8 @@ export default function Builder() {
   const [currentVoyaHoldings, setCurrentVoyaHoldings] = useState<
     CurrentVoyaHolding[] | undefined
   >(undefined);
+  const [ghostRegimeData, setGhostRegimeData] = useState<GhostRegimeScaleData | null>(null);
+  const [ghostRegimeError, setGhostRegimeError] = useState<boolean>(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -621,33 +624,107 @@ export default function Builder() {
                 This is a house preset. Percentages are of your Schwab slice. This is for
                 illustration only, not a recommendation.
               </p>
-              <p className="text-[11px] text-zinc-400 mt-1">
-                Pro tip: Most folks rebalance into Schwab monthly or quarterly, not every paycheck.
-                Pick a cadence you&apos;ll actually stick with.
-              </p>
-              <div className="mt-2 space-y-2 text-xs text-zinc-300 leading-relaxed">
-                {getHouseModelWithWrappers(preset, goldInstrument, btcInstrument).map((alloc) => (
-                  <div
-                    key={alloc.id}
-                    className="rounded-lg border border-zinc-800 bg-black/40 p-4"
-                  >
-                    <div className="flex items-baseline justify-between mb-2">
-                      <div>
-                        <span className="font-mono text-sm font-semibold">
-                          {alloc.ticker}
-                        </span>
-                        <span className="text-xs text-zinc-400 ml-2">{alloc.label}</span>
-                      </div>
-                      <span className="text-sm font-semibold text-amber-300">
-                        {alloc.pct}%
+              
+              {ghostRegimeData ? (
+                <>
+                  {/* GhostRegime scaling callout */}
+                  <div className="mt-3 p-2 bg-amber-500/10 border border-amber-500/20 rounded text-[11px]">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-amber-200 font-medium">
+                        GhostRegime scaling applied
                       </span>
+                      {ghostRegimeData.stale && (
+                        <span className="text-amber-400/80 bg-amber-500/20 px-1.5 py-0.5 rounded text-[10px]">
+                          Stale
+                        </span>
+                      )}
                     </div>
-                    {alloc.notes && (
-                      <p className="text-[11px] text-zinc-400 mt-1">{alloc.notes}</p>
+                    {ghostRegimeData.date && (
+                      <p className="text-zinc-400 text-[10px] mb-1">
+                        As of: {new Date(ghostRegimeData.date).toLocaleDateString()}
+                      </p>
                     )}
+                    <div className="flex gap-3 text-[10px] text-zinc-300 mt-1">
+                      <span>Stocks ×{ghostRegimeData.stocks_scale.toFixed(2)}</span>
+                      <span>Gold ×{ghostRegimeData.gold_scale.toFixed(2)}</span>
+                      <span>BTC ×{ghostRegimeData.btc_scale.toFixed(2)}</span>
+                    </div>
                   </div>
-                ))}
-              </div>
+                  
+                  {/* Scaled lineup */}
+                  <div className="mt-2 space-y-2 text-xs text-zinc-300 leading-relaxed">
+                    {computeScaledHouseLineup(
+                      getHouseModel(preset),
+                      ghostRegimeData,
+                      goldInstrument,
+                      btcInstrument
+                    ).map((item) => (
+                      <div
+                        key={item.id}
+                        className="rounded-lg border border-zinc-800 bg-black/40 p-4"
+                      >
+                        <div className="flex items-baseline justify-between mb-2">
+                          <div>
+                            <span className="font-mono text-sm font-semibold">
+                              {item.ticker}
+                            </span>
+                            <span className="text-xs text-zinc-400 ml-2">{item.label}</span>
+                          </div>
+                          <div className="text-right">
+                            {item.isCash ? (
+                              <span className="text-sm font-semibold text-amber-300">
+                                {item.actualPct.toFixed(1)}%
+                              </span>
+                            ) : (
+                              <div>
+                                <span className="text-sm font-semibold text-amber-300">
+                                  {item.actualPct.toFixed(1)}%
+                                </span>
+                                <span className="text-[10px] text-zinc-500 ml-1">
+                                  ({item.targetPct}% × {item.scale.toFixed(2)})
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Static lineup (fallback) */}
+                  {ghostRegimeError && (
+                    <p className="text-[11px] text-zinc-500 mt-2 italic">
+                      GhostRegime data not available right now — showing base targets.
+                    </p>
+                  )}
+                  <div className="mt-2 space-y-2 text-xs text-zinc-300 leading-relaxed">
+                    {getHouseModelWithWrappers(preset, goldInstrument, btcInstrument).map((alloc) => (
+                      <div
+                        key={alloc.id}
+                        className="rounded-lg border border-zinc-800 bg-black/40 p-4"
+                      >
+                        <div className="flex items-baseline justify-between mb-2">
+                          <div>
+                            <span className="font-mono text-sm font-semibold">
+                              {alloc.ticker}
+                            </span>
+                            <span className="text-xs text-zinc-400 ml-2">{alloc.label}</span>
+                          </div>
+                          <span className="text-sm font-semibold text-amber-300">
+                            {alloc.pct}%
+                          </span>
+                        </div>
+                        {alloc.notes && (
+                          <p className="text-[11px] text-zinc-400 mt-1">{alloc.notes}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+              
               {(goldInstrument === 'ygld' || btcInstrument === 'maxi') && (
                 <p className="text-[11px] text-amber-300 mt-2">
                   Using income wrappers: {goldInstrument === 'ygld' ? 'YGLD' : ''}

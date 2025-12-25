@@ -238,5 +238,28 @@ export const REVIEW_FIXTURES: ReviewFixture[] = [
     },
     expectedRiskLevel: 3,
   },
+  {
+    id: 'voya-schwab-house-scaled-moderate',
+    title: 'Voya+Schwab + House Preset + GhostRegime Scaling + Moderate Risk',
+    notes: 'House preset with mocked GhostRegime scales (stocks_scale=0.5, gold_scale=1, btc_scale=0) to test scaled lineup',
+    answers: {
+      age: 45,
+      yearsToGoal: 20,
+      isRetired: false,
+      drawdownTolerance: 'medium',
+      behaviorInCrash: 'hold',
+      incomeStability: 'medium',
+      complexityPreference: 'moderate',
+      hasPension: false,
+      pensionCoverage: 'none',
+      platform: 'voya_and_schwab',
+      currentSchwabPct: 50,
+      schwabPreference: 'stay_low',
+      portfolioPreset: 'ghostregime_60_30_10',
+      goldInstrument: 'gldm',
+      btcInstrument: 'fbtc',
+    },
+    expectedRiskLevel: 3,
+  },
 ];
 

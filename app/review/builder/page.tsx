@@ -12,6 +12,7 @@ import {
 import { getHouseModel, getHouseModelWithWrappers, isHousePreset } from '@/lib/houseModels';
 import { getStandardSchwabLineup } from '@/lib/schwabLineups';
 import { isTargetDateFund, isTargetDateName, looksLikeTargetDateFund, getFundById } from '@/lib/voyaFunds';
+import { computeScaledHouseLineup, type GhostRegimeScaleData, type ScaledLineupItem } from '@/lib/houseScaling';
 import type { ExampleETF } from '@/lib/types';
 
 /**
@@ -77,6 +78,7 @@ interface ReviewOutput {
   schwabLineup: {
     type: 'house' | 'standard' | 'standard_tilted';
     houseModel?: ReturnType<typeof getHouseModel>;
+    scaledLineup?: ScaledLineupItem[];
     standardEtfs?: ExampleETF[];
     standardSleeves?: Array<{ id: string; name: string; weight: number; etfs: ExampleETF[] }>;
     tiltedItems?: Array<{
@@ -97,6 +99,10 @@ interface ReviewOutput {
     tiltHasGldmFbtc: boolean;
     tiltIncludesStandardEtfs: boolean;
     voyaMixNoTargetDateFunds: boolean;
+    scaledLineupHasSpymGoldBtc: boolean;
+    scaledLineupHasCash: boolean;
+    scaledLineupSumsTo100: boolean;
+    scaledLineupWrappersApplied: boolean;
   };
 }
 
@@ -236,6 +242,50 @@ function computeReviewOutput(fixture: typeof REVIEW_FIXTURES[0]): ReviewOutput {
     }
   }
 
+  // Assertions for scaled house lineup
+  let scaledLineupHasSpymGoldBtc = true;
+  let scaledLineupHasCash = false;
+  let scaledLineupSumsTo100 = true;
+  let scaledLineupWrappersApplied = true;
+  
+  if (schwabLineup.type === 'house' && schwabLineup.scaledLineup) {
+    const lineup = schwabLineup.scaledLineup;
+    const tickers = lineup.map((item) => item.ticker);
+    
+    // Check for SPYM, Gold (GLDM/YGLD), BTC (FBTC/MAXI)
+    scaledLineupHasSpymGoldBtc =
+      tickers.includes('SPYM') &&
+      (tickers.includes('GLDM') || tickers.includes('YGLD')) &&
+      (tickers.includes('FBTC') || tickers.includes('MAXI'));
+    
+    // Check for cash
+    scaledLineupHasCash = lineup.some((item) => item.isCash);
+    
+    // Check sum ~100%
+    const sum = lineup.reduce((s, item) => s + item.actualPct, 0);
+    scaledLineupSumsTo100 = Math.abs(sum - 100) <= 0.01;
+    
+    // Check wrappers (if fixture specifies them)
+    const goldInstrument = fixture.answers.goldInstrument ?? 'gldm';
+    const btcInstrument = fixture.answers.btcInstrument ?? 'fbtc';
+    if (goldInstrument === 'ygld') {
+      scaledLineupWrappersApplied = scaledLineupWrappersApplied && tickers.includes('YGLD');
+    } else {
+      scaledLineupWrappersApplied = scaledLineupWrappersApplied && tickers.includes('GLDM');
+    }
+    if (btcInstrument === 'maxi') {
+      scaledLineupWrappersApplied = scaledLineupWrappersApplied && tickers.includes('MAXI');
+    } else {
+      scaledLineupWrappersApplied = scaledLineupWrappersApplied && tickers.includes('FBTC');
+    }
+  } else {
+    // Not applicable if no scaled lineup
+    scaledLineupHasSpymGoldBtc = true;
+    scaledLineupHasCash = true;
+    scaledLineupSumsTo100 = true;
+    scaledLineupWrappersApplied = true;
+  }
+
   return {
     fixtureId: fixture.id,
     riskLevel,
@@ -251,6 +301,10 @@ function computeReviewOutput(fixture: typeof REVIEW_FIXTURES[0]): ReviewOutput {
       tiltHasGldmFbtc,
       tiltIncludesStandardEtfs,
       voyaMixNoTargetDateFunds,
+      scaledLineupHasSpymGoldBtc,
+      scaledLineupHasCash,
+      scaledLineupSumsTo100,
+      scaledLineupWrappersApplied,
     },
   };
 }
@@ -525,6 +579,82 @@ export default function ReviewBuilderPage() {
                       Voya mix: No target-date funds
                     </span>
                   </li>
+                )}
+                {output.schwabLineup.type === 'house' && output.schwabLineup.scaledLineup && (
+                  <>
+                    <li className="flex items-center gap-2">
+                      <span
+                        className={`inline-block w-2 h-2 rounded-full ${
+                          output.assertions.scaledLineupHasSpymGoldBtc
+                            ? 'bg-green-500'
+                            : 'bg-red-500'
+                        }`}
+                      />
+                      <span
+                        className={
+                          output.assertions.scaledLineupHasSpymGoldBtc
+                            ? 'text-green-300'
+                            : 'text-red-300'
+                        }
+                      >
+                        Scaled lineup: Has SPYM + Gold + BTC
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span
+                        className={`inline-block w-2 h-2 rounded-full ${
+                          output.assertions.scaledLineupHasCash
+                            ? 'bg-green-500'
+                            : 'bg-red-500'
+                        }`}
+                      />
+                      <span
+                        className={
+                          output.assertions.scaledLineupHasCash
+                            ? 'text-green-300'
+                            : 'text-red-300'
+                        }
+                      >
+                        Scaled lineup: Has cash when total &lt; 100%
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span
+                        className={`inline-block w-2 h-2 rounded-full ${
+                          output.assertions.scaledLineupSumsTo100
+                            ? 'bg-green-500'
+                            : 'bg-red-500'
+                        }`}
+                      />
+                      <span
+                        className={
+                          output.assertions.scaledLineupSumsTo100
+                            ? 'text-green-300'
+                            : 'text-red-300'
+                        }
+                      >
+                        Scaled lineup: Sums to ~100%
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span
+                        className={`inline-block w-2 h-2 rounded-full ${
+                          output.assertions.scaledLineupWrappersApplied
+                            ? 'bg-green-500'
+                            : 'bg-red-500'
+                        }`}
+                      />
+                      <span
+                        className={
+                          output.assertions.scaledLineupWrappersApplied
+                            ? 'text-green-300'
+                            : 'text-red-300'
+                        }
+                      >
+                        Scaled lineup: Wrappers applied correctly
+                      </span>
+                    </li>
+                  </>
                 )}
               </ul>
             </div>
