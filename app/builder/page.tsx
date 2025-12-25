@@ -888,6 +888,77 @@ export default function Builder() {
                     );
                   })()}
                   
+                  {/* Why this setup? */}
+                  {(() => {
+                    const houseModel = getHouseModel(preset);
+                    const goldTicker = goldInstrument === 'ygld' ? 'YGLD' : 'GLDM';
+                    const btcTicker = btcInstrument === 'maxi' ? 'MAXI' : 'FBTC';
+                    const goldLabel = goldInstrument === 'ygld' ? 'YGLD (income wrapper)' : 'GLDM';
+                    const btcLabel = btcInstrument === 'maxi' ? 'MAXI (income wrapper)' : 'FBTC';
+                    
+                    // Get target percentages from house model
+                    const stocksTarget = houseModel.allocations.find((a) => a.id === 'spym')?.pct ?? 60;
+                    const goldTarget = houseModel.allocations.find((a) => a.id === 'gldm')?.pct ?? 30;
+                    const btcTarget = houseModel.allocations.find((a) => a.id === 'fbtc')?.pct ?? 10;
+                    
+                    return (
+                      <div className="mt-4 p-3 bg-zinc-900/50 border border-zinc-800 rounded-lg space-y-3">
+                        <h3 className="text-xs font-semibold text-zinc-200 uppercase tracking-wide">
+                          Why this setup?
+                        </h3>
+                        
+                        {/* Why 60/30/10? */}
+                        <details className="text-[11px] text-zinc-300">
+                          <summary className="cursor-pointer hover:text-zinc-400 font-medium">
+                            Why {stocksTarget}/{goldTarget}/{btcTarget}?
+                          </summary>
+                          <div className="mt-2 space-y-1.5 pl-2">
+                            <p>
+                              <strong className="text-zinc-200">{stocksTarget}% Stocks</strong> = growth engine ({houseModel.allocations.find((a) => a.id === 'spym')?.ticker ?? 'SPYM'})
+                            </p>
+                            <p>
+                              <strong className="text-zinc-200">{goldTarget}% Gold</strong> = inflation/monetary weirdness hedge ({goldLabel})
+                            </p>
+                            <p>
+                              <strong className="text-zinc-200">{btcTarget}% Bitcoin</strong> = asymmetric &quot;call option on chaos&quot; ({btcLabel})
+                            </p>
+                            <p className="text-zinc-400 italic mt-2">
+                              It&apos;s diversified… but still admits we live in interesting times.
+                            </p>
+                            <p className="text-[10px] text-zinc-500 mt-2">
+                              These targets are for your Schwab brokerage slice (not your whole 457).
+                            </p>
+                          </div>
+                        </details>
+                        
+                        {/* What do the scales mean? */}
+                        <details className="text-[11px] text-zinc-300">
+                          <summary className="cursor-pointer hover:text-zinc-400 font-medium">
+                            What do the scales mean?
+                          </summary>
+                          <div className="mt-2 space-y-1.5 pl-2">
+                            {ghostRegimeData ? (
+                              <>
+                                <ul className="space-y-1 pl-4 list-disc">
+                                  <li><strong className="text-zinc-200">1.0</strong> = full size (normal exposure)</li>
+                                  <li><strong className="text-zinc-200">0.5</strong> = half size (cautious)</li>
+                                  <li><strong className="text-zinc-200">0.0</strong> = off (risk control)</li>
+                                </ul>
+                                <p className="text-zinc-400 text-[10px] mt-2">
+                                  When something is scaled down, the unused portion sits as Schwab cash (unallocated) until your next rebalance.
+                                </p>
+                              </>
+                            ) : (
+                              <p className="text-zinc-400 text-[10px]">
+                                Scales come from GhostRegime. Data isn&apos;t available right now, so you&apos;re seeing base targets (no scaling).
+                              </p>
+                            )}
+                          </div>
+                        </details>
+                      </div>
+                    );
+                  })()}
+                  
                   {/* Scaled lineup */}
                   <div className="mt-2 space-y-2 text-xs text-zinc-300 leading-relaxed">
                     {computeScaledHouseLineup(
@@ -948,6 +1019,62 @@ export default function Builder() {
                       GhostRegime data isn&apos;t available right now — showing base targets (no scaling).
                     </p>
                   )}
+                  
+                  {/* Why this setup? (static targets) */}
+                  {(() => {
+                    const houseModel = getHouseModel(preset);
+                    const goldLabel = goldInstrument === 'ygld' ? 'YGLD (income wrapper)' : 'GLDM';
+                    const btcLabel = btcInstrument === 'maxi' ? 'MAXI (income wrapper)' : 'FBTC';
+                    
+                    // Get target percentages from house model
+                    const stocksTarget = houseModel.allocations.find((a) => a.id === 'spym')?.pct ?? 60;
+                    const goldTarget = houseModel.allocations.find((a) => a.id === 'gldm')?.pct ?? 30;
+                    const btcTarget = houseModel.allocations.find((a) => a.id === 'fbtc')?.pct ?? 10;
+                    
+                    return (
+                      <div className="mt-4 p-3 bg-zinc-900/50 border border-zinc-800 rounded-lg space-y-3">
+                        <h3 className="text-xs font-semibold text-zinc-200 uppercase tracking-wide">
+                          Why this setup?
+                        </h3>
+                        
+                        {/* Why 60/30/10? */}
+                        <details className="text-[11px] text-zinc-300">
+                          <summary className="cursor-pointer hover:text-zinc-400 font-medium">
+                            Why {stocksTarget}/{goldTarget}/{btcTarget}?
+                          </summary>
+                          <div className="mt-2 space-y-1.5 pl-2">
+                            <p>
+                              <strong className="text-zinc-200">{stocksTarget}% Stocks</strong> = growth engine ({houseModel.allocations.find((a) => a.id === 'spym')?.ticker ?? 'SPYM'})
+                            </p>
+                            <p>
+                              <strong className="text-zinc-200">{goldTarget}% Gold</strong> = inflation/monetary weirdness hedge ({goldLabel})
+                            </p>
+                            <p>
+                              <strong className="text-zinc-200">{btcTarget}% Bitcoin</strong> = asymmetric &quot;call option on chaos&quot; ({btcLabel})
+                            </p>
+                            <p className="text-zinc-400 italic mt-2">
+                              It&apos;s diversified… but still admits we live in interesting times.
+                            </p>
+                            <p className="text-[10px] text-zinc-500 mt-2">
+                              These targets are for your Schwab brokerage slice (not your whole 457).
+                            </p>
+                          </div>
+                        </details>
+                        
+                        {/* What do the scales mean? */}
+                        <details className="text-[11px] text-zinc-300">
+                          <summary className="cursor-pointer hover:text-zinc-400 font-medium">
+                            What do the scales mean?
+                          </summary>
+                          <div className="mt-2 space-y-1.5 pl-2">
+                            <p className="text-zinc-400 text-[10px]">
+                              Scales come from GhostRegime. Data isn&apos;t available right now, so you&apos;re seeing base targets (no scaling).
+                            </p>
+                          </div>
+                        </details>
+                      </div>
+                    );
+                  })()}
                   
                   {/* Rebalance Cheatsheet (static targets) */}
                   {(() => {
