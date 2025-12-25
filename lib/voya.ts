@@ -8,53 +8,9 @@ import { isHousePreset } from './houseModels';
 import {
   getFundById,
   getFundName,
-  VOYA_TDF_FUNDS,
   validateFundMix,
-  isTargetDateFund,
-  isTargetDateName,
-  looksLikeTargetDateFund,
+  getTargetDateReasons,
 } from './voyaFunds';
-import type { VoyaFund } from './voyaFunds';
-
-/**
- * Selects a target-date fund based on years to goal and risk level.
- * Returns the canonical fund name from VOYA_FUNDS.
- */
-function pickTargetDateFund(
-  yearsToGoal: number | null | undefined,
-  riskLevel: RiskLevel
-): string {
-  // Use coarse bands; no need to be perfect.
-  const y = yearsToGoal ?? 20;
-
-  let fundId: string;
-  if (y <= 5) {
-    fundId = 'vanguard_target_retirement_income';
-  } else if (y <= 10) {
-    fundId = 'vanguard_target_retirement_2025';
-  } else if (y <= 15) {
-    fundId = 'vanguard_target_retirement_2030';
-  } else if (y <= 20) {
-    fundId = 'vanguard_target_retirement_2035';
-  } else if (y <= 25) {
-    fundId = 'vanguard_target_retirement_2040';
-  } else if (y <= 30) {
-    fundId = 'vanguard_target_retirement_2045';
-  } else if (y <= 35) {
-    fundId = 'vanguard_target_retirement_2050';
-  } else if (y <= 40) {
-    fundId = 'vanguard_target_retirement_2055';
-  } else if (y <= 45) {
-    fundId = 'vanguard_target_retirement_2060';
-  } else if (y <= 50) {
-    fundId = 'vanguard_target_retirement_2065';
-  } else {
-    fundId = 'vanguard_target_retirement_2070';
-  }
-
-  // Return canonical name from VOYA_FUNDS
-  return getFundName(fundId);
-}
 
 /**
  * Check if a recommended Voya mix contains target-date funds
@@ -73,18 +29,8 @@ function assertNoTargetDateFundsInMix(
       continue; // Skip invalid funds (will be caught by validateFundMix)
     }
     
-    if (looksLikeTargetDateFund(fund)) {
-      const reasons: string[] = [];
-      if (fund.group === 'Target Date') {
-        reasons.push('group classification');
-      }
-      if (isTargetDateFund(fund.id)) {
-        reasons.push('ID check');
-      }
-      if (isTargetDateName(fund.name)) {
-        reasons.push('name pattern');
-      }
-      
+    const reasons = getTargetDateReasons(fund);
+    if (reasons.length > 0) {
       offenders.push({
         id: fund.id,
         name: fund.name,
@@ -114,6 +60,7 @@ function assertNoTargetDateFundsInMix(
 /**
  * Sanitize a recommended Voya mix to ensure no target-date funds
  * If TDFs are detected, replaces with a safe fallback mix
+ * Note: assertNoTargetDateFundsInMix() already logs errors, so we only log a brief fallback message here
  */
 function ensureRecommendedMixNoTdf(
   mix: VoyaFundMixItem[],
@@ -129,13 +76,10 @@ function ensureRecommendedMixNoTdf(
   // TDFs detected: use safe fallback (core mix is guaranteed non-TDF)
   const fallbackMix = _getCoreMixForRiskInternal(riskLevel);
   
-  // Log error once with context
-  const offenderList = check.offenders
-    .map((o) => `  - ${o.name} (${o.id}): detected by ${o.reason}`)
-    .join('\n');
-  console.error(
-    `[voya.ts] WARNING: ${contextLabel} contained target-date fund(s), using fallback core mix:\n${offenderList}`
-  );
+  // Brief fallback message (detailed error already logged by assertNoTargetDateFundsInMix)
+  if (process.env.NODE_ENV === 'production') {
+    console.warn(`[voya.ts] Using fallback core mix for ${contextLabel} due to TDF detection`);
+  }
   
   return {
     mix: fallbackMix,

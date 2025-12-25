@@ -236,34 +236,54 @@ export const VOYA_CORE_FUNDS = VOYA_FUNDS.filter((f) => f.group === 'Core');
 export const VOYA_TDF_FUNDS = VOYA_FUNDS.filter((f) => f.group === 'Target Date');
 
 /**
- * Check if a fund is a target-date fund by ID
+ * Regex patterns for target-date fund name detection (compiled once)
  */
-export function isTargetDateFund(fundId: string): boolean {
-  const fund = getFundById(fundId);
-  return fund?.group === 'Target Date';
-}
+const TDF_NAME_PATTERNS = {
+  // Pattern A: "target" near "retirement/date" (supports hyphenated: target-retirement, target-date)
+  targetDate: /\btarget[\s-]*(date|retirement)\b/i,
+  // Pattern B: "retirement" + a plausible year (20xx)
+  retirementYear: /\bretirement\b.*\b20\d{2}\b|\b20\d{2}\b.*\bretirement\b/i,
+  // Pattern C: known glidepath series tokens (LifePath) + a year
+  lifepathYear: /\blifepath\b.*\b20\d{2}\b/i,
+  // Pattern D: "freedom" + a year (Fidelity Freedom series)
+  freedomYear: /\bfreedom\b.*\b20\d{2}\b|\b20\d{2}\b.*\bfreedom\b/i,
+} as const;
 
 /**
- * Canonical classifier for "recommendation blacklist"
- * Returns true if the fund looks like a target-date fund by any detection method:
- * - fund.group === "Target Date"
- * - OR isTargetDateFund(fund.id)
- * - OR isTargetDateName(fund.name)
+ * Check if a fund ID looks like a target-date fund (string-based heuristic)
+ * Works even if the fund is missing or misclassified.
+ * Does NOT call getFundById() to avoid recursion.
  */
-export function looksLikeTargetDateFund(fund: VoyaFund): boolean {
-  // Primary: group classification
-  if (fund.group === 'Target Date') {
-    return true;
-  }
+export function looksLikeTargetDateId(id: string): boolean {
+  const lower = id.toLowerCase();
+  const resolved = resolveFundId(lower);
   
-  // Secondary: ID-based check
-  if (isTargetDateFund(fund.id)) {
-    return true;
-  }
+  // Check for TDF-related tokens in the ID
+  const tdfTokens = [
+    'target',
+    'retirement',
+    'target_date',
+    'target_retirement',
+    'lifepath',
+    'freedom',
+  ];
   
-  // Tertiary: name-based regex detection (catches mis-grouped funds)
-  if (isTargetDateName(fund.name)) {
-    return true;
+  // Check if ID contains any TDF token
+  for (const token of tdfTokens) {
+    if (resolved.includes(token)) {
+      // If it has a year token (20xx), it's almost certainly a TDF
+      if (/\b20\d{2}\b/.test(resolved)) {
+        return true;
+      }
+      // If it has "target" + ("date" or "retirement"), it's a TDF
+      if (token === 'target' && (resolved.includes('date') || resolved.includes('retirement'))) {
+        return true;
+      }
+      // If it has "lifepath" or "freedom", it's likely a TDF (even without year)
+      if (token === 'lifepath' || token === 'freedom') {
+        return true;
+      }
+    }
   }
   
   return false;
@@ -272,35 +292,76 @@ export function looksLikeTargetDateFund(fund: VoyaFund): boolean {
 /**
  * Check if a fund name indicates it's a target-date fund
  * Uses strict regex patterns to catch common TDF naming without false positives
+ * Supports hyphenated variants (e.g., "Target-Retirement")
  */
 export function isTargetDateName(name: string): boolean {
-  const lower = name.toLowerCase();
-  
-  // Pattern A: "target" near "retirement/date" (Target Retirement, Target Date)
-  const targetDatePattern = /\btarget\s*(date|retirement)\b/;
-  if (targetDatePattern.test(lower)) {
+  // Pattern A: "target" near "retirement/date" (supports hyphenated)
+  if (TDF_NAME_PATTERNS.targetDate.test(name)) {
     return true;
   }
   
   // Pattern B: "retirement" + a plausible year (20xx)
-  const retirementYearPattern = /\bretirement\b.*\b20\d{2}\b|\b20\d{2}\b.*\bretirement\b/;
-  if (retirementYearPattern.test(lower)) {
+  if (TDF_NAME_PATTERNS.retirementYear.test(name)) {
     return true;
   }
   
-  // Pattern C: known glidepath series tokens (LifePath, Freedom) + a year
-  const lifepathPattern = /\blifepath\b.*\b20\d{2}\b/;
-  if (lifepathPattern.test(lower)) {
+  // Pattern C: known glidepath series tokens (LifePath) + a year
+  if (TDF_NAME_PATTERNS.lifepathYear.test(name)) {
     return true;
   }
   
   // Pattern D: "freedom" + a year (Fidelity Freedom series)
-  const freedomYearPattern = /\bfreedom\b.*\b20\d{2}\b|\b20\d{2}\b.*\bfreedom\b/;
-  if (freedomYearPattern.test(lower)) {
+  if (TDF_NAME_PATTERNS.freedomYear.test(name)) {
     return true;
   }
   
   return false;
+}
+
+/**
+ * Get all reasons why a fund looks like a target-date fund
+ * Centralized reason generator to avoid duplicate logic
+ */
+export function getTargetDateReasons(fund: VoyaFund): string[] {
+  const reasons: string[] = [];
+  
+  // Primary: group classification
+  if (fund.group === 'Target Date') {
+    reasons.push('group classification');
+  }
+  
+  // Secondary: ID heuristic (works even if fund is misclassified)
+  if (looksLikeTargetDateId(fund.id)) {
+    reasons.push('id heuristic');
+  }
+  
+  // Tertiary: name pattern (catches mis-grouped funds)
+  if (isTargetDateName(fund.name)) {
+    reasons.push('name pattern');
+  }
+  
+  return reasons;
+}
+
+/**
+ * Canonical classifier for "recommendation blacklist"
+ * Returns true if the fund looks like a target-date fund by any detection method
+ */
+export function looksLikeTargetDateFund(fund: VoyaFund): boolean {
+  return getTargetDateReasons(fund).length > 0;
+}
+
+/**
+ * Check if a fund is a target-date fund by ID
+ * Truly redundant: tries lookup first, falls back to ID heuristic if not found
+ */
+export function isTargetDateFund(fundId: string): boolean {
+  const fund = getFundById(fundId);
+  if (fund) {
+    return fund.group === 'Target Date';
+  }
+  // Fallback: use ID heuristic if fund not found
+  return looksLikeTargetDateId(resolveFundId(fundId));
 }
 
 /**

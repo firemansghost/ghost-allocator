@@ -25,9 +25,11 @@ function runCanaryChecks() {
 
   const positiveSamples = [
     'Vanguard Target Retirement 2035 Fund',
+    'Vanguard Target-Retirement 2035 Fund', // Hyphenated variant
     'Fidelity Freedom 2040 Fund',
     'BlackRock LifePath Index 2050',
     'Target Date 2045',
+    'Target-Date 2045', // Hyphenated variant
     'Retirement 2030 Fund',
     'LifePath 2055 Index Fund',
   ];
@@ -38,6 +40,7 @@ function runCanaryChecks() {
     'Northern Trust S&P 500 Index',
     'SSGA Russell Small/Mid Cap Index',
     'Stable Value Option',
+    'Targeted Income Fund', // Should not match (targeted != target + date/retirement)
   ];
 
   const failures: string[] = [];
