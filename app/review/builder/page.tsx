@@ -118,9 +118,30 @@ function computeReviewOutput(fixture: typeof REVIEW_FIXTURES[0]): ReviewOutput {
   if (platformSplit.platform === 'voya_and_schwab') {
     if (isHouseModel) {
       const houseModel = getHouseModel(preset);
+      const goldInstrument = fixture.answers.goldInstrument ?? 'gldm';
+      const btcInstrument = fixture.answers.btcInstrument ?? 'fbtc';
+      
+      // For review harness: use mocked GhostRegime data for specific fixture
+      let scaleData: GhostRegimeScaleData | null = null;
+      if (fixture.id === 'voya-schwab-house-scaled-moderate') {
+        // Mocked scale data: stocks_scale=0.5, gold_scale=1, btc_scale=0
+        scaleData = {
+          stocks_scale: 0.5,
+          gold_scale: 1,
+          btc_scale: 0,
+          date: '2024-01-15',
+          stale: false,
+        };
+      }
+      
+      const scaledLineup = scaleData
+        ? computeScaledHouseLineup(houseModel, scaleData, goldInstrument, btcInstrument)
+        : undefined;
+      
       schwabLineup = {
         type: 'house',
         houseModel,
+        scaledLineup,
       };
     } else {
       const portfolio = selectModelPortfolio(riskLevel);
