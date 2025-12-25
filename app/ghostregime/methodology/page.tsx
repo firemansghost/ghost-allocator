@@ -7,6 +7,14 @@ import { buildMetadata } from '@/lib/seo';
 import type { Metadata } from 'next';
 import { GlassCard } from '@/components/GlassCard';
 import Link from 'next/link';
+import {
+  GHOSTREGIME_DATA_SOURCES,
+  GHOSTREGIME_PRICE_RETURN_NOTE,
+  GHOSTREGIME_BROKER_MISMATCH_REASONS,
+  GHOSTREGIME_UPDATE_TIMING_LINES,
+  GHOSTREGIME_STALE_BEHAVIOR_LINE,
+  GHOSTREGIME_COMMODITIES_FALLBACK_NOTE,
+} from '@/lib/ghostregime/content';
 
 export const metadata: Metadata = buildMetadata({
   title: 'GhostRegime Methodology - Ghost Allocator',
@@ -218,66 +226,44 @@ export default function MethodologyPage() {
             <div>
               <h3 className="text-base font-medium text-zinc-200 mb-2">Data Sources</h3>
               <ul className="space-y-2 pl-4 list-disc">
-                <li>
-                  <strong className="text-zinc-200">ETF prices</strong> (SPY, GLD, HYG, IEF, EEM, TLT, UUP, TIP, etc.): daily close data from{' '}
-                  <a
-                    href="https://stooq.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
-                  >
-                    Stooq
-                  </a>
-                </li>
-                <li>
-                  <strong className="text-zinc-200">VIX</strong>:{' '}
-                  <a
-                    href="https://www.cboe.com/tradable_products/vix/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
-                  >
-                    CBOE
-                  </a>{' '}
-                  data
-                </li>
-                <li>
-                  <strong className="text-zinc-200">Bitcoin</strong> (BTC-USD):{' '}
-                  <a
-                    href="https://stooq.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
-                  >
-                    Stooq
-                  </a>
-                </li>
-                <li>
-                  <strong className="text-zinc-200">Commodities</strong> (PDBC): typically{' '}
-                  <a
-                    href="https://www.alphavantage.co"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
-                  >
-                    AlphaVantage
-                  </a>
-                  , with DBC fallback from Stooq
-                </li>
+                {GHOSTREGIME_DATA_SOURCES.map((source) => (
+                  <li key={source.key}>
+                    <strong className="text-zinc-200">{source.label}</strong>
+                    {source.description}
+                    {source.links && source.links.length > 0 && (
+                      <>
+                        {' '}
+                        {source.links.map((link, idx) => (
+                          <span key={idx}>
+                            <a
+                              href={link.href}
+                              target="_blank"
+                              rel="noreferrer noopener"
+                              className="text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
+                            >
+                              {link.label}
+                            </a>
+                            {idx < source.links!.length - 1 && ', '}
+                          </span>
+                        ))}
+                        {source.key === 'vix' && ' data'}
+                        {source.key === 'commodities' && GHOSTREGIME_COMMODITIES_FALLBACK_NOTE}
+                      </>
+                    )}
+                  </li>
+                ))}
               </ul>
               <p className="text-zinc-400 text-xs mt-3">
-                <strong className="text-zinc-300">Important:</strong> GhostRegime uses close-to-close price returns, not total return —
-                so dividends can cause differences vs brokerage total-return charts.
+                <strong className="text-zinc-300">Important:</strong> {GHOSTREGIME_PRICE_RETURN_NOTE}
               </p>
               <details className="mt-3">
                 <summary className="cursor-pointer text-amber-400 hover:text-amber-300 font-medium text-xs">
                   Why my broker won&apos;t match perfectly
                 </summary>
                 <div className="mt-2 pl-4 space-y-1.5 text-xs text-zinc-400">
-                  <p>• Different pricing timestamps (your broker might use intraday vs. close)</p>
-                  <p>• Dividends/total return vs. price return (we use price return)</p>
-                  <p>• Holiday/weekend gaps (data might lag on non-trading days)</p>
-                  <p>• Data revisions (providers sometimes backfill corrections)</p>
+                  {GHOSTREGIME_BROKER_MISMATCH_REASONS.map((reason, idx) => (
+                    <p key={idx}>• {reason}</p>
+                  ))}
                 </div>
               </details>
             </div>
@@ -285,20 +271,16 @@ export default function MethodologyPage() {
             {/* Update Timing */}
             <div>
               <h3 className="text-base font-medium text-zinc-200 mb-2">Update Timing</h3>
-              <p>
-                GhostRegime is designed to update once per weekday after market close. Current job runs around 03:30 UTC (Mon–Fri),
-                which is roughly evening in US Central time.
-              </p>
-              <p className="text-zinc-400 italic mt-2">
-                It&apos;s a daily model — most humans rebalance on a cadence, not every time a number twitches.
-              </p>
+              {GHOSTREGIME_UPDATE_TIMING_LINES.map((line, idx) => (
+                <p key={idx} className={idx > 0 ? 'text-zinc-400 italic mt-2' : ''}>
+                  {line}
+                </p>
+              ))}
             </div>
 
             {/* Stale Behavior */}
             <div>
-              <p className="text-zinc-400 text-xs">
-                If a data source is unavailable, we mark the snapshot stale and keep showing the last good result rather than face-planting.
-              </p>
+              <p className="text-zinc-400 text-xs">{GHOSTREGIME_STALE_BEHAVIOR_LINE}</p>
             </div>
           </div>
         </GlassCard>
