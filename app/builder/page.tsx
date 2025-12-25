@@ -52,6 +52,21 @@ export default function Builder() {
   >(undefined);
   const [ghostRegimeData, setGhostRegimeData] = useState<GhostRegimeScaleData | null>(null);
   const [ghostRegimeError, setGhostRegimeError] = useState<boolean>(false);
+  const [ghostRegimeFull, setGhostRegimeFull] = useState<{
+    regime: string;
+    risk_regime: string;
+    date?: string;
+    stale?: boolean;
+  } | null>(null);
+  const [ghostRegimeHistory, setGhostRegimeHistory] = useState<Array<{
+    date: string;
+    regime: string;
+    risk_regime: string;
+    stocks_scale: number;
+    gold_scale: number;
+    btc_scale: number;
+  }> | null>(null);
+  const [ghostRegimeHistoryError, setGhostRegimeHistoryError] = useState<boolean>(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -638,6 +653,133 @@ export default function Builder() {
               
               {ghostRegimeData ? (
                 <>
+                  {/* GhostRegime Snapshot Panel */}
+                  <div className="mt-3 p-3 bg-zinc-900/50 border border-zinc-800 rounded-lg space-y-3">
+                    <h3 className="text-xs font-semibold text-zinc-200 uppercase tracking-wide">
+                      GhostRegime snapshot
+                    </h3>
+                    
+                    {/* Current state chips */}
+                    <div className="flex flex-wrap gap-2 text-[10px]">
+                      {ghostRegimeFull && (
+                        <>
+                          <span className="px-2 py-1 bg-zinc-800 rounded text-zinc-300">
+                            {ghostRegimeFull.regime}
+                          </span>
+                          <span className="px-2 py-1 bg-zinc-800 rounded text-zinc-300">
+                            {ghostRegimeFull.risk_regime}
+                          </span>
+                        </>
+                      )}
+                      {ghostRegimeData.date && (
+                        <span className="px-2 py-1 bg-zinc-800 rounded text-zinc-400">
+                          {new Date(ghostRegimeData.date).toLocaleDateString()}
+                        </span>
+                      )}
+                      {ghostRegimeData.stale && (
+                        <span className="px-2 py-1 bg-amber-500/20 text-amber-400 rounded text-[10px]">
+                          Stale
+                        </span>
+                      )}
+                    </div>
+                    
+                    {/* "So what?" explanation */}
+                    <div className="text-[11px] text-zinc-300 space-y-1">
+                      {ghostRegimeData.stocks_scale < 1 && (
+                        <p>
+                          Stocks scale is {ghostRegimeData.stocks_scale.toFixed(2)} → your stock sleeve is running at{' '}
+                          {ghostRegimeData.stocks_scale === 0.5 ? 'half' : `${(ghostRegimeData.stocks_scale * 100).toFixed(0)}%`} size right now.
+                        </p>
+                      )}
+                      {ghostRegimeData.gold_scale < 1 && (
+                        <p>
+                          Gold scale is {ghostRegimeData.gold_scale.toFixed(2)} → your gold sleeve is running at{' '}
+                          {ghostRegimeData.gold_scale === 0.5 ? 'half' : `${(ghostRegimeData.gold_scale * 100).toFixed(0)}%`} size right now.
+                        </p>
+                      )}
+                      {ghostRegimeData.btc_scale < 1 && (
+                        <p>
+                          BTC scale is {ghostRegimeData.btc_scale.toFixed(2)} → your Bitcoin sleeve is running at{' '}
+                          {ghostRegimeData.btc_scale === 0.5 ? 'half' : `${(ghostRegimeData.btc_scale * 100).toFixed(0)}%`} size right now.
+                        </p>
+                      )}
+                      {(ghostRegimeData.stocks_scale < 1 || ghostRegimeData.gold_scale < 1 || ghostRegimeData.btc_scale < 1) && (
+                        <p className="text-zinc-400 italic">
+                          Anything scaled down sits as Schwab cash until you rebalance.
+                        </p>
+                      )}
+                    </div>
+                    
+                    {/* What changed section */}
+                    {ghostRegimeHistory && ghostRegimeHistory.length >= 2 ? (
+                      <div className="pt-2 border-t border-zinc-800">
+                        <p className="text-[10px] text-zinc-400 font-medium mb-1.5">What changed since last update:</p>
+                        <div className="text-[10px] text-zinc-300 space-y-1">
+                          {(() => {
+                            const [current, previous] = ghostRegimeHistory;
+                            const changes: string[] = [];
+                            
+                            if (current.regime !== previous.regime) {
+                              changes.push(`Regime: ${previous.regime} → ${current.regime}`);
+                            }
+                            if (current.risk_regime !== previous.risk_regime) {
+                              changes.push(`Risk: ${previous.risk_regime} → ${current.risk_regime}`);
+                            }
+                            if (Math.abs(current.stocks_scale - previous.stocks_scale) > 0.01) {
+                              changes.push(`Stocks scale: ${previous.stocks_scale.toFixed(2)} → ${current.stocks_scale.toFixed(2)}`);
+                            }
+                            if (Math.abs(current.gold_scale - previous.gold_scale) > 0.01) {
+                              changes.push(`Gold scale: ${previous.gold_scale.toFixed(2)} → ${current.gold_scale.toFixed(2)}`);
+                            }
+                            if (Math.abs(current.btc_scale - previous.btc_scale) > 0.01) {
+                              changes.push(`BTC scale: ${previous.btc_scale.toFixed(2)} → ${current.btc_scale.toFixed(2)}`);
+                            }
+                            
+                            if (changes.length === 0) {
+                              return <p className="text-zinc-400 italic">No change since the last update. Markets were boring. (Enjoy it.)</p>;
+                            }
+                            
+                            return changes.map((change, idx) => (
+                              <p key={idx}>{change}</p>
+                            ));
+                          })()}
+                        </div>
+                      </div>
+                    ) : ghostRegimeHistoryError ? (
+                      <div className="pt-2 border-t border-zinc-800">
+                        <p className="text-[10px] text-zinc-500 italic">
+                          Change summary unavailable — showing today&apos;s snapshot only.
+                        </p>
+                      </div>
+                    ) : null}
+                    
+                    {/* Links */}
+                    <div className="pt-2 border-t border-zinc-800 flex gap-3">
+                      <Link
+                        href="/ghostregime"
+                        className="text-[10px] text-amber-400 hover:text-amber-300 underline"
+                      >
+                        Open dashboard
+                      </Link>
+                      <Link
+                        href="/ghostregime/methodology"
+                        className="text-[10px] text-amber-400 hover:text-amber-300 underline"
+                      >
+                        Read methodology
+                      </Link>
+                    </div>
+                    
+                    {/* Micro-glossary */}
+                    <details className="text-[10px] text-zinc-500">
+                      <summary className="cursor-pointer hover:text-zinc-400">What do these mean?</summary>
+                      <div className="mt-2 space-y-1 pl-2">
+                        <p><strong className="text-zinc-400">Regime</strong> = macro backdrop (growth/inflation mix).</p>
+                        <p><strong className="text-zinc-400">Scales</strong> = how much exposure we&apos;re taking today (1, 0.5, 0).</p>
+                        <p><strong className="text-zinc-400">Cash</strong> = unallocated Schwab cash created when something is scaled down.</p>
+                      </div>
+                    </details>
+                  </div>
+                  
                   {/* GhostRegime scaling callout */}
                   <div className="mt-3 p-2 bg-amber-500/10 border border-amber-500/20 rounded text-[11px]">
                     <div className="flex items-center justify-between mb-1">
