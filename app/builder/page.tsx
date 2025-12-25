@@ -807,6 +807,87 @@ export default function Builder() {
                     </p>
                   </div>
                   
+                  {/* Rebalance Cheatsheet */}
+                  {(() => {
+                    const REBALANCE_DELTA_THRESHOLD = 3;
+                    const scaledLineup = computeScaledHouseLineup(
+                      getHouseModel(preset),
+                      ghostRegimeData,
+                      goldInstrument,
+                      btcInstrument
+                    );
+                    
+                    // Calculate deltas (exclude cash)
+                    const deltas = scaledLineup
+                      .filter((item) => !item.isCash)
+                      .map((item) => ({
+                        ticker: item.ticker,
+                        label: item.label,
+                        delta: item.actualPct - item.targetPct,
+                      }));
+                    
+                    // Filter to significant deltas
+                    const significantDeltas = deltas.filter(
+                      (d) => Math.abs(d.delta) >= REBALANCE_DELTA_THRESHOLD
+                    );
+                    
+                    const overweights = significantDeltas.filter((d) => d.delta > 0);
+                    const underweights = significantDeltas.filter((d) => d.delta < 0);
+                    const hasCash = scaledLineup.some((item) => item.isCash);
+                    
+                    return (
+                      <div className="mt-4 p-3 bg-zinc-900/50 border border-zinc-800 rounded-lg space-y-3">
+                        <div>
+                          <h3 className="text-xs font-semibold text-zinc-200 uppercase tracking-wide">
+                            Rebalance cheatsheet
+                          </h3>
+                          <p className="text-[10px] text-zinc-400 mt-0.5">
+                            Based on your Schwab slice. Use your chosen cadence.
+                          </p>
+                        </div>
+                        
+                        {significantDeltas.length > 0 ? (
+                          <div className="space-y-2 text-[11px] text-zinc-300">
+                            <p className="text-zinc-400 font-medium">If you&apos;re rebalancing today:</p>
+                            <ul className="space-y-1 pl-4 list-disc">
+                              {overweights.map((d) => (
+                                <li key={d.ticker}>
+                                  Trim {d.ticker} by ~{Math.abs(d.delta).toFixed(1)}%
+                                </li>
+                              ))}
+                              {underweights.map((d) => (
+                                <li key={d.ticker}>
+                                  Add {d.ticker} by ~{Math.abs(d.delta).toFixed(1)}%
+                                </li>
+                              ))}
+                              {hasCash && underweights.length > 0 && (
+                                <li className="text-zinc-400 italic">
+                                  Use Schwab cash to fund the adds
+                                </li>
+                              )}
+                            </ul>
+                          </div>
+                        ) : (
+                          <p className="text-[11px] text-zinc-300">
+                            You&apos;re basically on target. Do nothing. Touch grass.
+                          </p>
+                        )}
+                        
+                        {/* How do I execute this? */}
+                        <details className="text-[10px] text-zinc-500">
+                          <summary className="cursor-pointer hover:text-zinc-400">
+                            How do I execute this?
+                          </summary>
+                          <ul className="mt-2 space-y-1 pl-4 list-disc">
+                            <li>In Schwab, you&apos;re adjusting ETFs + Schwab cash.</li>
+                            <li>In Voya, you&apos;re adjusting core funds (Stable Value is cash-like).</li>
+                            <li>House preset uses Schwab for Gold/BTC exposure.</li>
+                          </ul>
+                        </details>
+                      </div>
+                    );
+                  })()}
+                  
                   {/* Scaled lineup */}
                   <div className="mt-2 space-y-2 text-xs text-zinc-300 leading-relaxed">
                     {computeScaledHouseLineup(
@@ -867,6 +948,39 @@ export default function Builder() {
                       GhostRegime data isn&apos;t available right now — showing base targets (no scaling).
                     </p>
                   )}
+                  
+                  {/* Rebalance Cheatsheet (static targets) */}
+                  {(() => {
+                    return (
+                      <div className="mt-4 p-3 bg-zinc-900/50 border border-zinc-800 rounded-lg space-y-3">
+                        <div>
+                          <h3 className="text-xs font-semibold text-zinc-200 uppercase tracking-wide">
+                            Rebalance cheatsheet
+                          </h3>
+                          <p className="text-[10px] text-zinc-400 mt-0.5">
+                            Based on your Schwab slice. Use your chosen cadence.
+                          </p>
+                        </div>
+                        
+                        <p className="text-[11px] text-zinc-300">
+                          You&apos;re basically on target. Do nothing. Touch grass.
+                        </p>
+                        
+                        {/* How do I execute this? */}
+                        <details className="text-[10px] text-zinc-500">
+                          <summary className="cursor-pointer hover:text-zinc-400">
+                            How do I execute this?
+                          </summary>
+                          <ul className="mt-2 space-y-1 pl-4 list-disc">
+                            <li>In Schwab, you&apos;re adjusting ETFs + Schwab cash.</li>
+                            <li>In Voya, you&apos;re adjusting core funds (Stable Value is cash-like).</li>
+                            <li>House preset uses Schwab for Gold/BTC exposure.</li>
+                          </ul>
+                        </details>
+                      </div>
+                    );
+                  })()}
+                  
                   <div className="mt-2 space-y-2 text-xs text-zinc-300 leading-relaxed">
                     {getHouseModelWithWrappers(preset, goldInstrument, btcInstrument).map((alloc) => (
                       <div
