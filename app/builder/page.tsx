@@ -18,6 +18,7 @@ import {
 import { getHouseModel, getHouseModelWithWrappers, isHousePreset } from '@/lib/houseModels';
 import { getStandardSchwabLineup, willShowGoldBtc } from '@/lib/schwabLineups';
 import { computeScaledHouseLineup, type GhostRegimeScaleData } from '@/lib/houseScaling';
+import { DEFAULT_REBALANCE_THRESHOLD_PCT } from '@/lib/ghostregime/education';
 import AllocationChart from '@/components/AllocationChart';
 import SleeveBreakdown from '@/components/SleeveBreakdown';
 import { GlassCard } from '@/components/GlassCard';
@@ -664,7 +665,7 @@ export default function Builder() {
                   goldInstrument,
                   btcInstrument
                 )}
-                rebalanceThresholdPct={3}
+                rebalanceThresholdPct={DEFAULT_REBALANCE_THRESHOLD_PCT}
                 goldInstrument={goldInstrument}
                 btcInstrument={btcInstrument}
                 ghostRegimeError={ghostRegimeError}

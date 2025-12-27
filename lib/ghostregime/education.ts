@@ -7,6 +7,12 @@ import type { GhostRegimeScaleData, ScaledLineupItem } from '@/lib/houseScaling'
 import type { HouseModelSpec } from '@/lib/houseModels';
 
 /**
+ * Default rebalance threshold percentage
+ * Used to determine when deltas are significant enough to warrant rebalancing
+ */
+export const DEFAULT_REBALANCE_THRESHOLD_PCT = 3;
+
+/**
  * Format a scale value to human-readable text
  */
 export function formatScale(scale: number): string {
@@ -122,7 +128,7 @@ export interface RebalanceActions {
  */
 export function computeRebalanceActions(
   scaledLineup: ScaledLineupItem[],
-  thresholdPct: number = 3
+  thresholdPct: number = DEFAULT_REBALANCE_THRESHOLD_PCT
 ): RebalanceActions {
   // Calculate deltas (exclude cash)
   const deltas = scaledLineup
