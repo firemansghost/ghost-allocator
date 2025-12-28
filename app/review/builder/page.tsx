@@ -91,6 +91,7 @@ interface ReviewOutput {
     }>;
   };
   assertions: {
+    riskLevelMatchesExpected: boolean;
     voyaTotalValid: boolean;
     schwabTotalValid: boolean;
     housePresetHasCorrectTickers: boolean;
@@ -307,6 +308,9 @@ function computeReviewOutput(fixture: typeof REVIEW_FIXTURES[0]): ReviewOutput {
     scaledLineupWrappersApplied = true;
   }
 
+  // Validate risk level matches expected (for template fixtures)
+  const riskLevelMatchesExpected = riskLevel === fixture.expectedRiskLevel;
+
   return {
     fixtureId: fixture.id,
     riskLevel,
@@ -314,6 +318,7 @@ function computeReviewOutput(fixture: typeof REVIEW_FIXTURES[0]): ReviewOutput {
     voyaImplementation,
     schwabLineup,
     assertions: {
+      riskLevelMatchesExpected,
       voyaTotalValid,
       schwabTotalValid,
       housePresetHasCorrectTickers,
@@ -392,7 +397,9 @@ export default function ReviewBuilderPage() {
               </div>
               <div>
                 <span className="text-zinc-400">Risk Level: </span>
-                <span className="text-zinc-200">{output.riskLevel}</span>
+                <span className="text-zinc-200">
+                  {output.riskLevel} {output.riskLevel === fixture.expectedRiskLevel ? '✓' : `(expected ${fixture.expectedRiskLevel})`}
+                </span>
               </div>
               {output.platformSplit.platform === 'voya_and_schwab' && (
                 <div>
@@ -496,6 +503,16 @@ export default function ReviewBuilderPage() {
             <div className="pt-2 border-t border-zinc-800">
               <h3 className="text-xs font-semibold text-zinc-300 mb-2">Assertions</h3>
               <ul className="space-y-1 text-xs">
+                <li className="flex items-center gap-2">
+                  <span
+                    className={`inline-block w-2 h-2 rounded-full ${
+                      output.assertions.riskLevelMatchesExpected ? 'bg-green-500' : 'bg-red-500'
+                    }`}
+                  />
+                  <span className={output.assertions.riskLevelMatchesExpected ? 'text-green-300' : 'text-red-300'}>
+                    Risk level matches expected ({fixture.expectedRiskLevel})
+                  </span>
+                </li>
                 <li className="flex items-center gap-2">
                   <span
                     className={`inline-block w-2 h-2 rounded-full ${

@@ -44,11 +44,9 @@ export default function ModelsPage() {
           >
             <div className="flex items-start justify-between">
               <h3 className="text-sm font-semibold text-zinc-50">{model.title}</h3>
-              {model.badge && (
+              {model.badge && model.status === 'available' && (
                 <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${
-                  model.badge === 'Coming Soon'
-                    ? 'border-amber-400/60 bg-amber-400/10 text-amber-300'
-                    : model.badge === 'House'
+                  model.badge === 'House'
                     ? 'border-amber-400/60 bg-amber-400/20 text-amber-200'
                     : 'border-amber-400/60 bg-amber-400/10 text-amber-300'
                 }`}>

@@ -6,6 +6,7 @@ import type { QuestionnaireAnswers, PortfolioPreset, GoldBtcTilt } from '@/lib/t
 import { computeRiskLevel } from '@/lib/portfolioEngine';
 import type { QuestionnaireResult } from '@/lib/types';
 import { willShowGoldBtc } from '@/lib/schwabLineups';
+import { getModelTemplate } from '@/lib/modelTemplates';
 
 const STORAGE_KEY = 'ghostAllocatorQuestionnaire';
 
@@ -27,16 +28,35 @@ export default function QuestionnaireForm() {
     pensionCoverage: 'none',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
 
-  // Read template query param and preselect preset if valid
+  // Read template query param and apply defaults if valid
   useEffect(() => {
-    const template = searchParams.get('template');
-    // Map template IDs (with hyphens) to portfolio preset IDs (with underscores)
-    if (template === 'ghostregime-60-30-10') {
-      setFormData((prev) => ({
-        ...prev,
-        portfolioPreset: 'ghostregime_60_30_10',
-      }));
+    const templateId = searchParams.get('template');
+    if (templateId) {
+      const template = getModelTemplate(templateId);
+      if (template && template.defaults) {
+        setSelectedTemplate(template.title);
+        setFormData((prev) => {
+          const updated = { ...prev };
+          if (template.defaults?.portfolioPreset) {
+            updated.portfolioPreset = template.defaults.portfolioPreset;
+          }
+          if (template.defaults?.riskLevelOverride !== undefined) {
+            updated.riskLevelOverride = template.defaults.riskLevelOverride;
+          }
+          if (template.defaults?.schwabLineupStyle) {
+            updated.schwabLineupStyle = template.defaults.schwabLineupStyle;
+          }
+          return updated;
+        });
+      } else if (templateId === 'ghostregime-60-30-10') {
+        // Legacy support for house preset
+        setFormData((prev) => ({
+          ...prev,
+          portfolioPreset: 'ghostregime_60_30_10',
+        }));
+      }
     }
   }, [searchParams]);
 
@@ -123,6 +143,26 @@ export default function QuestionnaireForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5 text-sm">
+      {selectedTemplate && (
+        <div className="rounded-md border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-xs text-amber-200">
+          <p className="font-medium">Template selected: {selectedTemplate}</p>
+          <p className="mt-1 text-amber-200/80">You can change anything below.</p>
+          {formData.riskLevelOverride !== undefined && (
+            <button
+              type="button"
+              onClick={() => {
+                setFormData((prev) => {
+                  const { riskLevelOverride, ...rest } = prev;
+                  return rest;
+                });
+              }}
+              className="mt-2 text-[11px] text-amber-300 underline hover:text-amber-200"
+            >
+              Reset to computed risk
+            </button>
+          )}
+        </div>
+      )}
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1">
           <label className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">Age</label>

@@ -14,8 +14,14 @@ import { buildVoyaImplementation } from './voya';
 /**
  * Computes risk level from questionnaire answers using a numeric scoring system
  * Starts from neutral base (3), adjusts for various factors, then applies pension boost
+ * If riskLevelOverride is set, returns that value instead (used by templates)
  */
 export function computeRiskLevel(answers: QuestionnaireAnswers): RiskLevel {
+  // If override is set (e.g., from a template), use it directly
+  if (answers.riskLevelOverride !== undefined) {
+    return answers.riskLevelOverride;
+  }
+
   // Start at neutral
   let score = 3;
 

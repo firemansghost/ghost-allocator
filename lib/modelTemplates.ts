@@ -7,6 +7,7 @@
 export type ModelTemplateBadge = 'Coming Soon' | 'Live' | 'House';
 export type TurnoverExpectation = 'Low' | 'Medium' | 'High';
 export type TemplateStatus = 'available' | 'coming_soon';
+import type { PortfolioPreset, RiskLevel, SchwabLineupStyle } from './types';
 
 export interface ModelTemplate {
   id: string;
@@ -20,6 +21,11 @@ export interface ModelTemplate {
   description: string; // short paragraph used in card body
   tags?: string[];
   notes?: string[];
+  defaults?: {
+    portfolioPreset?: PortfolioPreset;
+    riskLevelOverride?: RiskLevel;
+    schwabLineupStyle?: SchwabLineupStyle;
+  };
 }
 
 /**
@@ -30,50 +36,66 @@ export const MODEL_TEMPLATES: ModelTemplate[] = [
   {
     id: 'conservative',
     title: 'Conservative',
-    status: 'coming_soon',
-    badge: 'Coming Soon',
+    status: 'available',
     subtitle: 'Lower risk, steady growth focus',
     intendedFor: 'Set-it-and-mostly-forget-it',
     turnover: 'Low',
     usesGhostRegime: true,
     description: 'Lower risk, steady growth focus',
     tags: ['defensive', 'low-volatility'],
+    defaults: {
+      portfolioPreset: 'standard',
+      riskLevelOverride: 2,
+      schwabLineupStyle: 'standard',
+    },
   },
   {
     id: 'balanced',
     title: 'Balanced',
-    status: 'coming_soon',
-    badge: 'Coming Soon',
+    status: 'available',
     subtitle: 'Moderate risk with growth potential',
     intendedFor: 'Can tolerate swings',
     turnover: 'Low',
     usesGhostRegime: true,
     description: 'Moderate risk with growth potential',
     tags: ['balanced', 'moderate-risk'],
+    defaults: {
+      portfolioPreset: 'standard',
+      riskLevelOverride: 3,
+      schwabLineupStyle: 'standard',
+    },
   },
   {
     id: 'growth',
     title: 'Growth',
-    status: 'coming_soon',
-    badge: 'Coming Soon',
+    status: 'available',
     subtitle: 'Higher risk, higher growth potential',
     intendedFor: 'Comfortable with volatility',
     turnover: 'Low',
     usesGhostRegime: true,
     description: 'Higher risk, higher growth potential',
     tags: ['growth', 'higher-risk'],
+    defaults: {
+      portfolioPreset: 'standard',
+      riskLevelOverride: 4,
+      schwabLineupStyle: 'standard',
+    },
   },
   {
     id: 'aggressive',
     title: 'Aggressive',
-    status: 'coming_soon',
-    badge: 'Coming Soon',
+    status: 'available',
     subtitle: 'Maximum growth focus',
     intendedFor: 'Can tolerate significant swings',
     turnover: 'Low',
     usesGhostRegime: true,
     description: 'Maximum growth focus',
     tags: ['aggressive', 'high-risk'],
+    defaults: {
+      portfolioPreset: 'standard',
+      riskLevelOverride: 5,
+      schwabLineupStyle: 'standard',
+    },
   },
   {
     id: 'ghostregime-60-30-10',

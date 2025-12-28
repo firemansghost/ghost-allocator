@@ -58,6 +58,7 @@ export interface QuestionnaireAnswers {
   goldInstrument?: GoldInstrument; // default "gldm"
   btcInstrument?: BtcInstrument; // default "fbtc"
   currentVoyaHoldings?: CurrentVoyaHolding[];
+  riskLevelOverride?: RiskLevel; // Override computed risk level (used by templates)
 }
 
 export interface Sleeve {
