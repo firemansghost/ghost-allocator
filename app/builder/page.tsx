@@ -19,6 +19,7 @@ import { getHouseModel, getHouseModelWithWrappers, isHousePreset } from '@/lib/h
 import { getStandardSchwabLineup, willShowGoldBtc } from '@/lib/schwabLineups';
 import { computeScaledHouseLineup, type GhostRegimeScaleData } from '@/lib/houseScaling';
 import { DEFAULT_REBALANCE_THRESHOLD_PCT } from '@/lib/ghostregime/education';
+import { getModelTemplate } from '@/lib/modelTemplates';
 import AllocationChart from '@/components/AllocationChart';
 import SleeveBreakdown from '@/components/SleeveBreakdown';
 import { GlassCard } from '@/components/GlassCard';
@@ -170,6 +171,35 @@ export default function Builder() {
           Risk level: {riskLabels[riskLevel]}
         </span>
       </header>
+
+      {/* Template DNA Banner */}
+      {answers.selectedTemplateId && (() => {
+        const template = getModelTemplate(answers.selectedTemplateId);
+        if (!template) return null;
+        return (
+          <GlassCard className="p-4 mb-6 border-amber-400/30 bg-amber-400/5">
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-amber-200">Template DNA:</span>
+                  <span className="text-xs text-amber-300">{template.title}</span>
+                </div>
+                <p className="text-[11px] text-zinc-400">
+                  {answers.riskLevelOverride !== undefined
+                    ? `Risk is pinned to ${answers.riskLevelOverride}`
+                    : 'Risk is computed'}
+                </p>
+              </div>
+              <Link
+                href="/models"
+                className="text-[11px] text-amber-300 hover:text-amber-200 underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-1"
+              >
+                Change templates
+              </Link>
+            </div>
+          </GlassCard>
+        );
+      })()}
 
       {/* Start here strip */}
       <GlassCard className="p-4 sm:p-5">

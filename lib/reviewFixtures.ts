@@ -11,6 +11,7 @@ export interface ReviewFixture {
   notes?: string;
   answers: QuestionnaireAnswers;
   expectedRiskLevel: RiskLevel;
+  expectedTemplateId?: string; // Optional: template ID that should be set
 }
 
 /**
@@ -278,8 +279,10 @@ export const REVIEW_FIXTURES: ReviewFixture[] = [
       platform: 'voya_only',
       portfolioPreset: 'standard',
       riskLevelOverride: 2,
+      selectedTemplateId: 'conservative',
     },
     expectedRiskLevel: 2,
+    expectedTemplateId: 'conservative',
   },
   {
     id: 'voya-only-template-balanced',
@@ -298,8 +301,10 @@ export const REVIEW_FIXTURES: ReviewFixture[] = [
       platform: 'voya_only',
       portfolioPreset: 'standard',
       riskLevelOverride: 3,
+      selectedTemplateId: 'balanced',
     },
     expectedRiskLevel: 3,
+    expectedTemplateId: 'balanced',
   },
   {
     id: 'voya-only-template-growth',
@@ -318,8 +323,10 @@ export const REVIEW_FIXTURES: ReviewFixture[] = [
       platform: 'voya_only',
       portfolioPreset: 'standard',
       riskLevelOverride: 4,
+      selectedTemplateId: 'growth',
     },
     expectedRiskLevel: 4,
+    expectedTemplateId: 'growth',
   },
   {
     id: 'voya-only-template-aggressive',
@@ -338,8 +345,10 @@ export const REVIEW_FIXTURES: ReviewFixture[] = [
       platform: 'voya_only',
       portfolioPreset: 'standard',
       riskLevelOverride: 5,
+      selectedTemplateId: 'aggressive',
     },
     expectedRiskLevel: 5,
+    expectedTemplateId: 'aggressive',
   },
   {
     id: 'voya-schwab-template-conservative',
@@ -360,8 +369,10 @@ export const REVIEW_FIXTURES: ReviewFixture[] = [
       schwabPreference: 'stay_low',
       portfolioPreset: 'standard',
       riskLevelOverride: 2,
+      selectedTemplateId: 'conservative',
     },
     expectedRiskLevel: 2,
+    expectedTemplateId: 'conservative',
   },
   {
     id: 'voya-schwab-template-balanced',
@@ -382,8 +393,10 @@ export const REVIEW_FIXTURES: ReviewFixture[] = [
       schwabPreference: 'stay_low',
       portfolioPreset: 'standard',
       riskLevelOverride: 3,
+      selectedTemplateId: 'balanced',
     },
     expectedRiskLevel: 3,
+    expectedTemplateId: 'balanced',
   },
   {
     id: 'voya-schwab-template-growth',
@@ -404,8 +417,10 @@ export const REVIEW_FIXTURES: ReviewFixture[] = [
       schwabPreference: 'stay_low',
       portfolioPreset: 'standard',
       riskLevelOverride: 4,
+      selectedTemplateId: 'growth',
     },
     expectedRiskLevel: 4,
+    expectedTemplateId: 'growth',
   },
   {
     id: 'voya-schwab-template-aggressive',
@@ -426,8 +441,10 @@ export const REVIEW_FIXTURES: ReviewFixture[] = [
       schwabPreference: 'stay_low',
       portfolioPreset: 'standard',
       riskLevelOverride: 5,
+      selectedTemplateId: 'aggressive',
     },
     expectedRiskLevel: 5,
+    expectedTemplateId: 'aggressive',
   },
 ];
 

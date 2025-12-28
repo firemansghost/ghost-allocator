@@ -59,6 +59,7 @@ export interface QuestionnaireAnswers {
   btcInstrument?: BtcInstrument; // default "fbtc"
   currentVoyaHoldings?: CurrentVoyaHolding[];
   riskLevelOverride?: RiskLevel; // Override computed risk level (used by templates)
+  selectedTemplateId?: string; // Template ID from lib/modelTemplates.ts (e.g., "balanced", "ghostregime-60-30-10")
 }
 
 export interface Sleeve {

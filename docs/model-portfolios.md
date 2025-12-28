@@ -187,6 +187,8 @@ The `/models` page displays five model portfolio templates:
 
 The template definitions live in `lib/modelTemplates.ts` and are the single source of truth for the `/models` page UI.
 
+**Note**: Builder shows Template DNA when a template prefill was used. The Template DNA banner displays the template name and indicates whether risk is pinned (via override) or computed.
+
 ## House Presets (Schwab)
 
 House presets are an alternative to the standard Ghost sleeve-based approach for users with Schwab BrokerageLink access. They replace the Schwab ETF sleeve lineup with a simplified house model allocation.

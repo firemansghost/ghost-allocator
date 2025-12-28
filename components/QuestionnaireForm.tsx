@@ -39,6 +39,7 @@ export default function QuestionnaireForm() {
         setSelectedTemplate(template.title);
         setFormData((prev) => {
           const updated = { ...prev };
+          updated.selectedTemplateId = templateId; // Persist template ID
           if (template.defaults?.portfolioPreset) {
             updated.portfolioPreset = template.defaults.portfolioPreset;
           }
@@ -52,8 +53,10 @@ export default function QuestionnaireForm() {
         });
       } else if (templateId === 'ghostregime-60-30-10') {
         // Legacy support for house preset
+        setSelectedTemplate('GhostRegime 60/30/10');
         setFormData((prev) => ({
           ...prev,
+          selectedTemplateId: templateId,
           portfolioPreset: 'ghostregime_60_30_10',
         }));
       }

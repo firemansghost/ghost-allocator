@@ -92,6 +92,8 @@ interface ReviewOutput {
   };
   assertions: {
     riskLevelMatchesExpected: boolean;
+    templateIdMatchesExpected: boolean;
+    riskOverrideMatchesExpected: boolean;
     voyaTotalValid: boolean;
     schwabTotalValid: boolean;
     housePresetHasCorrectTickers: boolean;
@@ -310,6 +312,16 @@ function computeReviewOutput(fixture: typeof REVIEW_FIXTURES[0]): ReviewOutput {
 
   // Validate risk level matches expected (for template fixtures)
   const riskLevelMatchesExpected = riskLevel === fixture.expectedRiskLevel;
+  
+  // Validate template ID matches expected (if specified)
+  const templateIdMatchesExpected = fixture.expectedTemplateId
+    ? fixture.answers.selectedTemplateId === fixture.expectedTemplateId
+    : true; // If not specified, always pass
+  
+  // Validate risk override matches expected (if template is selected)
+  const riskOverrideMatchesExpected = fixture.expectedTemplateId
+    ? fixture.answers.riskLevelOverride === fixture.expectedRiskLevel
+    : true; // If no template expected, don't validate override
 
   return {
     fixtureId: fixture.id,
@@ -319,6 +331,8 @@ function computeReviewOutput(fixture: typeof REVIEW_FIXTURES[0]): ReviewOutput {
     schwabLineup,
     assertions: {
       riskLevelMatchesExpected,
+      templateIdMatchesExpected,
+      riskOverrideMatchesExpected,
       voyaTotalValid,
       schwabTotalValid,
       housePresetHasCorrectTickers,
@@ -513,6 +527,30 @@ export default function ReviewBuilderPage() {
                     Risk level matches expected ({fixture.expectedRiskLevel})
                   </span>
                 </li>
+                {fixture.expectedTemplateId && (
+                  <>
+                    <li className="flex items-center gap-2">
+                      <span
+                        className={`inline-block w-2 h-2 rounded-full ${
+                          output.assertions.templateIdMatchesExpected ? 'bg-green-500' : 'bg-red-500'
+                        }`}
+                      />
+                      <span className={output.assertions.templateIdMatchesExpected ? 'text-green-300' : 'text-red-300'}>
+                        Template ID matches expected ({fixture.expectedTemplateId})
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span
+                        className={`inline-block w-2 h-2 rounded-full ${
+                          output.assertions.riskOverrideMatchesExpected ? 'bg-green-500' : 'bg-red-500'
+                        }`}
+                      />
+                      <span className={output.assertions.riskOverrideMatchesExpected ? 'text-green-300' : 'text-red-300'}>
+                        Risk override matches expected
+                      </span>
+                    </li>
+                  </>
+                )}
                 <li className="flex items-center gap-2">
                   <span
                     className={`inline-block w-2 h-2 rounded-full ${
