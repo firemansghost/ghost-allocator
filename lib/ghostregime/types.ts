@@ -96,6 +96,9 @@ export interface GhostRegimeRow {
   row_computed_at_utc?: string; // ISO timestamp when row was computed
   row_build_commit?: string; // Git commit hash when row was computed
   row_engine_version?: string; // Engine version when row was computed
+  // Signal receipts (metadata only, for transparency/education)
+  risk_receipts?: SignalReceipt[]; // Per-signal contributions to risk_score
+  inflation_receipts?: SignalReceipt[]; // Per-signal contributions to inflation_score_total (core + satellites)
 }
 
 export interface DebugVotes {
@@ -136,6 +139,18 @@ export interface TieBreakDetail {
   end_close?: number; // Close price at end
   computed_from?: string; // "close_to_close" (explicit)
   tie_rule?: 'GTE_ZERO' | 'GT_ZERO'; // Rule used: >=0 or >0
+}
+
+/**
+ * Signal receipt: per-signal contribution to axis scoring
+ * Used for transparency/education: shows which signals drove the current axes
+ */
+export interface SignalReceipt {
+  key: string; // Stable identifier (e.g., "spy", "hyg_ief", "pdbc", "commodity_basket")
+  label: string; // Human-readable name (e.g., "SPY trend", "Credit vs Treasuries", "Commodities")
+  vote: number; // Per-signal contribution (+1, -1, 0, or fractional for satellites)
+  direction: 'Risk On' | 'Risk Off' | 'Inflation' | 'Disinflation'; // Which direction this vote pushes
+  note?: string; // Optional short explanation (e.g., "credit improved", "volatility elevated")
 }
 
 export interface SeedStatus {

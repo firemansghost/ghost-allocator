@@ -4,7 +4,7 @@
  */
 
 import { formatISO, parseISO, isBefore, differenceInDays } from 'date-fns';
-import type { GhostRegimeRow, MarketDataPoint, SatelliteData, RegimeType } from './types';
+import type { GhostRegimeRow, MarketDataPoint, SatelliteData, RegimeType, SignalReceipt } from './types';
 import { CUTOVER_DATE_UTC, MARKET_SYMBOLS, MODEL_VERSION, TIEBREAK_RULE } from './config';
 import { loadReplayHistory } from './replayLoader';
 import { defaultMarketDataProvider } from './marketData';
@@ -187,6 +187,30 @@ export async function computeGhostRegime(
     daysSinceLastFlip
   );
 
+  // Build signal receipts (metadata only, for transparency/education)
+  // Start with core receipts from votes
+  const riskReceipts: SignalReceipt[] = votes.risk_receipts ? [...votes.risk_receipts] : [];
+  const inflationReceipts: SignalReceipt[] = votes.inflation_receipts ? [...votes.inflation_receipts] : [];
+  
+  // Add satellite receipts to inflation
+  const satelliteReceipts = buildSatelliteReceipts(satelliteData, SATELLITE_CONFIGS, asofDate);
+  inflationReceipts.push(...satelliteReceipts);
+  
+  // Add inflation tie-breaker receipt if used
+  if (inflTiebreakerUsed && votes.debug_votes?.inflation?.tiebreak) {
+    const tiebreak = votes.debug_votes.inflation.tiebreak;
+    if (tiebreak.reason === 'score_zero' && tiebreak.input_sign !== undefined) {
+      const seriesLabel = (tiebreak as any).series_used || 'PDBC';
+      inflationReceipts.push({
+        key: 'infl_tiebreak',
+        label: `Inflation tie-breaker (${seriesLabel} TR_21)`,
+        vote: tiebreak.input_sign,
+        direction: tiebreak.input_sign > 0 ? 'Inflation' : 'Disinflation',
+        note: 'Tie-breaker applied',
+      });
+    }
+  }
+
   // Build row
   const row: GhostRegimeRow = {
     date: formatISO(asofDate, { representation: 'date' }),
@@ -219,6 +243,8 @@ export async function computeGhostRegime(
     flip_watch_status: flipWatchStatus,
     source: 'computed',
     stale: false,
+    risk_receipts: riskReceipts,
+    inflation_receipts: inflationReceipts,
   };
 
   // Add debug votes if requested
@@ -231,6 +257,78 @@ export async function computeGhostRegime(
   }
 
   return row;
+}
+
+/**
+ * Build satellite receipts for inflation axis
+ * Processes satellites individually to get per-signal contributions
+ */
+function buildSatelliteReceipts(
+  satelliteData: SatelliteData[],
+  satelliteConfigs: typeof SATELLITE_CONFIGS,
+  asofDate: Date
+): SignalReceipt[] {
+  const receipts: SignalReceipt[] = [];
+
+  for (const config of satelliteConfigs) {
+    const data = satelliteData.find((d) => d.series === config.series);
+    if (!data) continue;
+
+    // Check TTL
+    if (data.age_days > config.ttl_days) {
+      continue; // Expired
+    }
+
+    // Calculate raw vote (same logic as processSatellites)
+    let rawVote = 0;
+    const threshold = config.thresholds;
+
+    if (config.signal_definition.includes('tr_')) {
+      if (threshold.inflation_vote_gte !== undefined && data.value >= threshold.inflation_vote_gte) {
+        rawVote = 1;
+      } else if (
+        threshold.disinflation_vote_lte !== undefined &&
+        data.value <= threshold.disinflation_vote_lte
+      ) {
+        rawVote = -1;
+      }
+    } else if (config.signal_definition.includes('level_index')) {
+      if (threshold.inflation_vote_gte !== undefined && data.value >= threshold.inflation_vote_gte) {
+        rawVote = 1;
+      } else if (
+        threshold.disinflation_vote_lte !== undefined &&
+        data.value <= threshold.disinflation_vote_lte
+      ) {
+        rawVote = -1;
+      }
+    } else if (config.signal_definition.includes('delta_') || config.signal_definition.includes('_pp')) {
+      if (threshold.inflation_vote_gte_pp !== undefined && data.value >= threshold.inflation_vote_gte_pp) {
+        rawVote = 1;
+      } else if (
+        threshold.disinflation_vote_lte_pp !== undefined &&
+        data.value <= threshold.disinflation_vote_lte_pp
+      ) {
+        rawVote = -1;
+      }
+    }
+
+    // Apply decay formula: effective_vote = raw_vote * vote_weight * (0.5 ^ (age_days / half_life_days))
+    const decayFactor = Math.pow(0.5, data.age_days / config.half_life_days);
+    const effectiveVote = rawVote * config.vote_weight * decayFactor;
+
+    // Only include if non-zero
+    if (effectiveVote !== 0) {
+      receipts.push({
+        key: `satellite_${config.series.replace(/\s+/g, '_').toLowerCase()}`,
+        label: config.series,
+        vote: effectiveVote, // Fractional vote (after decay)
+        direction: effectiveVote > 0 ? 'Inflation' : 'Disinflation',
+        note: `Age: ${data.age_days}d, decay: ${(decayFactor * 100).toFixed(1)}%`,
+      });
+    }
+  }
+
+  return receipts;
 }
 
 /**

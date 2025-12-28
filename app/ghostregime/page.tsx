@@ -22,11 +22,24 @@ import {
   describeAxisFromScores,
   formatVamsState,
   getFlipWatchCopy,
+  pickTopDrivers,
+  formatDriverLine,
+  formatSignedNumber,
+  computeAxisAgreement,
+  formatAgreementBadge,
 } from '@/lib/ghostregime/ui';
 import {
   WHY_REGIME_TITLE,
   FLIPWATCH_TITLE_PREFIX,
   FLIPWATCH_NONE_HINT,
+  TOP_DRIVERS_TITLE,
+  TOP_DRIVERS_RISK_HEADER,
+  TOP_DRIVERS_INFLATION_HEADER,
+  TOP_DRIVERS_FALLBACK,
+  TOP_DRIVERS_FOOTNOTE,
+  TOP_DRIVERS_NO_STRONG_DRIVERS,
+  AGREEMENT_TOOLTIP,
+  AGREEMENT_TOOLTIP_NA,
 } from '@/lib/ghostregime/ghostregimePageCopy';
 import Link from 'next/link';
 
@@ -390,12 +403,27 @@ export default function GhostRegimePage() {
           {/* Why This Regime Today */}
           {(() => {
             const axisDesc = describeAxisFromScores(data);
+            // Compute agreement for optional display
+            const riskAxisDirection = data.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
+            const riskAgreement = computeAxisAgreement(data.risk_receipts, riskAxisDirection);
+            const inflAxis = data.infl_axis === 'Inflation' ? 'Inflation' : 'Disinflation';
+            const inflAgreement = computeAxisAgreement(data.inflation_receipts, inflAxis);
             return (
               <GlassCard className="p-6">
                 <h2 className="text-sm font-semibold text-zinc-50 mb-4">{WHY_REGIME_TITLE}</h2>
                 <div className="space-y-2 text-xs text-zinc-300 leading-relaxed">
                   <p>{axisDesc.riskLine.replace(/\*\*/g, '')}</p>
+                  {riskAgreement.total > 0 && (
+                    <p className="text-zinc-400 text-[11px]">
+                      Signal agreement: {riskAgreement.agree}/{riskAgreement.total} ({riskAgreement.pct?.toFixed(0)}%)
+                    </p>
+                  )}
                   <p>{axisDesc.inflationLine.replace(/\*\*/g, '')}</p>
+                  {inflAgreement.total > 0 && (
+                    <p className="text-zinc-400 text-[11px]">
+                      Signal agreement: {inflAgreement.agree}/{inflAgreement.total} ({inflAgreement.pct?.toFixed(0)}%)
+                    </p>
+                  )}
                   <p className="text-amber-300 font-medium">{axisDesc.regimeLine.replace(/\*\*/g, '')}</p>
                   <div className="pt-2 space-y-1">
                     {axisDesc.soWhatLines.map((line, idx) => (
@@ -403,6 +431,99 @@ export default function GhostRegimePage() {
                     ))}
                   </div>
                 </div>
+              </GlassCard>
+            );
+          })()}
+
+          {/* Top Drivers Today */}
+          {(() => {
+            const riskDrivers = pickTopDrivers(data.risk_receipts, 2);
+            const inflationDrivers = pickTopDrivers(data.inflation_receipts, 2);
+            const hasReceipts = (data.risk_receipts && data.risk_receipts.length > 0) || 
+                                (data.inflation_receipts && data.inflation_receipts.length > 0);
+            const allVotesZero = hasReceipts && 
+              (!data.risk_receipts || data.risk_receipts.every(r => r.vote === 0)) &&
+              (!data.inflation_receipts || data.inflation_receipts.every(r => r.vote === 0));
+
+            return (
+              <GlassCard className="p-6">
+                <h2 className="text-sm font-semibold text-zinc-50 mb-4">{TOP_DRIVERS_TITLE}</h2>
+                {!hasReceipts ? (
+                  <p className="text-xs text-zinc-400 mb-2">{TOP_DRIVERS_FALLBACK}</p>
+                ) : allVotesZero ? (
+                  <p className="text-xs text-zinc-400 mb-2">{TOP_DRIVERS_NO_STRONG_DRIVERS}</p>
+                ) : (
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="text-xs font-medium text-zinc-300">{TOP_DRIVERS_RISK_HEADER}</h3>
+                        {(() => {
+                          // Map RISK ON/RISK OFF to Risk On/Risk Off for agreement computation
+                          const riskAxisDirection = data.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
+                          const riskAgreement = computeAxisAgreement(data.risk_receipts, riskAxisDirection);
+                          const badge = formatAgreementBadge(riskAgreement);
+                          if (riskAgreement.total === 0 && !hasReceipts) {
+                            return null; // Don't show badge if no receipts available
+                          }
+                          return (
+                            <Tooltip content={badge.tooltip}>
+                              <span className="text-[10px] px-2 py-0.5 rounded border border-amber-400/20 bg-amber-400/5 text-amber-300/80">
+                                {badge.label}
+                              </span>
+                            </Tooltip>
+                          );
+                        })()}
+                      </div>
+                      {riskDrivers.length > 0 ? (
+                        <ul className="space-y-1 text-xs text-zinc-300">
+                          {riskDrivers.map((driver, idx) => (
+                            <li key={idx} className="flex items-center gap-2">
+                              <span className="text-amber-300">→</span>
+                              <span>{formatDriverLine(driver)}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-xs text-zinc-400 italic">No strong risk drivers</p>
+                      )}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="text-xs font-medium text-zinc-300">{TOP_DRIVERS_INFLATION_HEADER}</h3>
+                        {(() => {
+                          const inflAxis = data.infl_axis === 'Inflation' ? 'Inflation' : 'Disinflation';
+                          const inflAgreement = computeAxisAgreement(data.inflation_receipts, inflAxis);
+                          const badge = formatAgreementBadge(inflAgreement);
+                          if (inflAgreement.total === 0 && !hasReceipts) {
+                            return null; // Don't show badge if no receipts available
+                          }
+                          return (
+                            <Tooltip content={badge.tooltip}>
+                              <span className="text-[10px] px-2 py-0.5 rounded border border-amber-400/20 bg-amber-400/5 text-amber-300/80">
+                                {badge.label}
+                              </span>
+                            </Tooltip>
+                          );
+                        })()}
+                      </div>
+                      {inflationDrivers.length > 0 ? (
+                        <ul className="space-y-1 text-xs text-zinc-300">
+                          {inflationDrivers.map((driver, idx) => (
+                            <li key={idx} className="flex items-center gap-2">
+                              <span className="text-amber-300">→</span>
+                              <span>{formatDriverLine(driver)}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-xs text-zinc-400 italic">No strong inflation drivers</p>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-zinc-500 mt-3 pt-3 border-t border-zinc-800">
+                      {TOP_DRIVERS_FOOTNOTE}
+                    </p>
+                  </div>
+                )}
               </GlassCard>
             );
           })()}
@@ -838,6 +959,105 @@ export default function GhostRegimePage() {
               </div>
             </div>
           </GlassCard>
+
+          {/* Advanced: Signal Receipts */}
+          {(() => {
+            const hasRiskReceipts = data.risk_receipts && data.risk_receipts.length > 0;
+            const hasInflationReceipts = data.inflation_receipts && data.inflation_receipts.length > 0;
+            const hasAnyReceipts = hasRiskReceipts || hasInflationReceipts;
+
+            if (!hasAnyReceipts) {
+              return null; // Hide section if no receipts available
+            }
+
+            return (
+              <GlassCard className="p-4 sm:p-5 space-y-3 md:col-span-2">
+                <h2 className="text-sm font-semibold text-zinc-50">Signal receipts</h2>
+                <div className="space-y-4">
+                  {hasRiskReceipts && (
+                    <div>
+                      <h3 className="text-xs font-medium text-zinc-300 mb-2">{TOP_DRIVERS_RISK_HEADER}</h3>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-xs border-collapse">
+                          <thead>
+                            <tr className="border-b border-zinc-800">
+                              <th className="text-left py-1 px-2 text-zinc-400 font-medium">Signal</th>
+                              <th className="text-right py-1 px-2 text-zinc-400 font-medium">Vote</th>
+                              <th className="text-left py-1 px-2 text-zinc-400 font-medium">Direction</th>
+                              {data.risk_receipts?.some(r => r.note) && (
+                                <th className="text-left py-1 px-2 text-zinc-400 font-medium">Note</th>
+                              )}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {data.risk_receipts?.map((receipt, idx) => (
+                              <tr key={idx} className="border-b border-zinc-900/50">
+                                <td className="py-1 px-2 text-zinc-300">{receipt.label}</td>
+                                <td className="py-1 px-2 text-right text-zinc-200 font-mono">
+                                  {formatSignedNumber(receipt.vote)}
+                                </td>
+                                <td className="py-1 px-2 text-zinc-300">{receipt.direction}</td>
+                                {data.risk_receipts?.some(r => r.note) && (
+                                  <td className="py-1 px-2 text-zinc-400 text-[10px]">{receipt.note || ''}</td>
+                                )}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                  {hasInflationReceipts && (
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-xs font-medium text-zinc-300">{TOP_DRIVERS_INFLATION_HEADER}</h3>
+                        {(() => {
+                          const inflAxis = data.infl_axis === 'Inflation' ? 'Inflation' : 'Disinflation';
+                          const inflAgreement = computeAxisAgreement(data.inflation_receipts, inflAxis);
+                          if (inflAgreement.total > 0) {
+                            return (
+                              <span className="text-[10px] text-zinc-400">
+                                Agreement: {inflAgreement.agree}/{inflAgreement.total} ({inflAgreement.pct?.toFixed(0)}%)
+                              </span>
+                            );
+                          }
+                          return null;
+                        })()}
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-xs border-collapse">
+                          <thead>
+                            <tr className="border-b border-zinc-800">
+                              <th className="text-left py-1 px-2 text-zinc-400 font-medium">Signal</th>
+                              <th className="text-right py-1 px-2 text-zinc-400 font-medium">Vote</th>
+                              <th className="text-left py-1 px-2 text-zinc-400 font-medium">Direction</th>
+                              {data.inflation_receipts?.some(r => r.note) && (
+                                <th className="text-left py-1 px-2 text-zinc-400 font-medium">Note</th>
+                              )}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {data.inflation_receipts?.map((receipt, idx) => (
+                              <tr key={idx} className="border-b border-zinc-900/50">
+                                <td className="py-1 px-2 text-zinc-300">{receipt.label}</td>
+                                <td className="py-1 px-2 text-right text-zinc-200 font-mono">
+                                  {formatSignedNumber(receipt.vote)}
+                                </td>
+                                <td className="py-1 px-2 text-zinc-300">{receipt.direction}</td>
+                                {data.inflation_receipts?.some(r => r.note) && (
+                                  <td className="py-1 px-2 text-zinc-400 text-[10px]">{receipt.note || ''}</td>
+                                )}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </GlassCard>
+            );
+          })()}
         </div>
       )}
 

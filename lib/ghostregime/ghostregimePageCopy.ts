@@ -23,3 +23,16 @@ export const SO_WHAT_LINES = {
   disinflation: 'Prices are calming down (for now).',
 } as const;
 
+// Top Drivers Today
+export const TOP_DRIVERS_TITLE = 'Top drivers today';
+export const TOP_DRIVERS_RISK_HEADER = 'Risk axis';
+export const TOP_DRIVERS_INFLATION_HEADER = 'Inflation axis';
+export const TOP_DRIVERS_FALLBACK = 'Driver list unavailable for this snapshot (older data).';
+export const TOP_DRIVERS_FOOTNOTE = "These are the two biggest signal votes feeding today's scores. Full receipts live in Nerd Mode.";
+export const TOP_DRIVERS_NO_STRONG_DRIVERS = 'No strong drivers today. The model is basically shrugging.';
+
+// Agreement/Confidence
+export const AGREEMENT_LABEL_PREFIX = 'Agreement:';
+export const AGREEMENT_TOOLTIP = 'Agreement among non-zero signal votes. Not a probability.';
+export const AGREEMENT_TOOLTIP_NA = 'All signals were neutral today.';
+

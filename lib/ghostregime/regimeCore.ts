@@ -24,6 +24,21 @@ export interface VoteResult {
   infl_score: number;
   risk_tiebreaker_used: boolean;
   infl_tiebreaker_used: boolean;
+  // Receipts: per-signal contributions (always computed for transparency)
+  risk_receipts?: Array<{
+    key: string;
+    label: string;
+    vote: number;
+    direction: 'Risk On' | 'Risk Off';
+    note?: string;
+  }>;
+  inflation_receipts?: Array<{
+    key: string;
+    label: string;
+    vote: number;
+    direction: 'Inflation' | 'Disinflation';
+    note?: string;
+  }>;
   debug_votes?: {
     risk: {
       spy: { tr_63: number; vote: number; threshold_hit?: string };
@@ -80,6 +95,8 @@ export function computeOptionBVotes(
   // Risk axis vote 1: SPY TR_63
   let riskScore = 0;
   const debugRisk: any = includeDebug ? {} : undefined;
+  // Receipts: always computed for transparency (separate from debug_votes)
+  const riskReceiptsData: any = {};
   let spyTR = 0;
   let spyVote = 0;
   let spyThreshold = '';
@@ -96,6 +113,7 @@ export function computeOptionBVotes(
       spyThreshold = `<= ${VOTE_THRESHOLDS.SPY_RISK_OFF} (RiskOff)`;
     }
   }
+  riskReceiptsData.spy = { vote: spyVote, threshold_hit: spyThreshold || 'none' };
   if (includeDebug) {
     debugRisk.spy = { tr_63: spyTR, vote: spyVote, threshold_hit: spyThreshold || 'none' };
   }
@@ -116,6 +134,7 @@ export function computeOptionBVotes(
       hygIefThreshold = `<= ${VOTE_THRESHOLDS.HYG_IEF_RISK_OFF} (RiskOff)`;
     }
   }
+  riskReceiptsData.hyg_ief = { vote: hygIefVote, threshold_hit: hygIefThreshold || 'none' };
   if (includeDebug) {
     debugRisk.hyg_ief = { tr_63: hygIefRatio, vote: hygIefVote, threshold_hit: hygIefThreshold || 'none' };
   }
@@ -136,6 +155,7 @@ export function computeOptionBVotes(
       vixThreshold = `>= ${VOTE_THRESHOLDS.VIX_RISK_OFF} (RiskOff)`;
     }
   }
+  riskReceiptsData.vix = { vote: vixVote, threshold_hit: vixThreshold || 'none' };
   if (includeDebug) {
     debugRisk.vix = { tr_21: vixTR, vote: vixVote, threshold_hit: vixThreshold || 'none' };
   }
@@ -156,6 +176,7 @@ export function computeOptionBVotes(
       eemSpyThreshold = `<= ${VOTE_THRESHOLDS.EEM_SPY_RISK_OFF} (RiskOff)`;
     }
   }
+  riskReceiptsData.eem_spy = { vote: eemSpyVote, threshold_hit: eemSpyThreshold || 'none' };
   if (includeDebug) {
     debugRisk.eem_spy = { tr_63: eemSpyRatio, vote: eemSpyVote, threshold_hit: eemSpyThreshold || 'none' };
   }
@@ -163,6 +184,7 @@ export function computeOptionBVotes(
   // Tie-breaker for risk: if risk_score == 0, use sign of TR_21(SPY)
   let riskTiebreakerUsed = false;
   let riskTiebreakDetail: any = undefined;
+  let riskTiebreakReceipt: any = undefined;
   if (riskScore === 0 && filteredSpyData.length >= TR_21) {
     // Get window for TR_21 calculation
     const window = getLastNObservations(filteredSpyData, TR_21);
@@ -174,6 +196,7 @@ export function computeOptionBVotes(
         const isRiskOn = spyTR21 >= 0;
         riskScore = isRiskOn ? 1 : -1;
         riskTiebreakerUsed = true;
+        riskTiebreakReceipt = { input_sign: isRiskOn ? 1 : -1 };
         if (includeDebug) {
           riskTiebreakDetail = {
             reason: 'score_zero',
@@ -197,6 +220,9 @@ export function computeOptionBVotes(
   }
   if (includeDebug && riskTiebreakDetail) {
     debugRisk.tiebreak = riskTiebreakDetail;
+  }
+  if (riskTiebreakReceipt) {
+    riskReceiptsData.tiebreak = riskTiebreakReceipt;
   }
 
   // Inflation axis votes
@@ -223,6 +249,8 @@ export function computeOptionBVotes(
 
   let inflScore = 0;
   const debugInfl: any = includeDebug ? {} : undefined;
+  // Receipts: always computed for transparency (separate from debug_votes)
+  const inflationReceiptsData: any = {};
   let pdbcTR = 0;
   let pdbcVote = 0;
   let pdbcThreshold = '';
@@ -240,6 +268,11 @@ export function computeOptionBVotes(
       pdbcThreshold = `<= ${VOTE_THRESHOLDS.PDBC_DISINFLATION} (Disinflation)`;
     }
   }
+  inflationReceiptsData.pdbc = {
+    vote: pdbcVote,
+    threshold_hit: pdbcThreshold || 'none',
+    proxy_used: proxyUsed?.[MARKET_SYMBOLS.PDBC],
+  };
   if (includeDebug) {
     debugInfl.pdbc = {
       tr_63: pdbcTR,
@@ -265,6 +298,7 @@ export function computeOptionBVotes(
       tipIefThreshold = `<= ${VOTE_THRESHOLDS.TIP_IEF_DISINFLATION} (Disinflation)`;
     }
   }
+  inflationReceiptsData.tip_ief = { vote: tipIefVote, threshold_hit: tipIefThreshold || 'none' };
   if (includeDebug) {
     debugInfl.tip_ief = { tr_63: tipIefRatio, vote: tipIefVote, threshold_hit: tipIefThreshold || 'none' };
   }
@@ -286,6 +320,7 @@ export function computeOptionBVotes(
       tltThreshold = `<= ${VOTE_THRESHOLDS.TLT_INFLATION_THRESHOLD} (Inflation)`;
     }
   }
+  inflationReceiptsData.tlt = { vote: tltVote, threshold_hit: tltThreshold || 'none' };
   if (includeDebug) {
     debugInfl.tlt = { tr_63: tltTR, vote: tltVote, threshold_hit: tltThreshold || 'none' };
   }
@@ -307,6 +342,7 @@ export function computeOptionBVotes(
       uupThreshold = `<= ${VOTE_THRESHOLDS.UUP_INFLATION_THRESHOLD} (Inflation)`;
     }
   }
+  inflationReceiptsData.uup = { vote: uupVote, threshold_hit: uupThreshold || 'none' };
   if (includeDebug) {
     debugInfl.uup = { tr_63: uupTR, vote: uupVote, threshold_hit: uupThreshold || 'none' };
   }
@@ -320,11 +356,101 @@ export function computeOptionBVotes(
     debugInfl.tiebreak = inflTiebreakDetail;
   }
 
+  // Build receipts (always computed for transparency, separate from debug_votes)
+  const riskReceipts: VoteResult['risk_receipts'] = [];
+  if (riskReceiptsData.spy) {
+    riskReceipts.push({
+      key: 'spy',
+      label: 'SPY trend',
+      vote: riskReceiptsData.spy.vote,
+      direction: riskReceiptsData.spy.vote > 0 ? 'Risk On' : 'Risk Off',
+      note: riskReceiptsData.spy.threshold_hit && riskReceiptsData.spy.threshold_hit !== 'none' ? riskReceiptsData.spy.threshold_hit : undefined,
+    });
+  }
+  if (riskReceiptsData.hyg_ief) {
+    riskReceipts.push({
+      key: 'hyg_ief',
+      label: 'Credit vs Treasuries',
+      vote: riskReceiptsData.hyg_ief.vote,
+      direction: riskReceiptsData.hyg_ief.vote > 0 ? 'Risk On' : 'Risk Off',
+      note: riskReceiptsData.hyg_ief.threshold_hit && riskReceiptsData.hyg_ief.threshold_hit !== 'none' ? riskReceiptsData.hyg_ief.threshold_hit : undefined,
+    });
+  }
+  if (riskReceiptsData.vix) {
+    riskReceipts.push({
+      key: 'vix',
+      label: 'VIX stress',
+      vote: riskReceiptsData.vix.vote,
+      direction: riskReceiptsData.vix.vote > 0 ? 'Risk On' : 'Risk Off',
+      note: riskReceiptsData.vix.threshold_hit && riskReceiptsData.vix.threshold_hit !== 'none' ? riskReceiptsData.vix.threshold_hit : undefined,
+    });
+  }
+  if (riskReceiptsData.eem_spy) {
+    riskReceipts.push({
+      key: 'eem_spy',
+      label: 'EM vs US',
+      vote: riskReceiptsData.eem_spy.vote,
+      direction: riskReceiptsData.eem_spy.vote > 0 ? 'Risk On' : 'Risk Off',
+      note: riskReceiptsData.eem_spy.threshold_hit && riskReceiptsData.eem_spy.threshold_hit !== 'none' ? riskReceiptsData.eem_spy.threshold_hit : undefined,
+    });
+  }
+  if (riskReceiptsData.tiebreak && riskReceiptsData.tiebreak.input_sign !== undefined) {
+    riskReceipts.push({
+      key: 'risk_tiebreak',
+      label: 'Risk tie-breaker (SPY TR_21)',
+      vote: riskReceiptsData.tiebreak.input_sign,
+      direction: riskReceiptsData.tiebreak.input_sign > 0 ? 'Risk On' : 'Risk Off',
+      note: 'Tie-breaker applied',
+    });
+  }
+
+  const inflationReceipts: VoteResult['inflation_receipts'] = [];
+  if (inflationReceiptsData.pdbc) {
+    const proxyNote = inflationReceiptsData.pdbc.proxy_used ? ` (proxy: ${inflationReceiptsData.pdbc.proxy_used})` : '';
+    inflationReceipts.push({
+      key: 'pdbc',
+      label: 'Commodities' + proxyNote,
+      vote: inflationReceiptsData.pdbc.vote,
+      direction: inflationReceiptsData.pdbc.vote > 0 ? 'Inflation' : 'Disinflation',
+      note: inflationReceiptsData.pdbc.threshold_hit && inflationReceiptsData.pdbc.threshold_hit !== 'none' ? inflationReceiptsData.pdbc.threshold_hit : undefined,
+    });
+  }
+  if (inflationReceiptsData.tip_ief) {
+    inflationReceipts.push({
+      key: 'tip_ief',
+      label: 'TIP/IEF ratio',
+      vote: inflationReceiptsData.tip_ief.vote,
+      direction: inflationReceiptsData.tip_ief.vote > 0 ? 'Inflation' : 'Disinflation',
+      note: inflationReceiptsData.tip_ief.threshold_hit && inflationReceiptsData.tip_ief.threshold_hit !== 'none' ? inflationReceiptsData.tip_ief.threshold_hit : undefined,
+    });
+  }
+  if (inflationReceiptsData.tlt) {
+    inflationReceipts.push({
+      key: 'tlt',
+      label: 'TLT',
+      vote: inflationReceiptsData.tlt.vote,
+      direction: inflationReceiptsData.tlt.vote > 0 ? 'Disinflation' : 'Inflation', // TLT: +1 = Disinflation, -1 = Inflation
+      note: inflationReceiptsData.tlt.threshold_hit && inflationReceiptsData.tlt.threshold_hit !== 'none' ? inflationReceiptsData.tlt.threshold_hit : undefined,
+    });
+  }
+  if (inflationReceiptsData.uup) {
+    inflationReceipts.push({
+      key: 'uup',
+      label: 'Dollar',
+      vote: inflationReceiptsData.uup.vote,
+      direction: inflationReceiptsData.uup.vote > 0 ? 'Disinflation' : 'Inflation', // UUP: +1 = Disinflation, -1 = Inflation
+      note: inflationReceiptsData.uup.threshold_hit && inflationReceiptsData.uup.threshold_hit !== 'none' ? inflationReceiptsData.uup.threshold_hit : undefined,
+    });
+  }
+  // Note: Inflation tie-breaker is handled in engine.ts after satellites
+
   return {
     risk_score: riskScore,
     infl_score: inflScore,
     risk_tiebreaker_used: riskTiebreakerUsed,
     infl_tiebreaker_used: false, // Will be set in engine after satellites
+    risk_receipts: riskReceipts,
+    inflation_receipts: inflationReceipts,
     debug_votes: includeDebug ? {
       risk: debugRisk,
       inflation: debugInfl,

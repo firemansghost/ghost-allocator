@@ -5,7 +5,7 @@
  * for the GhostRegime page UI. No fetches, no hooks, no side effects.
  */
 
-import type { GhostRegimeRow, RegimeType } from './types';
+import type { GhostRegimeRow, RegimeType, SignalReceipt } from './types';
 
 /**
  * Format scale value to human-readable label
@@ -327,5 +327,142 @@ export function getFlipWatchCopy(flipWatchStatus: string): {
   ];
 
   return { title, lines };
+}
+
+/**
+ * Pick top N drivers from receipts
+ * Sorting rules (deterministic):
+ * - Prefer non-zero votes
+ * - Higher absolute vote first
+ * - Tie-break by stable key order (alphabetical) so it doesn't flicker
+ */
+export function pickTopDrivers(receipts: SignalReceipt[] | undefined, n: number = 2): SignalReceipt[] {
+  if (!receipts || receipts.length === 0) {
+    return [];
+  }
+
+  // Filter to non-zero votes, then sort by absolute vote (descending), then by key (ascending)
+  const nonZero = receipts.filter((r) => r.vote !== 0);
+  const sorted = nonZero.sort((a, b) => {
+    const absA = Math.abs(a.vote);
+    const absB = Math.abs(b.vote);
+    if (absA !== absB) {
+      return absB - absA; // Higher absolute vote first
+    }
+    // Tie-break by key (alphabetical)
+    return a.key.localeCompare(b.key);
+  });
+
+  return sorted.slice(0, n);
+}
+
+/**
+ * Format a driver line for display
+ * e.g. "Credit vs Treasuries → Risk On (+1)"
+ */
+export function formatDriverLine(item: SignalReceipt): string {
+  const voteStr = formatSignedNumber(item.vote);
+  return `${item.label} → ${item.direction} (${voteStr})`;
+}
+
+/**
+ * Group drivers by axis direction
+ * Returns drivers pushing in the current axis direction vs the opposite
+ */
+export function groupDriversByAxis(
+  receipts: SignalReceipt[] | undefined,
+  currentAxis: 'Risk On' | 'Risk Off' | 'Inflation' | 'Disinflation'
+): {
+  pushingThisWay: SignalReceipt[];
+  pushingOtherWay: SignalReceipt[];
+} {
+  if (!receipts || receipts.length === 0) {
+    return { pushingThisWay: [], pushingOtherWay: [] };
+  }
+
+  const pushingThisWay: SignalReceipt[] = [];
+  const pushingOtherWay: SignalReceipt[] = [];
+
+  for (const receipt of receipts) {
+    if (receipt.direction === currentAxis) {
+      pushingThisWay.push(receipt);
+    } else {
+      pushingOtherWay.push(receipt);
+    }
+  }
+
+  return { pushingThisWay, pushingOtherWay };
+}
+
+/**
+ * Compute axis agreement from receipts
+ * Returns how many non-zero votes align with the current axis direction
+ */
+export function computeAxisAgreement(
+  receipts: SignalReceipt[] | undefined,
+  axisDirection: 'Risk On' | 'Risk Off' | 'Inflation' | 'Disinflation'
+): {
+  agree: number;
+  total: number;
+  disagree: number;
+  pct: number | null;
+} {
+  if (!receipts || receipts.length === 0) {
+    return { agree: 0, total: 0, disagree: 0, pct: null };
+  }
+
+  // Filter to non-zero votes only
+  const nonZero = receipts.filter((r) => r.vote !== 0);
+  const total = nonZero.length;
+
+  if (total === 0) {
+    return { agree: 0, total: 0, disagree: 0, pct: null };
+  }
+
+  // Count votes that align with axis direction
+  let agree = 0;
+  for (const receipt of nonZero) {
+    // Risk axis: Risk On means votes > 0 agree, Risk Off means votes < 0 agree
+    // Inflation axis: Inflation means votes > 0 agree, Disinflation means votes < 0 agree
+    const isAgreeing =
+      (axisDirection === 'Risk On' || axisDirection === 'Inflation') 
+        ? receipt.vote > 0 
+        : receipt.vote < 0;
+    
+    if (isAgreeing) {
+      agree++;
+    }
+  }
+
+  const disagree = total - agree;
+  const pct = total > 0 ? (agree / total) * 100 : null;
+
+  return { agree, total, disagree, pct };
+}
+
+/**
+ * Format agreement badge label and tooltip
+ */
+export function formatAgreementBadge(agreement: {
+  agree: number;
+  total: number;
+  disagree: number;
+  pct: number | null;
+}): {
+  label: string;
+  tooltip: string;
+} {
+  if (agreement.total === 0) {
+    return {
+      label: 'Agreement: n/a',
+      tooltip: 'All signals were neutral today.',
+    };
+  }
+
+  const pctStr = agreement.pct !== null ? ` (${agreement.pct.toFixed(0)}%)` : '';
+  return {
+    label: `Agreement: ${agreement.agree}/${agreement.total}${pctStr}`,
+    tooltip: 'Agreement among non-zero signal votes. Not a probability.',
+  };
 }
 
