@@ -7,6 +7,7 @@ import { computeRiskLevel } from '@/lib/portfolioEngine';
 import type { QuestionnaireResult } from '@/lib/types';
 import { willShowGoldBtc } from '@/lib/schwabLineups';
 import { getModelTemplate } from '@/lib/modelTemplates';
+import { decodeDnaFromQuery } from '@/lib/builder/dnaLink';
 
 const STORAGE_KEY = 'ghostAllocatorQuestionnaire';
 
@@ -29,9 +30,50 @@ export default function QuestionnaireForm() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [dnaLoadStatus, setDnaLoadStatus] = useState<'success' | 'error' | null>(null);
 
-  // Read template query param and apply defaults if valid
+  // Read DNA param first (takes precedence over template param)
   useEffect(() => {
+    const dnaParam = searchParams.get('dna');
+    if (dnaParam) {
+      const result = decodeDnaFromQuery(dnaParam);
+      if (result.ok) {
+        setDnaLoadStatus('success');
+        // Apply DNA answers to form with guardrails
+        setFormData((prev) => {
+          const updated = { ...prev, ...result.answers };
+          
+          // Apply guardrails: if platform is voya_only, reset house presets
+          if (result.answers.platform === 'voya_only') {
+            if (updated.portfolioPreset === 'ghostregime_60_30_10' || updated.portfolioPreset === 'ghostregime_60_25_15') {
+              updated.portfolioPreset = 'standard';
+            }
+            // Reset tilt and lineup style for voya_only
+            updated.goldBtcTilt = 'none';
+            updated.schwabLineupStyle = 'standard';
+          }
+          
+          // If template is in DNA, set the template title for display
+          if (result.answers.selectedTemplateId) {
+            const template = getModelTemplate(result.answers.selectedTemplateId);
+            if (template) {
+              setSelectedTemplate(template.title);
+            }
+          }
+          return updated;
+        });
+      } else {
+        setDnaLoadStatus('error');
+        console.warn('Failed to decode DNA link:', result.error);
+      }
+    }
+  }, [searchParams]);
+
+  // Read template query param and apply defaults if valid (only if no DNA param)
+  useEffect(() => {
+    const dnaParam = searchParams.get('dna');
+    if (dnaParam) return; // DNA takes precedence
+
     const templateId = searchParams.get('template');
     if (templateId) {
       const template = getModelTemplate(templateId);

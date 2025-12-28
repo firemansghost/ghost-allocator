@@ -187,7 +187,18 @@ The `/models` page displays five model portfolio templates:
 
 The template definitions live in `lib/modelTemplates.ts` and are the single source of truth for the `/models` page UI.
 
-**Note**: Builder shows Template DNA when a template prefill was used. The Template DNA banner displays the template name and indicates whether risk is pinned (via override) or computed.
+**Note**: Builder shows Template DNA when a template prefill was used. The Template DNA banner displays the template name and indicates whether risk is pinned (via override) or computed. The Action Plan section also includes a compact Template DNA block showing template context (template name, risk status, preset, lineup style, wrappers) so the plan carries its own context when copied or screenshot. The Action Plan Template DNA block includes a one-line "DNA" string and a Copy button for sharing/debugging the exact template configuration.
+
+### Shareable DNA Links
+
+The Action Plan Template DNA block includes a "Share link" button that generates a shareable URL (e.g., `/onboarding?dna=XXXX`) containing the encoded template configuration. When someone visits that URL, the onboarding form is automatically prefilled with the same template settings (selectedTemplateId, riskLevelOverride, platform, preset, lineup style, wrappers, tilt, etc.).
+
+**Important notes:**
+- DNA links only include configuration fields (no personal info like age, yearsToGoal)
+- Links are versioned (currently v1) and use base64url encoding for compactness
+- Invalid or unsupported DNA links fail gracefully with a non-scary warning
+- No server-side storage: DNA links are stateless URL parameters
+- DNA import takes precedence over template query params if both are present
 
 ## House Presets (Schwab)
 

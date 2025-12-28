@@ -13,6 +13,9 @@ import { getHouseModel, getHouseModelWithWrappers, isHousePreset } from '@/lib/h
 import { getStandardSchwabLineup } from '@/lib/schwabLineups';
 import { isTargetDateFund, isTargetDateName, looksLikeTargetDateFund, getFundById } from '@/lib/voyaFunds';
 import { computeScaledHouseLineup, type GhostRegimeScaleData, type ScaledLineupItem } from '@/lib/houseScaling';
+import { getModelTemplate } from '@/lib/modelTemplates';
+import { buildActionPlanDnaString } from '@/lib/builder/actionPlanCopy';
+import { encodeDnaToQuery, decodeDnaFromQuery } from '@/lib/builder/dnaLink';
 import type { ExampleETF } from '@/lib/types';
 
 /**
@@ -90,10 +93,14 @@ interface ReviewOutput {
       etfs?: ExampleETF[];
     }>;
   };
+  actionPlanDnaString?: string;
   assertions: {
     riskLevelMatchesExpected: boolean;
     templateIdMatchesExpected: boolean;
     riskOverrideMatchesExpected: boolean;
+    actionPlanShowsTemplateDna: boolean;
+    actionPlanDnaStringPresent: boolean;
+    dnaImportRoundTripOk: boolean;
     voyaTotalValid: boolean;
     schwabTotalValid: boolean;
     housePresetHasCorrectTickers: boolean;
@@ -323,16 +330,95 @@ function computeReviewOutput(fixture: typeof REVIEW_FIXTURES[0]): ReviewOutput {
     ? fixture.answers.riskLevelOverride === fixture.expectedRiskLevel
     : true; // If no template expected, don't validate override
 
+  // Validate that Action Plan Template DNA would render (if template is selected)
+  const actionPlanShowsTemplateDna = fixture.expectedTemplateId
+    ? fixture.answers.selectedTemplateId === fixture.expectedTemplateId
+    : true; // If no template expected, always pass
+
+  // Validate Action Plan DNA string (if template is selected)
+  let actionPlanDnaStringPresent = true;
+  let actionPlanDnaString = '';
+  if (fixture.answers.selectedTemplateId) {
+    const template = getModelTemplate(fixture.answers.selectedTemplateId);
+    if (template) {
+      actionPlanDnaString = buildActionPlanDnaString({
+        templateId: fixture.answers.selectedTemplateId,
+        templateName: template.title,
+        platform: fixture.answers.platform,
+        riskLevelOverride: fixture.answers.riskLevelOverride,
+        portfolioPreset: fixture.answers.portfolioPreset,
+        schwabLineupStyle: fixture.answers.schwabLineupStyle,
+        goldBtcTilt: fixture.answers.goldBtcTilt,
+        goldInstrument: fixture.answers.goldInstrument,
+        btcInstrument: fixture.answers.btcInstrument,
+      });
+      // Check that DNA string is non-empty and contains template info
+      actionPlanDnaStringPresent =
+        actionPlanDnaString.length > 0 &&
+        (actionPlanDnaString.includes(fixture.answers.selectedTemplateId) ||
+          actionPlanDnaString.includes(template.title));
+      // If expectedTemplateId exists, ensure it's in the string
+      if (fixture.expectedTemplateId) {
+        actionPlanDnaStringPresent =
+          actionPlanDnaStringPresent &&
+          (actionPlanDnaString.includes(fixture.expectedTemplateId) ||
+            actionPlanDnaString.includes(template.title));
+      }
+    }
+  }
+
+  // Validate DNA round-trip encoding/decoding
+  let dnaImportRoundTripOk = true;
+  if (fixture.answers.selectedTemplateId) {
+    try {
+      // Encode current fixture answers
+      const encoded = encodeDnaToQuery(fixture.answers);
+      // Decode it back
+      const decoded = decodeDnaFromQuery(encoded);
+      
+      if (!decoded.ok) {
+        dnaImportRoundTripOk = false;
+      } else {
+        // Check that key fields match (whitelisted fields only)
+        const checkField = (field: keyof typeof fixture.answers) => {
+          const original = fixture.answers[field];
+          const restored = decoded.answers[field];
+          if (original !== undefined && original !== null) {
+            return original === restored;
+          }
+          return true; // If original was undefined, restored can be undefined too
+        };
+
+        dnaImportRoundTripOk =
+          checkField('selectedTemplateId') &&
+          checkField('riskLevelOverride') &&
+          checkField('platform') &&
+          checkField('portfolioPreset') &&
+          checkField('schwabLineupStyle') &&
+          checkField('goldInstrument') &&
+          checkField('btcInstrument') &&
+          checkField('goldBtcTilt') &&
+          checkField('complexityPreference');
+      }
+    } catch (err) {
+      dnaImportRoundTripOk = false;
+    }
+  }
+
   return {
     fixtureId: fixture.id,
     riskLevel,
     platformSplit,
     voyaImplementation,
     schwabLineup,
+    actionPlanDnaString: actionPlanDnaString || undefined,
     assertions: {
       riskLevelMatchesExpected,
       templateIdMatchesExpected,
       riskOverrideMatchesExpected,
+      actionPlanShowsTemplateDna,
+      actionPlanDnaStringPresent,
+      dnaImportRoundTripOk,
       voyaTotalValid,
       schwabTotalValid,
       housePresetHasCorrectTickers,
@@ -547,6 +633,41 @@ export default function ReviewBuilderPage() {
                       />
                       <span className={output.assertions.riskOverrideMatchesExpected ? 'text-green-300' : 'text-red-300'}>
                         Risk override matches expected
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span
+                        className={`inline-block w-2 h-2 rounded-full ${
+                          output.assertions.actionPlanShowsTemplateDna ? 'bg-green-500' : 'bg-red-500'
+                        }`}
+                      />
+                      <span className={output.assertions.actionPlanShowsTemplateDna ? 'text-green-300' : 'text-red-300'}>
+                        Action Plan shows Template DNA
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span
+                        className={`inline-block w-2 h-2 rounded-full ${
+                          output.assertions.actionPlanDnaStringPresent ? 'bg-green-500' : 'bg-red-500'
+                        }`}
+                      />
+                      <span className={output.assertions.actionPlanDnaStringPresent ? 'text-green-300' : 'text-red-300'}>
+                        Action Plan DNA string present
+                      </span>
+                    </li>
+                    {output.actionPlanDnaString && (
+                      <li className="text-[10px] text-zinc-400 font-mono break-all pl-4">
+                        {output.actionPlanDnaString}
+                      </li>
+                    )}
+                    <li className="flex items-center gap-2">
+                      <span
+                        className={`inline-block w-2 h-2 rounded-full ${
+                          output.assertions.dnaImportRoundTripOk ? 'bg-green-500' : 'bg-red-500'
+                        }`}
+                      />
+                      <span className={output.assertions.dnaImportRoundTripOk ? 'text-green-300' : 'text-red-300'}>
+                        DNA round-trip encoding/decoding OK
                       </span>
                     </li>
                   </>

@@ -25,6 +25,7 @@ import SleeveBreakdown from '@/components/SleeveBreakdown';
 import { GlassCard } from '@/components/GlassCard';
 import CurrentVoyaForm from '@/components/CurrentVoyaForm';
 import GhostRegimeHouseEducation from '@/components/ghostregime/GhostRegimeHouseEducation';
+import ActionPlanTemplateDna from '@/components/builder/ActionPlanTemplateDna';
 import { formatPercent } from '@/lib/format';
 import type { CurrentVoyaHolding } from '@/lib/types';
 
@@ -255,6 +256,19 @@ export default function Builder() {
       {/* Action Plan */}
       <GlassCard className="p-5 sm:p-6 space-y-4">
         <h2 className="text-lg font-semibold text-zinc-50">Action plan</h2>
+        {answers.selectedTemplateId && (
+          <ActionPlanTemplateDna
+            selectedTemplateId={answers.selectedTemplateId}
+            platform={platformSplit.platform}
+            riskLevelOverride={answers.riskLevelOverride}
+            portfolioPreset={preset}
+            schwabLineupStyle={lineupStyle}
+            goldBtcTilt={tilt}
+            goldInstrument={goldInstrument}
+            btcInstrument={btcInstrument}
+            complexityPreference={answers.complexityPreference}
+          />
+        )}
         {platformSplit.platform === 'voya_only' ? (
           <div className="space-y-4">
             <div>
