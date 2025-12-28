@@ -1,0 +1,153 @@
+/**
+ * GhostRegime UI Helpers
+ * 
+ * Pure deterministic functions for formatting and deriving display information
+ * for the GhostRegime page UI. No fetches, no hooks, no side effects.
+ */
+
+import type { GhostRegimeRow, RegimeType } from './types';
+
+/**
+ * Format scale value to human-readable label
+ */
+export function formatScaleLabel(scale: number): 'full size' | 'half size' | 'off' | string {
+  if (scale === 1.0) return 'full size';
+  if (scale === 0.5) return 'half size';
+  if (scale === 0.0) return 'off';
+  return `${(scale * 100).toFixed(0)}%`;
+}
+
+/**
+ * Format bucket × scale line for display
+ * e.g. "bucket 10% × half size"
+ */
+export function formatBucketScaleLine(bucketPct: number, scale: number): string {
+  const bucketPercent = (bucketPct * 100).toFixed(0);
+  const scaleLabel = formatScaleLabel(scale);
+  return `bucket ${bucketPercent}% × ${scaleLabel}`;
+}
+
+/**
+ * Get cash sources (assets contributing leftover cash)
+ * Returns array of asset names where scale < 1 and target > 0
+ */
+export function getCashSources(data: GhostRegimeRow): string[] {
+  const sources: string[] = [];
+  
+  if (data.stocks_target > 0 && data.stocks_scale < 1) {
+    sources.push('Stocks');
+  }
+  if (data.gold_target > 0 && data.gold_scale < 1) {
+    sources.push('Gold');
+  }
+  if (data.btc_target > 0 && data.btc_scale < 1) {
+    sources.push('Bitcoin');
+  }
+  
+  return sources;
+}
+
+/**
+ * Build Today's Snapshot one-liner
+ * Format: "Today: Targets 60/30/10. Scales: Stocks full, Gold full, BTC half → Actual 60/30/5 + 5 cash."
+ */
+export function buildTodaySnapshotLine(data: GhostRegimeRow | null): string | null {
+  if (!data) return null;
+  
+  const stocksTarget = (data.stocks_target * 100).toFixed(0);
+  const goldTarget = (data.gold_target * 100).toFixed(0);
+  const btcTarget = (data.btc_target * 100).toFixed(0);
+  
+  const stocksActual = (data.stocks_actual * 100).toFixed(0);
+  const goldActual = (data.gold_actual * 100).toFixed(0);
+  const btcActual = (data.btc_actual * 100).toFixed(0);
+  const cash = (data.cash * 100).toFixed(0);
+  
+  const stocksScale = formatScaleLabel(data.stocks_scale);
+  const goldScale = formatScaleLabel(data.gold_scale);
+  const btcScale = formatScaleLabel(data.btc_scale);
+  
+  const scales = [
+    `Stocks ${stocksScale}`,
+    `Gold ${goldScale}`,
+    `BTC ${btcScale}`,
+  ].join(', ');
+  
+  const actuals = `${stocksActual}/${goldActual}/${btcActual}`;
+  const cashPart = parseFloat(cash) > 0.1 ? ` + ${cash} cash` : '';
+  
+  return `Today: Targets ${stocksTarget}/${goldTarget}/${btcTarget}. Scales: ${scales} → Actual ${actuals}${cashPart}.`;
+}
+
+/**
+ * Build micro-flow line showing Targets → Scales → Actual → Cash
+ * Format: "Targets (60/30/10) → Scales (full/full/half) → Actual (60/30/5) → Cash (5)"
+ */
+export function buildMicroFlowLine(data: GhostRegimeRow | null): string | null {
+  if (!data) return null;
+  
+  const stocksTarget = (data.stocks_target * 100).toFixed(0);
+  const goldTarget = (data.gold_target * 100).toFixed(0);
+  const btcTarget = (data.btc_target * 100).toFixed(0);
+  
+  const stocksActual = (data.stocks_actual * 100).toFixed(0);
+  const goldActual = (data.gold_actual * 100).toFixed(0);
+  const btcActual = (data.btc_actual * 100).toFixed(0);
+  const cash = (data.cash * 100).toFixed(0);
+  
+  const stocksScale = formatScaleLabel(data.stocks_scale);
+  const goldScale = formatScaleLabel(data.gold_scale);
+  const btcScale = formatScaleLabel(data.btc_scale);
+  
+  const targets = `${stocksTarget}/${goldTarget}/${btcTarget}`;
+  const scales = `${stocksScale}/${goldScale}/${btcScale}`;
+  const actuals = `${stocksActual}/${goldActual}/${btcActual}`;
+  
+  return `Targets (${targets}) → Scales (${scales}) → Actual (${actuals}) → Cash (${cash})`;
+}
+
+/**
+ * Regime Map Configuration
+ * Maps regime types to their position in the 2x2 grid
+ */
+export interface RegimeMapPosition {
+  regime: RegimeType;
+  riskAxis: 'Risk On' | 'Risk Off';
+  inflAxis: 'Inflation' | 'Disinflation';
+  label: string;
+}
+
+export const REGIME_MAP: RegimeMapPosition[] = [
+  {
+    regime: 'GOLDILOCKS',
+    riskAxis: 'Risk On',
+    inflAxis: 'Disinflation',
+    label: 'GOLDILOCKS',
+  },
+  {
+    regime: 'REFLATION',
+    riskAxis: 'Risk On',
+    inflAxis: 'Inflation',
+    label: 'REFLATION',
+  },
+  {
+    regime: 'INFLATION',
+    riskAxis: 'Risk Off',
+    inflAxis: 'Inflation',
+    label: 'INFLATION',
+  },
+  {
+    regime: 'DEFLATION',
+    riskAxis: 'Risk Off',
+    inflAxis: 'Disinflation',
+    label: 'DEFLATION',
+  },
+];
+
+/**
+ * Get regime map position for a given regime
+ */
+export function getRegimeMapPosition(regime: RegimeType): RegimeMapPosition | undefined {
+  return REGIME_MAP.find((m) => m.regime === regime);
+}
+

@@ -10,6 +10,15 @@ import { GlassCard } from '@/components/GlassCard';
 import { Tooltip } from '@/components/Tooltip';
 import { AllocationBar } from '@/components/AllocationBar';
 import type { GhostRegimeRow } from '@/lib/ghostregime/types';
+import {
+  formatBucketScaleLine,
+  formatScaleLabel,
+  getCashSources,
+  buildTodaySnapshotLine,
+  buildMicroFlowLine,
+  REGIME_MAP,
+  getRegimeMapPosition,
+} from '@/lib/ghostregime/ui';
 import Link from 'next/link';
 
 interface HealthStatus {
@@ -224,10 +233,54 @@ export default function GhostRegimePage() {
         )}
       </div>
 
+      {/* Today's Snapshot */}
+      {buildTodaySnapshotLine(data) && (
+        <div className="text-sm text-zinc-300 leading-relaxed">
+          {buildTodaySnapshotLine(data)}
+        </div>
+      )}
+
       {/* Main Content Grid */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Left Column: Regime + Flip Watch */}
         <div className="space-y-6">
+          {/* Regime Map */}
+          <GlassCard className="p-6">
+            <h2 className="text-sm font-semibold text-zinc-50 mb-4">Regime Map</h2>
+            <div className="space-y-3">
+              <div className="text-[10px] text-zinc-400 uppercase tracking-wide mb-2">
+                Risk On ↔ Risk Off | Inflation ↔ Disinflation
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {REGIME_MAP.map((mapPos) => {
+                  const isCurrent = mapPos.regime === data.regime;
+                  return (
+                    <div
+                      key={mapPos.regime}
+                      className={`p-3 rounded border text-center transition-all ${
+                        isCurrent
+                          ? 'border-amber-400/60 bg-amber-400/10 ring-2 ring-amber-400/30'
+                          : 'border-zinc-700 bg-zinc-900/30'
+                      }`}
+                    >
+                      <div className="text-xs font-semibold text-zinc-200 mb-1">
+                        {mapPos.label}
+                      </div>
+                      <div className="text-[10px] text-zinc-400">
+                        {mapPos.riskAxis} / {mapPos.inflAxis}
+                      </div>
+                      {isCurrent && (
+                        <div className="mt-2 text-[10px] text-amber-300 font-medium">
+                          You are here
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </GlassCard>
+
           {/* Regime Details */}
           <GlassCard className="p-6">
             <h2 className="text-sm font-semibold text-zinc-50 mb-4">Regime Classification</h2>
@@ -293,7 +346,7 @@ export default function GhostRegimePage() {
                 actual={data.stocks_actual}
                 scale={data.stocks_scale}
                 color="amber"
-                showScale={true}
+                bucketScaleLine={formatBucketScaleLine(data.stocks_target, data.stocks_scale)}
               />
               <AllocationBar
                 label="Gold"
@@ -301,7 +354,7 @@ export default function GhostRegimePage() {
                 actual={data.gold_actual}
                 scale={data.gold_scale}
                 color="blue"
-                showScale={true}
+                bucketScaleLine={formatBucketScaleLine(data.gold_target, data.gold_scale)}
               />
               <AllocationBar
                 label="Bitcoin"
@@ -309,20 +362,34 @@ export default function GhostRegimePage() {
                 actual={data.btc_actual}
                 scale={data.btc_scale}
                 color="purple"
-                showScale={true}
+                bucketScaleLine={formatBucketScaleLine(data.btc_target, data.btc_scale)}
               />
               <AllocationBar
-                label="Cash"
+                label="Cash (unallocated / leftover)"
                 target={0}
                 actual={data.cash}
                 color="zinc"
-                showValues={true}
-                showScale={false}
+                isCash={true}
               />
             </div>
-            <p className="text-[10px] text-zinc-500 mt-4 leading-relaxed">
-              Cash represents the portfolio's "I don't trust this market" expression when VAMS reduces exposure.
-            </p>
+            {data.cash > 0.01 && (() => {
+              const cashSources = getCashSources(data);
+              if (cashSources.length > 0) {
+                return (
+                  <p className="text-[10px] text-zinc-500 mt-2 leading-relaxed">
+                    Cash created by scaling down: {cashSources.join(', ')}.
+                  </p>
+                );
+              }
+              return null;
+            })()}
+            {buildMicroFlowLine(data) && (
+              <div className="mt-4 pt-4 border-t border-zinc-800">
+                <p className="text-[10px] text-zinc-400 font-mono">
+                  {buildMicroFlowLine(data)}
+                </p>
+              </div>
+            )}
           </GlassCard>
         </div>
       </div>
@@ -567,24 +634,24 @@ export default function GhostRegimePage() {
               <div className="flex justify-between">
                 <span className="text-zinc-300">Stocks</span>
                 <span className="text-zinc-100">
-                  {(data.stocks_actual * 100).toFixed(1)}% (target: {(data.stocks_target * 100).toFixed(1)}%, scale: {(data.stocks_scale * 100).toFixed(0)}%)
+                  {(data.stocks_actual * 100).toFixed(1)}% ({formatBucketScaleLine(data.stocks_target, data.stocks_scale)})
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-zinc-300">Gold</span>
                 <span className="text-zinc-100">
-                  {(data.gold_actual * 100).toFixed(1)}% (target: {(data.gold_target * 100).toFixed(1)}%, scale: {(data.gold_scale * 100).toFixed(0)}%)
+                  {(data.gold_actual * 100).toFixed(1)}% ({formatBucketScaleLine(data.gold_target, data.gold_scale)})
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-zinc-300">BTC</span>
                 <span className="text-zinc-100">
-                  {(data.btc_actual * 100).toFixed(1)}% (target: {(data.btc_target * 100).toFixed(1)}%, scale: {(data.btc_scale * 100).toFixed(0)}%)
+                  {(data.btc_actual * 100).toFixed(1)}% ({formatBucketScaleLine(data.btc_target, data.btc_scale)})
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-zinc-300">Cash</span>
-                <span className="text-zinc-100">{(data.cash * 100).toFixed(1)}%</span>
+                <span className="text-zinc-100">{(data.cash * 100).toFixed(1)}% (unallocated)</span>
               </div>
             </div>
           </GlassCard>

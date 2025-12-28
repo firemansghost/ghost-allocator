@@ -11,6 +11,8 @@ interface AllocationBarProps {
   color?: 'amber' | 'blue' | 'green' | 'purple' | 'zinc';
   showValues?: boolean;
   showScale?: boolean;
+  bucketScaleLine?: string; // e.g. "bucket 60% × full size"
+  isCash?: boolean; // true for cash row
 }
 
 const colorClasses = {
@@ -29,6 +31,8 @@ export function AllocationBar({
   color = 'amber',
   showValues = true,
   showScale = false,
+  bucketScaleLine,
+  isCash = false,
 }: AllocationBarProps) {
   const targetPct = Math.round(target * 100);
   const actualPct = Math.round(actual * 100);
@@ -41,10 +45,13 @@ export function AllocationBar({
         {showValues && (
           <div className="flex items-center gap-2 text-zinc-200">
             <span className="font-semibold">{actualPct}%</span>
-            {showScale && scalePct !== null && (
+            {bucketScaleLine && (
+              <span className="text-zinc-400 text-[10px]">({bucketScaleLine})</span>
+            )}
+            {showScale && scalePct !== null && !bucketScaleLine && (
               <span className="text-zinc-400 text-[10px]">(scale: {scalePct}%)</span>
             )}
-            {targetPct !== actualPct && (
+            {!isCash && targetPct !== actualPct && !bucketScaleLine && (
               <span className="text-zinc-500 text-[10px]">target: {targetPct}%</span>
             )}
           </div>
@@ -52,7 +59,7 @@ export function AllocationBar({
       </div>
       <div className="relative h-3 rounded-full bg-zinc-800/50 overflow-hidden">
         {/* Target indicator (dashed line) */}
-        {targetPct !== actualPct && (
+        {!isCash && targetPct !== actualPct && (
           <div
             className="absolute top-0 bottom-0 border-r-2 border-dashed border-zinc-500/50 z-10"
             style={{ left: `${targetPct}%` }}
