@@ -20,11 +20,25 @@ export function formatScaleLabel(scale: number): 'full size' | 'half size' | 'of
 /**
  * Format bucket × scale line for display
  * e.g. "bucket 10% × half size"
+ * @deprecated Use formatBucketUtilizationLine instead
  */
 export function formatBucketScaleLine(bucketPct: number, scale: number): string {
   const bucketPercent = (bucketPct * 100).toFixed(0);
   const scaleLabel = formatScaleLabel(scale);
   return `bucket ${bucketPercent}% × ${scaleLabel}`;
+}
+
+/**
+ * Format bucket utilization line for display
+ * e.g. "100% of your 60% bucket (scale 1.0 • full size)"
+ * e.g. "50% of your 10% bucket (scale 0.5 • half size)"
+ * e.g. "0% of your 10% bucket (scale 0.0 • off)"
+ */
+export function formatBucketUtilizationLine(bucketPct: number, scale: number): string {
+  const bucketPercent = (bucketPct * 100).toFixed(0);
+  const utilizationPct = (scale * 100).toFixed(0);
+  const scaleLabel = formatScaleLabel(scale);
+  return `${utilizationPct}% of your ${bucketPercent}% bucket (scale ${scale.toFixed(1)} • ${scaleLabel})`;
 }
 
 /**
@@ -45,6 +59,43 @@ export function getCashSources(data: GhostRegimeRow): string[] {
   }
   
   return sources;
+}
+
+/**
+ * Summarize changes between two GhostRegime rows
+ * Returns a compact string summary, or null if no changes
+ */
+export function summarizeGhostRegimeChange(
+  current: GhostRegimeRow,
+  previous: GhostRegimeRow
+): string | null {
+  const changes: string[] = [];
+
+  if (current.regime !== previous.regime) {
+    changes.push(`Regime ${previous.regime} → ${current.regime}`);
+  }
+
+  if (current.risk_regime !== previous.risk_regime) {
+    changes.push(`Risk ${previous.risk_regime} → ${current.risk_regime}`);
+  }
+
+  if (current.stocks_scale !== previous.stocks_scale) {
+    changes.push(`Stocks scale ${previous.stocks_scale.toFixed(1)} → ${current.stocks_scale.toFixed(1)}`);
+  }
+
+  if (current.gold_scale !== previous.gold_scale) {
+    changes.push(`Gold scale ${previous.gold_scale.toFixed(1)} → ${current.gold_scale.toFixed(1)}`);
+  }
+
+  if (current.btc_scale !== previous.btc_scale) {
+    changes.push(`BTC scale ${previous.btc_scale.toFixed(1)} → ${current.btc_scale.toFixed(1)}`);
+  }
+
+  if (changes.length === 0) {
+    return null;
+  }
+
+  return changes.join('; ');
 }
 
 /**

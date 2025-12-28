@@ -11,13 +11,14 @@ import { Tooltip } from '@/components/Tooltip';
 import { AllocationBar } from '@/components/AllocationBar';
 import type { GhostRegimeRow } from '@/lib/ghostregime/types';
 import {
-  formatBucketScaleLine,
+  formatBucketUtilizationLine,
   formatScaleLabel,
   getCashSources,
   buildTodaySnapshotLine,
   buildMicroFlowLine,
   REGIME_MAP,
   getRegimeMapPosition,
+  summarizeGhostRegimeChange,
 } from '@/lib/ghostregime/ui';
 import Link from 'next/link';
 
@@ -41,6 +42,9 @@ export default function GhostRegimePage() {
   const [notSeeded, setNotSeeded] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [healthStatus, setHealthStatus] = useState<HealthStatus | null>(null);
+  const [historyChangeSummary, setHistoryChangeSummary] = useState<string | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyAvailable, setHistoryAvailable] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -87,6 +91,59 @@ export default function GhostRegimePage() {
 
     fetchData();
   }, []);
+
+  // Fetch history for "what changed" summary
+  useEffect(() => {
+    if (!data) return;
+
+    async function fetchHistory() {
+      if (!data) return; // TypeScript guard
+      setHistoryLoading(true);
+      try {
+        const endDate = data.date;
+        // Calculate start date (approximately 10 trading days back)
+        const startDateObj = new Date(endDate);
+        startDateObj.setDate(startDateObj.getDate() - 14); // 14 calendar days ≈ 10 trading days
+        const startDate = startDateObj.toISOString().split('T')[0];
+
+        const response = await fetch(
+          `/api/ghostregime/history?startDate=${startDate}&endDate=${endDate}`,
+          { cache: 'no-store' }
+        );
+
+        if (!response.ok) {
+          setHistoryAvailable(false);
+          setHistoryChangeSummary(null);
+          return;
+        }
+
+        const history: GhostRegimeRow[] = await response.json();
+        
+        // Get last 2 valid rows (sorted by date descending)
+        const validRows = history
+          .filter((row) => !row.stale && row.date)
+          .sort((a, b) => b.date.localeCompare(a.date))
+          .slice(0, 2);
+
+        if (validRows.length >= 2) {
+          setHistoryAvailable(true);
+          const summary = summarizeGhostRegimeChange(validRows[0], validRows[1]);
+          setHistoryChangeSummary(summary);
+        } else {
+          setHistoryAvailable(false);
+          setHistoryChangeSummary(null);
+        }
+      } catch (err) {
+        // Graceful degradation: don't break the page
+        setHistoryAvailable(false);
+        setHistoryChangeSummary(null);
+      } finally {
+        setHistoryLoading(false);
+      }
+    }
+
+    fetchHistory();
+  }, [data]);
 
   if (notSeeded) {
     return (
@@ -240,6 +297,18 @@ export default function GhostRegimePage() {
         </div>
       )}
 
+      {/* What Changed Since Last Update */}
+      {historyChangeSummary !== null && (
+        <div className="text-xs text-zinc-400 leading-relaxed">
+          Since last update: {historyChangeSummary}
+        </div>
+      )}
+      {historyChangeSummary === null && !historyLoading && historyAvailable && data && (
+        <div className="text-xs text-zinc-500 italic">
+          No change since the last update. Markets were boring. (Enjoy it.)
+        </div>
+      )}
+
       {/* Main Content Grid */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Left Column: Regime + Flip Watch */}
@@ -248,35 +317,63 @@ export default function GhostRegimePage() {
           <GlassCard className="p-6">
             <h2 className="text-sm font-semibold text-zinc-50 mb-4">Regime Map</h2>
             <div className="space-y-3">
-              <div className="text-[10px] text-zinc-400 uppercase tracking-wide mb-2">
-                Risk On ↔ Risk Off | Inflation ↔ Disinflation
+              {/* Axis labels */}
+              <div className="grid grid-cols-3 gap-1 text-[10px] text-zinc-500 mb-2">
+                <div className="text-center"></div>
+                <div className="text-center flex items-center justify-center gap-1">
+                  <span>Risk Off</span>
+                  <span>←→</span>
+                  <span>Risk On</span>
+                </div>
+                <div className="text-center"></div>
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                {REGIME_MAP.map((mapPos) => {
-                  const isCurrent = mapPos.regime === data.regime;
-                  return (
-                    <div
-                      key={mapPos.regime}
-                      className={`p-3 rounded border text-center transition-all ${
-                        isCurrent
-                          ? 'border-amber-400/60 bg-amber-400/10 ring-2 ring-amber-400/30'
-                          : 'border-zinc-700 bg-zinc-900/30'
-                      }`}
-                    >
-                      <div className="text-xs font-semibold text-zinc-200 mb-1">
-                        {mapPos.label}
-                      </div>
-                      <div className="text-[10px] text-zinc-400">
-                        {mapPos.riskAxis} / {mapPos.inflAxis}
-                      </div>
-                      {isCurrent && (
-                        <div className="mt-2 text-[10px] text-amber-300 font-medium">
-                          You are here
+              
+              <div className="grid grid-cols-3 gap-1">
+                {/* Left axis label */}
+                <div className="flex flex-col justify-center items-center text-[10px] text-zinc-500">
+                  <span>Inflation</span>
+                  <span className="text-xs">↑</span>
+                  <span className="mt-1">↓</span>
+                  <span>Disinflation</span>
+                </div>
+                
+                {/* Grid */}
+                <div className="grid grid-cols-2 gap-2 col-span-2">
+                  {REGIME_MAP.map((mapPos) => {
+                    const isCurrent = mapPos.regime === data.regime;
+                    return (
+                      <div
+                        key={mapPos.regime}
+                        className={`p-3 rounded border text-center transition-all ${
+                          isCurrent
+                            ? 'border-amber-400/60 bg-amber-400/10 ring-2 ring-amber-400/30'
+                            : 'border-zinc-700 bg-zinc-900/30'
+                        }`}
+                      >
+                        <div className="text-xs font-semibold text-zinc-200 mb-1">
+                          {mapPos.label}
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
+                        <div className="text-[10px] text-zinc-400">
+                          {mapPos.riskAxis} / {mapPos.inflAxis}
+                        </div>
+                        {isCurrent && (
+                          <div className="mt-2 text-[10px] text-amber-300 font-medium">
+                            You are here
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              
+              <div className="pt-2 border-t border-zinc-800">
+                <Link
+                  href="/ghostregime/methodology"
+                  className="text-[10px] text-amber-400 hover:text-amber-300 underline underline-offset-2"
+                >
+                  Read methodology →
+                </Link>
               </div>
             </div>
           </GlassCard>
@@ -346,7 +443,7 @@ export default function GhostRegimePage() {
                 actual={data.stocks_actual}
                 scale={data.stocks_scale}
                 color="amber"
-                bucketScaleLine={formatBucketScaleLine(data.stocks_target, data.stocks_scale)}
+                bucketScaleLine={formatBucketUtilizationLine(data.stocks_target, data.stocks_scale)}
               />
               <AllocationBar
                 label="Gold"
@@ -354,7 +451,7 @@ export default function GhostRegimePage() {
                 actual={data.gold_actual}
                 scale={data.gold_scale}
                 color="blue"
-                bucketScaleLine={formatBucketScaleLine(data.gold_target, data.gold_scale)}
+                bucketScaleLine={formatBucketUtilizationLine(data.gold_target, data.gold_scale)}
               />
               <AllocationBar
                 label="Bitcoin"
@@ -362,7 +459,7 @@ export default function GhostRegimePage() {
                 actual={data.btc_actual}
                 scale={data.btc_scale}
                 color="purple"
-                bucketScaleLine={formatBucketScaleLine(data.btc_target, data.btc_scale)}
+                bucketScaleLine={formatBucketUtilizationLine(data.btc_target, data.btc_scale)}
               />
               <AllocationBar
                 label="Cash (unallocated / leftover)"
@@ -377,7 +474,7 @@ export default function GhostRegimePage() {
               if (cashSources.length > 0) {
                 return (
                   <p className="text-[10px] text-zinc-500 mt-2 leading-relaxed">
-                    Cash created by scaling down: {cashSources.join(', ')}.
+                    Cash created by throttling: {cashSources.join(', ')}.
                   </p>
                 );
               }
@@ -634,19 +731,19 @@ export default function GhostRegimePage() {
               <div className="flex justify-between">
                 <span className="text-zinc-300">Stocks</span>
                 <span className="text-zinc-100">
-                  {(data.stocks_actual * 100).toFixed(1)}% ({formatBucketScaleLine(data.stocks_target, data.stocks_scale)})
+                  {(data.stocks_actual * 100).toFixed(1)}% ({formatBucketUtilizationLine(data.stocks_target, data.stocks_scale)})
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-zinc-300">Gold</span>
                 <span className="text-zinc-100">
-                  {(data.gold_actual * 100).toFixed(1)}% ({formatBucketScaleLine(data.gold_target, data.gold_scale)})
+                  {(data.gold_actual * 100).toFixed(1)}% ({formatBucketUtilizationLine(data.gold_target, data.gold_scale)})
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-zinc-300">BTC</span>
                 <span className="text-zinc-100">
-                  {(data.btc_actual * 100).toFixed(1)}% ({formatBucketScaleLine(data.btc_target, data.btc_scale)})
+                  {(data.btc_actual * 100).toFixed(1)}% ({formatBucketUtilizationLine(data.btc_target, data.btc_scale)})
                 </span>
               </div>
               <div className="flex justify-between">
