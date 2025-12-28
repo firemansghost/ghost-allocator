@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "next lint",
     "test": "tsx lib/ghostregime/__tests__/regimeCore.test.ts",
-    "audit:models": "tsx scripts/audit-models.ts"
+    "audit:models": "tsx scripts/audit-models.ts",
+    "check:ghostregime-copy": "node scripts/check-ghostregime-builder-copy.mjs"
   },
   "repository": {
     "type": "git",

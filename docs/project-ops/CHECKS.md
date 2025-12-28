@@ -41,6 +41,7 @@
 - Confirm model portfolios render correctly on /models
 - Confirm builder outputs match chosen model definitions
 - Confirm GhostRegime pages have improved visual hierarchy and key info is scannable
+- Run copy drift check: `npm run check:ghostregime-copy` (ensures Builder education copy stays centralized)
 
 ## Known Failure Modes
 - Delta calculations look "wrong" if current holdings don't sum to ~100%
