@@ -18,8 +18,16 @@ import {
   buildMicroFlowLine,
   REGIME_MAP,
   getRegimeMapPosition,
-  summarizeGhostRegimeChange,
+  summarizeGhostRegimeChangeDetailed,
+  describeAxisFromScores,
+  formatVamsState,
+  getFlipWatchCopy,
 } from '@/lib/ghostregime/ui';
+import {
+  WHY_REGIME_TITLE,
+  FLIPWATCH_TITLE_PREFIX,
+  FLIPWATCH_NONE_HINT,
+} from '@/lib/ghostregime/ghostregimePageCopy';
 import Link from 'next/link';
 
 interface HealthStatus {
@@ -127,7 +135,8 @@ export default function GhostRegimePage() {
 
         if (validRows.length >= 2) {
           setHistoryAvailable(true);
-          const summary = summarizeGhostRegimeChange(validRows[0], validRows[1]);
+          const changes = summarizeGhostRegimeChangeDetailed(validRows[0], validRows[1]);
+          const summary = changes.length > 0 ? changes.join('; ') : null;
           setHistoryChangeSummary(summary);
         } else {
           setHistoryAvailable(false);
@@ -378,6 +387,26 @@ export default function GhostRegimePage() {
             </div>
           </GlassCard>
 
+          {/* Why This Regime Today */}
+          {(() => {
+            const axisDesc = describeAxisFromScores(data);
+            return (
+              <GlassCard className="p-6">
+                <h2 className="text-sm font-semibold text-zinc-50 mb-4">{WHY_REGIME_TITLE}</h2>
+                <div className="space-y-2 text-xs text-zinc-300 leading-relaxed">
+                  <p>{axisDesc.riskLine.replace(/\*\*/g, '')}</p>
+                  <p>{axisDesc.inflationLine.replace(/\*\*/g, '')}</p>
+                  <p className="text-amber-300 font-medium">{axisDesc.regimeLine.replace(/\*\*/g, '')}</p>
+                  <div className="pt-2 space-y-1">
+                    {axisDesc.soWhatLines.map((line, idx) => (
+                      <p key={idx} className="text-zinc-400 italic">{line}</p>
+                    ))}
+                  </div>
+                </div>
+              </GlassCard>
+            );
+          })()}
+
           {/* Regime Details */}
           <GlassCard className="p-6">
             <h2 className="text-sm font-semibold text-zinc-50 mb-4">Regime Classification</h2>
@@ -406,24 +435,29 @@ export default function GhostRegimePage() {
           </GlassCard>
 
           {/* Flip Watch Callout */}
-          {hasFlipWatch ? (
-            <GlassCard className="p-6 border-amber-400/30 bg-amber-400/10">
-              <div className="flex items-start gap-3">
-                <span className="text-2xl">⚠️</span>
-                <div className="flex-1">
-                  <h3 className="text-sm font-semibold text-amber-300 mb-1">Flip Watch</h3>
-                  <p className="text-xs text-amber-200 leading-relaxed">
-                    {flipWatchStatus === 'BREWING' && 'A regime flip may be brewing. Monitor closely.'}
-                    {flipWatchStatus === 'PENDING_CONFIRMATION' && 'A regime flip is pending confirmation. Prepare for potential changes.'}
-                    {flipWatchStatus === 'STRONG_FLIP' && 'Strong signals suggest a regime flip is imminent.'}
-                    {!['BREWING', 'PENDING_CONFIRMATION', 'STRONG_FLIP'].includes(flipWatchStatus) && `Status: ${flipWatchStatus}`}
-                  </p>
-                </div>
-              </div>
-            </GlassCard>
-          ) : (
+          {hasFlipWatch ? (() => {
+            const flipWatchCopy = getFlipWatchCopy(flipWatchStatus);
+            if (flipWatchCopy) {
+              return (
+                <GlassCard className="p-6 border-amber-400/30 bg-amber-400/10">
+                  <div className="flex items-start gap-3">
+                    <span className="text-2xl">⚠️</span>
+                    <div className="flex-1">
+                      <h3 className="text-sm font-semibold text-amber-300 mb-2">{flipWatchCopy.title}</h3>
+                      {flipWatchCopy.lines.map((line, idx) => (
+                        <p key={idx} className="text-xs text-amber-200 leading-relaxed">
+                          {line}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                </GlassCard>
+              );
+            }
+            return null;
+          })() : (
             <GlassCard className="p-4 border-zinc-800 bg-zinc-900/30">
-              <p className="text-xs text-zinc-500">No flip watch warning</p>
+              <p className="text-xs text-zinc-500">{FLIPWATCH_NONE_HINT}</p>
             </GlassCard>
           )}
         </div>
@@ -786,15 +820,21 @@ export default function GhostRegimePage() {
             <div className="space-y-2 text-xs">
               <div className="flex justify-between">
                 <span className="text-zinc-300">Stocks</span>
-                <span className="text-zinc-100">{data.stocks_vams_state}</span>
+                <span className="text-zinc-100">
+                  {data.stocks_vams_state} ({formatVamsState(data.stocks_vams_state)})
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-zinc-300">Gold</span>
-                <span className="text-zinc-100">{data.gold_vams_state}</span>
+                <span className="text-zinc-100">
+                  {data.gold_vams_state} ({formatVamsState(data.gold_vams_state)})
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-zinc-300">BTC</span>
-                <span className="text-zinc-100">{data.btc_vams_state}</span>
+                <span className="text-zinc-100">
+                  {data.btc_vams_state} ({formatVamsState(data.btc_vams_state)})
+                </span>
               </div>
             </div>
           </GlassCard>

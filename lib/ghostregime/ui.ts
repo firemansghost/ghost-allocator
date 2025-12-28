@@ -202,3 +202,130 @@ export function getRegimeMapPosition(regime: RegimeType): RegimeMapPosition | un
   return REGIME_MAP.find((m) => m.regime === regime);
 }
 
+/**
+ * Format a signed number for display
+ * e.g. 2 -> "+2", -3.0 -> "-3.0"
+ */
+export function formatSignedNumber(n: number): string {
+  if (n > 0) return `+${n.toFixed(n % 1 === 0 ? 0 : 1)}`;
+  return n.toFixed(n % 1 === 0 ? 0 : 1);
+}
+
+/**
+ * Format VAMS state to human-readable label
+ */
+export function formatVamsState(state: number): string {
+  if (state === 2) return 'full size';
+  if (state === 0) return 'half size';
+  if (state === -2) return 'off';
+  return `${state}`;
+}
+
+/**
+ * Describe axis from scores and generate regime explanation
+ */
+export function describeAxisFromScores(row: GhostRegimeRow): {
+  riskLine: string;
+  inflationLine: string;
+  regimeLine: string;
+  soWhatLines: string[];
+} {
+  const riskScore = row.risk_score;
+  const inflScore = row.infl_score;
+  
+  const riskAxis = riskScore > 0 ? 'RISK ON' : 'RISK OFF';
+  const inflAxis = inflScore > 0 ? 'INFLATION' : 'DISINFLATION';
+  
+  const riskLine = `Risk axis: **${riskAxis}** (risk score: ${formatSignedNumber(riskScore)})`;
+  const inflationLine = `Inflation axis: **${inflAxis}** (inflation score: ${formatSignedNumber(inflScore)})`;
+  const regimeLine = `→ That combination lands in **${row.regime}**.`;
+  
+  const soWhatLines: string[] = [];
+  if (riskScore > 0) {
+    soWhatLines.push('Markets are acting brave.');
+  } else {
+    soWhatLines.push('Markets are acting like they saw a ghost.');
+  }
+  if (inflScore > 0) {
+    soWhatLines.push('Prices are being spicy.');
+  } else {
+    soWhatLines.push('Prices are calming down (for now).');
+  }
+  
+  return {
+    riskLine,
+    inflationLine,
+    regimeLine,
+    soWhatLines,
+  };
+}
+
+/**
+ * Summarize changes between two GhostRegime rows with score deltas
+ * Returns an array of change strings that can be joined with "; "
+ */
+export function summarizeGhostRegimeChangeDetailed(
+  current: GhostRegimeRow,
+  previous: GhostRegimeRow
+): string[] {
+  const changes: string[] = [];
+
+  // Regime changes
+  if (current.regime !== previous.regime) {
+    changes.push(`Regime ${previous.regime} → ${current.regime}`);
+  }
+
+  // Risk regime changes
+  if (current.risk_regime !== previous.risk_regime) {
+    changes.push(`Risk ${previous.risk_regime} → ${current.risk_regime}`);
+  }
+
+  // Score deltas
+  const riskDelta = current.risk_score - previous.risk_score;
+  if (Math.abs(riskDelta) > 0.01) {
+    const direction = riskDelta > 0 ? 'more Risk On' : 'more Risk Off';
+    changes.push(`Risk score ${formatSignedNumber(riskDelta)} (${direction})`);
+  }
+
+  const inflDelta = current.infl_score - previous.infl_score;
+  if (Math.abs(inflDelta) > 0.01) {
+    const direction = inflDelta > 0 ? 'more Inflation' : 'more Disinflation';
+    changes.push(`Inflation score ${formatSignedNumber(inflDelta)} (${direction})`);
+  }
+
+  // Scale changes
+  if (current.stocks_scale !== previous.stocks_scale) {
+    changes.push(`Stocks scale ${previous.stocks_scale.toFixed(1)} → ${current.stocks_scale.toFixed(1)}`);
+  }
+
+  if (current.gold_scale !== previous.gold_scale) {
+    changes.push(`Gold scale ${previous.gold_scale.toFixed(1)} → ${current.gold_scale.toFixed(1)}`);
+  }
+
+  if (current.btc_scale !== previous.btc_scale) {
+    changes.push(`BTC scale ${previous.btc_scale.toFixed(1)} → ${current.btc_scale.toFixed(1)}`);
+  }
+
+  return changes;
+}
+
+/**
+ * Get Flip Watch copy for display
+ */
+export function getFlipWatchCopy(flipWatchStatus: string): {
+  title: string;
+  lines: string[];
+} | null {
+  if (flipWatchStatus === 'NONE') {
+    return null; // Handled separately
+  }
+
+  const title = `Flip Watch: ${flipWatchStatus}`;
+  const lines = [
+    "This is the model saying: 'cool story — show me tomorrow too.'",
+    'It reduces whipsaw by waiting for confirmation.',
+  ];
+
+  return { title, lines };
+}
+
