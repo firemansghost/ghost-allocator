@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { getModelTemplate } from '@/lib/modelTemplates';
 import type { PortfolioPreset, SchwabLineupStyle, GoldInstrument, BtcInstrument, PlatformType, GoldBtcTilt, RiskLevel } from '@/lib/types';
 import { GlassCard } from '@/components/GlassCard';
@@ -17,6 +16,7 @@ import {
   buildActionPlanDnaString,
 } from '@/lib/builder/actionPlanCopy';
 import { encodeDnaToQuery } from '@/lib/builder/dnaLink';
+import { useClipboardCopy } from '@/lib/builder/useClipboardCopy';
 
 interface ActionPlanTemplateDnaProps {
   selectedTemplateId: string;
@@ -41,7 +41,8 @@ export default function ActionPlanTemplateDna({
   btcInstrument,
   complexityPreference,
 }: ActionPlanTemplateDnaProps) {
-  const [copied, setCopied] = useState<'dna' | 'link' | null>(null);
+  const [dnaCopied, copyDna] = useClipboardCopy();
+  const [linkCopied, copyLink] = useClipboardCopy();
   const template = getModelTemplate(selectedTemplateId);
   if (!template) return null;
 
@@ -69,35 +70,8 @@ export default function ActionPlanTemplateDna({
     btcInstrument,
   });
 
-  const copyToClipboard = async (text: string): Promise<boolean> => {
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(text);
-        return true;
-      } else {
-        // Fallback for older browsers
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
-        document.body.appendChild(textarea);
-        textarea.select();
-        const success = document.execCommand('copy');
-        document.body.removeChild(textarea);
-        return success;
-      }
-    } catch (err) {
-      console.error('Failed to copy to clipboard:', err);
-      return false;
-    }
-  };
-
   const handleCopyDna = async () => {
-    const success = await copyToClipboard(dnaString);
-    if (success) {
-      setCopied('dna');
-      setTimeout(() => setCopied(null), 1500);
-    }
+    await copyDna(dnaString);
   };
 
   const handleShareLink = async () => {
@@ -119,11 +93,7 @@ export default function ActionPlanTemplateDna({
       ? `${window.location.origin}/onboarding?dna=${encoded}`
       : `/onboarding?dna=${encoded}`;
 
-    const success = await copyToClipboard(url);
-    if (success) {
-      setCopied('link');
-      setTimeout(() => setCopied(null), 1500);
-    }
+    await copyLink(url);
   };
 
   return (
@@ -173,14 +143,14 @@ export default function ActionPlanTemplateDna({
                 aria-label="Copy Template DNA to clipboard"
                 className="text-[10px] px-2 py-1 rounded border border-amber-400/30 bg-amber-400/10 text-amber-300 hover:bg-amber-400/20 hover:text-amber-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
               >
-                {copied === 'dna' ? 'Copied' : 'Copy DNA'}
+                {dnaCopied ? 'Copied' : 'Copy DNA'}
               </button>
               <button
                 onClick={handleShareLink}
                 aria-label="Copy shareable DNA link to clipboard"
                 className="text-[10px] px-2 py-1 rounded border border-amber-400/30 bg-amber-400/10 text-amber-300 hover:bg-amber-400/20 hover:text-amber-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
               >
-                {copied === 'link' ? 'Copied' : 'Share link'}
+                {linkCopied ? 'Copied' : 'Share link'}
               </button>
             </div>
           </div>

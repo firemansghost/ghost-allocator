@@ -28,6 +28,10 @@ import GhostRegimeHouseEducation from '@/components/ghostregime/GhostRegimeHouse
 import ActionPlanTemplateDna from '@/components/builder/ActionPlanTemplateDna';
 import { formatPercent } from '@/lib/format';
 import type { CurrentVoyaHolding } from '@/lib/types';
+import { buildActionPlanDnaString } from '@/lib/builder/actionPlanCopy';
+import { encodeDnaToQuery } from '@/lib/builder/dnaLink';
+import { useClipboardCopy } from '@/lib/builder/useClipboardCopy';
+import type { PortfolioPreset, SchwabLineupStyle, GoldInstrument, BtcInstrument, GoldBtcTilt, RiskLevel } from '@/lib/types';
 
 const STORAGE_KEY = 'ghostAllocatorQuestionnaire';
 
@@ -46,6 +50,116 @@ const riskDescriptions: Record<number, string> = {
   4: 'Higher equity allocation with strategic use of convexity and real assets.',
   5: 'Maximum equity allocation for investors with longer horizons and higher risk tolerance.',
 };
+
+/**
+ * Template DNA Banner Component (inline in Builder)
+ * Shows template info with Copy DNA and Share link actions
+ */
+function TemplateDnaBanner({
+  selectedTemplateId,
+  platform,
+  riskLevelOverride,
+  portfolioPreset,
+  schwabLineupStyle,
+  goldBtcTilt,
+  goldInstrument,
+  btcInstrument,
+  complexityPreference,
+}: {
+  selectedTemplateId: string;
+  platform: 'voya_only' | 'voya_and_schwab';
+  riskLevelOverride?: RiskLevel;
+  portfolioPreset?: PortfolioPreset;
+  schwabLineupStyle?: SchwabLineupStyle;
+  goldBtcTilt?: GoldBtcTilt;
+  goldInstrument?: GoldInstrument;
+  btcInstrument?: BtcInstrument;
+  complexityPreference?: 'simple' | 'moderate' | 'advanced';
+}) {
+  const [dnaCopied, copyDna] = useClipboardCopy();
+  const [linkCopied, copyLink] = useClipboardCopy();
+  
+  const template = getModelTemplate(selectedTemplateId);
+  if (!template) return null;
+
+  // Build DNA string
+  const dnaString = buildActionPlanDnaString({
+    templateId: selectedTemplateId,
+    templateName: template.title,
+    platform,
+    riskLevelOverride,
+    portfolioPreset,
+    schwabLineupStyle,
+    goldBtcTilt,
+    goldInstrument,
+    btcInstrument,
+  });
+
+  const handleCopyDna = async () => {
+    await copyDna(dnaString);
+  };
+
+  const handleShareLink = async () => {
+    const answers = {
+      selectedTemplateId,
+      platform,
+      riskLevelOverride,
+      portfolioPreset,
+      schwabLineupStyle,
+      goldBtcTilt,
+      goldInstrument,
+      btcInstrument,
+      complexityPreference,
+    };
+
+    const encoded = encodeDnaToQuery(answers);
+    const url = typeof window !== 'undefined' 
+      ? `${window.location.origin}/onboarding?dna=${encoded}`
+      : `/onboarding?dna=${encoded}`;
+
+    await copyLink(url);
+  };
+
+  return (
+    <GlassCard className="p-4 mb-6 border-amber-400/30 bg-amber-400/5">
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-1 flex-1">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-amber-200">Template DNA:</span>
+            <span className="text-xs text-amber-300">{template.title}</span>
+          </div>
+          <p className="text-[11px] text-zinc-400">
+            {riskLevelOverride !== undefined
+              ? `Risk is pinned to ${riskLevelOverride}`
+              : 'Risk is computed'}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleCopyDna}
+            aria-label="Copy Template DNA to clipboard"
+            className="text-[10px] px-2 py-1 rounded border border-amber-400/30 bg-amber-400/10 text-amber-300 hover:bg-amber-400/20 hover:text-amber-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 whitespace-nowrap"
+          >
+            {dnaCopied ? 'Copied' : 'Copy DNA'}
+          </button>
+          <button
+            onClick={handleShareLink}
+            aria-label="Copy shareable DNA link to clipboard"
+            className="text-[10px] px-2 py-1 rounded border border-amber-400/30 bg-amber-400/10 text-amber-300 hover:bg-amber-400/20 hover:text-amber-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 whitespace-nowrap"
+          >
+            {linkCopied ? 'Copied' : 'Share link'}
+          </button>
+          <Link
+            href="/models"
+            className="text-[11px] text-amber-300 hover:text-amber-200 underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-1 whitespace-nowrap"
+          >
+            Change templates
+          </Link>
+        </div>
+      </div>
+    </GlassCard>
+  );
+}
 
 export default function Builder() {
   const [result, setResult] = useState<QuestionnaireResult | null>(null);
@@ -174,33 +288,19 @@ export default function Builder() {
       </header>
 
       {/* Template DNA Banner */}
-      {answers.selectedTemplateId && (() => {
-        const template = getModelTemplate(answers.selectedTemplateId);
-        if (!template) return null;
-        return (
-          <GlassCard className="p-4 mb-6 border-amber-400/30 bg-amber-400/5">
-            <div className="flex items-start justify-between gap-3">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-amber-200">Template DNA:</span>
-                  <span className="text-xs text-amber-300">{template.title}</span>
-                </div>
-                <p className="text-[11px] text-zinc-400">
-                  {answers.riskLevelOverride !== undefined
-                    ? `Risk is pinned to ${answers.riskLevelOverride}`
-                    : 'Risk is computed'}
-                </p>
-              </div>
-              <Link
-                href="/models"
-                className="text-[11px] text-amber-300 hover:text-amber-200 underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-1"
-              >
-                Change templates
-              </Link>
-            </div>
-          </GlassCard>
-        );
-      })()}
+      {answers.selectedTemplateId && (
+        <TemplateDnaBanner
+          selectedTemplateId={answers.selectedTemplateId}
+          platform={platformSplit.platform}
+          riskLevelOverride={answers.riskLevelOverride}
+          portfolioPreset={preset}
+          schwabLineupStyle={lineupStyle}
+          goldBtcTilt={tilt}
+          goldInstrument={goldInstrument}
+          btcInstrument={btcInstrument}
+          complexityPreference={answers.complexityPreference}
+        />
+      )}
 
       {/* Start here strip */}
       <GlassCard className="p-4 sm:p-5">

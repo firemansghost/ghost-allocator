@@ -8,6 +8,7 @@ import type { QuestionnaireResult } from '@/lib/types';
 import { willShowGoldBtc } from '@/lib/schwabLineups';
 import { getModelTemplate } from '@/lib/modelTemplates';
 import { decodeDnaFromQuery } from '@/lib/builder/dnaLink';
+import { extractDnaParam } from '@/lib/builder/dnaImport';
 
 const STORAGE_KEY = 'ghostAllocatorQuestionnaire';
 
@@ -31,6 +32,9 @@ export default function QuestionnaireForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [dnaLoadStatus, setDnaLoadStatus] = useState<'success' | 'error' | null>(null);
+  const [dnaImportInput, setDnaImportInput] = useState('');
+  const [dnaImportStatus, setDnaImportStatus] = useState<'idle' | 'success' | 'error' | 'warning'>('idle');
+  const [dnaImportMessage, setDnaImportMessage] = useState('');
 
   // Read DNA param first (takes precedence over template param)
   useEffect(() => {
@@ -104,6 +108,69 @@ export default function QuestionnaireForm() {
       }
     }
   }, [searchParams]);
+
+  // Manual DNA import handler
+  const handleDnaImport = () => {
+    if (!dnaImportInput.trim()) {
+      setDnaImportStatus('warning');
+      setDnaImportMessage('No input provided.');
+      return;
+    }
+
+    // Check if input looks like the human-readable DNA string (Template=... | ...)
+    if (dnaImportInput.includes('Template=') || dnaImportInput.includes('|')) {
+      setDnaImportStatus('warning');
+      setDnaImportMessage('Paste the Share link or dna token, not the one-line DNA label.');
+      return;
+    }
+
+    // Extract DNA token
+    const token = extractDnaParam(dnaImportInput);
+    if (!token) {
+      setDnaImportStatus('warning');
+      setDnaImportMessage('No dna= token found.');
+      return;
+    }
+
+    // Decode DNA
+    const result = decodeDnaFromQuery(token);
+    if (!result.ok) {
+      setDnaImportStatus('error');
+      setDnaImportMessage('Invalid DNA token.');
+      return;
+    }
+
+    // Apply decoded answers (same logic as auto-import)
+    setFormData((prev) => {
+      const updated = { ...prev, ...result.answers };
+      // Enforce guardrails if platform is voya_only
+      if (updated.platform === 'voya_only') {
+        updated.portfolioPreset = 'standard'; // House presets not allowed
+        updated.goldBtcTilt = 'none';
+        updated.schwabLineupStyle = 'standard';
+        updated.goldInstrument = 'gldm';
+        updated.btcInstrument = 'fbtc';
+      }
+      return updated;
+    });
+
+    // Set selected template if included
+    if (result.answers.selectedTemplateId) {
+      const template = getModelTemplate(result.answers.selectedTemplateId);
+      if (template) {
+        setSelectedTemplate(template.title);
+      }
+    }
+
+    setDnaImportStatus('success');
+    setDnaImportMessage('DNA imported.');
+  };
+
+  const handleClearDnaImport = () => {
+    setDnaImportInput('');
+    setDnaImportStatus('idle');
+    setDnaImportMessage('');
+  };
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -188,6 +255,50 @@ export default function QuestionnaireForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5 text-sm">
+      {/* Import DNA Section */}
+      <div className="rounded-md border border-zinc-700 bg-zinc-900/50 px-4 py-3 mb-4">
+        <label htmlFor="dna-import" className="block text-xs font-medium text-zinc-300 mb-2">
+          Import DNA
+        </label>
+        <div className="flex gap-2">
+          <input
+            id="dna-import"
+            type="text"
+            value={dnaImportInput}
+            onChange={(e) => setDnaImportInput(e.target.value)}
+            placeholder="Paste a /onboarding?dna=... link or dna token"
+            className="flex-1 px-3 py-2 text-sm bg-zinc-800 border border-zinc-700 rounded text-zinc-200 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-400/60 focus:border-amber-400/60"
+          />
+          <button
+            type="button"
+            onClick={handleDnaImport}
+            className="px-4 py-2 text-sm font-medium rounded bg-amber-400/20 text-amber-300 border border-amber-400/30 hover:bg-amber-400/30 hover:text-amber-200 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400/60"
+          >
+            Import
+          </button>
+          <button
+            type="button"
+            onClick={handleClearDnaImport}
+            className="px-4 py-2 text-sm font-medium rounded bg-zinc-800 text-zinc-300 border border-zinc-700 hover:bg-zinc-700 hover:text-zinc-200 transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-500"
+          >
+            Clear
+          </button>
+        </div>
+        {dnaImportStatus !== 'idle' && dnaImportMessage && (
+          <div
+            className={`mt-2 px-3 py-2 rounded text-xs ${
+              dnaImportStatus === 'success'
+                ? 'bg-green-500/20 text-green-300 border border-green-500/30'
+                : dnaImportStatus === 'error'
+                ? 'bg-red-500/20 text-red-300 border border-red-500/30'
+                : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+            }`}
+          >
+            {dnaImportMessage}
+          </div>
+        )}
+      </div>
+
       {selectedTemplate && (
         <div className="rounded-md border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-xs text-amber-200">
           <p className="font-medium">Template selected: {selectedTemplate}</p>

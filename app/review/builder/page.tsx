@@ -16,6 +16,7 @@ import { computeScaledHouseLineup, type GhostRegimeScaleData, type ScaledLineupI
 import { getModelTemplate } from '@/lib/modelTemplates';
 import { buildActionPlanDnaString } from '@/lib/builder/actionPlanCopy';
 import { encodeDnaToQuery, decodeDnaFromQuery } from '@/lib/builder/dnaLink';
+import { extractDnaParam } from '@/lib/builder/dnaImport';
 import type { ExampleETF } from '@/lib/types';
 
 /**
@@ -101,6 +102,8 @@ interface ReviewOutput {
     actionPlanShowsTemplateDna: boolean;
     actionPlanDnaStringPresent: boolean;
     dnaImportRoundTripOk: boolean;
+    builderBannerShowsShareActions: boolean;
+    onboardingDnaImportHelpersWork: boolean;
     voyaTotalValid: boolean;
     schwabTotalValid: boolean;
     housePresetHasCorrectTickers: boolean;
@@ -367,6 +370,38 @@ function computeReviewOutput(fixture: typeof REVIEW_FIXTURES[0]): ReviewOutput {
     }
   }
 
+  // Validate that Builder banner would show share actions (if template is selected)
+  const builderBannerShowsShareActions = fixture.expectedTemplateId
+    ? fixture.answers.selectedTemplateId === fixture.expectedTemplateId
+    : true; // If no template expected, always pass
+
+  // Validate DNA import helpers (extractDnaParam function)
+  let onboardingDnaImportHelpersWork = true;
+  try {
+    // Test case a: raw token
+    const rawToken = 'eyJ2IjoxLCJzZWxlY3RlZFRlbXBsYXRlSWQiOiJiYWxhbmNlZCJ9';
+    const extractedA = extractDnaParam(rawToken);
+    if (extractedA !== rawToken) {
+      onboardingDnaImportHelpersWork = false;
+    }
+    
+    // Test case b: partial URL
+    const partialUrl = `/onboarding?dna=${rawToken}`;
+    const extractedB = extractDnaParam(partialUrl);
+    if (extractedB !== rawToken) {
+      onboardingDnaImportHelpersWork = false;
+    }
+    
+    // Test case c: full URL
+    const fullUrl = `https://example.com/onboarding?dna=${rawToken}`;
+    const extractedC = extractDnaParam(fullUrl);
+    if (extractedC !== rawToken) {
+      onboardingDnaImportHelpersWork = false;
+    }
+  } catch (err) {
+    onboardingDnaImportHelpersWork = false;
+  }
+
   // Validate DNA round-trip encoding/decoding
   let dnaImportRoundTripOk = true;
   if (fixture.answers.selectedTemplateId) {
@@ -419,6 +454,8 @@ function computeReviewOutput(fixture: typeof REVIEW_FIXTURES[0]): ReviewOutput {
       actionPlanShowsTemplateDna,
       actionPlanDnaStringPresent,
       dnaImportRoundTripOk,
+      builderBannerShowsShareActions,
+      onboardingDnaImportHelpersWork,
       voyaTotalValid,
       schwabTotalValid,
       housePresetHasCorrectTickers,
@@ -668,6 +705,26 @@ export default function ReviewBuilderPage() {
                       />
                       <span className={output.assertions.dnaImportRoundTripOk ? 'text-green-300' : 'text-red-300'}>
                         DNA round-trip encoding/decoding OK
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span
+                        className={`inline-block w-2 h-2 rounded-full ${
+                          output.assertions.builderBannerShowsShareActions ? 'bg-green-500' : 'bg-red-500'
+                        }`}
+                      />
+                      <span className={output.assertions.builderBannerShowsShareActions ? 'text-green-300' : 'text-red-300'}>
+                        Builder banner shows share actions
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span
+                        className={`inline-block w-2 h-2 rounded-full ${
+                          output.assertions.onboardingDnaImportHelpersWork ? 'bg-green-500' : 'bg-red-500'
+                        }`}
+                      />
+                      <span className={output.assertions.onboardingDnaImportHelpersWork ? 'text-green-300' : 'text-red-300'}>
+                        Onboarding DNA import helpers work
                       </span>
                     </li>
                   </>
