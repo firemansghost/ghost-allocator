@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { GlassCard } from '@/components/GlassCard';
 import { Tooltip } from '@/components/Tooltip';
 import { AllocationBar } from '@/components/AllocationBar';
+import { AgreementChipStrip } from '@/components/ghostregime/AgreementChipStrip';
 import type { GhostRegimeRow } from '@/lib/ghostregime/types';
 import {
   formatBucketUtilizationLine,
@@ -28,6 +29,7 @@ import {
   computeAxisAgreement,
   formatAgreementBadge,
   computeAgreementDelta,
+  computeAgreementSeries,
 } from '@/lib/ghostregime/ui';
 import {
   WHY_REGIME_TITLE,
@@ -41,6 +43,8 @@ import {
   TOP_DRIVERS_NO_STRONG_DRIVERS,
   AGREEMENT_TOOLTIP,
   AGREEMENT_TOOLTIP_NA,
+  AGREEMENT_HISTORY_LABEL,
+  TOP_DRIVERS_OLD_DATA_HINT,
 } from '@/lib/ghostregime/ghostregimePageCopy';
 import Link from 'next/link';
 
@@ -67,6 +71,7 @@ export default function GhostRegimePage() {
   const [historyChangeSummary, setHistoryChangeSummary] = useState<string | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyAvailable, setHistoryAvailable] = useState(false);
+  const [historyRows, setHistoryRows] = useState<GhostRegimeRow[]>([]);
 
   useEffect(() => {
     async function fetchData() {
@@ -463,7 +468,7 @@ export default function GhostRegimePage() {
               <GlassCard className="p-6">
                 <h2 className="text-sm font-semibold text-zinc-50 mb-4">{TOP_DRIVERS_TITLE}</h2>
                 {!hasReceipts ? (
-                  <p className="text-xs text-zinc-400 mb-2">{TOP_DRIVERS_FALLBACK}</p>
+                  <p className="text-xs text-zinc-400 mb-2">{TOP_DRIVERS_OLD_DATA_HINT}</p>
                 ) : allVotesZero ? (
                   <p className="text-xs text-zinc-400 mb-2">{TOP_DRIVERS_NO_STRONG_DRIVERS}</p>
                 ) : (
@@ -488,6 +493,20 @@ export default function GhostRegimePage() {
                           );
                         })()}
                       </div>
+                      {(() => {
+                        // Include today's row in history for agreement series
+                        const allRows = data ? [data, ...historyRows] : historyRows;
+                        const riskSeries = computeAgreementSeries(allRows, 'risk', 5);
+                        if (riskSeries.length >= 2) {
+                          return (
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-[10px] text-zinc-500">{AGREEMENT_HISTORY_LABEL}</span>
+                              <AgreementChipStrip items={riskSeries} ariaLabel="Risk axis agreement history" />
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
                       {riskDrivers.length > 0 ? (
                         <ul className="space-y-1 text-xs text-zinc-300">
                           {riskDrivers.map((driver, idx) => (
@@ -520,6 +539,20 @@ export default function GhostRegimePage() {
                           );
                         })()}
                       </div>
+                      {(() => {
+                        // Include today's row in history for agreement series
+                        const allRows = data ? [data, ...historyRows] : historyRows;
+                        const inflSeries = computeAgreementSeries(allRows, 'inflation', 5);
+                        if (inflSeries.length >= 2) {
+                          return (
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-[10px] text-zinc-500">{AGREEMENT_HISTORY_LABEL}</span>
+                              <AgreementChipStrip items={inflSeries} ariaLabel="Inflation axis agreement history" />
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
                       {inflationDrivers.length > 0 ? (
                         <ul className="space-y-1 text-xs text-zinc-300">
                           {inflationDrivers.map((driver, idx) => (

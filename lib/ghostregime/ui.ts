@@ -545,3 +545,72 @@ export function computeAgreementDelta(
   return result;
 }
 
+/**
+ * Compute agreement for a single row using that row's axis direction
+ */
+export function computeRowAgreement(
+  row: GhostRegimeRow,
+  axis: 'risk' | 'inflation'
+): {
+  agree: number;
+  total: number;
+  disagree: number;
+  pct: number | null;
+} {
+  if (axis === 'risk') {
+    const riskAxisDirection = row.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
+    return computeAxisAgreement(row.risk_receipts, riskAxisDirection);
+  } else {
+    const inflAxis = row.infl_axis === 'Inflation' ? 'Inflation' : 'Disinflation';
+    return computeAxisAgreement(row.inflation_receipts, inflAxis);
+  }
+}
+
+/**
+ * Compute agreement series from history rows
+ * Returns newest-first array of agreement data points
+ */
+export function computeAgreementSeries(
+  rows: GhostRegimeRow[],
+  axis: 'risk' | 'inflation',
+  lookback: number = 5
+): Array<{
+  date: string;
+  pct: number;
+  agree: number;
+  total: number;
+  label: string;
+}> {
+  // Filter to rows with valid receipts and non-zero totals
+  const validRows = rows
+    .map((row) => {
+      const agreement = computeRowAgreement(row, axis);
+      if (agreement.total === 0 || agreement.pct === null) {
+        return null;
+      }
+      return {
+        row,
+        agreement,
+      };
+    })
+    .filter((item): item is { row: GhostRegimeRow; agreement: ReturnType<typeof computeRowAgreement> } => item !== null);
+
+  // Sort by date descending (newest first)
+  const sorted = validRows.sort((a, b) => b.row.date.localeCompare(a.row.date));
+
+  // Take up to lookback items
+  const limited = sorted.slice(0, lookback);
+
+  // Format for display
+  return limited.map(({ row, agreement }) => {
+    const pct = agreement.pct!; // Safe because we filtered for non-null
+    return {
+      date: row.date,
+      pct,
+      agree: agreement.agree,
+      total: agreement.total,
+      label: `${row.date}: ${agreement.agree}/${agreement.total} (${pct.toFixed(0)}%)`,
+    };
+  });
+}
+

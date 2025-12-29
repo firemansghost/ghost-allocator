@@ -44,3 +44,7 @@ export const AGREEMENT_TREND_CLEANER = 'cleaner';
 export const AGREEMENT_TREND_MIXED = 'more mixed';
 export const AGREEMENT_TREND_SAME = 'about the same';
 
+// Agreement History
+export const AGREEMENT_HISTORY_LABEL = 'Recent agreement';
+export const TOP_DRIVERS_OLD_DATA_HINT = "Drivers/receipts weren't saved for this older snapshot. New snapshots will include them after the next update.";
+
