@@ -27,6 +27,7 @@ import {
   formatSignedNumber,
   computeAxisAgreement,
   formatAgreementBadge,
+  computeAgreementDelta,
 } from '@/lib/ghostregime/ui';
 import {
   WHY_REGIME_TITLE,
@@ -149,7 +150,20 @@ export default function GhostRegimePage() {
         if (validRows.length >= 2) {
           setHistoryAvailable(true);
           const changes = summarizeGhostRegimeChangeDetailed(validRows[0], validRows[1]);
-          const summary = changes.length > 0 ? changes.join('; ') : null;
+          
+          // Add agreement trend lines if available
+          const agreementDelta = computeAgreementDelta(validRows[0], validRows[1]);
+          const agreementLines: string[] = [];
+          if (agreementDelta.risk) {
+            agreementLines.push(agreementDelta.risk.line);
+          }
+          if (agreementDelta.inflation) {
+            agreementLines.push(agreementDelta.inflation.line);
+          }
+          
+          // Combine all changes: agreement trends first, then other changes
+          const allChanges = [...agreementLines, ...changes];
+          const summary = allChanges.length > 0 ? allChanges.join('; ') : null;
           setHistoryChangeSummary(summary);
         } else {
           setHistoryAvailable(false);

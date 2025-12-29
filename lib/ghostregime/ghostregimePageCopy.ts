@@ -36,3 +36,11 @@ export const AGREEMENT_LABEL_PREFIX = 'Agreement:';
 export const AGREEMENT_TOOLTIP = 'Agreement among non-zero signal votes. Not a probability.';
 export const AGREEMENT_TOOLTIP_NA = 'All signals were neutral today.';
 
+// Agreement Trend
+export const AGREEMENT_TREND_HEADER = 'Signal agreement';
+export const AGREEMENT_TREND_RISK_PREFIX = 'Risk agreement:';
+export const AGREEMENT_TREND_INFLATION_PREFIX = 'Inflation agreement:';
+export const AGREEMENT_TREND_CLEANER = 'cleaner';
+export const AGREEMENT_TREND_MIXED = 'more mixed';
+export const AGREEMENT_TREND_SAME = 'about the same';
+

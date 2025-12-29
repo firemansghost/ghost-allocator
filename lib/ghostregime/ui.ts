@@ -6,6 +6,13 @@
  */
 
 import type { GhostRegimeRow, RegimeType, SignalReceipt } from './types';
+import {
+  AGREEMENT_TREND_RISK_PREFIX,
+  AGREEMENT_TREND_INFLATION_PREFIX,
+  AGREEMENT_TREND_CLEANER,
+  AGREEMENT_TREND_MIXED,
+  AGREEMENT_TREND_SAME,
+} from './ghostregimePageCopy';
 
 /**
  * Format scale value to human-readable label
@@ -464,5 +471,77 @@ export function formatAgreementBadge(agreement: {
     label: `Agreement: ${agreement.agree}/${agreement.total}${pctStr}`,
     tooltip: 'Agreement among non-zero signal votes. Not a probability.',
   };
+}
+
+/**
+ * Compute agreement delta between two rows
+ * Returns trend lines for Risk and Inflation axes if both rows have receipts
+ */
+export function computeAgreementDelta(
+  currentRow: GhostRegimeRow,
+  previousRow: GhostRegimeRow
+): {
+  risk?: {
+    current: ReturnType<typeof computeAxisAgreement>;
+    prev: ReturnType<typeof computeAxisAgreement>;
+    deltaPct: number | null;
+    line: string;
+  };
+  inflation?: {
+    current: ReturnType<typeof computeAxisAgreement>;
+    prev: ReturnType<typeof computeAxisAgreement>;
+    deltaPct: number | null;
+    line: string;
+  };
+} {
+  const result: ReturnType<typeof computeAgreementDelta> = {};
+
+  // Risk axis agreement delta
+  const riskAxisDirection = currentRow.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
+  const currentRiskAgreement = computeAxisAgreement(currentRow.risk_receipts, riskAxisDirection);
+  const prevRiskAgreement = computeAxisAgreement(previousRow.risk_receipts, riskAxisDirection);
+
+  if (
+    currentRiskAgreement.total > 0 &&
+    prevRiskAgreement.total > 0 &&
+    currentRiskAgreement.pct !== null &&
+    prevRiskAgreement.pct !== null
+  ) {
+    const deltaPct = currentRiskAgreement.pct - prevRiskAgreement.pct;
+    const descriptor =
+      deltaPct >= 20 ? AGREEMENT_TREND_CLEANER : deltaPct <= -20 ? AGREEMENT_TREND_MIXED : AGREEMENT_TREND_SAME;
+    const line = `${AGREEMENT_TREND_RISK_PREFIX} ${currentRiskAgreement.agree}/${currentRiskAgreement.total} (${currentRiskAgreement.pct.toFixed(0)}%) → ${prevRiskAgreement.agree}/${prevRiskAgreement.total} (${prevRiskAgreement.pct.toFixed(0)}%) (${descriptor})`;
+    result.risk = {
+      current: currentRiskAgreement,
+      prev: prevRiskAgreement,
+      deltaPct,
+      line,
+    };
+  }
+
+  // Inflation axis agreement delta
+  const inflAxis = currentRow.infl_axis === 'Inflation' ? 'Inflation' : 'Disinflation';
+  const currentInflAgreement = computeAxisAgreement(currentRow.inflation_receipts, inflAxis);
+  const prevInflAgreement = computeAxisAgreement(previousRow.inflation_receipts, inflAxis);
+
+  if (
+    currentInflAgreement.total > 0 &&
+    prevInflAgreement.total > 0 &&
+    currentInflAgreement.pct !== null &&
+    prevInflAgreement.pct !== null
+  ) {
+    const deltaPct = currentInflAgreement.pct - prevInflAgreement.pct;
+    const descriptor =
+      deltaPct >= 20 ? AGREEMENT_TREND_CLEANER : deltaPct <= -20 ? AGREEMENT_TREND_MIXED : AGREEMENT_TREND_SAME;
+    const line = `${AGREEMENT_TREND_INFLATION_PREFIX} ${currentInflAgreement.agree}/${currentInflAgreement.total} (${currentInflAgreement.pct.toFixed(0)}%) → ${prevInflAgreement.agree}/${prevInflAgreement.total} (${prevInflAgreement.pct.toFixed(0)}%) (${descriptor})`;
+    result.inflation = {
+      current: currentInflAgreement,
+      prev: prevInflAgreement,
+      deltaPct,
+      line,
+    };
+  }
+
+  return result;
 }
 
