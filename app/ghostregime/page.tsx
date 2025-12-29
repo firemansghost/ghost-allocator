@@ -45,6 +45,7 @@ import {
   AGREEMENT_TOOLTIP_NA,
   AGREEMENT_HISTORY_LABEL,
   TOP_DRIVERS_OLD_DATA_HINT,
+  AGREEMENT_HISTORY_HINT,
 } from '@/lib/ghostregime/ghostregimePageCopy';
 import Link from 'next/link';
 
@@ -427,6 +428,15 @@ export default function GhostRegimePage() {
             const riskAgreement = computeAxisAgreement(data.risk_receipts, riskAxisDirection);
             const inflAxis = data.infl_axis === 'Inflation' ? 'Inflation' : 'Disinflation';
             const inflAgreement = computeAxisAgreement(data.inflation_receipts, inflAxis);
+            
+            // Compute agreement series for history visualization
+            const allRows = data ? [data, ...historyRows] : historyRows;
+            const riskSeries = computeAgreementSeries(allRows, 'risk', 6);
+            const inflSeries = computeAgreementSeries(allRows, 'inflation', 6);
+            const hasTodayReceipts = (data.risk_receipts && data.risk_receipts.length > 0) || 
+                                     (data.inflation_receipts && data.inflation_receipts.length > 0);
+            const hasHistoryButNotToday = !hasTodayReceipts && (riskSeries.length >= 2 || inflSeries.length >= 2);
+            
             return (
               <GlassCard className="p-6">
                 <h2 className="text-sm font-semibold text-zinc-50 mb-4">{WHY_REGIME_TITLE}</h2>
@@ -437,10 +447,25 @@ export default function GhostRegimePage() {
                       Signal agreement: {riskAgreement.agree}/{riskAgreement.total} ({riskAgreement.pct?.toFixed(0)}%)
                     </p>
                   )}
+                  {riskSeries.length >= 2 && (
+                    <div className="mt-1">
+                      <AgreementChipStrip items={riskSeries} label={AGREEMENT_HISTORY_LABEL} />
+                    </div>
+                  )}
                   <p>{axisDesc.inflationLine.replace(/\*\*/g, '')}</p>
                   {inflAgreement.total > 0 && (
                     <p className="text-zinc-400 text-[11px]">
                       Signal agreement: {inflAgreement.agree}/{inflAgreement.total} ({inflAgreement.pct?.toFixed(0)}%)
+                    </p>
+                  )}
+                  {inflSeries.length >= 2 && (
+                    <div className="mt-1">
+                      <AgreementChipStrip items={inflSeries} label={AGREEMENT_HISTORY_LABEL} />
+                    </div>
+                  )}
+                  {hasHistoryButNotToday && (
+                    <p className="text-zinc-500 text-[10px] italic mt-2">
+                      {AGREEMENT_HISTORY_HINT}
                     </p>
                   )}
                   <p className="text-amber-300 font-medium">{axisDesc.regimeLine.replace(/\*\*/g, '')}</p>
@@ -493,20 +518,6 @@ export default function GhostRegimePage() {
                           );
                         })()}
                       </div>
-                      {(() => {
-                        // Include today's row in history for agreement series
-                        const allRows = data ? [data, ...historyRows] : historyRows;
-                        const riskSeries = computeAgreementSeries(allRows, 'risk', 5);
-                        if (riskSeries.length >= 2) {
-                          return (
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="text-[10px] text-zinc-500">{AGREEMENT_HISTORY_LABEL}</span>
-                              <AgreementChipStrip items={riskSeries} ariaLabel="Risk axis agreement history" />
-                            </div>
-                          );
-                        }
-                        return null;
-                      })()}
                       {riskDrivers.length > 0 ? (
                         <ul className="space-y-1 text-xs text-zinc-300">
                           {riskDrivers.map((driver, idx) => (
@@ -539,20 +550,6 @@ export default function GhostRegimePage() {
                           );
                         })()}
                       </div>
-                      {(() => {
-                        // Include today's row in history for agreement series
-                        const allRows = data ? [data, ...historyRows] : historyRows;
-                        const inflSeries = computeAgreementSeries(allRows, 'inflation', 5);
-                        if (inflSeries.length >= 2) {
-                          return (
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="text-[10px] text-zinc-500">{AGREEMENT_HISTORY_LABEL}</span>
-                              <AgreementChipStrip items={inflSeries} ariaLabel="Inflation axis agreement history" />
-                            </div>
-                          );
-                        }
-                        return null;
-                      })()}
                       {inflationDrivers.length > 0 ? (
                         <ul className="space-y-1 text-xs text-zinc-300">
                           {inflationDrivers.map((driver, idx) => (

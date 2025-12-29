@@ -568,12 +568,12 @@ export function computeRowAgreement(
 
 /**
  * Compute agreement series from history rows
- * Returns newest-first array of agreement data points
+ * Returns oldest-first array of agreement data points (for left-to-right visualization)
  */
 export function computeAgreementSeries(
   rows: GhostRegimeRow[],
   axis: 'risk' | 'inflation',
-  lookback: number = 5
+  lookback: number = 6
 ): Array<{
   date: string;
   pct: number;
@@ -598,11 +598,14 @@ export function computeAgreementSeries(
   // Sort by date descending (newest first)
   const sorted = validRows.sort((a, b) => b.row.date.localeCompare(a.row.date));
 
-  // Take up to lookback items
+  // Take up to lookback items (newest)
   const limited = sorted.slice(0, lookback);
 
+  // Reverse to oldest-first for left-to-right visualization
+  const oldestFirst = limited.reverse();
+
   // Format for display
-  return limited.map(({ row, agreement }) => {
+  return oldestFirst.map(({ row, agreement }) => {
     const pct = agreement.pct!; // Safe because we filtered for non-null
     return {
       date: row.date,
