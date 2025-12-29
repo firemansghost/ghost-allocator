@@ -372,11 +372,25 @@ export default function GhostRegimePage() {
               
               <div className="grid grid-cols-3 gap-1">
                 {/* Left axis label */}
-                <div className="flex flex-col justify-center items-center text-[10px] text-zinc-500">
-                  <span>Inflation</span>
-                  <span className="text-xs">↑</span>
-                  <span className="mt-1">↓</span>
-                  <span>Disinflation</span>
+                <div className="relative flex flex-col justify-between items-start text-[10px] text-zinc-500 pl-1 min-h-[120px]">
+                  {/* Top label: Inflation ↑ */}
+                  <Tooltip content="Y-axis: Inflation up, Disinflation down">
+                    <div className="flex items-center gap-1">
+                      <span>Inflation</span>
+                      <span className="text-xs">↑</span>
+                    </div>
+                  </Tooltip>
+                  
+                  {/* Vertical guide line */}
+                  <div className="absolute left-0 top-6 bottom-6 w-px bg-zinc-700/50" />
+                  
+                  {/* Bottom label: Disinflation ↓ */}
+                  <Tooltip content="Y-axis: Inflation up, Disinflation down">
+                    <div className="flex items-center gap-1">
+                      <span>Disinflation</span>
+                      <span className="text-xs">↓</span>
+                    </div>
+                  </Tooltip>
                 </div>
                 
                 {/* Grid */}
