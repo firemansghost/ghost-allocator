@@ -857,23 +857,41 @@ export default function GhostRegimePage() {
                     )}
                   </div>
                   <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-xs font-medium text-zinc-300">{TOP_DRIVERS_INFLATION_HEADER}</h3>
-                      {(() => {
-                        const inflAxis = data.infl_axis === 'Inflation' ? 'Inflation' : 'Disinflation';
-                        const inflAgreement = computeAxisAgreement(data.inflation_receipts, inflAxis);
-                        const badge = formatAgreementBadge(inflAgreement);
-                        if (inflAgreement.total === 0 && !hasReceipts) {
-                          return null;
-                        }
-                        return (
-                          <Tooltip content={badge.tooltip}>
-                            <span className="text-[10px] px-2 py-0.5 rounded border border-amber-400/20 bg-amber-400/5 text-amber-300/80">
-                              {badge.label}
-                            </span>
-                          </Tooltip>
-                        );
-                      })()}
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-xs font-medium text-zinc-300">{TOP_DRIVERS_INFLATION_HEADER}</h3>
+                        {(() => {
+                          const inflAxis = data.infl_axis === 'Inflation' ? 'Inflation' : 'Disinflation';
+                          const inflAgreement = computeAxisAgreement(data.inflation_receipts, inflAxis);
+                          const badge = formatAgreementBadge(inflAgreement);
+                          if (inflAgreement.total === 0 && !hasReceipts) {
+                            return null;
+                          }
+                          return (
+                            <Tooltip content={badge.tooltip}>
+                              <span className="text-[10px] px-2 py-0.5 rounded border border-amber-400/20 bg-amber-400/5 text-amber-300/80">
+                                {badge.label}
+                              </span>
+                            </Tooltip>
+                          );
+                        })()}
+                      </div>
+                      {data.inflation_receipts && data.inflation_receipts.length > 0 && (
+                        <button
+                          onClick={() => {
+                            setShowAdvanced(true);
+                            setTimeout(() => {
+                              const element = document.getElementById('receipts-inflation');
+                              if (element) {
+                                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                              }
+                            }, 100);
+                          }}
+                          className="text-[10px] text-amber-400 hover:text-amber-300 underline-offset-2 hover:underline"
+                        >
+                          {VIEW_RECEIPTS_LINK}
+                        </button>
+                      )}
                     </div>
                     {data.inflation_receipts && data.inflation_receipts.length > 0 && (() => {
                       const netVote = computeAxisNetVote(data.inflation_receipts, 'inflation');
