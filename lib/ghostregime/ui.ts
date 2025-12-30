@@ -474,6 +474,149 @@ export function formatAgreementBadge(agreement: {
 }
 
 /**
+ * Compute axis statistics: agreement + coverage + confidence
+ * Returns comprehensive stats for an axis including confidence heuristic
+ */
+export function computeAxisStats(
+  receipts: SignalReceipt[] | undefined,
+  axisDirection: 'Risk On' | 'Risk Off' | 'Inflation' | 'Disinflation'
+): {
+  totalSignals: number;
+  nonNeutral: number;
+  agree: number;
+  disagree: number;
+  agreementPct: number | null;
+  coveragePct: number | null;
+  agreementLabel: string;
+  coverageLabel: string;
+  confidence: {
+    label: 'High' | 'Medium' | 'Low' | 'n/a';
+    score: number | null;
+    tooltip: string;
+  };
+} {
+  if (!receipts || receipts.length === 0) {
+    return {
+      totalSignals: 0,
+      nonNeutral: 0,
+      agree: 0,
+      disagree: 0,
+      agreementPct: null,
+      coveragePct: null,
+      agreementLabel: 'Agreement: n/a',
+      coverageLabel: 'Coverage: n/a',
+      confidence: {
+        label: 'n/a',
+        score: null,
+        tooltip: 'Heuristic: agreement + breadth (coverage). Not a probability.',
+      },
+    };
+  }
+
+  const totalSignals = receipts.length;
+  const nonZero = receipts.filter((r) => r.vote !== 0);
+  const nonNeutral = nonZero.length;
+
+  if (nonNeutral === 0) {
+    return {
+      totalSignals,
+      nonNeutral: 0,
+      agree: 0,
+      disagree: 0,
+      agreementPct: null,
+      coveragePct: 0,
+      agreementLabel: 'Agreement: n/a',
+      coverageLabel: `Coverage: 0/${totalSignals} signals`,
+      confidence: {
+        label: 'n/a',
+        score: null,
+        tooltip: 'Heuristic: agreement + breadth (coverage). Not a probability.',
+      },
+    };
+  }
+
+  // Count votes that align with axis direction
+  let agree = 0;
+  for (const receipt of nonZero) {
+    const isAgreeing =
+      (axisDirection === 'Risk On' || axisDirection === 'Inflation')
+        ? receipt.vote > 0
+        : receipt.vote < 0;
+    
+    if (isAgreeing) {
+      agree++;
+    }
+  }
+
+  const disagree = nonNeutral - agree;
+  const agreementPct = nonNeutral > 0 ? (agree / nonNeutral) * 100 : null;
+  const coveragePct = totalSignals > 0 ? (nonNeutral / totalSignals) * 100 : null;
+
+  // Confidence heuristic: 0.7 * agreement + 0.3 * coverage (both 0..1)
+  let confidence: { label: 'High' | 'Medium' | 'Low' | 'n/a'; score: number | null; tooltip: string };
+  if (agreementPct === null || coveragePct === null) {
+    confidence = {
+      label: 'n/a',
+      score: null,
+      tooltip: 'Heuristic: agreement + breadth (coverage). Not a probability.',
+    };
+  } else {
+    const agreementNorm = agreementPct / 100;
+    const coverageNorm = coveragePct / 100;
+    const score = 0.7 * agreementNorm + 0.3 * coverageNorm;
+    
+    let label: 'High' | 'Medium' | 'Low';
+    if (score >= 0.85) {
+      label = 'High';
+    } else if (score >= 0.65) {
+      label = 'Medium';
+    } else {
+      label = 'Low';
+    }
+    
+    confidence = {
+      label,
+      score,
+      tooltip: 'Heuristic: agreement + breadth (coverage). Not a probability.',
+    };
+  }
+
+  const agreementPctStr = agreementPct !== null ? ` (${agreementPct.toFixed(0)}%)` : '';
+  const agreementLabel = `Agreement: ${agree}/${nonNeutral}${agreementPctStr}`;
+  const coverageLabel = `Coverage: ${nonNeutral}/${totalSignals} signals`;
+
+  return {
+    totalSignals,
+    nonNeutral,
+    agree,
+    disagree,
+    agreementPct,
+    coveragePct,
+    agreementLabel,
+    coverageLabel,
+    confidence,
+  };
+}
+
+/**
+ * Derive "Voted" label from vote sign (UI-only, for receipts table)
+ * Risk axis: + => "Risk On", - => "Risk Off", 0 => "Neutral"
+ * Inflation axis: + => "Inflation", - => "Disinflation", 0 => "Neutral"
+ */
+export function deriveVotedLabel(
+  vote: number,
+  axisType: 'risk' | 'inflation'
+): string {
+  if (vote === 0) return 'Neutral';
+  
+  if (axisType === 'risk') {
+    return vote > 0 ? 'Risk On' : 'Risk Off';
+  } else {
+    return vote > 0 ? 'Inflation' : 'Disinflation';
+  }
+}
+
+/**
  * Compute agreement delta between two rows
  * Returns trend lines for Risk and Inflation axes if both rows have receipts
  */

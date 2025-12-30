@@ -48,4 +48,10 @@ export const AGREEMENT_TREND_SAME = 'about the same';
 export const AGREEMENT_HISTORY_LABEL = 'Recent agreement';
 export const TOP_DRIVERS_OLD_DATA_HINT = "Drivers/receipts weren't saved for this older snapshot. New snapshots will include them after the next update.";
 export const AGREEMENT_HISTORY_HINT = "Agreement history uses receipts. This snapshot is older — it'll fill in after the next update.";
+export const AGREEMENT_HISTORY_INSUFFICIENT_HINT = 'Agreement history will appear after a couple updates.';
+
+// Confidence
+export const CONFIDENCE_LABEL_PREFIX = 'Confidence:';
+export const CONFIDENCE_TOOLTIP = 'Heuristic: agreement + breadth (coverage). Not a probability.';
+export const COVERAGE_TOOLTIP = 'Coverage = how many signals fired (non-neutral) out of total signals.';
 
