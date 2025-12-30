@@ -583,6 +583,10 @@ export default function GhostRegimePage() {
             : data.infl_score;
           const inflConviction = computeConviction(inflNetVote, inflStats.totalSignals || (data.inflation_receipts?.length ?? null));
           
+          // Compute agreement percentages for primary driver
+          const riskAgreement = computeAxisAgreement(data.risk_receipts, riskAxisDirection);
+          const inflAgreement = computeAxisAgreement(data.inflation_receipts, inflAxis);
+          
           // Compute agreement series for history visualization
           const allRows = data ? [data, ...historyRows] : historyRows;
           const riskSeries = computeAgreementSeries(allRows, 'risk', 6);
@@ -874,7 +878,21 @@ export default function GhostRegimePage() {
           
           const regimeConvictionIndex = computeRegimeConvictionIndex(riskConviction.index, inflConviction.index);
           const regimeConfidenceLabel = computeRegimeConfidenceLabel(riskStats.confidence.label, inflStats.confidence.label);
-          const primaryDriver = computePrimaryDriver(data.risk_score, data.infl_score);
+          
+          // Compute agreement percentages for primary driver
+          const riskAgreement = computeAxisAgreement(data.risk_receipts, riskAxisDirection);
+          const inflAgreement = computeAxisAgreement(data.inflation_receipts, inflAxis);
+          
+          const primaryDriver = computePrimaryDriver(
+            data.risk_score,
+            data.infl_score,
+            riskConviction.index,
+            inflConviction.index,
+            riskStats.confidence.label,
+            inflStats.confidence.label,
+            riskAgreement.pct,
+            inflAgreement.pct
+          );
           const flipWatchLabel = formatFlipWatchLabel(data.flip_watch_status);
           const hasFlipWatch = data.flip_watch_status && data.flip_watch_status !== 'NONE';
           
@@ -901,12 +919,17 @@ export default function GhostRegimePage() {
                   </div>
                 )}
                 {primaryDriver.label !== 'n/a' && (
-                  <div>
+                  <div className="space-y-1">
                     <Tooltip content={PRIMARY_DRIVER_TOOLTIP}>
                       <span className="px-2 py-0.5 rounded border border-amber-400/20 bg-amber-400/5 text-amber-300/80 text-xs">
                         {PRIMARY_DRIVER_PREFIX} {primaryDriver.label}
                       </span>
                     </Tooltip>
+                    {primaryDriver.whyReason && (
+                      <p className="text-[10px] text-zinc-500">
+                        Why: {primaryDriver.whyReason}
+                      </p>
+                    )}
                   </div>
                 )}
                 <div>
@@ -1257,9 +1280,9 @@ export default function GhostRegimePage() {
                   {hasRiskReceipts && (
                     <div>
                       <h3 className="text-xs font-medium text-zinc-300 mb-2">{TOP_DRIVERS_RISK_HEADER}</h3>
-                      <div className="overflow-x-auto">
+                      <div className="overflow-x-auto max-h-[320px] overflow-y-auto">
                         <table className="w-full text-xs border-collapse">
-                          <thead>
+                          <thead className="sticky top-0 z-10 bg-zinc-900/95 backdrop-blur-sm">
                             <tr className="border-b border-zinc-800">
                               <th className="text-left py-1 px-2 text-zinc-400 font-medium">Signal</th>
                               <th className="text-right py-1 px-2 text-zinc-400 font-medium">Vote</th>
@@ -1276,7 +1299,7 @@ export default function GhostRegimePage() {
                             {data.risk_receipts?.map((receipt, idx) => {
                               const { rule, meta } = splitReceiptNote(receipt.note);
                               return (
-                                <tr key={idx} className="border-b border-zinc-900/50">
+                                <tr key={idx} className={`border-b border-zinc-900/50 ${idx % 2 === 0 ? 'bg-white/0' : 'bg-white/[0.03]'}`}>
                                   <td className="py-1 px-2 text-zinc-300">{receipt.label}</td>
                                   <td className="py-1 px-2 text-right text-zinc-200 font-mono">
                                     {formatSignedNumber(receipt.vote)}
@@ -1313,9 +1336,9 @@ export default function GhostRegimePage() {
                           return null;
                         })()}
                       </div>
-                      <div className="overflow-x-auto">
+                      <div className="overflow-x-auto max-h-[320px] overflow-y-auto">
                         <table className="w-full text-xs border-collapse">
-                          <thead>
+                          <thead className="sticky top-0 z-10 bg-zinc-900/95 backdrop-blur-sm">
                             <tr className="border-b border-zinc-800">
                               <th className="text-left py-1 px-2 text-zinc-400 font-medium">Signal</th>
                               <th className="text-right py-1 px-2 text-zinc-400 font-medium">Vote</th>
@@ -1332,7 +1355,7 @@ export default function GhostRegimePage() {
                             {data.inflation_receipts?.map((receipt, idx) => {
                               const { rule, meta } = splitReceiptNote(receipt.note);
                               return (
-                                <tr key={idx} className="border-b border-zinc-900/50">
+                                <tr key={idx} className={`border-b border-zinc-900/50 ${idx % 2 === 0 ? 'bg-white/0' : 'bg-white/[0.03]'}`}>
                                   <td className="py-1 px-2 text-zinc-300">{receipt.label}</td>
                                   <td className="py-1 px-2 text-right text-zinc-200 font-mono">
                                     {formatSignedNumber(receipt.vote)}

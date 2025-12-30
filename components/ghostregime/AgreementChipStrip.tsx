@@ -24,6 +24,7 @@ interface AgreementChipStripProps {
   className?: string;
   showLegend?: boolean;
   axisName?: string; // e.g., "Risk" or "Inflation" for tooltip
+  highlightLast?: boolean; // Highlight the last chip (today)
 }
 
 export function AgreementChipStrip({ 
@@ -31,7 +32,8 @@ export function AgreementChipStrip({
   items, 
   className = '', 
   showLegend = false,
-  axisName 
+  axisName,
+  highlightLast = true
 }: AgreementChipStripProps) {
   // Don't render if less than 2 items (avoid visual noise)
   if (items.length < 2) {
@@ -63,10 +65,12 @@ export function AgreementChipStrip({
           tooltipParts.push(`${item.agree}/${item.total} (${item.pct.toFixed(0)}%)`);
           const tooltip = tooltipParts.join(' • ');
 
+          const isLast = highlightLast && idx === items.length - 1;
+          
           return (
             <Tooltip key={`${item.date}-${idx}`} content={tooltip}>
               <span
-                className="w-3.5 h-2.5 rounded-sm border transition-all hover:opacity-100 hover:scale-110 cursor-help"
+                className={`w-3.5 h-2.5 rounded-sm border transition-all hover:opacity-100 hover:scale-110 cursor-help ${isLast ? 'ring-1 ring-amber-300/70' : ''}`}
                 style={{
                   backgroundColor: `rgba(251, 191, 36, ${bgOpacity})`, // amber-400
                   borderColor: `rgba(251, 191, 36, ${borderOpacity})`,

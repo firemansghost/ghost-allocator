@@ -58,6 +58,7 @@ export const COVERAGE_TOOLTIP = 'Coverage = how many signals fired (non-neutral)
 // Conviction
 export const CONVICTION_LABEL_PREFIX = 'Conviction:';
 export const CONVICTION_TOOLTIP = '|net vote| per available signals. Not a probability or forecast.';
+export const CONVICTION_TOOLTIP_SPICY = '|net vote| per available signals. Not a probability or forecast. High conviction = signals piling onto one side today. Could be clarity… or a crowded trade.';
 export const CONVICTION_TOOLTIP_NA = 'Conviction is unavailable when net vote or signal count is missing.';
 
 // Regime Summary

@@ -14,6 +14,7 @@ import {
   AGREEMENT_TREND_SAME,
   CONVICTION_LABEL_PREFIX,
   CONVICTION_TOOLTIP,
+  CONVICTION_TOOLTIP_SPICY,
   CONVICTION_TOOLTIP_NA,
 } from './ghostregimePageCopy';
 
@@ -493,6 +494,7 @@ export function computeConviction(
 ): {
   raw: number | null;
   index: number | null;
+  bucketLabel: string | null;
   label: string;
   tooltip: string;
 } {
@@ -500,6 +502,7 @@ export function computeConviction(
     return {
       raw: null,
       index: null,
+      bucketLabel: null,
       label: `${CONVICTION_LABEL_PREFIX} n/a`,
       tooltip: CONVICTION_TOOLTIP_NA,
     };
@@ -507,12 +510,25 @@ export function computeConviction(
 
   const raw = Math.abs(netVote) / totalSignals;
   const index = clamp(Math.round(raw * 100), 0, 100);
+  
+  // Determine bucket label
+  let bucketLabel: string | null = null;
+  if (index >= 0 && index <= 25) {
+    bucketLabel = 'weak';
+  } else if (index >= 26 && index <= 50) {
+    bucketLabel = 'lean';
+  } else if (index >= 51 && index <= 75) {
+    bucketLabel = 'strong';
+  } else if (index >= 76 && index <= 100) {
+    bucketLabel = 'lopsided';
+  }
 
   return {
     raw,
     index,
-    label: `${CONVICTION_LABEL_PREFIX} ${index}`,
-    tooltip: CONVICTION_TOOLTIP,
+    bucketLabel,
+    label: bucketLabel ? `${CONVICTION_LABEL_PREFIX} ${index} (${bucketLabel})` : `${CONVICTION_LABEL_PREFIX} ${index}`,
+    tooltip: CONVICTION_TOOLTIP_SPICY,
   };
 }
 
@@ -773,26 +789,80 @@ export function computeRegimeConfidenceLabel(
 }
 
 /**
- * Compute primary driver from Risk and Inflation scores
- * Returns which axis has the stronger signal (by absolute value)
+ * Compute primary driver from Risk and Inflation scores/conviction
+ * Returns which axis has the stronger signal and a short "why it won" reason
  */
 export function computePrimaryDriver(
   riskScore: number | null | undefined,
-  inflScore: number | null | undefined
-): { label: string; detail?: string } {
+  inflScore: number | null | undefined,
+  riskConvictionIndex: number | null | undefined,
+  inflConvictionIndex: number | null | undefined,
+  riskConfidenceLabel: string | null | undefined,
+  inflConfidenceLabel: string | null | undefined,
+  riskAgreementPct: number | null | undefined,
+  inflAgreementPct: number | null | undefined
+): { label: string; whyReason: string | null; detail?: string } {
+  // If we have conviction indices, use those for comparison
+  if (riskConvictionIndex !== null && riskConvictionIndex !== undefined && 
+      inflConvictionIndex !== null && inflConvictionIndex !== undefined) {
+    const diff = Math.abs(riskConvictionIndex - inflConvictionIndex);
+    
+    if (diff >= 15) {
+      // Clear winner
+      const winner = riskConvictionIndex > inflConvictionIndex ? 'Risk' : 'Inflation';
+      const other = winner === 'Risk' ? 'Inflation' : 'Risk';
+      return { 
+        label: winner, 
+        whyReason: `${winner} stronger than ${other}`,
+        detail: `${winner} conviction ${riskConvictionIndex > inflConvictionIndex ? riskConvictionIndex : inflConvictionIndex} vs ${other} ${riskConvictionIndex > inflConvictionIndex ? inflConvictionIndex : riskConvictionIndex}`
+      };
+    } else {
+      // Tie - determine if strong/weak/mixed
+      const bothStrong = riskConvictionIndex >= 60 && inflConvictionIndex >= 60;
+      const bothWeak = riskConvictionIndex <= 35 && inflConvictionIndex <= 35;
+      
+      if (bothStrong) {
+        return { label: 'Tie', whyReason: 'Tie: both axes strong' };
+      } else if (bothWeak) {
+        return { label: 'Tie', whyReason: 'Tie: both axes weak' };
+      } else {
+        // Check if signals are clean or mixed using agreement/confidence
+        const riskClean = (riskAgreementPct !== null && riskAgreementPct !== undefined && riskAgreementPct >= 0.75) || riskConfidenceLabel === 'High';
+        const inflClean = (inflAgreementPct !== null && inflAgreementPct !== undefined && inflAgreementPct >= 0.75) || inflConfidenceLabel === 'High';
+        const riskMixed = (riskAgreementPct !== null && riskAgreementPct !== undefined && riskAgreementPct <= 0.5) || riskConfidenceLabel === 'Low';
+        const inflMixed = (inflAgreementPct !== null && inflAgreementPct !== undefined && inflAgreementPct <= 0.5) || inflConfidenceLabel === 'Low';
+        
+        if (riskMixed && inflMixed) {
+          return { label: 'Tie', whyReason: 'Tie: mixed signals' };
+        } else if (riskClean && inflClean) {
+          return { label: 'Tie', whyReason: 'Tie: both axes strong' };
+        } else {
+          return { label: 'Tie', whyReason: 'Tie: mixed signals' };
+        }
+      }
+    }
+  }
+  
+  // Fallback to score-based comparison
   if (riskScore === null || riskScore === undefined || inflScore === null || inflScore === undefined) {
-    return { label: 'n/a' };
+    // Check if only one axis available
+    if ((riskScore !== null && riskScore !== undefined) && (inflScore === null || inflScore === undefined)) {
+      return { label: 'Risk', whyReason: 'Only Risk signals available' };
+    } else if ((riskScore === null || riskScore === undefined) && (inflScore !== null && inflScore !== undefined)) {
+      return { label: 'Inflation', whyReason: 'Only Inflation signals available' };
+    }
+    return { label: 'n/a', whyReason: null };
   }
   
   const absRisk = Math.abs(riskScore);
   const absInfl = Math.abs(inflScore);
   
   if (absRisk > absInfl) {
-    return { label: 'Risk', detail: `Risk score ${absRisk.toFixed(1)} vs Inflation ${absInfl.toFixed(1)}` };
+    return { label: 'Risk', whyReason: 'Risk moved more than Inflation' };
   } else if (absInfl > absRisk) {
-    return { label: 'Inflation', detail: `Inflation score ${absInfl.toFixed(1)} vs Risk ${absRisk.toFixed(1)}` };
+    return { label: 'Inflation', whyReason: 'Inflation moved more than Risk' };
   } else {
-    return { label: 'Tie', detail: `Both scores ${absRisk.toFixed(1)}` };
+    return { label: 'Tie', whyReason: 'Tie: both axes strong' };
   }
 }
 
@@ -822,16 +892,18 @@ export function formatSignedInt(n: number): string {
 export function computeAxisNetVote(
   receipts: SignalReceipt[] | undefined,
   axisType: 'risk' | 'inflation'
-): { net: number; label: string } {
+): { net: number; totalNonZero: number; totalSignals: number; directionLabel: string; label: string } {
   if (!receipts || receipts.length === 0) {
-    return { net: 0, label: '0 (Neutral)' };
+    return { net: 0, totalNonZero: 0, totalSignals: 0, directionLabel: 'Neutral', label: '0 (Neutral)' };
   }
   
   // Sum all votes (including zeros)
   const net = receipts.reduce((sum, r) => sum + r.vote, 0);
+  const totalNonZero = receipts.filter(r => r.vote !== 0).length;
+  const totalSignals = receipts.length;
   
   if (net === 0) {
-    return { net: 0, label: '0 (Neutral)' };
+    return { net: 0, totalNonZero, totalSignals, directionLabel: 'Neutral', label: totalSignals > 0 ? `0/${totalSignals} (Neutral)` : '0 (Neutral)' };
   }
   
   // Determine direction label based on axis type
@@ -842,7 +914,13 @@ export function computeAxisNetVote(
     direction = net > 0 ? 'Inflation' : 'Disinflation';
   }
   
-  return { net, label: `${formatSignedInt(net)} (${direction})` };
+  return { 
+    net, 
+    totalNonZero,
+    totalSignals,
+    directionLabel: direction,
+    label: `${formatSignedInt(net)}/${totalSignals} (${direction})`
+  };
 }
 
 /**
