@@ -32,6 +32,7 @@ import {
   computeAgreementSeries,
   computeAxisStats,
   deriveVotedLabel,
+  computeConviction,
 } from '@/lib/ghostregime/ui';
 import {
   WHY_REGIME_TITLE,
@@ -518,8 +519,10 @@ export default function GhostRegimePage() {
           const axisDesc = describeAxisFromScores(data);
           const riskAxisDirection = data.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
           const riskStats = computeAxisStats(data.risk_receipts, riskAxisDirection);
+          const riskConviction = computeConviction(data.risk_score, riskStats.totalSignals);
           const inflAxis = data.infl_axis === 'Inflation' ? 'Inflation' : 'Disinflation';
           const inflStats = computeAxisStats(data.inflation_receipts, inflAxis);
+          const inflConviction = computeConviction(data.infl_score, inflStats.totalSignals);
           
           // Compute agreement series for history visualization
           const allRows = data ? [data, ...historyRows] : historyRows;
@@ -550,6 +553,16 @@ export default function GhostRegimePage() {
                           {CONFIDENCE_LABEL_PREFIX} {riskStats.confidence.label}
                         </span>
                       </Tooltip>
+                      {riskConviction.index !== null && (
+                        <>
+                          <span>•</span>
+                          <Tooltip content={riskConviction.tooltip}>
+                            <span className="px-2 py-0.5 rounded border border-amber-400/15 bg-amber-400/3 text-amber-300/70">
+                              {riskConviction.label}
+                            </span>
+                          </Tooltip>
+                        </>
+                      )}
                     </div>
                   )}
                   {riskSeries.length >= 2 ? (
@@ -579,6 +592,16 @@ export default function GhostRegimePage() {
                           {CONFIDENCE_LABEL_PREFIX} {inflStats.confidence.label}
                         </span>
                       </Tooltip>
+                      {inflConviction.index !== null && (
+                        <>
+                          <span>•</span>
+                          <Tooltip content={inflConviction.tooltip}>
+                            <span className="px-2 py-0.5 rounded border border-amber-400/15 bg-amber-400/3 text-amber-300/70">
+                              {inflConviction.label}
+                            </span>
+                          </Tooltip>
+                        </>
+                      )}
                     </div>
                   )}
                   {inflSeries.length >= 2 ? (

@@ -55,3 +55,8 @@ export const CONFIDENCE_LABEL_PREFIX = 'Confidence:';
 export const CONFIDENCE_TOOLTIP = 'Heuristic: agreement + breadth (coverage). Not a probability.';
 export const COVERAGE_TOOLTIP = 'Coverage = how many signals fired (non-neutral) out of total signals.';
 
+// Conviction
+export const CONVICTION_LABEL_PREFIX = 'Conviction:';
+export const CONVICTION_TOOLTIP = 'Strength of the axis score per available signals. Not a probability or forecast.';
+export const CONVICTION_TOOLTIP_NA = 'Conviction is unavailable when the axis score or signal count is missing.';
+

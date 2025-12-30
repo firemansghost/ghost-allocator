@@ -12,6 +12,9 @@ import {
   AGREEMENT_TREND_CLEANER,
   AGREEMENT_TREND_MIXED,
   AGREEMENT_TREND_SAME,
+  CONVICTION_LABEL_PREFIX,
+  CONVICTION_TOOLTIP,
+  CONVICTION_TOOLTIP_NA,
 } from './ghostregimePageCopy';
 
 /**
@@ -470,6 +473,46 @@ export function formatAgreementBadge(agreement: {
   return {
     label: `Agreement: ${agreement.agree}/${agreement.total}${pctStr}`,
     tooltip: 'Agreement among non-zero signal votes. Not a probability.',
+  };
+}
+
+/**
+ * Clamp a number between min and max
+ */
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
+}
+
+/**
+ * Compute conviction metric: strength of axis score per available signals
+ * Returns a 0..100 index representing how "strong" the score is relative to signal count
+ */
+export function computeConviction(
+  axisScore: number | null | undefined,
+  totalSignals: number | null | undefined
+): {
+  raw: number | null;
+  index: number | null;
+  label: string;
+  tooltip: string;
+} {
+  if (axisScore === null || axisScore === undefined || !totalSignals || totalSignals === 0) {
+    return {
+      raw: null,
+      index: null,
+      label: `${CONVICTION_LABEL_PREFIX} n/a`,
+      tooltip: CONVICTION_TOOLTIP_NA,
+    };
+  }
+
+  const raw = Math.abs(axisScore) / totalSignals;
+  const index = clamp(Math.round(raw * 50), 0, 100);
+
+  return {
+    raw,
+    index,
+    label: `${CONVICTION_LABEL_PREFIX} ${index}`,
+    tooltip: CONVICTION_TOOLTIP,
   };
 }
 
