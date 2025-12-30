@@ -924,6 +924,119 @@ export function computeAxisNetVote(
 }
 
 /**
+ * Compute crowding tag (signals piling onto one side)
+ */
+export function computeCrowdingTag(params: {
+  convictionIndex: number | null;
+  confidenceLabel: string | null;
+  agreementPct: number | null;
+  coveragePct: number | null;
+}): boolean {
+  const { convictionIndex, confidenceLabel, agreementPct, coveragePct } = params;
+  
+  if (convictionIndex === null || convictionIndex === undefined || convictionIndex < 76) {
+    return false;
+  }
+  
+  if (confidenceLabel !== 'High') {
+    return false;
+  }
+  
+  if (agreementPct === null || agreementPct < 80) {
+    return false;
+  }
+  
+  if (coveragePct === null || coveragePct < 0.5) {
+    return false;
+  }
+  
+  return true;
+}
+
+/**
+ * Compute axis stat deltas between current and previous row
+ */
+export function computeAxisStatDeltas(
+  currRow: GhostRegimeRow,
+  prevRow: GhostRegimeRow | null | undefined,
+  axis: 'risk' | 'inflation'
+): string | null {
+  if (!prevRow) {
+    return null;
+  }
+  
+  const axisDirection = axis === 'risk' 
+    ? (currRow.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off')
+    : (currRow.infl_axis === 'Inflation' ? 'Inflation' : 'Disinflation');
+  
+  const currReceipts = axis === 'risk' ? currRow.risk_receipts : currRow.inflation_receipts;
+  const prevReceipts = axis === 'risk' ? prevRow.risk_receipts : prevRow.inflation_receipts;
+  
+  if (!currReceipts || currReceipts.length === 0 || !prevReceipts || prevReceipts.length === 0) {
+    return null;
+  }
+  
+  const currAgreement = computeAxisAgreement(currReceipts, axisDirection);
+  const prevAgreement = computeAxisAgreement(prevReceipts, axisDirection);
+  
+  if (currAgreement.total === 0 || prevAgreement.total === 0) {
+    return null;
+  }
+  
+  const currStats = computeAxisStats(currReceipts, axisDirection);
+  const prevStats = computeAxisStats(prevReceipts, axisDirection);
+  
+  const currNetVote = computeAxisNetVote(currReceipts, axis);
+  const prevNetVote = computeAxisNetVote(prevReceipts, axis);
+  
+  const currConviction = computeConviction(currNetVote.net, currStats.totalSignals);
+  const prevConviction = computeConviction(prevNetVote.net, prevStats.totalSignals);
+  
+  const parts: string[] = [];
+  
+  // Agreement delta (percentage points)
+  if (currAgreement.pct !== null && prevAgreement.pct !== null) {
+    const delta = currAgreement.pct - prevAgreement.pct;
+    const sign = delta >= 0 ? '+' : '';
+    parts.push(`Agree ${sign}${delta.toFixed(0)}pp`);
+  }
+  
+  // Conviction delta
+  if (currConviction.index !== null && prevConviction.index !== null) {
+    const delta = currConviction.index - prevConviction.index;
+    const sign = delta >= 0 ? '+' : '';
+    parts.push(`Conv ${sign}${delta}`);
+  }
+  
+  // Confidence delta (same/up/down)
+  const confidenceOrder = ['High', 'Medium', 'Low', 'n/a'];
+  const currConfIdx = confidenceOrder.indexOf(currStats.confidence.label);
+  const prevConfIdx = confidenceOrder.indexOf(prevStats.confidence.label);
+  if (currConfIdx !== -1 && prevConfIdx !== -1 && currConfIdx !== prevConfIdx) {
+    if (currConfIdx < prevConfIdx) {
+      parts.push('Conf up');
+    } else {
+      parts.push('Conf down');
+    }
+  } else if (currConfIdx === prevConfIdx && currConfIdx !== -1) {
+    parts.push('Conf same');
+  }
+  
+  // Net vote delta
+  if (currNetVote.net !== prevNetVote.net) {
+    const delta = currNetVote.net - prevNetVote.net;
+    const sign = delta >= 0 ? '+' : '';
+    parts.push(`Net ${sign}${delta}`);
+  }
+  
+  if (parts.length === 0) {
+    return null;
+  }
+  
+  return `Δ since last: ${parts.join(' • ')}`;
+}
+
+/**
  * Build actionable read line from current regime data
  */
 export function buildActionableReadLine(params: {
@@ -973,6 +1086,21 @@ export function buildActionableReadLine(params: {
   }
   
   return parts.join(' • ');
+}
+
+/**
+ * Build copy snapshot text (date + actionable read)
+ */
+export function buildCopySnapshotText(
+  row: GhostRegimeRow,
+  actionableRead: string | null
+): string | null {
+  if (!actionableRead) {
+    return null;
+  }
+  
+  const date = row.date || new Date().toISOString().split('T')[0];
+  return `${date} • ${actionableRead}`;
 }
 
 /**

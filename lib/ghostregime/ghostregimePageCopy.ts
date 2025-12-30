@@ -71,4 +71,11 @@ export const PRIMARY_DRIVER_PREFIX = 'Primary driver:';
 export const PRIMARY_DRIVER_TOOLTIP = 'Which axis (Risk or Inflation) has the stronger signal today.';
 export const FLIPWATCH_PILL_TOOLTIP = 'Flip Watch reduces whipsaw by waiting for confirmation.';
 export const ACTIONABLE_READ_PREFIX = 'Actionable read:';
+export const CROWDED_LABEL = 'Crowded';
+export const CROWDED_TOOLTIP = 'Signals are piling onto one side. Could be clarity… or everyone running through the same door.';
+export const COPY_SNAPSHOT_BUTTON = 'Copy';
+export const COPY_SNAPSHOT_COPIED = 'Copied';
+export const COPY_SNAPSHOT_DISABLED_TOOLTIP = 'Not enough data to copy snapshot.';
+export const ACTIVE_ONLY_TOGGLE = 'Active only';
+export const SHOW_ALL_TOGGLE = 'Show all';
 

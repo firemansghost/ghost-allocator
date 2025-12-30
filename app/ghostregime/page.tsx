@@ -10,6 +10,7 @@ import { GlassCard } from '@/components/GlassCard';
 import { Tooltip } from '@/components/Tooltip';
 import { AllocationBar } from '@/components/AllocationBar';
 import { AgreementChipStrip } from '@/components/ghostregime/AgreementChipStrip';
+import { AxisStatsBlock } from '@/components/ghostregime/AxisStatsBlock';
 import type { GhostRegimeRow } from '@/lib/ghostregime/types';
 import {
   formatBucketUtilizationLine,
@@ -40,6 +41,8 @@ import {
   formatFlipWatchLabel,
   computeAxisNetVote,
   buildActionableReadLine,
+  computeAxisStatDeltas,
+  buildCopySnapshotText,
 } from '@/lib/ghostregime/ui';
 import {
   WHY_REGIME_TITLE,
@@ -67,6 +70,13 @@ import {
   PRIMARY_DRIVER_TOOLTIP,
   FLIPWATCH_PILL_TOOLTIP,
   ACTIONABLE_READ_PREFIX,
+  CROWDED_LABEL,
+  CROWDED_TOOLTIP,
+  COPY_SNAPSHOT_BUTTON,
+  COPY_SNAPSHOT_COPIED,
+  COPY_SNAPSHOT_DISABLED_TOOLTIP,
+  ACTIVE_ONLY_TOGGLE,
+  SHOW_ALL_TOGGLE,
 } from '@/lib/ghostregime/ghostregimePageCopy';
 import Link from 'next/link';
 
@@ -94,6 +104,9 @@ export default function GhostRegimePage() {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyAvailable, setHistoryAvailable] = useState(false);
   const [historyRows, setHistoryRows] = useState<GhostRegimeRow[]>([]);
+  const [showNeutralRisk, setShowNeutralRisk] = useState(false);
+  const [showNeutralInfl, setShowNeutralInfl] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -599,93 +612,40 @@ export default function GhostRegimePage() {
             <GlassCard className="p-6">
               <h2 className="text-sm font-semibold text-zinc-50 mb-4">{WHY_REGIME_TITLE}</h2>
               <div className="space-y-3 text-xs text-zinc-300 leading-relaxed">
-                <div>
-                  <p>{axisDesc.riskLine.replace(/\*\*/g, '')}</p>
-                  {riskStats.nonNeutral > 0 && (
-                    <div className="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-zinc-400">
-                      <Tooltip content={AGREEMENT_TOOLTIP}>
-                        <span>{riskStats.agreementLabel}</span>
-                      </Tooltip>
-                      <span>•</span>
-                      <Tooltip content={COVERAGE_TOOLTIP}>
-                        <span>{riskStats.coverageLabel}</span>
-                      </Tooltip>
-                      <span>•</span>
-                      <Tooltip content={riskStats.confidence.tooltip}>
-                        <span className="px-2 py-0.5 rounded border border-amber-400/20 bg-amber-400/5 text-amber-300/80">
-                          {CONFIDENCE_LABEL_PREFIX} {riskStats.confidence.label}
-                        </span>
-                      </Tooltip>
-                      {riskConviction.index !== null && (
-                        <>
-                          <span>•</span>
-                          <Tooltip content={riskConviction.tooltip}>
-                            <span className="px-2 py-0.5 rounded border border-amber-400/15 bg-amber-400/3 text-amber-300/70">
-                              {riskConviction.label}
-                            </span>
-                          </Tooltip>
-                        </>
-                      )}
-                    </div>
-                  )}
-                  {riskSeries.length >= 2 && (
-                    <div className="mt-1">
-                      <AgreementChipStrip 
-                        items={riskSeries} 
-                        label={AGREEMENT_HISTORY_LABEL} 
+                {(() => {
+                  // Find previous row for delta computation
+                  const prevRow = historyRows.length > 0 ? historyRows[0] : null;
+                  const riskDelta = prevRow ? computeAxisStatDeltas(data, prevRow, 'risk') : null;
+                  const inflDelta = prevRow ? computeAxisStatDeltas(data, prevRow, 'inflation') : null;
+                  
+                  return (
+                    <>
+                      <AxisStatsBlock
+                        axisLine={axisDesc.riskLine.replace(/\*\*/g, '')}
+                        stats={riskStats}
+                        conviction={riskConviction}
+                        agreementSeries={riskSeries.length >= 2 ? riskSeries : undefined}
+                        deltaLine={riskDelta}
                         axisName="Risk"
-                        showLegend={true}
                       />
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <p>{axisDesc.inflationLine.replace(/\*\*/g, '')}</p>
-                  {inflStats.nonNeutral > 0 && (
-                    <div className="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-zinc-400">
-                      <Tooltip content={AGREEMENT_TOOLTIP}>
-                        <span>{inflStats.agreementLabel}</span>
-                      </Tooltip>
-                      <span>•</span>
-                      <Tooltip content={COVERAGE_TOOLTIP}>
-                        <span>{inflStats.coverageLabel}</span>
-                      </Tooltip>
-                      <span>•</span>
-                      <Tooltip content={inflStats.confidence.tooltip}>
-                        <span className="px-2 py-0.5 rounded border border-amber-400/20 bg-amber-400/5 text-amber-300/80">
-                          {CONFIDENCE_LABEL_PREFIX} {inflStats.confidence.label}
-                        </span>
-                      </Tooltip>
-                      {inflConviction.index !== null && (
-                        <>
-                          <span>•</span>
-                          <Tooltip content={inflConviction.tooltip}>
-                            <span className="px-2 py-0.5 rounded border border-amber-400/15 bg-amber-400/3 text-amber-300/70">
-                              {inflConviction.label}
-                            </span>
-                          </Tooltip>
-                        </>
-                      )}
-                    </div>
-                  )}
-                  {inflSeries.length >= 2 && (
-                    <div className="mt-1">
-                      <AgreementChipStrip 
-                        items={inflSeries} 
-                        label={AGREEMENT_HISTORY_LABEL} 
+                      <AxisStatsBlock
+                        axisLine={axisDesc.inflationLine.replace(/\*\*/g, '')}
+                        stats={inflStats}
+                        conviction={inflConviction}
+                        agreementSeries={inflSeries.length >= 2 ? inflSeries : undefined}
+                        deltaLine={inflDelta}
                         axisName="Inflation"
-                        showLegend={true}
                       />
-                    </div>
-                  )}
-                </div>
+                    </>
+                  );
+                })()}
+                {/* Show agreement history hint once at bottom */}
                 {hasHistoryButNotToday && (
                   <p className="text-zinc-500 text-[10px] italic mt-2">
                     {AGREEMENT_HISTORY_HINT}
                   </p>
                 )}
-                {/* Show agreement history hint once at bottom if receipts exist but history insufficient */}
-                {hasTodayReceipts && riskSeries.length < 2 && inflSeries.length < 2 && (
+                {hasTodayReceipts && !hasHistoryButNotToday && riskSeries.length < 2 && inflSeries.length < 2 && (
                   <p className="text-zinc-500 text-[10px] italic mt-2">
                     {AGREEMENT_HISTORY_INSUFFICIENT_HINT}
                   </p>
@@ -1277,104 +1237,134 @@ export default function GhostRegimePage() {
               <GlassCard className="p-4 sm:p-5 space-y-3 md:col-span-2">
                 <h2 className="text-sm font-semibold text-zinc-50">Signal receipts</h2>
                 <div className="space-y-4">
-                  {hasRiskReceipts && (
-                    <div>
-                      <h3 className="text-xs font-medium text-zinc-300 mb-2">{TOP_DRIVERS_RISK_HEADER}</h3>
-                      <div className="overflow-x-auto max-h-[320px] overflow-y-auto">
-                        <table className="w-full text-xs border-collapse">
-                          <thead className="sticky top-0 z-10 bg-zinc-900/95 backdrop-blur-sm">
-                            <tr className="border-b border-zinc-800">
-                              <th className="text-left py-1 px-2 text-zinc-400 font-medium">Signal</th>
-                              <th className="text-right py-1 px-2 text-zinc-400 font-medium">Vote</th>
-                              <th className="text-left py-1 px-2 text-zinc-400 font-medium">Voted</th>
-                              {data.risk_receipts?.some(r => r.note) && (
-                                <>
-                                  <th className="text-left py-1 px-2 text-zinc-400 font-medium">Rule</th>
-                                  <th className="text-left py-1 px-2 text-zinc-400 font-medium">Meta</th>
-                                </>
-                              )}
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {data.risk_receipts?.map((receipt, idx) => {
-                              const { rule, meta } = splitReceiptNote(receipt.note);
-                              return (
-                                <tr key={idx} className={`border-b border-zinc-900/50 ${idx % 2 === 0 ? 'bg-white/0' : 'bg-white/[0.03]'}`}>
-                                  <td className="py-1 px-2 text-zinc-300">{receipt.label}</td>
-                                  <td className="py-1 px-2 text-right text-zinc-200 font-mono">
-                                    {formatSignedNumber(receipt.vote)}
-                                  </td>
-                                  <td className="py-1 px-2 text-zinc-400">{deriveVotedLabel(receipt.vote, 'risk')}</td>
-                                  {data.risk_receipts?.some(r => r.note) && (
-                                    <>
-                                      <td className="py-1 px-2 text-zinc-400 text-[10px]">{rule || ''}</td>
-                                      <td className="py-1 px-2 text-zinc-400 text-[10px]">{meta || ''}</td>
-                                    </>
-                                  )}
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
+                  {hasRiskReceipts && (() => {
+                    const totalSignals = data.risk_receipts?.length || 0;
+                    const activeSignals = data.risk_receipts?.filter(r => r.vote !== 0).length || 0;
+                    const neutralSignals = totalSignals - activeSignals;
+                    const filteredReceipts = (showNeutralRisk 
+                      ? data.risk_receipts 
+                      : data.risk_receipts?.filter(r => r.vote !== 0)) || [];
+                    
+                    return (
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="text-xs font-medium text-zinc-300">{TOP_DRIVERS_RISK_HEADER}</h3>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] text-zinc-500">
+                              Active: {activeSignals}/{totalSignals} • Neutral: {neutralSignals}
+                            </span>
+                            <button
+                              onClick={() => setShowNeutralRisk(!showNeutralRisk)}
+                              className="px-2 py-0.5 text-[10px] rounded border border-zinc-700 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800 transition-colors"
+                            >
+                              {showNeutralRisk ? SHOW_ALL_TOGGLE : ACTIVE_ONLY_TOGGLE}
+                            </button>
+                          </div>
+                        </div>
+                        <div className="overflow-x-auto max-h-[320px] overflow-y-auto">
+                          <table className="w-full text-xs border-collapse">
+                            <thead className="sticky top-0 z-10 bg-zinc-900/95 backdrop-blur-sm">
+                              <tr className="border-b border-zinc-800">
+                                <th className="text-left py-1 px-2 text-zinc-400 font-medium">Signal</th>
+                                <th className="text-right py-1 px-2 text-zinc-400 font-medium">Vote</th>
+                                <th className="text-left py-1 px-2 text-zinc-400 font-medium">Voted</th>
+                                {data.risk_receipts?.some(r => r.note) && (
+                                  <>
+                                    <th className="text-left py-1 px-2 text-zinc-400 font-medium">Rule</th>
+                                    <th className="text-left py-1 px-2 text-zinc-400 font-medium">Meta</th>
+                                  </>
+                                )}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {filteredReceipts.map((receipt, idx) => {
+                                const { rule, meta } = splitReceiptNote(receipt.note);
+                                return (
+                                  <tr key={idx} className={`border-b border-zinc-900/50 ${idx % 2 === 0 ? 'bg-white/0' : 'bg-white/[0.03]'}`}>
+                                    <td className="py-1 px-2 text-zinc-300">{receipt.label}</td>
+                                    <td className="py-1 px-2 text-right text-zinc-200 font-mono">
+                                      {formatSignedNumber(receipt.vote)}
+                                    </td>
+                                    <td className="py-1 px-2 text-zinc-400">{deriveVotedLabel(receipt.vote, 'risk')}</td>
+                                    {data.risk_receipts?.some(r => r.note) && (
+                                      <>
+                                        <td className="py-1 px-2 text-zinc-400 text-[10px]">{rule || ''}</td>
+                                        <td className="py-1 px-2 text-zinc-400 text-[10px]">{meta || ''}</td>
+                                      </>
+                                    )}
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  {hasInflationReceipts && (
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-xs font-medium text-zinc-300">{TOP_DRIVERS_INFLATION_HEADER}</h3>
-                        {(() => {
-                          const inflAxis = data.infl_axis === 'Inflation' ? 'Inflation' : 'Disinflation';
-                          const inflAgreement = computeAxisAgreement(data.inflation_receipts, inflAxis);
-                          if (inflAgreement.total > 0) {
-                            return (
-                              <span className="text-[10px] text-zinc-400">
-                                Agreement: {inflAgreement.agree}/{inflAgreement.total} ({inflAgreement.pct?.toFixed(0)}%)
-                              </span>
-                            );
-                          }
-                          return null;
-                        })()}
+                    );
+                  })()}
+                  {hasInflationReceipts && (() => {
+                    const totalSignals = data.inflation_receipts?.length || 0;
+                    const activeSignals = data.inflation_receipts?.filter(r => r.vote !== 0).length || 0;
+                    const neutralSignals = totalSignals - activeSignals;
+                    const filteredReceipts = (showNeutralInfl 
+                      ? data.inflation_receipts 
+                      : data.inflation_receipts?.filter(r => r.vote !== 0)) || [];
+                    
+                    return (
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="text-xs font-medium text-zinc-300">{TOP_DRIVERS_INFLATION_HEADER}</h3>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] text-zinc-500">
+                              Active: {activeSignals}/{totalSignals} • Neutral: {neutralSignals}
+                            </span>
+                            <button
+                              onClick={() => setShowNeutralInfl(!showNeutralInfl)}
+                              className="px-2 py-0.5 text-[10px] rounded border border-zinc-700 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800 transition-colors"
+                            >
+                              {showNeutralInfl ? SHOW_ALL_TOGGLE : ACTIVE_ONLY_TOGGLE}
+                            </button>
+                          </div>
+                        </div>
+                        <div className="overflow-x-auto max-h-[320px] overflow-y-auto">
+                          <table className="w-full text-xs border-collapse">
+                            <thead className="sticky top-0 z-10 bg-zinc-900/95 backdrop-blur-sm">
+                              <tr className="border-b border-zinc-800">
+                                <th className="text-left py-1 px-2 text-zinc-400 font-medium">Signal</th>
+                                <th className="text-right py-1 px-2 text-zinc-400 font-medium">Vote</th>
+                                <th className="text-left py-1 px-2 text-zinc-400 font-medium">Voted</th>
+                                {data.inflation_receipts?.some(r => r.note) && (
+                                  <>
+                                    <th className="text-left py-1 px-2 text-zinc-400 font-medium">Rule</th>
+                                    <th className="text-left py-1 px-2 text-zinc-400 font-medium">Meta</th>
+                                  </>
+                                )}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {filteredReceipts.map((receipt, idx) => {
+                                const { rule, meta } = splitReceiptNote(receipt.note);
+                                return (
+                                  <tr key={idx} className={`border-b border-zinc-900/50 ${idx % 2 === 0 ? 'bg-white/0' : 'bg-white/[0.03]'}`}>
+                                    <td className="py-1 px-2 text-zinc-300">{receipt.label}</td>
+                                    <td className="py-1 px-2 text-right text-zinc-200 font-mono">
+                                      {formatSignedNumber(receipt.vote)}
+                                    </td>
+                                    <td className="py-1 px-2 text-zinc-400">{deriveVotedLabel(receipt.vote, 'inflation')}</td>
+                                    {data.inflation_receipts?.some(r => r.note) && (
+                                      <>
+                                        <td className="py-1 px-2 text-zinc-400 text-[10px]">{rule || ''}</td>
+                                        <td className="py-1 px-2 text-zinc-400 text-[10px]">{meta || ''}</td>
+                                      </>
+                                    )}
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
-                      <div className="overflow-x-auto max-h-[320px] overflow-y-auto">
-                        <table className="w-full text-xs border-collapse">
-                          <thead className="sticky top-0 z-10 bg-zinc-900/95 backdrop-blur-sm">
-                            <tr className="border-b border-zinc-800">
-                              <th className="text-left py-1 px-2 text-zinc-400 font-medium">Signal</th>
-                              <th className="text-right py-1 px-2 text-zinc-400 font-medium">Vote</th>
-                              <th className="text-left py-1 px-2 text-zinc-400 font-medium">Voted</th>
-                              {data.inflation_receipts?.some(r => r.note) && (
-                                <>
-                                  <th className="text-left py-1 px-2 text-zinc-400 font-medium">Rule</th>
-                                  <th className="text-left py-1 px-2 text-zinc-400 font-medium">Meta</th>
-                                </>
-                              )}
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {data.inflation_receipts?.map((receipt, idx) => {
-                              const { rule, meta } = splitReceiptNote(receipt.note);
-                              return (
-                                <tr key={idx} className={`border-b border-zinc-900/50 ${idx % 2 === 0 ? 'bg-white/0' : 'bg-white/[0.03]'}`}>
-                                  <td className="py-1 px-2 text-zinc-300">{receipt.label}</td>
-                                  <td className="py-1 px-2 text-right text-zinc-200 font-mono">
-                                    {formatSignedNumber(receipt.vote)}
-                                  </td>
-                                  <td className="py-1 px-2 text-zinc-400">{deriveVotedLabel(receipt.vote, 'inflation')}</td>
-                                  {data.inflation_receipts?.some(r => r.note) && (
-                                    <>
-                                      <td className="py-1 px-2 text-zinc-400 text-[10px]">{rule || ''}</td>
-                                      <td className="py-1 px-2 text-zinc-400 text-[10px]">{meta || ''}</td>
-                                    </>
-                                  )}
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  )}
+                    );
+                  })()}
                 </div>
               </GlassCard>
             );
