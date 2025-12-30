@@ -484,11 +484,11 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 /**
- * Compute conviction metric: strength of axis score per available signals
- * Returns a 0..100 index representing how "strong" the score is relative to signal count
+ * Compute conviction metric: strength of net vote per available signals
+ * Returns a 0..100 index representing how "strong" the net vote is relative to signal count
  */
 export function computeConviction(
-  axisScore: number | null | undefined,
+  netVote: number | null | undefined,
   totalSignals: number | null | undefined
 ): {
   raw: number | null;
@@ -496,7 +496,7 @@ export function computeConviction(
   label: string;
   tooltip: string;
 } {
-  if (axisScore === null || axisScore === undefined || !totalSignals || totalSignals === 0) {
+  if (netVote === null || netVote === undefined || !totalSignals || totalSignals === 0) {
     return {
       raw: null,
       index: null,
@@ -505,8 +505,8 @@ export function computeConviction(
     };
   }
 
-  const raw = Math.abs(axisScore) / totalSignals;
-  const index = clamp(Math.round(raw * 50), 0, 100);
+  const raw = Math.abs(netVote) / totalSignals;
+  const index = clamp(Math.round(raw * 100), 0, 100);
 
   return {
     raw,

@@ -8,6 +8,8 @@
 
 'use client';
 
+import { Tooltip } from '@/components/Tooltip';
+
 export interface AgreementSeriesItem {
   date: string;
   pct: number;
@@ -62,17 +64,17 @@ export function AgreementChipStrip({
           const tooltip = tooltipParts.join(' • ');
 
           return (
-            <span
-              key={`${item.date}-${idx}`}
-              title={tooltip}
-              className="w-3.5 h-2.5 rounded-sm border transition-all hover:opacity-100 hover:scale-110"
-              style={{
-                backgroundColor: `rgba(251, 191, 36, ${bgOpacity})`, // amber-400
-                borderColor: `rgba(251, 191, 36, ${borderOpacity})`,
-                borderWidth: '1px',
-              }}
-              aria-label={tooltip}
-            />
+            <Tooltip key={`${item.date}-${idx}`} content={tooltip}>
+              <span
+                className="w-3.5 h-2.5 rounded-sm border transition-all hover:opacity-100 hover:scale-110 cursor-help"
+                style={{
+                  backgroundColor: `rgba(251, 191, 36, ${bgOpacity})`, // amber-400
+                  borderColor: `rgba(251, 191, 36, ${borderOpacity})`,
+                  borderWidth: '1px',
+                }}
+                aria-label={tooltip}
+              />
+            </Tooltip>
           );
         })}
       </div>

@@ -57,8 +57,8 @@ export const COVERAGE_TOOLTIP = 'Coverage = how many signals fired (non-neutral)
 
 // Conviction
 export const CONVICTION_LABEL_PREFIX = 'Conviction:';
-export const CONVICTION_TOOLTIP = 'Strength of the axis score per available signals. Not a probability or forecast.';
-export const CONVICTION_TOOLTIP_NA = 'Conviction is unavailable when the axis score or signal count is missing.';
+export const CONVICTION_TOOLTIP = '|net vote| per available signals. Not a probability or forecast.';
+export const CONVICTION_TOOLTIP_NA = 'Conviction is unavailable when net vote or signal count is missing.';
 
 // Regime Summary
 export const REGIME_SUMMARY_TITLE = 'Regime Summary';

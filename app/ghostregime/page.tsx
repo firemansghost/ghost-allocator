@@ -362,10 +362,17 @@ export default function GhostRegimePage() {
           {(() => {
             const riskAxisDirection = data.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
             const riskStats = computeAxisStats(data.risk_receipts, riskAxisDirection);
-            const riskConviction = computeConviction(data.risk_score, riskStats.totalSignals);
+            // Use net vote for conviction if receipts exist, otherwise fallback to axis score
+            const riskNetVote = data.risk_receipts && data.risk_receipts.length > 0
+              ? computeAxisNetVote(data.risk_receipts, 'risk').net
+              : data.risk_score;
+            const riskConviction = computeConviction(riskNetVote, riskStats.totalSignals || (data.risk_receipts?.length ?? null));
             const inflAxis = data.infl_axis === 'Inflation' ? 'Inflation' : 'Disinflation';
             const inflStats = computeAxisStats(data.inflation_receipts, inflAxis);
-            const inflConviction = computeConviction(data.infl_score, inflStats.totalSignals);
+            const inflNetVote = data.inflation_receipts && data.inflation_receipts.length > 0
+              ? computeAxisNetVote(data.inflation_receipts, 'inflation').net
+              : data.infl_score;
+            const inflConviction = computeConviction(inflNetVote, inflStats.totalSignals || (data.inflation_receipts?.length ?? null));
             const regimeConvictionIndex = computeRegimeConvictionIndex(riskConviction.index, inflConviction.index);
             const regimeConfidenceLabel = computeRegimeConfidenceLabel(riskStats.confidence.label, inflStats.confidence.label);
             const cashSources = getCashSources(data);
@@ -564,10 +571,17 @@ export default function GhostRegimePage() {
           const axisDesc = describeAxisFromScores(data);
           const riskAxisDirection = data.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
           const riskStats = computeAxisStats(data.risk_receipts, riskAxisDirection);
-          const riskConviction = computeConviction(data.risk_score, riskStats.totalSignals);
+          // Use net vote for conviction if receipts exist, otherwise fallback to axis score
+          const riskNetVote = data.risk_receipts && data.risk_receipts.length > 0
+            ? computeAxisNetVote(data.risk_receipts, 'risk').net
+            : data.risk_score;
+          const riskConviction = computeConviction(riskNetVote, riskStats.totalSignals || (data.risk_receipts?.length ?? null));
           const inflAxis = data.infl_axis === 'Inflation' ? 'Inflation' : 'Disinflation';
           const inflStats = computeAxisStats(data.inflation_receipts, inflAxis);
-          const inflConviction = computeConviction(data.infl_score, inflStats.totalSignals);
+          const inflNetVote = data.inflation_receipts && data.inflation_receipts.length > 0
+            ? computeAxisNetVote(data.inflation_receipts, 'inflation').net
+            : data.infl_score;
+          const inflConviction = computeConviction(inflNetVote, inflStats.totalSignals || (data.inflation_receipts?.length ?? null));
           
           // Compute agreement series for history visualization
           const allRows = data ? [data, ...historyRows] : historyRows;
@@ -846,10 +860,17 @@ export default function GhostRegimePage() {
           // Compute overall regime metrics from Risk and Inflation stats
           const riskAxisDirection = data.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
           const riskStats = computeAxisStats(data.risk_receipts, riskAxisDirection);
-          const riskConviction = computeConviction(data.risk_score, riskStats.totalSignals);
+          // Use net vote for conviction if receipts exist, otherwise fallback to axis score
+          const riskNetVote = data.risk_receipts && data.risk_receipts.length > 0
+            ? computeAxisNetVote(data.risk_receipts, 'risk').net
+            : data.risk_score;
+          const riskConviction = computeConviction(riskNetVote, riskStats.totalSignals || (data.risk_receipts?.length ?? null));
           const inflAxis = data.infl_axis === 'Inflation' ? 'Inflation' : 'Disinflation';
           const inflStats = computeAxisStats(data.inflation_receipts, inflAxis);
-          const inflConviction = computeConviction(data.infl_score, inflStats.totalSignals);
+          const inflNetVote = data.inflation_receipts && data.inflation_receipts.length > 0
+            ? computeAxisNetVote(data.inflation_receipts, 'inflation').net
+            : data.infl_score;
+          const inflConviction = computeConviction(inflNetVote, inflStats.totalSignals || (data.inflation_receipts?.length ?? null));
           
           const regimeConvictionIndex = computeRegimeConvictionIndex(riskConviction.index, inflConviction.index);
           const regimeConfidenceLabel = computeRegimeConfidenceLabel(riskStats.confidence.label, inflStats.confidence.label);
