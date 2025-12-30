@@ -73,6 +73,32 @@ export function getCashSources(data: GhostRegimeRow): string[] {
 }
 
 /**
+ * Format a single cash source to a friendly label
+ */
+export function formatCashSourceLabel(source: string): string {
+  const mapping: Record<string, string> = {
+    'Bitcoin': 'BTC throttle',
+    'Stocks': 'Equity throttle',
+    'Gold': 'Gold throttle',
+  };
+  return mapping[source] || source;
+}
+
+/**
+ * Format cash sources array to a pill label
+ */
+export function formatCashPillLabel(sources: string[]): string {
+  if (sources.length === 0) {
+    return '';
+  }
+  if (sources.length === 1) {
+    return `Cash from ${formatCashSourceLabel(sources[0])}`;
+  }
+  // Multiple sources: use generic label
+  return 'Cash from throttling';
+}
+
+/**
  * Summarize changes between two GhostRegime rows
  * Returns a compact string summary, or null if no changes
  */

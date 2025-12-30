@@ -92,6 +92,13 @@ export const LEGEND_DELTA = 'Δ since last: Change in key metrics compared to th
 // View receipts
 export const VIEW_RECEIPTS_LINK = 'View receipts →';
 
+// Compare panel
+export const COMPARE_LINK_LABEL = 'Compare to previous';
+export const COMPARE_PANEL_TITLE = 'Compare:';
+export const COMPARE_DISABLED_TOOLTIP = 'Need at least 2 snapshots to compare.';
+export const COMPARE_REGIME_UNCHANGED = 'unchanged';
+export const ACTIONABLE_CASH_PILL_TOOLTIP = 'Cash is leftover because exposure was reduced (throttled). Not cash "held in" the asset.';
+
 // Snapshot viewing
 export const VIEWING_SNAPSHOT_LABEL = 'Viewing snapshot:';
 export const VIEWING_SNAPSHOT_TOOLTIP = 'You are viewing a historical snapshot, not the latest data.';

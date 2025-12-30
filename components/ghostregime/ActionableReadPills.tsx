@@ -12,7 +12,9 @@ import {
   REGIME_CONFIDENCE_TOOLTIP,
   REGIME_CONVICTION_TOOLTIP,
   CROWDED_TOOLTIP,
+  ACTIONABLE_CASH_PILL_TOOLTIP,
 } from '@/lib/ghostregime/ghostregimePageCopy';
+import { formatCashPillLabel } from '@/lib/ghostregime/ui';
 
 interface ActionableReadPillsProps {
   regime: string;
@@ -79,7 +81,10 @@ export function ActionableReadPills({
   
   // 7) Cash source
   if (cashSources.length > 0) {
-    pills.push({ label: `Cash: ${cashSources.join(', ')}` });
+    pills.push({ 
+      label: formatCashPillLabel(cashSources),
+      tooltip: ACTIONABLE_CASH_PILL_TOOLTIP,
+    });
   }
   
   if (pills.length === 0) {
@@ -90,7 +95,7 @@ export function ActionableReadPills({
     <div className="flex flex-wrap items-center gap-1.5">
       {pills.map((pill, idx) => {
         const content = (
-          <span className="px-2 py-0.5 rounded border border-amber-400/15 bg-amber-400/3 text-amber-300/70 text-[10px]">
+          <span className="px-2.5 py-1 rounded border border-amber-400/15 bg-amber-400/3 text-amber-300/70 text-xs">
             {pill.label}
           </span>
         );

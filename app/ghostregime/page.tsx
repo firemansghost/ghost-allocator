@@ -14,6 +14,7 @@ import { AgreementChipStrip } from '@/components/ghostregime/AgreementChipStrip'
 import { AxisStatsBlock } from '@/components/ghostregime/AxisStatsBlock';
 import { ActionableReadPills } from '@/components/ghostregime/ActionableReadPills';
 import { ReceiptsFilterToggle } from '@/components/ghostregime/ReceiptsFilterToggle';
+import { ComparePanel } from '@/components/ghostregime/ComparePanel';
 import type { GhostRegimeRow } from '@/lib/ghostregime/types';
 import {
   formatBucketUtilizationLine,
@@ -96,6 +97,8 @@ import {
   COPY_LINK_BUTTON,
   COPY_LINK_COPIED,
   BACK_TO_LATEST_LINK,
+  COMPARE_LINK_LABEL,
+  COMPARE_DISABLED_TOOLTIP,
 } from '@/lib/ghostregime/ghostregimePageCopy';
 import Link from 'next/link';
 
@@ -131,6 +134,8 @@ function GhostRegimePageContent() {
   const [linkCopied, setLinkCopied] = useState(false);
   const [viewingSnapshot, setViewingSnapshot] = useState<string | null>(null);
   const [asofError, setAsofError] = useState<string | null>(null);
+  const [showCompare, setShowCompare] = useState(false);
+  const [prevRow, setPrevRow] = useState<GhostRegimeRow | null>(null);
 
   // Parse asof param on mount and when searchParams change
   useEffect(() => {
@@ -535,6 +540,25 @@ function GhostRegimePageContent() {
           >
             {linkCopied ? COPY_LINK_COPIED : COPY_LINK_BUTTON}
           </button>
+          {/* Compare to previous link */}
+          {prevRow ? (
+            <button
+              onClick={() => setShowCompare(!showCompare)}
+              className="px-2 py-1 text-[10px] rounded border border-zinc-700 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800 hover:border-zinc-600 transition-colors"
+            >
+              {COMPARE_LINK_LABEL}
+            </button>
+          ) : (
+            <Tooltip content={COMPARE_DISABLED_TOOLTIP}>
+              <button
+                disabled
+                className="px-2 py-1 text-[10px] rounded border border-zinc-800 bg-zinc-900/30 text-zinc-600 cursor-not-allowed"
+                aria-label={COMPARE_DISABLED_TOOLTIP}
+              >
+                {COMPARE_LINK_LABEL}
+              </button>
+            </Tooltip>
+          )}
         </div>
       </div>
 
@@ -663,6 +687,18 @@ function GhostRegimePageContent() {
               </div>
             ) : null;
           })()}
+          
+          {/* Compare Panel */}
+          {showCompare && prevRow && (
+            <div className="mt-3">
+              <ComparePanel
+                currentRow={data}
+                prevRow={prevRow}
+                currentAsOf={data.date}
+                prevAsOf={prevRow.date}
+              />
+            </div>
+          )}
         </div>
       )}
 
