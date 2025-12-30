@@ -660,6 +660,82 @@ export function deriveVotedLabel(
 }
 
 /**
+ * Sanitize receipt note by removing trailing direction parentheticals
+ * Removes patterns like "(Inflation)", "(Disinflation)", "(RiskOn)", "(RiskOff)", etc.
+ */
+export function sanitizeReceiptNote(note?: string): string {
+  if (!note) return '';
+  
+  let sanitized = note.trim();
+  
+  // Remove trailing direction parentheticals (case-insensitive)
+  const directionPatterns = [
+    /\s*\(Inflation\)\s*$/i,
+    /\s*\(Disinflation\)\s*$/i,
+    /\s*\(RiskOn\)\s*$/i,
+    /\s*\(Risk Off\)\s*$/i,
+    /\s*\(Risk\s+On\)\s*$/i,
+    /\s*\(Risk\s+Off\)\s*$/i,
+  ];
+  
+  for (const pattern of directionPatterns) {
+    sanitized = sanitized.replace(pattern, '');
+  }
+  
+  return sanitized.trim();
+}
+
+/**
+ * Compute overall regime conviction index from Risk and Inflation conviction indices
+ * Returns average if both exist, single value if only one exists, null otherwise
+ */
+export function computeRegimeConvictionIndex(
+  riskIndex: number | null | undefined,
+  inflIndex: number | null | undefined
+): number | null {
+  if (riskIndex !== null && riskIndex !== undefined && inflIndex !== null && inflIndex !== undefined) {
+    return Math.round((riskIndex + inflIndex) / 2);
+  }
+  if (riskIndex !== null && riskIndex !== undefined) {
+    return riskIndex;
+  }
+  if (inflIndex !== null && inflIndex !== undefined) {
+    return inflIndex;
+  }
+  return null;
+}
+
+/**
+ * Compute overall regime confidence label from Risk and Inflation confidence labels
+ * Returns the LOWER of the two (High > Medium > Low), or single value if only one exists
+ */
+export function computeRegimeConfidenceLabel(
+  riskLabel: string | null | undefined,
+  inflLabel: string | null | undefined
+): string | null {
+  const labels = ['High', 'Medium', 'Low', 'n/a'];
+  const getPriority = (label: string | null | undefined): number => {
+    if (!label) return 999;
+    const idx = labels.indexOf(label);
+    return idx === -1 ? 999 : idx;
+  };
+  
+  const riskPriority = getPriority(riskLabel);
+  const inflPriority = getPriority(inflLabel);
+  
+  if (riskPriority === 999 && inflPriority === 999) {
+    return null;
+  }
+  
+  // Return the one with higher priority (lower index = higher confidence)
+  if (riskPriority === 999) return inflLabel ?? null;
+  if (inflPriority === 999) return riskLabel ?? null;
+  
+  // Return the lower confidence (higher priority number)
+  return (riskPriority > inflPriority ? riskLabel : inflLabel) ?? null;
+}
+
+/**
  * Compute agreement delta between two rows
  * Returns trend lines for Risk and Inflation axes if both rows have receipts
  */

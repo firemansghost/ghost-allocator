@@ -60,3 +60,10 @@ export const CONVICTION_LABEL_PREFIX = 'Conviction:';
 export const CONVICTION_TOOLTIP = 'Strength of the axis score per available signals. Not a probability or forecast.';
 export const CONVICTION_TOOLTIP_NA = 'Conviction is unavailable when the axis score or signal count is missing.';
 
+// Regime Summary
+export const REGIME_SUMMARY_TITLE = 'Regime Summary';
+export const REGIME_CONVICTION_LABEL_PREFIX = 'Regime Conviction:';
+export const REGIME_CONVICTION_TOOLTIP = 'Combined strength of today\'s Risk + Inflation signals. Not a forecast.';
+export const REGIME_CONFIDENCE_LABEL_PREFIX = 'Regime Confidence:';
+export const REGIME_CONFIDENCE_TOOLTIP = 'Heuristic from signal agreement + coverage. Not a probability.';
+
