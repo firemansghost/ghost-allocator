@@ -1104,6 +1104,44 @@ export function buildCopySnapshotText(
 }
 
 /**
+ * Parse and validate asof query parameter
+ */
+export function parseAsOfParam(param: string | null): { asof: string | null; error?: string } {
+  if (!param) {
+    return { asof: null };
+  }
+  
+  // Must match YYYY-MM-DD format
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(param)) {
+    return { asof: null, error: 'Invalid as-of date — showing latest.' };
+  }
+  
+  // Validate it's a real calendar date
+  const date = new Date(param + 'T00:00:00');
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const reconstructed = `${year}-${month}-${day}`;
+  
+  if (reconstructed !== param || isNaN(date.getTime())) {
+    return { asof: null, error: 'Invalid as-of date — showing latest.' };
+  }
+  
+  return { asof: param };
+}
+
+/**
+ * Build shareable URL with asof parameter
+ */
+export function buildShareUrl(asof: string | null, baseUrl?: string): string {
+  const base = baseUrl || (typeof window !== 'undefined' ? window.location.origin + window.location.pathname : '');
+  if (!asof) {
+    return base;
+  }
+  return `${base}?asof=${asof}`;
+}
+
+/**
  * Compute agreement delta between two rows
  * Returns trend lines for Risk and Inflation axes if both rows have receipts
  */

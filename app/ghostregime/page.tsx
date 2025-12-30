@@ -5,7 +5,8 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { GlassCard } from '@/components/GlassCard';
 import { Tooltip } from '@/components/Tooltip';
 import { AllocationBar } from '@/components/AllocationBar';
@@ -45,6 +46,8 @@ import {
   buildActionableReadLine,
   computeAxisStatDeltas,
   buildCopySnapshotText,
+  parseAsOfParam,
+  buildShareUrl,
 } from '@/lib/ghostregime/ui';
 import {
   WHY_REGIME_TITLE,
@@ -86,6 +89,13 @@ import {
   LEGEND_NET_VOTE,
   LEGEND_DELTA,
   VIEW_RECEIPTS_LINK,
+  VIEWING_SNAPSHOT_LABEL,
+  VIEWING_SNAPSHOT_TOOLTIP,
+  ASOF_INVALID_FALLBACK_HINT,
+  ASOF_NOT_FOUND_FALLBACK_HINT,
+  COPY_LINK_BUTTON,
+  COPY_LINK_COPIED,
+  BACK_TO_LATEST_LINK,
 } from '@/lib/ghostregime/ghostregimePageCopy';
 import Link from 'next/link';
 
@@ -102,7 +112,9 @@ interface HealthStatus {
   message?: string;
 }
 
-export default function GhostRegimePage() {
+function GhostRegimePageContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [data, setData] = useState<GhostRegimeRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -116,21 +128,83 @@ export default function GhostRegimePage() {
   const [showNeutralRisk, setShowNeutralRisk] = useState<'active' | 'all'>('active');
   const [showNeutralInfl, setShowNeutralInfl] = useState<'active' | 'all'>('active');
   const [copied, setCopied] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
+  const [viewingSnapshot, setViewingSnapshot] = useState<string | null>(null);
+  const [asofError, setAsofError] = useState<string | null>(null);
+
+  // Parse asof param on mount and when searchParams change
+  useEffect(() => {
+    const asofParam = searchParams.get('asof');
+    const { asof, error } = parseAsOfParam(asofParam);
+    
+    if (error) {
+      setAsofError(error);
+      setViewingSnapshot(null);
+    } else if (asof) {
+      setAsofError(null);
+      setViewingSnapshot(asof);
+    } else {
+      setAsofError(null);
+      setViewingSnapshot(null);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        // Fetch both today's data and health status
-        const [todayResponse, healthResponse] = await Promise.all([
-          fetch('/api/ghostregime/today'),
-          fetch('/api/ghostregime/health'),
-        ]);
+        // Check if we need to load a specific snapshot
+        const asofParam = searchParams.get('asof');
+        const { asof } = parseAsOfParam(asofParam);
         
-        // Handle health status
+        // Fetch health status
+        const healthResponse = await fetch('/api/ghostregime/health');
         if (healthResponse.ok) {
           const health = await healthResponse.json();
           setHealthStatus(health);
         }
+        
+        // If asof is specified, try to load from history first
+        if (asof) {
+          // Fetch history with wider lookback to find the snapshot
+          const startDateObj = new Date(asof);
+          startDateObj.setDate(startDateObj.getDate() - 30); // 30 days back
+          const startDate = startDateObj.toISOString().split('T')[0];
+          const endDateObj = new Date(asof);
+          endDateObj.setDate(endDateObj.getDate() + 1); // Include the asof date
+          const endDate = endDateObj.toISOString().split('T')[0];
+          
+          try {
+            const historyResponse = await fetch(
+              `/api/ghostregime/history?startDate=${startDate}&endDate=${endDate}`,
+              { cache: 'no-store' }
+            );
+            
+            if (historyResponse.ok) {
+              const history: GhostRegimeRow[] = await historyResponse.json();
+              const snapshotRow = history.find(row => row.date === asof);
+              
+              if (snapshotRow) {
+                setData(snapshotRow);
+                setViewingSnapshot(asof);
+                setAsofError(null);
+                setLoading(false);
+                return;
+              } else {
+                // Snapshot not found, fall back to latest
+                setAsofError(ASOF_NOT_FOUND_FALLBACK_HINT.replace('{date}', asof));
+                setViewingSnapshot(null);
+                // Continue to fetch latest below
+              }
+            }
+          } catch (err) {
+            // History fetch failed, fall back to latest
+            setAsofError(ASOF_NOT_FOUND_FALLBACK_HINT.replace('{date}', asof));
+            setViewingSnapshot(null);
+          }
+        }
+        
+        // Fetch latest data (either as fallback or default)
+        const todayResponse = await fetch('/api/ghostregime/today');
         
         // Handle today's data
         if (todayResponse.status === 503) {
@@ -153,6 +227,9 @@ export default function GhostRegimePage() {
 
         const row = await todayResponse.json();
         setData(row);
+        if (!asof) {
+          setViewingSnapshot(null);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
@@ -161,7 +238,7 @@ export default function GhostRegimePage() {
     }
 
     fetchData();
-  }, []);
+  }, [searchParams]);
 
   // Fetch history for "what changed" summary
   useEffect(() => {
@@ -191,10 +268,22 @@ export default function GhostRegimePage() {
         const history: GhostRegimeRow[] = await response.json();
         
         // Get last 2 valid rows (sorted by date descending)
-        const validRows = history
+        // If viewing snapshot, find the row before the snapshot
+        let validRows = history
           .filter((row) => !row.stale && row.date)
-          .sort((a, b) => b.date.localeCompare(a.date))
-          .slice(0, 2);
+          .sort((a, b) => b.date.localeCompare(a.date));
+        
+        if (viewingSnapshot) {
+          // Find the snapshot row and the one before it
+          const snapshotIdx = validRows.findIndex(row => row.date === viewingSnapshot);
+          if (snapshotIdx >= 0 && snapshotIdx + 1 < validRows.length) {
+            validRows = [validRows[snapshotIdx], validRows[snapshotIdx + 1]];
+          } else {
+            validRows = validRows.slice(0, 2);
+          }
+        } else {
+          validRows = validRows.slice(0, 2);
+        }
 
         if (validRows.length >= 2) {
           setHistoryAvailable(true);
@@ -228,7 +317,7 @@ export default function GhostRegimePage() {
     }
 
     fetchHistory();
-  }, [data]);
+  }, [data, viewingSnapshot]);
 
   if (notSeeded) {
     return (
@@ -356,23 +445,97 @@ export default function GhostRegimePage() {
       </div>
 
       {/* Timestamp & Stale Indicator */}
-      <div className="flex items-center gap-4 text-xs text-zinc-400">
-        <span>As of {formatDate(data.date)}</span>
-        {isStaleOrOld && (
-          <span className="inline-flex items-center gap-1 px-2 py-1 rounded border border-amber-400/30 bg-amber-400/10 text-amber-300">
-            <span>⚠️</span>
-            <span>Stale data</span>
-            {healthStatus?.freshness && !healthStatus.freshness.is_fresh && (
-              <span className="text-[10px]">({healthStatus.freshness.age_days} days old)</span>
-            )}
-          </span>
-        )}
-        {!isStaleOrOld && healthStatus?.status === 'OK' && (
-          <span className="inline-flex items-center gap-1 text-green-400">
-            <span>✓</span>
-            <span>Fresh</span>
-          </span>
-        )}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex items-center gap-4 text-xs text-zinc-400 flex-wrap">
+          <span>As of {formatDate(data.date)}</span>
+          {viewingSnapshot && (
+            <Tooltip content={VIEWING_SNAPSHOT_TOOLTIP}>
+              <span className="inline-flex items-center gap-1 px-2 py-1 rounded border border-amber-400/20 bg-amber-400/5 text-amber-300/80">
+                <span>{VIEWING_SNAPSHOT_LABEL}</span>
+                <span className="font-mono">{viewingSnapshot}</span>
+              </span>
+            </Tooltip>
+          )}
+          {!viewingSnapshot && isStaleOrOld && (
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded border border-amber-400/30 bg-amber-400/10 text-amber-300">
+              <span>⚠️</span>
+              <span>Stale data</span>
+              {healthStatus?.freshness && !healthStatus.freshness.is_fresh && (
+                <span className="text-[10px]">({healthStatus.freshness.age_days} days old)</span>
+              )}
+            </span>
+          )}
+          {!viewingSnapshot && !isStaleOrOld && healthStatus?.status === 'OK' && (
+            <span className="inline-flex items-center gap-1 text-green-400">
+              <span>✓</span>
+              <span>Fresh</span>
+            </span>
+          )}
+          {viewingSnapshot && (
+            <span className="inline-flex items-center gap-1 text-zinc-500">
+              <span>Snapshot</span>
+            </span>
+          )}
+          {asofError && (
+            <span className="text-[10px] text-amber-400/80 italic">{asofError}</span>
+          )}
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Date Picker */}
+          <input
+            type="date"
+            value={viewingSnapshot || data.date}
+            max={data.date}
+            onChange={(e) => {
+              const selectedDate = e.target.value;
+              if (selectedDate) {
+                router.push(`/ghostregime?asof=${selectedDate}`);
+              }
+            }}
+            className="px-2 py-1 text-[10px] rounded border border-zinc-700 bg-zinc-900/50 text-zinc-300 focus:outline-none focus:ring-1 focus:ring-amber-400/50"
+          />
+          {/* Back to latest link */}
+          {viewingSnapshot && (
+            <button
+              onClick={() => router.push('/ghostregime')}
+              className="text-[10px] text-amber-400 hover:text-amber-300 underline-offset-2 hover:underline"
+            >
+              {BACK_TO_LATEST_LINK}
+            </button>
+          )}
+          {/* Copy link button */}
+          <button
+            onClick={async () => {
+              const asofDate = viewingSnapshot || data.date;
+              const shareUrl = buildShareUrl(asofDate);
+              try {
+                await navigator.clipboard.writeText(shareUrl);
+                setLinkCopied(true);
+                setTimeout(() => setLinkCopied(false), 1500);
+              } catch (err) {
+                // Fallback for older browsers
+                const textarea = document.createElement('textarea');
+                textarea.value = shareUrl;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                  document.execCommand('copy');
+                  setLinkCopied(true);
+                  setTimeout(() => setLinkCopied(false), 1500);
+                } catch (e) {
+                  // Ignore
+                }
+                document.body.removeChild(textarea);
+              }
+            }}
+            className="px-2 py-1 text-[10px] rounded border border-zinc-700 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800 hover:border-zinc-600 transition-colors"
+            aria-label={linkCopied ? COPY_LINK_COPIED : COPY_LINK_BUTTON}
+          >
+            {linkCopied ? COPY_LINK_COPIED : COPY_LINK_BUTTON}
+          </button>
+        </div>
       </div>
 
       {/* Today's Snapshot */}
@@ -1523,6 +1686,21 @@ export default function GhostRegimePage() {
         </Link>
       </div>
     </div>
+  );
+}
+
+export default function GhostRegimePage() {
+  return (
+    <Suspense fallback={
+      <div className="space-y-6">
+        <header className="space-y-2">
+          <h1 className="text-2xl font-semibold tracking-tight">GhostRegime</h1>
+          <p className="text-sm text-zinc-300">Loading...</p>
+        </header>
+      </div>
+    }>
+      <GhostRegimePageContent />
+    </Suspense>
   );
 }
 

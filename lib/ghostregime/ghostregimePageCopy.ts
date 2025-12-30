@@ -92,3 +92,12 @@ export const LEGEND_DELTA = 'Δ since last: Change in key metrics compared to th
 // View receipts
 export const VIEW_RECEIPTS_LINK = 'View receipts →';
 
+// Snapshot viewing
+export const VIEWING_SNAPSHOT_LABEL = 'Viewing snapshot:';
+export const VIEWING_SNAPSHOT_TOOLTIP = 'You are viewing a historical snapshot, not the latest data.';
+export const ASOF_INVALID_FALLBACK_HINT = 'Invalid as-of date — showing latest.';
+export const ASOF_NOT_FOUND_FALLBACK_HINT = 'No snapshot found for {date} — showing latest.';
+export const COPY_LINK_BUTTON = 'Copy link';
+export const COPY_LINK_COPIED = 'Copied';
+export const BACK_TO_LATEST_LINK = 'Back to latest';
+
