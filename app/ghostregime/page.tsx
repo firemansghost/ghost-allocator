@@ -359,15 +359,30 @@ export default function GhostRegimePage() {
           <GlassCard className="p-6">
             <h2 className="text-sm font-semibold text-zinc-50 mb-4">Regime Map</h2>
             <div className="space-y-3">
-              {/* Axis labels */}
-              <div className="grid grid-cols-3 gap-1 text-[10px] text-zinc-500 mb-2">
-                <div className="text-center"></div>
-                <div className="text-center flex items-center justify-center gap-1">
-                  <span>Risk Off</span>
-                  <span>←→</span>
-                  <span>Risk On</span>
+              {/* X-axis labels */}
+              <div className="grid grid-cols-3 gap-1">
+                <div></div>
+                <div className="relative flex items-center justify-between text-[10px] text-zinc-500 pb-2">
+                  {/* Left label: Risk Off ← */}
+                  <Tooltip content="X-axis: Risk Off left, Risk On right">
+                    <div className="flex items-center gap-1">
+                      <span>Risk Off</span>
+                      <span className="text-xs">←</span>
+                    </div>
+                  </Tooltip>
+                  
+                  {/* Horizontal guide line */}
+                  <div className="absolute left-0 right-0 bottom-0 h-px bg-zinc-700/50" />
+                  
+                  {/* Right label: Risk On → */}
+                  <Tooltip content="X-axis: Risk Off left, Risk On right">
+                    <div className="flex items-center gap-1">
+                      <span>Risk On</span>
+                      <span className="text-xs">→</span>
+                    </div>
+                  </Tooltip>
                 </div>
-                <div className="text-center"></div>
+                <div></div>
               </div>
               
               <div className="grid grid-cols-3 gap-1">
