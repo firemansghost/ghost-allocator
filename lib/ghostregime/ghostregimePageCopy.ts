@@ -66,4 +66,8 @@ export const REGIME_CONVICTION_LABEL_PREFIX = 'Regime Conviction:';
 export const REGIME_CONVICTION_TOOLTIP = 'Combined strength of today\'s Risk + Inflation signals. Not a forecast.';
 export const REGIME_CONFIDENCE_LABEL_PREFIX = 'Regime Confidence:';
 export const REGIME_CONFIDENCE_TOOLTIP = 'Heuristic from signal agreement + coverage. Not a probability.';
+export const PRIMARY_DRIVER_PREFIX = 'Primary driver:';
+export const PRIMARY_DRIVER_TOOLTIP = 'Which axis (Risk or Inflation) has the stronger signal today.';
+export const FLIPWATCH_PILL_TOOLTIP = 'Flip Watch reduces whipsaw by waiting for confirmation.';
+export const ACTIONABLE_READ_PREFIX = 'Actionable read:';
 

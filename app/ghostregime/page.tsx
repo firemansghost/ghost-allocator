@@ -33,8 +33,13 @@ import {
   deriveVotedLabel,
   computeConviction,
   sanitizeReceiptNote,
+  splitReceiptNote,
   computeRegimeConvictionIndex,
   computeRegimeConfidenceLabel,
+  computePrimaryDriver,
+  formatFlipWatchLabel,
+  computeAxisNetVote,
+  buildActionableReadLine,
 } from '@/lib/ghostregime/ui';
 import {
   WHY_REGIME_TITLE,
@@ -58,6 +63,10 @@ import {
   REGIME_CONVICTION_TOOLTIP,
   REGIME_CONFIDENCE_LABEL_PREFIX,
   REGIME_CONFIDENCE_TOOLTIP,
+  PRIMARY_DRIVER_PREFIX,
+  PRIMARY_DRIVER_TOOLTIP,
+  FLIPWATCH_PILL_TOOLTIP,
+  ACTIONABLE_READ_PREFIX,
 } from '@/lib/ghostregime/ghostregimePageCopy';
 import Link from 'next/link';
 
@@ -346,8 +355,39 @@ export default function GhostRegimePage() {
 
       {/* Today's Snapshot */}
       {buildTodaySnapshotLine(data) && (
-        <div className="text-sm text-zinc-300 leading-relaxed">
-          {buildTodaySnapshotLine(data)}
+        <div className="space-y-1">
+          <div className="text-sm text-zinc-300 leading-relaxed">
+            {buildTodaySnapshotLine(data)}
+          </div>
+          {(() => {
+            const riskAxisDirection = data.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
+            const riskStats = computeAxisStats(data.risk_receipts, riskAxisDirection);
+            const riskConviction = computeConviction(data.risk_score, riskStats.totalSignals);
+            const inflAxis = data.infl_axis === 'Inflation' ? 'Inflation' : 'Disinflation';
+            const inflStats = computeAxisStats(data.inflation_receipts, inflAxis);
+            const inflConviction = computeConviction(data.infl_score, inflStats.totalSignals);
+            const regimeConvictionIndex = computeRegimeConvictionIndex(riskConviction.index, inflConviction.index);
+            const regimeConfidenceLabel = computeRegimeConfidenceLabel(riskStats.confidence.label, inflStats.confidence.label);
+            const cashSources = getCashSources(data);
+            
+            const actionableRead = buildActionableReadLine({
+              regime: data.regime,
+              risk_regime: data.risk_regime,
+              infl_axis: data.infl_axis,
+              regimeConfidenceLabel,
+              regimeConvictionIndex,
+              cashPct: data.cash,
+              cashSources,
+              btcScale: data.btc_scale,
+              flipWatch: data.flip_watch_status,
+            });
+            
+            return actionableRead ? (
+              <div className="text-xs text-zinc-400 leading-relaxed">
+                <span className="font-medium text-zinc-300">{ACTIONABLE_READ_PREFIX}</span> {actionableRead}
+              </div>
+            ) : null;
+          })()}
         </div>
       )}
 
@@ -572,7 +612,12 @@ export default function GhostRegimePage() {
                   )}
                   {riskSeries.length >= 2 && (
                     <div className="mt-1">
-                      <AgreementChipStrip items={riskSeries} label={AGREEMENT_HISTORY_LABEL} />
+                      <AgreementChipStrip 
+                        items={riskSeries} 
+                        label={AGREEMENT_HISTORY_LABEL} 
+                        axisName="Risk"
+                        showLegend={true}
+                      />
                     </div>
                   )}
                 </div>
@@ -607,7 +652,12 @@ export default function GhostRegimePage() {
                   )}
                   {inflSeries.length >= 2 && (
                     <div className="mt-1">
-                      <AgreementChipStrip items={inflSeries} label={AGREEMENT_HISTORY_LABEL} />
+                      <AgreementChipStrip 
+                        items={inflSeries} 
+                        label={AGREEMENT_HISTORY_LABEL} 
+                        axisName="Inflation"
+                        showLegend={true}
+                      />
                     </div>
                   )}
                 </div>
@@ -671,19 +721,27 @@ export default function GhostRegimePage() {
                         );
                       })()}
                     </div>
+                    {data.risk_receipts && data.risk_receipts.length > 0 && (() => {
+                      const netVote = computeAxisNetVote(data.risk_receipts, 'risk');
+                      return (
+                        <p className="text-[10px] text-zinc-500 mb-2">
+                          Net vote: {netVote.label}
+                        </p>
+                      );
+                    })()}
                     {riskDrivers.length > 0 ? (
                       <ul className="space-y-1.5 text-xs text-zinc-300">
                         {riskDrivers.map((driver, idx) => {
-                          const sanitizedNote = sanitizeReceiptNote(driver.note);
+                          const { rule } = splitReceiptNote(driver.note);
                           return (
                             <li key={idx} className="space-y-0.5">
                               <div className="flex items-center gap-2">
                                 <span className="text-amber-300">→</span>
                                 <span>{formatDriverLine(driver)}</span>
                               </div>
-                              {sanitizedNote && (
+                              {rule && (
                                 <p className="text-[10px] text-zinc-500 italic ml-5">
-                                  Rule: {sanitizedNote}
+                                  Rule: {rule}
                                 </p>
                               )}
                             </li>
@@ -713,19 +771,27 @@ export default function GhostRegimePage() {
                         );
                       })()}
                     </div>
+                    {data.inflation_receipts && data.inflation_receipts.length > 0 && (() => {
+                      const netVote = computeAxisNetVote(data.inflation_receipts, 'inflation');
+                      return (
+                        <p className="text-[10px] text-zinc-500 mb-2">
+                          Net vote: {netVote.label}
+                        </p>
+                      );
+                    })()}
                     {inflationDrivers.length > 0 ? (
                       <ul className="space-y-1.5 text-xs text-zinc-300">
                         {inflationDrivers.map((driver, idx) => {
-                          const sanitizedNote = sanitizeReceiptNote(driver.note);
+                          const { rule } = splitReceiptNote(driver.note);
                           return (
                             <li key={idx} className="space-y-0.5">
                               <div className="flex items-center gap-2">
                                 <span className="text-amber-300">→</span>
                                 <span>{formatDriverLine(driver)}</span>
                               </div>
-                              {sanitizedNote && (
+                              {rule && (
                                 <p className="text-[10px] text-zinc-500 italic ml-5">
-                                  Rule: {sanitizedNote}
+                                  Rule: {rule}
                                 </p>
                               )}
                             </li>
@@ -787,6 +853,9 @@ export default function GhostRegimePage() {
           
           const regimeConvictionIndex = computeRegimeConvictionIndex(riskConviction.index, inflConviction.index);
           const regimeConfidenceLabel = computeRegimeConfidenceLabel(riskStats.confidence.label, inflStats.confidence.label);
+          const primaryDriver = computePrimaryDriver(data.risk_score, data.infl_score);
+          const flipWatchLabel = formatFlipWatchLabel(data.flip_watch_status);
+          const hasFlipWatch = data.flip_watch_status && data.flip_watch_status !== 'NONE';
           
           return (
             <GlassCard className="p-6">
@@ -810,6 +879,26 @@ export default function GhostRegimePage() {
                     </Tooltip>
                   </div>
                 )}
+                {primaryDriver.label !== 'n/a' && (
+                  <div>
+                    <Tooltip content={PRIMARY_DRIVER_TOOLTIP}>
+                      <span className="px-2 py-0.5 rounded border border-amber-400/20 bg-amber-400/5 text-amber-300/80 text-xs">
+                        {PRIMARY_DRIVER_PREFIX} {primaryDriver.label}
+                      </span>
+                    </Tooltip>
+                  </div>
+                )}
+                <div>
+                  <Tooltip content={FLIPWATCH_PILL_TOOLTIP}>
+                    <span className={`px-2 py-0.5 rounded border text-xs ${
+                      hasFlipWatch
+                        ? 'border-amber-400/30 bg-amber-400/10 text-amber-300/80'
+                        : 'border-zinc-700/50 bg-zinc-900/30 text-zinc-500'
+                    }`}>
+                      Flip Watch: {flipWatchLabel}
+                    </span>
+                  </Tooltip>
+                </div>
               </div>
             </GlassCard>
           );
@@ -1155,23 +1244,32 @@ export default function GhostRegimePage() {
                               <th className="text-right py-1 px-2 text-zinc-400 font-medium">Vote</th>
                               <th className="text-left py-1 px-2 text-zinc-400 font-medium">Voted</th>
                               {data.risk_receipts?.some(r => r.note) && (
-                                <th className="text-left py-1 px-2 text-zinc-400 font-medium">Note</th>
+                                <>
+                                  <th className="text-left py-1 px-2 text-zinc-400 font-medium">Rule</th>
+                                  <th className="text-left py-1 px-2 text-zinc-400 font-medium">Meta</th>
+                                </>
                               )}
                             </tr>
                           </thead>
                           <tbody>
-                            {data.risk_receipts?.map((receipt, idx) => (
-                              <tr key={idx} className="border-b border-zinc-900/50">
-                                <td className="py-1 px-2 text-zinc-300">{receipt.label}</td>
-                                <td className="py-1 px-2 text-right text-zinc-200 font-mono">
-                                  {formatSignedNumber(receipt.vote)}
-                                </td>
-                                <td className="py-1 px-2 text-zinc-400">{deriveVotedLabel(receipt.vote, 'risk')}</td>
-                                {data.risk_receipts?.some(r => r.note) && (
-                                  <td className="py-1 px-2 text-zinc-400 text-[10px]">{sanitizeReceiptNote(receipt.note)}</td>
-                                )}
-                              </tr>
-                            ))}
+                            {data.risk_receipts?.map((receipt, idx) => {
+                              const { rule, meta } = splitReceiptNote(receipt.note);
+                              return (
+                                <tr key={idx} className="border-b border-zinc-900/50">
+                                  <td className="py-1 px-2 text-zinc-300">{receipt.label}</td>
+                                  <td className="py-1 px-2 text-right text-zinc-200 font-mono">
+                                    {formatSignedNumber(receipt.vote)}
+                                  </td>
+                                  <td className="py-1 px-2 text-zinc-400">{deriveVotedLabel(receipt.vote, 'risk')}</td>
+                                  {data.risk_receipts?.some(r => r.note) && (
+                                    <>
+                                      <td className="py-1 px-2 text-zinc-400 text-[10px]">{rule || ''}</td>
+                                      <td className="py-1 px-2 text-zinc-400 text-[10px]">{meta || ''}</td>
+                                    </>
+                                  )}
+                                </tr>
+                              );
+                            })}
                           </tbody>
                         </table>
                       </div>
@@ -1202,23 +1300,32 @@ export default function GhostRegimePage() {
                               <th className="text-right py-1 px-2 text-zinc-400 font-medium">Vote</th>
                               <th className="text-left py-1 px-2 text-zinc-400 font-medium">Voted</th>
                               {data.inflation_receipts?.some(r => r.note) && (
-                                <th className="text-left py-1 px-2 text-zinc-400 font-medium">Note</th>
+                                <>
+                                  <th className="text-left py-1 px-2 text-zinc-400 font-medium">Rule</th>
+                                  <th className="text-left py-1 px-2 text-zinc-400 font-medium">Meta</th>
+                                </>
                               )}
                             </tr>
                           </thead>
                           <tbody>
-                            {data.inflation_receipts?.map((receipt, idx) => (
-                              <tr key={idx} className="border-b border-zinc-900/50">
-                                <td className="py-1 px-2 text-zinc-300">{receipt.label}</td>
-                                <td className="py-1 px-2 text-right text-zinc-200 font-mono">
-                                  {formatSignedNumber(receipt.vote)}
-                                </td>
-                                <td className="py-1 px-2 text-zinc-400">{deriveVotedLabel(receipt.vote, 'inflation')}</td>
-                                {data.inflation_receipts?.some(r => r.note) && (
-                                  <td className="py-1 px-2 text-zinc-400 text-[10px]">{sanitizeReceiptNote(receipt.note)}</td>
-                                )}
-                              </tr>
-                            ))}
+                            {data.inflation_receipts?.map((receipt, idx) => {
+                              const { rule, meta } = splitReceiptNote(receipt.note);
+                              return (
+                                <tr key={idx} className="border-b border-zinc-900/50">
+                                  <td className="py-1 px-2 text-zinc-300">{receipt.label}</td>
+                                  <td className="py-1 px-2 text-right text-zinc-200 font-mono">
+                                    {formatSignedNumber(receipt.vote)}
+                                  </td>
+                                  <td className="py-1 px-2 text-zinc-400">{deriveVotedLabel(receipt.vote, 'inflation')}</td>
+                                  {data.inflation_receipts?.some(r => r.note) && (
+                                    <>
+                                      <td className="py-1 px-2 text-zinc-400 text-[10px]">{rule || ''}</td>
+                                      <td className="py-1 px-2 text-zinc-400 text-[10px]">{meta || ''}</td>
+                                    </>
+                                  )}
+                                </tr>
+                              );
+                            })}
                           </tbody>
                         </table>
                       </div>

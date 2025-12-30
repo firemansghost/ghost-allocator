@@ -20,9 +20,17 @@ interface AgreementChipStripProps {
   label?: string;
   items: AgreementSeriesItem[];
   className?: string;
+  showLegend?: boolean;
+  axisName?: string; // e.g., "Risk" or "Inflation" for tooltip
 }
 
-export function AgreementChipStrip({ label, items, className = '' }: AgreementChipStripProps) {
+export function AgreementChipStrip({ 
+  label, 
+  items, 
+  className = '', 
+  showLegend = false,
+  axisName 
+}: AgreementChipStripProps) {
   // Don't render if less than 2 items (avoid visual noise)
   if (items.length < 2) {
     return null;
@@ -44,21 +52,33 @@ export function AgreementChipStrip({ label, items, className = '' }: AgreementCh
           // Border: slightly more visible for definition
           const borderOpacity = Math.max(0.3, fillIntensity * 0.6);
 
+          // Build enhanced tooltip
+          const tooltipParts: string[] = [];
+          if (axisName) {
+            tooltipParts.push(`${axisName} agreement`);
+          }
+          tooltipParts.push(item.date);
+          tooltipParts.push(`${item.agree}/${item.total} (${item.pct.toFixed(0)}%)`);
+          const tooltip = tooltipParts.join(' • ');
+
           return (
             <span
               key={`${item.date}-${idx}`}
-              title={item.label}
+              title={tooltip}
               className="w-3.5 h-2.5 rounded-sm border transition-all hover:opacity-100 hover:scale-110"
               style={{
                 backgroundColor: `rgba(251, 191, 36, ${bgOpacity})`, // amber-400
                 borderColor: `rgba(251, 191, 36, ${borderOpacity})`,
                 borderWidth: '1px',
               }}
-              aria-label={item.label}
+              aria-label={tooltip}
             />
           );
         })}
       </div>
+      {showLegend && (
+        <span className="text-[9px] text-zinc-600 ml-1">low → high</span>
+      )}
     </div>
   );
 }

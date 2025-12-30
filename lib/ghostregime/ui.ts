@@ -662,6 +662,7 @@ export function deriveVotedLabel(
 /**
  * Sanitize receipt note by removing trailing direction parentheticals
  * Removes patterns like "(Inflation)", "(Disinflation)", "(RiskOn)", "(RiskOff)", etc.
+ * Returns the "rule" portion only (thresholds/conditions).
  */
 export function sanitizeReceiptNote(note?: string): string {
   if (!note) return '';
@@ -682,7 +683,43 @@ export function sanitizeReceiptNote(note?: string): string {
     sanitized = sanitized.replace(pattern, '');
   }
   
+  // Remove meta portion (Age:, decay:) if present
+  const metaIndex = sanitized.search(/\s+Age:/i);
+  if (metaIndex > 0) {
+    sanitized = sanitized.substring(0, metaIndex);
+  }
+  
   return sanitized.trim();
+}
+
+/**
+ * Split receipt note into Rule (threshold/condition) and Meta (age/decay/etc)
+ */
+export function splitReceiptNote(note?: string): { rule: string; meta: string } {
+  if (!note) return { rule: '', meta: '' };
+  
+  const trimmed = note.trim();
+  
+  // Find meta portion (starts with "Age:" or contains "decay:")
+  const ageIndex = trimmed.search(/\s+Age:/i);
+  const decayIndex = trimmed.search(/\s+decay:/i);
+  
+  let rule = trimmed;
+  let meta = '';
+  
+  if (ageIndex > 0) {
+    rule = trimmed.substring(0, ageIndex).trim();
+    meta = trimmed.substring(ageIndex).trim();
+  } else if (decayIndex > 0) {
+    // If no Age: but has decay:, treat everything from decay: as meta
+    rule = trimmed.substring(0, decayIndex).trim();
+    meta = trimmed.substring(decayIndex).trim();
+  }
+  
+  // Sanitize rule (remove direction parentheticals)
+  rule = sanitizeReceiptNote(rule);
+  
+  return { rule, meta };
 }
 
 /**
@@ -733,6 +770,131 @@ export function computeRegimeConfidenceLabel(
   
   // Return the lower confidence (higher priority number)
   return (riskPriority > inflPriority ? riskLabel : inflLabel) ?? null;
+}
+
+/**
+ * Compute primary driver from Risk and Inflation scores
+ * Returns which axis has the stronger signal (by absolute value)
+ */
+export function computePrimaryDriver(
+  riskScore: number | null | undefined,
+  inflScore: number | null | undefined
+): { label: string; detail?: string } {
+  if (riskScore === null || riskScore === undefined || inflScore === null || inflScore === undefined) {
+    return { label: 'n/a' };
+  }
+  
+  const absRisk = Math.abs(riskScore);
+  const absInfl = Math.abs(inflScore);
+  
+  if (absRisk > absInfl) {
+    return { label: 'Risk', detail: `Risk score ${absRisk.toFixed(1)} vs Inflation ${absInfl.toFixed(1)}` };
+  } else if (absInfl > absRisk) {
+    return { label: 'Inflation', detail: `Inflation score ${absInfl.toFixed(1)} vs Risk ${absRisk.toFixed(1)}` };
+  } else {
+    return { label: 'Tie', detail: `Both scores ${absRisk.toFixed(1)}` };
+  }
+}
+
+/**
+ * Format Flip Watch status for display
+ */
+export function formatFlipWatchLabel(flipWatch: string | null | undefined): string {
+  if (!flipWatch || flipWatch === 'NONE') {
+    return 'off';
+  }
+  return flipWatch;
+}
+
+/**
+ * Format signed integer for display (e.g., +2, -1, 0)
+ */
+export function formatSignedInt(n: number): string {
+  if (n > 0) return `+${n}`;
+  if (n < 0) return `${n}`;
+  return '0';
+}
+
+/**
+ * Compute net vote (sum) for an axis from receipts
+ * Excludes zeros from label calculation but includes them in numeric sum
+ */
+export function computeAxisNetVote(
+  receipts: SignalReceipt[] | undefined,
+  axisType: 'risk' | 'inflation'
+): { net: number; label: string } {
+  if (!receipts || receipts.length === 0) {
+    return { net: 0, label: '0 (Neutral)' };
+  }
+  
+  // Sum all votes (including zeros)
+  const net = receipts.reduce((sum, r) => sum + r.vote, 0);
+  
+  if (net === 0) {
+    return { net: 0, label: '0 (Neutral)' };
+  }
+  
+  // Determine direction label based on axis type
+  let direction: string;
+  if (axisType === 'risk') {
+    direction = net > 0 ? 'Risk On' : 'Risk Off';
+  } else {
+    direction = net > 0 ? 'Inflation' : 'Disinflation';
+  }
+  
+  return { net, label: `${formatSignedInt(net)} (${direction})` };
+}
+
+/**
+ * Build actionable read line from current regime data
+ */
+export function buildActionableReadLine(params: {
+  regime: string;
+  risk_regime: string;
+  infl_axis: string;
+  regimeConfidenceLabel: string | null;
+  regimeConvictionIndex: number | null;
+  cashPct: number;
+  cashSources: string[];
+  btcScale: number;
+  flipWatch: string | null | undefined;
+}): string | null {
+  const parts: string[] = [];
+  
+  // Start with regime
+  const riskLabel = params.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
+  const inflLabel = params.infl_axis;
+  parts.push(`${params.regime} (${riskLabel} + ${inflLabel})`);
+  
+  // Add confidence + conviction
+  if (params.regimeConfidenceLabel) {
+    parts.push(`Confidence ${params.regimeConfidenceLabel}`);
+  }
+  if (params.regimeConvictionIndex !== null) {
+    parts.push(`Conviction ${params.regimeConvictionIndex}`);
+  }
+  
+  // Add BTC throttling
+  if (params.btcScale < 1) {
+    const scaleLabel = params.btcScale === 0.5 ? 'half size' : 'off';
+    parts.push(`BTC throttled (${scaleLabel})`);
+  }
+  
+  // Add cash from throttling
+  if (params.cashPct > 0.01 && params.cashSources.length > 0) {
+    parts.push(`Cash from throttling: ${params.cashSources.join(', ')}`);
+  }
+  
+  // Add Flip Watch
+  if (params.flipWatch && params.flipWatch !== 'NONE') {
+    parts.push(`Flip Watch: ON`);
+  }
+  
+  if (parts.length === 0) {
+    return null;
+  }
+  
+  return parts.join(' • ');
 }
 
 /**
