@@ -11,6 +11,8 @@ import { Tooltip } from '@/components/Tooltip';
 import { AllocationBar } from '@/components/AllocationBar';
 import { AgreementChipStrip } from '@/components/ghostregime/AgreementChipStrip';
 import { AxisStatsBlock } from '@/components/ghostregime/AxisStatsBlock';
+import { ActionableReadPills } from '@/components/ghostregime/ActionableReadPills';
+import { ReceiptsFilterToggle } from '@/components/ghostregime/ReceiptsFilterToggle';
 import type { GhostRegimeRow } from '@/lib/ghostregime/types';
 import {
   formatBucketUtilizationLine,
@@ -75,8 +77,15 @@ import {
   COPY_SNAPSHOT_BUTTON,
   COPY_SNAPSHOT_COPIED,
   COPY_SNAPSHOT_DISABLED_TOOLTIP,
-  ACTIVE_ONLY_TOGGLE,
-  SHOW_ALL_TOGGLE,
+  LEGEND_TITLE,
+  LEGEND_AGREEMENT,
+  LEGEND_COVERAGE,
+  LEGEND_CONFIDENCE,
+  LEGEND_CONVICTION,
+  LEGEND_CROWDED,
+  LEGEND_NET_VOTE,
+  LEGEND_DELTA,
+  VIEW_RECEIPTS_LINK,
 } from '@/lib/ghostregime/ghostregimePageCopy';
 import Link from 'next/link';
 
@@ -104,8 +113,8 @@ export default function GhostRegimePage() {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyAvailable, setHistoryAvailable] = useState(false);
   const [historyRows, setHistoryRows] = useState<GhostRegimeRow[]>([]);
-  const [showNeutralRisk, setShowNeutralRisk] = useState(false);
-  const [showNeutralInfl, setShowNeutralInfl] = useState(false);
+  const [showNeutralRisk, setShowNeutralRisk] = useState<'active' | 'all'>('active');
+  const [showNeutralInfl, setShowNeutralInfl] = useState<'active' | 'all'>('active');
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -402,9 +411,92 @@ export default function GhostRegimePage() {
               flipWatch: data.flip_watch_status,
             });
             
+            // Compute regime conviction label (bucket)
+            const regimeConvictionLabel = regimeConvictionIndex !== null
+              ? (() => {
+                  if (regimeConvictionIndex >= 0 && regimeConvictionIndex <= 25) return 'weak';
+                  if (regimeConvictionIndex >= 26 && regimeConvictionIndex <= 50) return 'lean';
+                  if (regimeConvictionIndex >= 51 && regimeConvictionIndex <= 75) return 'strong';
+                  if (regimeConvictionIndex >= 76 && regimeConvictionIndex <= 100) return 'lopsided';
+                  return null;
+                })()
+              : null;
+            
+            // Check if regime is crowded (both axes need to meet criteria)
+            const riskAgreement = computeAxisAgreement(data.risk_receipts, riskAxisDirection);
+            const inflAgreement = computeAxisAgreement(data.inflation_receipts, inflAxis);
+            const riskCrowded = riskConviction.index !== null && riskConviction.index >= 76 &&
+                               riskStats.confidence.label === 'High' &&
+                               riskAgreement.pct !== null && riskAgreement.pct >= 80 &&
+                               (riskStats.totalSignals || 0) > 0 && (riskStats.nonNeutral / (riskStats.totalSignals || 1)) >= 0.5;
+            const inflCrowded = inflConviction.index !== null && inflConviction.index >= 76 &&
+                               inflStats.confidence.label === 'High' &&
+                               inflAgreement.pct !== null && inflAgreement.pct >= 80 &&
+                               (inflStats.totalSignals || 0) > 0 && (inflStats.nonNeutral / (inflStats.totalSignals || 1)) >= 0.5;
+            const isCrowded = riskCrowded && inflCrowded;
+            
+            const copyText = buildCopySnapshotText(data, actionableRead);
+            
             return actionableRead ? (
-              <div className="text-xs text-zinc-400 leading-relaxed">
-                <span className="font-medium text-zinc-300">{ACTIONABLE_READ_PREFIX}</span> {actionableRead}
+              <div className="space-y-2">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                  <div className="flex-1">
+                    <div className="text-[10px] text-zinc-500 mb-1.5">{ACTIONABLE_READ_PREFIX}</div>
+                    <ActionableReadPills
+                      regime={data.regime}
+                      riskRegime={data.risk_regime}
+                      inflAxis={data.infl_axis}
+                      regimeConfidenceLabel={regimeConfidenceLabel}
+                      regimeConvictionIndex={regimeConvictionIndex}
+                      regimeConvictionLabel={regimeConvictionLabel}
+                      isCrowded={isCrowded}
+                      btcScale={data.btc_scale}
+                      cashSources={cashSources}
+                    />
+                  </div>
+                  {copyText && (
+                    <button
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(copyText);
+                          setCopied(true);
+                          setTimeout(() => setCopied(false), 1500);
+                        } catch (err) {
+                          // Fallback for older browsers
+                          const textarea = document.createElement('textarea');
+                          textarea.value = copyText;
+                          textarea.style.position = 'fixed';
+                          textarea.style.opacity = '0';
+                          document.body.appendChild(textarea);
+                          textarea.select();
+                          try {
+                            document.execCommand('copy');
+                            setCopied(true);
+                            setTimeout(() => setCopied(false), 1500);
+                          } catch (e) {
+                            // Ignore
+                          }
+                          document.body.removeChild(textarea);
+                        }
+                      }}
+                      className="px-2 py-1 text-[10px] rounded border border-zinc-700 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800 hover:border-zinc-600 transition-colors self-start sm:self-center"
+                      aria-label={copied ? COPY_SNAPSHOT_COPIED : COPY_SNAPSHOT_BUTTON}
+                    >
+                      {copied ? COPY_SNAPSHOT_COPIED : COPY_SNAPSHOT_BUTTON}
+                    </button>
+                  )}
+                  {!copyText && (
+                    <Tooltip content={COPY_SNAPSHOT_DISABLED_TOOLTIP}>
+                      <button
+                        disabled
+                        className="px-2 py-1 text-[10px] rounded border border-zinc-800 bg-zinc-900/30 text-zinc-600 cursor-not-allowed self-start sm:self-center"
+                        aria-label={COPY_SNAPSHOT_DISABLED_TOOLTIP}
+                      >
+                        {COPY_SNAPSHOT_BUTTON}
+                      </button>
+                    </Tooltip>
+                  )}
+                </div>
               </div>
             ) : null;
           })()}
@@ -656,6 +748,22 @@ export default function GhostRegimePage() {
                     <p key={idx} className="text-zinc-400 italic">{line}</p>
                   ))}
                 </div>
+                
+                {/* Legend */}
+                <details className="mt-3 pt-3 border-t border-zinc-800">
+                  <summary className="text-[10px] text-zinc-500 cursor-pointer hover:text-zinc-400">
+                    {LEGEND_TITLE}
+                  </summary>
+                  <div className="mt-2 space-y-1.5 text-[10px] text-zinc-500">
+                    <div><strong className="text-zinc-400">Agreement:</strong> {LEGEND_AGREEMENT}</div>
+                    <div><strong className="text-zinc-400">Coverage:</strong> {LEGEND_COVERAGE}</div>
+                    <div><strong className="text-zinc-400">Confidence:</strong> {LEGEND_CONFIDENCE}</div>
+                    <div><strong className="text-zinc-400">Conviction:</strong> {LEGEND_CONVICTION}</div>
+                    <div><strong className="text-zinc-400">Crowded:</strong> {LEGEND_CROWDED}</div>
+                    <div><strong className="text-zinc-400">Net vote:</strong> {LEGEND_NET_VOTE}</div>
+                    <div><strong className="text-zinc-400">Δ since last:</strong> {LEGEND_DELTA}</div>
+                  </div>
+                </details>
               </div>
             </GlassCard>
           );
@@ -681,23 +789,41 @@ export default function GhostRegimePage() {
               ) : (
                 <div className="space-y-4">
                   <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-xs font-medium text-zinc-300">{TOP_DRIVERS_RISK_HEADER}</h3>
-                      {(() => {
-                        const riskAxisDirection = data.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
-                        const riskAgreement = computeAxisAgreement(data.risk_receipts, riskAxisDirection);
-                        const badge = formatAgreementBadge(riskAgreement);
-                        if (riskAgreement.total === 0 && !hasReceipts) {
-                          return null;
-                        }
-                        return (
-                          <Tooltip content={badge.tooltip}>
-                            <span className="text-[10px] px-2 py-0.5 rounded border border-amber-400/20 bg-amber-400/5 text-amber-300/80">
-                              {badge.label}
-                            </span>
-                          </Tooltip>
-                        );
-                      })()}
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-xs font-medium text-zinc-300">{TOP_DRIVERS_RISK_HEADER}</h3>
+                        {(() => {
+                          const riskAxisDirection = data.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
+                          const riskAgreement = computeAxisAgreement(data.risk_receipts, riskAxisDirection);
+                          const badge = formatAgreementBadge(riskAgreement);
+                          if (riskAgreement.total === 0 && !hasReceipts) {
+                            return null;
+                          }
+                          return (
+                            <Tooltip content={badge.tooltip}>
+                              <span className="text-[10px] px-2 py-0.5 rounded border border-amber-400/20 bg-amber-400/5 text-amber-300/80">
+                                {badge.label}
+                              </span>
+                            </Tooltip>
+                          );
+                        })()}
+                      </div>
+                      {data.risk_receipts && data.risk_receipts.length > 0 && (
+                        <button
+                          onClick={() => {
+                            setShowAdvanced(true);
+                            setTimeout(() => {
+                              const element = document.getElementById('receipts-risk');
+                              if (element) {
+                                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                              }
+                            }, 100);
+                          }}
+                          className="text-[10px] text-amber-400 hover:text-amber-300 underline-offset-2 hover:underline"
+                        >
+                          {VIEW_RECEIPTS_LINK}
+                        </button>
+                      )}
                     </div>
                     {data.risk_receipts && data.risk_receipts.length > 0 && (() => {
                       const netVote = computeAxisNetVote(data.risk_receipts, 'risk');
@@ -1241,25 +1367,21 @@ export default function GhostRegimePage() {
                     const totalSignals = data.risk_receipts?.length || 0;
                     const activeSignals = data.risk_receipts?.filter(r => r.vote !== 0).length || 0;
                     const neutralSignals = totalSignals - activeSignals;
-                    const filteredReceipts = (showNeutralRisk 
+                    const filteredReceipts = (showNeutralRisk === 'all'
                       ? data.risk_receipts 
                       : data.risk_receipts?.filter(r => r.vote !== 0)) || [];
                     
                     return (
-                      <div>
+                      <div id="receipts-risk">
                         <div className="flex items-center justify-between mb-2">
                           <h3 className="text-xs font-medium text-zinc-300">{TOP_DRIVERS_RISK_HEADER}</h3>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[10px] text-zinc-500">
-                              Active: {activeSignals}/{totalSignals} • Neutral: {neutralSignals}
-                            </span>
-                            <button
-                              onClick={() => setShowNeutralRisk(!showNeutralRisk)}
-                              className="px-2 py-0.5 text-[10px] rounded border border-zinc-700 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800 transition-colors"
-                            >
-                              {showNeutralRisk ? SHOW_ALL_TOGGLE : ACTIVE_ONLY_TOGGLE}
-                            </button>
-                          </div>
+                          <ReceiptsFilterToggle
+                            mode={showNeutralRisk}
+                            setMode={setShowNeutralRisk}
+                            activeCount={activeSignals}
+                            totalCount={totalSignals}
+                            neutralCount={neutralSignals}
+                          />
                         </div>
                         <div className="overflow-x-auto max-h-[320px] overflow-y-auto">
                           <table className="w-full text-xs border-collapse">
@@ -1305,25 +1427,21 @@ export default function GhostRegimePage() {
                     const totalSignals = data.inflation_receipts?.length || 0;
                     const activeSignals = data.inflation_receipts?.filter(r => r.vote !== 0).length || 0;
                     const neutralSignals = totalSignals - activeSignals;
-                    const filteredReceipts = (showNeutralInfl 
+                    const filteredReceipts = (showNeutralInfl === 'all'
                       ? data.inflation_receipts 
                       : data.inflation_receipts?.filter(r => r.vote !== 0)) || [];
                     
                     return (
-                      <div>
+                      <div id="receipts-inflation">
                         <div className="flex items-center justify-between mb-2">
                           <h3 className="text-xs font-medium text-zinc-300">{TOP_DRIVERS_INFLATION_HEADER}</h3>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[10px] text-zinc-500">
-                              Active: {activeSignals}/{totalSignals} • Neutral: {neutralSignals}
-                            </span>
-                            <button
-                              onClick={() => setShowNeutralInfl(!showNeutralInfl)}
-                              className="px-2 py-0.5 text-[10px] rounded border border-zinc-700 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800 transition-colors"
-                            >
-                              {showNeutralInfl ? SHOW_ALL_TOGGLE : ACTIVE_ONLY_TOGGLE}
-                            </button>
-                          </div>
+                          <ReceiptsFilterToggle
+                            mode={showNeutralInfl}
+                            setMode={setShowNeutralInfl}
+                            activeCount={activeSignals}
+                            totalCount={totalSignals}
+                            neutralCount={neutralSignals}
+                          />
                         </div>
                         <div className="overflow-x-auto max-h-[320px] overflow-y-auto">
                           <table className="w-full text-xs border-collapse">

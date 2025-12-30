@@ -79,3 +79,16 @@ export const COPY_SNAPSHOT_DISABLED_TOOLTIP = 'Not enough data to copy snapshot.
 export const ACTIVE_ONLY_TOGGLE = 'Active only';
 export const SHOW_ALL_TOGGLE = 'Show all';
 
+// Legend
+export const LEGEND_TITLE = 'What do these mean?';
+export const LEGEND_AGREEMENT = 'Agreement: How many non-zero signals agree with the axis direction.';
+export const LEGEND_COVERAGE = 'Coverage: How many signals fired (non-neutral) out of total signals.';
+export const LEGEND_CONFIDENCE = 'Confidence: Heuristic combining agreement + coverage. Not a probability.';
+export const LEGEND_CONVICTION = 'Conviction: |net vote| per available signals. Strength indicator, not a forecast.';
+export const LEGEND_CROWDED = 'Crowded: Extreme conviction + high agreement. Could be clarity… or a crowded trade.';
+export const LEGEND_NET_VOTE = 'Net vote: Sum of all signal votes for this axis. Shows push direction.';
+export const LEGEND_DELTA = 'Δ since last: Change in key metrics compared to the previous snapshot.';
+
+// View receipts
+export const VIEW_RECEIPTS_LINK = 'View receipts →';
+

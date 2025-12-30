@@ -81,31 +81,33 @@ export function AxisStatsBlock({
           
           {/* Line B: Confidence + Conviction + Crowded */}
           <div className="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-zinc-400">
-            <Tooltip content={stats.confidence.tooltip}>
-              <span className="px-2 py-0.5 rounded border border-amber-400/20 bg-amber-400/5 text-amber-300/80">
-                {CONFIDENCE_LABEL_PREFIX} {stats.confidence.label}
-              </span>
-            </Tooltip>
-            {conviction.index !== null && (
-              <>
-                <span>•</span>
-                <Tooltip content={conviction.tooltip}>
-                  <span className="px-2 py-0.5 rounded border border-amber-400/15 bg-amber-400/3 text-amber-300/70">
-                    {conviction.label}
-                  </span>
-                </Tooltip>
-              </>
-            )}
-            {showCrowded && (
-              <>
-                <span>•</span>
-                <Tooltip content={CROWDED_TOOLTIP}>
-                  <span className="px-2 py-0.5 rounded border border-amber-400/10 bg-amber-400/2 text-amber-300/60">
-                    {CROWDED_LABEL}
-                  </span>
-                </Tooltip>
-              </>
-            )}
+            <div className="flex items-center gap-2 min-w-0">
+              <Tooltip content={stats.confidence.tooltip}>
+                <span className="px-2 py-0.5 rounded border border-amber-400/20 bg-amber-400/5 text-amber-300/80 whitespace-nowrap">
+                  {CONFIDENCE_LABEL_PREFIX} {stats.confidence.label}
+                </span>
+              </Tooltip>
+              {conviction.index !== null && (
+                <>
+                  <span className="text-zinc-600">•</span>
+                  <Tooltip content={conviction.tooltip}>
+                    <span className="px-2 py-0.5 rounded border border-amber-400/15 bg-amber-400/3 text-amber-300/70 whitespace-nowrap">
+                      {conviction.label}
+                    </span>
+                  </Tooltip>
+                </>
+              )}
+              {showCrowded && (
+                <>
+                  <span className="text-zinc-600">•</span>
+                  <Tooltip content={CROWDED_TOOLTIP}>
+                    <span className="px-2 py-0.5 rounded border border-amber-400/10 bg-amber-400/2 text-amber-300/60 whitespace-nowrap">
+                      {CROWDED_LABEL}
+                    </span>
+                  </Tooltip>
+                </>
+              )}
+            </div>
           </div>
           
           {/* Delta line (if available) */}
