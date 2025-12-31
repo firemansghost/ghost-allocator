@@ -17,6 +17,7 @@ import { ReceiptsFilterToggle } from '@/components/ghostregime/ReceiptsFilterTog
 import { ReceiptsSortToggle } from '@/components/ghostregime/ReceiptsSortToggle';
 import { ReceiptsSearchInput } from '@/components/ghostregime/ReceiptsSearchInput';
 import { ComparePanel } from '@/components/ghostregime/ComparePanel';
+import { MethodologyPillLink } from '@/components/ghostregime/MethodologyPillLink';
 import type { GhostRegimeRow, RegimeType } from '@/lib/ghostregime/types';
 import {
   formatBucketUtilizationLine,
@@ -123,6 +124,8 @@ import {
   REGIME_MAP_LEGEND_TOOLTIP,
   REGIME_MAP_METHODOLOGY_CTA,
   REGIME_MAP_METHODOLOGY_LINK,
+  GHOSTREGIME_METHODOLOGY_PILL_LABEL,
+  GHOSTREGIME_METHODOLOGY_PILL_TOOLTIP,
 } from '@/lib/ghostregime/ghostregimePageCopy';
 import Link from 'next/link';
 
@@ -715,13 +718,8 @@ function GhostRegimePageContent() {
               </button>
             </Tooltip>
           )}
-          {/* Methodology link */}
-          <Link
-            href="/ghostregime/methodology"
-            className="px-2 py-1 text-[10px] rounded border border-zinc-700 bg-zinc-900/50 text-amber-400 hover:text-amber-300 hover:bg-zinc-800 hover:border-amber-400/50 transition-colors font-medium"
-          >
-            {REGIME_MAP_METHODOLOGY_CTA}
-          </Link>
+          {/* Methodology pill */}
+          <MethodologyPillLink />
         </div>
       </div>
 

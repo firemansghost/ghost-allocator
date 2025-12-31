@@ -137,6 +137,8 @@ export const REGIME_MAP_LEGEND_SUMMARY = 'Legend';
 export const REGIME_MAP_LEGEND_TOOLTIP = 'Show the 4 regime descriptions.';
 export const REGIME_MAP_METHODOLOGY_CTA = 'Methodology →';
 export const REGIME_MAP_METHODOLOGY_LINK = 'Read methodology →';
+export const GHOSTREGIME_METHODOLOGY_PILL_LABEL = 'Methodology';
+export const GHOSTREGIME_METHODOLOGY_PILL_TOOLTIP = 'How this model works.';
 
 // Snapshot viewing
 export const VIEWING_SNAPSHOT_LABEL = 'Viewing snapshot:';
