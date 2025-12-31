@@ -1168,6 +1168,192 @@ export function buildShareUrl(asof: string | null, baseUrl?: string): string {
 }
 
 /**
+ * Compute the "biggest change" headline for compare panel
+ * Returns the most meaningful delta between current and previous snapshot
+ */
+export function computeCompareBiggestChange(
+  currentRow: GhostRegimeRow,
+  prevRow: GhostRegimeRow
+): { text: string; tooltip?: string } | null {
+  // 1) Regime change (highest priority)
+  if (currentRow.regime !== prevRow.regime) {
+    return {
+      text: `Regime flip — ${prevRow.regime} → ${currentRow.regime}`,
+    };
+  }
+
+  // 2) Crowded tag toggled
+  const riskAxisDirectionCurr = currentRow.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
+  const riskStatsCurr = computeAxisStats(currentRow.risk_receipts, riskAxisDirectionCurr);
+  const riskNetVoteCurr = currentRow.risk_receipts && currentRow.risk_receipts.length > 0
+    ? computeAxisNetVote(currentRow.risk_receipts, 'risk').net
+    : currentRow.risk_score;
+  const riskConvictionCurr = computeConviction(
+    riskNetVoteCurr,
+    riskStatsCurr.totalSignals || (currentRow.risk_receipts?.length ?? null)
+  );
+  const riskAgreementCurr = computeAxisAgreement(currentRow.risk_receipts, riskAxisDirectionCurr);
+  const riskCrowdedCurr = computeCrowdingTag({
+    convictionIndex: riskConvictionCurr.index,
+    confidenceLabel: riskStatsCurr.confidence.label,
+    agreementPct: riskAgreementCurr.pct,
+    coveragePct: riskStatsCurr.totalSignals > 0 ? (riskStatsCurr.nonNeutral / riskStatsCurr.totalSignals) : null,
+  });
+
+  const inflAxisCurr = currentRow.infl_axis === 'Inflation' ? 'Inflation' : 'Disinflation';
+  const inflStatsCurr = computeAxisStats(currentRow.inflation_receipts, inflAxisCurr);
+  const inflNetVoteCurr = currentRow.inflation_receipts && currentRow.inflation_receipts.length > 0
+    ? computeAxisNetVote(currentRow.inflation_receipts, 'inflation').net
+    : currentRow.infl_score;
+  const inflConvictionCurr = computeConviction(
+    inflNetVoteCurr,
+    inflStatsCurr.totalSignals || (currentRow.inflation_receipts?.length ?? null)
+  );
+  const inflAgreementCurr = computeAxisAgreement(currentRow.inflation_receipts, inflAxisCurr);
+  const inflCrowdedCurr = computeCrowdingTag({
+    convictionIndex: inflConvictionCurr.index,
+    confidenceLabel: inflStatsCurr.confidence.label,
+    agreementPct: inflAgreementCurr.pct,
+    coveragePct: inflStatsCurr.totalSignals > 0 ? (inflStatsCurr.nonNeutral / inflStatsCurr.totalSignals) : null,
+  });
+
+  const riskAxisDirectionPrev = prevRow.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
+  const riskStatsPrev = computeAxisStats(prevRow.risk_receipts, riskAxisDirectionPrev);
+  const riskNetVotePrev = prevRow.risk_receipts && prevRow.risk_receipts.length > 0
+    ? computeAxisNetVote(prevRow.risk_receipts, 'risk').net
+    : prevRow.risk_score;
+  const riskConvictionPrev = computeConviction(
+    riskNetVotePrev,
+    riskStatsPrev.totalSignals || (prevRow.risk_receipts?.length ?? null)
+  );
+  const riskAgreementPrev = computeAxisAgreement(prevRow.risk_receipts, riskAxisDirectionPrev);
+  const riskCrowdedPrev = computeCrowdingTag({
+    convictionIndex: riskConvictionPrev.index,
+    confidenceLabel: riskStatsPrev.confidence.label,
+    agreementPct: riskAgreementPrev.pct,
+    coveragePct: riskStatsPrev.totalSignals > 0 ? (riskStatsPrev.nonNeutral / riskStatsPrev.totalSignals) : null,
+  });
+
+  const inflAxisPrev = prevRow.infl_axis === 'Inflation' ? 'Inflation' : 'Disinflation';
+  const inflStatsPrev = computeAxisStats(prevRow.inflation_receipts, inflAxisPrev);
+  const inflNetVotePrev = prevRow.inflation_receipts && prevRow.inflation_receipts.length > 0
+    ? computeAxisNetVote(prevRow.inflation_receipts, 'inflation').net
+    : prevRow.infl_score;
+  const inflConvictionPrev = computeConviction(
+    inflNetVotePrev,
+    inflStatsPrev.totalSignals || (prevRow.inflation_receipts?.length ?? null)
+  );
+  const inflAgreementPrev = computeAxisAgreement(prevRow.inflation_receipts, inflAxisPrev);
+  const inflCrowdedPrev = computeCrowdingTag({
+    convictionIndex: inflConvictionPrev.index,
+    confidenceLabel: inflStatsPrev.confidence.label,
+    agreementPct: inflAgreementPrev.pct,
+    coveragePct: inflStatsPrev.totalSignals > 0 ? (inflStatsPrev.nonNeutral / inflStatsPrev.totalSignals) : null,
+  });
+
+  // Check for crowded toggles
+  if (riskCrowdedCurr !== riskCrowdedPrev) {
+    return {
+      text: riskCrowdedCurr ? 'Crowded ON (Risk)' : 'Crowded cleared (Risk)',
+    };
+  }
+  if (inflCrowdedCurr !== inflCrowdedPrev) {
+    return {
+      text: inflCrowdedCurr ? 'Crowded ON (Inflation)' : 'Crowded cleared (Inflation)',
+    };
+  }
+
+  // 3) Conviction delta (largest absolute, >= 10)
+  const riskConvDelta = riskConvictionCurr.index !== null && riskConvictionPrev.index !== null
+    ? riskConvictionCurr.index - riskConvictionPrev.index
+    : null;
+  const inflConvDelta = inflConvictionCurr.index !== null && inflConvictionPrev.index !== null
+    ? inflConvictionCurr.index - inflConvictionPrev.index
+    : null;
+
+  // Pick the axis with largest absolute delta
+  const riskConvAbs = riskConvDelta !== null ? Math.abs(riskConvDelta) : 0;
+  const inflConvAbs = inflConvDelta !== null ? Math.abs(inflConvDelta) : 0;
+  
+  if (riskConvAbs >= 10 || inflConvAbs >= 10) {
+    const useRisk = riskConvAbs >= inflConvAbs;
+    const delta = useRisk ? riskConvDelta! : inflConvDelta!;
+    const axisName = useRisk ? 'Risk' : 'Inflation';
+    const convictionCurr = useRisk ? riskConvictionCurr : inflConvictionCurr;
+    const statsCurr = useRisk ? riskStatsCurr : inflStatsCurr;
+    const agreementCurr = useRisk ? riskAgreementCurr : inflAgreementCurr;
+    
+    const sign = delta >= 0 ? '+' : '';
+    let text = `${axisName} conviction ${sign}${delta}`;
+    // Check if new conviction is extreme and meets crowding criteria
+    if (convictionCurr.index !== null && convictionCurr.index >= 76 &&
+        statsCurr.confidence.label === 'High' &&
+        agreementCurr.pct !== null && agreementCurr.pct >= 80 &&
+        statsCurr.totalSignals > 0 && (statsCurr.nonNeutral / statsCurr.totalSignals) >= 0.5) {
+      text += ' (crowding risk ↑)';
+    }
+    return { text };
+  }
+
+  // 4) Agreement pp change (>= 15pp, pick largest absolute)
+  const riskAgreeDelta = riskAgreementCurr.pct !== null && riskAgreementPrev.pct !== null
+    ? riskAgreementCurr.pct - riskAgreementPrev.pct
+    : null;
+  const inflAgreeDelta = inflAgreementCurr.pct !== null && inflAgreementPrev.pct !== null
+    ? inflAgreementCurr.pct - inflAgreementPrev.pct
+    : null;
+
+  const riskAgreeAbs = riskAgreeDelta !== null ? Math.abs(riskAgreeDelta) : 0;
+  const inflAgreeAbs = inflAgreeDelta !== null ? Math.abs(inflAgreeDelta) : 0;
+
+  if (riskAgreeAbs >= 15 || inflAgreeAbs >= 15) {
+    const useRisk = riskAgreeAbs >= inflAgreeAbs;
+    const delta = useRisk ? riskAgreeDelta! : inflAgreeDelta!;
+    const axisName = useRisk ? 'Risk' : 'Inflation';
+    const sign = delta >= 0 ? '+' : '';
+    return { text: `${axisName} agreement ${sign}${Math.round(delta)}pp` };
+  }
+
+  // 5) Net vote swing (>= 2, pick largest absolute)
+  const riskNetVoteCurrObj = computeAxisNetVote(currentRow.risk_receipts, 'risk');
+  const riskNetVotePrevObj = computeAxisNetVote(prevRow.risk_receipts, 'risk');
+  const riskNetDelta = riskNetVoteCurrObj.net - riskNetVotePrevObj.net;
+
+  const inflNetVoteCurrObj = computeAxisNetVote(currentRow.inflation_receipts, 'inflation');
+  const inflNetVotePrevObj = computeAxisNetVote(prevRow.inflation_receipts, 'inflation');
+  const inflNetDelta = inflNetVoteCurrObj.net - inflNetVotePrevObj.net;
+
+  const riskNetAbs = Math.abs(riskNetDelta);
+  const inflNetAbs = Math.abs(inflNetDelta);
+
+  if (riskNetAbs >= 2 || inflNetAbs >= 2) {
+    const useRisk = riskNetAbs >= inflNetAbs;
+    const delta = useRisk ? riskNetDelta : inflNetDelta;
+    const axisName = useRisk ? 'Risk' : 'Inflation';
+    const sign = delta >= 0 ? '+' : '';
+    const direction = useRisk 
+      ? (delta > 0 ? 'Risk On' : 'Risk Off')
+      : (delta > 0 ? 'Inflation' : 'Disinflation');
+    return { text: `${axisName} net vote ${sign}${delta} (${direction})` };
+  }
+
+  // 6) Confidence label change
+  if (riskStatsCurr.confidence.label !== riskStatsPrev.confidence.label) {
+    return {
+      text: `Risk confidence ${riskStatsPrev.confidence.label}→${riskStatsCurr.confidence.label}`,
+    };
+  }
+  if (inflStatsCurr.confidence.label !== inflStatsPrev.confidence.label) {
+    return {
+      text: `Inflation confidence ${inflStatsPrev.confidence.label}→${inflStatsCurr.confidence.label}`,
+    };
+  }
+
+  // 7) Fallback: no material change
+  return null;
+}
+
+/**
  * Compute agreement delta between two rows
  * Returns trend lines for Risk and Inflation axes if both rows have receipts
  */

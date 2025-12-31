@@ -97,6 +97,8 @@ export const COMPARE_LINK_LABEL = 'Compare to previous';
 export const COMPARE_PANEL_TITLE = 'Compare:';
 export const COMPARE_DISABLED_TOOLTIP = 'Need at least 2 snapshots to compare.';
 export const COMPARE_REGIME_UNCHANGED = 'unchanged';
+export const COMPARE_BIGGEST_CHANGE_LABEL = 'Biggest change:';
+export const COMPARE_BIGGEST_CHANGE_TOOLTIP = 'Heuristic: largest movement among regime/conviction/agreement/confidence/net vote. Not advice.';
 export const ACTIONABLE_CASH_PILL_TOOLTIP = 'Cash is leftover because exposure was reduced (throttled). Not cash "held in" the asset.';
 
 // Snapshot viewing

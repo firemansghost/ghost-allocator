@@ -15,11 +15,15 @@ import {
   computeAxisStats,
   computeConviction,
   computeAxisNetVote,
+  computeCompareBiggestChange,
 } from '@/lib/ghostregime/ui';
 import {
   COMPARE_PANEL_TITLE,
   COMPARE_REGIME_UNCHANGED,
+  COMPARE_BIGGEST_CHANGE_LABEL,
+  COMPARE_BIGGEST_CHANGE_TOOLTIP,
 } from '@/lib/ghostregime/ghostregimePageCopy';
+import { Tooltip } from '@/components/Tooltip';
 
 interface ComparePanelProps {
   currentRow: GhostRegimeRow;
@@ -89,6 +93,9 @@ export function ComparePanel({
   const riskDelta = computeAxisStatDeltas(currentRow, prevRow, 'risk');
   const inflDelta = computeAxisStatDeltas(currentRow, prevRow, 'inflation');
 
+  // Compute biggest change headline
+  const biggestChange = computeCompareBiggestChange(currentRow, prevRow);
+
   // Format dates
   const formatDate = (dateStr: string) => {
     const [y, m, d] = dateStr.split('-').map(Number);
@@ -146,6 +153,17 @@ export function ComparePanel({
             </div>
           )}
         </div>
+
+        {/* Biggest change */}
+        {biggestChange && (
+          <div className="pt-2 border-t border-zinc-800">
+            <Tooltip content={COMPARE_BIGGEST_CHANGE_TOOLTIP}>
+              <div className="text-zinc-300 text-[10px]">
+                <strong className="text-amber-300/80">{COMPARE_BIGGEST_CHANGE_LABEL}</strong> {biggestChange.text}
+              </div>
+            </Tooltip>
+          </div>
+        )}
       </div>
     </GlassCard>
   );
