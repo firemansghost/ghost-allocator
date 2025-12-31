@@ -21,6 +21,7 @@ import {
   computeCompareBiggestChange,
   getDeltaTone,
   buildCompareUrl,
+  buildCompareDiffSummaryText,
 } from '@/lib/ghostregime/ui';
 import {
   COMPARE_PANEL_TITLE,
@@ -41,6 +42,12 @@ import {
   COMPARE_CONTEXT_VIEWING,
   COMPARE_CONTEXT_COMPARING,
   PILLS_DELTA_COLORS_TOOLTIP,
+  COPY_DIFF_SUMMARY,
+  COPY_DIFF_SUMMARY_COPIED,
+  COPY_DIFF_SUMMARY_TOOLTIP_DISABLED,
+  PIN_COMPARE,
+  PIN_COMPARE_PINNED,
+  PIN_COMPARE_TOOLTIP_DISABLED,
 } from '@/lib/ghostregime/ghostregimePageCopy';
 import { Tooltip } from '@/components/Tooltip';
 
@@ -51,6 +58,7 @@ interface ComparePanelProps {
   prevAsOf: string | null;
   onJump?: (opts: { kind: CompareKind; axis?: CompareAxis }) => void;
   onReset?: () => void;
+  onPinCompare?: () => void;
   prevNotFoundHint?: boolean;
 }
 
@@ -61,11 +69,14 @@ export function ComparePanel({
   prevAsOf,
   onJump,
   onReset,
+  onPinCompare,
   prevNotFoundHint = false,
 }: ComparePanelProps) {
   const [viewMode, setViewMode] = useState<'summary' | 'pills'>('summary');
   const [copied, setCopied] = useState(false);
   const [biggestChangeCopied, setBiggestChangeCopied] = useState(false);
+  const [diffSummaryCopied, setDiffSummaryCopied] = useState(false);
+  const [pinned, setPinned] = useState(false);
 
   if (!prevRow || !prevAsOf) {
     return null;
@@ -160,6 +171,19 @@ export function ComparePanel({
     }
   };
 
+  // Handle copy diff summary
+  const handleCopyDiffSummary = async () => {
+    const summary = buildCompareDiffSummaryText(currentRow, prevRow, currentAsOf, prevAsOf);
+    if (!summary) return;
+    try {
+      await navigator.clipboard.writeText(summary);
+      setDiffSummaryCopied(true);
+      setTimeout(() => setDiffSummaryCopied(false), 1500);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
+
   // Handle reset
   const handleReset = () => {
     setViewMode('summary');
@@ -176,6 +200,20 @@ export function ComparePanel({
       onJump({ kind: biggestChange.kind, axis: biggestChange.axis });
     }
   };
+
+  // Handle pin compare
+  const handlePinCompare = () => {
+    if (onPinCompare) {
+      onPinCompare();
+      setPinned(true);
+      setTimeout(() => setPinned(false), 1500);
+    }
+  };
+
+  // Check if diff summary can be generated
+  const diffSummaryText = prevRow && prevAsOf && currentAsOf
+    ? buildCompareDiffSummaryText(currentRow, prevRow, currentAsOf, prevAsOf)
+    : null;
 
   // Get tone classes
   const getToneClasses = (tone: 'pos' | 'neg' | 'flat' | 'na') => {
@@ -237,6 +275,44 @@ export function ComparePanel({
                 className="px-2 py-0.5 text-[10px] transition-colors rounded border border-zinc-800 text-zinc-600 cursor-not-allowed"
               >
                 {COPY_COMPARE_LINK}
+              </button>
+            </Tooltip>
+          )}
+          
+          {/* Copy diff summary */}
+          {diffSummaryText ? (
+            <button
+              onClick={handleCopyDiffSummary}
+              className="px-2 py-0.5 text-[10px] transition-colors rounded border border-zinc-700 text-zinc-400 hover:text-zinc-300 hover:border-zinc-600"
+            >
+              {diffSummaryCopied ? COPY_DIFF_SUMMARY_COPIED : COPY_DIFF_SUMMARY}
+            </button>
+          ) : (
+            <Tooltip content={COPY_DIFF_SUMMARY_TOOLTIP_DISABLED}>
+              <button
+                disabled
+                className="px-2 py-0.5 text-[10px] transition-colors rounded border border-zinc-800 text-zinc-600 cursor-not-allowed"
+              >
+                {COPY_DIFF_SUMMARY}
+              </button>
+            </Tooltip>
+          )}
+          
+          {/* Pin compare */}
+          {prevRow && onPinCompare ? (
+            <button
+              onClick={handlePinCompare}
+              className="px-2 py-0.5 text-[10px] transition-colors rounded border border-zinc-700 text-zinc-400 hover:text-zinc-300 hover:border-zinc-600"
+            >
+              {pinned ? PIN_COMPARE_PINNED : PIN_COMPARE}
+            </button>
+          ) : (
+            <Tooltip content={PIN_COMPARE_TOOLTIP_DISABLED}>
+              <button
+                disabled
+                className="px-2 py-0.5 text-[10px] transition-colors rounded border border-zinc-800 text-zinc-600 cursor-not-allowed"
+              >
+                {PIN_COMPARE}
               </button>
             </Tooltip>
           )}

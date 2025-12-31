@@ -1360,6 +1360,128 @@ export function buildCompareUrl(asof: string, prev: string, baseUrl?: string): s
 }
 
 /**
+ * Build compare diff summary text (compact one-liner)
+ */
+export function buildCompareDiffSummaryText(
+  currentRow: GhostRegimeRow,
+  prevRow: GhostRegimeRow,
+  currentAsOf: string,
+  prevAsOf: string
+): string | null {
+  if (!prevRow || !currentAsOf || !prevAsOf) {
+    return null;
+  }
+
+  const parts: string[] = [];
+  
+  // Start with compare dates
+  parts.push(`Compare ${prevAsOf} → ${currentAsOf}`);
+  
+  // Biggest change
+  const biggestChange = computeCompareBiggestChange(currentRow, prevRow);
+  if (biggestChange) {
+    const biggestText = biggestChange.detail
+      ? `${biggestChange.headline} (${biggestChange.detail})`
+      : biggestChange.headline;
+    parts.push(`Biggest: ${biggestText}`);
+  }
+  
+  // Regime
+  if (currentRow.regime === prevRow.regime) {
+    parts.push(`Regime: same`);
+  } else {
+    parts.push(`Regime: ${prevRow.regime}→${currentRow.regime}`);
+  }
+  
+  // Risk axis tokens
+  const riskTokens = computeAxisStatDeltaTokens(currentRow, prevRow, 'risk');
+  if (riskTokens && riskTokens.length > 0) {
+    const riskText = riskTokens.map(t => t.label).join(' ');
+    parts.push(`Risk: ${riskText}`);
+  }
+  
+  // Inflation axis tokens
+  const inflTokens = computeAxisStatDeltaTokens(currentRow, prevRow, 'inflation');
+  if (inflTokens && inflTokens.length > 0) {
+    const inflText = inflTokens.map(t => t.label).join(' ');
+    parts.push(`Infl: ${inflText}`);
+  }
+  
+  if (parts.length <= 1) {
+    return null; // Only has the compare dates, not enough data
+  }
+  
+  return parts.join(' | ');
+}
+
+/**
+ * Filter receipts by search query (case-insensitive substring match)
+ */
+export function filterReceiptsByQuery(
+  receipts: SignalReceipt[],
+  query: string
+): SignalReceipt[] {
+  if (!query.trim()) {
+    return receipts;
+  }
+  
+  const lowerQuery = query.toLowerCase().trim();
+  
+  return receipts.filter(receipt => {
+    // Match against label
+    if (receipt.label.toLowerCase().includes(lowerQuery)) {
+      return true;
+    }
+    
+    // Match against key
+    if (receipt.key.toLowerCase().includes(lowerQuery)) {
+      return true;
+    }
+    
+    // Match against note (rule + meta)
+    if (receipt.note) {
+      const { rule, meta } = splitReceiptNote(receipt.note);
+      if (rule && rule.toLowerCase().includes(lowerQuery)) {
+        return true;
+      }
+      if (meta && meta.toLowerCase().includes(lowerQuery)) {
+        return true;
+      }
+    }
+    
+    return false;
+  });
+}
+
+/**
+ * Get driver rule and meta from receipt
+ */
+export function getDriverRuleMeta(receipt: SignalReceipt): { rule?: string; meta?: string } {
+  if (!receipt.note) {
+    return {};
+  }
+  
+  const { rule, meta } = splitReceiptNote(receipt.note);
+  return {
+    rule: rule || undefined,
+    meta: meta || undefined,
+  };
+}
+
+/**
+ * Get regime description for legend
+ */
+export function getRegimeDescription(regime: RegimeType): string {
+  const descriptions: Record<RegimeType, string> = {
+    GOLDILOCKS: 'Risk On + Disinflation. Markets are brave and prices are calm.',
+    REFLATION: 'Risk On + Inflation. Markets are brave but prices are rising.',
+    INFLATION: 'Risk Off + Inflation. Markets are cautious and prices are rising.',
+    DEFLATION: 'Risk Off + Disinflation. Markets are cautious and prices are falling.',
+  };
+  return descriptions[regime] || '';
+}
+
+/**
  * Get delta tone for styling
  */
 export function getDeltaTone(delta: number | null | undefined): 'pos' | 'neg' | 'flat' | 'na' {

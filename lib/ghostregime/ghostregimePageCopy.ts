@@ -118,6 +118,21 @@ export const COMPARE_PREV_SNAPSHOT_TOOLTIP = 'Previous = the prior available tra
 export const PILLS_DELTA_COLORS_TOOLTIP = 'Colors show change direction, not "good" or "bad".';
 export const RECEIPTS_SORT_DEFAULT = 'Default';
 export const RECEIPTS_SORT_BY_STRENGTH = 'By strength';
+export const COPY_DIFF_SUMMARY = 'Copy diff summary';
+export const COPY_DIFF_SUMMARY_COPIED = 'Copied';
+export const COPY_DIFF_SUMMARY_TOOLTIP_DISABLED = 'Not enough data to copy diff summary.';
+export const PIN_COMPARE = 'Pin';
+export const PIN_COMPARE_PINNED = 'Pinned';
+export const PIN_COMPARE_TOOLTIP_DISABLED = 'Cannot pin: missing snapshot data.';
+export const RECEIPTS_SEARCH_PLACEHOLDER_RISK = 'Search signals...';
+export const RECEIPTS_SEARCH_PLACEHOLDER_INFL = 'Search signals...';
+export const RECEIPTS_SEARCH_CLEAR = 'Clear';
+export const DRIVER_SHOW_RULE = 'Show rule';
+export const DRIVER_RULE_LABEL = 'Rule:';
+export const DRIVER_META_LABEL = 'Meta:';
+export const REGIME_LEGEND_TITLE = 'Regimes';
+export const REGIME_LEGEND_RESET = 'Reset';
+export const REGIME_LEGEND_SELECTED_SUFFIX = '(selected)';
 
 // Snapshot viewing
 export const VIEWING_SNAPSHOT_LABEL = 'Viewing snapshot:';

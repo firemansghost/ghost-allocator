@@ -15,8 +15,9 @@ import { AxisStatsBlock } from '@/components/ghostregime/AxisStatsBlock';
 import { ActionableReadPills } from '@/components/ghostregime/ActionableReadPills';
 import { ReceiptsFilterToggle } from '@/components/ghostregime/ReceiptsFilterToggle';
 import { ReceiptsSortToggle } from '@/components/ghostregime/ReceiptsSortToggle';
+import { ReceiptsSearchInput } from '@/components/ghostregime/ReceiptsSearchInput';
 import { ComparePanel } from '@/components/ghostregime/ComparePanel';
-import type { GhostRegimeRow } from '@/lib/ghostregime/types';
+import type { GhostRegimeRow, RegimeType } from '@/lib/ghostregime/types';
 import {
   formatBucketUtilizationLine,
   formatScaleLabel,
@@ -53,6 +54,9 @@ import {
   parsePrevParam,
   buildCompareUrl,
   sortReceipts,
+  filterReceiptsByQuery,
+  getDriverRuleMeta,
+  getRegimeDescription,
   type CompareKind,
   type CompareAxis,
 } from '@/lib/ghostregime/ui';
@@ -106,6 +110,14 @@ import {
   COMPARE_LINK_LABEL,
   COMPARE_DISABLED_TOOLTIP,
   COMPARE_PREV_SNAPSHOT_TOOLTIP,
+  RECEIPTS_SEARCH_PLACEHOLDER_RISK,
+  RECEIPTS_SEARCH_PLACEHOLDER_INFL,
+  DRIVER_SHOW_RULE,
+  DRIVER_RULE_LABEL,
+  DRIVER_META_LABEL,
+  REGIME_LEGEND_TITLE,
+  REGIME_LEGEND_RESET,
+  REGIME_LEGEND_SELECTED_SUFFIX,
 } from '@/lib/ghostregime/ghostregimePageCopy';
 import Link from 'next/link';
 
@@ -139,6 +151,9 @@ function GhostRegimePageContent() {
   const [showNeutralInfl, setShowNeutralInfl] = useState<'active' | 'all'>('active');
   const [sortModeRisk, setSortModeRisk] = useState<'default' | 'strength'>('default');
   const [sortModeInfl, setSortModeInfl] = useState<'default' | 'strength'>('default');
+  const [riskReceiptQuery, setRiskReceiptQuery] = useState('');
+  const [inflReceiptQuery, setInflReceiptQuery] = useState('');
+  const [selectedRegime, setSelectedRegime] = useState<RegimeType | null>(null);
   const [copied, setCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [viewingSnapshot, setViewingSnapshot] = useState<string | null>(null);
@@ -860,6 +875,12 @@ function GhostRegimePageContent() {
                   }
                 }}
                 onReset={handleCompareReset}
+                onPinCompare={() => {
+                  if (prevRow && data) {
+                    const url = buildCompareUrl(data.date, prevRow.date);
+                    router.push(url);
+                  }
+                }}
                 prevNotFoundHint={prevNotFoundHint}
               />
             </div>
@@ -938,14 +959,19 @@ function GhostRegimePageContent() {
                 <div className="grid grid-cols-2 gap-2 col-span-2">
                   {REGIME_MAP.map((mapPos) => {
                     const isCurrent = mapPos.regime === data.regime;
+                    const isSelected = selectedRegime === mapPos.regime;
                     return (
-                      <div
+                      <button
                         key={mapPos.regime}
-                        className={`p-3 rounded border text-center transition-all ${
+                        onClick={() => setSelectedRegime(mapPos.regime)}
+                        className={`p-3 rounded border text-center transition-all w-full ${
                           isCurrent
                             ? 'border-amber-400/60 bg-amber-400/10 ring-2 ring-amber-400/30'
-                            : 'border-zinc-700 bg-zinc-900/30'
+                            : isSelected
+                            ? 'border-amber-400/40 bg-amber-400/5 ring-1 ring-amber-400/20'
+                            : 'border-zinc-700 bg-zinc-900/30 hover:border-zinc-600'
                         }`}
+                        aria-pressed={isSelected}
                       >
                         <div className="text-xs font-semibold text-zinc-200 mb-1">
                           {mapPos.label}
@@ -958,9 +984,41 @@ function GhostRegimePageContent() {
                             You are here
                           </div>
                         )}
-                      </div>
+                      </button>
                     );
                   })}
+                </div>
+              </div>
+              
+              {/* Regime legend and description */}
+              <div className="pt-2 border-t border-zinc-800 space-y-2">
+                <div className="text-[10px] text-zinc-400">
+                  <strong>{REGIME_LEGEND_TITLE}:</strong>
+                  <ul className="mt-1 space-y-0.5">
+                    {REGIME_MAP.map((mapPos) => (
+                      <li key={mapPos.regime} className="text-zinc-500">
+                        {mapPos.label}: {getRegimeDescription(mapPos.regime)}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="text-[10px] text-zinc-300">
+                  {selectedRegime ? (
+                    <div>
+                      <strong>About {selectedRegime}:</strong> {getRegimeDescription(selectedRegime)}{' '}
+                      <span className="text-zinc-400">{REGIME_LEGEND_SELECTED_SUFFIX}</span>
+                      <button
+                        onClick={() => setSelectedRegime(null)}
+                        className="ml-2 text-amber-400 hover:text-amber-300 underline underline-offset-2"
+                      >
+                        {REGIME_LEGEND_RESET}
+                      </button>
+                    </div>
+                  ) : (
+                    <div>
+                      <strong>About {data.regime}:</strong> {getRegimeDescription(data.regime)}
+                    </div>
+                  )}
                 </div>
               </div>
               
@@ -1200,17 +1258,32 @@ function GhostRegimePageContent() {
                     {riskDrivers.length > 0 ? (
                       <ul className="space-y-1.5 text-xs text-zinc-300">
                         {riskDrivers.map((driver, idx) => {
-                          const { rule } = splitReceiptNote(driver.note);
+                          const { rule, meta } = getDriverRuleMeta(driver);
+                          const hasRuleOrMeta = rule || meta;
                           return (
                             <li key={idx} className="space-y-0.5">
                               <div className="flex items-center gap-2">
                                 <span className="text-amber-300">→</span>
                                 <span>{formatDriverLine(driver)}</span>
                               </div>
-                              {rule && (
-                                <p className="text-[10px] text-zinc-500 italic ml-5">
-                                  Rule: {rule}
-                                </p>
+                              {hasRuleOrMeta && (
+                                <details className="ml-5 text-[10px]">
+                                  <summary className="cursor-pointer text-zinc-400 hover:text-zinc-300">
+                                    {DRIVER_SHOW_RULE}
+                                  </summary>
+                                  <div className="mt-1 space-y-0.5 text-zinc-500">
+                                    {rule && (
+                                      <div>
+                                        <strong>{DRIVER_RULE_LABEL}</strong> {rule}
+                                      </div>
+                                    )}
+                                    {meta && (
+                                      <div>
+                                        <strong>{DRIVER_META_LABEL}</strong> {meta}
+                                      </div>
+                                    )}
+                                  </div>
+                                </details>
                               )}
                             </li>
                           );
@@ -1821,7 +1894,8 @@ function GhostRegimePageContent() {
                     const filteredReceipts = (showNeutralInfl === 'all'
                       ? data.inflation_receipts 
                       : data.inflation_receipts?.filter(r => r.vote !== 0)) || [];
-                    const sortedReceipts = sortReceipts(filteredReceipts, sortModeInfl);
+                    const searchedReceipts = filterReceiptsByQuery(filteredReceipts, inflReceiptQuery);
+                    const sortedReceipts = sortReceipts(searchedReceipts, sortModeInfl);
                     
                     return (
                       <div id="receipts-inflation">
@@ -1840,6 +1914,13 @@ function GhostRegimePageContent() {
                               setMode={setSortModeInfl}
                             />
                           </div>
+                        </div>
+                        <div className="mb-2">
+                          <ReceiptsSearchInput
+                            value={inflReceiptQuery}
+                            onChange={setInflReceiptQuery}
+                            placeholder={RECEIPTS_SEARCH_PLACEHOLDER_INFL}
+                          />
                         </div>
                         <div className="overflow-x-auto max-h-[320px] overflow-y-auto">
                           <table className="w-full text-xs border-collapse">
