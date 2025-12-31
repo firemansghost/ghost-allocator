@@ -14,6 +14,7 @@ import { AgreementChipStrip } from '@/components/ghostregime/AgreementChipStrip'
 import { AxisStatsBlock } from '@/components/ghostregime/AxisStatsBlock';
 import { ActionableReadPills } from '@/components/ghostregime/ActionableReadPills';
 import { ReceiptsFilterToggle } from '@/components/ghostregime/ReceiptsFilterToggle';
+import { ReceiptsSortToggle } from '@/components/ghostregime/ReceiptsSortToggle';
 import { ComparePanel } from '@/components/ghostregime/ComparePanel';
 import type { GhostRegimeRow } from '@/lib/ghostregime/types';
 import {
@@ -51,6 +52,7 @@ import {
   buildShareUrl,
   parsePrevParam,
   buildCompareUrl,
+  sortReceipts,
   type CompareKind,
   type CompareAxis,
 } from '@/lib/ghostregime/ui';
@@ -103,6 +105,7 @@ import {
   BACK_TO_LATEST_LINK,
   COMPARE_LINK_LABEL,
   COMPARE_DISABLED_TOOLTIP,
+  COMPARE_PREV_SNAPSHOT_TOOLTIP,
 } from '@/lib/ghostregime/ghostregimePageCopy';
 import Link from 'next/link';
 
@@ -134,6 +137,8 @@ function GhostRegimePageContent() {
   const [historyRows, setHistoryRows] = useState<GhostRegimeRow[]>([]);
   const [showNeutralRisk, setShowNeutralRisk] = useState<'active' | 'all'>('active');
   const [showNeutralInfl, setShowNeutralInfl] = useState<'active' | 'all'>('active');
+  const [sortModeRisk, setSortModeRisk] = useState<'default' | 'strength'>('default');
+  const [sortModeInfl, setSortModeInfl] = useState<'default' | 'strength'>('default');
   const [copied, setCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [viewingSnapshot, setViewingSnapshot] = useState<string | null>(null);
@@ -670,13 +675,15 @@ function GhostRegimePageContent() {
           </button>
           {/* Compare to previous link */}
           {prevRow ? (
-            <button
-              ref={compareTriggerRef}
-              onClick={() => setShowCompare(!showCompare)}
-              className="px-2 py-1 text-[10px] rounded border border-zinc-700 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800 hover:border-zinc-600 transition-colors"
-            >
-              {COMPARE_LINK_LABEL}
-            </button>
+            <Tooltip content={COMPARE_PREV_SNAPSHOT_TOOLTIP}>
+              <button
+                ref={compareTriggerRef}
+                onClick={() => setShowCompare(!showCompare)}
+                className="px-2 py-1 text-[10px] rounded border border-zinc-700 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800 hover:border-zinc-600 transition-colors"
+              >
+                {COMPARE_LINK_LABEL}
+              </button>
+            </Tooltip>
           ) : (
             <Tooltip content={COMPARE_DISABLED_TOOLTIP}>
               <button
@@ -1747,18 +1754,25 @@ function GhostRegimePageContent() {
                     const filteredReceipts = (showNeutralRisk === 'all'
                       ? data.risk_receipts 
                       : data.risk_receipts?.filter(r => r.vote !== 0)) || [];
+                    const sortedReceipts = sortReceipts(filteredReceipts, sortModeRisk);
                     
                     return (
                       <div id="receipts-risk">
                         <div className="flex items-center justify-between mb-2">
                           <h3 className="text-xs font-medium text-zinc-300">{TOP_DRIVERS_RISK_HEADER}</h3>
-                          <ReceiptsFilterToggle
-                            mode={showNeutralRisk}
-                            setMode={setShowNeutralRisk}
-                            activeCount={activeSignals}
-                            totalCount={totalSignals}
-                            neutralCount={neutralSignals}
-                          />
+                          <div className="flex items-center gap-2">
+                            <ReceiptsFilterToggle
+                              mode={showNeutralRisk}
+                              setMode={setShowNeutralRisk}
+                              activeCount={activeSignals}
+                              totalCount={totalSignals}
+                              neutralCount={neutralSignals}
+                            />
+                            <ReceiptsSortToggle
+                              mode={sortModeRisk}
+                              setMode={setSortModeRisk}
+                            />
+                          </div>
                         </div>
                         <div className="overflow-x-auto max-h-[320px] overflow-y-auto">
                           <table className="w-full text-xs border-collapse">
@@ -1807,18 +1821,25 @@ function GhostRegimePageContent() {
                     const filteredReceipts = (showNeutralInfl === 'all'
                       ? data.inflation_receipts 
                       : data.inflation_receipts?.filter(r => r.vote !== 0)) || [];
+                    const sortedReceipts = sortReceipts(filteredReceipts, sortModeInfl);
                     
                     return (
                       <div id="receipts-inflation">
                         <div className="flex items-center justify-between mb-2">
                           <h3 className="text-xs font-medium text-zinc-300">{TOP_DRIVERS_INFLATION_HEADER}</h3>
-                          <ReceiptsFilterToggle
-                            mode={showNeutralInfl}
-                            setMode={setShowNeutralInfl}
-                            activeCount={activeSignals}
-                            totalCount={totalSignals}
-                            neutralCount={neutralSignals}
-                          />
+                          <div className="flex items-center gap-2">
+                            <ReceiptsFilterToggle
+                              mode={showNeutralInfl}
+                              setMode={setShowNeutralInfl}
+                              activeCount={activeSignals}
+                              totalCount={totalSignals}
+                              neutralCount={neutralSignals}
+                            />
+                            <ReceiptsSortToggle
+                              mode={sortModeInfl}
+                              setMode={setSortModeInfl}
+                            />
+                          </div>
                         </div>
                         <div className="overflow-x-auto max-h-[320px] overflow-y-auto">
                           <table className="w-full text-xs border-collapse">
@@ -1836,7 +1857,7 @@ function GhostRegimePageContent() {
                               </tr>
                             </thead>
                             <tbody>
-                              {filteredReceipts.map((receipt, idx) => {
+                              {sortedReceipts.map((receipt, idx) => {
                                 const { rule, meta } = splitReceiptNote(receipt.note);
                                 return (
                                   <tr key={idx} className={`border-b border-zinc-900/50 ${idx % 2 === 0 ? 'bg-white/0' : 'bg-white/[0.03]'}`}>

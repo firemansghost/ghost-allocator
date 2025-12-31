@@ -37,6 +37,10 @@ import {
   COPY_BIGGEST_CHANGE_TOOLTIP,
   COPY_BIGGEST_CHANGE_COPIED,
   PREV_NOT_FOUND_INFO_TOOLTIP,
+  COMPARE_CONTEXT_LABEL,
+  COMPARE_CONTEXT_VIEWING,
+  COMPARE_CONTEXT_COMPARING,
+  PILLS_DELTA_COLORS_TOOLTIP,
 } from '@/lib/ghostregime/ghostregimePageCopy';
 import { Tooltip } from '@/components/Tooltip';
 
@@ -251,6 +255,20 @@ export function ComparePanel({
         </div>
       </div>
       
+      {/* Context line */}
+      {(currentAsOf || prevAsOf) && (
+        <div className="mb-2 text-[10px] text-zinc-400">
+          {COMPARE_CONTEXT_LABEL}{' '}
+          {currentAsOf && (
+            <span>{COMPARE_CONTEXT_VIEWING} {currentAsOf}</span>
+          )}
+          {currentAsOf && prevAsOf && ' • '}
+          {prevAsOf && (
+            <span>{COMPARE_CONTEXT_COMPARING} {prevAsOf}</span>
+          )}
+        </div>
+      )}
+      
       {/* Prev not found hint - info icon */}
       {prevNotFoundHint && (
         <div className="mb-2 flex items-center gap-1.5">
@@ -310,6 +328,11 @@ export function ComparePanel({
         ) : (
           <>
             {/* Pills mode */}
+            <div className="flex items-center gap-2 mb-2">
+              <Tooltip content={PILLS_DELTA_COLORS_TOOLTIP}>
+                <span className="text-zinc-400 text-[10px] cursor-help">ⓘ</span>
+              </Tooltip>
+            </div>
             <div className="flex flex-wrap gap-1.5">
               {/* Regime pill */}
               <span className={`px-2 py-0.5 rounded border text-[10px] ${

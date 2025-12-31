@@ -110,7 +110,14 @@ export const COMPARE_RESET_TOOLTIP = 'Close compare panel and reset to default v
 export const COPY_BIGGEST_CHANGE_TOOLTIP = 'Copy biggest change';
 export const COPY_BIGGEST_CHANGE_COPIED = 'Copied';
 export const PREV_NOT_FOUND_INFO_TOOLTIP = 'Requested prev snapshot wasn\'t found. Using the nearest previous snapshot instead.';
-export const ACTIONABLE_CASH_PILL_TOOLTIP = 'Cash is leftover because exposure was reduced (throttled). Not cash "held in" the asset.';
+export const ACTIONABLE_CASH_PILL_TOOLTIP = 'Cash = leftover after scaling targets down; it sits unallocated until rebalance. Not cash "held in" the asset.';
+export const COMPARE_CONTEXT_LABEL = 'Context:';
+export const COMPARE_CONTEXT_VIEWING = 'Viewing';
+export const COMPARE_CONTEXT_COMPARING = 'Comparing to';
+export const COMPARE_PREV_SNAPSHOT_TOOLTIP = 'Previous = the prior available trading snapshot in the current history window (not necessarily yesterday).';
+export const PILLS_DELTA_COLORS_TOOLTIP = 'Colors show change direction, not "good" or "bad".';
+export const RECEIPTS_SORT_DEFAULT = 'Default';
+export const RECEIPTS_SORT_BY_STRENGTH = 'By strength';
 
 // Snapshot viewing
 export const VIEWING_SNAPSHOT_LABEL = 'Viewing snapshot:';

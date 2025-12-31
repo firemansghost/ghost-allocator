@@ -7,6 +7,31 @@
 
 import type { GhostRegimeRow, RegimeType, SignalReceipt } from './types';
 
+/**
+ * Sort receipts by strength (absolute vote value) or keep default order
+ */
+export function sortReceipts(
+  receipts: SignalReceipt[],
+  mode: 'default' | 'strength'
+): SignalReceipt[] {
+  if (mode === 'default') {
+    return receipts;
+  }
+  
+  // Sort by absolute vote descending, then by key for deterministic tie-breaker
+  return [...receipts].sort((a, b) => {
+    const absA = Math.abs(a.vote);
+    const absB = Math.abs(b.vote);
+    
+    if (absB !== absA) {
+      return absB - absA; // Descending by absolute vote
+    }
+    
+    // Tie-breaker: sort by key (deterministic)
+    return a.key.localeCompare(b.key);
+  });
+}
+
 // Compare panel types
 export type CompareAxis = 'risk' | 'infl';
 export type CompareKind = 'regime' | 'crowded' | 'conviction' | 'agreement' | 'netvote' | 'confidence';
