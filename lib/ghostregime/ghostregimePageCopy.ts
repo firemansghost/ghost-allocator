@@ -99,6 +99,12 @@ export const COMPARE_DISABLED_TOOLTIP = 'Need at least 2 snapshots to compare.';
 export const COMPARE_REGIME_UNCHANGED = 'unchanged';
 export const COMPARE_BIGGEST_CHANGE_LABEL = 'Biggest change:';
 export const COMPARE_BIGGEST_CHANGE_TOOLTIP = 'Heuristic: largest movement among regime/conviction/agreement/confidence/net vote. Not advice.';
+export const COMPARE_TOGGLE_SUMMARY = 'Summary';
+export const COMPARE_TOGGLE_PILLS = 'Pills';
+export const COPY_COMPARE_LINK = 'Copy compare link';
+export const COPY_COMPARE_LINK_COPIED = 'Copied';
+export const COPY_COMPARE_LINK_TOOLTIP_DISABLED = 'No previous snapshot available.';
+export const PREV_SNAPSHOT_NOT_FOUND_HINT = 'Prev snapshot not found — using inferred previous.';
 export const ACTIONABLE_CASH_PILL_TOOLTIP = 'Cash is leftover because exposure was reduced (throttled). Not cash "held in" the asset.';
 
 // Snapshot viewing

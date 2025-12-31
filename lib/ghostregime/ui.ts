@@ -6,6 +6,18 @@
  */
 
 import type { GhostRegimeRow, RegimeType, SignalReceipt } from './types';
+
+// Compare panel types
+export type CompareAxis = 'risk' | 'infl';
+export type CompareKind = 'regime' | 'crowded' | 'conviction' | 'agreement' | 'netvote' | 'confidence';
+
+export interface CompareBiggestChange {
+  headline: string;
+  kind: CompareKind;
+  axis?: CompareAxis;
+  detail?: string;
+  tooltip: string;
+}
 import {
   AGREEMENT_TREND_RISK_PREFIX,
   AGREEMENT_TREND_INFLATION_PREFIX,
@@ -1063,6 +1075,98 @@ export function computeAxisStatDeltas(
 }
 
 /**
+ * Compute axis stat deltas as structured tokens for pills mode
+ */
+export function computeAxisStatDeltaTokens(
+  currRow: GhostRegimeRow,
+  prevRow: GhostRegimeRow | null | undefined,
+  axis: 'risk' | 'inflation'
+): Array<{ label: string; delta: number | null; tone: 'pos' | 'neg' | 'flat' | 'na' }> | null {
+  if (!prevRow) {
+    return null;
+  }
+  
+  const axisDirection = axis === 'risk' 
+    ? (currRow.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off')
+    : (currRow.infl_axis === 'Inflation' ? 'Inflation' : 'Disinflation');
+  
+  const currReceipts = axis === 'risk' ? currRow.risk_receipts : currRow.inflation_receipts;
+  const prevReceipts = axis === 'risk' ? prevRow.risk_receipts : prevRow.inflation_receipts;
+  
+  if (!currReceipts || currReceipts.length === 0 || !prevReceipts || prevReceipts.length === 0) {
+    return null;
+  }
+  
+  const currAgreement = computeAxisAgreement(currReceipts, axisDirection);
+  const prevAgreement = computeAxisAgreement(prevReceipts, axisDirection);
+  
+  if (currAgreement.total === 0 || prevAgreement.total === 0) {
+    return null;
+  }
+  
+  const currStats = computeAxisStats(currReceipts, axisDirection);
+  const prevStats = computeAxisStats(prevReceipts, axisDirection);
+  
+  const currNetVote = computeAxisNetVote(currReceipts, axis);
+  const prevNetVote = computeAxisNetVote(prevReceipts, axis);
+  
+  const currConviction = computeConviction(currNetVote.net, currStats.totalSignals);
+  const prevConviction = computeConviction(prevNetVote.net, prevStats.totalSignals);
+  
+  const tokens: Array<{ label: string; delta: number | null; tone: 'pos' | 'neg' | 'flat' | 'na' }> = [];
+  
+  // Agreement delta (percentage points)
+  if (currAgreement.pct !== null && prevAgreement.pct !== null) {
+    const delta = currAgreement.pct - prevAgreement.pct;
+    tokens.push({
+      label: `Agree ${delta >= 0 ? '+' : ''}${delta.toFixed(0)}pp`,
+      delta,
+      tone: getDeltaTone(delta),
+    });
+  }
+  
+  // Conviction delta
+  if (currConviction.index !== null && prevConviction.index !== null) {
+    const delta = currConviction.index - prevConviction.index;
+    tokens.push({
+      label: `Conv ${delta >= 0 ? '+' : ''}${delta}`,
+      delta,
+      tone: getDeltaTone(delta),
+    });
+  }
+  
+  // Confidence delta (same/up/down)
+  const confidenceOrder = ['High', 'Medium', 'Low', 'n/a'];
+  const currConfIdx = confidenceOrder.indexOf(currStats.confidence.label);
+  const prevConfIdx = confidenceOrder.indexOf(prevStats.confidence.label);
+  if (currConfIdx !== -1 && prevConfIdx !== -1) {
+    if (currConfIdx < prevConfIdx) {
+      tokens.push({ label: 'Conf up', delta: -1, tone: 'pos' });
+    } else if (currConfIdx > prevConfIdx) {
+      tokens.push({ label: 'Conf down', delta: 1, tone: 'neg' });
+    } else {
+      tokens.push({ label: 'Conf same', delta: 0, tone: 'flat' });
+    }
+  }
+  
+  // Net vote delta
+  if (currNetVote.net !== prevNetVote.net) {
+    const delta = currNetVote.net - prevNetVote.net;
+    tokens.push({
+      label: `Net ${delta >= 0 ? '+' : ''}${delta}`,
+      delta,
+      tone: getDeltaTone(delta),
+    });
+  }
+  
+  if (tokens.length === 0) {
+    return null;
+  }
+  
+  return tokens;
+}
+
+/**
  * Build actionable read line from current regime data
  */
 export function buildActionableReadLine(params: {
@@ -1157,6 +1261,33 @@ export function parseAsOfParam(param: string | null): { asof: string | null; err
 }
 
 /**
+ * Parse and validate prev query parameter
+ */
+export function parsePrevParam(param: string | null): { value: string | null; error?: string } {
+  if (!param) {
+    return { value: null };
+  }
+  
+  // Must match YYYY-MM-DD format
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(param)) {
+    return { value: null, error: 'Invalid prev date parameter.' };
+  }
+  
+  // Validate it's a real calendar date
+  const date = new Date(param + 'T00:00:00');
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const reconstructed = `${year}-${month}-${day}`;
+  
+  if (reconstructed !== param || isNaN(date.getTime())) {
+    return { value: null, error: 'Invalid prev date parameter.' };
+  }
+  
+  return { value: param };
+}
+
+/**
  * Build shareable URL with asof parameter
  */
 export function buildShareUrl(asof: string | null, baseUrl?: string): string {
@@ -1168,17 +1299,48 @@ export function buildShareUrl(asof: string | null, baseUrl?: string): string {
 }
 
 /**
+ * Build compare URL with asof and prev parameters
+ */
+export function buildCompareUrl(asof: string, prev: string, baseUrl?: string): string {
+  const base = baseUrl || (typeof window !== 'undefined' ? window.location.origin + window.location.pathname : '');
+  return `${base}?asof=${asof}&prev=${prev}`;
+}
+
+/**
+ * Get delta tone for styling
+ */
+export function getDeltaTone(delta: number | null | undefined): 'pos' | 'neg' | 'flat' | 'na' {
+  if (delta === null || delta === undefined) {
+    return 'na';
+  }
+  if (delta > 0) return 'pos';
+  if (delta < 0) return 'neg';
+  return 'flat';
+}
+
+/**
  * Compute the "biggest change" headline for compare panel
  * Returns the most meaningful delta between current and previous snapshot
  */
 export function computeCompareBiggestChange(
   currentRow: GhostRegimeRow,
   prevRow: GhostRegimeRow
-): { text: string; tooltip?: string } | null {
+): CompareBiggestChange | null {
+  const tooltip = 'Heuristic: largest movement among regime/conviction/agreement/confidence/net vote. Not advice.';
+  
   // 1) Regime change (highest priority)
   if (currentRow.regime !== prevRow.regime) {
+    const riskLabelCurr = currentRow.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
+    const inflLabelCurr = currentRow.infl_axis;
+    const riskLabelPrev = prevRow.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
+    const inflLabelPrev = prevRow.infl_axis;
+    const detail = `${riskLabelPrev} + ${inflLabelPrev} → ${riskLabelCurr} + ${inflLabelCurr}`;
+    
     return {
-      text: `Regime flip — ${prevRow.regime} → ${currentRow.regime}`,
+      headline: `Regime flip — ${prevRow.regime} → ${currentRow.regime}`,
+      kind: 'regime',
+      detail,
+      tooltip,
     };
   }
 
@@ -1254,12 +1416,18 @@ export function computeCompareBiggestChange(
   // Check for crowded toggles
   if (riskCrowdedCurr !== riskCrowdedPrev) {
     return {
-      text: riskCrowdedCurr ? 'Crowded ON (Risk)' : 'Crowded cleared (Risk)',
+      headline: riskCrowdedCurr ? 'Crowded ON (Risk)' : 'Crowded cleared (Risk)',
+      kind: 'crowded',
+      axis: 'risk',
+      tooltip,
     };
   }
   if (inflCrowdedCurr !== inflCrowdedPrev) {
     return {
-      text: inflCrowdedCurr ? 'Crowded ON (Inflation)' : 'Crowded cleared (Inflation)',
+      headline: inflCrowdedCurr ? 'Crowded ON (Inflation)' : 'Crowded cleared (Inflation)',
+      kind: 'crowded',
+      axis: 'infl',
+      tooltip,
     };
   }
 
@@ -1279,20 +1447,33 @@ export function computeCompareBiggestChange(
     const useRisk = riskConvAbs >= inflConvAbs;
     const delta = useRisk ? riskConvDelta! : inflConvDelta!;
     const axisName = useRisk ? 'Risk' : 'Inflation';
+    const axis = useRisk ? 'risk' as CompareAxis : 'infl' as CompareAxis;
     const convictionCurr = useRisk ? riskConvictionCurr : inflConvictionCurr;
     const statsCurr = useRisk ? riskStatsCurr : inflStatsCurr;
     const agreementCurr = useRisk ? riskAgreementCurr : inflAgreementCurr;
+    const netVoteCurrObj = useRisk ? computeAxisNetVote(currentRow.risk_receipts, 'risk') : computeAxisNetVote(currentRow.inflation_receipts, 'inflation');
+    const netVotePrevObj = useRisk ? computeAxisNetVote(prevRow.risk_receipts, 'risk') : computeAxisNetVote(prevRow.inflation_receipts, 'inflation');
     
     const sign = delta >= 0 ? '+' : '';
-    let text = `${axisName} conviction ${sign}${delta}`;
+    let headline = `${axisName} conviction ${sign}${delta}`;
     // Check if new conviction is extreme and meets crowding criteria
     if (convictionCurr.index !== null && convictionCurr.index >= 76 &&
         statsCurr.confidence.label === 'High' &&
         agreementCurr.pct !== null && agreementCurr.pct >= 80 &&
         statsCurr.totalSignals > 0 && (statsCurr.nonNeutral / statsCurr.totalSignals) >= 0.5) {
-      text += ' (crowding risk ↑)';
+      headline += ' (crowding risk ↑)';
     }
-    return { text };
+    
+    // Detail: net vote from→to
+    const detail = `${netVotePrevObj.net}/${netVotePrevObj.totalSignals} → ${netVoteCurrObj.net}/${netVoteCurrObj.totalSignals}`;
+    
+    return {
+      headline,
+      kind: 'conviction',
+      axis,
+      detail,
+      tooltip,
+    };
   }
 
   // 4) Agreement pp change (>= 15pp, pick largest absolute)
@@ -1310,8 +1491,23 @@ export function computeCompareBiggestChange(
     const useRisk = riskAgreeAbs >= inflAgreeAbs;
     const delta = useRisk ? riskAgreeDelta! : inflAgreeDelta!;
     const axisName = useRisk ? 'Risk' : 'Inflation';
+    const axis = useRisk ? 'risk' as CompareAxis : 'infl' as CompareAxis;
+    const agreementCurr = useRisk ? riskAgreementCurr : inflAgreementCurr;
+    const agreementPrev = useRisk ? riskAgreementPrev : inflAgreementPrev;
     const sign = delta >= 0 ? '+' : '';
-    return { text: `${axisName} agreement ${sign}${Math.round(delta)}pp` };
+    
+    // Detail: agreement fraction from→to
+    const detail = agreementPrev.total > 0 && agreementCurr.total > 0
+      ? `${agreementPrev.agree}/${agreementPrev.total} → ${agreementCurr.agree}/${agreementCurr.total}`
+      : undefined;
+    
+    return {
+      headline: `${axisName} agreement ${sign}${Math.round(delta)}pp`,
+      kind: 'agreement',
+      axis,
+      detail,
+      tooltip,
+    };
   }
 
   // 5) Net vote swing (>= 2, pick largest absolute)
@@ -1330,22 +1526,43 @@ export function computeCompareBiggestChange(
     const useRisk = riskNetAbs >= inflNetAbs;
     const delta = useRisk ? riskNetDelta : inflNetDelta;
     const axisName = useRisk ? 'Risk' : 'Inflation';
+    const axis = useRisk ? 'risk' as CompareAxis : 'infl' as CompareAxis;
+    const netVoteCurrObj = useRisk ? riskNetVoteCurrObj : inflNetVoteCurrObj;
+    const netVotePrevObj = useRisk ? riskNetVotePrevObj : inflNetVotePrevObj;
     const sign = delta >= 0 ? '+' : '';
     const direction = useRisk 
       ? (delta > 0 ? 'Risk On' : 'Risk Off')
       : (delta > 0 ? 'Inflation' : 'Disinflation');
-    return { text: `${axisName} net vote ${sign}${delta} (${direction})` };
+    
+    // Detail: net vote from→to
+    const detail = `${netVotePrevObj.net}/${netVotePrevObj.totalSignals} → ${netVoteCurrObj.net}/${netVoteCurrObj.totalSignals}`;
+    
+    return {
+      headline: `${axisName} net vote ${sign}${delta} (${direction})`,
+      kind: 'netvote',
+      axis,
+      detail,
+      tooltip,
+    };
   }
 
   // 6) Confidence label change
   if (riskStatsCurr.confidence.label !== riskStatsPrev.confidence.label) {
     return {
-      text: `Risk confidence ${riskStatsPrev.confidence.label}→${riskStatsCurr.confidence.label}`,
+      headline: `Risk confidence ${riskStatsPrev.confidence.label}→${riskStatsCurr.confidence.label}`,
+      kind: 'confidence',
+      axis: 'risk',
+      detail: `${riskStatsPrev.confidence.label} → ${riskStatsCurr.confidence.label}`,
+      tooltip,
     };
   }
   if (inflStatsCurr.confidence.label !== inflStatsPrev.confidence.label) {
     return {
-      text: `Inflation confidence ${inflStatsPrev.confidence.label}→${inflStatsCurr.confidence.label}`,
+      headline: `Inflation confidence ${inflStatsPrev.confidence.label}→${inflStatsCurr.confidence.label}`,
+      kind: 'confidence',
+      axis: 'infl',
+      detail: `${inflStatsPrev.confidence.label} → ${inflStatsCurr.confidence.label}`,
+      tooltip,
     };
   }
 

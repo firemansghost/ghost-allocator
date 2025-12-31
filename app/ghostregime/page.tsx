@@ -49,6 +49,10 @@ import {
   buildCopySnapshotText,
   parseAsOfParam,
   buildShareUrl,
+  parsePrevParam,
+  buildCompareUrl,
+  type CompareKind,
+  type CompareAxis,
 } from '@/lib/ghostregime/ui';
 import {
   WHY_REGIME_TITLE,
@@ -136,8 +140,9 @@ function GhostRegimePageContent() {
   const [asofError, setAsofError] = useState<string | null>(null);
   const [showCompare, setShowCompare] = useState(false);
   const [prevRow, setPrevRow] = useState<GhostRegimeRow | null>(null);
+  const [prevNotFoundHint, setPrevNotFoundHint] = useState(false);
 
-  // Parse asof param on mount and when searchParams change
+  // Parse asof and prev params on mount and when searchParams change
   useEffect(() => {
     const asofParam = searchParams.get('asof');
     const { asof, error } = parseAsOfParam(asofParam);
@@ -152,6 +157,10 @@ function GhostRegimePageContent() {
       setAsofError(null);
       setViewingSnapshot(null);
     }
+    
+    // Parse prev param (validation only, actual loading happens in fetchData)
+    const prevParam = searchParams.get('prev');
+    parsePrevParam(prevParam);
   }, [searchParams]);
 
   useEffect(() => {
@@ -168,14 +177,19 @@ function GhostRegimePageContent() {
           setHealthStatus(health);
         }
         
-        // If asof is specified, try to load from history first
-        if (asof) {
-          // Fetch history with wider lookback to find the snapshot
-          const startDateObj = new Date(asof);
-          startDateObj.setDate(startDateObj.getDate() - 30); // 30 days back
+        // Check for prev param
+        const prevParam = searchParams.get('prev');
+        const { value: prev } = parsePrevParam(prevParam);
+        
+        // If asof or prev is specified, fetch history with wider lookback
+        if (asof || prev) {
+          // Use 90 days lookback when asof or prev is present
+          const targetDate = asof || prev || data?.date || new Date().toISOString().split('T')[0];
+          const startDateObj = new Date(targetDate);
+          startDateObj.setDate(startDateObj.getDate() - 90); // 90 days back
           const startDate = startDateObj.toISOString().split('T')[0];
-          const endDateObj = new Date(asof);
-          endDateObj.setDate(endDateObj.getDate() + 1); // Include the asof date
+          const endDateObj = new Date(targetDate);
+          endDateObj.setDate(endDateObj.getDate() + 1); // Include the target date
           const endDate = endDateObj.toISOString().split('T')[0];
           
           try {
@@ -186,25 +200,72 @@ function GhostRegimePageContent() {
             
             if (historyResponse.ok) {
               const history: GhostRegimeRow[] = await historyResponse.json();
-              const snapshotRow = history.find(row => row.date === asof);
               
-              if (snapshotRow) {
-                setData(snapshotRow);
-                setViewingSnapshot(asof);
-                setAsofError(null);
-                setLoading(false);
-                return;
-              } else {
-                // Snapshot not found, fall back to latest
-                setAsofError(ASOF_NOT_FOUND_FALLBACK_HINT.replace('{date}', asof));
-                setViewingSnapshot(null);
-                // Continue to fetch latest below
+              // If asof is specified, try to load that snapshot
+              if (asof) {
+                const snapshotRow = history.find(row => row.date === asof);
+                
+                if (snapshotRow) {
+                  setData(snapshotRow);
+                  setViewingSnapshot(asof);
+                  setAsofError(null);
+                  
+                  // If prev param is also specified, find that row
+                  if (prev) {
+                    const prevRowFound = history.find(row => row.date === prev);
+                    if (prevRowFound) {
+                      setPrevRow(prevRowFound);
+                      setPrevNotFoundHint(false);
+                    } else {
+                      // Find inferred previous (row before snapshot)
+                      const snapshotIdx = history.findIndex(row => row.date === asof);
+                      const inferredPrev = snapshotIdx >= 0 && snapshotIdx + 1 < history.length
+                        ? history[snapshotIdx + 1]
+                        : null;
+                      if (inferredPrev) {
+                        setPrevRow(inferredPrev);
+                        setPrevNotFoundHint(true);
+                      } else {
+                        setPrevRow(null);
+                        setPrevNotFoundHint(false);
+                      }
+                    }
+                  } else {
+                    // No prev param, find inferred previous
+                    const snapshotIdx = history.findIndex(row => row.date === asof);
+                    const inferredPrev = snapshotIdx >= 0 && snapshotIdx + 1 < history.length
+                      ? history[snapshotIdx + 1]
+                      : null;
+                    setPrevRow(inferredPrev);
+                    setPrevNotFoundHint(false);
+                  }
+                  
+                  setLoading(false);
+                  return;
+                } else {
+                  // Snapshot not found, fall back to latest
+                  setAsofError(ASOF_NOT_FOUND_FALLBACK_HINT.replace('{date}', asof));
+                  setViewingSnapshot(null);
+                  // Continue to fetch latest below
+                }
+              } else if (prev) {
+                // Only prev param specified (no asof), find prev row for later use
+                const prevRowFound = history.find(row => row.date === prev);
+                if (prevRowFound) {
+                  setPrevRow(prevRowFound);
+                  setPrevNotFoundHint(false);
+                } else {
+                  setPrevRow(null);
+                  setPrevNotFoundHint(false);
+                }
               }
             }
           } catch (err) {
             // History fetch failed, fall back to latest
-            setAsofError(ASOF_NOT_FOUND_FALLBACK_HINT.replace('{date}', asof));
-            setViewingSnapshot(null);
+            if (asof) {
+              setAsofError(ASOF_NOT_FOUND_FALLBACK_HINT.replace('{date}', asof));
+              setViewingSnapshot(null);
+            }
           }
         }
         
@@ -254,9 +315,15 @@ function GhostRegimePageContent() {
       setHistoryLoading(true);
       try {
         const endDate = data.date;
-        // Calculate start date (approximately 10 trading days back)
+        // Expand lookback to 90 days if asof or prev param is present
+        const asofParam = searchParams.get('asof');
+        const prevParam = searchParams.get('prev');
+        const hasSnapshotParams = asofParam || prevParam;
+        const lookbackDays = hasSnapshotParams ? 90 : 14;
+        
+        // Calculate start date
         const startDateObj = new Date(endDate);
-        startDateObj.setDate(startDateObj.getDate() - 14); // 14 calendar days ≈ 10 trading days
+        startDateObj.setDate(startDateObj.getDate() - lookbackDays);
         const startDate = startDateObj.toISOString().split('T')[0];
 
         const response = await fetch(
@@ -274,20 +341,53 @@ function GhostRegimePageContent() {
         
         // Get last 2 valid rows (sorted by date descending)
         // If viewing snapshot, find the row before the snapshot
+        // If prev param is specified, use that instead of inferred
         let validRows = history
           .filter((row) => !row.stale && row.date)
           .sort((a, b) => b.date.localeCompare(a.date));
         
+        const prevParamValue = searchParams.get('prev');
+        const { value: prev } = parsePrevParam(prevParamValue);
+        
         if (viewingSnapshot) {
-          // Find the snapshot row and the one before it
+          // Find the snapshot row
           const snapshotIdx = validRows.findIndex(row => row.date === viewingSnapshot);
-          if (snapshotIdx >= 0 && snapshotIdx + 1 < validRows.length) {
-            validRows = [validRows[snapshotIdx], validRows[snapshotIdx + 1]];
+          if (snapshotIdx >= 0) {
+            // If prev param is specified, use that row
+            if (prev) {
+              const prevIdx = validRows.findIndex(row => row.date === prev);
+              if (prevIdx >= 0) {
+                validRows = [validRows[snapshotIdx], validRows[prevIdx]];
+              } else {
+                // Prev not found, use inferred
+                if (snapshotIdx + 1 < validRows.length) {
+                  validRows = [validRows[snapshotIdx], validRows[snapshotIdx + 1]];
+                } else {
+                  validRows = validRows.slice(0, 1);
+                }
+              }
+            } else {
+              // No prev param, use inferred
+              if (snapshotIdx + 1 < validRows.length) {
+                validRows = [validRows[snapshotIdx], validRows[snapshotIdx + 1]];
+              } else {
+                validRows = validRows.slice(0, 1);
+              }
+            }
           } else {
             validRows = validRows.slice(0, 2);
           }
         } else {
           validRows = validRows.slice(0, 2);
+        }
+        
+        // Set prevRow if we have 2 rows
+        if (validRows.length >= 2) {
+          setPrevRow(validRows[1]);
+          setPrevNotFoundHint(false);
+        } else if (validRows.length === 1 && !prevRow) {
+          // Only one row, no previous available
+          setPrevRow(null);
         }
 
         if (validRows.length >= 2) {
@@ -322,7 +422,7 @@ function GhostRegimePageContent() {
     }
 
     fetchHistory();
-  }, [data, viewingSnapshot]);
+  }, [data, viewingSnapshot, searchParams]);
 
   if (notSeeded) {
     return (
@@ -696,6 +796,34 @@ function GhostRegimePageContent() {
                 prevRow={prevRow}
                 currentAsOf={data.date}
                 prevAsOf={prevRow.date}
+                onJump={({ kind, axis }) => {
+                  if (kind === 'regime') {
+                    // Scroll to regime summary
+                    const element = document.getElementById('regime-summary');
+                    if (element) {
+                      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                  } else if (axis === 'risk' || axis === 'infl') {
+                    // Expand Nerd Mode if collapsed
+                    if (!showAdvanced) {
+                      setShowAdvanced(true);
+                      // Wait a bit for the DOM to update, then scroll
+                      setTimeout(() => {
+                        const element = document.getElementById(axis === 'risk' ? 'receipts-risk' : 'receipts-inflation');
+                        if (element) {
+                          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                      }, 100);
+                    } else {
+                      // Already expanded, just scroll
+                      const element = document.getElementById(axis === 'risk' ? 'receipts-risk' : 'receipts-inflation');
+                      if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }
+                    }
+                  }
+                }}
+                prevNotFoundHint={prevNotFoundHint}
               />
             </div>
           )}
@@ -1200,8 +1328,9 @@ function GhostRegimePageContent() {
           const hasFlipWatch = data.flip_watch_status && data.flip_watch_status !== 'NONE';
           
           return (
-            <GlassCard className="p-6">
-              <h2 className="text-sm font-semibold text-zinc-50 mb-4">{REGIME_SUMMARY_TITLE}</h2>
+            <div id="regime-summary">
+              <GlassCard className="p-6">
+                <h2 className="text-sm font-semibold text-zinc-50 mb-4">{REGIME_SUMMARY_TITLE}</h2>
               <div className="space-y-3">
                 {regimeConfidenceLabel && (
                   <div>
@@ -1248,6 +1377,7 @@ function GhostRegimePageContent() {
                 </div>
               </div>
             </GlassCard>
+            </div>
           );
         })()}
       </div>
