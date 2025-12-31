@@ -1470,15 +1470,12 @@ export function getDriverRuleMeta(receipt: SignalReceipt): { rule?: string; meta
 
 /**
  * Get regime description for legend
+ * Thin wrapper around canonical regimeLegend module
  */
 export function getRegimeDescription(regime: RegimeType): string {
-  const descriptions: Record<RegimeType, string> = {
-    GOLDILOCKS: 'Risk On + Disinflation. Markets are brave and prices are calm.',
-    REFLATION: 'Risk On + Inflation. Markets are brave but prices are rising.',
-    INFLATION: 'Risk Off + Inflation. Markets are cautious and prices are rising.',
-    DEFLATION: 'Risk Off + Disinflation. Markets are cautious and prices are falling.',
-  };
-  return descriptions[regime] || '';
+  // Import from canonical module to prevent drift
+  const { getRegimeDescription: getCanonicalDescription } = require('./regimeLegend');
+  return getCanonicalDescription(regime);
 }
 
 /**

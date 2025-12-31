@@ -60,6 +60,7 @@ import {
   type CompareKind,
   type CompareAxis,
 } from '@/lib/ghostregime/ui';
+import { REGIME_LEGEND_ITEMS } from '@/lib/ghostregime/regimeLegend';
 import {
   WHY_REGIME_TITLE,
   TOP_DRIVERS_TITLE,
@@ -995,9 +996,9 @@ function GhostRegimePageContent() {
                 <div className="text-[10px] text-zinc-400">
                   <strong>{REGIME_LEGEND_TITLE}:</strong>
                   <ul className="mt-1 space-y-0.5">
-                    {REGIME_MAP.map((mapPos) => (
-                      <li key={mapPos.regime} className="text-zinc-500">
-                        {mapPos.label}: {getRegimeDescription(mapPos.regime)}
+                    {REGIME_LEGEND_ITEMS.map((item) => (
+                      <li key={item.key} className="text-zinc-500">
+                        {item.label}: {item.description}
                       </li>
                     ))}
                   </ul>
@@ -1005,7 +1006,7 @@ function GhostRegimePageContent() {
                 <div className="text-[10px] text-zinc-300">
                   {selectedRegime ? (
                     <div>
-                      <strong>About {selectedRegime}:</strong> {getRegimeDescription(selectedRegime)}{' '}
+                      <strong>About {selectedRegime}:</strong> {REGIME_LEGEND_ITEMS.find(item => item.key === selectedRegime)?.description || ''}{' '}
                       <span className="text-zinc-400">{REGIME_LEGEND_SELECTED_SUFFIX}</span>
                       <button
                         onClick={() => setSelectedRegime(null)}
@@ -1016,7 +1017,7 @@ function GhostRegimePageContent() {
                     </div>
                   ) : (
                     <div>
-                      <strong>About {data.regime}:</strong> {getRegimeDescription(data.regime)}
+                      <strong>About {data.regime}:</strong> {REGIME_LEGEND_ITEMS.find(item => item.key === data.regime)?.description || ''}
                     </div>
                   )}
                 </div>

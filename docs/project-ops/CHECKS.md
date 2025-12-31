@@ -43,6 +43,11 @@
 - Confirm GhostRegime pages have improved visual hierarchy and key info is scannable
 - Run copy drift check: `npm run check:ghostregime-copy` (ensures Builder education copy stays centralized)
 
+## V7.4 verification
+- Run regime legend drift check: `npm run check:ghostregime-legend` (ensures regime descriptions stay centralized in lib/ghostregime/regimeLegend.ts)
+- Confirm /ghostregime and /ghostregime/methodology both use canonical regime descriptions
+- Confirm methodology page has "Regimes at a glance" section with static 2x2 map
+
 ## Known Failure Modes
 - Delta calculations look "wrong" if current holdings don't sum to ~100%
 - Confusion between "Target mix" (what to set) vs "Ghost sleeves" (concept)

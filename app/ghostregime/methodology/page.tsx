@@ -15,6 +15,14 @@ import {
   GHOSTREGIME_STALE_BEHAVIOR_LINE,
   GHOSTREGIME_COMMODITIES_FALLBACK_NOTE,
 } from '@/lib/ghostregime/content';
+import { REGIME_LEGEND_ITEMS, REGIME_AXIS_LABELS } from '@/lib/ghostregime/regimeLegend';
+import {
+  METHODOLOGY_REGIMES_AT_GLANCE_TITLE,
+  METHODOLOGY_HOW_MAP_CHOSEN_TITLE,
+  METHODOLOGY_HOW_ALLOCATIONS_TITLE,
+  METHODOLOGY_HOW_MAP_CHOSEN_STEPS,
+  METHODOLOGY_HOW_ALLOCATIONS_STEPS,
+} from '@/lib/ghostregime/methodologyCopy';
 
 export const metadata: Metadata = buildMetadata({
   title: 'GhostRegime Methodology - Ghost Allocator',
@@ -40,6 +48,9 @@ export default function MethodologyPage() {
         <nav className="space-y-1 text-sm">
           <a href="#overview" className="block text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline">
             Overview
+          </a>
+          <a href="#regimes-at-a-glance" className="block text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline">
+            Regimes at a glance
           </a>
           <a href="#option-b" className="block text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline">
             Option B Voting
@@ -84,6 +95,80 @@ export default function MethodologyPage() {
             This is a daily model. Humans usually rebalance on a cadence, not every time a number twitches.
           </p>
         </div>
+        </GlassCard>
+      </div>
+
+      {/* Regimes at a glance */}
+      <div id="regimes-at-a-glance" className="scroll-mt-6">
+        <GlassCard className="p-4 sm:p-5">
+          <h2 className="text-lg font-semibold text-zinc-50 mb-3">{METHODOLOGY_REGIMES_AT_GLANCE_TITLE}</h2>
+          
+          {/* Static 2x2 regime map */}
+          <div className="mb-4">
+            <div className="relative grid grid-cols-2 grid-rows-2 gap-2 p-4 border border-zinc-800 rounded-lg bg-zinc-900/30">
+              {/* Axis labels */}
+              <div className="absolute -left-8 top-1/2 -translate-y-1/2 text-[10px] text-zinc-400 -rotate-90 whitespace-nowrap">
+                {REGIME_AXIS_LABELS.inflation} ↑
+              </div>
+              <div className="absolute -right-8 top-1/2 -translate-y-1/2 text-[10px] text-zinc-400 rotate-90 whitespace-nowrap">
+                {REGIME_AXIS_LABELS.disinflation} ↓
+              </div>
+              <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] text-zinc-400 whitespace-nowrap">
+                ← {REGIME_AXIS_LABELS.riskOff}
+              </div>
+              <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] text-zinc-400 whitespace-nowrap">
+                {REGIME_AXIS_LABELS.riskOn} →
+              </div>
+              
+              {/* Grid cells - arranged as 2x2: top row = Risk On, bottom row = Risk Off; left col = Disinflation, right col = Inflation */}
+              <div className="p-3 rounded border border-zinc-700 bg-zinc-900/50 text-center">
+                <div className="text-xs font-semibold text-zinc-200 mb-1">GOLDILOCKS</div>
+                <div className="text-[10px] text-zinc-400">Risk On / Disinflation</div>
+              </div>
+              <div className="p-3 rounded border border-zinc-700 bg-zinc-900/50 text-center">
+                <div className="text-xs font-semibold text-zinc-200 mb-1">REFLATION</div>
+                <div className="text-[10px] text-zinc-400">Risk On / Inflation</div>
+              </div>
+              <div className="p-3 rounded border border-zinc-700 bg-zinc-900/50 text-center">
+                <div className="text-xs font-semibold text-zinc-200 mb-1">DEFLATION</div>
+                <div className="text-[10px] text-zinc-400">Risk Off / Disinflation</div>
+              </div>
+              <div className="p-3 rounded border border-zinc-700 bg-zinc-900/50 text-center">
+                <div className="text-xs font-semibold text-zinc-200 mb-1">INFLATION</div>
+                <div className="text-[10px] text-zinc-400">Risk Off / Inflation</div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Legend list */}
+          <div className="space-y-2 text-sm text-zinc-300">
+            {REGIME_LEGEND_ITEMS.map((item) => (
+              <div key={item.key} className="border-l-2 border-amber-400/30 pl-3">
+                <div className="font-medium text-zinc-200">{item.label}</div>
+                <div className="text-zinc-400 text-xs mt-0.5">{item.description}</div>
+              </div>
+            ))}
+          </div>
+        </GlassCard>
+      </div>
+
+      {/* How the map is chosen */}
+      <div id="how-map-chosen" className="scroll-mt-6">
+        <GlassCard className="p-4 sm:p-5">
+          <h2 className="text-lg font-semibold text-zinc-50 mb-3">{METHODOLOGY_HOW_MAP_CHOSEN_TITLE}</h2>
+          <div className="space-y-3 text-sm text-zinc-300 leading-relaxed">
+            <p>
+              The regime map is determined by a simple 3-step flow:
+            </p>
+            <ol className="space-y-2 pl-4 list-decimal">
+              {METHODOLOGY_HOW_MAP_CHOSEN_STEPS.map((step, idx) => (
+                <li key={idx}>{step}</li>
+              ))}
+            </ol>
+            <p className="text-zinc-400 text-xs italic mt-3">
+              Signals vote on risk and inflation directions independently. The combination of these two axes determines which quadrant (regime) we're in.
+            </p>
+          </div>
         </GlassCard>
       </div>
 
@@ -150,6 +235,26 @@ export default function MethodologyPage() {
             </div>
           </details>
         </div>
+        </GlassCard>
+      </div>
+
+      {/* How allocations are produced */}
+      <div id="how-allocations" className="scroll-mt-6">
+        <GlassCard className="p-4 sm:p-5">
+          <h2 className="text-lg font-semibold text-zinc-50 mb-3">{METHODOLOGY_HOW_ALLOCATIONS_TITLE}</h2>
+          <div className="space-y-3 text-sm text-zinc-300 leading-relaxed">
+            <p>
+              Allocations flow through a simple pipeline:
+            </p>
+            <ol className="space-y-2 pl-4 list-decimal">
+              {METHODOLOGY_HOW_ALLOCATIONS_STEPS.map((step, idx) => (
+                <li key={idx}>{step}</li>
+              ))}
+            </ol>
+            <p className="text-zinc-400 text-xs italic mt-3">
+              Important: This cash is Schwab cash, not Voya Stable Value (cash-like). They&apos;re different things.
+            </p>
+          </div>
         </GlassCard>
       </div>
 
