@@ -119,6 +119,10 @@ import {
   REGIME_LEGEND_TITLE,
   REGIME_LEGEND_RESET,
   REGIME_LEGEND_SELECTED_SUFFIX,
+  REGIME_MAP_LEGEND_SUMMARY,
+  REGIME_MAP_LEGEND_TOOLTIP,
+  REGIME_MAP_METHODOLOGY_CTA,
+  REGIME_MAP_METHODOLOGY_LINK,
 } from '@/lib/ghostregime/ghostregimePageCopy';
 import Link from 'next/link';
 
@@ -711,6 +715,13 @@ function GhostRegimePageContent() {
               </button>
             </Tooltip>
           )}
+          {/* Methodology link */}
+          <Link
+            href="/ghostregime/methodology"
+            className="px-2 py-1 text-[10px] rounded border border-zinc-700 bg-zinc-900/50 text-amber-400 hover:text-amber-300 hover:bg-zinc-800 hover:border-amber-400/50 transition-colors font-medium"
+          >
+            {REGIME_MAP_METHODOLOGY_CTA}
+          </Link>
         </div>
       </div>
 
@@ -905,7 +916,15 @@ function GhostRegimePageContent() {
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Row 1, Col 1: Regime Map */}
         <GlassCard className="p-6">
-            <h2 className="text-sm font-semibold text-zinc-50 mb-4">Regime Map</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-semibold text-zinc-50">Regime Map</h2>
+              <Link
+                href="/ghostregime/methodology"
+                className="text-xs text-amber-400 hover:text-amber-300 underline underline-offset-2 font-medium"
+              >
+                {REGIME_MAP_METHODOLOGY_CTA}
+              </Link>
+            </div>
             <div className="space-y-3">
               {/* X-axis labels */}
               <div className="grid grid-cols-3 gap-1">
@@ -993,16 +1012,7 @@ function GhostRegimePageContent() {
               
               {/* Regime legend and description */}
               <div className="pt-2 border-t border-zinc-800 space-y-2">
-                <div className="text-[10px] text-zinc-400">
-                  <strong>{REGIME_LEGEND_TITLE}:</strong>
-                  <ul className="mt-1 space-y-0.5">
-                    {REGIME_LEGEND_ITEMS.map((item) => (
-                      <li key={item.key} className="text-zinc-500">
-                        {item.label}: {item.description}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                {/* Current/Selected regime description - always visible */}
                 <div className="text-[10px] text-zinc-300">
                   {selectedRegime ? (
                     <div>
@@ -1021,15 +1031,32 @@ function GhostRegimePageContent() {
                     </div>
                   )}
                 </div>
-              </div>
-              
-              <div className="pt-2 border-t border-zinc-800">
-                <Link
-                  href="/ghostregime/methodology"
-                  className="text-[10px] text-amber-400 hover:text-amber-300 underline underline-offset-2"
-                >
-                  Read methodology →
-                </Link>
+                
+                {/* Collapsible legend dropdown */}
+                <details className="group">
+                  <summary className="cursor-pointer text-[10px] text-zinc-400 hover:text-zinc-300 list-none flex items-center gap-1">
+                    <span className="font-medium">{REGIME_MAP_LEGEND_SUMMARY} ({REGIME_LEGEND_ITEMS.length})</span>
+                    <span className="text-[8px] transition-transform group-open:rotate-180">▼</span>
+                  </summary>
+                  <ul className="mt-2 space-y-0.5 pl-2 border-l border-zinc-800">
+                    {REGIME_LEGEND_ITEMS.map((item) => {
+                      const isCurrent = item.key === data.regime;
+                      const isSelected = selectedRegime === item.key;
+                      return (
+                        <li 
+                          key={item.key} 
+                          className={`text-[10px] ${
+                            isCurrent || isSelected
+                              ? 'text-zinc-300 font-medium'
+                              : 'text-zinc-500'
+                          }`}
+                        >
+                          <span className="font-semibold">{item.label}:</span> {item.description}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </details>
               </div>
             </div>
           </GlassCard>

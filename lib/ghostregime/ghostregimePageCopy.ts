@@ -133,6 +133,10 @@ export const DRIVER_META_LABEL = 'Meta:';
 export const REGIME_LEGEND_TITLE = 'Regimes';
 export const REGIME_LEGEND_RESET = 'Reset';
 export const REGIME_LEGEND_SELECTED_SUFFIX = '(selected)';
+export const REGIME_MAP_LEGEND_SUMMARY = 'Legend';
+export const REGIME_MAP_LEGEND_TOOLTIP = 'Show the 4 regime descriptions.';
+export const REGIME_MAP_METHODOLOGY_CTA = 'Methodology →';
+export const REGIME_MAP_METHODOLOGY_LINK = 'Read methodology →';
 
 // Snapshot viewing
 export const VIEWING_SNAPSHOT_LABEL = 'Viewing snapshot:';
