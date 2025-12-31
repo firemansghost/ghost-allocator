@@ -17,7 +17,7 @@ import { ReceiptsFilterToggle } from '@/components/ghostregime/ReceiptsFilterTog
 import { ReceiptsSortToggle } from '@/components/ghostregime/ReceiptsSortToggle';
 import { ReceiptsSearchInput } from '@/components/ghostregime/ReceiptsSearchInput';
 import { ComparePanel } from '@/components/ghostregime/ComparePanel';
-import { MethodologyPillLink } from '@/components/ghostregime/MethodologyPillLink';
+import { GhostRegimeToolbar } from '@/components/ghostregime/GhostRegimeToolbar';
 import type { GhostRegimeRow, RegimeType } from '@/lib/ghostregime/types';
 import {
   formatBucketUtilizationLine,
@@ -605,123 +605,50 @@ function GhostRegimePageContent() {
         </div>
       </div>
 
-      {/* Timestamp & Stale Indicator */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div className="flex items-center gap-4 text-xs text-zinc-400 flex-wrap">
-          <span>As of {formatDate(data.date)}</span>
-          {viewingSnapshot && (
-            <Tooltip content={VIEWING_SNAPSHOT_TOOLTIP}>
-              <span className="inline-flex items-center gap-1 px-2 py-1 rounded border border-amber-400/20 bg-amber-400/5 text-amber-300/80">
-                <span>{VIEWING_SNAPSHOT_LABEL}</span>
-                <span className="font-mono">{viewingSnapshot}</span>
-              </span>
-            </Tooltip>
-          )}
-          {!viewingSnapshot && isStaleOrOld && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 rounded border border-amber-400/30 bg-amber-400/10 text-amber-300">
-              <span>⚠️</span>
-              <span>Stale data</span>
-              {healthStatus?.freshness && !healthStatus.freshness.is_fresh && (
-                <span className="text-[10px]">({healthStatus.freshness.age_days} days old)</span>
-              )}
-            </span>
-          )}
-          {!viewingSnapshot && !isStaleOrOld && healthStatus?.status === 'OK' && (
-            <span className="inline-flex items-center gap-1 text-green-400">
-              <span>✓</span>
-              <span>Fresh</span>
-            </span>
-          )}
-          {viewingSnapshot && (
-            <span className="inline-flex items-center gap-1 text-zinc-500">
-              <span>Snapshot</span>
-            </span>
-          )}
-          {asofError && (
-            <span className="text-[10px] text-amber-400/80 italic">{asofError}</span>
-          )}
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Date Picker */}
-          <input
-            type="date"
-            value={viewingSnapshot || data.date}
-            max={data.date}
-            onChange={(e) => {
-              const selectedDate = e.target.value;
-              if (selectedDate) {
-                router.push(`/ghostregime?asof=${selectedDate}`);
-              }
-            }}
-            className="px-2 py-1 text-[10px] rounded border border-zinc-700 bg-zinc-900/50 text-zinc-300 focus:outline-none focus:ring-1 focus:ring-amber-400/50"
-          />
-          {/* Back to latest link */}
-          {viewingSnapshot && (
-            <button
-              onClick={() => router.push('/ghostregime')}
-              className="text-[10px] text-amber-400 hover:text-amber-300 underline-offset-2 hover:underline"
-            >
-              {BACK_TO_LATEST_LINK}
-            </button>
-          )}
-          {/* Copy link button */}
-          <button
-            onClick={async () => {
-              const asofDate = viewingSnapshot || data.date;
-              const shareUrl = buildShareUrl(asofDate);
-              try {
-                await navigator.clipboard.writeText(shareUrl);
-                setLinkCopied(true);
-                setTimeout(() => setLinkCopied(false), 1500);
-              } catch (err) {
-                // Fallback for older browsers
-                const textarea = document.createElement('textarea');
-                textarea.value = shareUrl;
-                textarea.style.position = 'fixed';
-                textarea.style.opacity = '0';
-                document.body.appendChild(textarea);
-                textarea.select();
-                try {
-                  document.execCommand('copy');
-                  setLinkCopied(true);
-                  setTimeout(() => setLinkCopied(false), 1500);
-                } catch (e) {
-                  // Ignore
-                }
-                document.body.removeChild(textarea);
-              }
-            }}
-            className="px-2 py-1 text-[10px] rounded border border-zinc-700 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800 hover:border-zinc-600 transition-colors"
-            aria-label={linkCopied ? COPY_LINK_COPIED : COPY_LINK_BUTTON}
-          >
-            {linkCopied ? COPY_LINK_COPIED : COPY_LINK_BUTTON}
-          </button>
-          {/* Compare to previous link */}
-          {prevRow ? (
-            <Tooltip content={COMPARE_PREV_SNAPSHOT_TOOLTIP}>
-              <button
-                ref={compareTriggerRef}
-                onClick={() => setShowCompare(!showCompare)}
-                className="px-2 py-1 text-[10px] rounded border border-zinc-700 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800 hover:border-zinc-600 transition-colors"
-              >
-                {COMPARE_LINK_LABEL}
-              </button>
-            </Tooltip>
-          ) : (
-            <Tooltip content={COMPARE_DISABLED_TOOLTIP}>
-              <button
-                disabled
-                className="px-2 py-1 text-[10px] rounded border border-zinc-800 bg-zinc-900/30 text-zinc-600 cursor-not-allowed"
-                aria-label={COMPARE_DISABLED_TOOLTIP}
-              >
-                {COMPARE_LINK_LABEL}
-              </button>
-            </Tooltip>
-          )}
-          {/* Methodology pill */}
-          <MethodologyPillLink />
-        </div>
-      </div>
+      {/* Toolbar */}
+      <GhostRegimeToolbar
+        currentAsOf={data.date}
+        viewingSnapshot={viewingSnapshot}
+        maxDate={data.date}
+        isStaleOrOld={isStaleOrOld}
+        healthStatus={healthStatus}
+        asofError={asofError}
+        linkCopied={linkCopied}
+        onCopyLink={async () => {
+          const asofDate = viewingSnapshot || data.date;
+          const shareUrl = buildShareUrl(asofDate);
+          try {
+            await navigator.clipboard.writeText(shareUrl);
+            setLinkCopied(true);
+            setTimeout(() => setLinkCopied(false), 1500);
+          } catch (err) {
+            // Fallback for older browsers
+            const textarea = document.createElement('textarea');
+            textarea.value = shareUrl;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+              document.execCommand('copy');
+              setLinkCopied(true);
+              setTimeout(() => setLinkCopied(false), 1500);
+            } catch (e) {
+              // Ignore
+            }
+            document.body.removeChild(textarea);
+          }
+        }}
+        compareEnabled={!!prevRow}
+        onToggleCompare={() => setShowCompare(!showCompare)}
+        compareTriggerRef={compareTriggerRef}
+        onAsOfChange={(dateStr) => {
+          router.push(`/ghostregime?asof=${dateStr}`);
+        }}
+        onClearAsOf={() => {
+          router.push('/ghostregime');
+        }}
+      />
 
       {/* Today's Snapshot */}
       {buildTodaySnapshotLine(data) && (
