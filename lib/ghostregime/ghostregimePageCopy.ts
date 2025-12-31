@@ -105,6 +105,11 @@ export const COPY_COMPARE_LINK = 'Copy compare link';
 export const COPY_COMPARE_LINK_COPIED = 'Copied';
 export const COPY_COMPARE_LINK_TOOLTIP_DISABLED = 'No previous snapshot available.';
 export const PREV_SNAPSHOT_NOT_FOUND_HINT = 'Prev snapshot not found — using inferred previous.';
+export const COMPARE_RESET_BUTTON = 'Reset';
+export const COMPARE_RESET_TOOLTIP = 'Close compare panel and reset to default view';
+export const COPY_BIGGEST_CHANGE_TOOLTIP = 'Copy biggest change';
+export const COPY_BIGGEST_CHANGE_COPIED = 'Copied';
+export const PREV_NOT_FOUND_INFO_TOOLTIP = 'Requested prev snapshot wasn\'t found. Using the nearest previous snapshot instead.';
 export const ACTIONABLE_CASH_PILL_TOOLTIP = 'Cash is leftover because exposure was reduced (throttled). Not cash "held in" the asset.';
 
 // Snapshot viewing

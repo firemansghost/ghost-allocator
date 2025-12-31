@@ -1115,48 +1115,76 @@ export function computeAxisStatDeltaTokens(
   
   const tokens: Array<{ label: string; delta: number | null; tone: 'pos' | 'neg' | 'flat' | 'na' }> = [];
   
-  // Agreement delta (percentage points)
+  // Agreement delta (percentage points) - normalized format
   if (currAgreement.pct !== null && prevAgreement.pct !== null) {
     const delta = currAgreement.pct - prevAgreement.pct;
     tokens.push({
-      label: `Agree ${delta >= 0 ? '+' : ''}${delta.toFixed(0)}pp`,
+      label: `Agree: ${delta >= 0 ? '+' : ''}${delta.toFixed(0)}pp`,
       delta,
       tone: getDeltaTone(delta),
     });
   }
   
-  // Conviction delta
+  // Conviction delta - normalized format
   if (currConviction.index !== null && prevConviction.index !== null) {
     const delta = currConviction.index - prevConviction.index;
     tokens.push({
-      label: `Conv ${delta >= 0 ? '+' : ''}${delta}`,
+      label: `Conv: ${delta >= 0 ? '+' : ''}${delta === 0 ? '0' : delta}`,
       delta,
       tone: getDeltaTone(delta),
     });
   }
   
-  // Confidence delta (same/up/down)
+  // Confidence delta (same/up/down) - normalized format
   const confidenceOrder = ['High', 'Medium', 'Low', 'n/a'];
   const currConfIdx = confidenceOrder.indexOf(currStats.confidence.label);
   const prevConfIdx = confidenceOrder.indexOf(prevStats.confidence.label);
   if (currConfIdx !== -1 && prevConfIdx !== -1) {
     if (currConfIdx < prevConfIdx) {
-      tokens.push({ label: 'Conf up', delta: -1, tone: 'pos' });
+      tokens.push({ 
+        label: `Conf: ${prevStats.confidence.label}→${currStats.confidence.label}`, 
+        delta: -1, 
+        tone: 'pos' 
+      });
     } else if (currConfIdx > prevConfIdx) {
-      tokens.push({ label: 'Conf down', delta: 1, tone: 'neg' });
+      tokens.push({ 
+        label: `Conf: ${prevStats.confidence.label}→${currStats.confidence.label}`, 
+        delta: 1, 
+        tone: 'neg' 
+      });
     } else {
-      tokens.push({ label: 'Conf same', delta: 0, tone: 'flat' });
+      tokens.push({ label: 'Conf: same', delta: 0, tone: 'flat' });
     }
   }
   
-  // Net vote delta
-  if (currNetVote.net !== prevNetVote.net) {
-    const delta = currNetVote.net - prevNetVote.net;
-    tokens.push({
-      label: `Net ${delta >= 0 ? '+' : ''}${delta}`,
-      delta,
-      tone: getDeltaTone(delta),
-    });
+  // Net vote delta - normalized format with swing notation when denominators available
+  const netDelta = currNetVote.net - prevNetVote.net;
+  if (netDelta !== 0) {
+    // Prefer swing format if both have denominators
+    if (currNetVote.totalSignals > 0 && prevNetVote.totalSignals > 0) {
+      tokens.push({
+        label: `Net: ${prevNetVote.net}/${prevNetVote.totalSignals}→${currNetVote.net}/${currNetVote.totalSignals}`,
+        delta: netDelta,
+        tone: getDeltaTone(netDelta),
+      });
+    } else {
+      // Fallback to simple delta
+      tokens.push({
+        label: `Net: ${prevNetVote.net}→${currNetVote.net}`,
+        delta: netDelta,
+        tone: getDeltaTone(netDelta),
+      });
+    }
+  } else {
+    // Unchanged - only show if we're showing other tokens
+    // (Don't spam "same" tokens unless there are other changes)
+    if (tokens.length > 0) {
+      tokens.push({
+        label: 'Net: same',
+        delta: 0,
+        tone: 'flat',
+      });
+    }
   }
   
   if (tokens.length === 0) {

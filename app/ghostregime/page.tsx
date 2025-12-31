@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { GlassCard } from '@/components/GlassCard';
 import { Tooltip } from '@/components/Tooltip';
@@ -141,6 +141,7 @@ function GhostRegimePageContent() {
   const [showCompare, setShowCompare] = useState(false);
   const [prevRow, setPrevRow] = useState<GhostRegimeRow | null>(null);
   const [prevNotFoundHint, setPrevNotFoundHint] = useState(false);
+  const compareTriggerRef = useRef<HTMLButtonElement | null>(null);
 
   // Parse asof and prev params on mount and when searchParams change
   useEffect(() => {
@@ -424,6 +425,33 @@ function GhostRegimePageContent() {
     fetchHistory();
   }, [data, viewingSnapshot, searchParams]);
 
+  // Handle Escape key to close compare panel
+  useEffect(() => {
+    if (!showCompare) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowCompare(false);
+        setPrevNotFoundHint(false);
+        // Return focus to the compare trigger button
+        setTimeout(() => {
+          compareTriggerRef.current?.focus();
+        }, 0);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showCompare]);
+
+  // Handle compare reset
+  const handleCompareReset = () => {
+    setShowCompare(false);
+    setPrevNotFoundHint(false);
+  };
+
   if (notSeeded) {
     return (
       <div className="space-y-6">
@@ -643,6 +671,7 @@ function GhostRegimePageContent() {
           {/* Compare to previous link */}
           {prevRow ? (
             <button
+              ref={compareTriggerRef}
               onClick={() => setShowCompare(!showCompare)}
               className="px-2 py-1 text-[10px] rounded border border-zinc-700 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800 hover:border-zinc-600 transition-colors"
             >
@@ -823,6 +852,7 @@ function GhostRegimePageContent() {
                     }
                   }
                 }}
+                onReset={handleCompareReset}
                 prevNotFoundHint={prevNotFoundHint}
               />
             </div>

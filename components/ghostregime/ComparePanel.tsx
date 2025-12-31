@@ -32,6 +32,11 @@ import {
   COPY_COMPARE_LINK,
   COPY_COMPARE_LINK_COPIED,
   COPY_COMPARE_LINK_TOOLTIP_DISABLED,
+  COMPARE_RESET_BUTTON,
+  COMPARE_RESET_TOOLTIP,
+  COPY_BIGGEST_CHANGE_TOOLTIP,
+  COPY_BIGGEST_CHANGE_COPIED,
+  PREV_NOT_FOUND_INFO_TOOLTIP,
 } from '@/lib/ghostregime/ghostregimePageCopy';
 import { Tooltip } from '@/components/Tooltip';
 
@@ -41,6 +46,7 @@ interface ComparePanelProps {
   currentAsOf: string;
   prevAsOf: string | null;
   onJump?: (opts: { kind: CompareKind; axis?: CompareAxis }) => void;
+  onReset?: () => void;
   prevNotFoundHint?: boolean;
 }
 
@@ -50,10 +56,12 @@ export function ComparePanel({
   currentAsOf,
   prevAsOf,
   onJump,
+  onReset,
   prevNotFoundHint = false,
 }: ComparePanelProps) {
   const [viewMode, setViewMode] = useState<'summary' | 'pills'>('summary');
   const [copied, setCopied] = useState(false);
+  const [biggestChangeCopied, setBiggestChangeCopied] = useState(false);
 
   if (!prevRow || !prevAsOf) {
     return null;
@@ -135,6 +143,29 @@ export function ComparePanel({
     }
   };
 
+  // Handle biggest change copy
+  const handleCopyBiggestChange = async () => {
+    if (!biggestChange) return;
+    try {
+      const text = `${COMPARE_BIGGEST_CHANGE_LABEL} ${biggestChange.headline}${biggestChange.detail ? ` (${biggestChange.detail})` : ''}`;
+      await navigator.clipboard.writeText(text);
+      setBiggestChangeCopied(true);
+      setTimeout(() => setBiggestChangeCopied(false), 1500);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
+
+  // Handle reset
+  const handleReset = () => {
+    setViewMode('summary');
+    setCopied(false);
+    setBiggestChangeCopied(false);
+    if (onReset) {
+      onReset();
+    }
+  };
+
   // Handle biggest change jump
   const handleJump = () => {
     if (onJump && biggestChange) {
@@ -205,12 +236,27 @@ export function ComparePanel({
               </button>
             </Tooltip>
           )}
+          
+          {/* Reset button */}
+          {onReset && (
+            <Tooltip content={COMPARE_RESET_TOOLTIP}>
+              <button
+                onClick={handleReset}
+                className="px-2 py-0.5 text-[10px] transition-colors rounded border border-zinc-700 text-zinc-400 hover:text-zinc-300 hover:border-zinc-600"
+              >
+                {COMPARE_RESET_BUTTON}
+              </button>
+            </Tooltip>
+          )}
         </div>
       </div>
       
+      {/* Prev not found hint - info icon */}
       {prevNotFoundHint && (
-        <div className="mb-2 text-[10px] text-amber-400/70">
-          Prev snapshot not found — using inferred previous.
+        <div className="mb-2 flex items-center gap-1.5">
+          <Tooltip content={PREV_NOT_FOUND_INFO_TOOLTIP}>
+            <span className="text-zinc-400 text-[10px] cursor-help">ⓘ</span>
+          </Tooltip>
         </div>
       )}
       
@@ -335,31 +381,45 @@ export function ComparePanel({
 
         {/* Biggest change */}
         {biggestChange && (
-          <div className="pt-2 border-t border-zinc-800">
-            <Tooltip content={biggestChange.tooltip}>
-              <div className="text-zinc-300 text-[10px]">
-                {onJump ? (
-                  <button
-                    onClick={handleJump}
-                    className="text-left hover:text-amber-300/80 transition-colors"
-                  >
-                    <strong className="text-amber-300/80">{COMPARE_BIGGEST_CHANGE_LABEL}</strong>{' '}
-                    {biggestChange.headline}
-                    {biggestChange.detail && (
-                      <span className="text-zinc-400 ml-1">({biggestChange.detail})</span>
+          <div className="pt-2 border-t border-zinc-800 group">
+            <div className="flex items-start gap-2">
+              <div className="flex-1">
+                <Tooltip content={biggestChange.tooltip}>
+                  <div className="text-zinc-300 text-[10px]">
+                    {onJump ? (
+                      <button
+                        onClick={handleJump}
+                        className="text-left hover:text-amber-300/80 transition-colors"
+                      >
+                        <strong className="text-amber-300/80">{COMPARE_BIGGEST_CHANGE_LABEL}</strong>{' '}
+                        {biggestChange.headline}
+                        {biggestChange.detail && (
+                          <span className="text-zinc-400 ml-1">({biggestChange.detail})</span>
+                        )}
+                      </button>
+                    ) : (
+                      <>
+                        <strong className="text-amber-300/80">{COMPARE_BIGGEST_CHANGE_LABEL}</strong>{' '}
+                        {biggestChange.headline}
+                        {biggestChange.detail && (
+                          <span className="text-zinc-400 ml-1">({biggestChange.detail})</span>
+                        )}
+                      </>
                     )}
-                  </button>
-                ) : (
-                  <>
-                    <strong className="text-amber-300/80">{COMPARE_BIGGEST_CHANGE_LABEL}</strong>{' '}
-                    {biggestChange.headline}
-                    {biggestChange.detail && (
-                      <span className="text-zinc-400 ml-1">({biggestChange.detail})</span>
-                    )}
-                  </>
-                )}
+                  </div>
+                </Tooltip>
               </div>
-            </Tooltip>
+              {/* Copy button - visible on hover (desktop) and always on mobile */}
+              <Tooltip content={biggestChangeCopied ? COPY_BIGGEST_CHANGE_COPIED : COPY_BIGGEST_CHANGE_TOOLTIP}>
+                <button
+                  onClick={handleCopyBiggestChange}
+                  className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity text-zinc-400 hover:text-zinc-300 text-[10px] px-1.5 py-0.5 rounded border border-zinc-700 hover:border-zinc-600"
+                  aria-label={COPY_BIGGEST_CHANGE_TOOLTIP}
+                >
+                  {biggestChangeCopied ? '✓' : 'Copy'}
+                </button>
+              </Tooltip>
+            </div>
           </div>
         )}
       </div>
