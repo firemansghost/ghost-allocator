@@ -11,6 +11,7 @@
     "test": "tsx lib/ghostregime/__tests__/regimeCore.test.ts",
     "test:parity": "tsx lib/ghostregime/parity/__tests__/kissAlloc.test.ts",
     "ghostregime:parity": "npm run test:parity",
+    "ghostregime:state-parity": "tsx scripts/ghostregime/state-parity-report.ts",
     "audit:models": "tsx scripts/audit-models.ts",
     "check:ghostregime-copy": "node scripts/check-ghostregime-builder-copy.mjs",
     "check:ghostregime-legend": "node scripts/check-ghostregime-regime-legend-drift.mjs"

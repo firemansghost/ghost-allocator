@@ -172,6 +172,12 @@ function GhostRegimePageContent() {
   const [prevNotFoundHint, setPrevNotFoundHint] = useState(false);
   const compareTriggerRef = useRef<HTMLButtonElement | null>(null);
   const [showParity, setShowParity] = useState(false);
+  const [parityEnabled, setParityEnabled] = useState(false);
+
+  // Check if parity is enabled (client-side only)
+  useEffect(() => {
+    setParityEnabled(process.env.NEXT_PUBLIC_ENABLE_PARITY === '1');
+  }, []);
 
   // Parse asof and prev params on mount and when searchParams change
   useEffect(() => {
@@ -1523,7 +1529,7 @@ function GhostRegimePageContent() {
 
       {showParity && (
         <div className="mb-6">
-          <ParityPanel onClose={() => setShowParity(false)} />
+          <ParityPanel onClose={() => setShowParity(false)} currentGhostRegime={data} />
         </div>
       )}
 

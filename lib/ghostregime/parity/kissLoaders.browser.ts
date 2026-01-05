@@ -87,8 +87,14 @@ function validateAndNormalizeSnapshot(data: KissLatestSnapshot): KissLatestSnaps
 
 /**
  * Load KISS latest snapshot from JSON file (async, browser)
+ * Only works if NEXT_PUBLIC_ENABLE_PARITY=1
  */
 export async function loadKissLatestSnapshot(): Promise<KissLatestSnapshot> {
+  // Gate behind env flag
+  if (process.env.NEXT_PUBLIC_ENABLE_PARITY !== '1') {
+    throw new Error('Parity features are disabled. Set NEXT_PUBLIC_ENABLE_PARITY=1 to enable.');
+  }
+  
   const filePath = `${KISS_DATA_DIR}/kiss_latest_snapshot.json`;
   const response = await fetch(`/${filePath}`);
   if (!response.ok) {
