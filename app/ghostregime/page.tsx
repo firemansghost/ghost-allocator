@@ -1512,14 +1512,26 @@ function GhostRegimePageContent() {
 
       {/* Advanced Details Toggle */}
       <div className="space-y-1">
-        <button
-          onClick={() => setShowAdvanced(!showAdvanced)}
-          className="flex items-center gap-2 text-sm font-medium text-amber-400 hover:text-amber-300 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-2 py-1 min-h-[44px]"
-          aria-label={showAdvanced ? 'Hide advanced details' : 'Show advanced details'}
-        >
-          <span>{showAdvanced ? '▼' : '▶'}</span>
-          <span>Advanced Details (Nerd Mode)</span>
-        </button>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="flex items-center gap-2 text-sm font-medium text-amber-400 hover:text-amber-300 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-2 py-1 min-h-[44px]"
+            aria-label={showAdvanced ? 'Hide advanced details' : 'Show advanced details'}
+          >
+            <span>{showAdvanced ? '▼' : '▶'}</span>
+            <span>Advanced Details (Nerd Mode)</span>
+          </button>
+          {parityEnabled && (
+            <button
+              onClick={() => setShowParity(!showParity)}
+              className="flex items-center gap-2 text-xs font-medium text-zinc-400 hover:text-zinc-300 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-2 py-1"
+              aria-label={showParity ? 'Hide parity panel' : 'Show parity panel'}
+            >
+              <span>{showParity ? '▼' : '▶'}</span>
+              <span>Parity: 42 Macro KISS</span>
+            </button>
+          )}
+        </div>
         <p className="text-[11px] text-zinc-500 ml-6">
           {showAdvanced 
             ? "Receipts only: targets, actuals, VAMS states, and the 'what ran when' metadata. No new magic, just the paper trail."
