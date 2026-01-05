@@ -18,6 +18,7 @@ import { ReceiptsSortToggle } from '@/components/ghostregime/ReceiptsSortToggle'
 import { ReceiptsSearchInput } from '@/components/ghostregime/ReceiptsSearchInput';
 import { ComparePanel } from '@/components/ghostregime/ComparePanel';
 import { GhostRegimeToolbar } from '@/components/ghostregime/GhostRegimeToolbar';
+import { ParityPanel } from '@/components/ghostregime/ParityPanel';
 import type { GhostRegimeRow, RegimeType } from '@/lib/ghostregime/types';
 import {
   formatBucketUtilizationLine,
@@ -170,6 +171,7 @@ function GhostRegimePageContent() {
   const [prevRow, setPrevRow] = useState<GhostRegimeRow | null>(null);
   const [prevNotFoundHint, setPrevNotFoundHint] = useState(false);
   const compareTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const [showParity, setShowParity] = useState(false);
 
   // Parse asof and prev params on mount and when searchParams change
   useEffect(() => {
@@ -1518,6 +1520,12 @@ function GhostRegimePageContent() {
             : "If you read commit hashes for fun, welcome home. If not, nothing down here changes the signal."}
         </p>
       </div>
+
+      {showParity && (
+        <div className="mb-6">
+          <ParityPanel onClose={() => setShowParity(false)} />
+        </div>
+      )}
 
       {showAdvanced && (
         <div className="grid gap-6 md:grid-cols-2">
