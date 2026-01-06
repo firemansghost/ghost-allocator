@@ -140,3 +140,11 @@ vite.config.ts.timestamp-*
 
 .vercel
 .env*.local
+
+# Reference data (local-only, not in repo)
+.local/
+data/kiss/
+public/data/kiss/
+
+# Generated reports (optional)
+reports/

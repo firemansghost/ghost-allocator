@@ -3,7 +3,7 @@
  * 
  * If you change data schema/providers, update loaders/tests. UI should not lie.
  * 
- * Compares GhostRegime-computed states vs 42 Macro KISS reference states.
+ * Compares GhostRegime-computed states vs external reference workbook states.
  * Pure, deterministic comparison for diagnostic purposes.
  */
 

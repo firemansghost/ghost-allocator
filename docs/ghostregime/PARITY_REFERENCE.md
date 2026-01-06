@@ -1,21 +1,21 @@
-# GhostRegime Parity Harness: 42 Macro KISS
+# GhostRegime Parity Harness: External Reference Workbook
 
 ## Overview
 
-This parity harness validates that GhostRegime allocation wiring matches the 42 Macro KISS reference model. It answers one crisp question:
+This parity harness validates that GhostRegime allocation wiring matches an external reference workbook. It answers one crisp question:
 
-**"If the KISS states are known, do we produce the same allocations as the KISS workbook?"**
+**"If the reference states are known, do we produce the same allocations as the reference workbook?"**
 
 ## What This Is
 
 - A **validation tool** that locks allocation math when states are known
 - A **test suite** that prevents BTC sizing bugs from returning
-- A **debug panel** for viewing KISS reference allocations
+- A **debug panel** for viewing reference workbook allocations
 - A **parity check** against 2,091 backtest rows
 
 ## What This Is NOT
 
-- **NOT** a reverse-engineering of KISS state computation (VAMS math)
+- **NOT** a reverse-engineering of reference state computation (VAMS math)
 - **NOT** a change to GhostRegime default behavior
 - **NOT** a replacement for GhostRegime's own allocation logic
 - **NOT** used in normal GhostRegime mode (debug/toggle only)
@@ -23,22 +23,25 @@ This parity harness validates that GhostRegime allocation wiring matches the 42 
 ## Naming Convention
 
 - **GhostRegime** = our product/module
-- **KISS** = the external 42 Macro reference model/data source
+- **Reference Workbook** = the external reference model/data source
 
-We are building GhostRegime parity tooling using KISS reference data.
+We are building GhostRegime parity tooling using reference workbook data.
 
 ## Reference Files
 
-Reference files live in `data/kiss/`:
+Reference files must be placed in a local-only directory (not in the repo or public/):
 
-- `kiss_latest_snapshot.json` - Latest snapshot (2026-01-02)
-- `kiss_reference_kiss_backtest.csv` - 2,091 backtest rows (2017-12-29 to 2025-12-31)
-- `kiss_states_market_regime_ES1_XAU_XBT.csv` - Historical states (optional)
-- `kiss_prices_ES1_XAU_XBT.csv` - Historical prices (optional, not used in this step)
+- `reference_latest_snapshot.json` - Latest snapshot (2026-01-02)
+- `reference_backtest.csv` - 2,091 backtest rows (2017-12-29 to 2025-12-31)
+- `reference_states.csv` - Historical states (optional)
+
+Default location: `.local/reference/`
+
+Override via env var: `GHOSTREGIME_REFERENCE_DATA_DIR`
 
 These files are inputs for tests + parity UI. They are **not** used in normal GhostRegime mode.
 
-## KISS Behavior Spec (Truth)
+## Reference Behavior Spec (Truth)
 
 ### 1. Regime → Targets
 
@@ -78,28 +81,32 @@ cash = 1 - (stocks_actual + gold_actual + btc_actual)
   - Stocks = 0.60
   - Gold = 0.30
 
-GhostRegime currently shows BTC as "half" (state 0) which is **wrong** vs the KISS reference.
+GhostRegime currently shows BTC as "half" (state 0) which is **wrong** vs the reference workbook.
 
 ## Running Tests
 
 ```bash
-# Run parity tests
-npm run test:parity
+# Run parity tests (opt-in, requires reference data)
+RUN_PARITY_TESTS=1 npm run test:parity
 
 # Or use the alias
-npm run ghostregime:parity
+RUN_PARITY_TESTS=1 npm run ghostregime:parity
 ```
 
 Tests validate:
 1. Latest snapshot parity (2026-01-02) - BTC must be 0.0
 2. All 2,091 backtest rows match within tolerance (1e-9)
 
+**Note:** Tests are opt-in and will skip if `RUN_PARITY_TESTS != 1` or reference data is not found locally.
+
 ## Using the Parity Panel
 
 1. Navigate to `/ghostregime`
-2. Click "Parity: 42 Macro KISS" toggle (near Advanced Details)
-3. Click "Load KISS Reference Snapshot"
-4. Verify allocations match KISS sheet values
+2. Set `NEXT_PUBLIC_ENABLE_PARITY=1` in your environment
+3. Click "Parity: External Reference" toggle (near Advanced Details)
+4. Click "Load Reference Snapshot"
+
+**Note:** Reference data must be available locally (not served from public/). The panel will show a friendly error if data is not found.
 
 The panel shows:
 - Snapshot info (date, regime)
@@ -107,7 +114,7 @@ The panel shows:
 - Targets (from regime)
 - Scales (from states: +2→1.0, 0→0.5, -2→0.0)
 - Final allocations (stocks, gold, bitcoin, cash)
-- KISS sheet reference values
+- Reference sheet values
 
 ## Module Structure
 
@@ -127,17 +134,23 @@ lib/ghostregime/parity/
 
 This comment appears at the top of all parity files to prevent drift.
 
+**Vendor naming is forbidden in UI/docs.** Use neutral language:
+- "External Reference Workbook" not "42 Macro KISS"
+- "Reference" not "KISS"
+
+Run `npm run check:parity-names` to verify.
+
 ## The Real Problem (Future Work)
 
 Once this harness is in place, the real question becomes:
 
-**"Why does GhostRegime compute BTC state differently than KISS?"**
+**"Why does GhostRegime compute BTC state differently than the reference?"**
 
 That's a whole separate boss fight. This harness only validates allocation math, not state computation.
 
 ## Acceptance Test
 
-With parity mode using `kiss_latest_snapshot.json`:
+With parity mode using `reference_latest_snapshot.json`:
 - Date: 2026-01-02
 - Regime: GOLDILOCKS
 - States: ES1 +2, XAU +2, XBT -2

@@ -1,13 +1,17 @@
 /**
- * KISS Parity Tests
+ * Reference Parity Tests
  * 
  * If you change data schema/providers, update loaders/tests. UI should not lie.
  * 
- * These tests lock BTC sizing forever and validate parity against KISS reference.
+ * These tests lock BTC sizing forever and validate parity against reference workbook.
+ * 
+ * Opt-in: Only runs when RUN_PARITY_TESTS=1 and reference data exists locally.
  */
 
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
+import { existsSync } from 'fs';
+import { join } from 'path';
 import {
   loadKissLatestSnapshotSync,
   loadKissBacktest,
@@ -21,7 +25,19 @@ import {
 // Tolerance for floating point comparisons
 const TOLERANCE = 1e-9;
 
-describe('KISS Allocation Engine', () => {
+// Check if parity tests should run
+const shouldRunParityTests = (): boolean => {
+  if (process.env.RUN_PARITY_TESTS !== '1') {
+    return false;
+  }
+  
+  // Check if reference data exists
+  const dataDir = process.env.GHOSTREGIME_REFERENCE_DATA_DIR || '.local/reference';
+  const snapshotPath = join(process.cwd(), dataDir, 'reference_latest_snapshot.json');
+  return existsSync(snapshotPath);
+};
+
+describe('Reference Allocation Engine', () => {
   describe('scaleFromState', () => {
     it('should map +2 to 1.0', () => {
       assert.strictEqual(scaleFromState(2), 1.0);
@@ -138,8 +154,12 @@ describe('KISS Allocation Engine', () => {
   });
 });
 
-describe('KISS Latest Snapshot Parity', () => {
-  it('should match KISS reference snapshot (2026-01-02)', () => {
+describe('Reference Latest Snapshot Parity', () => {
+  it('should match reference snapshot (2026-01-02)', () => {
+    if (!shouldRunParityTests()) {
+      it.skip('Parity tests disabled. Set RUN_PARITY_TESTS=1 and ensure reference data exists locally.');
+      return;
+    }
     const snapshot = loadKissLatestSnapshotSync();
     
     // Validate snapshot structure
@@ -183,8 +203,12 @@ describe('KISS Latest Snapshot Parity', () => {
   });
 });
 
-describe('KISS Backtest Parity', () => {
+describe('Reference Backtest Parity', () => {
   it('should match all backtest rows within tolerance', () => {
+    if (!shouldRunParityTests()) {
+      it.skip('Parity tests disabled. Set RUN_PARITY_TESTS=1 and ensure reference data exists locally.');
+      return;
+    }
     const backtest = loadKissBacktest();
     
     let mismatchCount = 0;

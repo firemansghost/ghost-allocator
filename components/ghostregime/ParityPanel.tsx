@@ -3,7 +3,7 @@
  * 
  * If you change data schema/providers, update loaders/tests. UI should not lie.
  * 
- * Debug panel for viewing 42 Macro KISS reference allocations.
+ * Debug panel for viewing external reference workbook allocations.
  * This is a parity validation tool - NOT for normal GhostRegime computation.
  */
 
@@ -73,7 +73,7 @@ export function ParityPanel({ onClose, currentGhostRegime }: ParityPanelProps) {
   return (
     <GlassCard className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-zinc-200">Parity: 42 Macro KISS</h3>
+        <h3 className="text-sm font-semibold text-zinc-200">Parity: External Reference Workbook</h3>
         {onClose && (
           <button
             onClick={onClose}
@@ -86,11 +86,11 @@ export function ParityPanel({ onClose, currentGhostRegime }: ParityPanelProps) {
 
       <div className="text-xs text-zinc-400 space-y-2">
         <p>
-          This panel shows allocations computed using 42 Macro KISS reference logic.
-          It validates that our allocation wiring matches the KISS workbook.
+          This panel shows allocations computed using external reference workbook logic.
+          It validates that our allocation wiring matches the reference workbook.
         </p>
         <p className="text-amber-400/80">
-          <strong>Note:</strong> This does NOT reverse-engineer KISS state computation.
+          <strong>Note:</strong> This does NOT reverse-engineer reference state computation.
           It only validates allocation math when states are known.
         </p>
       </div>
@@ -100,7 +100,7 @@ export function ParityPanel({ onClose, currentGhostRegime }: ParityPanelProps) {
           onClick={handleLoadSnapshot}
           className="px-3 py-1.5 text-xs rounded border border-amber-400/30 bg-amber-400/5 text-amber-400 hover:text-amber-300 hover:bg-amber-400/10 hover:border-amber-400/50 transition-colors"
         >
-          Load KISS Reference Snapshot
+          Load Reference Snapshot
         </button>
       </div>
 
@@ -221,9 +221,9 @@ export function ParityPanel({ onClose, currentGhostRegime }: ParityPanelProps) {
             )}
           </div>
 
-          {/* KISS Sheet Reference */}
+          {/* Reference Sheet Values */}
           <div className="space-y-2 pt-2 border-t border-zinc-700">
-            <div className="text-xs font-medium text-zinc-300">KISS Sheet Reference</div>
+            <div className="text-xs font-medium text-zinc-300">Reference Sheet Values</div>
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div>
                 <span className="text-zinc-500">Stocks:</span>{' '}
@@ -257,7 +257,7 @@ export function ParityPanel({ onClose, currentGhostRegime }: ParityPanelProps) {
                     <tr className="border-b border-zinc-700">
                       <th className="text-left py-1 text-zinc-400">Sleeve</th>
                       <th className="text-left py-1 text-zinc-400">GhostRegime</th>
-                      <th className="text-left py-1 text-zinc-400">KISS</th>
+                      <th className="text-left py-1 text-zinc-400">Reference</th>
                       <th className="text-left py-1 text-zinc-400">Match</th>
                     </tr>
                   </thead>

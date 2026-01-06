@@ -1,13 +1,15 @@
 /**
- * KISS Reference Data Loaders (Node.js - for tests only)
+ * Reference Data Loaders (Node.js - for tests only)
  * 
  * If you change data schema/providers, update loaders/tests. UI should not lie.
  * 
- * Node.js-only loaders for KISS reference files (uses fs).
+ * Node.js-only loaders for reference files (uses fs).
+ * Reference data must be in local-only directory (not in repo or public/).
  * For browser usage, see kissLoaders.browser.ts
  */
 
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
+import { join } from 'path';
 import { parse } from 'csv-parse/sync';
 import type {
   KissLatestSnapshot,
@@ -17,7 +19,10 @@ import type {
   KissState,
 } from './kissTypes';
 
-const KISS_DATA_DIR = 'data/kiss';
+// Get reference data directory from env var, default to .local/reference
+const getReferenceDataDir = (): string => {
+  return process.env.GHOSTREGIME_REFERENCE_DATA_DIR || '.local/reference';
+};
 
 /**
  * Normalize date string to YYYY-MM-DD format
@@ -31,7 +36,7 @@ function normalizeDate(dateStr: string): string {
 }
 
 /**
- * Parse KISS state value from CSV (can be empty string, number, or null)
+ * Parse reference state value from CSV (can be empty string, number, or null)
  */
 function parseKissState(value: string | number | null | undefined): KissState | null {
   if (value === null || value === undefined) {
@@ -58,7 +63,7 @@ function parseKissState(value: string | number | null | undefined): KissState | 
 }
 
 /**
- * Parse KISS regime from string
+ * Parse reference regime from string
  */
 function parseKissRegime(value: string): KissRegime {
   const regimes: KissRegime[] = ['GOLDILOCKS', 'REFLATION', 'INFLATION', 'DEFLATION'];
@@ -69,10 +74,16 @@ function parseKissRegime(value: string): KissRegime {
 }
 
 /**
- * Load KISS latest snapshot from JSON file (sync, Node.js only, for tests)
+ * Load reference latest snapshot from JSON file (sync, Node.js only, for tests)
  */
 export function loadKissLatestSnapshotSync(): KissLatestSnapshot {
-  const filePath = `${KISS_DATA_DIR}/kiss_latest_snapshot.json`;
+  const dataDir = getReferenceDataDir();
+  const filePath = join(process.cwd(), dataDir, 'reference_latest_snapshot.json');
+  
+  if (!existsSync(filePath)) {
+    throw new Error(`Reference data not found at ${filePath}. Set GHOSTREGIME_REFERENCE_DATA_DIR to specify the path, or place reference data in .local/reference/`);
+  }
+  
   const content = readFileSync(filePath, 'utf-8');
   const data = JSON.parse(content) as KissLatestSnapshot;
   
@@ -96,10 +107,16 @@ export function loadKissLatestSnapshotSync(): KissLatestSnapshot {
 }
 
 /**
- * Load KISS backtest CSV file (sync, Node.js only, for tests)
+ * Load reference backtest CSV file (sync, Node.js only, for tests)
  */
 export function loadKissBacktest(): KissBacktestRow[] {
-  const filePath = `${KISS_DATA_DIR}/kiss_reference_kiss_backtest.csv`;
+  const dataDir = getReferenceDataDir();
+  const filePath = join(process.cwd(), dataDir, 'reference_backtest.csv');
+  
+  if (!existsSync(filePath)) {
+    throw new Error(`Reference data not found at ${filePath}. Set GHOSTREGIME_REFERENCE_DATA_DIR to specify the path, or place reference data in .local/reference/`);
+  }
+  
   const content = readFileSync(filePath, 'utf-8');
   
   const records = parse(content, {
@@ -142,10 +159,16 @@ export function loadKissBacktest(): KissBacktestRow[] {
 }
 
 /**
- * Load KISS states CSV file (sync, Node.js only, for tests)
+ * Load reference states CSV file (sync, Node.js only, for tests)
  */
 export function loadKissStates(): KissStatesRow[] {
-  const filePath = `${KISS_DATA_DIR}/kiss_states_market_regime_ES1_XAU_XBT.csv`;
+  const dataDir = getReferenceDataDir();
+  const filePath = join(process.cwd(), dataDir, 'reference_states.csv');
+  
+  if (!existsSync(filePath)) {
+    throw new Error(`Reference data not found at ${filePath}. Set GHOSTREGIME_REFERENCE_DATA_DIR to specify the path, or place reference data in .local/reference/`);
+  }
+  
   const content = readFileSync(filePath, 'utf-8');
   
   const records = parse(content, {

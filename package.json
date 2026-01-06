@@ -14,7 +14,8 @@
     "ghostregime:state-parity": "tsx scripts/ghostregime/state-parity-report.ts",
     "audit:models": "tsx scripts/audit-models.ts",
     "check:ghostregime-copy": "node scripts/check-ghostregime-builder-copy.mjs",
-    "check:ghostregime-legend": "node scripts/check-ghostregime-regime-legend-drift.mjs"
+    "check:ghostregime-legend": "node scripts/check-ghostregime-regime-legend-drift.mjs",
+    "check:parity-names": "node scripts/check-parity-vendor-names.mjs"
   },
   "repository": {
     "type": "git",

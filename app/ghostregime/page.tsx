@@ -1528,7 +1528,7 @@ function GhostRegimePageContent() {
               aria-label={showParity ? 'Hide parity panel' : 'Show parity panel'}
             >
               <span>{showParity ? '▼' : '▶'}</span>
-              <span>Parity: 42 Macro KISS</span>
+              <span>Parity: External Reference</span>
             </button>
           )}
         </div>
