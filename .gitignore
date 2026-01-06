@@ -145,6 +145,7 @@ vite.config.ts.timestamp-*
 .local/
 data/kiss/
 public/data/kiss/
+docs/KISS/
 
 # Generated reports (optional)
 reports/

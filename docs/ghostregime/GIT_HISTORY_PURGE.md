@@ -23,10 +23,18 @@ Files should already be deleted, but verify:
 # Check if files still exist
 ls -la data/kiss/
 ls -la public/data/kiss/
+ls -la docs/KISS/
 
 # If they exist, remove them
 rm -rf data/kiss/
 rm -rf public/data/kiss/
+rm -rf docs/KISS/
+```
+
+**Verify no tracked files:**
+```bash
+# Should return nothing
+git ls-files data/kiss docs/KISS public/data/kiss
 ```
 
 ### Step 2: Install git-filter-repo (if not already installed)
@@ -59,11 +67,12 @@ git clone <your-repo-url> ghost-allocator-backup
 cd /path/to/ghost-allocator
 
 # Purge reference data paths from history
-git filter-repo --path data/kiss --path public/data/kiss --invert-paths
+git filter-repo --path data/kiss --path public/data/kiss --path docs/KISS --invert-paths
 
 # Verify the purge worked
 git log --all --full-history -- data/kiss/
 git log --all --full-history -- public/data/kiss/
+git log --all --full-history -- docs/KISS/
 # Should show no results
 ```
 
@@ -99,9 +108,11 @@ git reset --hard origin/main
 
 1. ✅ `npm run build` passes
 2. ✅ `npm run check:parity-names` passes
-3. ✅ `npm test` passes (parity tests skip without `RUN_PARITY_TESTS=1`)
-4. ✅ No reference data files in repo or history
-5. ✅ Parity UI shows friendly error when data not found
+3. ✅ `npm run check:no-reference-data` passes
+4. ✅ `npm test` passes (parity tests skip without `RUN_PARITY_TESTS=1`)
+5. ✅ No reference data files in repo or history
+6. ✅ `git ls-files data/kiss docs/KISS public/data/kiss` returns nothing
+7. ✅ Parity UI shows friendly error when data not found
 
 ## Notes
 

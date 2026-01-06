@@ -15,7 +15,8 @@
     "audit:models": "tsx scripts/audit-models.ts",
     "check:ghostregime-copy": "node scripts/check-ghostregime-builder-copy.mjs",
     "check:ghostregime-legend": "node scripts/check-ghostregime-regime-legend-drift.mjs",
-    "check:parity-names": "node scripts/check-parity-vendor-names.mjs"
+    "check:parity-names": "node scripts/check-parity-vendor-names.mjs",
+    "check:no-reference-data": "node scripts/check-no-reference-data.mjs"
   },
   "repository": {
     "type": "git",

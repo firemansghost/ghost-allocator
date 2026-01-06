@@ -48,6 +48,11 @@
 - Confirm /ghostregime and /ghostregime/methodology both use canonical regime descriptions
 - Confirm methodology page has "Regimes at a glance" section with static 2x2 map
 
+## V7.6.1 verification
+- Run parity naming check: `npm run check:parity-names` (ensures no vendor naming in UI/docs)
+- Run reference data check: `npm run check:no-reference-data` (ensures no reference data files are tracked)
+- Verify `git ls-files data/kiss docs/KISS public/data/kiss` returns nothing
+
 ## Known Failure Modes
 - Delta calculations look "wrong" if current holdings don't sum to ~100%
 - Confusion between "Target mix" (what to set) vs "Ghost sleeves" (concept)
