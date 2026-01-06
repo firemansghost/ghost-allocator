@@ -4,6 +4,8 @@
 
 This document describes how to purge reference datasets from git history. This is a **destructive operation** that rewrites git history.
 
+**For Windows/PowerShell users:** See `HISTORY_PURGE_WINDOWS.md` for a Windows-specific runbook with PowerShell commands.
+
 ## What Was Done
 
 1. ✅ Removed vendor naming from UI/docs ("42 Macro KISS" → "External Reference Workbook")
@@ -106,13 +108,27 @@ git reset --hard origin/main
 
 ## Post-Purge Verification
 
-1. ✅ `npm run build` passes
-2. ✅ `npm run check:parity-names` passes
-3. ✅ `npm run check:no-reference-data` passes
-4. ✅ `npm test` passes (parity tests skip without `RUN_PARITY_TESTS=1`)
-5. ✅ No reference data files in repo or history
-6. ✅ `git ls-files data/kiss docs/KISS public/data/kiss` returns nothing
-7. ✅ Parity UI shows friendly error when data not found
+Run the verification script:
+
+```bash
+npm run verify:reference-clean
+```
+
+This runs three checks:
+1. `check:no-reference-data` - Verifies no reference files in tracked working tree
+2. `check:no-reference-history` - Verifies no reference files in git history
+3. `check:parity-names` - Verifies no vendor naming in UI/docs
+
+All checks should pass after a successful purge.
+
+**Individual checks:**
+- ✅ `npm run build` passes
+- ✅ `npm run check:parity-names` passes
+- ✅ `npm run check:no-reference-data` passes
+- ✅ `npm run check:no-reference-history` passes (this verifies history is clean)
+- ✅ `npm test` passes (parity tests skip without `RUN_PARITY_TESTS=1`)
+- ✅ `git ls-files data/kiss docs/KISS public/data/kiss` returns nothing
+- ✅ Parity UI shows friendly error when data not found
 
 ## Notes
 

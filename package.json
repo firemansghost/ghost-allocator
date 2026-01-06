@@ -16,7 +16,9 @@
     "check:ghostregime-copy": "node scripts/check-ghostregime-builder-copy.mjs",
     "check:ghostregime-legend": "node scripts/check-ghostregime-regime-legend-drift.mjs",
     "check:parity-names": "node scripts/check-parity-vendor-names.mjs",
-    "check:no-reference-data": "node scripts/check-no-reference-data.mjs"
+    "check:no-reference-data": "node scripts/check-no-reference-data.mjs",
+    "check:no-reference-history": "node scripts/check-no-reference-history.mjs",
+    "verify:reference-clean": "npm run check:no-reference-data && npm run check:no-reference-history && npm run check:parity-names"
   },
   "repository": {
     "type": "git",

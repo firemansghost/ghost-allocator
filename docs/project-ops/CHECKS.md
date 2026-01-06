@@ -53,6 +53,26 @@
 - Run reference data check: `npm run check:no-reference-data` (ensures no reference data files are tracked)
 - Verify `git ls-files data/kiss docs/KISS public/data/kiss` returns nothing
 
+## Post-purge verification
+After running the git history purge (see `docs/ghostregime/HISTORY_PURGE_WINDOWS.md`), verify that reference data is completely removed:
+
+```powershell
+# Run all reference data checks
+npm run verify:reference-clean
+```
+
+This runs three checks:
+1. `check:no-reference-data` - Verifies no reference files in tracked working tree
+2. `check:no-reference-history` - Verifies no reference files in git history
+3. `check:parity-names` - Verifies no vendor naming in UI/docs
+
+**What "fail" means:**
+- If `check:no-reference-history` fails: History still contains reference data. Run the history purge runbook.
+- If `check:no-reference-data` fails: Working tree contains tracked reference files. Remove them and commit.
+- If `check:parity-names` fails: Vendor naming found in UI/docs. Update to neutral language.
+
+**Note:** History checks are opt-in and not CI-gated. They should be run manually after a history purge to verify success.
+
 ## Known Failure Modes
 - Delta calculations look "wrong" if current holdings don't sum to ~100%
 - Confusion between "Target mix" (what to set) vs "Ghost sleeves" (concept)
