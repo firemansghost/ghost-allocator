@@ -283,6 +283,12 @@ export class LocalFileAdapter implements StorageAdapter {
 export function getStorageAdapter(): StorageAdapter {
   const token = process.env.BLOB_READ_WRITE_TOKEN;
   const isDev = process.env.NODE_ENV === 'development';
+  const isCliRuntime = process.env.GHOSTREGIME_RUNTIME === 'cli';
+
+  // CLI diagnostics always use local file adapter (no blob token required)
+  if (isCliRuntime) {
+    return new LocalFileAdapter();
+  }
 
   // Use local file adapter in dev if no token, otherwise use blob
   if (isDev && !token) {

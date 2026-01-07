@@ -14,6 +14,9 @@
  * Output: reports/btc_mismatch_attribution.md
  */
 
+// Bootstrap: Set CLI runtime flags for local persistence
+import './_bootstrapDiagnostics';
+
 import { parseISO } from 'date-fns';
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join } from 'path';

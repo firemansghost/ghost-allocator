@@ -5,6 +5,9 @@
  * GhostRegime states vs 42 Macro KISS reference states.
  */
 
+// Bootstrap: Set CLI runtime flags for local persistence
+import './_bootstrapDiagnostics';
+
 import { compareStateParity, computeStateParityStats } from '../../lib/ghostregime/parity/stateParity';
 import { writeFileSync, mkdirSync } from 'fs';
 import { join } from 'path';

@@ -7,6 +7,9 @@
  * If reference state exists locally, also prints comparison.
  */
 
+// Bootstrap: Set CLI runtime flags for local persistence
+import './_bootstrapDiagnostics';
+
 import { parseISO } from 'date-fns';
 import { getGhostRegimeHistory } from '../../lib/ghostregime/engine';
 import { buildBtcStateDebugRow } from '../../lib/ghostregime/parity/btcStateDebug';

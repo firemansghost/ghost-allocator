@@ -25,6 +25,8 @@ If GhostRegime's BTC state differs from the reference, the mismatch can be due t
   - `reference_prices.csv` (optional but recommended for attribution)
 - `RUN_PARITY_TESTS=1` environment variable (for parameter scan)
 
+**Note:** CLI diagnostics run with local persistence and do not require `BLOB_READ_WRITE_TOKEN`. The bootstrap automatically configures the runtime to use local file storage.
+
 ## Diagnostic Workflow
 
 ### Step 1: Check BTC State for a Specific Date
@@ -33,6 +35,11 @@ Use the `why-btc-state` script to see exactly what inputs produced the BTC state
 
 ```powershell
 # Windows PowerShell
+npm run ghostregime:why-btc-state -- --date 2026-01-02
+```
+
+Or directly with tsx:
+```powershell
 tsx scripts/ghostregime/why-btc-state.ts --date 2026-01-02
 ```
 
@@ -93,6 +100,11 @@ Run the attribution report to determine whether the mismatch is primarily due to
 
 ```powershell
 # Windows PowerShell
+npm run ghostregime:btc-attribution
+```
+
+Or directly with tsx:
+```powershell
 tsx scripts/ghostregime/btc-mismatch-attribution.ts
 ```
 
@@ -118,6 +130,12 @@ If the attribution suggests math/threshold differences, run a parameter scan to 
 
 ```powershell
 # Windows PowerShell
+$env:RUN_PARITY_TESTS = "1"
+npm run ghostregime:btc-parameter-scan
+```
+
+Or directly with tsx:
+```powershell
 $env:RUN_PARITY_TESTS = "1"
 tsx scripts/ghostregime/btc-parameter-scan.ts
 ```
