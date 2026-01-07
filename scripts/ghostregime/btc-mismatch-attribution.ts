@@ -5,7 +5,8 @@
  * - Different BTC price series (proxy/data issue)
  * - Different math/thresholds (calculation issue)
  * 
- * Usage: tsx scripts/ghostregime/btc-mismatch-attribution.ts
+ * Usage: 
+ *   tsx scripts/ghostregime/btc-mismatch-attribution.ts [--source local|api|auto] [--base-url <url>] [--days <n>]
  * 
  * Requires:
  * - Reference states file (reference_states.csv)
@@ -18,19 +19,16 @@
 import './_bootstrapDiagnostics';
 
 import { parseISO } from 'date-fns';
-import { writeFileSync, mkdirSync, existsSync } from 'fs';
+import { writeFileSync, mkdirSync, readFileSync, existsSync } from 'fs';
 import { join } from 'path';
-import { getGhostRegimeHistory } from '../../lib/ghostregime/engine';
 import { buildBtcStateDebugRow } from '../../lib/ghostregime/parity/btcStateDebug';
 import { defaultMarketDataProvider } from '../../lib/ghostregime/marketData';
 import { MARKET_SYMBOLS } from '../../lib/ghostregime/config';
 import { loadKissStates } from '../../lib/ghostregime/parity/kissLoaders';
 import { compareStateParity } from '../../lib/ghostregime/parity/stateParity';
+import { loadGhostRegimeHistoryForDiagnostics, type HistorySource } from '../../lib/ghostregime/parity/historySource';
+import { resolveReferencePricesPath, resolveReferenceStatesPath } from '../../lib/ghostregime/parity/referencePaths';
 import type { MarketDataPoint } from '../../lib/ghostregime/types';
-
-function getReferenceDataDir(): string {
-  return process.env.GHOSTREGIME_REFERENCE_DATA_DIR || '.local/reference';
-}
 
 interface ReferencePriceRow {
   date: string;
@@ -38,17 +36,15 @@ interface ReferencePriceRow {
 }
 
 function loadReferencePrices(): ReferencePriceRow[] | null {
-  const dataDir = getReferenceDataDir();
-  const pricesPath = join(process.cwd(), dataDir, 'reference_prices.csv');
+  const resolved = resolveReferencePricesPath();
   
-  if (!existsSync(pricesPath)) {
+  if (!resolved.path) {
     return null;
   }
   
   try {
-    const { readFileSync } = require('fs');
     const { parse } = require('csv-parse/sync');
-    const content = readFileSync(pricesPath, 'utf-8');
+    const content = readFileSync(resolved.path, 'utf-8');
     
     const records = parse(content, {
       columns: true,
@@ -89,16 +85,59 @@ function convertReferencePricesToMarketData(
   return data.sort((a, b) => a.date.getTime() - b.date.getTime());
 }
 
+function parseArgs(): {
+  source: HistorySource;
+  baseUrl?: string;
+  days: number;
+} {
+  const args = process.argv.slice(2);
+  
+  // Parse --source
+  const sourceIndex = args.indexOf('--source');
+  const sourceStr = sourceIndex !== -1 && sourceIndex < args.length - 1
+    ? args[sourceIndex + 1]
+    : 'auto';
+  if (!['local', 'api', 'auto'].includes(sourceStr)) {
+    console.error(`Error: Invalid source "${sourceStr}". Must be: local, api, or auto`);
+    process.exit(1);
+  }
+  const source = sourceStr as HistorySource;
+  
+  // Parse --base-url
+  const baseUrlIndex = args.indexOf('--base-url');
+  const baseUrl = baseUrlIndex !== -1 && baseUrlIndex < args.length - 1
+    ? args[baseUrlIndex + 1]
+    : undefined;
+  
+  // Parse --days
+  const daysIndex = args.indexOf('--days');
+  const days = daysIndex !== -1 && daysIndex < args.length - 1
+    ? parseInt(args[daysIndex + 1], 10)
+    : 120;
+  
+  if (isNaN(days) || days < 1) {
+    console.error(`Error: Invalid days value. Must be a positive number.`);
+    process.exit(1);
+  }
+  
+  return { source, baseUrl, days };
+}
+
 async function generateReport() {
+  const { source, baseUrl, days } = parseArgs();
+  
   console.log('Generating BTC mismatch attribution report...\n');
+  console.log(`History source: ${source}${baseUrl ? ` (${baseUrl})` : ''}\n`);
   
   // Check for reference data
-  const dataDir = getReferenceDataDir();
-  const statesPath = join(process.cwd(), dataDir, 'reference_states.csv');
-  
-  if (!existsSync(statesPath)) {
-    console.error(`Error: Reference states file not found at ${statesPath}`);
-    console.error('Set GHOSTREGIME_REFERENCE_DATA_DIR or place reference_states.csv in .local/reference/');
+  const resolved = resolveReferenceStatesPath();
+  if (!resolved.path) {
+    console.error('Error: Reference states file not found.');
+    console.error('Expected locations:');
+    console.error('  - .local/reference/reference_states.csv');
+    console.error('  - docs/KISS/kiss_states_market_regime_ES1_XAU_XBT.csv');
+    console.error('');
+    console.error('Run: npm run ghostregime:setup-reference to copy from drop folder.');
     process.exit(1);
   }
   
@@ -111,8 +150,22 @@ async function generateReport() {
   const hasReferencePrices = referencePrices !== null && referencePrices.length > 0;
   console.log(`Reference prices available: ${hasReferencePrices ? 'Yes' : 'No'}`);
   
-  // Get GhostRegime history
-  const ghostHistory = await getGhostRegimeHistory();
+  // Get GhostRegime history using the specified source
+  let ghostHistory;
+  try {
+    ghostHistory = await loadGhostRegimeHistoryForDiagnostics({
+      source,
+      baseUrl,
+      lookbackDays: days,
+    });
+  } catch (error) {
+    console.error(`Error loading history: ${error instanceof Error ? error.message : error}`);
+    if (source === 'api' || source === 'auto') {
+      console.error('');
+      console.error('Hint: Try --source local or provide --base-url for API access');
+    }
+    process.exit(1);
+  }
   console.log(`Loaded ${ghostHistory.length} GhostRegime history rows\n`);
   
   // Get state parity comparison

@@ -1,7 +1,8 @@
 /**
  * CLI: Why BTC State?
  * 
- * Usage: tsx scripts/ghostregime/why-btc-state.ts --date YYYY-MM-DD
+ * Usage: 
+ *   tsx scripts/ghostregime/why-btc-state.ts --date YYYY-MM-DD [--source local|api|auto] [--base-url <url>] [--days <n>]
  * 
  * Prints GhostRegime's BTC debug row for a specific date.
  * If reference state exists locally, also prints comparison.
@@ -10,24 +11,13 @@
 // Bootstrap: Set CLI runtime flags for local persistence
 import './_bootstrapDiagnostics';
 
-import { parseISO } from 'date-fns';
-import { getGhostRegimeHistory } from '../../lib/ghostregime/engine';
+import { parseISO, subDays } from 'date-fns';
 import { buildBtcStateDebugRow } from '../../lib/ghostregime/parity/btcStateDebug';
 import { defaultMarketDataProvider } from '../../lib/ghostregime/marketData';
 import { MARKET_SYMBOLS } from '../../lib/ghostregime/config';
 import { loadKissStates } from '../../lib/ghostregime/parity/kissLoaders';
-import { existsSync } from 'fs';
-import { join } from 'path';
-
-function getReferenceDataDir(): string {
-  return process.env.GHOSTREGIME_REFERENCE_DATA_DIR || '.local/reference';
-}
-
-function hasReferenceData(): boolean {
-  const dataDir = getReferenceDataDir();
-  const statesPath = join(process.cwd(), dataDir, 'reference_states.csv');
-  return existsSync(statesPath);
-}
+import { loadGhostRegimeHistoryForDiagnostics, type HistorySource } from '../../lib/ghostregime/parity/historySource';
+import { resolveReferenceStatesPath } from '../../lib/ghostregime/parity/referencePaths';
 
 function formatNumber(value: number | null, decimals: number = 4): string {
   if (value === null) return 'N/A';
@@ -95,18 +85,57 @@ function printDebugRow(debug: ReturnType<typeof buildBtcStateDebugRow>, referenc
   }
 }
 
-async function main() {
+function parseArgs(): {
+  date: string;
+  source: HistorySource;
+  baseUrl?: string;
+  days: number;
+} {
   const args = process.argv.slice(2);
-  const dateIndex = args.indexOf('--date');
   
+  // Parse --date
+  const dateIndex = args.indexOf('--date');
   if (dateIndex === -1 || dateIndex === args.length - 1) {
-    console.error('Usage: tsx scripts/ghostregime/why-btc-state.ts --date YYYY-MM-DD');
+    console.error('Usage: tsx scripts/ghostregime/why-btc-state.ts --date YYYY-MM-DD [--source local|api|auto] [--base-url <url>] [--days <n>]');
+    process.exit(1);
+  }
+  const dateStr = args[dateIndex + 1];
+  
+  // Parse --source
+  const sourceIndex = args.indexOf('--source');
+  const sourceStr = sourceIndex !== -1 && sourceIndex < args.length - 1
+    ? args[sourceIndex + 1]
+    : 'auto';
+  if (!['local', 'api', 'auto'].includes(sourceStr)) {
+    console.error(`Error: Invalid source "${sourceStr}". Must be: local, api, or auto`);
+    process.exit(1);
+  }
+  const source = sourceStr as HistorySource;
+  
+  // Parse --base-url
+  const baseUrlIndex = args.indexOf('--base-url');
+  const baseUrl = baseUrlIndex !== -1 && baseUrlIndex < args.length - 1
+    ? args[baseUrlIndex + 1]
+    : undefined;
+  
+  // Parse --days
+  const daysIndex = args.indexOf('--days');
+  const days = daysIndex !== -1 && daysIndex < args.length - 1
+    ? parseInt(args[daysIndex + 1], 10)
+    : 120;
+  
+  if (isNaN(days) || days < 1) {
+    console.error(`Error: Invalid days value. Must be a positive number.`);
     process.exit(1);
   }
   
-  const dateStr = args[dateIndex + 1];
-  let targetDate: Date;
+  return { date: dateStr, source, baseUrl, days };
+}
+
+async function main() {
+  const { date: dateStr, source, baseUrl, days } = parseArgs();
   
+  let targetDate: Date;
   try {
     targetDate = parseISO(dateStr);
     if (isNaN(targetDate.getTime())) {
@@ -117,24 +146,52 @@ async function main() {
     process.exit(1);
   }
   
-  // Load GhostRegime history
-  const history = await getGhostRegimeHistory();
+  // Load GhostRegime history using the specified source
+  let history;
+  try {
+    history = await loadGhostRegimeHistoryForDiagnostics({
+      source,
+      baseUrl,
+      lookbackDays: days,
+      endDate: targetDate,
+    });
+  } catch (error) {
+    console.error(`Error loading history: ${error instanceof Error ? error.message : error}`);
+    if (source === 'api' || source === 'auto') {
+      console.error('');
+      console.error('Hint: Try --source local or provide --base-url for API access');
+    }
+    process.exit(1);
+  }
+  
   const row = history.find((r) => r.date === dateStr);
   
   if (!row) {
     console.error(`Error: No GhostRegime data found for date ${dateStr}`);
-    console.error('Available dates (last 10):');
-    history
-      .slice(-10)
-      .reverse()
-      .forEach((r) => console.error(`  ${r.date}`));
+    console.error('');
+    if (history.length > 0) {
+      console.error('Available dates (last 10):');
+      history
+        .slice(-10)
+        .reverse()
+        .forEach((r) => console.error(`  ${r.date}`));
+    } else {
+      console.error('No history data available.');
+    }
+    console.error('');
+    if (source === 'local') {
+      console.error('Hint: Try --source api --base-url <url> to query deployed app');
+    } else if (source === 'auto' && !baseUrl) {
+      console.error('Hint: Provide --base-url <url> to enable API fallback');
+    } else if (source === 'api' || (source === 'auto' && baseUrl)) {
+      console.error('Hint: Try increasing --days to load more history');
+    }
     process.exit(1);
   }
   
   // Fetch market data for BTC
   const endDate = targetDate;
-  const startDate = new Date(endDate);
-  startDate.setDate(startDate.getDate() - 600); // ~600 calendar days for TR_252
+  const startDate = subDays(endDate, 600); // ~600 calendar days for TR_252
   
   const marketData = await defaultMarketDataProvider.getHistoricalPrices(
     [MARKET_SYMBOLS.BTC_USD],
@@ -151,7 +208,8 @@ async function main() {
   
   // Try to load reference state if available
   let referenceState: number | null = null;
-  if (hasReferenceData()) {
+  const resolved = resolveReferenceStatesPath();
+  if (resolved.path) {
     try {
       const referenceStates = loadKissStates();
       const refRow = referenceStates.find((r) => r.date === dateStr);

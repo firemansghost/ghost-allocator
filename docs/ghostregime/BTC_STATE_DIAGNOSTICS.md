@@ -20,12 +20,58 @@ If GhostRegime's BTC state differs from the reference, the mismatch can be due t
 
 ## Prerequisites
 
-- Reference data files in `.local/reference/` (or `GHOSTREGIME_REFERENCE_DATA_DIR`):
+- Reference data files (see Quick Start below for setup)
   - `reference_states.csv` (required)
   - `reference_prices.csv` (optional but recommended for attribution)
 - `RUN_PARITY_TESTS=1` environment variable (for parameter scan)
 
 **Note:** CLI diagnostics run with local persistence and do not require `BLOB_READ_WRITE_TOKEN`. The bootstrap automatically configures the runtime to use local file storage.
+
+## Quick Start (Windows)
+
+### Step 1: Place Reference Data
+
+Place your reference CSV file in the local drop folder (not tracked by git):
+
+```
+docs/KISS/kiss_states_market_regime_ES1_XAU_XBT.csv
+```
+
+**Important:** If your repo is public, do not commit reference CSVs. Keep them in `.local/reference/` or `docs/KISS/` locally only.
+
+### Step 2: Normalize Reference Data
+
+Copy files from the drop folder to the canonical location:
+
+```powershell
+npm run ghostregime:setup-reference
+```
+
+This copies files from `docs/KISS/` to `.local/reference/` with normalized names.
+
+### Step 3: Run Diagnostics
+
+```powershell
+# Check BTC state for a specific date (uses API if local history doesn't have it)
+npm run ghostregime:why-btc-state -- --date 2026-01-02 --source api --base-url https://ghost-allocator.vercel.app
+
+# Generate attribution report
+npm run ghostregime:btc-attribution -- --source api --base-url https://ghost-allocator.vercel.app
+
+# Verify guardrails
+npm run check:no-reference-data
+```
+
+### CLI Flags
+
+All diagnostic scripts support these flags:
+
+- `--source local|api|auto` - History source (default: `auto`)
+  - `local`: Use local persistence only
+  - `api`: Query deployed app API
+  - `auto`: Try local first, fallback to API if needed
+- `--base-url <url>` - Base URL for API access (required for `api` or `auto` fallback)
+- `--days <n>` - Lookback days for history (default: 120)
 
 ## Diagnostic Workflow
 
@@ -34,13 +80,16 @@ If GhostRegime's BTC state differs from the reference, the mismatch can be due t
 Use the `why-btc-state` script to see exactly what inputs produced the BTC state:
 
 ```powershell
-# Windows PowerShell
-npm run ghostregime:why-btc-state -- --date 2026-01-02
+# Windows PowerShell - with API fallback for dates not in local history
+npm run ghostregime:why-btc-state -- --date 2026-01-02 --source api --base-url https://ghost-allocator.vercel.app
+
+# Or use local only
+npm run ghostregime:why-btc-state -- --date 2026-01-02 --source local
 ```
 
 Or directly with tsx:
 ```powershell
-tsx scripts/ghostregime/why-btc-state.ts --date 2026-01-02
+tsx scripts/ghostregime/why-btc-state.ts --date 2026-01-02 --source api --base-url https://ghost-allocator.vercel.app
 ```
 
 This will show:
@@ -99,13 +148,13 @@ Run the attribution report to determine whether the mismatch is primarily due to
 - Different calculation methods/thresholds (math issue)
 
 ```powershell
-# Windows PowerShell
-npm run ghostregime:btc-attribution
+# Windows PowerShell - with API source for latest dates
+npm run ghostregime:btc-attribution -- --source api --base-url https://ghost-allocator.vercel.app
 ```
 
 Or directly with tsx:
 ```powershell
-tsx scripts/ghostregime/btc-mismatch-attribution.ts
+tsx scripts/ghostregime/btc-mismatch-attribution.ts --source api --base-url https://ghost-allocator.vercel.app
 ```
 
 This generates `reports/btc_mismatch_attribution.md` with:

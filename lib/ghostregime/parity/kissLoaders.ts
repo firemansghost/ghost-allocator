@@ -18,11 +18,7 @@ import type {
   KissRegime,
   KissState,
 } from './kissTypes';
-
-// Get reference data directory from env var, default to .local/reference
-const getReferenceDataDir = (): string => {
-  return process.env.GHOSTREGIME_REFERENCE_DATA_DIR || '.local/reference';
-};
+import { resolveReferenceStatesPath, ensureLocalOnlyWarning, getReferenceDir } from './referencePaths';
 
 /**
  * Normalize date string to YYYY-MM-DD format
@@ -77,7 +73,7 @@ function parseKissRegime(value: string): KissRegime {
  * Load reference latest snapshot from JSON file (sync, Node.js only, for tests)
  */
 export function loadKissLatestSnapshotSync(): KissLatestSnapshot {
-  const dataDir = getReferenceDataDir();
+  const dataDir = getReferenceDir();
   const filePath = join(process.cwd(), dataDir, 'reference_latest_snapshot.json');
   
   if (!existsSync(filePath)) {
@@ -110,7 +106,7 @@ export function loadKissLatestSnapshotSync(): KissLatestSnapshot {
  * Load reference backtest CSV file (sync, Node.js only, for tests)
  */
 export function loadKissBacktest(): KissBacktestRow[] {
-  const dataDir = getReferenceDataDir();
+  const dataDir = getReferenceDir();
   const filePath = join(process.cwd(), dataDir, 'reference_backtest.csv');
   
   if (!existsSync(filePath)) {
@@ -162,12 +158,25 @@ export function loadKissBacktest(): KissBacktestRow[] {
  * Load reference states CSV file (sync, Node.js only, for tests)
  */
 export function loadKissStates(): KissStatesRow[] {
-  const dataDir = getReferenceDataDir();
-  const filePath = join(process.cwd(), dataDir, 'reference_states.csv');
+  const resolved = resolveReferenceStatesPath();
   
-  if (!existsSync(filePath)) {
-    throw new Error(`Reference data not found at ${filePath}. Set GHOSTREGIME_REFERENCE_DATA_DIR to specify the path, or place reference data in .local/reference/`);
+  if (!resolved.path) {
+    const referenceDir = getReferenceDir();
+    throw new Error(
+      `Reference states file not found. ` +
+      `Expected locations:\n` +
+      `  - ${referenceDir}/reference_states.csv\n` +
+      `  - docs/KISS/kiss_states_market_regime_ES1_XAU_XBT.csv\n` +
+      `\nRun: npm run ghostregime:setup-reference to copy from drop folder.`
+    );
   }
+  
+  // Warn if found in drop folder
+  if (resolved.foundIn === 'dropDir') {
+    ensureLocalOnlyWarning('dropDir');
+  }
+  
+  const filePath = resolved.path;
   
   const content = readFileSync(filePath, 'utf-8');
   

@@ -18,12 +18,12 @@ import './_bootstrapDiagnostics';
 import { parseISO } from 'date-fns';
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join } from 'path';
-import { getGhostRegimeHistory } from '../../lib/ghostregime/engine';
 import { buildBtcStateDebugRow } from '../../lib/ghostregime/parity/btcStateDebug';
 import { defaultMarketDataProvider } from '../../lib/ghostregime/marketData';
 import { MARKET_SYMBOLS } from '../../lib/ghostregime/config';
 import { loadKissStates } from '../../lib/ghostregime/parity/kissLoaders';
 import { compareStateParity } from '../../lib/ghostregime/parity/stateParity';
+import { loadGhostRegimeHistoryForDiagnostics, type HistorySource } from '../../lib/ghostregime/parity/historySource';
 import type { MarketDataPoint } from '../../lib/ghostregime/types';
 import { getDataForSymbol, calculateTR, getReturnsForWindow, calculateStdDev, TR_126, TR_252 } from '../../lib/ghostregime/dataWindows';
 
@@ -103,12 +103,16 @@ async function scanParameters(): Promise<ScanResult[]> {
   }
   
   // Check for reference data
-  const dataDir = getReferenceDataDir();
-  const statesPath = join(process.cwd(), dataDir, 'reference_states.csv');
+  const { resolveReferenceStatesPath } = await import('../../lib/ghostregime/parity/referencePaths');
+  const resolved = resolveReferenceStatesPath();
   
-  if (!existsSync(statesPath)) {
-    console.error(`Error: Reference states file not found at ${statesPath}`);
-    console.error('Set GHOSTREGIME_REFERENCE_DATA_DIR or place reference_states.csv in .local/reference/');
+  if (!resolved.path) {
+    console.error('Error: Reference states file not found.');
+    console.error('Expected locations:');
+    console.error('  - .local/reference/reference_states.csv');
+    console.error('  - docs/KISS/kiss_states_market_regime_ES1_XAU_XBT.csv');
+    console.error('');
+    console.error('Run: npm run ghostregime:setup-reference to copy from drop folder.');
     process.exit(1);
   }
   
@@ -116,8 +120,37 @@ async function scanParameters(): Promise<ScanResult[]> {
   const referenceStates = loadKissStates();
   console.log(`Loaded ${referenceStates.length} reference state rows`);
   
-  // Get GhostRegime history
-  const ghostHistory = await getGhostRegimeHistory();
+  // Get GhostRegime history (for date range, use local or auto with API fallback)
+  // Parameter scan needs full history, so we'll use local by default
+  // Users can override with --source api if needed
+  const args = process.argv.slice(2);
+  const sourceIndex = args.indexOf('--source');
+  const sourceStr = sourceIndex !== -1 && sourceIndex < args.length - 1
+    ? args[sourceIndex + 1]
+    : 'local';
+  const source = (['local', 'api', 'auto'].includes(sourceStr) ? sourceStr : 'local') as HistorySource;
+  
+  const baseUrlIndex = args.indexOf('--base-url');
+  const baseUrl = baseUrlIndex !== -1 && baseUrlIndex < args.length - 1
+    ? args[baseUrlIndex + 1]
+    : undefined;
+  
+  const daysIndex = args.indexOf('--days');
+  const days = daysIndex !== -1 && daysIndex < args.length - 1
+    ? parseInt(args[daysIndex + 1], 10)
+    : 120;
+  
+  let ghostHistory;
+  try {
+    ghostHistory = await loadGhostRegimeHistoryForDiagnostics({
+      source,
+      baseUrl,
+      lookbackDays: days,
+    });
+  } catch (error) {
+    console.error(`Error loading history: ${error instanceof Error ? error.message : error}`);
+    process.exit(1);
+  }
   console.log(`Loaded ${ghostHistory.length} GhostRegime history rows\n`);
   
   // Get state parity comparison
