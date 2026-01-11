@@ -65,6 +65,60 @@ function printDebugRow(debug: ReturnType<typeof buildBtcStateDebugRow>, referenc
   console.log(`  Otherwise → State = 0 (Neutral)`);
   console.log('');
   
+  // Distance to flip section
+  console.log('Distance to Flip:');
+  const flip = debug.distanceToFlip;
+  
+  if (flip.distanceToBearishScore !== null) {
+    console.log(`  To Bearish (-2): score needs ≤ ${formatNumber(debug.thresholdNeg)}`);
+    console.log(`    Current score: ${formatNumber(debug.combinedScore)} (distance: ${formatNumber(flip.distanceToBearishScore)} from bearish line)`);
+  }
+  
+  if (flip.distanceToBullishScore !== null) {
+    console.log(`  To Bullish (+2): score needs ≥ ${formatNumber(debug.thresholdPos)}`);
+    console.log(`    Current score: ${formatNumber(debug.combinedScore)} (distance: ${formatNumber(flip.distanceToBullishScore)} from bullish line)`);
+  }
+  
+  console.log('');
+  
+  // Volatility required (holding momentum fixed)
+  if (flip.volRequiredForBearish !== null) {
+    const volDelta = flip.volDeltaToBearish !== null ? formatNumber(flip.volDeltaToBearish) : 'N/A';
+    const volDeltaSign = flip.volDeltaToBearish !== null && flip.volDeltaToBearish > 0 ? '+' : '';
+    console.log(`  If momentum stays the same: bearish if vol ≤ ${formatNumber(flip.volRequiredForBearish)} (Δ vol ${volDeltaSign}${volDelta})`);
+  } else if (flip.volRequiredForBearishNote) {
+    console.log(`  If momentum stays the same: bearish ${flip.volRequiredForBearishNote}`);
+  }
+  
+  if (flip.volRequiredForBullish !== null) {
+    const volDelta = flip.volDeltaToBullish !== null ? formatNumber(flip.volDeltaToBullish) : 'N/A';
+    const volDeltaSign = flip.volDeltaToBullish !== null && flip.volDeltaToBullish > 0 ? '+' : '';
+    console.log(`  If momentum stays the same: bullish if vol ≤ ${formatNumber(flip.volRequiredForBullish)} (Δ vol ${volDeltaSign}${volDelta})`);
+  } else if (flip.volRequiredForBullishNote) {
+    console.log(`  If momentum stays the same: bullish ${flip.volRequiredForBullishNote}`);
+  }
+  
+  console.log('');
+  
+  // Momentum required (holding vol fixed)
+  if (flip.momRequiredForBearish !== null && flip.momDeltaToBearish !== null) {
+    const momDelta = formatNumber(flip.momDeltaToBearish);
+    const momDeltaSign = flip.momDeltaToBearish > 0 ? '+' : '';
+    console.log(`  If vol stays the same: bearish if momentum ≤ ${formatNumber(flip.momRequiredForBearish)} (Δ mom ${momDeltaSign}${momDelta})`);
+  } else if (flip.momRequiredNote) {
+    console.log(`  If vol stays the same: bearish ${flip.momRequiredNote}`);
+  }
+  
+  if (flip.momRequiredForBullish !== null && flip.momDeltaToBullish !== null) {
+    const momDelta = formatNumber(flip.momDeltaToBullish);
+    const momDeltaSign = flip.momDeltaToBullish > 0 ? '+' : '';
+    console.log(`  If vol stays the same: bullish if momentum ≥ ${formatNumber(flip.momRequiredForBullish)} (Δ mom ${momDeltaSign}${momDelta})`);
+  } else if (flip.momRequiredNote) {
+    console.log(`  If vol stays the same: bullish ${flip.momRequiredNote}`);
+  }
+  
+  console.log('');
+  
   console.log('Result:');
   console.log(`  State: ${debug.state}`);
   console.log(`  Scale: ${debug.scale}`);

@@ -73,6 +73,26 @@ All diagnostic scripts support these flags:
 - `--base-url <url>` - Base URL for API access (required for `api` or `auto` fallback)
 - `--days <n>` - Lookback days for history (default: 120)
 
+## Distance to Flip
+
+The "distance to flip" diagnostics show how close the current BTC state is to flipping to a different state (Bearish -2 or Bullish +2). This is a local sensitivity analysis that holds one variable constant while showing what the other would need to change.
+
+**What it shows:**
+- **Distance in score-space**: How far the current combined score is from the bearish/bullish thresholds
+- **Volatility required**: If momentum stays the same, what volatility level would be needed to flip state
+- **Momentum required**: If volatility stays the same, what momentum level would be needed to flip state
+
+**What it does NOT mean:**
+- This is not a forecast or prediction
+- It does not account for correlations between momentum and volatility
+- It assumes one variable stays constant while the other changes (a simplification)
+- It's a diagnostic tool to understand sensitivity, not a trading signal
+
+**Example interpretation:**
+- If `distanceToBearishScore = 0.0817`, the current score is 0.0817 above the bearish threshold (-0.5)
+- If `volDeltaToBearish = -0.15`, volatility would need to drop by 0.15 (holding momentum fixed) to flip bearish
+- If `momDeltaToBearish = -0.20`, momentum would need to drop by 0.20 (holding vol fixed) to flip bearish
+
 ## Diagnostic Workflow
 
 ### Step 1: Check BTC State for a Specific Date
