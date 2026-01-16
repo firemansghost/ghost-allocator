@@ -226,7 +226,8 @@ export default function Builder() {
     );
   }
 
-  const { answers, riskLevel } = result;
+  const { answers: initialAnswers, riskLevel } = result;
+  const [answers, setAnswers] = useState(initialAnswers);
   const platformSplit = computePlatformSplit(answers);
   const voyaImplementation = buildVoyaImplementation(answers, riskLevel);
   const preset = answers.portfolioPreset ?? 'standard';
@@ -269,6 +270,14 @@ export default function Builder() {
     const updatedAnswers = { ...answers, currentVoyaHoldings: holdings };
     const updatedResult = { ...result, answers: updatedAnswers };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedResult));
+  };
+
+  const handleTiltChange = (newTilt: GoldBtcTilt) => {
+    const updatedAnswers = { ...answers, goldBtcTilt: newTilt };
+    setAnswers(updatedAnswers);
+    const updatedResult = { ...result, answers: updatedAnswers };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedResult));
+    setResult(updatedResult);
   };
 
   return (
@@ -843,6 +852,59 @@ export default function Builder() {
                 These example ETFs would apply to the Schwab portion of your account. This is for
                 illustration only, not a recommendation.
               </p>
+              
+              {/* Customize: Optional Tilts (Schwab only) */}
+              {platformSplit.platform === 'voya_and_schwab' &&
+                !isHouseModel &&
+                platformSplit.targetSchwabPct > 0 && (
+                  <div className="mt-4 pt-4 border-t border-zinc-700">
+                    <h3 className="text-sm font-semibold text-zinc-200 mb-2">Customize</h3>
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium text-zinc-300">
+                        Optional tilts (Schwab only)
+                      </label>
+                      <div className="space-y-1.5 text-sm text-zinc-200">
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name="goldBtcTilt"
+                            value="none"
+                            checked={tilt === 'none'}
+                            onChange={() => handleTiltChange('none')}
+                            className="h-3.5 w-3.5 accent-amber-400"
+                          />
+                          <span>None</span>
+                        </label>
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name="goldBtcTilt"
+                            value="gold10_btc5"
+                            checked={tilt === 'gold10_btc5'}
+                            onChange={() => handleTiltChange('gold10_btc5')}
+                            className="h-3.5 w-3.5 accent-amber-400"
+                          />
+                          <span>10% Gold / 5% Bitcoin</span>
+                        </label>
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name="goldBtcTilt"
+                            value="gold15_btc5"
+                            checked={tilt === 'gold15_btc5'}
+                            onChange={() => handleTiltChange('gold15_btc5')}
+                            className="h-3.5 w-3.5 accent-amber-400"
+                          />
+                          <span>15% Gold / 5% Bitcoin</span>
+                        </label>
+                      </div>
+                      <p className="text-xs text-zinc-400 mt-1">
+                        This adjusts the Schwab lineup only (percent of your Schwab slice).
+                      </p>
+                    </div>
+                  </div>
+                )}
+              
               {tilt !== 'none' && (
                 <p className="text-[11px] text-amber-300 mt-1">
                   Includes Gold + Bitcoin tilt.

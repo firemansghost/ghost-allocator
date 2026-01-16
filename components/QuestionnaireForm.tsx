@@ -12,6 +12,23 @@ import { extractDnaParam } from '@/lib/builder/dnaImport';
 
 const STORAGE_KEY = 'ghostAllocatorQuestionnaire';
 
+/**
+ * Infer drawdown tolerance from crash behavior
+ */
+function inferDrawdownTolerance(behaviorInCrash?: 'panic_sell' | 'hold' | 'buy_more'): 'low' | 'medium' | 'high' {
+  if (!behaviorInCrash) return 'medium';
+  switch (behaviorInCrash) {
+    case 'panic_sell':
+      return 'low';
+    case 'hold':
+      return 'medium';
+    case 'buy_more':
+      return 'high';
+    default:
+      return 'medium';
+  }
+}
+
 export default function QuestionnaireForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -35,6 +52,15 @@ export default function QuestionnaireForm() {
   const [dnaImportInput, setDnaImportInput] = useState('');
   const [dnaImportStatus, setDnaImportStatus] = useState<'idle' | 'success' | 'error' | 'warning'>('idle');
   const [dnaImportMessage, setDnaImportMessage] = useState('');
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [drawdownOverride, setDrawdownOverride] = useState<boolean>(false);
+
+  // Auto-expand Advanced if complexity preference is "advanced"
+  useEffect(() => {
+    if (formData.complexityPreference === 'advanced' && !showAdvanced) {
+      setShowAdvanced(true);
+    }
+  }, [formData.complexityPreference, showAdvanced]);
 
   // Read DNA param first (takes precedence over template param)
   useEffect(() => {
@@ -185,7 +211,13 @@ export default function QuestionnaireForm() {
     if (formData.isRetired === undefined) {
       errors.isRetired = 'Please select an option';
     }
-    if (!formData.drawdownTolerance) {
+    // Drawdown tolerance: use override if set, otherwise infer from crash behavior
+    const finalDrawdownTolerance = drawdownOverride && formData.drawdownTolerance
+      ? formData.drawdownTolerance
+      : inferDrawdownTolerance(formData.behaviorInCrash);
+    
+    // Only validate if override is active and not set
+    if (drawdownOverride && !formData.drawdownTolerance) {
       errors.drawdownTolerance = 'Please select an option';
     }
     if (!formData.behaviorInCrash) {
@@ -224,18 +256,15 @@ export default function QuestionnaireForm() {
     // Clean up Schwab fields if platform is voya_only
     // Reset portfolio preset to standard if platform is voya_only
     // Reset goldBtcTilt to none if platform is voya_only or preset is house
+    // Set drawdown tolerance: use override if set, otherwise infer
     const finalFormData = {
       ...formData,
+      drawdownTolerance: finalDrawdownTolerance,
       pensionCoverage: formData.hasPension ? formData.pensionCoverage : 'none',
       currentSchwabPct: formData.platform === 'voya_and_schwab' ? formData.currentSchwabPct : undefined,
       schwabPreference: formData.platform === 'voya_and_schwab' ? formData.schwabPreference : undefined,
       portfolioPreset: formData.platform === 'voya_and_schwab' ? (formData.portfolioPreset ?? 'standard') : 'standard',
-      goldBtcTilt:
-        formData.platform === 'voya_and_schwab' &&
-        (formData.portfolioPreset ?? 'standard') === 'standard' &&
-        (formData.schwabLineupStyle ?? 'standard') === 'standard'
-          ? (formData.goldBtcTilt ?? 'none')
-          : 'none',
+      goldBtcTilt: 'none', // Tilts moved to builder page (Task 4)
       schwabLineupStyle:
         formData.platform === 'voya_and_schwab' &&
         (formData.portfolioPreset ?? 'standard') === 'standard'
@@ -253,52 +282,14 @@ export default function QuestionnaireForm() {
     router.push('/builder');
   };
 
+  // Get inferred drawdown tolerance
+  const inferredDrawdownTolerance = inferDrawdownTolerance(formData.behaviorInCrash);
+  const effectiveDrawdownTolerance = drawdownOverride && formData.drawdownTolerance
+    ? formData.drawdownTolerance
+    : inferredDrawdownTolerance;
+
   return (
     <form onSubmit={handleSubmit} className="space-y-5 text-sm">
-      {/* Import DNA Section */}
-      <div className="rounded-md border border-zinc-700 bg-zinc-900/50 px-4 py-3 mb-4">
-        <label htmlFor="dna-import" className="block text-xs font-medium text-zinc-300 mb-2">
-          Import DNA
-        </label>
-        <div className="flex gap-2">
-          <input
-            id="dna-import"
-            type="text"
-            value={dnaImportInput}
-            onChange={(e) => setDnaImportInput(e.target.value)}
-            placeholder="Paste a /onboarding?dna=... link or dna token"
-            className="flex-1 px-3 py-2 text-sm bg-zinc-800 border border-zinc-700 rounded text-zinc-200 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-400/60 focus:border-amber-400/60"
-          />
-          <button
-            type="button"
-            onClick={handleDnaImport}
-            className="px-4 py-2 text-sm font-medium rounded bg-amber-400/20 text-amber-300 border border-amber-400/30 hover:bg-amber-400/30 hover:text-amber-200 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400/60"
-          >
-            Import
-          </button>
-          <button
-            type="button"
-            onClick={handleClearDnaImport}
-            className="px-4 py-2 text-sm font-medium rounded bg-zinc-800 text-zinc-300 border border-zinc-700 hover:bg-zinc-700 hover:text-zinc-200 transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-500"
-          >
-            Clear
-          </button>
-        </div>
-        {dnaImportStatus !== 'idle' && dnaImportMessage && (
-          <div
-            className={`mt-2 px-3 py-2 rounded text-xs ${
-              dnaImportStatus === 'success'
-                ? 'bg-green-500/20 text-green-300 border border-green-500/30'
-                : dnaImportStatus === 'error'
-                ? 'bg-red-500/20 text-red-300 border border-red-500/30'
-                : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-            }`}
-          >
-            {dnaImportMessage}
-          </div>
-        )}
-      </div>
-
       {selectedTemplate && (
         <div className="rounded-md border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-xs text-amber-200">
           <p className="font-medium">Template selected: {selectedTemplate}</p>
@@ -319,6 +310,13 @@ export default function QuestionnaireForm() {
           )}
         </div>
       )}
+
+      {/* Quick Build Section */}
+      <div className="space-y-5">
+        <div className="border-b border-zinc-700 pb-3">
+          <h2 className="text-base font-semibold text-zinc-200">Quick Build</h2>
+          <p className="text-xs text-zinc-400 mt-1">Answer these questions to get started quickly.</p>
+        </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1">
           <label className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">Age</label>
@@ -392,27 +390,38 @@ export default function QuestionnaireForm() {
         )}
       </div>
 
+      {/* Inferred Drawdown Tolerance (Quick Build) */}
       <div className="space-y-1">
         <label className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">
-          Drawdown tolerance
+          Estimated drawdown tolerance
         </label>
-        <select
-          value={formData.drawdownTolerance || ''}
-          onChange={(e) =>
-            setFormData({
-              ...formData,
-              drawdownTolerance: e.target.value as 'low' | 'medium' | 'high',
-            })
-          }
-          className="w-full rounded-md border border-zinc-700 bg-black/40 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-amber-400 focus:outline-none focus:ring-0"
-        >
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-        </select>
-        {errors.drawdownTolerance && (
-          <p className="mt-1 text-xs text-red-400">
-            {errors.drawdownTolerance}
+        <div className="flex items-center gap-2">
+          <div className="flex-1 rounded-md border border-zinc-700 bg-black/40 px-3 py-2 text-sm text-zinc-300">
+            {effectiveDrawdownTolerance.charAt(0).toUpperCase() + effectiveDrawdownTolerance.slice(1)}
+            {!drawdownOverride && (
+              <span className="text-zinc-500 ml-2 text-xs">
+                (inferred from crash behavior)
+              </span>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setDrawdownOverride(!drawdownOverride);
+              if (!drawdownOverride) {
+                setFormData({ ...formData, drawdownTolerance: inferredDrawdownTolerance });
+              }
+              setShowAdvanced(true);
+            }}
+            className="px-3 py-2 text-xs text-amber-300 hover:text-amber-200 underline"
+          >
+            {drawdownOverride ? 'Using override' : 'Edit'}
+          </button>
+        </div>
+        {/* Update inferred value when crash behavior changes */}
+        {!drawdownOverride && formData.behaviorInCrash && (
+          <p className="text-xs text-zinc-400 mt-1">
+            Based on: {formData.behaviorInCrash === 'panic_sell' ? 'Panic sell' : formData.behaviorInCrash === 'hold' ? 'Hold' : 'Buy more'} → {inferredDrawdownTolerance.charAt(0).toUpperCase() + inferredDrawdownTolerance.slice(1)} tolerance
           </p>
         )}
       </div>
@@ -471,30 +480,7 @@ export default function QuestionnaireForm() {
         )}
       </div>
 
-      <div className="space-y-1">
-        <label className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">
-          Income stability
-        </label>
-        <select
-          value={formData.incomeStability || ''}
-          onChange={(e) =>
-            setFormData({
-              ...formData,
-              incomeStability: e.target.value as 'low' | 'medium' | 'high',
-            })
-          }
-          className="w-full rounded-md border border-zinc-700 bg-black/40 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-amber-400 focus:outline-none focus:ring-0"
-        >
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-        </select>
-        {errors.incomeStability && (
-          <p className="mt-1 text-xs text-red-400">
-            {errors.incomeStability}
-          </p>
-        )}
-      </div>
+      {/* Income stability moved to Advanced */}
 
       <div className="space-y-1">
         <label className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">
@@ -678,304 +664,7 @@ export default function QuestionnaireForm() {
         )}
       </div>
 
-      {/* Portfolio Preset Selection */}
-      <div className="space-y-2">
-        <p className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">
-          Portfolio preset
-        </p>
-        <div className="space-y-1.5 text-sm text-zinc-200">
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              name="portfolioPreset"
-              value="standard"
-              checked={(formData.portfolioPreset ?? 'standard') === 'standard'}
-              onChange={() =>
-                setFormData({
-                  ...formData,
-                  portfolioPreset: 'standard',
-                  // Keep tilt if platform is still Voya+Schwab, otherwise reset
-                  goldBtcTilt:
-                    formData.platform === 'voya_and_schwab'
-                      ? formData.goldBtcTilt ?? 'none'
-                      : 'none',
-                })
-              }
-              className="h-3.5 w-3.5 accent-amber-400"
-            />
-            <span>Standard (Ghost sleeves)</span>
-          </label>
-          <label
-            className={`flex items-center gap-2 ${
-              formData.platform !== 'voya_and_schwab'
-                ? 'opacity-50 cursor-not-allowed'
-                : ''
-            }`}
-          >
-            <input
-              type="radio"
-              name="portfolioPreset"
-              value="ghostregime_60_30_10"
-              checked={formData.portfolioPreset === 'ghostregime_60_30_10'}
-              onChange={() =>
-                setFormData({
-                  ...formData,
-                  portfolioPreset: 'ghostregime_60_30_10',
-                  goldBtcTilt: 'none', // Reset tilt when switching to house preset
-                })
-              }
-              disabled={formData.platform !== 'voya_and_schwab'}
-              className="h-3.5 w-3.5 accent-amber-400"
-            />
-            <span>House Model: GhostRegime 60/30/10</span>
-          </label>
-          <label
-            className={`flex items-center gap-2 ${
-              formData.platform !== 'voya_and_schwab'
-                ? 'opacity-50 cursor-not-allowed'
-                : ''
-            }`}
-          >
-            <input
-              type="radio"
-              name="portfolioPreset"
-              value="ghostregime_60_25_15"
-              checked={formData.portfolioPreset === 'ghostregime_60_25_15'}
-              onChange={() =>
-                setFormData({
-                  ...formData,
-                  portfolioPreset: 'ghostregime_60_25_15',
-                  goldBtcTilt: 'none', // Reset tilt when switching to house preset
-                })
-              }
-              disabled={formData.platform !== 'voya_and_schwab'}
-              className="h-3.5 w-3.5 accent-amber-400"
-            />
-            <span>House Model: GhostRegime 60/25/15 (optional)</span>
-          </label>
-        </div>
-        {formData.platform !== 'voya_and_schwab' && (
-          <p className="text-xs text-zinc-400 mt-1">
-            House models require Schwab (or another brokerage).
-          </p>
-        )}
-      </div>
-
-      {/* Optional Gold + Bitcoin Tilt (Schwab only, Standard preset only) */}
-      {formData.platform === 'voya_and_schwab' &&
-        (formData.portfolioPreset ?? 'standard') === 'standard' && (
-          <div className="space-y-2">
-            <p className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">
-              Optional tilts (Schwab only)
-            </p>
-            <div className="space-y-1.5 text-sm text-zinc-200">
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="goldBtcTilt"
-                  value="none"
-                  checked={(formData.goldBtcTilt ?? 'none') === 'none'}
-                  onChange={() =>
-                    setFormData({
-                      ...formData,
-                      goldBtcTilt: 'none',
-                    })
-                  }
-                  className="h-3.5 w-3.5 accent-amber-400"
-                />
-                <span>None</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="goldBtcTilt"
-                  value="gold10_btc5"
-                  checked={formData.goldBtcTilt === 'gold10_btc5'}
-                  onChange={() =>
-                    setFormData({
-                      ...formData,
-                      goldBtcTilt: 'gold10_btc5',
-                    })
-                  }
-                  className="h-3.5 w-3.5 accent-amber-400"
-                />
-                <span>10% Gold / 5% Bitcoin</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="goldBtcTilt"
-                  value="gold15_btc5"
-                  checked={formData.goldBtcTilt === 'gold15_btc5'}
-                  onChange={() =>
-                    setFormData({
-                      ...formData,
-                      goldBtcTilt: 'gold15_btc5',
-                    })
-                  }
-                  className="h-3.5 w-3.5 accent-amber-400"
-                />
-                <span>15% Gold / 5% Bitcoin</span>
-              </label>
-            </div>
-            <p className="text-xs text-zinc-400 mt-1">
-              This adjusts the Schwab lineup only (percent of your Schwab slice).
-            </p>
-          </div>
-        )}
-
-      {/* Schwab ETF Lineup Style (Schwab only, Standard preset only) */}
-      {formData.platform === 'voya_and_schwab' &&
-        (formData.portfolioPreset ?? 'standard') === 'standard' && (
-          <div className="space-y-2">
-            <p className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">
-              Schwab ETF lineup style
-            </p>
-            <div className="space-y-1.5 text-sm text-zinc-200">
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="schwabLineupStyle"
-                  value="standard"
-                  checked={(formData.schwabLineupStyle ?? 'standard') === 'standard'}
-                  onChange={() =>
-                    setFormData({
-                      ...formData,
-                      schwabLineupStyle: 'standard',
-                    })
-                  }
-                  className="h-3.5 w-3.5 accent-amber-400"
-                />
-                <span>Standard (core index ETFs)</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="schwabLineupStyle"
-                  value="simplify"
-                  checked={formData.schwabLineupStyle === 'simplify'}
-                  onChange={() =>
-                    setFormData({
-                      ...formData,
-                      schwabLineupStyle: 'simplify',
-                      // Disable tilt when simplify mode is selected
-                      goldBtcTilt: 'none',
-                    })
-                  }
-                  className="h-3.5 w-3.5 accent-amber-400"
-                />
-                <span>Simplify mode (alts/hedges/convexity)</span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30">
-                  Advanced
-                </span>
-              </label>
-            </div>
-            <p className="text-xs text-zinc-400 mt-1">
-              Simplify mode uses building-block ETFs with options overlays and alternative strategies.
-            </p>
-          </div>
-        )}
-
-      {/* Instrument Wrappers (only show when Gold/BTC will appear) */}
-      {formData.platform === 'voya_and_schwab' && (() => {
-        const preset = (formData.portfolioPreset ?? 'standard') as PortfolioPreset;
-        const tilt = (formData.goldBtcTilt ?? 'none') as GoldBtcTilt;
-        const { willShowGold, willShowBtc } = willShowGoldBtc(preset, tilt);
-        return willShowGold || willShowBtc;
-      })() && (
-        <div className="space-y-2">
-          <p className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">
-            Instrument wrappers (advanced)
-          </p>
-          {(() => {
-            const preset = (formData.portfolioPreset ?? 'standard') as PortfolioPreset;
-            const tilt = (formData.goldBtcTilt ?? 'none') as GoldBtcTilt;
-            const { willShowGold, willShowBtc } = willShowGoldBtc(preset, tilt);
-            return (
-              <>
-                {willShowGold && (
-                  <div className="space-y-1.5 text-sm text-zinc-200 mb-3">
-                    <p className="text-xs text-zinc-400 mb-1">Gold instrument:</p>
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        name="goldInstrument"
-                        value="gldm"
-                        checked={(formData.goldInstrument ?? 'gldm') === 'gldm'}
-                        onChange={() =>
-                          setFormData({
-                            ...formData,
-                            goldInstrument: 'gldm',
-                          })
-                        }
-                        className="h-3.5 w-3.5 accent-amber-400"
-                      />
-                      <span>GLDM (spot)</span>
-                    </label>
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        name="goldInstrument"
-                        value="ygld"
-                        checked={formData.goldInstrument === 'ygld'}
-                        onChange={() =>
-                          setFormData({
-                            ...formData,
-                            goldInstrument: 'ygld',
-                          })
-                        }
-                        className="h-3.5 w-3.5 accent-amber-400"
-                      />
-                      <span>YGLD (income wrapper)</span>
-                    </label>
-                  </div>
-                )}
-                {willShowBtc && (
-                  <div className="space-y-1.5 text-sm text-zinc-200">
-                    <p className="text-xs text-zinc-400 mb-1">Bitcoin instrument:</p>
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        name="btcInstrument"
-                        value="fbtc"
-                        checked={(formData.btcInstrument ?? 'fbtc') === 'fbtc'}
-                        onChange={() =>
-                          setFormData({
-                            ...formData,
-                            btcInstrument: 'fbtc',
-                          })
-                        }
-                        className="h-3.5 w-3.5 accent-amber-400"
-                      />
-                      <span>FBTC (spot)</span>
-                    </label>
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        name="btcInstrument"
-                        value="maxi"
-                        checked={formData.btcInstrument === 'maxi'}
-                        onChange={() =>
-                          setFormData({
-                            ...formData,
-                            btcInstrument: 'maxi',
-                          })
-                        }
-                        className="h-3.5 w-3.5 accent-amber-400"
-                      />
-                      <span>MAXI (income wrapper)</span>
-                    </label>
-                  </div>
-                )}
-              </>
-            );
-          })()}
-          <p className="text-xs text-zinc-400 mt-1">
-            Income wrappers (YGLD/MAXI) use options overlays and may have ROC-style distributions.
-          </p>
-        </div>
-      )}
-
+      {/* Pension section - still in Quick Build */}
       <div className="space-y-1">
         <label className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">
           Do you have (or expect) a pension that will pay you a monthly benefit
@@ -1091,6 +780,310 @@ export default function QuestionnaireForm() {
           )}
         </div>
       )}
+      </div>
+
+      {/* Advanced Settings Accordion */}
+      <div className="border-t border-zinc-700 pt-5">
+        <button
+          type="button"
+          onClick={() => setShowAdvanced(!showAdvanced)}
+          className="w-full flex items-center justify-between text-left"
+        >
+          <div>
+            <h2 className="text-base font-semibold text-zinc-200">Advanced Settings</h2>
+            <p className="text-xs text-zinc-400 mt-1">Optional customization and power-user controls</p>
+          </div>
+          <svg
+            className={`w-5 h-5 text-zinc-400 transition-transform ${showAdvanced ? 'rotate-180' : ''}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        {showAdvanced && (
+          <div className="mt-4 space-y-5">
+            {/* Load a saved setup (formerly Import DNA) */}
+            <div className="rounded-md border border-zinc-700 bg-zinc-900/50 px-4 py-3">
+              <label htmlFor="dna-import" className="block text-xs font-medium text-zinc-300 mb-2">
+                Load a saved setup (optional)
+              </label>
+              <p className="text-xs text-zinc-400 mb-2">
+                Paste a saved link or code to restore a previous build. This recreates the same answers + portfolio from a shareable code/link.
+              </p>
+              <div className="flex gap-2">
+                <input
+                  id="dna-import"
+                  type="text"
+                  value={dnaImportInput}
+                  onChange={(e) => setDnaImportInput(e.target.value)}
+                  placeholder="Paste a saved link or code"
+                  className="flex-1 px-3 py-2 text-sm bg-zinc-800 border border-zinc-700 rounded text-zinc-200 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-400/60 focus:border-amber-400/60"
+                />
+                <button
+                  type="button"
+                  onClick={handleDnaImport}
+                  className="px-4 py-2 text-sm font-medium rounded bg-amber-400/20 text-amber-300 border border-amber-400/30 hover:bg-amber-400/30 hover:text-amber-200 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400/60"
+                >
+                  Import
+                </button>
+                <button
+                  type="button"
+                  onClick={handleClearDnaImport}
+                  className="px-4 py-2 text-sm font-medium rounded bg-zinc-800 text-zinc-300 border border-zinc-700 hover:bg-zinc-700 hover:text-zinc-200 transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-500"
+                >
+                  Clear
+                </button>
+              </div>
+              {dnaImportStatus !== 'idle' && dnaImportMessage && (
+                <div
+                  className={`mt-2 px-3 py-2 rounded text-xs ${
+                    dnaImportStatus === 'success'
+                      ? 'bg-green-500/20 text-green-300 border border-green-500/30'
+                      : dnaImportStatus === 'error'
+                      ? 'bg-red-500/20 text-red-300 border border-red-500/30'
+                      : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                  }`}
+                >
+                  {dnaImportMessage}
+                </div>
+              )}
+            </div>
+
+            {/* Portfolio Preset Selection */}
+            <div className="space-y-2">
+              <p className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">
+                Portfolio preset
+              </p>
+              <div className="space-y-1.5 text-sm text-zinc-200">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="portfolioPreset"
+                    value="standard"
+                    checked={(formData.portfolioPreset ?? 'standard') === 'standard'}
+                    onChange={() =>
+                      setFormData({
+                        ...formData,
+                        portfolioPreset: 'standard',
+                        goldBtcTilt: 'none',
+                      })
+                    }
+                    className="h-3.5 w-3.5 accent-amber-400"
+                  />
+                  <span>Standard (Ghost sleeves)</span>
+                </label>
+                <label
+                  className={`flex items-center gap-2 ${
+                    formData.platform !== 'voya_and_schwab'
+                      ? 'opacity-50 cursor-not-allowed'
+                      : ''
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="portfolioPreset"
+                    value="ghostregime_60_30_10"
+                    checked={formData.portfolioPreset === 'ghostregime_60_30_10'}
+                    onChange={() =>
+                      setFormData({
+                        ...formData,
+                        portfolioPreset: 'ghostregime_60_30_10',
+                        goldBtcTilt: 'none',
+                      })
+                    }
+                    disabled={formData.platform !== 'voya_and_schwab'}
+                    className="h-3.5 w-3.5 accent-amber-400"
+                  />
+                  <span>House Model: GhostRegime 60/30/10</span>
+                </label>
+                <label
+                  className={`flex items-center gap-2 ${
+                    formData.platform !== 'voya_and_schwab'
+                      ? 'opacity-50 cursor-not-allowed'
+                      : ''
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="portfolioPreset"
+                    value="ghostregime_60_25_15"
+                    checked={formData.portfolioPreset === 'ghostregime_60_25_15'}
+                    onChange={() =>
+                      setFormData({
+                        ...formData,
+                        portfolioPreset: 'ghostregime_60_25_15',
+                        goldBtcTilt: 'none',
+                      })
+                    }
+                    disabled={formData.platform !== 'voya_and_schwab'}
+                    className="h-3.5 w-3.5 accent-amber-400"
+                  />
+                  <span>House Model: GhostRegime 60/25/15 (optional)</span>
+                </label>
+              </div>
+              {formData.platform !== 'voya_and_schwab' && (
+                <p className="text-xs text-zinc-400 mt-1">
+                  House models require Schwab (or another brokerage).
+                </p>
+              )}
+            </div>
+
+            {/* Schwab ETF Lineup Style (Schwab only, Standard preset only) */}
+            {formData.platform === 'voya_and_schwab' &&
+              (formData.portfolioPreset ?? 'standard') === 'standard' && (
+                <div className="space-y-2">
+                  <p className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">
+                    Schwab ETF lineup style
+                  </p>
+                  <div className="space-y-1.5 text-sm text-zinc-200">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="schwabLineupStyle"
+                        value="standard"
+                        checked={(formData.schwabLineupStyle ?? 'standard') === 'standard'}
+                        onChange={() =>
+                          setFormData({
+                            ...formData,
+                            schwabLineupStyle: 'standard',
+                          })
+                        }
+                        className="h-3.5 w-3.5 accent-amber-400"
+                      />
+                      <span>Standard (core index ETFs)</span>
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="schwabLineupStyle"
+                        value="simplify"
+                        checked={formData.schwabLineupStyle === 'simplify'}
+                        onChange={() =>
+                          setFormData({
+                            ...formData,
+                            schwabLineupStyle: 'simplify',
+                            goldBtcTilt: 'none',
+                          })
+                        }
+                        className="h-3.5 w-3.5 accent-amber-400"
+                      />
+                      <span>Simplify mode (alts/hedges/convexity)</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                        Advanced
+                      </span>
+                    </label>
+                  </div>
+                  <p className="text-xs text-zinc-400 mt-1">
+                    Simplify mode uses building-block ETFs with options overlays and alternative strategies.
+                  </p>
+                </div>
+              )}
+
+            {/* Instrument Wrappers (only show when Gold/BTC will appear) */}
+            {formData.platform === 'voya_and_schwab' && (() => {
+              const preset = (formData.portfolioPreset ?? 'standard') as PortfolioPreset;
+              const tilt = (formData.goldBtcTilt ?? 'none') as GoldBtcTilt;
+              const { willShowGold, willShowBtc } = willShowGoldBtc(preset, tilt);
+              return willShowGold || willShowBtc;
+            })() && (
+              <div className="space-y-2">
+                <p className="text-[11px] font-medium text-zinc-300 leading-snug uppercase tracking-wide">
+                  Instrument wrappers (advanced)
+                </p>
+                {(() => {
+                  const preset = (formData.portfolioPreset ?? 'standard') as PortfolioPreset;
+                  const tilt = (formData.goldBtcTilt ?? 'none') as GoldBtcTilt;
+                  const { willShowGold, willShowBtc } = willShowGoldBtc(preset, tilt);
+                  return (
+                    <>
+                      {willShowGold && (
+                        <div className="space-y-1.5 text-sm text-zinc-200 mb-3">
+                          <p className="text-xs text-zinc-400 mb-1">Gold instrument:</p>
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="radio"
+                              name="goldInstrument"
+                              value="gldm"
+                              checked={(formData.goldInstrument ?? 'gldm') === 'gldm'}
+                              onChange={() =>
+                                setFormData({
+                                  ...formData,
+                                  goldInstrument: 'gldm',
+                                })
+                              }
+                              className="h-3.5 w-3.5 accent-amber-400"
+                            />
+                            <span>GLDM (spot)</span>
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="radio"
+                              name="goldInstrument"
+                              value="ygld"
+                              checked={formData.goldInstrument === 'ygld'}
+                              onChange={() =>
+                                setFormData({
+                                  ...formData,
+                                  goldInstrument: 'ygld',
+                                })
+                              }
+                              className="h-3.5 w-3.5 accent-amber-400"
+                            />
+                            <span>YGLD (income wrapper)</span>
+                          </label>
+                        </div>
+                      )}
+                      {willShowBtc && (
+                        <div className="space-y-1.5 text-sm text-zinc-200">
+                          <p className="text-xs text-zinc-400 mb-1">Bitcoin instrument:</p>
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="radio"
+                              name="btcInstrument"
+                              value="fbtc"
+                              checked={(formData.btcInstrument ?? 'fbtc') === 'fbtc'}
+                              onChange={() =>
+                                setFormData({
+                                  ...formData,
+                                  btcInstrument: 'fbtc',
+                                })
+                              }
+                              className="h-3.5 w-3.5 accent-amber-400"
+                            />
+                            <span>FBTC (spot)</span>
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="radio"
+                              name="btcInstrument"
+                              value="maxi"
+                              checked={formData.btcInstrument === 'maxi'}
+                              onChange={() =>
+                                setFormData({
+                                  ...formData,
+                                  btcInstrument: 'maxi',
+                                })
+                              }
+                              className="h-3.5 w-3.5 accent-amber-400"
+                            />
+                            <span>MAXI (income wrapper)</span>
+                          </label>
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
+                <p className="text-xs text-zinc-400 mt-1">
+                  Income wrappers (YGLD/MAXI) use options overlays and may have ROC-style distributions.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       <button
         type="submit"
