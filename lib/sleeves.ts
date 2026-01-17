@@ -63,8 +63,8 @@ export const exampleETFs: ExampleETF[] = [
     sleeveId: 'convex_equity',
   },
   {
-    ticker: 'GLD',
-    name: 'SPDR Gold Trust',
+    ticker: 'GLDM',
+    name: 'SPDR Gold MiniShares Trust',
     description: 'Physical gold exposure for inflation protection',
     sleeveId: 'real_assets',
   },

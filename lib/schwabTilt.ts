@@ -89,12 +89,24 @@ export function applySchwabTilt(
   for (const sleeve of sleeves) {
     if (sleeve.weight > 0) {
       const scaledWeight = (sleeve.weight * 100) * scaleFactor;
+      
+      // When gold tilt is active, remove gold ETFs from Real Assets sleeve
+      let etfs = sleeveEtfs[sleeve.id] || [];
+      let label = sleeve.name;
+      
+      if (goldPct > 0 && sleeve.id === 'real_assets') {
+        // Filter out gold ETFs (GLDM, YGLD) from Real Assets
+        etfs = etfs.filter((etf) => etf.ticker !== 'GLDM' && etf.ticker !== 'YGLD');
+        // Update label to indicate gold is handled separately
+        label = 'Commodities';
+      }
+      
       result.push({
         type: 'sleeve',
         id: sleeve.id,
-        label: sleeve.name,
+        label: label,
         weight: scaledWeight,
-        etfs: sleeveEtfs[sleeve.id] || [],
+        etfs: etfs,
       });
     }
   }

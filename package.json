@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "tsx lib/ghostregime/__tests__/regimeCore.test.ts",
+    "test:lineups": "tsx lib/schwabLineups.test.ts",
     "test:parity": "tsx lib/ghostregime/parity/__tests__/kissAlloc.test.ts",
     "ghostregime:parity": "npm run test:parity",
     "ghostregime:setup-reference": "tsx scripts/ghostregime/setup-reference.ts",

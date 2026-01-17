@@ -16,6 +16,7 @@ import type {
 import { exampleETFs } from './sleeves';
 import { applySchwabTilt, getTiltPercentages } from './schwabTilt';
 import { isHousePreset } from './houseModels';
+import { validateNoDuplicateTickers, validateWeightSum } from './portfolio/validateLineup';
 
 /**
  * Simplify mode ETF mappings by sleeve
@@ -204,7 +205,7 @@ export function getStandardSchwabLineup(
   if (tilt !== 'none') {
     const tilted = applySchwabTilt(sleeves, etfsBySleeve, tilt);
     // Apply instrument wrappers to tilted lineup
-    return tilted.map((item) => {
+    const result = tilted.map((item) => {
       if (item.type === 'tilt') {
         // Apply wrapper to tilt items
         const ticker = item.ticker;
@@ -223,10 +224,16 @@ export function getStandardSchwabLineup(
         };
       }
     });
+    
+    // Validate no duplicate tickers
+    validateNoDuplicateTickers(result);
+    validateWeightSum(result);
+    
+    return result;
   }
 
   // No tilt: return sleeve-based lineup
-  return sleeves
+  const result = sleeves
     .filter((s) => s.weight > 0)
     .map((sleeve) => {
       const etfs = etfsBySleeve[sleeve.id] || [];
@@ -240,6 +247,12 @@ export function getStandardSchwabLineup(
         etfs: wrappedEtfs,
       };
     });
+  
+  // Validate no duplicate tickers
+  validateNoDuplicateTickers(result);
+  validateWeightSum(result);
+  
+  return result;
 }
 
 /**
