@@ -1,5 +1,46 @@
----
 # DECISIONS
+
+## 2026-01-18 — Education hub implementation: manual data, validation, fallback links
+Choice:
+- Masterclass data file uses manual list (no runtime parsing of archive file).
+- Triffin Trap series categorized as "Dollar Plumbing" (not "Other").
+- Items without substackUrl show "Find on Substack" fallback link (never disabled buttons).
+- Dev-time validation guardrails for data integrity (unique IDs, valid startHereOrder, non-empty fields).
+
+Why:
+- Manual list is most reliable and maintainable; parsing adds complexity and failure modes.
+- "Other" should be reserved for truly miscellaneous items, not a catch-all.
+- Every item must have a working click path; fallback to series page ensures usability.
+- Validation catches errors early in development without risking production crashes.
+
+Consequences / follow-ups:
+- Data file is manually maintained; updates require editing the array.
+- Validation runs on import in dev mode only (gated on NODE_ENV).
+- Fallback links ensure good UX even before per-article URLs are provided.
+
+---
+
+## 2026-01-17 — Education hub + Masterclass integration approach (guided path, Level 1 link-out)
+Choice:
+- Add an Education area (/learn) with a guided "Start here" path.
+- Integrate Macro Mayhem Masterclass as Level 1: link out to Substack (no content migration yet).
+- Add a 457(b) basics page first (generic, first-responder friendly). Add an OKC-specific stub later when plan docs are available.
+
+Why:
+- Education improves trust + onboarding and reduces user confusion before they hit the builder.
+- Level 1 avoids a migration/time-sink while preserving Substack as the canonical home for MMM.
+- Guided path reduces "what do I click" paralysis for normal humans.
+
+Alternatives considered:
+- Level 2 (host MMM content in-app as MD/MDX) — deferred until after Learn hub ships and structure proves useful.
+- Free-form library only (no guided path) — rejected; too easy to become a link dump.
+
+Consequences / follow-ups:
+- Add /learn to top nav + add a homepage secondary CTA ("Learn 457 Basics").
+- Build /learn/masterclass with "Start here" ordering, categories, and brief blurbs.
+- Create a lightweight data file for MMM entries; allow "Link pending" until URLs are provided.
+
+---
 
 ## 2025-12-01 — No options; ETF "options-like" exposure via ETFs only
 Choice: Avoid options strategies; if we need convexity/managed futures/etc, use ETFs/funds.
@@ -30,4 +71,3 @@ Choice: V1 is MVP Foundation; V1.1 is model portfolio validation + GhostRegime v
 Why: Keeps a stable shipping milestone while allowing iterative refinement.
 Alternatives: "V1 never ends" (rejected)
 ---
-

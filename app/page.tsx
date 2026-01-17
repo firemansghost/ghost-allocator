@@ -33,6 +33,12 @@ export default function HomePage() {
             Build My Portfolio
           </Link>
           <Link
+            href="/learn/457"
+            className="text-sm font-medium text-zinc-300 hover:text-zinc-100 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-2 py-1 min-h-[44px] flex items-center"
+          >
+            Learn 457 Basics
+          </Link>
+          <Link
             href="/why-60-40-dead"
             className="text-sm font-medium text-zinc-300 hover:text-zinc-100 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-2 py-1 min-h-[44px] flex items-center"
           >

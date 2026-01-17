@@ -1,7 +1,35 @@
----
 # HANDOFF
 
 ## Last Session Summary
+Education hub (V1.1) is complete. Implemented:
+- /learn hub with guided "Start Here" path and Browse section
+- /learn/457 basics page (generic, first responder friendly)
+- /learn/masterclass page with Level 1 link-out to Substack
+- Masterclass data file with real titles/dates from archive, validation guardrails, and fallback links
+- All stub pages created (/learn/457/okc, /learn/basics, /learn/glossary)
+- Navigation updated: "Learn" in top nav, secondary CTA on homepage
+- Sitemap updated with /learn routes
+
+## State of Work
+- Core app is stable and deployable; builder/onboarding works.
+- Sleeve logic is clean (no Gold double-counting; Gold and Commodities remain separate).
+- GhostRegime diagnostics are in a good place and can be revisited if parity issues matter again.
+- Education section is live and functional. Masterclass items use fallback links ("Find on Substack") until per-article URLs are provided.
+
+## Priority for Next Session
+1) Add per-article Substack URLs to masterclass data file as Bobby provides them
+2) Develop OKC-specific 457(b) playbook content when plan documents are available
+3) Consider content for Finance Basics and Glossary pages (currently stubs)
+
+## Open Questions
+- When will per-article Substack URLs be available to replace fallback links?
+- What's the timeline for OKC plan documents to enable OKC-specific 457(b) playbook?
+- Should Finance Basics and Glossary be prioritized, or focus on other features first?
+
+---
+
+## Archive
+### Snapshot (2025-12-22)
 Ghost Allocator V1 is in a strong place: platform-aware builder flow, Voya fund menu completeness, delta "one-time rebalance" guidance, and clearer UX hierarchy. SEO basics are added (metadata, robots/sitemap, OG). GhostRegime workflow was adjusted to avoid noisy failures by skipping safely when not configured.
 
 ## State of Work
@@ -33,7 +61,7 @@ Before acting:
 3) Propose a plan (max 3 steps).
 4) Wait for Bobby's approval before coding.
 
-Risk posture: Moderate
+Risk posture: Conservative
 Tone: Use SKILLS.md
 
 ## END SESSION PROMPT (copy/paste)
@@ -47,5 +75,3 @@ UPDATE FILES:
 - Add a new entry to TASK_LOG.md
 - Add decisions (if any) to DECISIONS.md
 - Update HANDOFF.md with next-session priority + open questions
----
-

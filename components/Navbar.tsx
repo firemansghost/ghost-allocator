@@ -24,6 +24,12 @@ export function Navbar() {
             Why 60/40?
           </Link>
           <Link
+            href="/learn"
+            className="text-zinc-300 hover:text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-2 py-1 min-h-[44px] flex items-center"
+          >
+            Learn
+          </Link>
+          <Link
             href="/ghostregime"
             className="text-zinc-300 hover:text-zinc-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-2 py-1 min-h-[44px] flex items-center"
           >
