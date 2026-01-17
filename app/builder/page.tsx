@@ -327,9 +327,14 @@ export default function Builder() {
           >
             Save setup
           </button>
-          <span className="inline-flex items-center rounded-full border border-amber-400/60 bg-amber-400/10 px-3 py-1 text-xs font-medium text-amber-300">
-            Risk level: {riskLabels[riskLevel]}
-          </span>
+          <div className="flex flex-col items-end gap-1">
+            <span className="inline-flex items-center rounded-full border border-amber-400/60 bg-amber-400/10 px-3 py-1 text-xs font-medium text-amber-300">
+              Risk level: {riskLabels[riskLevel]}
+            </span>
+            <p className="text-[10px] text-zinc-400 text-right max-w-[200px]">
+              Tolerance is what you said you can stomach. Risk level is what the engine recommends given your income floor + horizon.
+            </p>
+          </div>
         </div>
       </header>
 
@@ -366,13 +371,13 @@ export default function Builder() {
             </Link>
           </li>
           <li>
-            If you know your current mix, add it below (optional) for exact &quot;move money from X to Y&quot; steps.
+            If you know your current mix, add it below (optional) for exact "move money from X to Y" steps.
           </li>
           <li>
             Set your future contributions to match the target mix{' '}
             {platformSplit.platform === 'voya_only'
               ? '— then let contributions do most of the work.'
-              : '— then sweep to Schwab monthly/quarterly when you rebalance (payroll can&apos;t send it there).'}
+              : "— then sweep to Schwab monthly/quarterly when you rebalance (payroll can't send it there)."}
           </li>
         </ol>
         <div className="mt-3 pt-3 border-t border-zinc-800 flex flex-wrap gap-3 text-xs">
@@ -430,8 +435,8 @@ export default function Builder() {
                 Step 2 – Clean up your Voya mix
               </h3>
               <p className="text-xs text-zinc-300 leading-relaxed">
-                Use the &quot;Current Voya mix&quot; and &quot;One-time rebalance (optional)&quot; cards below to move money out of what&apos;s overweight and into
-                what&apos;s missing.
+                Use the "Current Voya mix" and "One-time rebalance (optional)" cards below to move money out of what's overweight and into
+                what's missing.
               </p>
             </div>
             <div>
@@ -456,7 +461,7 @@ export default function Builder() {
               </p>
               <p className="text-[11px] text-zinc-400 mt-1">
                 Ghost Allocator uses Schwab for the growth sleeves and Voya as your safety +
-                inflation bucket. New contributions will still land in Voya first – you&apos;ll move
+                inflation bucket. New contributions will still land in Voya first – you'll move
                 some over to Schwab when you rebalance.
               </p>
             </div>
@@ -465,12 +470,12 @@ export default function Builder() {
                 Step 2 – Inside Voya
               </h3>
               <p className="text-xs text-zinc-300 leading-relaxed">
-                Use the Voya core-fund mix for your risk band (see the &quot;Voya core funds&quot;
+                Use the Voya core-fund mix for your risk band (see the "Voya core funds"
                 card below). Voya is your safety + inflation bucket.
               </p>
               <p className="text-[11px] text-zinc-400 mt-1">
-                If your current Voya funds are different, use the &quot;Current Voya mix&quot; and
-                &quot;One-time rebalance (optional)&quot; cards below to see how to shift.
+                If your current Voya funds are different, use the "Current Voya mix" and
+                "One-time rebalance (optional)" cards below to see how to shift.
               </p>
             </div>
             <div>
@@ -489,15 +494,15 @@ export default function Builder() {
                 split over time
               </h3>
               <p className="text-xs text-zinc-300 leading-relaxed">
-                In the OKC 457, every paycheck still lands in Voya first – that&apos;s how the plan
+                In the OKC 457, every paycheck still lands in Voya first – that's how the plan
                 is set up. Here&apos;s how to keep your {platformSplit.targetSchwabPct}/
                 {platformSplit.targetVoyaPct} target:
               </p>
               <ul className="text-xs text-zinc-300 leading-relaxed mt-1 space-y-1 ml-4 list-disc">
                 <li>
                   In Voya, keep your contribution allocation 100% into the Voya core funds using
-                  the mix above. The plan can&apos;t send money straight to Schwab from payroll –
-                  you&apos;ll move it yourself when you rebalance.
+                  the mix above. The plan can't send money straight to Schwab from payroll –
+                  you'll move it yourself when you rebalance.
                 </li>
                 <li>
                   Once a month or once a quarter, move some of your Voya balance over to Schwab
@@ -506,7 +511,7 @@ export default function Builder() {
                 <li>
                   When you move money, aim so your total 457 is still roughly{' '}
                   {platformSplit.targetSchwabPct}% in Schwab and {platformSplit.targetVoyaPct}% in
-                  Voya. Close enough is good enough; it doesn&apos;t have to be perfect.
+                  Voya. Close enough is good enough; it doesn't have to be perfect.
                 </li>
               </ul>
             </div>
@@ -526,10 +531,10 @@ export default function Builder() {
                 Set your Voya contribution allocation to match this target mix. This implements your Ghost sleeves using the OKC Voya core menu.
               </p>
               <p className="text-[11px] text-zinc-400 mt-2 italic">
-                Note: Target-date funds are allowed as current holdings, but Ghost Allocator doesn&apos;t recommend them as the target mix.
+                Note: Target-date funds are allowed as current holdings, but Ghost Allocator doesn't recommend them as the target mix.
               </p>
               <p className="text-[11px] text-zinc-400 mt-1">
-                In Voya, &quot;Stable Value Option&quot; is your cash-like holding.
+                In Voya, "Stable Value Option" is your cash-like holding.
               </p>
               {voyaImplementation.note && (
                 <div className="mt-2 p-2 bg-amber-500/10 border border-amber-500/20 rounded text-[11px] text-amber-200">
@@ -624,7 +629,7 @@ export default function Builder() {
             <GlassCard className="p-4 sm:p-5 space-y-3">
               <h2 className="text-sm font-semibold text-zinc-50">Income Floor Detected</h2>
               <p className="text-xs text-zinc-300 leading-relaxed">
-                You told us you&apos;ll have pension and other guaranteed income
+                You told us you'll have pension and other guaranteed income
                 covering{' '}
                 {answers.pensionCoverage === 'most_or_all'
                   ? 'most or all'
@@ -634,8 +639,8 @@ export default function Builder() {
                 of your basic retirement expenses.
               </p>
               <p className="text-xs text-zinc-300 leading-relaxed">
-                That means your investment portfolio is doing more &quot;growth and
-                flexibility&quot; work and less &quot;keep the lights on&quot; work.
+                That means your investment portfolio is doing more "growth and
+                flexibility" work and less "keep the lights on" work.
                 Ghost Allocator takes that income floor into account when setting
                 your risk level.
               </p>
@@ -651,7 +656,7 @@ export default function Builder() {
             />
             {platformSplit.platform === 'voya_only' && (
               <p className="text-[11px] text-zinc-400 mt-2">
-                In Voya, &quot;Stable Value Option&quot; is your cash-like holding.
+                In Voya, "Stable Value Option" is your cash-like holding.
               </p>
             )}
           </div>
@@ -666,7 +671,7 @@ export default function Builder() {
                 {voyaImplementation.style === 'core_mix' && voyaImplementation.mix && (
                   <>
                     <p className="text-xs text-zinc-300 leading-relaxed">
-                      Based on what you told us about your current Voya holdings, here&apos;s how to
+                      Based on what you told us about your current Voya holdings, here's how to
                       get closer to the target mix.
                       {platformSplit.platform === 'voya_and_schwab' && (
                         <> Numbers are percentages of the Voya slice of your 457, not the whole account.</>
@@ -711,15 +716,15 @@ export default function Builder() {
                   voyaDeltaPlan.totalCurrentPct < 95 ? (
                     <p className="text-[11px] text-amber-300">
                       Heads up: your current Voya percentages add up to about{' '}
-                      {Math.round(voyaDeltaPlan.totalCurrentPct)}%. That&apos;s okay for a rough
-                      pass, but the moves below assume they&apos;re &quot;about right&quot;.
+                      {Math.round(voyaDeltaPlan.totalCurrentPct)}%. That's okay for a rough
+                      pass, but the moves below assume they're "about right".
                     </p>
                   ) : null}
                   {voyaDeltaPlan.overweight.length === 0 &&
                   voyaDeltaPlan.underweight.length === 0 ? (
                     <p className="text-xs text-zinc-300 leading-relaxed">
                       Your current Voya mix is already very close to the suggested mix. You
-                      don&apos;t need big changes—just keep future contributions pointed at this
+                      don't need big changes—just keep future contributions pointed at this
                       target.
                     </p>
                   ) : (
@@ -773,9 +778,9 @@ export default function Builder() {
                 One-time rebalance (optional)
               </h2>
               <p className="text-xs text-zinc-300 leading-relaxed">
-                Enter your current Voya holdings in the &quot;Current Voya mix&quot; section above to
-                get exact &quot;move money from X to Y&quot; instructions. Once you add your current
-                mix (percentages should add up to ~100% of your 457), we&apos;ll show you exactly how
+                Enter your current Voya holdings in the "Current Voya mix" section above to
+                get exact "move money from X to Y" instructions. Once you add your current
+                mix (percentages should add up to ~100% of your 457), we'll show you exactly how
                 to shift your holdings to match the recommended mix.
               </p>
             </GlassCard>
@@ -957,7 +962,7 @@ export default function Builder() {
               )}
               <p className="text-[11px] text-zinc-400 mt-1">
                 Pro tip: Most folks rebalance into Schwab monthly or quarterly, not every paycheck.
-                Pick a cadence you&apos;ll actually stick with.
+                Pick a cadence you'll actually stick with.
               </p>
               <div className="mt-2 space-y-1 text-xs text-zinc-300 leading-relaxed">
                 {standardSchwabLineup?.map((item) => {
@@ -1041,8 +1046,8 @@ export default function Builder() {
               {platformSplit.platform === 'voya_only' && (
                 <p className="mt-1 text-[11px] text-zinc-400 leading-snug">
                   This shows the ideal Ghost sleeve mix for your risk band. Your Voya core-fund mix
-                  below is a translation using the limited menu, so the percentages won&apos;t match
-                  1:1 — they&apos;re matched on role (growth vs defensive), not labels.
+                  below is a translation using the limited menu, so the percentages won't match
+                  1:1 — they're matched on role (growth vs defensive), not labels.
                 </p>
               )}
             </div>
@@ -1076,7 +1081,7 @@ export default function Builder() {
             </h3>
             <p className="text-xs text-zinc-300 leading-relaxed mb-3">
               These are example ETFs you could use in a full brokerage account (like Schwab or an
-              IRA) if you ever decide to open one. They&apos;re not available directly in the Voya
+              IRA) if you ever decide to open one. They're not available directly in the Voya
               core menu, but they follow the same Ghost sleeves shown above.
             </p>
             <div className="space-y-1 text-xs text-zinc-300 leading-relaxed">

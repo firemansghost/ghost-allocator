@@ -52,6 +52,7 @@ export default function QuestionnaireForm() {
   const [dnaImportInput, setDnaImportInput] = useState('');
   const [dnaImportStatus, setDnaImportStatus] = useState<'idle' | 'success' | 'error' | 'warning'>('idle');
   const [dnaImportMessage, setDnaImportMessage] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [drawdownOverride, setDrawdownOverride] = useState<boolean>(false);
 
@@ -247,6 +248,53 @@ export default function QuestionnaireForm() {
     setDnaImportInput('');
     setDnaImportStatus('idle');
     setDnaImportMessage('');
+  };
+
+  const handleFileUpload = async (file: File) => {
+    if (!file.name.endsWith('.json')) {
+      setDnaImportStatus('error');
+      setDnaImportMessage('Please upload a JSON file (.json).');
+      return;
+    }
+
+    try {
+      const text = await file.text();
+      setDnaImportInput(text);
+      // Auto-trigger import after reading file
+      setTimeout(() => {
+        handleDnaImport();
+      }, 100);
+    } catch (err) {
+      setDnaImportStatus('error');
+      setDnaImportMessage('Could not read file. Please try again.');
+    }
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileUpload(file);
+    }
+    // Reset input so same file can be selected again
+    e.target.value = '';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      handleFileUpload(file);
+    }
   };
 
   const handleSubmit = (e: FormEvent) => {
@@ -494,7 +542,7 @@ export default function QuestionnaireForm() {
               className="mr-2"
             />
             <span className="text-sm text-zinc-300">
-              I&apos;d probably panic sell
+              I'd probably panic sell
             </span>
           </label>
           <label className="flex items-center">
@@ -508,7 +556,7 @@ export default function QuestionnaireForm() {
               }
               className="mr-2"
             />
-            <span className="text-sm text-zinc-300">I&apos;d probably hold</span>
+            <span className="text-sm text-zinc-300">I'd probably hold</span>
           </label>
           <label className="flex items-center">
             <input
@@ -522,7 +570,7 @@ export default function QuestionnaireForm() {
               className="mr-2"
             />
             <span className="text-sm text-zinc-300">
-              I&apos;d probably buy more
+              I'd probably buy more
             </span>
           </label>
         </div>
@@ -566,7 +614,7 @@ export default function QuestionnaireForm() {
               className="mr-2"
             />
             <span className="text-sm text-zinc-300">
-              I&apos;m okay with some complexity
+              I'm okay with some complexity
             </span>
           </label>
           <label className="flex items-center">
@@ -687,7 +735,7 @@ export default function QuestionnaireForm() {
                   }
                   className="h-3.5 w-3.5 accent-amber-400"
                 />
-                <span>I&apos;d rather keep it closer to where it is</span>
+                <span>I'd rather keep it closer to where it is</span>
               </label>
               <label className="flex items-center gap-2">
                 <input
@@ -703,7 +751,7 @@ export default function QuestionnaireForm() {
                   }
                   className="h-3.5 w-3.5 accent-amber-400"
                 />
-                <span>I&apos;m fine going up to the 75% cap for more flexibility</span>
+                <span>I'm fine going up to the 75% cap for more flexibility</span>
               </label>
             </div>
             {errors.schwabPreference && (
@@ -862,32 +910,68 @@ export default function QuestionnaireForm() {
                 Load a saved setup (JSON)
               </label>
               <p className="text-xs text-zinc-400 mb-2">
-                Paste a saved setup file (JSON) or Share link to restore a previous build. Use a file you saved from this site.
+                Get this file by clicking "Save setup" on your results page. Upload the file or paste its contents below.
               </p>
-              <div className="flex gap-2">
-                <textarea
-                  id="dna-import"
-                  value={dnaImportInput}
-                  onChange={(e) => setDnaImportInput(e.target.value)}
-                  placeholder="Paste JSON file contents or Share link"
-                  rows={3}
-                  className="flex-1 px-3 py-2 text-sm bg-zinc-800 border border-zinc-700 rounded text-zinc-200 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-400/60 focus:border-amber-400/60 font-mono text-xs resize-y"
-                />
-                <div className="flex flex-col gap-2">
-                  <button
-                    type="button"
-                    onClick={handleDnaImport}
-                    className="px-4 py-2 text-sm font-medium rounded bg-amber-400/20 text-amber-300 border border-amber-400/30 hover:bg-amber-400/30 hover:text-amber-200 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400/60"
+              
+              {/* File Upload */}
+              <div
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`mb-3 p-4 border-2 border-dashed rounded-md transition-colors ${
+                  isDragging
+                    ? 'border-amber-400/60 bg-amber-400/10'
+                    : 'border-zinc-700 bg-zinc-800/50'
+                }`}
+              >
+                <div className="flex flex-col items-center gap-2">
+                  <input
+                    type="file"
+                    accept=".json"
+                    onChange={handleFileInputChange}
+                    className="hidden"
+                    id="file-upload"
+                  />
+                  <label
+                    htmlFor="file-upload"
+                    className="cursor-pointer px-4 py-2 text-sm font-medium rounded bg-amber-400/20 text-amber-300 border border-amber-400/30 hover:bg-amber-400/30 hover:text-amber-200 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400/60"
                   >
-                    Load
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleClearDnaImport}
-                    className="px-4 py-2 text-sm font-medium rounded bg-zinc-800 text-zinc-300 border border-zinc-700 hover:bg-zinc-700 hover:text-zinc-200 transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-500"
-                  >
-                    Clear
-                  </button>
+                    Upload JSON file
+                  </label>
+                  <p className="text-[10px] text-zinc-400">
+                    {isDragging ? 'Drop file here' : 'or drag and drop'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Paste Fallback */}
+              <div className="mb-2">
+                <p className="text-[10px] text-zinc-400 mb-1">Or paste JSON contents or Share link:</p>
+                <div className="flex gap-2">
+                  <textarea
+                    id="dna-import"
+                    value={dnaImportInput}
+                    onChange={(e) => setDnaImportInput(e.target.value)}
+                    placeholder="Paste JSON file contents or Share link"
+                    rows={3}
+                    className="flex-1 px-3 py-2 text-sm bg-zinc-800 border border-zinc-700 rounded text-zinc-200 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-400/60 focus:border-amber-400/60 font-mono text-xs resize-y"
+                  />
+                  <div className="flex flex-col gap-2">
+                    <button
+                      type="button"
+                      onClick={handleDnaImport}
+                      className="px-4 py-2 text-sm font-medium rounded bg-amber-400/20 text-amber-300 border border-amber-400/30 hover:bg-amber-400/30 hover:text-amber-200 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400/60"
+                    >
+                      Load
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleClearDnaImport}
+                      className="px-4 py-2 text-sm font-medium rounded bg-zinc-800 text-zinc-300 border border-zinc-700 hover:bg-zinc-700 hover:text-zinc-200 transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-500"
+                    >
+                      Clear
+                    </button>
+                  </div>
                 </div>
               </div>
               {dnaImportStatus !== 'idle' && dnaImportMessage && (
