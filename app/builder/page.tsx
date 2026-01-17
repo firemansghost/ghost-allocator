@@ -27,6 +27,7 @@ import { GlassCard } from '@/components/GlassCard';
 import CurrentVoyaForm from '@/components/CurrentVoyaForm';
 import GhostRegimeHouseEducation from '@/components/ghostregime/GhostRegimeHouseEducation';
 import ActionPlanTemplateDna from '@/components/builder/ActionPlanTemplateDna';
+import BondsFAQ from '@/components/builder/BondsFAQ';
 import { formatPercent } from '@/lib/format';
 import type { CurrentVoyaHolding } from '@/lib/types';
 import { buildActionPlanDnaString } from '@/lib/builder/actionPlanCopy';
@@ -1050,6 +1051,9 @@ export default function Builder() {
                   }
                 })}
               </div>
+              
+              {/* Bonds FAQ */}
+              <BondsFAQ />
             </GlassCard>
           )}
         </>
