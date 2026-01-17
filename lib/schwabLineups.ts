@@ -75,12 +75,20 @@ const SIMPLIFY_ETFS: Record<string, ExampleETF[]> = {
       sleeveId: 't_bills',
     },
   ],
-  real_assets: [
+  gold: [
+    {
+      ticker: 'GLDM',
+      name: 'SPDR Gold MiniShares Trust',
+      description: 'Physical gold exposure for inflation protection',
+      sleeveId: 'gold',
+    },
+  ],
+  commodities: [
     {
       ticker: 'HARD',
       name: 'Simplify Commodities Strategy No K-1 ETF',
       description: 'Commodities strategy without K-1 tax complexity',
-      sleeveId: 'real_assets',
+      sleeveId: 'commodities',
     },
   ],
   core_bonds: [

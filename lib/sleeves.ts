@@ -11,6 +11,16 @@ export const sleeveDefinitions: Record<string, Omit<Sleeve, 'weight'>> = {
     name: 'Convex Equity (Options-Overlay ETFs)',
     description: 'Equity ETFs that embed options strategies to provide downside protection and enhanced risk-adjusted returns. No direct options trading required.',
   },
+  gold: {
+    id: 'gold',
+    name: 'Gold',
+    description: 'Physical gold exposure for inflation protection and portfolio diversification.',
+  },
+  commodities: {
+    id: 'commodities',
+    name: 'Commodities',
+    description: 'Broad commodity exposure for inflation protection and diversification away from financial assets.',
+  },
   real_assets: {
     id: 'real_assets',
     name: 'Real Assets',
@@ -66,13 +76,13 @@ export const exampleETFs: ExampleETF[] = [
     ticker: 'GLDM',
     name: 'SPDR Gold MiniShares Trust',
     description: 'Physical gold exposure for inflation protection',
-    sleeveId: 'real_assets',
+    sleeveId: 'gold',
   },
   {
     ticker: 'DBC',
     name: 'Invesco DB Commodity Index Tracking Fund',
     description: 'Broad commodity exposure',
-    sleeveId: 'real_assets',
+    sleeveId: 'commodities',
   },
   {
     ticker: 'SHV',

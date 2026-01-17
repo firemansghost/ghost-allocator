@@ -15,7 +15,7 @@ export interface ModelPortfolioSpec {
   name: string;
   riskLevel: RiskLevel;
   description: string;
-  sleeves: Record<SleeveId, number>; // sleeve ID -> weight (0-1, represents percentage)
+  sleeves: Partial<Record<SleeveId, number>>; // sleeve ID -> weight (0-1, represents percentage). Only sleeves with non-zero weight need to be included.
 }
 
 /**
@@ -32,7 +32,8 @@ export const MODEL_PORTFOLIOS: Record<ModelId, ModelPortfolioSpec> = {
     sleeves: {
       core_equity: 0.20,
       convex_equity: 0.10,
-      real_assets: 0.15,
+      gold: 0.10,
+      commodities: 0.05,
       t_bills: 0.20,
       core_bonds: 0.15,
       managed_futures: 0.10,
@@ -48,7 +49,8 @@ export const MODEL_PORTFOLIOS: Record<ModelId, ModelPortfolioSpec> = {
     sleeves: {
       core_equity: 0.20,
       convex_equity: 0.10,
-      real_assets: 0.15,
+      gold: 0.10,
+      commodities: 0.05,
       t_bills: 0.20,
       core_bonds: 0.15,
       managed_futures: 0.10,
@@ -64,7 +66,8 @@ export const MODEL_PORTFOLIOS: Record<ModelId, ModelPortfolioSpec> = {
     sleeves: {
       core_equity: 0.30,
       convex_equity: 0.15,
-      real_assets: 0.15,
+      gold: 0.10,
+      commodities: 0.05,
       t_bills: 0.10,
       core_bonds: 0.10,
       managed_futures: 0.12,
@@ -80,7 +83,8 @@ export const MODEL_PORTFOLIOS: Record<ModelId, ModelPortfolioSpec> = {
     sleeves: {
       core_equity: 0.35,
       convex_equity: 0.20,
-      real_assets: 0.15,
+      gold: 0.10,
+      commodities: 0.05,
       t_bills: 0.05,
       core_bonds: 0.05,
       managed_futures: 0.15,
@@ -96,7 +100,8 @@ export const MODEL_PORTFOLIOS: Record<ModelId, ModelPortfolioSpec> = {
     sleeves: {
       core_equity: 0.35,
       convex_equity: 0.20,
-      real_assets: 0.15,
+      gold: 0.10,
+      commodities: 0.05,
       t_bills: 0.05,
       core_bonds: 0.05,
       managed_futures: 0.15,

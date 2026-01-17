@@ -30,10 +30,17 @@ function extractTickers(lineup: ReturnType<typeof getStandardSchwabLineup>): str
 }
 
 /**
- * Test helper: Find Real Assets sleeve
+ * Test helper: Find Gold sleeve
  */
-function findRealAssetsSleeve(lineup: ReturnType<typeof getStandardSchwabLineup>) {
-  return lineup.find((item) => item.id === 'real_assets' || item.label.toLowerCase().includes('real assets') || item.label.toLowerCase().includes('commodities'));
+function findGoldSleeve(lineup: ReturnType<typeof getStandardSchwabLineup>) {
+  return lineup.find((item) => item.id === 'gold' || item.label.toLowerCase() === 'gold');
+}
+
+/**
+ * Test helper: Find Commodities sleeve
+ */
+function findCommoditiesSleeve(lineup: ReturnType<typeof getStandardSchwabLineup>) {
+  return lineup.find((item) => item.id === 'commodities' || item.label.toLowerCase() === 'commodities');
 }
 
 describe('Schwab Lineup Gold Tilt Tests', () => {
@@ -45,7 +52,7 @@ describe('Schwab Lineup Gold Tilt Tests', () => {
   const portfolio = selectModelPortfolio(riskLevel);
   const sleeves = portfolio.sleeves;
 
-  it('tilt=None includes GLDM in Real Assets sleeve', () => {
+  it('tilt=None includes Gold and Commodities as separate sleeves', () => {
     const lineup = getStandardSchwabLineup(
       sleeves,
       riskLevel,
@@ -56,20 +63,32 @@ describe('Schwab Lineup Gold Tilt Tests', () => {
     );
     
     const tickers = extractTickers(lineup);
-    const realAssets = findRealAssetsSleeve(lineup);
+    const goldSleeve = findGoldSleeve(lineup);
+    const commoditiesSleeve = findCommoditiesSleeve(lineup);
     
-    // Should have GLDM in Real Assets
-    assert(realAssets !== undefined, 'Real Assets sleeve should exist');
-    assert(realAssets?.etfs?.some((etf) => etf.ticker === 'GLDM'), 'Real Assets should contain GLDM');
+    // Should have Gold sleeve with GLDM
+    assert(goldSleeve !== undefined, 'Gold sleeve should exist');
+    assert(goldSleeve?.etfs?.some((etf) => etf.ticker === 'GLDM'), 'Gold sleeve should contain GLDM');
+    
+    // Should have Commodities sleeve with DBC or HARD
+    assert(commoditiesSleeve !== undefined, 'Commodities sleeve should exist');
+    const commoditiesTickers = commoditiesSleeve?.etfs?.map((etf) => etf.ticker) || [];
+    assert(commoditiesTickers.length > 0, 'Commodities sleeve should have ETFs');
     
     // Should NOT have GLD anywhere
     assert(!tickers.includes('GLD'), 'Should not contain GLD');
     
-    // Should have GLDM somewhere
+    // Should have GLDM in Gold sleeve only
     assert(tickers.includes('GLDM'), 'Should contain GLDM');
+    const gldmCount = tickers.filter((t) => t === 'GLDM').length;
+    assert.strictEqual(gldmCount, 1, 'GLDM should appear exactly once');
+    
+    // Should NOT have Real Assets sleeve
+    const realAssetsSleeve = lineup.find((item) => item.id === 'real_assets');
+    assert(realAssetsSleeve === undefined, 'Real Assets sleeve should not exist');
   });
 
-  it('tilt=10% gold / 5% btc: GLDM appears once (in tilt), not in Real Assets', () => {
+  it('tilt=10% gold / 5% btc: Gold sleeve weight is 10%, Bitcoin is separate position', () => {
     const lineup = getStandardSchwabLineup(
       sleeves,
       riskLevel,
@@ -80,34 +99,38 @@ describe('Schwab Lineup Gold Tilt Tests', () => {
     );
     
     const tickers = extractTickers(lineup);
-    const realAssets = findRealAssetsSleeve(lineup);
+    const goldSleeve = findGoldSleeve(lineup);
+    const commoditiesSleeve = findCommoditiesSleeve(lineup);
     
-    // GLDM should appear exactly once (in tilt)
+    // GLDM should appear exactly once (in Gold sleeve)
     const gldmCount = tickers.filter((t) => t === 'GLDM').length;
     assert.strictEqual(gldmCount, 1, 'GLDM should appear exactly once');
     
-    // Real Assets should NOT contain GLDM or YGLD
-    const realAssetsTickers = realAssets?.etfs?.map((etf) => etf.ticker) || [];
-    assert(!realAssetsTickers.includes('GLDM'), 'Real Assets should not contain GLDM');
-    assert(!realAssetsTickers.includes('YGLD'), 'Real Assets should not contain YGLD');
+    // Gold sleeve should contain GLDM and have weight 10%
+    assert(goldSleeve !== undefined, 'Gold sleeve should exist');
+    assert(goldSleeve?.etfs?.some((etf) => etf.ticker === 'GLDM'), 'Gold sleeve should contain GLDM');
+    assert.strictEqual(goldSleeve?.weight, 10, 'Gold sleeve should be 10%');
     
-    // Real Assets label should be "Commodities" when gold tilt is active
-    assert.strictEqual(realAssets?.label, 'Commodities', 'Real Assets label should be "Commodities"');
+    // Commodities sleeve should NOT contain GLDM or YGLD
+    const commoditiesTickers = commoditiesSleeve?.etfs?.map((etf) => etf.ticker) || [];
+    assert(!commoditiesTickers.includes('GLDM'), 'Commodities should not contain GLDM');
+    assert(!commoditiesTickers.includes('YGLD'), 'Commodities should not contain YGLD');
     
     // Should NOT have GLD anywhere
     assert(!tickers.includes('GLD'), 'Should not contain GLD');
     
-    // Should have FBTC in tilt
+    // Should have FBTC as tilt position
     const tiltItems = lineup.filter((item) => item.type === 'tilt');
-    const goldTilt = tiltItems.find((item) => item.ticker === 'GLDM');
     const btcTilt = tiltItems.find((item) => item.ticker === 'FBTC');
-    assert(goldTilt !== undefined, 'Gold tilt should exist');
-    assert.strictEqual(goldTilt?.weight, 10, 'Gold tilt should be 10%');
     assert(btcTilt !== undefined, 'BTC tilt should exist');
     assert.strictEqual(btcTilt?.weight, 5, 'BTC tilt should be 5%');
+    
+    // Should NOT have Real Assets sleeve
+    const realAssetsSleeve = lineup.find((item) => item.id === 'real_assets');
+    assert(realAssetsSleeve === undefined, 'Real Assets sleeve should not exist');
   });
 
-  it('tilt=15% gold / 5% btc: GLDM appears once (in tilt), not in Real Assets', () => {
+  it('tilt=15% gold / 5% btc: Gold sleeve weight is 15%, Bitcoin is separate position', () => {
     const lineup = getStandardSchwabLineup(
       sleeves,
       riskLevel,
@@ -118,31 +141,35 @@ describe('Schwab Lineup Gold Tilt Tests', () => {
     );
     
     const tickers = extractTickers(lineup);
-    const realAssets = findRealAssetsSleeve(lineup);
+    const goldSleeve = findGoldSleeve(lineup);
+    const commoditiesSleeve = findCommoditiesSleeve(lineup);
     
-    // GLDM should appear exactly once (in tilt)
+    // GLDM should appear exactly once (in Gold sleeve)
     const gldmCount = tickers.filter((t) => t === 'GLDM').length;
     assert.strictEqual(gldmCount, 1, 'GLDM should appear exactly once');
     
-    // Real Assets should NOT contain GLDM or YGLD
-    const realAssetsTickers = realAssets?.etfs?.map((etf) => etf.ticker) || [];
-    assert(!realAssetsTickers.includes('GLDM'), 'Real Assets should not contain GLDM');
-    assert(!realAssetsTickers.includes('YGLD'), 'Real Assets should not contain YGLD');
+    // Gold sleeve should contain GLDM and have weight 15%
+    assert(goldSleeve !== undefined, 'Gold sleeve should exist');
+    assert(goldSleeve?.etfs?.some((etf) => etf.ticker === 'GLDM'), 'Gold sleeve should contain GLDM');
+    assert.strictEqual(goldSleeve?.weight, 15, 'Gold sleeve should be 15%');
     
-    // Real Assets label should be "Commodities" when gold tilt is active
-    assert.strictEqual(realAssets?.label, 'Commodities', 'Real Assets label should be "Commodities"');
+    // Commodities sleeve should NOT contain GLDM or YGLD
+    const commoditiesTickers = commoditiesSleeve?.etfs?.map((etf) => etf.ticker) || [];
+    assert(!commoditiesTickers.includes('GLDM'), 'Commodities should not contain GLDM');
+    assert(!commoditiesTickers.includes('YGLD'), 'Commodities should not contain YGLD');
     
     // Should NOT have GLD anywhere
     assert(!tickers.includes('GLD'), 'Should not contain GLD');
     
-    // Should have FBTC in tilt
+    // Should have FBTC as tilt position
     const tiltItems = lineup.filter((item) => item.type === 'tilt');
-    const goldTilt = tiltItems.find((item) => item.ticker === 'GLDM');
     const btcTilt = tiltItems.find((item) => item.ticker === 'FBTC');
-    assert(goldTilt !== undefined, 'Gold tilt should exist');
-    assert.strictEqual(goldTilt?.weight, 15, 'Gold tilt should be 15%');
     assert(btcTilt !== undefined, 'BTC tilt should exist');
     assert.strictEqual(btcTilt?.weight, 5, 'BTC tilt should be 5%');
+    
+    // Should NOT have Real Assets sleeve
+    const realAssetsSleeve = lineup.find((item) => item.id === 'real_assets');
+    assert(realAssetsSleeve === undefined, 'Real Assets sleeve should not exist');
   });
 
   it('no duplicate tickers in any lineup configuration', () => {

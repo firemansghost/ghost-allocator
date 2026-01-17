@@ -6,6 +6,7 @@ import type {
   RegimeScenario,
   PlatformSplit,
   Sleeve,
+  SleeveId,
 } from './types';
 import { exampleETFs, sleeveDefinitions } from './sleeves';
 import { MODEL_PORTFOLIOS, RISK_TO_MODEL } from './modelPortfolios';
@@ -90,15 +91,17 @@ export function selectModelPortfolio(
 
   // Convert ModelPortfolioSpec to ModelPortfolio format
   // Build sleeves array from spec.sleeves Record
+  // Filter out real_assets (legacy) and only include sleeves with non-zero weight
   const sleeves: Sleeve[] = Object.entries(spec.sleeves)
+    .filter(([sleeveId]) => sleeveId !== 'real_assets') // Exclude legacy real_assets from Schwab lineup
     .map(([sleeveId, weight]) => {
-      const sleeveDef = sleeveDefinitions[sleeveId];
+      const sleeveDef = sleeveDefinitions[sleeveId as SleeveId];
       if (!sleeveDef) {
         throw new Error(`Sleeve definition not found for ID: ${sleeveId}`);
       }
       return {
         ...sleeveDef,
-        weight,
+        weight: weight || 0,
       };
     })
     .filter((s) => s.weight > 0); // Only include sleeves with non-zero weight

@@ -26,7 +26,9 @@ export type BtcInstrument = 'fbtc' | 'maxi';
 export type SleeveId =
   | 'core_equity'
   | 'convex_equity'
-  | 'real_assets'
+  | 'gold'
+  | 'commodities'
+  | 'real_assets' // Legacy: kept for backward compatibility, but not used in Schwab lineup
   | 't_bills'
   | 'core_bonds'
   | 'managed_futures'

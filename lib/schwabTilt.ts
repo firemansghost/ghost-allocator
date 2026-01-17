@@ -33,9 +33,10 @@ export function getTiltPercentages(tilt: GoldBtcTilt): { goldPct: number; btcPct
  * Apply Gold + Bitcoin tilt to Standard preset Schwab lineup
  * 
  * Takes existing sleeve-based lineup and:
- * 1. Adds GLDM (Gold) and FBTC (Bitcoin) at specified weights
- * 2. Scales down all existing sleeve weights proportionally to make room
- * 3. Returns a flat list of items (sleeves + tilt items)
+ * 1. Increases Gold sleeve weight to target (10% or 15% of Schwab slice)
+ * 2. Adds Bitcoin as a dedicated position (5% of Schwab slice)
+ * 3. Scales down other sleeves proportionally to keep total = 100%
+ * 4. Returns a flat list of items (sleeves + Bitcoin position)
  */
 export function applySchwabTilt(
   sleeves: Sleeve[],
@@ -48,7 +49,7 @@ export function applySchwabTilt(
   // If no tilt, return original lineup structure
   if (tiltTotal === 0) {
     return sleeves
-      .filter((s) => s.weight > 0)
+      .filter((s) => s.weight > 0 && s.id !== 'real_assets') // Exclude legacy real_assets
       .map((sleeve) => ({
         type: 'sleeve' as const,
         id: sleeve.id,
@@ -58,23 +59,52 @@ export function applySchwabTilt(
       }));
   }
 
-  // Calculate scale factor for existing sleeves
-  // We need to reduce total from 100% to (100% - tiltTotal%)
-  const scaleFactor = (100 - tiltTotal) / 100;
+  // Find Gold sleeve and calculate its current weight
+  const goldSleeve = sleeves.find((s) => s.id === 'gold');
+  const currentGoldWeight = goldSleeve ? goldSleeve.weight * 100 : 0;
+  
+  // Calculate total weight of all sleeves (excluding real_assets)
+  const totalSleeveWeight = sleeves
+    .filter((s) => s.id !== 'real_assets' && s.weight > 0)
+    .reduce((sum, s) => sum + s.weight * 100, 0);
+  
+  // Calculate how much weight we need to free up for gold increase + BTC
+  const goldIncrease = goldPct - currentGoldWeight;
+  const weightToFreeUp = goldIncrease + btcPct;
+  
+  // Calculate scale factor for non-gold sleeves to make room
+  const nonGoldSleevesTotal = sleeves
+    .filter((s) => s.id !== 'gold' && s.id !== 'real_assets' && s.weight > 0)
+    .reduce((sum, s) => sum + s.weight * 100, 0);
+  
+  const scaleFactor = nonGoldSleevesTotal > 0 
+    ? (nonGoldSleevesTotal - weightToFreeUp) / nonGoldSleevesTotal
+    : 1;
 
-  // Build tilted lineup: tilt items first, then scaled sleeves
+  // Build tilted lineup: Gold sleeve first, then Bitcoin position, then other sleeves
   const result: TiltedSchwabItem[] = [];
 
-  // Add tilt items at the top
-  if (goldPct > 0) {
+  // Add Gold sleeve with increased weight
+  if (goldSleeve) {
     result.push({
-      type: 'tilt',
-      id: 'gldm_tilt',
+      type: 'sleeve',
+      id: 'gold',
       label: 'Gold',
-      ticker: 'GLDM',
       weight: goldPct,
+      etfs: sleeveEtfs['gold'] || [],
+    });
+  } else {
+    // Gold sleeve doesn't exist yet, create it
+    result.push({
+      type: 'sleeve',
+      id: 'gold',
+      label: 'Gold',
+      weight: goldPct,
+      etfs: sleeveEtfs['gold'] || [],
     });
   }
+
+  // Add Bitcoin as dedicated position
   if (btcPct > 0) {
     result.push({
       type: 'tilt',
@@ -85,28 +115,16 @@ export function applySchwabTilt(
     });
   }
 
-  // Add scaled-down sleeves
+  // Add scaled-down other sleeves (exclude gold, real_assets, and any zero-weight sleeves)
   for (const sleeve of sleeves) {
-    if (sleeve.weight > 0) {
+    if (sleeve.weight > 0 && sleeve.id !== 'gold' && sleeve.id !== 'real_assets') {
       const scaledWeight = (sleeve.weight * 100) * scaleFactor;
-      
-      // When gold tilt is active, remove gold ETFs from Real Assets sleeve
-      let etfs = sleeveEtfs[sleeve.id] || [];
-      let label = sleeve.name;
-      
-      if (goldPct > 0 && sleeve.id === 'real_assets') {
-        // Filter out gold ETFs (GLDM, YGLD) from Real Assets
-        etfs = etfs.filter((etf) => etf.ticker !== 'GLDM' && etf.ticker !== 'YGLD');
-        // Update label to indicate gold is handled separately
-        label = 'Commodities';
-      }
-      
       result.push({
         type: 'sleeve',
         id: sleeve.id,
-        label: label,
+        label: sleeve.name,
         weight: scaledWeight,
-        etfs: etfs,
+        etfs: sleeveEtfs[sleeve.id] || [],
       });
     }
   }
