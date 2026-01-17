@@ -186,6 +186,7 @@ export default function Builder() {
     btc_scale: number;
   }> | null>(null);
   const [ghostRegimeHistoryError, setGhostRegimeHistoryError] = useState<boolean>(false);
+  const [showRebalanceDetails, setShowRebalanceDetails] = useState(false);
 
   // HOOKS ORDER FIX: All hooks must be called before any conditional returns.
   // Initialize answers state with a default value, then update from result when available.
@@ -647,27 +648,54 @@ export default function Builder() {
             </GlassCard>
           )}
 
-          {/* Current Voya mix form */}
-          <div id="current-voya-mix">
-            <CurrentVoyaForm
-              value={currentVoyaHoldings}
-              onChange={handleVoyaHoldingsChange}
-              isVoyaOnly={platformSplit.platform === 'voya_only'}
-            />
-            {platformSplit.platform === 'voya_only' && (
-              <p className="text-[11px] text-zinc-400 mt-2">
-                In Voya, "Stable Value Option" is your cash-like holding.
-              </p>
-            )}
-          </div>
-
-          {/* One-time rebalance (optional) */}
-          {voyaDeltaPlan.hasData ? (
-            <div id="move-steps">
-              <GlassCard className="p-4 sm:p-5 space-y-3">
+          {/* Progressive disclosure: Current Voya mix + One-time rebalance */}
+          <GlassCard className="p-4 sm:p-5">
+            <button
+              type="button"
+              onClick={() => setShowRebalanceDetails(!showRebalanceDetails)}
+              className="w-full flex items-center justify-between text-left"
+            >
+              <div>
                 <h2 className="text-sm font-semibold text-zinc-50">
-                  One-time rebalance (optional)
+                  Want exact "move money from X to Y" steps?
                 </h2>
+                <p className="text-xs text-zinc-400 mt-1">
+                  Optional: Enter your current Voya mix to get precise rebalance instructions
+                </p>
+              </div>
+              <svg
+                className={`w-5 h-5 text-zinc-400 transition-transform ${showRebalanceDetails ? 'rotate-180' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {showRebalanceDetails && (
+              <div className="mt-4 space-y-4">
+                {/* Current Voya mix form */}
+                <div id="current-voya-mix">
+                  <CurrentVoyaForm
+                    value={currentVoyaHoldings}
+                    onChange={handleVoyaHoldingsChange}
+                    isVoyaOnly={platformSplit.platform === 'voya_only'}
+                  />
+                  {platformSplit.platform === 'voya_only' && (
+                    <p className="text-[11px] text-zinc-400 mt-2">
+                      In Voya, "Stable Value Option" is your cash-like holding.
+                    </p>
+                  )}
+                </div>
+
+                {/* One-time rebalance (optional) */}
+                {voyaDeltaPlan.hasData ? (
+                  <div id="move-steps">
+                    <div className="rounded-md border border-zinc-700 bg-zinc-900/50 p-4 sm:p-5 space-y-3">
+                      <h3 className="text-sm font-semibold text-zinc-50">
+                        One-time rebalance (optional)
+                      </h3>
                 {voyaImplementation.style === 'core_mix' && voyaImplementation.mix && (
                   <>
                     <p className="text-xs text-zinc-300 leading-relaxed">
@@ -770,21 +798,24 @@ export default function Builder() {
                   )}
                 </>
               )}
-              </GlassCard>
-            </div>
-          ) : (
-            <GlassCard className="p-4 sm:p-5 space-y-3 opacity-75">
-              <h2 className="text-sm font-semibold text-zinc-50">
-                One-time rebalance (optional)
-              </h2>
-              <p className="text-xs text-zinc-300 leading-relaxed">
-                Enter your current Voya holdings in the "Current Voya mix" section above to
-                get exact "move money from X to Y" instructions. Once you add your current
-                mix (percentages should add up to ~100% of your 457), we'll show you exactly how
-                to shift your holdings to match the recommended mix.
-              </p>
-            </GlassCard>
-          )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-md border border-zinc-700 bg-zinc-900/50 p-4 space-y-3 opacity-75">
+                    <h3 className="text-sm font-semibold text-zinc-50">
+                      One-time rebalance (optional)
+                    </h3>
+                    <p className="text-xs text-zinc-300 leading-relaxed">
+                      Enter your current Voya holdings in the "Current Voya mix" section above to
+                      get exact "move money from X to Y" instructions. Once you add your current
+                      mix (percentages should add up to ~100% of your 457), we'll show you exactly how
+                      to shift your holdings to match the recommended mix.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </GlassCard>
         </div>
 
         {/* Right column - Voya implementation cards */}

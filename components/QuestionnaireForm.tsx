@@ -191,6 +191,48 @@ export default function QuestionnaireForm() {
         setDnaImportMessage('Setup loaded successfully.');
         return;
       }
+
+      // Check if it's an answers-only file (has schemaVersion and answers, but no result)
+      if (jsonData.schemaVersion && jsonData.answers && !jsonData.result) {
+        if (jsonData.schemaVersion > 1) {
+          setDnaImportStatus('error');
+          setDnaImportMessage('This file was saved with a newer version. Please update the tool and try again.');
+          return;
+        }
+
+        // Validate answers structure
+        if (!jsonData.answers || typeof jsonData.answers !== 'object') {
+          setDnaImportStatus('error');
+          setDnaImportMessage('That file doesn\'t look like a saved setup from this tool. Missing required fields.');
+          return;
+        }
+
+        // Apply the saved answers
+        setFormData((prev) => {
+          const updated = { ...prev, ...jsonData.answers };
+          // Enforce guardrails if platform is voya_only
+          if (updated.platform === 'voya_only') {
+            updated.portfolioPreset = 'standard';
+            updated.goldBtcTilt = 'none';
+            updated.schwabLineupStyle = 'standard';
+            updated.goldInstrument = 'gldm';
+            updated.btcInstrument = 'fbtc';
+          }
+          return updated;
+        });
+
+        // Set selected template if included
+        if (jsonData.answers.selectedTemplateId) {
+          const template = getModelTemplate(jsonData.answers.selectedTemplateId);
+          if (template) {
+            setSelectedTemplate(template.title);
+          }
+        }
+
+        setDnaImportStatus('success');
+        setDnaImportMessage('Answers loaded successfully.');
+        return;
+      }
     } catch {
       // Not JSON, continue with DNA token parsing
     }
@@ -295,6 +337,27 @@ export default function QuestionnaireForm() {
     if (file) {
       handleFileUpload(file);
     }
+  };
+
+  const handleSaveAnswers = () => {
+    // Export answers only (no computed results)
+    const exportData = {
+      schemaVersion: 1,
+      exportedAt: new Date().toISOString(),
+      answers: formData,
+    };
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+      type: 'application/json',
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ghost-allocator-answers-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const handleSubmit = (e: FormEvent) => {
@@ -987,6 +1050,27 @@ export default function QuestionnaireForm() {
                   {dnaImportMessage}
                 </div>
               )}
+            </div>
+
+            {/* Save answers (optional) */}
+            <div className="rounded-md border border-zinc-700 bg-zinc-900/50 px-4 py-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-zinc-300 mb-1">
+                    Save answers
+                  </p>
+                  <p className="text-[10px] text-zinc-400">
+                    Save your current inputs to continue later (answers only, no computed results)
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSaveAnswers}
+                  className="px-4 py-2 text-sm font-medium rounded bg-amber-400/20 text-amber-300 border border-amber-400/30 hover:bg-amber-400/30 hover:text-amber-200 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400/60"
+                >
+                  Save
+                </button>
+              </div>
             </div>
 
             {/* Portfolio Preset Selection */}
