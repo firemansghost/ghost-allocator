@@ -41,7 +41,7 @@ Education section (V1.1) is now live:
 2) Develop OKC-specific 457(b) playbook content when plan documents are available
 3) Consider adding Finance Basics and Glossary content (currently stubs)
 
-Last updated: 2026-01-18
+Last updated: 2026-01-17
 
 ---
 

@@ -59,23 +59,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.7,
     },
-    {
-      url: `${SITE_URL}/learn/457/okc`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    },
-    {
-      url: `${SITE_URL}/learn/basics`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    },
-    {
-      url: `${SITE_URL}/learn/glossary`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    },
   ];
 }

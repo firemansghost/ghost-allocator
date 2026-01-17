@@ -1,6 +1,6 @@
 # TASK LOG
 
-## 2026-01-18 — Education hub implementation (V1.1 complete)
+## 2026-01-17 — Education hub implementation (V1.1 complete)
 Completed:
 - Created /learn hub page with "Start Here" (3 primary cards) and Browse section (4 cards)
 - Added "Learn" link to top navigation between "Why 60/40?" and "GhostRegime"

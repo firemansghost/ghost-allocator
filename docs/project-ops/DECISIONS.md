@@ -1,6 +1,6 @@
 # DECISIONS
 
-## 2026-01-18 — Education hub implementation: manual data, validation, fallback links
+## 2026-01-17 — Education hub implementation: manual data, validation, fallback links
 Choice:
 - Masterclass data file uses manual list (no runtime parsing of archive file).
 - Triffin Trap series categorized as "Dollar Plumbing" (not "Other").

@@ -43,7 +43,7 @@ export const MASTERCLASS_ITEMS: MasterclassItem[] = [
     category: 'Foundations',
     startHereOrder: 2,
     blurb:
-      'A modern bank is less a vault, more a digital ledger. Bank runs now happen via apps, not queues on the sidewalk. The real risk is liquidity freeze in the payment system.',
+      'A modern bank is less a vault, more a digital ledger. Bank runs now happen via apps, not queues on the sidewalk.',
   },
   {
     id: 'eurodollars',
@@ -61,7 +61,7 @@ export const MASTERCLASS_ITEMS: MasterclassItem[] = [
     category: 'Inflation',
     startHereOrder: 4,
     blurb:
-      'Real inflation = too much money chasing the same goods. Fakeflation = temporary price hikes from supply shocks. Understanding the difference is crucial for navigating markets.',
+      'Real inflation = too much money chasing the same goods. Fakeflation = temporary price hikes from supply shocks.',
   },
   {
     id: 'fed-files',
@@ -70,7 +70,7 @@ export const MASTERCLASS_ITEMS: MasterclassItem[] = [
     category: 'Fed & Liquidity',
     startHereOrder: 5,
     blurb:
-      'The most powerful, least understood institution in modern economics. Fed tools include rate manipulation, QE/QT, and emergency lending. "Independence" is branding; reality is political choreography.',
+      'The most powerful, least understood institution in modern economics. Fed tools include rate manipulation, QE/QT, and emergency lending.',
   },
   {
     id: 'dollar-strength-vs-dominance',
@@ -79,7 +79,7 @@ export const MASTERCLASS_ITEMS: MasterclassItem[] = [
     category: 'Dollar Plumbing',
     startHereOrder: 6,
     blurb:
-      'Strength is short-term price moves. Dominance is structural power—the dollar as the global reserve currency that underpins trade, debt, and financial systems worldwide.',
+      'Strength is short-term price moves. Dominance is structural power—the dollar as the global reserve currency.',
   },
   {
     id: 'qe-qt',
@@ -88,7 +88,7 @@ export const MASTERCLASS_ITEMS: MasterclassItem[] = [
     category: 'Fed & Liquidity',
     startHereOrder: 7,
     blurb:
-      "QE is technically not money printing—it's an asset swap creating bank reserves. But psychologically and functionally, it behaves like money printing—distorting markets and inflating asset prices.",
+      "QE is technically not money printing—it's an asset swap creating bank reserves. But psychologically and functionally, it behaves like money printing.",
   },
   {
     id: 'triffin-trap-pt1',
@@ -97,7 +97,7 @@ export const MASTERCLASS_ITEMS: MasterclassItem[] = [
     category: 'Dollar Plumbing',
     startHereOrder: 8,
     blurb:
-      'Bretton Woods created a gold-backed dollar system. Robert Triffin predicted the fatal flaw: supplying the world with dollars would drain US gold reserves, undermining confidence.',
+      'Bretton Woods created a gold-backed dollar system. Robert Triffin predicted the fatal flaw: supplying the world with dollars would drain US gold reserves.',
   },
   {
     id: 'stablecoins',
@@ -106,7 +106,7 @@ export const MASTERCLASS_ITEMS: MasterclassItem[] = [
     category: 'Crypto & Policy',
     startHereOrder: 9,
     blurb:
-      "The most boring thing in crypto has morphed from a quirky market hack into a structural lifeline for Uncle Sam's borrowing habit. Every new token equals a fresh buy order for Treasuries.",
+      "The most boring thing in crypto has morphed from a quirky market hack into a structural lifeline for Uncle Sam's borrowing habit.",
   },
   {
     id: 'myth-of-fed-independence',
@@ -115,7 +115,7 @@ export const MASTERCLASS_ITEMS: MasterclassItem[] = [
     category: 'Fed & Liquidity',
     startHereOrder: 10,
     blurb:
-      "From Truman to Trump, the record is clear: independence is theater. The Fed is dependent on the political calendar, not data. Monetary policy isn't science—it's a hostage negotiation.",
+      "From Truman to Trump, the record is clear: independence is theater. The Fed is dependent on the political calendar, not data.",
   },
   {
     id: 'hedonic-magic',
@@ -123,7 +123,7 @@ export const MASTERCLASS_ITEMS: MasterclassItem[] = [
     title: 'Hedonic Magic',
     category: 'Inflation',
     blurb:
-      'Why your million-dollar yacht is "cheaper" than a rowboat. Hedonic quality adjustments are how economists adjust inflation numbers when products improve—sometimes losing touch with reality.',
+      'Why your million-dollar yacht is "cheaper" than a rowboat. Hedonic quality adjustments are how economists adjust inflation numbers when products improve.',
   },
   {
     id: 'eurodollars-revisited',
@@ -131,7 +131,7 @@ export const MASTERCLASS_ITEMS: MasterclassItem[] = [
     title: 'Eurodollars Revisited: Deeper Down the Rabbit Hole',
     category: 'Dollar Plumbing',
     blurb:
-      'Going deeper into the shadowy offshore dollar system. How Eurodollars dictate global events and why understanding this system is critical for navigating modern finance.',
+      'Going deeper into the shadowy offshore dollar system. How Eurodollars dictate global events and why understanding this system is critical.',
   },
   {
     id: 'triffin-trap-pt2',
@@ -139,7 +139,7 @@ export const MASTERCLASS_ITEMS: MasterclassItem[] = [
     title: 'The Triffin Trap, Pt. 2: Nixon Bails, Bankers Build a Monster',
     category: 'Dollar Plumbing',
     blurb:
-      'Nixon closed the gold window. The dollar became fiat, backed by vibes and Treasury debt. Bankers built an offshore Eurodollar system as a duct-tape fix to the liquidity crisis.',
+      'Nixon closed the gold window. The dollar became fiat, backed by vibes and Treasury debt.',
   },
   {
     id: 'triffin-trap-pt3',
@@ -147,7 +147,7 @@ export const MASTERCLASS_ITEMS: MasterclassItem[] = [
     title: 'The Triffin Trap, Pt. 3: Still Trapped, Still Screwed',
     category: 'Dollar Plumbing',
     blurb:
-      'We replaced gold with vibes, outsourced dollar creation to shadow banks, and now the Fed runs global daycare. The Triffin Dilemma never disappeared—it just shapeshifted into something more dangerous.',
+      'We replaced gold with vibes, outsourced dollar creation to shadow banks, and now the Fed runs global daycare.',
   },
   {
     id: 'betting-2024-election',
@@ -155,7 +155,7 @@ export const MASTERCLASS_ITEMS: MasterclassItem[] = [
     title: 'Betting the 2024 Election',
     category: 'Other',
     blurb:
-      'Data, odds, and surprises from the betting markets. Breaking down election odds, where value exists, and where bets were placed—not a campaign rally, but cold hard cash analysis.',
+      'Data, odds, and surprises from the betting markets. Breaking down election odds, where value exists, and where bets were placed.',
   },
 ];
 
@@ -193,6 +193,14 @@ function validateMasterclassData(): void {
     }
     if (!item.blurb || item.blurb.trim().length === 0) {
       errors.push(`Empty blurb for item: ${item.id}`);
+    }
+
+    // Check blurb is 1-2 sentences max
+    const sentences = item.blurb.split(/[.!?]+/).filter((s) => s.trim().length > 0);
+    if (sentences.length > 2) {
+      errors.push(
+        `Blurb for item "${item.id}" has ${sentences.length} sentences (max 2 allowed): "${item.blurb.substring(0, 100)}..."`
+      );
     }
   }
 
