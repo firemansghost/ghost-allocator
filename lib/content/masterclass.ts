@@ -35,6 +35,7 @@ export const MASTERCLASS_ITEMS: MasterclassItem[] = [
     startHereOrder: 1,
     blurb:
       "Money is more than paper—it's a tool for settling payments, physical or digital. The system runs entirely on trust; without it, we're back to bartering chickens.",
+    substackUrl: 'https://grayghost.substack.com/p/twimm-special-edition-money-101?r=1pan0x',
   },
   {
     id: 'what-is-a-bank',
@@ -44,6 +45,7 @@ export const MASTERCLASS_ITEMS: MasterclassItem[] = [
     startHereOrder: 2,
     blurb:
       'A modern bank is less a vault, more a digital ledger. Bank runs now happen via apps, not queues on the sidewalk.',
+    substackUrl: 'https://grayghost.substack.com/p/twimm-special-edition-4-what-is-a?r=1pan0x',
   },
   {
     id: 'eurodollars',
@@ -53,6 +55,7 @@ export const MASTERCLASS_ITEMS: MasterclassItem[] = [
     startHereOrder: 3,
     blurb:
       "US dollars held outside the US in an unregulated, reserveless system. They provide crucial liquidity for global trade and make the US dollar the world's reserve currency.",
+    substackUrl: 'https://grayghost.substack.com/p/twimm-special-edition-part-2-eurodollars?r=1pan0x',
   },
   {
     id: 'inflation-101',
@@ -62,6 +65,7 @@ export const MASTERCLASS_ITEMS: MasterclassItem[] = [
     startHereOrder: 4,
     blurb:
       'Real inflation = too much money chasing the same goods. Fakeflation = temporary price hikes from supply shocks.',
+    substackUrl: 'https://grayghost.substack.com/p/twimm-special-edition-inflation-101?r=1pan0x',
   },
   {
     id: 'fed-files',
@@ -71,6 +75,7 @@ export const MASTERCLASS_ITEMS: MasterclassItem[] = [
     startHereOrder: 5,
     blurb:
       'The most powerful, least understood institution in modern economics. Fed tools include rate manipulation, QE/QT, and emergency lending.',
+    substackUrl: 'https://grayghost.substack.com/p/twimm-special-edition-the-fed-files?r=1pan0x',
   },
   {
     id: 'dollar-strength-vs-dominance',
@@ -80,6 +85,7 @@ export const MASTERCLASS_ITEMS: MasterclassItem[] = [
     startHereOrder: 6,
     blurb:
       'Strength is short-term price moves. Dominance is structural power—the dollar as the global reserve currency.',
+    substackUrl: 'https://grayghost.substack.com/p/twimm-special-edition-dollar-strength?r=1pan0x',
   },
   {
     id: 'qe-qt',
@@ -89,6 +95,7 @@ export const MASTERCLASS_ITEMS: MasterclassItem[] = [
     startHereOrder: 7,
     blurb:
       "QE is technically not money printing—it's an asset swap creating bank reserves. But psychologically and functionally, it behaves like money printing.",
+    substackUrl: 'https://grayghost.substack.com/p/twimm-special-edition-qeqt-laundromat?r=1pan0x',
   },
   {
     id: 'triffin-trap-pt1',
@@ -98,6 +105,7 @@ export const MASTERCLASS_ITEMS: MasterclassItem[] = [
     startHereOrder: 8,
     blurb:
       'Bretton Woods created a gold-backed dollar system. Robert Triffin predicted the fatal flaw: supplying the world with dollars would drain US gold reserves.',
+    substackUrl: 'https://grayghost.substack.com/p/twimm-special-edition-the-triffin?r=1pan0x',
   },
   {
     id: 'stablecoins',
@@ -107,6 +115,7 @@ export const MASTERCLASS_ITEMS: MasterclassItem[] = [
     startHereOrder: 9,
     blurb:
       "The most boring thing in crypto has morphed from a quirky market hack into a structural lifeline for Uncle Sam's borrowing habit.",
+    substackUrl: 'https://grayghost.substack.com/p/stablecoins-how-crypto-became-washingtons?r=1pan0x',
   },
   {
     id: 'myth-of-fed-independence',
@@ -116,6 +125,7 @@ export const MASTERCLASS_ITEMS: MasterclassItem[] = [
     startHereOrder: 10,
     blurb:
       "From Truman to Trump, the record is clear: independence is theater. The Fed is dependent on the political calendar, not data.",
+    substackUrl: 'https://grayghost.substack.com/p/twimm-special-edition-the-myth-of?r=1pan0x',
   },
   {
     id: 'hedonic-magic',
@@ -124,6 +134,7 @@ export const MASTERCLASS_ITEMS: MasterclassItem[] = [
     category: 'Inflation',
     blurb:
       'Why your million-dollar yacht is "cheaper" than a rowboat. Hedonic quality adjustments are how economists adjust inflation numbers when products improve.',
+    substackUrl: 'https://grayghost.substack.com/p/twimm-special-edition-31-hedonic?r=1pan0x',
   },
   {
     id: 'eurodollars-revisited',
@@ -132,6 +143,7 @@ export const MASTERCLASS_ITEMS: MasterclassItem[] = [
     category: 'Dollar Plumbing',
     blurb:
       'Going deeper into the shadowy offshore dollar system. How Eurodollars dictate global events and why understanding this system is critical.',
+    substackUrl: 'https://grayghost.substack.com/p/special-edition-eurodollars-revisited?r=1pan0x',
   },
   {
     id: 'triffin-trap-pt2',
@@ -140,6 +152,7 @@ export const MASTERCLASS_ITEMS: MasterclassItem[] = [
     category: 'Dollar Plumbing',
     blurb:
       'Nixon closed the gold window. The dollar became fiat, backed by vibes and Treasury debt.',
+    substackUrl: 'https://grayghost.substack.com/p/twimm-special-edition-the-triffin-6b8?r=1pan0x',
   },
   {
     id: 'triffin-trap-pt3',
@@ -148,6 +161,7 @@ export const MASTERCLASS_ITEMS: MasterclassItem[] = [
     category: 'Dollar Plumbing',
     blurb:
       'We replaced gold with vibes, outsourced dollar creation to shadow banks, and now the Fed runs global daycare.',
+    substackUrl: 'https://grayghost.substack.com/p/twimm-special-edition-the-triffin-150?r=1pan0x',
   },
   {
     id: 'betting-2024-election',
@@ -156,6 +170,7 @@ export const MASTERCLASS_ITEMS: MasterclassItem[] = [
     category: 'Other',
     blurb:
       'Data, odds, and surprises from the betting markets. Breaking down election odds, where value exists, and where bets were placed.',
+    substackUrl: 'https://grayghost.substack.com/p/twimm-special-edition-betting-the?r=1pan0x',
   },
 ];
 

@@ -96,7 +96,7 @@ export default function MasterclassPage() {
                           rel="noopener noreferrer"
                           className="inline-flex items-center rounded-full bg-amber-400 px-4 py-2 text-xs font-semibold text-black hover:bg-amber-300 transition shadow-md shadow-amber-400/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 min-h-[36px]"
                         >
-                          Read on Substack
+                          Read on Substack →
                         </a>
                       ) : (
                         <a
@@ -105,7 +105,7 @@ export default function MasterclassPage() {
                           rel="noopener noreferrer"
                           className="inline-flex items-center rounded-full bg-zinc-700 px-4 py-2 text-xs font-semibold text-zinc-200 hover:bg-zinc-600 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 min-h-[36px]"
                         >
-                          Find on Substack
+                          Browse on Substack →
                         </a>
                       )}
                     </div>
@@ -154,7 +154,7 @@ export default function MasterclassPage() {
                               rel="noopener noreferrer"
                               className="inline-flex items-center text-xs font-medium text-zinc-400 hover:text-zinc-300 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-2 py-1"
                             >
-                              Find on Substack →
+                              Browse on Substack →
                             </a>
                           )}
                         </div>
