@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import type {
   QuestionnaireResult,
+  QuestionnaireAnswers,
   ModelPortfolio,
   ExampleETF,
   VoyaDeltaPlan,
@@ -186,6 +187,10 @@ export default function Builder() {
   }> | null>(null);
   const [ghostRegimeHistoryError, setGhostRegimeHistoryError] = useState<boolean>(false);
 
+  // HOOKS ORDER FIX: All hooks must be called before any conditional returns.
+  // Initialize answers state with a default value, then update from result when available.
+  const [answers, setAnswers] = useState<QuestionnaireAnswers | null>(null);
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -201,12 +206,15 @@ export default function Builder() {
       setCurrentVoyaHoldings(data.answers.currentVoyaHoldings);
       const modelPortfolio = selectModelPortfolio(data.riskLevel);
       setPortfolio(modelPortfolio);
+      // Update answers state when result is loaded
+      setAnswers(data.answers);
     } catch (err) {
       setError('Invalid questionnaire data');
     }
   }, []);
 
-  if (error || !result || !portfolio) {
+  // Early return AFTER all hooks have been called
+  if (error || !result || !portfolio || !answers) {
     return (
       <div className="text-center space-y-4">
         <h1 className="text-2xl font-semibold tracking-tight">
@@ -226,8 +234,7 @@ export default function Builder() {
     );
   }
 
-  const { answers: initialAnswers, riskLevel } = result;
-  const [answers, setAnswers] = useState(initialAnswers);
+  const { riskLevel } = result;
   const platformSplit = computePlatformSplit(answers);
   const voyaImplementation = buildVoyaImplementation(answers, riskLevel);
   const preset = answers.portfolioPreset ?? 'standard';
@@ -280,6 +287,27 @@ export default function Builder() {
     setResult(updatedResult);
   };
 
+  const handleSaveSetup = () => {
+    // Export the current setup as JSON
+    const exportData = {
+      schemaVersion: 1,
+      exportedAt: new Date().toISOString(),
+      result: result,
+    };
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+      type: 'application/json',
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ghost-allocator-setup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-8">
       <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
@@ -291,9 +319,18 @@ export default function Builder() {
               : "Based on your answers and income floor, here's a post-60/40 Ghost sleeve allocation and how to implement it across Schwab ETFs and the Voya core menu."}
           </p>
         </div>
-        <span className="inline-flex items-center rounded-full border border-amber-400/60 bg-amber-400/10 px-3 py-1 text-xs font-medium text-amber-300">
-          Risk level: {riskLabels[riskLevel]}
-        </span>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={handleSaveSetup}
+            className="inline-flex items-center rounded-md border border-amber-400/60 bg-amber-400/10 px-3 py-1.5 text-xs font-medium text-amber-300 hover:bg-amber-400/20 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400/60"
+          >
+            Save setup
+          </button>
+          <span className="inline-flex items-center rounded-full border border-amber-400/60 bg-amber-400/10 px-3 py-1 text-xs font-medium text-amber-300">
+            Risk level: {riskLabels[riskLevel]}
+          </span>
+        </div>
       </header>
 
       {/* Template DNA Banner */}
