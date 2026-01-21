@@ -5,6 +5,7 @@
 
 import Link from 'next/link';
 import { GlassCard } from '@/components/GlassCard';
+import DrawdownRealityCheck from '@/components/learn/DrawdownRealityCheck';
 import { buildMetadata } from '@/lib/seo';
 import type { Metadata } from 'next';
 
@@ -23,6 +24,17 @@ export default function HowItWorksPage() {
           A rules-based, long-only system that adjusts exposure when conditions change — without pretending we can predict the exact top or bottom.
         </p>
       </header>
+
+      {/* Why a rules-based process exists */}
+      <GlassCard className="p-6">
+        <h2 className="text-sm font-semibold text-zinc-50 mb-3">Why a rules-based process exists</h2>
+        <div className="space-y-3 text-xs text-zinc-300 leading-relaxed">
+          <p>
+            Disciplined risk management isn't optional. If we're in an era of monetary debasement and financial repression, you don't win by predicting headlines — you win by following a data-driven process that captures upside and limits downside when the inevitable secular bear shows up.
+          </p>
+          <DrawdownRealityCheck variant="full" />
+        </div>
+      </GlassCard>
 
       {/* What GhostRegime Is */}
       <GlassCard className="p-6">

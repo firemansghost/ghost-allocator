@@ -28,6 +28,7 @@ import CurrentVoyaForm from '@/components/CurrentVoyaForm';
 import GhostRegimeHouseEducation from '@/components/ghostregime/GhostRegimeHouseEducation';
 import ActionPlanTemplateDna from '@/components/builder/ActionPlanTemplateDna';
 import BondsFAQ from '@/components/builder/BondsFAQ';
+import DrawdownRealityCheck from '@/components/learn/DrawdownRealityCheck';
 import { formatPercent } from '@/lib/format';
 import type { CurrentVoyaHolding } from '@/lib/types';
 import { buildActionPlanDnaString } from '@/lib/builder/actionPlanCopy';
@@ -908,6 +909,27 @@ export default function Builder() {
               <p className="text-[11px] text-zinc-400 mt-3">
                 Want the sleeve-based version instead? Change preset back to Standard in onboarding.
               </p>
+
+              {/* Why discipline matters */}
+              <details className="mt-4 pt-4 border-t border-zinc-700 group">
+                <summary className="cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded">
+                  <h3 className="text-xs font-semibold text-zinc-300 inline-flex items-center gap-2 hover:text-zinc-200 transition-colors">
+                    <span className="text-xs text-zinc-500 group-open:rotate-90 transition-transform">
+                      ▶
+                    </span>
+                    Why discipline matters (read this before you freestyle)
+                  </h3>
+                </summary>
+                <div className="mt-3 space-y-3 text-xs text-zinc-300 leading-relaxed">
+                  <p>
+                    Disciplined risk management isn't optional. If we're in an era of monetary debasement and financial repression, you don't win by predicting headlines — you win by following a data-driven process that captures upside and limits downside when the inevitable secular bear shows up.
+                  </p>
+                  <DrawdownRealityCheck variant="compact" />
+                  <p className="text-xs text-amber-300 italic mt-2">
+                    That's why GhostRegime exists: not to be 'right' — to keep you from getting wrecked.
+                  </p>
+                </div>
+              </details>
             </GlassCard>
           ) : (
             /* Standard Schwab ETF lineup */
@@ -1054,6 +1076,27 @@ export default function Builder() {
               
               {/* Bonds FAQ */}
               <BondsFAQ />
+
+              {/* Why discipline matters */}
+              <details className="mt-4 pt-4 border-t border-zinc-700 group">
+                <summary className="cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded">
+                  <h3 className="text-xs font-semibold text-zinc-300 inline-flex items-center gap-2 hover:text-zinc-200 transition-colors">
+                    <span className="text-xs text-zinc-500 group-open:rotate-90 transition-transform">
+                      ▶
+                    </span>
+                    Why discipline matters (read this before you freestyle)
+                  </h3>
+                </summary>
+                <div className="mt-3 space-y-3 text-xs text-zinc-300 leading-relaxed">
+                  <p>
+                    Disciplined risk management isn't optional. If we're in an era of monetary debasement and financial repression, you don't win by predicting headlines — you win by following a data-driven process that captures upside and limits downside when the inevitable secular bear shows up.
+                  </p>
+                  <DrawdownRealityCheck variant="compact" />
+                  <p className="text-xs text-amber-300 italic mt-2">
+                    That's why GhostRegime exists: not to be 'right' — to keep you from getting wrecked.
+                  </p>
+                </div>
+              </details>
             </GlassCard>
           )}
         </>
