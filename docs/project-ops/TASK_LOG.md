@@ -1,5 +1,24 @@
 # TASK LOG
 
+## 2026-01-21 — Add "457(b) in 5 Minutes" quick reference
+Completed:
+- Created components/learn/457InFiveMinutes.tsx reusable component with scannable format
+- Added prominent "457(b) in 5 Minutes" section to /learn/457 page (positioned after header, before longer sections)
+- Added Browse card to /learn hub linking to /learn/457#in-5-minutes anchor
+- Component includes: 60-second version, governmental vs non-governmental differences, withdrawal rules (with rollover caution callout), catch-ups, common mistakes, and actionable checklist
+- Uses existing styling patterns (GlassCard, typography, spacing) for consistency
+- Anchor target (#in-5-minutes) enables direct linking from Browse card
+
+Changed:
+- /learn/457 page now has fast, scannable quick reference at top
+- /learn Browse section expanded with new "457 in 5 Minutes" card
+
+Discovered:
+- Scannable format (headings + bullets) works well for time-constrained users
+- Anchor linking provides smooth navigation from hub to specific section
+
+---
+
 ## 2026-01-17 — Education hub implementation (V1.1 complete)
 Completed:
 - Created /learn hub page with "Start Here" (3 primary cards) and Browse section (4 cards)

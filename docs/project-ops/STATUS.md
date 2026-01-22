@@ -6,6 +6,7 @@ Ghost Allocator is stable and usable: onboarding + builder flow works, Schwab sl
 Education section (V1.1) is now live:
 - /learn hub exists with guided "Start Here" path and Browse section
 - /learn/457 basics page provides generic 457(b) education (first responder friendly)
+- /learn/457 now includes "457(b) in 5 Minutes" quick reference section (fast, scannable format)
 - /learn/masterclass page integrates Macro Mayhem Masterclass as Level 1: link-out to Substack with curated "Start here" sequence and category browse
 - All stub pages created (/learn/457/okc, /learn/basics, /learn/glossary)
 - Masterclass data file uses real titles/dates from archive with validation guardrails
@@ -41,7 +42,7 @@ Education section (V1.1) is now live:
 2) Develop OKC-specific 457(b) playbook content when plan documents are available
 3) Consider adding Finance Basics and Glossary content (currently stubs)
 
-Last updated: 2026-01-17
+Last updated: 2026-01-21
 
 ---
 

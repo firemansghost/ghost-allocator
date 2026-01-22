@@ -1,14 +1,12 @@
 # HANDOFF
 
-## Last Session Summary (2026-01-17)
-Education hub (V1.1) is complete. Implemented:
-- /learn hub with guided "Start Here" path and Browse section
-- /learn/457 basics page (generic, first responder friendly)
-- /learn/masterclass page with Level 1 link-out to Substack
-- Masterclass data file with real titles/dates from archive, validation guardrails, and fallback links
-- All stub pages created (/learn/457/okc, /learn/basics, /learn/glossary)
-- Navigation updated: "Learn" in top nav, secondary CTA on homepage
-- Sitemap updated with /learn routes
+## Last Session Summary (2026-01-21)
+Added "457(b) in 5 Minutes" quick reference to education section:
+- Created reusable component (components/learn/457InFiveMinutes.tsx) with scannable format
+- Added prominent section to /learn/457 page (positioned after header, before longer content)
+- Added Browse card to /learn hub linking to /learn/457#in-5-minutes anchor
+- Component covers: 60-second version, governmental vs non-governmental, withdrawals (with rollover caution), catch-ups, common mistakes, and actionable checklist
+- Uses existing styling patterns for consistency
 
 ## State of Work
 - Core app is stable and deployable; builder/onboarding works.

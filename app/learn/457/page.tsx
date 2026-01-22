@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { GlassCard } from '@/components/GlassCard';
+import Four57InFiveMinutes from '@/components/learn/457InFiveMinutes';
 import { buildMetadata } from '@/lib/seo';
 import type { Metadata } from 'next';
 
@@ -21,6 +22,9 @@ export default function Learn457Page() {
             Understand how these plans work, from contributions to withdrawals.
           </p>
         </GlassCard>
+
+        {/* 457(b) in 5 Minutes */}
+        <Four57InFiveMinutes />
 
         {/* What is a 457(b) */}
         <GlassCard className="p-5 sm:p-6">
