@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { GlassCard } from '@/components/GlassCard';
+import DrawdownRealityCheck from '@/components/learn/DrawdownRealityCheck';
 import { buildMetadata } from '@/lib/seo';
 import type { Metadata } from 'next';
 
@@ -124,6 +125,34 @@ export default function HomePage() {
           </GlassCard>
         </div>
       </section>
+
+      {/* Drawdown Reality Check Teaser */}
+      <GlassCard className="p-4 sm:p-5">
+        <details className="group">
+          <summary className="cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded">
+            <h3 className="text-sm font-semibold text-zinc-50 inline-flex items-center gap-2 hover:text-zinc-200 transition-colors">
+              <span className="text-xs text-zinc-500 group-open:rotate-90 transition-transform">
+                ▶
+              </span>
+              Drawdown Reality Check (why rules beat vibes)
+            </h3>
+          </summary>
+          <div className="mt-4 space-y-4 text-xs text-zinc-300 leading-relaxed">
+            <p>
+              Disciplined risk management isn't optional. A rules-based process helps capture upside and limit downside when markets inevitably get ugly.
+            </p>
+            <DrawdownRealityCheck variant="compact" />
+            <div className="pt-2">
+              <Link
+                href="/ghostregime/how-it-works"
+                className="inline-flex items-center text-xs font-semibold text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-2 py-1"
+              >
+                See how GhostRegime works →
+              </Link>
+            </div>
+          </div>
+        </details>
+      </GlassCard>
 
       {/* Not a Crystal Ball Callout */}
       <GlassCard className="p-6 border-amber-400/30 bg-amber-400/5">
