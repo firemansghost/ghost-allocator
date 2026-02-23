@@ -4,17 +4,26 @@
 
 GhostRegime is a market regime classifier that runs automatically via GitHub Actions on weekdays. This runbook covers operational procedures, troubleshooting, and manual interventions.
 
+## GhostRegime Data Flow
+
+1. **Seed** — CSV at `data/ghostregime/seed/ghostregime_replay_history.csv` provides bootstrap history for dates **≤ cutover** (default `2025-11-28` UTC). Used for deterministic local behavior and to serve history/today for past dates.
+2. **Cutover** — Configurable via `NEXT_PUBLIC_GHOSTREGIME_CUTOVER_DATE_UTC`. Dates **after** cutover are not read from the seed.
+3. **Persistence** — For dates after cutover, the engine computes from live market data and writes the latest row to Vercel Blob storage. Reads (today, health, history) use this persisted state when available.
+
+If the seed is missing or empty, `/api/ghostregime/today`, `/explain`, and `/history` return `503` with `GHOSTREGIME_NOT_SEEDED`. If no latest row has ever been persisted, `/api/ghostregime/health` returns `503 NOT_READY`.
+
 ## Daily Workflow
 
 ### Automatic Execution
 
-**Schedule**: Every weekday at 3:30 AM UTC (after US market close)
-- **Cron**: `30 3 * * 1-5` (Monday-Friday)
+**Schedule**: Every weekday at **3:30 AM UTC** (after US market close).
+- **Cron**: `30 3 * * 1-5` (Monday–Friday)
 - **Workflow**: `.github/workflows/ghostregime-daily.yml`
-- **Actions**: 
-  1. Force refresh GhostRegime (`?force=1` with secret)
-  2. Check health endpoint
-  3. (Optional) Send Slack notification on failure
+- **Actions**:
+  1. Guard: skip if seed file missing/empty or `GHOSTREGIME_CRON_SECRET` unset
+  2. Force refresh GhostRegime (`?force=1` with cron secret)
+  3. Check health endpoint
+  4. (Optional) Send Slack notification on failure
 
 ### Manual Execution
 
@@ -23,11 +32,12 @@ GhostRegime is a market regime classifier that runs automatically via GitHub Act
 2. Select "GhostRegime Daily Refresh" workflow
 3. Click "Run workflow" → "Run workflow"
 
-**Via API** (requires secret):
+**Via API** (requires secret). Use the **root domain** as base URL (not a path like `/ghostregime`):
 ```bash
 curl -H "x-ghostregime-cron: YOUR_SECRET" \
   "https://ghost-allocator.vercel.app/api/ghostregime/today?force=1&cb=$(date +%s)"
 ```
+**Base URL**: Always use the site root (e.g. `https://ghost-allocator.vercel.app`). API paths are `/api/ghostregime/today`, `/api/ghostregime/health`, etc. Do not use `https://.../ghostregime` as the base.
 
 ## Endpoints Reference
 
@@ -75,6 +85,21 @@ curl https://ghost-allocator.vercel.app/api/ghostregime/health
 - `latest` - Full persisted row
 - `freshness` - Age in days, max_age_days (4), is_fresh flag
 - `warnings` - Array of warning messages (if any)
+
+## Common Failure Modes (Check First)
+
+1. **503 NOT_READY or NOT_SEEDED**
+   - **NOT_SEEDED**: Seed file missing or empty at `data/ghostregime/seed/ghostregime_replay_history.csv`. Add or restore the file and redeploy.
+   - **NOT_READY**: No persisted latest row (e.g. Blob not configured, or force refresh never succeeded). Set `BLOB_READ_WRITE_TOKEN` and run a manual force refresh.
+
+2. **401 Unauthorized on force refresh**
+   - `GHOSTREGIME_CRON_SECRET` missing or mismatch between Vercel and GitHub Actions. Set in both and ensure values match.
+
+3. **Stale data (MISSING_CORE_SERIES, INSUFFICIENT_HISTORY, etc.)**
+   - Check provider status (AlphaVantage, CBOE VIX, Stooq). See “Workflow Fails with Stale Data” and “Missing Core Symbols” below.
+
+4. **Workflow skipped**
+   - Seed file missing/empty or `GHOSTREGIME_CRON_SECRET` unset in GitHub Actions. Fix guard conditions and re-run.
 
 ## Troubleshooting
 
@@ -159,15 +184,23 @@ curl https://ghost-allocator.vercel.app/api/ghostregime/health
 
 ## Environment Variables
 
-### Required in Vercel
-- `GHOSTREGIME_CRON_SECRET` - Secret for force mode (must match GitHub Actions)
-- `BLOB_READ_WRITE_TOKEN` - Vercel Blob storage token
-- `ALPHAVANTAGE_API_KEY` - AlphaVantage API key (optional, falls back to DBC)
-- `FRED_API_KEY` - Not used (VIX uses CBOE now)
+### Vercel (production)
 
-### Required in GitHub Actions
-- `GHOSTREGIME_CRON_SECRET` - Must match Vercel value
-- `SLACK_WEBHOOK_URL` - (Optional) For failure notifications
+| Variable | Purpose |
+|----------|---------|
+| `GHOSTREGIME_CRON_SECRET` | Secret for force mode; must match the value in GitHub Actions. If missing, force refresh returns 401. |
+| `BLOB_READ_WRITE_TOKEN` | Vercel Blob storage token. Required for persisting latest row and history. If missing, persistence fails and health can stay NOT_READY. |
+| `ALPHAVANTAGE_API_KEY` | AlphaVantage API key for PDBC (optional; falls back to DBC via Stooq if unset). |
+| `NEXT_PUBLIC_GHOSTREGIME_CUTOVER_DATE_UTC` | (Optional) Cutover date for seed vs persistence; default `2025-11-28T00:00:00Z`. |
+
+Seed presence is not an env var: the app expects the seed file at `data/ghostregime/seed/ghostregime_replay_history.csv` in the repo. If missing or empty, today/explain/history return 503 NOT_SEEDED and the daily workflow skips.
+
+### GitHub Actions
+
+| Variable | Purpose |
+|----------|---------|
+| `GHOSTREGIME_CRON_SECRET` | Must match Vercel; used in `x-ghostregime-cron` header for force refresh. If unset, workflow skips. |
+| `SLACK_WEBHOOK_URL` | (Optional) Failure notifications. |
 
 ## Manual Interventions
 
@@ -225,11 +258,13 @@ curl "https://ghost-allocator.vercel.app/api/ghostregime/today?debug=1" | jq '.d
 
 ### System Not Ready (503)
 
-**If health returns `NOT_READY`**:
-1. Check if seed file exists: `data/ghostregime/seed/ghostregime_replay_history.csv`
-2. Check if any latest row exists in Blob storage
-3. If seed missing: Add seed file and redeploy
-4. If no latest: Run manual force refresh
+**If health returns `NOT_READY`** (no persisted latest row):
+1. Confirm seed file exists and is non-empty: `data/ghostregime/seed/ghostregime_replay_history.csv` (see `data/ghostregime/seed/README.md`).
+2. Confirm `BLOB_READ_WRITE_TOKEN` is set in Vercel.
+3. Run a manual force refresh (with valid `GHOSTREGIME_CRON_SECRET`). After a successful force, health should return 200.
+
+**If today/explain/history return 503 with `GHOSTREGIME_NOT_SEEDED`**:
+1. Add or restore the seed CSV at `data/ghostregime/seed/ghostregime_replay_history.csv` and redeploy.
 
 ### Persistent Stale Data
 

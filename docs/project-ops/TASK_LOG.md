@@ -1,5 +1,50 @@
 # TASK LOG
 
+## 2026-01-21 — /models now renders read-only templates from lib/modelPortfolios.ts
+Completed:
+- Rewrote app/models/page.tsx to pull from MODEL_PORTFOLIOS (lib/modelPortfolios.ts) instead of MODEL_TEMPLATES
+- Page shows intro explaining reference templates; education/risk framing disclaimer; CTAs to Build my portfolio (/onboarding) and Learn (/learn)
+- Each risk model (r1–r5) rendered in collapsible details; first model open by default
+- Sleeve allocation table per model: sleeve name (from sleeveDefinitions), weight %, total row
+- Weights sorted by descending value for scannability; total displayed as X.X%
+- Removed "Coming Soon" and "What You'll Be Able To Do Soon" content
+
+Changed:
+- /models is now a read-only receipt of actual model portfolio sleeve allocations
+- No allocation or builder logic changes; UI + formatting only
+
+Verification:
+- npm run build passes
+- No changes to builder output or GhostRegime
+
+---
+
+## 2026-01-21 — Decision log update (GhostRegime posture, seed artifact)
+Completed:
+- Appended two entries to docs/project-ops/DECISIONS.md dated 2026-01-21: (1) GhostRegime as posture/education overlay only, not builder allocation driver; possible future opt-in overlay is contributions-only; (2) Seed CSV remains committed as bootstrap artifact; document cutover and what breaks if missing.
+
+Changed:
+- DECISIONS.md now records posture and seed artifact decisions for future maintainers.
+
+Verification:
+- Docs-only; no code changes.
+
+---
+
+## 2026-01-21 — GhostRegime seed and runbook docs cleanup (docs-only)
+Completed:
+- Updated data/ghostregime/seed/README.md: removed "seed will be provided later" language; documented seed location, purpose (bootstrap history, deterministic local behavior), cutover relationship (seed used for dates ≤ cutover, persistence after), what breaks if missing (503 NOT_SEEDED / NOT_READY), validation checks, and refresh/update steps (TBD but explicit)
+- Updated docs/ghostregime/RUNBOOK.md: added "GhostRegime data flow" section (Seed → Cutover → Persistence); confirmed scheduled workflow cadence (3:30 AM UTC Mon–Fri); documented required env vars and what they control (seed presence, blob token, cron secret, cutover); clarified base URL (root domain, not /ghostregime); added "Common failure modes (check first)" and tightened 503 / NOT_SEEDED vs NOT_READY procedures
+
+Changed:
+- Seed README is now the single place for seed location, cutover semantics, and refresh process
+- RUNBOOK env vars and failure modes are aligned with actual API and workflow behavior
+
+Verification:
+- No code or API behavior changes; markdown only
+
+---
+
 ## 2026-01-21 — Add "457(b) in 5 Minutes" quick reference
 Completed:
 - Created components/learn/457InFiveMinutes.tsx reusable component with scannable format

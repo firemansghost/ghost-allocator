@@ -1,5 +1,27 @@
 # DECISIONS
 
+## 2026-01-21 — GhostRegime is posture/education overlay (not builder allocation driver) for now
+Choice:
+- Builder remains stable; GhostRegime provides risk posture and education only.
+- Any future opt-in overlay (e.g. contribution guidance) would be contributions-only, not daily allocation churn.
+
+Why:
+- Avoids drift between builder logic and GhostRegime; matches 457 behavior reality (payroll lands in Voya, manual sweeps).
+- Avoids daily allocation churn and keeps user experience predictable.
+
+---
+
+## 2026-01-21 — Seed CSV remains committed as bootstrap artifact
+Choice:
+- Keep the seed CSV committed in the repo for determinism and local-first behavior.
+- Document cutover semantics and what breaks if the seed is missing (see data/ghostregime/seed/README.md and RUNBOOK).
+
+Why:
+- Avoids secrets dependency for local/CLI use; keeps CLI and diagnostics reliable without Blob tokens.
+- Prevents docs drift by having a single documented source of truth for seed location and behavior.
+
+---
+
 ## 2026-01-17 — Education hub implementation: manual data, validation, fallback links
 Choice:
 - Masterclass data file uses manual list (no runtime parsing of archive file).
