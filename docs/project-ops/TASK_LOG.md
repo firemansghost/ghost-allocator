@@ -1,5 +1,26 @@
 # TASK LOG
 
+## 2026-01-21 — Remove convex equity from model portfolios and builder
+Completed:
+- lib/modelPortfolios.ts: removed convex_equity sleeve; merged weight into core_equity for all r1–r5
+- lib/types.ts: removed convex_equity from SleeveId
+- lib/sleeves.ts: removed convex_equity definition and SPYC example ETF
+- lib/schwabLineups.ts: removed convex_equity from SIMPLIFY_ETFS, selectConvexEquityEtf, and lineup logic
+- app/models/ModelsPageContent.tsx: removed display-only merge; now uses selectModelPortfolio + getStandardSchwabLineup directly
+- app/builder/page.tsx: removed "convexity" from risk 4 description
+- components/QuestionnaireForm.tsx: "Simplify mode (alts/hedges)" and removed "options overlays" from copy
+
+Changed:
+- No convex/options-overlay sleeve anywhere in builder or /models output
+- Weights sum ~100%; no duplicate tickers; lineup tests pass
+
+Verification:
+- npm run test:lineups passes
+- npm run build passes
+- npm run check:no-reference-data passes
+
+---
+
 ## 2026-01-21 — /models now shows implementable Voya-only and Voya+Schwab templates
 Completed:
 - Rewrote /models to show implementable templates using real OKC Voya funds (lib/voya.ts)

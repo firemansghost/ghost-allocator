@@ -10,8 +10,7 @@ import { GlassCard } from '@/components/GlassCard';
 import { buildVoyaImplementation } from '@/lib/voya';
 import { selectModelPortfolio } from '@/lib/portfolioEngine';
 import { getStandardSchwabLineup } from '@/lib/schwabLineups';
-import { sleeveDefinitions } from '@/lib/sleeves';
-import type { QuestionnaireAnswers, RiskLevel, Sleeve, SleeveId } from '@/lib/types';
+import type { QuestionnaireAnswers, RiskLevel } from '@/lib/types';
 
 const MODEL_TEMPLATES: { name: string; riskLevel: RiskLevel }[] = [
   { name: 'Conservative', riskLevel: 2 },
@@ -34,55 +33,6 @@ function minimalAnswers(platform: 'voya_only' | 'voya_and_schwab'): Questionnair
     portfolioPreset: 'standard',
     goldBtcTilt: 'none',
   };
-}
-
-/**
- * Creates display-only sleeves for Schwab slice: removes convex_equity and merges its weight into core_equity.
- * Does not alter builder or engine outputs.
- */
-function getDisplaySleevesWithoutConvex(riskLevel: RiskLevel): Sleeve[] {
-  const portfolio = selectModelPortfolio(riskLevel);
-  const convexSleeve = portfolio.sleeves.find((s) => s.id === 'convex_equity');
-  const convexWeight = convexSleeve?.weight ?? 0;
-
-  const result: Sleeve[] = [];
-  let coreEquityWeight = 0;
-
-  for (const s of portfolio.sleeves) {
-    if (s.id === 'convex_equity') continue;
-    if (s.id === 'core_equity') {
-      coreEquityWeight += s.weight;
-      continue;
-    }
-    if (s.weight > 0) result.push({ ...s });
-  }
-
-  if (coreEquityWeight > 0 || convexWeight > 0) {
-    const coreDef = sleeveDefinitions['core_equity'];
-    result.unshift({
-      id: 'core_equity' as SleeveId,
-      name: coreDef?.name ?? 'Core Equity',
-      description: coreDef?.description ?? '',
-      weight: coreEquityWeight + convexWeight,
-    });
-  }
-
-  return result.sort((a, b) => b.weight - a.weight);
-}
-
-/**
- * Returns Schwab lineup for display only, with convex_equity omitted (weight merged into core_equity).
- */
-function getDisplaySchwabLineup(riskLevel: RiskLevel) {
-  const displaySleeves = getDisplaySleevesWithoutConvex(riskLevel);
-  return getStandardSchwabLineup(
-    displaySleeves,
-    riskLevel,
-    'standard',
-    'gldm',
-    'fbtc',
-    'none'
-  );
 }
 
 /** Desktop (768px+): first card open by default. Mobile: closed. Avoids hydration mismatch. */
@@ -231,7 +181,15 @@ export function ModelsPageContent() {
             const impl = buildVoyaImplementation(minimalAnswers('voya_and_schwab'), riskLevel);
             const voyaMix = impl.mix ?? [];
             const voyaTotal = voyaMix.reduce((s, m) => s + m.allocationPct, 0);
-            const schwabLineup = getDisplaySchwabLineup(riskLevel);
+            const portfolio = selectModelPortfolio(riskLevel);
+            const schwabLineup = getStandardSchwabLineup(
+              portfolio.sleeves,
+              riskLevel,
+              'standard',
+              'gldm',
+              'fbtc',
+              'none'
+            );
             const schwabTotal = schwabLineup.reduce((s, i) => s + i.weight, 0);
             const isFirst = index === 0;
 

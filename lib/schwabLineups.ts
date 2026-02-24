@@ -20,7 +20,7 @@ import { validateNoDuplicateTickers, validateWeightSum } from './portfolio/valid
 
 /**
  * Simplify mode ETF mappings by sleeve
- * These are Simplify's building-block ETFs for alts/hedges/convexity
+ * These are Simplify's building-block ETFs for alts/hedges
  */
 const SIMPLIFY_ETFS: Record<string, ExampleETF[]> = {
   core_equity: [
@@ -29,26 +29,6 @@ const SIMPLIFY_ETFS: Record<string, ExampleETF[]> = {
       name: 'SPDR Portfolio S&P 500 ETF',
       description: 'Core S&P 500 exposure',
       sleeveId: 'core_equity',
-    },
-  ],
-  convex_equity: [
-    {
-      ticker: 'SPD',
-      name: 'Simplify US Equity PLUS Downside Convexity ETF',
-      description: 'S&P 500 with downside protection (conservative/balanced)',
-      sleeveId: 'convex_equity',
-    },
-    {
-      ticker: 'SPYC',
-      name: 'Simplify US Equity PLUS Convexity ETF',
-      description: 'S&P 500 with options overlay (balanced)',
-      sleeveId: 'convex_equity',
-    },
-    {
-      ticker: 'SPUC',
-      name: 'Simplify US Equity PLUS Upside Convexity ETF',
-      description: 'S&P 500 with upside convexity (growth/aggressive)',
-      sleeveId: 'convex_equity',
     },
   ],
   managed_futures: [
@@ -110,22 +90,6 @@ const SIMPLIFY_ETFS: Record<string, ExampleETF[]> = {
 };
 
 /**
- * Select convex equity ETF based on risk level
- */
-function selectConvexEquityEtf(riskLevel: RiskLevel): ExampleETF {
-  if (riskLevel <= 2) {
-    // Conservative/Balanced: SPD
-    return SIMPLIFY_ETFS.convex_equity[0];
-  } else if (riskLevel <= 3) {
-    // Balanced: SPYC
-    return SIMPLIFY_ETFS.convex_equity[1];
-  } else {
-    // Growth/Aggressive: SPUC
-    return SIMPLIFY_ETFS.convex_equity[2];
-  }
-}
-
-/**
  * Apply instrument wrapper substitutions
  */
 function applyInstrumentWrappers(
@@ -181,20 +145,14 @@ export function getStandardSchwabLineup(
     // Simplify mode: use Simplify ETFs
     for (const sleeve of sleeves) {
       if (sleeve.weight > 0) {
-        if (sleeve.id === 'convex_equity') {
-          // Special handling for convex equity based on risk
-          etfsBySleeve[sleeve.id] = [selectConvexEquityEtf(riskLevel)];
+        const simplifyEtfs = SIMPLIFY_ETFS[sleeve.id] || [];
+        if (simplifyEtfs.length > 0) {
+          etfsBySleeve[sleeve.id] = [simplifyEtfs[0]]; // Take first Simplify ETF
         } else {
-          // Use Simplify ETF for this sleeve if available
-          const simplifyEtfs = SIMPLIFY_ETFS[sleeve.id] || [];
-          if (simplifyEtfs.length > 0) {
-            etfsBySleeve[sleeve.id] = [simplifyEtfs[0]]; // Take first Simplify ETF
-          } else {
-            // Fallback to standard ETFs if no Simplify option
-            etfsBySleeve[sleeve.id] = exampleETFs
-              .filter((etf) => etf.sleeveId === sleeve.id)
-              .slice(0, 1);
-          }
+          // Fallback to standard ETFs if no Simplify option
+          etfsBySleeve[sleeve.id] = exampleETFs
+            .filter((etf) => etf.sleeveId === sleeve.id)
+            .slice(0, 1);
         }
       }
     }

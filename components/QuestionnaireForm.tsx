@@ -1191,14 +1191,14 @@ export default function QuestionnaireForm() {
                         }
                         className="h-3.5 w-3.5 accent-amber-400"
                       />
-                      <span>Simplify mode (alts/hedges/convexity)</span>
+                      <span>Simplify mode (alts/hedges)</span>
                       <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30">
                         Advanced
                       </span>
                     </label>
                   </div>
                   <p className="text-xs text-zinc-400 mt-1">
-                    Simplify mode uses building-block ETFs with options overlays and alternative strategies.
+                    Simplify mode uses building-block ETFs with alternative strategies.
                   </p>
                 </div>
               )}

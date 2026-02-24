@@ -1,5 +1,17 @@
 # DECISIONS
 
+## 2026-01-21 — Removed convex equity; merged into core equity
+Choice:
+- Removed convex_equity sleeve from model portfolios and builder entirely.
+- Reallocated 100% of convex_equity weight into core_equity across all risk models (r1–r5).
+- Removed convex_equity from sleeve definitions, types, Schwab lineups, and Simplify ETFs.
+
+Why:
+- Options-overlay ETFs are too complex for normal Voya users.
+- Simplifies both /models display and builder output; no display-only merging needed.
+
+---
+
 ## 2026-01-21 — Models page is implementable templates (platform-specific)
 Choice:
 - /models shows implementable templates using real OKC Voya funds, not engine sleeve allocations.
@@ -11,15 +23,10 @@ Why:
 
 ---
 
-## 2026-01-21 — Convex Equity omitted from models display; builder removal deferred to separate PR
+## 2026-01-21 — Convex Equity omitted from models display (superseded by full removal)
 Choice:
-- Convex Equity (options-overlay ETFs) does not appear on /models.
-- Display-only: Schwab slice merges convex_equity weight into core_equity for templates.
-- Builder and lib/modelPortfolios.ts unchanged; convex removal from builder is a separate PR.
-
-Why:
-- Too complex for normal Voya users; simplifies models page.
-- Isolates display change from engine change for safer rollout.
+- Initially: display-only merge of convex_equity into core_equity on /models.
+- Superseded by: full removal of convex_equity from model portfolios and builder (see above).
 
 ---
 

@@ -6,11 +6,6 @@ export const sleeveDefinitions: Record<string, Omit<Sleeve, 'weight'>> = {
     name: 'Core Equity (Value & Quality)',
     description: 'Broad market equity exposure with a focus on value and quality factors. Provides foundational growth potential while maintaining some defensive characteristics.',
   },
-  convex_equity: {
-    id: 'convex_equity',
-    name: 'Convex Equity (Options-Overlay ETFs)',
-    description: 'Equity ETFs that embed options strategies to provide downside protection and enhanced risk-adjusted returns. No direct options trading required.',
-  },
   gold: {
     id: 'gold',
     name: 'Gold',
@@ -65,12 +60,6 @@ export const exampleETFs: ExampleETF[] = [
     name: 'iShares MSCI USA Quality Factor ETF',
     description: 'Quality-focused equity exposure',
     sleeveId: 'core_equity',
-  },
-  {
-    ticker: 'SPYC',
-    name: 'Simplify US Equity PLUS Convexity ETF',
-    description: 'S&P 500 exposure with built-in options overlay for downside protection',
-    sleeveId: 'convex_equity',
   },
   {
     ticker: 'GLDM',

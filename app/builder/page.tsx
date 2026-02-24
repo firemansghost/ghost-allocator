@@ -50,7 +50,7 @@ const riskDescriptions: Record<number, string> = {
   1: 'Lower risk, higher allocation to defensive assets and cash. Suitable for those near retirement or with low risk tolerance.',
   2: 'Conservative allocation focused on capital preservation with income generation.',
   3: 'Balanced allocation across asset classes. Designed for investors with medium-term horizons and moderate risk tolerance.',
-  4: 'Higher equity allocation with strategic use of convexity and real assets.',
+  4: 'Higher equity allocation with strategic use of real assets.',
   5: 'Maximum equity allocation for investors with longer horizons and higher risk tolerance.',
 };
 

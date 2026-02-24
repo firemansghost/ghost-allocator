@@ -193,6 +193,39 @@ describe('Schwab Lineup Gold Tilt Tests', () => {
     }
   });
 
+  it('no convex_equity sleeve in lineup (removed from models)', () => {
+    const lineup = getStandardSchwabLineup(
+      sleeves,
+      riskLevel,
+      lineupStyle,
+      goldInstrument,
+      btcInstrument,
+      'none'
+    );
+    const convexSleeve = lineup.find((item) => item.id === 'convex_equity');
+    assert.strictEqual(convexSleeve, undefined, 'Convex equity sleeve should not exist');
+  });
+
+  it('lineup generation works for all risk levels (1-5)', () => {
+    const riskLevels: RiskLevel[] = [1, 2, 3, 4, 5];
+    for (const rl of riskLevels) {
+      const port = selectModelPortfolio(rl);
+      const lineup = getStandardSchwabLineup(
+        port.sleeves,
+        rl,
+        lineupStyle,
+        goldInstrument,
+        btcInstrument,
+        'none'
+      );
+      const total = lineup.reduce((sum, item) => sum + item.weight, 0);
+      assert(total > 99.9, `Risk ${rl}: total should be > 99.9%, got ${total}`);
+      assert(total < 100.1, `Risk ${rl}: total should be < 100.1%, got ${total}`);
+      const convexSleeve = lineup.find((item) => item.id === 'convex_equity');
+      assert.strictEqual(convexSleeve, undefined, `Risk ${rl}: convex_equity should not exist`);
+    }
+  });
+
   it('lineup weights sum to ~100%', () => {
     const tilts: GoldBtcTilt[] = ['none', 'gold10_btc5', 'gold15_btc5'];
     
