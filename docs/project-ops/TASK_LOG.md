@@ -1,5 +1,26 @@
 # TASK LOG
 
+## 2026-01-21 — /models now shows implementable Voya-only and Voya+Schwab templates
+Completed:
+- Rewrote /models to show implementable templates using real OKC Voya funds (lib/voya.ts)
+- Platform-first UI: tabs for "Voya Only" and "Voya + Schwab"
+- Voya-only: 3 models (Conservative / Moderate / Aggressive) with fund name, allocation %, role
+- Voya+Schwab: 3 models with both Voya slice and Schwab slice tables
+- Schwab slice display omits Convex Equity; weight merged into Core Equity for display only
+- CTAs: Build my portfolio (/onboarding), Learn (/learn)
+- Removed old r1–r5 sleeve-based view
+
+Changed:
+- /models is now implementable templates (platform-specific), not engine sleeve reference
+- Convex Equity does not appear on /models; builder unchanged (removal deferred to separate PR)
+- lib/modelPortfolios.ts unchanged; display-only logic in app/models
+
+Verification:
+- npm run build passes
+- No changes to builder output or GhostRegime
+
+---
+
 ## 2026-01-21 — /models now renders read-only templates from lib/modelPortfolios.ts
 Completed:
 - Rewrote app/models/page.tsx to pull from MODEL_PORTFOLIOS (lib/modelPortfolios.ts) instead of MODEL_TEMPLATES

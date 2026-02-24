@@ -1,5 +1,28 @@
 # DECISIONS
 
+## 2026-01-21 — Models page is implementable templates (platform-specific)
+Choice:
+- /models shows implementable templates using real OKC Voya funds, not engine sleeve allocations.
+- Platform-first: Voya-only and Voya+Schwab tabs with Conservative / Moderate / Aggressive per tab.
+
+Why:
+- Normal Voya users need actionable fund lists, not abstract sleeve weights.
+- Reduces confusion; aligns with builder output (Voya slice + Schwab slice).
+
+---
+
+## 2026-01-21 — Convex Equity omitted from models display; builder removal deferred to separate PR
+Choice:
+- Convex Equity (options-overlay ETFs) does not appear on /models.
+- Display-only: Schwab slice merges convex_equity weight into core_equity for templates.
+- Builder and lib/modelPortfolios.ts unchanged; convex removal from builder is a separate PR.
+
+Why:
+- Too complex for normal Voya users; simplifies models page.
+- Isolates display change from engine change for safer rollout.
+
+---
+
 ## 2026-01-21 — GhostRegime is posture/education overlay (not builder allocation driver) for now
 Choice:
 - Builder remains stable; GhostRegime provides risk posture and education only.
