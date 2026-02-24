@@ -4,7 +4,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { GlassCard } from '@/components/GlassCard';
 import { buildVoyaImplementation } from '@/lib/voya';
@@ -85,8 +85,22 @@ function getDisplaySchwabLineup(riskLevel: RiskLevel) {
   );
 }
 
+/** Desktop (768px+): first card open by default. Mobile: closed. Avoids hydration mismatch. */
+function useFirstCardDefaultOpen() {
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 768px)');
+    setOpen(mq.matches);
+    const handler = () => setOpen(mq.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+  return open;
+}
+
 export function ModelsPageContent() {
   const [tab, setTab] = useState<'voya_only' | 'voya_schwab'>('voya_only');
+  const firstCardOpen = useFirstCardDefaultOpen();
 
   return (
     <div className="space-y-8">
@@ -152,46 +166,60 @@ export function ModelsPageContent() {
       {/* Tab content */}
       {tab === 'voya_only' && (
         <div className="space-y-4">
-          {MODEL_TEMPLATES.map(({ name, riskLevel }) => {
+          {MODEL_TEMPLATES.map(({ name, riskLevel }, index) => {
             const impl = buildVoyaImplementation(minimalAnswers('voya_only'), riskLevel);
             const mix = impl.mix ?? [];
             const total = mix.reduce((s, m) => s + m.allocationPct, 0);
+            const isFirst = index === 0;
 
             return (
-              <GlassCard key={name} className="p-5 sm:p-6">
-                <h3 className="text-sm font-semibold text-zinc-50 mb-4">{name}</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[280px] text-xs">
-                    <thead>
-                      <tr className="border-b border-zinc-700">
-                        <th className="text-left py-2 pr-4 font-semibold text-zinc-200">
-                          Fund name
-                        </th>
-                        <th className="text-right py-2 pr-4 font-semibold text-zinc-200">
-                          Allocation %
-                        </th>
-                        <th className="text-left py-2 font-semibold text-zinc-200">Role</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {mix.map((item) => (
-                        <tr key={item.id} className="border-b border-zinc-800">
-                          <td className="py-2 pr-4 text-zinc-300">{item.name}</td>
-                          <td className="py-2 pr-4 text-right text-amber-300 font-medium">
-                            {item.allocationPct}%
-                          </td>
-                          <td className="py-2 text-zinc-400">{item.role}</td>
+              <details
+                key={name}
+                open={isFirst ? firstCardOpen : undefined}
+                className="group rounded-2xl border border-amber-50/15 bg-neutral-900/60 backdrop-blur-xl shadow-[0_18px_45px_rgba(0,0,0,0.85)]"
+              >
+                <summary className="cursor-pointer list-none p-5 sm:p-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded-2xl">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-zinc-50">{name}</h3>
+                    <span className="text-xs text-zinc-500 group-open:rotate-90 transition-transform">
+                      ▶
+                    </span>
+                  </div>
+                </summary>
+                <div className="px-5 sm:px-6 pb-5 sm:pb-6 pt-0">
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[280px] text-xs">
+                      <thead>
+                        <tr className="border-b border-zinc-700">
+                          <th className="text-left py-2 pr-4 font-semibold text-zinc-200">
+                            Fund name
+                          </th>
+                          <th className="text-right py-2 pr-4 font-semibold text-zinc-200">
+                            Allocation %
+                          </th>
+                          <th className="text-left py-2 font-semibold text-zinc-200">Role</th>
                         </tr>
-                      ))}
-                      <tr className="border-t border-zinc-700 font-semibold">
-                        <td className="py-2 pr-4 text-zinc-200">Total</td>
-                        <td className="py-2 pr-4 text-right text-amber-300">{total}%</td>
-                        <td className="py-2" />
-                      </tr>
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {mix.map((item) => (
+                          <tr key={item.id} className="border-b border-zinc-800">
+                            <td className="py-2 pr-4 text-zinc-300">{item.name}</td>
+                            <td className="py-2 pr-4 text-right text-amber-300 font-medium">
+                              {item.allocationPct}%
+                            </td>
+                            <td className="py-2 text-zinc-400">{item.role}</td>
+                          </tr>
+                        ))}
+                        <tr className="border-t border-zinc-700 font-semibold">
+                          <td className="py-2 pr-4 text-zinc-200">Total</td>
+                          <td className="py-2 pr-4 text-right text-amber-300">{total}%</td>
+                          <td className="py-2" />
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </GlassCard>
+              </details>
             );
           })}
         </div>
@@ -199,26 +227,38 @@ export function ModelsPageContent() {
 
       {tab === 'voya_schwab' && (
         <div className="space-y-4">
-          {MODEL_TEMPLATES.map(({ name, riskLevel }) => {
+          {MODEL_TEMPLATES.map(({ name, riskLevel }, index) => {
             const impl = buildVoyaImplementation(minimalAnswers('voya_and_schwab'), riskLevel);
             const voyaMix = impl.mix ?? [];
             const voyaTotal = voyaMix.reduce((s, m) => s + m.allocationPct, 0);
             const schwabLineup = getDisplaySchwabLineup(riskLevel);
             const schwabTotal = schwabLineup.reduce((s, i) => s + i.weight, 0);
+            const isFirst = index === 0;
 
             return (
-              <GlassCard key={name} className="p-5 sm:p-6 space-y-5">
-                <h3 className="text-sm font-semibold text-zinc-50">{name}</h3>
+              <details
+                key={name}
+                open={isFirst ? firstCardOpen : undefined}
+                className="group rounded-2xl border border-amber-50/15 bg-neutral-900/60 backdrop-blur-xl shadow-[0_18px_45px_rgba(0,0,0,0.85)]"
+              >
+                <summary className="cursor-pointer list-none p-5 sm:p-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded-2xl">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-zinc-50">{name}</h3>
+                    <span className="text-xs text-zinc-500 group-open:rotate-90 transition-transform">
+                      ▶
+                    </span>
+                  </div>
+                </summary>
+                <div className="px-5 sm:px-6 pb-5 sm:pb-6 pt-0 space-y-5">
+                  <p className="text-[11px] text-zinc-500">
+                    These are inside-slice allocations. Use the Builder to get your actual Voya vs
+                    Schwab split.
+                  </p>
 
-                <p className="text-[11px] text-zinc-500 italic">
-                  Your actual Voya vs Schwab split depends on your questionnaire (the Builder
-                  calculates it). This page shows what each slice would hold.
-                </p>
-
-                <div>
-                  <h4 className="text-xs font-semibold text-zinc-300 mb-2">
-                    Voya slice (percent of Voya portion)
-                  </h4>
+                  <div>
+                    <h4 className="text-xs font-semibold text-zinc-300 mb-2">
+                      Voya slice (percent of Voya portion)
+                    </h4>
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[280px] text-xs">
                       <thead>
@@ -294,7 +334,8 @@ export function ModelsPageContent() {
                     </table>
                   </div>
                 </div>
-              </GlassCard>
+              </div>
+            </details>
             );
           })}
         </div>
