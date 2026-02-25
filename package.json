@@ -7,7 +7,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "test": "tsx lib/ghostregime/__tests__/regimeCore.test.ts",
     "test:lineups": "tsx lib/schwabLineups.test.ts",
     "test:parity": "tsx lib/ghostregime/parity/__tests__/kissAlloc.test.ts",
@@ -52,7 +53,11 @@
     "typescript": "^5.9.3"
   },
   "devDependencies": {
+    "@eslint/js": "^9.17.0",
     "@tailwindcss/postcss": "^4.1.17",
+    "eslint": "^9.17.0",
+    "eslint-config-next": "^16.0.7",
+    "eslint-config-next-flat": "^0.1.2",
     "tsx": "^4.21.0"
   }
 }

@@ -106,7 +106,7 @@ function walkDir(dir, baseDir = dir) {
         } else if (stat.isFile()) {
           issues.push(...checkFile(fullPath));
         }
-      } catch (err) {
+      } catch {
         // Skip files we can't read
       }
     }

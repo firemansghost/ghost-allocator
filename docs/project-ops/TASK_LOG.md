@@ -1,5 +1,40 @@
 # TASK LOG
 
+## 2026-01-21 — SSR initial GhostRegime snapshot
+Completed:
+- Server fetches health + today at request time; passes to GhostRegimeClient for immediate first paint
+- Created lib/server/baseUrl.ts (headers-based base URL for server fetch)
+- app/ghostregime/page.tsx: server component; fetches with revalidate 60; handles NOT_READY/NOT_SEEDED
+- app/ghostregime/GhostRegimeClient.tsx: client component with initialHealth, initialToday, initialNotSeeded, initialError props
+- Client skips fetch when SSR data present and no asof/prev params; asof/prev logic unchanged
+
+Changed:
+- /ghostregime no longer shows "Loading..." as sole first paint; content renders from SSR data
+- Metadata exported from server page
+
+Verification:
+- npm run build passes
+- npm run lint passes
+
+---
+
+## 2026-01-21 — Migrate from next lint to ESLint CLI (Next.js 16)
+Completed:
+- Next.js 16 removed `next lint`; migrated to `eslint .` using ESLint 9 flat config
+- Added eslint.config.mjs using eslint-config-next-flat (FlatCompat with eslint-config-next had circular structure issues)
+- Scripts: `lint` = `eslint .`, `lint:fix` = `eslint . --fix`
+- Removed .eslintrc.json; fixed 2 lint errors in scripts (unused vars)
+
+Changed:
+- package.json: lint scripts, devDependencies (eslint, @eslint/js, eslint-config-next, eslint-config-next-flat)
+- eslint.config.mjs: flat config with ignores, js.configs.recommended, next preset
+
+Verification:
+- npm run lint passes
+- npm run build passes
+
+---
+
 ## 2026-01-21 — Cash sleeve guidance: add optional SGOV/BIL suggestion
 Completed:
 - Cash sleeve in Schwab lineup now shows two options: Option A (default) leave as cash; Option B park in ultra-short Treasury ETF (SGOV/BIL)
