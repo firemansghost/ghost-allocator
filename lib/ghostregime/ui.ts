@@ -1858,12 +1858,13 @@ export function computeAgreementDelta(
     const deltaPct = currentRiskAgreement.pct - prevRiskAgreement.pct;
     const curr = `${currentRiskAgreement.agree}/${currentRiskAgreement.total} (${currentRiskAgreement.pct.toFixed(0)}%)`;
     const prev = `${prevRiskAgreement.agree}/${prevRiskAgreement.total} (${prevRiskAgreement.pct.toFixed(0)}%)`;
+    // Arrow always shows chronological order: prev (old) → curr (new)
     const line =
       Math.abs(deltaPct) < 0.5
         ? `${AGREEMENT_TREND_RISK_PREFIX} ${AGREEMENT_TREND_UNCHANGED}: ${curr}.`
         : deltaPct > 0
           ? `${AGREEMENT_TREND_RISK_PREFIX} ${AGREEMENT_TREND_IMPROVED}: ${prev} → ${curr}.`
-          : `${AGREEMENT_TREND_RISK_PREFIX} ${AGREEMENT_TREND_WORSENED}: ${curr} → ${prev}.`;
+          : `${AGREEMENT_TREND_RISK_PREFIX} ${AGREEMENT_TREND_WORSENED}: ${prev} → ${curr}.`;
     result.risk = {
       current: currentRiskAgreement,
       prev: prevRiskAgreement,
@@ -1886,12 +1887,13 @@ export function computeAgreementDelta(
     const deltaPct = currentInflAgreement.pct - prevInflAgreement.pct;
     const curr = `${currentInflAgreement.agree}/${currentInflAgreement.total} (${currentInflAgreement.pct.toFixed(0)}%)`;
     const prev = `${prevInflAgreement.agree}/${prevInflAgreement.total} (${prevInflAgreement.pct.toFixed(0)}%)`;
+    // Arrow always shows chronological order: prev (old) → curr (new)
     const line =
       Math.abs(deltaPct) < 0.5
         ? `${AGREEMENT_TREND_INFLATION_PREFIX} ${AGREEMENT_TREND_UNCHANGED}: ${curr}.`
         : deltaPct > 0
           ? `${AGREEMENT_TREND_INFLATION_PREFIX} ${AGREEMENT_TREND_IMPROVED}: ${prev} → ${curr}.`
-          : `${AGREEMENT_TREND_INFLATION_PREFIX} ${AGREEMENT_TREND_WORSENED}: ${curr} → ${prev}.`;
+          : `${AGREEMENT_TREND_INFLATION_PREFIX} ${AGREEMENT_TREND_WORSENED}: ${prev} → ${curr}.`;
     result.inflation = {
       current: currentInflAgreement,
       prev: prevInflAgreement,

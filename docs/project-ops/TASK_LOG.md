@@ -1,5 +1,17 @@
 # TASK LOG
 
+## 2026-01-21 — Agreement delta tests; fix improved/worsened arrow
+Completed:
+- lib/ghostregime/__tests__/agreementDelta.test.ts: tests for IMPROVED, WORSENED, UNCHANGED (exact + threshold)
+- Fixed WORSENED arrow: was curr→prev (wrong); now prev→curr (chronological) for both improved and worsened
+- package.json: test:ghostregime-ui script
+
+Verification:
+- npm run test:ghostregime-ui passes
+- npm run build, npm run lint
+
+---
+
 ## 2026-01-21 — Copy summary button on GhostRegime
 Completed:
 - Added "Copy summary" button to toolbar; copies concise text summary to clipboard
