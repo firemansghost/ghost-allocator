@@ -35,6 +35,12 @@
   - Weights sum ~100%
   - Schwab sleeve logic stays consistent (Gold + Commodities separate)
 
+### 5b) Builder smoke test (automated)
+- npm run smoke:builder
+  - Model portfolio sleeve weights sum ~100%, no negatives, no duplicate sleeve IDs
+  - Schwab lineups (standard + simplify): no duplicate tickers (standard only), weights sum ~100%, valid sleeve IDs
+  - Voya implementation mixes: all fund IDs valid, weights sum ~100%
+
 ### 6) Reference data hygiene (automated)
 - npm run check:no-reference-data
   - Ensures no reference files are tracked in git

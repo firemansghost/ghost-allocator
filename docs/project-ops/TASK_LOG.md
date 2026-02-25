@@ -1,5 +1,22 @@
 # TASK LOG
 
+## 2026-01-21 — Builder smoke test (guardrails)
+Completed:
+- Added scripts/smoke-builder.ts: validates model portfolio weights, Schwab lineup sanity, Voya fund ID integrity
+- npm run smoke:builder: runs without secrets or network; Windows/CI friendly
+- Checks: sleeve weights sum ~100%, no negatives, no duplicate sleeve IDs; Schwab lineups (standard + simplify) weights ~100%, no duplicate tickers (standard only); Voya mixes reference valid fund IDs, weights ~100%
+
+Changed:
+- package.json: smoke:builder script
+- docs/project-ops/CHECKS.md: added Builder smoke test under Verification Steps
+
+Verification:
+- npm run build passes
+- npm run lint passes
+- npm run smoke:builder passes
+
+---
+
 ## 2026-01-21 — SSR initial GhostRegime snapshot
 Completed:
 - Server fetches health + today at request time; passes to GhostRegimeClient for immediate first paint
