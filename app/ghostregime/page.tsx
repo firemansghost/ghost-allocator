@@ -33,8 +33,10 @@ export default async function GhostRegimePage() {
       fetch(`${baseUrl}/api/ghostregime/today`, FETCH_OPTIONS),
     ]);
 
-    if (healthRes.ok) {
-      initialHealth = await healthRes.json();
+    // Parse health even on 503 (NOT_READY) so badge can show status
+    const healthJson = await healthRes.json();
+    if (healthJson.status) {
+      initialHealth = healthJson;
     }
 
     if (todayRes.status === 503) {

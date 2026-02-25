@@ -1,5 +1,20 @@
 # TASK LOG
 
+## 2026-01-21 — Freshness Badge for GhostRegime
+Completed:
+- components/ghostregime/FreshnessBadge.tsx: reusable badge showing "Last updated: YYYY-MM-DD (UTC)" + status pill (OK=green, WARN=amber, NOT_READY=red)
+- GhostRegimeClient: badge rendered in hero strip (all states: success, notSeeded, loading, error) when health data available
+- Server page: parse health JSON even on 503 so NOT_READY status is passed for badge display
+
+Changed:
+- /ghostregime shows update freshness immediately (SSR-first) to reassure users data updates
+
+Verification:
+- npm run build
+- npm run lint
+
+---
+
 ## 2026-01-21 — Builder smoke test (guardrails)
 Completed:
 - Added scripts/smoke-builder.ts: validates model portfolio weights, Schwab lineup sanity, Voya fund ID integrity

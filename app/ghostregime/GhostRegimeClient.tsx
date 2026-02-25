@@ -19,6 +19,7 @@ import { ReceiptsSortToggle } from '@/components/ghostregime/ReceiptsSortToggle'
 import { ReceiptsSearchInput } from '@/components/ghostregime/ReceiptsSearchInput';
 import { ComparePanel } from '@/components/ghostregime/ComparePanel';
 import { GhostRegimeToolbar } from '@/components/ghostregime/GhostRegimeToolbar';
+import { FreshnessBadge } from '@/components/ghostregime/FreshnessBadge';
 import { ParityPanel } from '@/components/ghostregime/ParityPanel';
 import type { GhostRegimeRow, RegimeType } from '@/lib/ghostregime/types';
 import {
@@ -519,6 +520,16 @@ export function GhostRegimeClient({
           <p className="text-sm text-zinc-300">
             Market regime classification and allocation system
           </p>
+          {initialHealth && (
+            <div className="mt-2">
+              <FreshnessBadge
+                status={initialHealth.status}
+                latestDateUtc={initialHealth.freshness?.latest_date}
+                ageDays={initialHealth.freshness?.age_days}
+                message={initialHealth.message}
+              />
+            </div>
+          )}
         </header>
 
         <GlassCard className="p-6 border-amber-400/30 bg-amber-400/10">
@@ -553,6 +564,16 @@ export function GhostRegimeClient({
         <header className="space-y-2">
           <h1 className="text-2xl font-semibold tracking-tight">GhostRegime</h1>
           <p className="text-sm text-zinc-300">Loading...</p>
+          {initialHealth && (
+            <div className="mt-2">
+              <FreshnessBadge
+                status={initialHealth.status}
+                latestDateUtc={initialHealth.freshness?.latest_date}
+                ageDays={initialHealth.freshness?.age_days}
+                message={initialHealth.message}
+              />
+            </div>
+          )}
         </header>
       </div>
     );
@@ -566,6 +587,16 @@ export function GhostRegimeClient({
           <p className="text-sm text-zinc-300">
             Market regime classification and allocation system
           </p>
+          {initialHealth && (
+            <div className="mt-2">
+              <FreshnessBadge
+                status={initialHealth.status}
+                latestDateUtc={initialHealth.freshness?.latest_date}
+                ageDays={initialHealth.freshness?.age_days}
+                message={initialHealth.message}
+              />
+            </div>
+          )}
         </header>
         <GlassCard className="p-6 border-red-400/30 bg-red-400/10">
           <div className="flex items-start gap-3">
@@ -621,6 +652,16 @@ export function GhostRegimeClient({
           <p className="text-sm text-zinc-300 mt-1">
             Rules-based signals for adjusting portfolio exposure
           </p>
+          {healthStatus && (
+            <div className="mt-2">
+              <FreshnessBadge
+                status={healthStatus.status}
+                latestDateUtc={healthStatus.freshness?.latest_date}
+                ageDays={healthStatus.freshness?.age_days}
+                message={healthStatus.message}
+              />
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-3 flex-wrap">
           {/* Current Regime Chip */}
