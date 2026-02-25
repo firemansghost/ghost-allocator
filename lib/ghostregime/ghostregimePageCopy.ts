@@ -147,5 +147,7 @@ export const ASOF_INVALID_FALLBACK_HINT = 'Invalid as-of date — showing latest
 export const ASOF_NOT_FOUND_FALLBACK_HINT = 'No snapshot found for {date} — showing latest.';
 export const COPY_LINK_BUTTON = 'Copy link';
 export const COPY_LINK_COPIED = 'Copied';
+export const COPY_SUMMARY_BUTTON = 'Copy summary';
+export const COPY_SUMMARY_COPIED = 'Copied';
 export const BACK_TO_LATEST_LINK = 'Back to latest';
 

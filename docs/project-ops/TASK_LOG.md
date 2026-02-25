@@ -1,5 +1,18 @@
 # TASK LOG
 
+## 2026-01-21 — Copy summary button on GhostRegime
+Completed:
+- Added "Copy summary" button to toolbar; copies concise text summary to clipboard
+- Summary: GhostRegime — date (UTC) — status; Regime | Risk; Targets; Scales; Actual
+- buildShareSummary in lib/ghostregime/ui.ts; fallback to execCommand if clipboard API unavailable
+- "Copied" feedback for ~1.5s
+
+Verification:
+- npm run build
+- npm run lint
+
+---
+
 ## 2026-01-21 — GhostRegime copy + clarity polish (UI-only)
 Completed:
 - Removed redundant freshness: toolbar no longer shows "As of … Fresh"/"Stale data"; FreshnessBadge is sole indicator

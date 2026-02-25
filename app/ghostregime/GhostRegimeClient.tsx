@@ -27,6 +27,7 @@ import {
   formatScaleLabel,
   getCashSources,
   buildTodaySnapshotBlocks,
+  buildShareSummary,
   buildMicroFlowLine,
   REGIME_MAP,
   getRegimeMapPosition,
@@ -181,6 +182,7 @@ export function GhostRegimeClient({
   const [selectedRegime, setSelectedRegime] = useState<RegimeType | null>(null);
   const [copied, setCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [summaryCopied, setSummaryCopied] = useState(false);
   const [viewingSnapshot, setViewingSnapshot] = useState<string | null>(null);
   const [asofError, setAsofError] = useState<string | null>(null);
   const [showCompare, setShowCompare] = useState(false);
@@ -681,6 +683,32 @@ export function GhostRegimeClient({
         maxDate={data.date}
         asofError={asofError}
         linkCopied={linkCopied}
+        summaryCopied={summaryCopied}
+        onCopySummary={async () => {
+          const blocks = buildTodaySnapshotBlocks(data);
+          if (!blocks) return;
+          const summary = buildShareSummary(data, blocks, healthStatus);
+          try {
+            await navigator.clipboard.writeText(summary);
+            setSummaryCopied(true);
+            setTimeout(() => setSummaryCopied(false), 1500);
+          } catch {
+            const textarea = document.createElement('textarea');
+            textarea.value = summary;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+              document.execCommand('copy');
+              setSummaryCopied(true);
+              setTimeout(() => setSummaryCopied(false), 1500);
+            } catch {
+              // Ignore
+            }
+            document.body.removeChild(textarea);
+          }
+        }}
         onCopyLink={async () => {
           const asofDate = viewingSnapshot || data.date;
           const shareUrl = buildShareUrl(asofDate);

@@ -16,6 +16,8 @@ import {
   VIEWING_SNAPSHOT_TOOLTIP,
   COPY_LINK_BUTTON,
   COPY_LINK_COPIED,
+  COPY_SUMMARY_BUTTON,
+  COPY_SUMMARY_COPIED,
   BACK_TO_LATEST_LINK,
   COMPARE_LINK_LABEL,
   COMPARE_PREV_SNAPSHOT_TOOLTIP,
@@ -34,6 +36,10 @@ export interface GhostRegimeToolbarProps {
   linkCopied: boolean;
   onCopyLink: () => void;
   
+  // Copy summary state
+  summaryCopied: boolean;
+  onCopySummary: () => void;
+  
   // Compare state
   compareEnabled: boolean;
   onToggleCompare: () => void;
@@ -51,6 +57,8 @@ export function GhostRegimeToolbar({
   asofError,
   linkCopied,
   onCopyLink,
+  summaryCopied,
+  onCopySummary,
   compareEnabled,
   onToggleCompare,
   compareTriggerRef,
@@ -107,6 +115,15 @@ export function GhostRegimeToolbar({
           aria-label={linkCopied ? COPY_LINK_COPIED : COPY_LINK_BUTTON}
         >
           {linkCopied ? COPY_LINK_COPIED : COPY_LINK_BUTTON}
+        </button>
+        
+        {/* Copy summary button */}
+        <button
+          onClick={onCopySummary}
+          className="px-2 py-1 text-[10px] rounded border border-zinc-700 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800 hover:border-zinc-600 transition-colors"
+          aria-label={summaryCopied ? COPY_SUMMARY_COPIED : COPY_SUMMARY_BUTTON}
+        >
+          {summaryCopied ? COPY_SUMMARY_COPIED : COPY_SUMMARY_BUTTON}
         </button>
         
         {/* Compare to previous link */}

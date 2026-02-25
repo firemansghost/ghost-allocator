@@ -246,6 +246,43 @@ export function buildTodaySnapshotBlocks(data: GhostRegimeRow | null): {
   return { targets, scales, actual };
 }
 
+/** Status label for share summary (OK=Fresh, WARN=Stale, NOT_READY=Not ready) */
+function getStatusLabelForSummary(status: string): string {
+  switch (status) {
+    case 'OK': return 'Fresh';
+    case 'WARN': return 'Stale';
+    case 'NOT_READY': return 'Not ready';
+    default: return status;
+  }
+}
+
+/**
+ * Build share summary string for clipboard
+ * Format: GhostRegime — date (UTC) — status; Regime | Risk; Targets; Scales; Actual
+ */
+export function buildShareSummary(
+  data: GhostRegimeRow,
+  blocks: { targets: string; scales: string; actual: string },
+  healthStatus: { status: string; freshness?: { latest_date: string } } | null
+): string {
+  const statusLabel = healthStatus ? getStatusLabelForSummary(healthStatus.status) : 'Unknown';
+  const latestDate = healthStatus?.freshness?.latest_date;
+
+  const header = latestDate
+    ? `GhostRegime — ${latestDate} (UTC) — ${statusLabel}`
+    : `GhostRegime — ${statusLabel}`;
+
+  const lines = [
+    header,
+    `Regime: ${data.regime} | Risk: ${data.risk_regime}`,
+    `Targets: ${blocks.targets}`,
+    `Scales: ${blocks.scales}`,
+    `Actual: ${blocks.actual}`,
+  ];
+
+  return lines.join('\n');
+}
+
 /**
  * Build micro-flow line showing Targets → Scales → Actual → Cash
  * Format: "Targets (60/30/10) → Scales (full/full/half) → Actual (60/30/5) → Cash (5)"
