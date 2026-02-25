@@ -26,7 +26,7 @@ import {
   formatBucketUtilizationLine,
   formatScaleLabel,
   getCashSources,
-  buildTodaySnapshotLine,
+  buildTodaySnapshotBlocks,
   buildMicroFlowLine,
   REGIME_MAP,
   getRegimeMapPosition,
@@ -636,9 +636,6 @@ export function GhostRegimeClient({
     return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
   };
 
-  // Check if data is stale or old
-  const isStaleOrOld = data?.stale || (healthStatus?.status === 'WARN' && !healthStatus?.freshness?.is_fresh);
-  
   // Check flip watch status
   const flipWatchStatus = data?.flip_watch_status || 'NONE';
   const hasFlipWatch = flipWatchStatus !== 'NONE';
@@ -682,8 +679,6 @@ export function GhostRegimeClient({
         currentAsOf={data.date}
         viewingSnapshot={viewingSnapshot}
         maxDate={data.date}
-        isStaleOrOld={isStaleOrOld}
-        healthStatus={healthStatus}
         asofError={asofError}
         linkCopied={linkCopied}
         onCopyLink={async () => {
@@ -723,10 +718,14 @@ export function GhostRegimeClient({
       />
 
       {/* Today's Snapshot */}
-      {buildTodaySnapshotLine(data) && (
+      {(() => {
+        const blocks = buildTodaySnapshotBlocks(data);
+        return blocks ? (
         <div className="space-y-1">
-          <div className="text-sm text-zinc-300 leading-relaxed">
-            {buildTodaySnapshotLine(data)}
+          <div className="text-sm text-zinc-300 leading-relaxed font-mono space-y-0.5">
+            <div>Targets: {blocks.targets}</div>
+            <div>Scales: {blocks.scales}</div>
+            <div>Actual: {blocks.actual}</div>
           </div>
           {(() => {
             const riskAxisDirection = data.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
@@ -895,7 +894,8 @@ export function GhostRegimeClient({
             </div>
           )}
         </div>
-      )}
+        ) : null;
+      })()}
 
       {/* What Changed Since Last Update */}
       {historyChangeSummary !== null && (
@@ -1202,8 +1202,20 @@ export function GhostRegimeClient({
                     {LEGEND_TITLE}
                   </summary>
                   <div className="mt-2 space-y-1.5 text-[10px] text-zinc-500">
-                    <div><strong className="text-zinc-400">Agreement:</strong> {LEGEND_AGREEMENT}</div>
-                    <div><strong className="text-zinc-400">Coverage:</strong> {LEGEND_COVERAGE}</div>
+                    <div className="flex items-center gap-1">
+                      <strong className="text-zinc-400">Agreement:</strong>
+                      <Tooltip content={AGREEMENT_TOOLTIP}>
+                        <span className="cursor-help opacity-70 hover:opacity-100" aria-label={AGREEMENT_TOOLTIP}>ⓘ</span>
+                      </Tooltip>
+                      <span>{LEGEND_AGREEMENT}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <strong className="text-zinc-400">Coverage:</strong>
+                      <Tooltip content={COVERAGE_TOOLTIP}>
+                        <span className="cursor-help opacity-70 hover:opacity-100" aria-label={COVERAGE_TOOLTIP}>ⓘ</span>
+                      </Tooltip>
+                      <span>{LEGEND_COVERAGE}</span>
+                    </div>
                     <div><strong className="text-zinc-400">Confidence:</strong> {LEGEND_CONFIDENCE}</div>
                     <div><strong className="text-zinc-400">Conviction:</strong> {LEGEND_CONVICTION}</div>
                     <div><strong className="text-zinc-400">Crowded:</strong> {LEGEND_CROWDED}</div>
@@ -1558,20 +1570,29 @@ export function GhostRegimeClient({
         </ul>
       </GlassCard>
 
-      {/* Use This Signal in Portfolio - Coming Soon */}
+      {/* Use This Signal - Posture guidance */}
       <GlassCard className="p-6 border-amber-400/30 bg-amber-400/5">
         <h2 className="text-sm font-semibold text-zinc-50 mb-3">Use This Signal in Your Portfolio</h2>
-        <p className="text-xs text-zinc-300 leading-relaxed mb-4">
-          Soon you'll be able to apply GhostRegime signals to model portfolios. Pick a template, 
-          map it to your 457 fund menu, and follow the target/actual exposures with simple rebalance steps.
+        <p className="text-xs text-zinc-300 leading-relaxed mb-3">
+          For now: use GhostRegime as a posture check.
         </p>
-        <button
-          disabled
-          className="rounded-md bg-zinc-800 text-zinc-500 px-4 py-2 text-xs font-medium cursor-not-allowed min-h-[44px]"
-          aria-label="Apply to a Model Portfolio (Coming Soon)"
-        >
-          Apply to a Model Portfolio (Coming Soon)
-        </button>
+        <p className="text-xs text-zinc-300 leading-relaxed mb-4">
+          If it flips Risk Off, consider applying it to new contributions before making big rebalance moves.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/onboarding"
+            className="rounded-md bg-amber-400/20 border border-amber-400/40 text-amber-300 px-4 py-2 text-xs font-medium hover:bg-amber-400/30 transition min-h-[44px] flex items-center"
+          >
+            Build a portfolio →
+          </Link>
+          <Link
+            href="/models"
+            className="rounded-md border border-zinc-600 text-zinc-300 px-4 py-2 text-xs font-medium hover:bg-zinc-800 hover:border-zinc-500 transition min-h-[44px] flex items-center"
+          >
+            View templates →
+          </Link>
+        </div>
       </GlassCard>
 
       {/* Advanced Details Toggle */}

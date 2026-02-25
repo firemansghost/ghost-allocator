@@ -1,5 +1,39 @@
 # TASK LOG
 
+## 2026-01-21 — GhostRegime copy + clarity polish (UI-only)
+Completed:
+- Removed redundant freshness: toolbar no longer shows "As of … Fresh"/"Stale data"; FreshnessBadge is sole indicator
+- Agreement change wording: "unchanged"/"improved"/"worsened" with correct X → Y format (was "about the same")
+- Agreement/Coverage tooltips: added ⓘ with "How many available signals vote the same way today" and "Signals available / signals expected (some can be missing)"
+- Use This Signal card: posture guidance ("use as posture check", "consider applying to new contributions before big rebalance"); Build portfolio + View templates links; removed Coming Soon button
+- Targets/Scales/Actual: reformatted to 3-line block (Targets, Scales, Actual)
+
+Changed:
+- GhostRegimeToolbar: removed isStaleOrOld, healthStatus props; removed formatDate
+- lib/ghostregime/ui.ts: computeAgreementDelta line format; buildTodaySnapshotBlocks; formatAgreementBadge tooltip
+- lib/ghostregime/ghostregimePageCopy.ts: agreement/coverage tooltips; trend constants
+
+Verification:
+- npm run build
+- npm run lint
+
+---
+
+## 2026-01-21 — Smoke pages script (routes + GhostRegime APIs)
+Completed:
+- scripts/smoke-pages.ts: fetches key routes (200) and GhostRegime APIs (200 or 503 with NOT_READY/NOT_SEEDED)
+- Args: --base-url (default localhost:3000), --timeout-ms (default 10000)
+- Does not start server; assumes user/CI starts it
+- package.json: smoke:pages script
+- CHECKS.md: 5c) Smoke pages section
+
+Verification:
+- npm run build
+- npm run lint
+- With dev server: npm run smoke:pages -- --base-url http://localhost:3000
+
+---
+
 ## 2026-01-21 — Freshness Badge for GhostRegime
 Completed:
 - components/ghostregime/FreshnessBadge.tsx: reusable badge showing "Last updated: YYYY-MM-DD (UTC)" + status pill (OK=green, WARN=amber, NOT_READY=red)

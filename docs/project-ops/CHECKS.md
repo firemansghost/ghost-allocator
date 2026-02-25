@@ -41,6 +41,11 @@
   - Schwab lineups (standard + simplify): no duplicate tickers (standard only), weights sum ~100%, valid sleeve IDs
   - Voya implementation mixes: all fund IDs valid, weights sum ~100%
 
+### 5c) Smoke pages (routes + GhostRegime APIs)
+- Start server: `npm run dev` OR `npm run build && npm start`
+- Run: `npm run smoke:pages -- --base-url http://localhost:3000`
+- Validates key page routes (200) and GhostRegime APIs (200 or 503 with NOT_READY/NOT_SEEDED)
+
 ### 6) Reference data hygiene (automated)
 - npm run check:no-reference-data
   - Ensures no reference files are tracked in git

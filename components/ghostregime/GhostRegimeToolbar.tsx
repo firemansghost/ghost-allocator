@@ -11,14 +11,6 @@
 
 import { Tooltip } from '@/components/Tooltip';
 import { MethodologyPillLink } from '@/components/ghostregime/MethodologyPillLink';
-
-// Format date string (YYYY-MM-DD) to readable format
-function formatDate(dateStr: string): string {
-  // Parse YYYY-MM-DD as local calendar date to avoid timezone shift
-  const [y, m, d] = dateStr.split('-').map(Number);
-  const date = new Date(y, m - 1, d);
-  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-}
 import {
   VIEWING_SNAPSHOT_LABEL,
   VIEWING_SNAPSHOT_TOOLTIP,
@@ -36,15 +28,6 @@ export interface GhostRegimeToolbarProps {
   viewingSnapshot: string | null; // The snapshot date if viewing one, null if latest
   maxDate: string; // Maximum date for date picker (usually latest date)
   
-  // Status indicators (left side)
-  isStaleOrOld: boolean;
-  healthStatus?: {
-    status: string;
-    freshness?: {
-      age_days: number;
-      is_fresh: boolean;
-    };
-  } | null;
   asofError: string | null; // Error message if asof param was invalid
   
   // Copy link state
@@ -65,8 +48,6 @@ export function GhostRegimeToolbar({
   currentAsOf,
   viewingSnapshot,
   maxDate,
-  isStaleOrOld,
-  healthStatus,
   asofError,
   linkCopied,
   onCopyLink,
@@ -78,9 +59,8 @@ export function GhostRegimeToolbar({
 }: GhostRegimeToolbarProps) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-      {/* Left side: Status indicators */}
+      {/* Left side: Snapshot indicator only (freshness is in FreshnessBadge) */}
       <div className="flex items-center gap-4 text-xs text-zinc-400 flex-wrap">
-        <span>As of {formatDate(currentAsOf)}</span>
         {viewingSnapshot && (
           <Tooltip content={VIEWING_SNAPSHOT_TOOLTIP}>
             <span className="inline-flex items-center gap-1 px-2 py-1 rounded border border-amber-400/20 bg-amber-400/5 text-amber-300/80">
@@ -88,26 +68,6 @@ export function GhostRegimeToolbar({
               <span className="font-mono">{viewingSnapshot}</span>
             </span>
           </Tooltip>
-        )}
-        {!viewingSnapshot && isStaleOrOld && (
-          <span className="inline-flex items-center gap-1 px-2 py-1 rounded border border-amber-400/30 bg-amber-400/10 text-amber-300">
-            <span>⚠️</span>
-            <span>Stale data</span>
-            {healthStatus?.freshness && !healthStatus.freshness.is_fresh && (
-              <span className="text-[10px]">({healthStatus.freshness.age_days} days old)</span>
-            )}
-          </span>
-        )}
-        {!viewingSnapshot && !isStaleOrOld && healthStatus?.status === 'OK' && (
-          <span className="inline-flex items-center gap-1 text-green-400">
-            <span>✓</span>
-            <span>Fresh</span>
-          </span>
-        )}
-        {viewingSnapshot && (
-          <span className="inline-flex items-center gap-1 text-zinc-500">
-            <span>Snapshot</span>
-          </span>
         )}
         {asofError && (
           <span className="text-[10px] text-amber-400/80 italic">{asofError}</span>

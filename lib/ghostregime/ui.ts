@@ -46,9 +46,11 @@ export interface CompareBiggestChange {
 import {
   AGREEMENT_TREND_RISK_PREFIX,
   AGREEMENT_TREND_INFLATION_PREFIX,
-  AGREEMENT_TREND_CLEANER,
-  AGREEMENT_TREND_MIXED,
-  AGREEMENT_TREND_SAME,
+  AGREEMENT_TREND_UNCHANGED,
+  AGREEMENT_TREND_IMPROVED,
+  AGREEMENT_TREND_WORSENED,
+  AGREEMENT_TOOLTIP,
+  AGREEMENT_TOOLTIP_NA,
   CONVICTION_LABEL_PREFIX,
   CONVICTION_TOOLTIP,
   CONVICTION_TOOLTIP_SPICY,
@@ -202,6 +204,46 @@ export function buildTodaySnapshotLine(data: GhostRegimeRow | null): string | nu
   const cashPart = parseFloat(cash) > 0.1 ? ` + ${cash} cash` : '';
   
   return `Today: Targets ${stocksTarget}/${goldTarget}/${btcTarget}. Scales: ${scales} → Actual ${actuals}${cashPart}.`;
+}
+
+/** Short scale label for compact display: full, half, off */
+function formatScaleShort(scale: number): string {
+  if (scale === 1.0) return 'full';
+  if (scale === 0.5) return 'half';
+  if (scale === 0.0) return 'off';
+  return `${(scale * 100).toFixed(0)}%`;
+}
+
+/**
+ * Build Today's Snapshot as structured blocks for 3-line display
+ * Returns { targets, scales, actual } for compact formatting
+ */
+export function buildTodaySnapshotBlocks(data: GhostRegimeRow | null): {
+  targets: string;
+  scales: string;
+  actual: string;
+} | null {
+  if (!data) return null;
+
+  const stocksTarget = (data.stocks_target * 100).toFixed(0);
+  const goldTarget = (data.gold_target * 100).toFixed(0);
+  const btcTarget = (data.btc_target * 100).toFixed(0);
+
+  const stocksActual = (data.stocks_actual * 100).toFixed(0);
+  const goldActual = (data.gold_actual * 100).toFixed(0);
+  const btcActual = (data.btc_actual * 100).toFixed(0);
+  const cash = (data.cash * 100).toFixed(0);
+
+  const targets = `${stocksTarget}/${goldTarget}/${btcTarget}`;
+  const scales = [
+    `Stocks ${formatScaleShort(data.stocks_scale)}`,
+    `Gold ${formatScaleShort(data.gold_scale)}`,
+    `BTC ${formatScaleShort(data.btc_scale)}`,
+  ].join(' • ');
+  const cashPart = parseFloat(cash) > 0.1 ? ` + ${cash} cash` : '';
+  const actual = `${stocksActual}/${goldActual}/${btcActual}${cashPart}`;
+
+  return { targets, scales, actual };
 }
 
 /**
@@ -529,14 +571,14 @@ export function formatAgreementBadge(agreement: {
   if (agreement.total === 0) {
     return {
       label: 'Agreement: n/a',
-      tooltip: 'All signals were neutral today.',
+      tooltip: AGREEMENT_TOOLTIP_NA,
     };
   }
 
   const pctStr = agreement.pct !== null ? ` (${agreement.pct.toFixed(0)}%)` : '';
   return {
     label: `Agreement: ${agreement.agree}/${agreement.total}${pctStr}`,
-    tooltip: 'Agreement among non-zero signal votes. Not a probability.',
+    tooltip: AGREEMENT_TOOLTIP,
   };
 }
 
@@ -1777,9 +1819,14 @@ export function computeAgreementDelta(
     prevRiskAgreement.pct !== null
   ) {
     const deltaPct = currentRiskAgreement.pct - prevRiskAgreement.pct;
-    const descriptor =
-      deltaPct >= 20 ? AGREEMENT_TREND_CLEANER : deltaPct <= -20 ? AGREEMENT_TREND_MIXED : AGREEMENT_TREND_SAME;
-    const line = `${AGREEMENT_TREND_RISK_PREFIX} ${currentRiskAgreement.agree}/${currentRiskAgreement.total} (${currentRiskAgreement.pct.toFixed(0)}%) → ${prevRiskAgreement.agree}/${prevRiskAgreement.total} (${prevRiskAgreement.pct.toFixed(0)}%) (${descriptor})`;
+    const curr = `${currentRiskAgreement.agree}/${currentRiskAgreement.total} (${currentRiskAgreement.pct.toFixed(0)}%)`;
+    const prev = `${prevRiskAgreement.agree}/${prevRiskAgreement.total} (${prevRiskAgreement.pct.toFixed(0)}%)`;
+    const line =
+      Math.abs(deltaPct) < 0.5
+        ? `${AGREEMENT_TREND_RISK_PREFIX} ${AGREEMENT_TREND_UNCHANGED}: ${curr}.`
+        : deltaPct > 0
+          ? `${AGREEMENT_TREND_RISK_PREFIX} ${AGREEMENT_TREND_IMPROVED}: ${prev} → ${curr}.`
+          : `${AGREEMENT_TREND_RISK_PREFIX} ${AGREEMENT_TREND_WORSENED}: ${curr} → ${prev}.`;
     result.risk = {
       current: currentRiskAgreement,
       prev: prevRiskAgreement,
@@ -1800,9 +1847,14 @@ export function computeAgreementDelta(
     prevInflAgreement.pct !== null
   ) {
     const deltaPct = currentInflAgreement.pct - prevInflAgreement.pct;
-    const descriptor =
-      deltaPct >= 20 ? AGREEMENT_TREND_CLEANER : deltaPct <= -20 ? AGREEMENT_TREND_MIXED : AGREEMENT_TREND_SAME;
-    const line = `${AGREEMENT_TREND_INFLATION_PREFIX} ${currentInflAgreement.agree}/${currentInflAgreement.total} (${currentInflAgreement.pct.toFixed(0)}%) → ${prevInflAgreement.agree}/${prevInflAgreement.total} (${prevInflAgreement.pct.toFixed(0)}%) (${descriptor})`;
+    const curr = `${currentInflAgreement.agree}/${currentInflAgreement.total} (${currentInflAgreement.pct.toFixed(0)}%)`;
+    const prev = `${prevInflAgreement.agree}/${prevInflAgreement.total} (${prevInflAgreement.pct.toFixed(0)}%)`;
+    const line =
+      Math.abs(deltaPct) < 0.5
+        ? `${AGREEMENT_TREND_INFLATION_PREFIX} ${AGREEMENT_TREND_UNCHANGED}: ${curr}.`
+        : deltaPct > 0
+          ? `${AGREEMENT_TREND_INFLATION_PREFIX} ${AGREEMENT_TREND_IMPROVED}: ${prev} → ${curr}.`
+          : `${AGREEMENT_TREND_INFLATION_PREFIX} ${AGREEMENT_TREND_WORSENED}: ${curr} → ${prev}.`;
     result.inflation = {
       current: currentInflAgreement,
       prev: prevInflAgreement,

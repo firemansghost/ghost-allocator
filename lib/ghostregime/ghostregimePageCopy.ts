@@ -33,16 +33,16 @@ export const TOP_DRIVERS_NO_STRONG_DRIVERS = 'No strong drivers today. The model
 
 // Agreement/Confidence
 export const AGREEMENT_LABEL_PREFIX = 'Agreement:';
-export const AGREEMENT_TOOLTIP = 'Agreement among non-zero signal votes. Not a probability.';
+export const AGREEMENT_TOOLTIP = 'How many available signals vote the same way today.';
 export const AGREEMENT_TOOLTIP_NA = 'All signals were neutral today.';
 
 // Agreement Trend
 export const AGREEMENT_TREND_HEADER = 'Signal agreement';
-export const AGREEMENT_TREND_RISK_PREFIX = 'Risk agreement:';
-export const AGREEMENT_TREND_INFLATION_PREFIX = 'Inflation agreement:';
-export const AGREEMENT_TREND_CLEANER = 'cleaner';
-export const AGREEMENT_TREND_MIXED = 'more mixed';
-export const AGREEMENT_TREND_SAME = 'about the same';
+export const AGREEMENT_TREND_RISK_PREFIX = 'Risk agreement';
+export const AGREEMENT_TREND_INFLATION_PREFIX = 'Inflation agreement';
+export const AGREEMENT_TREND_UNCHANGED = 'unchanged';
+export const AGREEMENT_TREND_IMPROVED = 'improved';
+export const AGREEMENT_TREND_WORSENED = 'worsened';
 
 // Agreement History
 export const AGREEMENT_HISTORY_LABEL = 'Recent agreement';
@@ -53,7 +53,7 @@ export const AGREEMENT_HISTORY_INSUFFICIENT_HINT = 'Agreement history will appea
 // Confidence
 export const CONFIDENCE_LABEL_PREFIX = 'Confidence:';
 export const CONFIDENCE_TOOLTIP = 'Heuristic: agreement + breadth (coverage). Not a probability.';
-export const COVERAGE_TOOLTIP = 'Coverage = how many signals fired (non-neutral) out of total signals.';
+export const COVERAGE_TOOLTIP = 'Signals available / signals expected (some can be missing).';
 
 // Conviction
 export const CONVICTION_LABEL_PREFIX = 'Conviction:';
@@ -81,8 +81,8 @@ export const SHOW_ALL_TOGGLE = 'Show all';
 
 // Legend
 export const LEGEND_TITLE = 'What do these mean?';
-export const LEGEND_AGREEMENT = 'Agreement: How many non-zero signals agree with the axis direction.';
-export const LEGEND_COVERAGE = 'Coverage: How many signals fired (non-neutral) out of total signals.';
+export const LEGEND_AGREEMENT = 'How many available signals vote the same way today.';
+export const LEGEND_COVERAGE = 'Signals available / signals expected (some can be missing).';
 export const LEGEND_CONFIDENCE = 'Confidence: Heuristic combining agreement + coverage. Not a probability.';
 export const LEGEND_CONVICTION = 'Conviction: |net vote| per available signals. Strength indicator, not a forecast.';
 export const LEGEND_CROWDED = 'Crowded: Extreme conviction + high agreement. Could be clarity… or a crowded trade.';
