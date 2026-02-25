@@ -124,13 +124,13 @@ export default function LearnPage() {
             <GlassCard className="p-4 sm:p-5 transition transform hover:-translate-y-1 hover:border-amber-400/60">
               <h3 className="text-sm font-semibold text-zinc-50">Glossary</h3>
               <p className="mt-2 text-xs text-zinc-300 leading-relaxed mb-3">
-                Coming soon: definitions of key terms and concepts.
+                Definitions of key terms used across GhostRegime, Builder, and Learn.
               </p>
               <Link
                 href="/learn/glossary"
-                className="text-xs font-medium text-zinc-500 cursor-not-allowed"
+                className="text-xs font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
               >
-                Coming soon
+                Browse glossary →
               </Link>
             </GlassCard>
 

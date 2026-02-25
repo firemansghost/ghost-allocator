@@ -1,5 +1,20 @@
 # TASK LOG
 
+## 2026-01-21 — Glossary v1
+Completed:
+- lib/content/glossary.ts: types + GLOSSARY_TERMS (~35 entries); categories: Basics, Builder & 457, Bonds & Rates, Equities, Macro, GhostRegime
+- app/learn/glossary/page.tsx: server shell + client GlossaryContent with search, category filter, GlassCards
+- app/learn/page.tsx: Glossary card — active link "Browse glossary →", updated copy
+- components/GlassCard.tsx: optional id prop for anchor links
+- Copy-link button on each term card (window.location.origin + /learn/glossary#term-id)
+
+Verification:
+- npm run build
+- npm run lint
+- Manual: /learn/glossary loads, search filters terms, category filter works, mobile stacks, anchor links work
+
+---
+
 ## 2026-01-21 — Agreement delta tests; fix improved/worsened arrow
 Completed:
 - lib/ghostregime/__tests__/agreementDelta.test.ts: tests for IMPROVED, WORSENED, UNCHANGED (exact + threshold)
