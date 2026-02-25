@@ -1040,8 +1040,10 @@ export default function Builder() {
                       </div>
                     );
                   } else {
-                    // Render sleeve item
-                    if (!item.etfs || item.etfs.length === 0) return null;
+                    // Render sleeve item (including Cash and others with no ETFs)
+                    const hasEtfs = item.etfs && item.etfs.length > 0;
+                    const isCash =
+                      item.id === 'cash' || item.label?.toLowerCase().includes('cash');
                     return (
                       <div
                         key={item.id}
@@ -1051,28 +1053,67 @@ export default function Builder() {
                           {item.label} ({item.weight.toFixed(1)}%)
                         </h3>
                         <div className="space-y-3">
-                          {item.etfs.map((etf, idx) => (
-                            <div
-                              key={idx}
-                              className="pl-3 border-l-2 border-zinc-700"
-                            >
-                              <div className="flex items-baseline gap-2 mb-1">
-                                <span className="font-mono text-xs font-semibold">
-                                  {etf.ticker}
-                                </span>
-                                <span className="text-xs text-zinc-400">{etf.name}</span>
+                          {hasEtfs ? (
+                            item.etfs!.map((etf, idx) => (
+                              <div
+                                key={idx}
+                                className="pl-3 border-l-2 border-zinc-700"
+                              >
+                                <div className="flex items-baseline gap-2 mb-1">
+                                  <span className="font-mono text-xs font-semibold">
+                                    {etf.ticker}
+                                  </span>
+                                  <span className="text-xs text-zinc-400">{etf.name}</span>
+                                </div>
+                                <p className="text-xs text-zinc-300 leading-relaxed">
+                                  {etf.description}
+                                </p>
                               </div>
-                              <p className="text-xs text-zinc-300 leading-relaxed">
-                                {etf.description}
+                            ))
+                          ) : isCash ? (
+                            <div className="space-y-2 text-xs text-zinc-400">
+                              <p>
+                                <span className="font-medium text-zinc-300">Option A (default):</span>{' '}
+                                Leave this portion as cash in the Schwab account (settlement/sweep).
+                              </p>
+                              <p>
+                                <span className="font-medium text-zinc-300">Option B:</span> If you
+                                prefer an instrument, park it in an ultra-short Treasury ETF like
+                                SGOV or BIL.
+                              </p>
+                              <p className="text-[11px] text-zinc-500 italic">
+                                Note: ETFs can move slightly with rates and aren&apos;t the same as
+                                insured bank cash. Use what your plan allows.
                               </p>
                             </div>
-                          ))}
+                          ) : (
+                            <p className="text-xs text-zinc-400 italic">
+                              No example ETF listed for this sleeve.
+                            </p>
+                          )}
                         </div>
                       </div>
                     );
                   }
                 })}
               </div>
+              {standardSchwabLineup && standardSchwabLineup.length > 0 && (() => {
+                const schwabTotal =
+                  standardSchwabLineup.reduce((s, i) => s + i.weight, 0);
+                const diffFrom100 = Math.abs(schwabTotal - 100);
+                return (
+                  <div className="mt-3 pt-3 border-t border-zinc-700">
+                    <p className="text-xs font-semibold text-zinc-200">
+                      Total (Schwab slice): {schwabTotal.toFixed(1)}%
+                    </p>
+                    {diffFrom100 < 0.5 && diffFrom100 > 0.01 && (
+                      <p className="text-[11px] text-zinc-500 mt-0.5">
+                        Note: totals may differ slightly due to rounding.
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
               
               {/* Bonds FAQ */}
               <BondsFAQ />

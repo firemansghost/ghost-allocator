@@ -1,5 +1,30 @@
 # TASK LOG
 
+## 2026-01-21 — Cash sleeve guidance: add optional SGOV/BIL suggestion
+Completed:
+- Cash sleeve in Schwab lineup now shows two options: Option A (default) leave as cash; Option B park in ultra-short Treasury ETF (SGOV/BIL)
+- Added note on ETF vs insured bank cash
+
+Changed:
+- app/builder/page.tsx: Cash fallback copy only (UI/copy)
+
+---
+
+## 2026-01-21 — Fix Cash sleeve dropped from Schwab lineup display
+Completed:
+- Schwab lineup rendering no longer skips sleeves with no ETFs (e.g. Cash)
+- Sleeves with no ETFs now show: Cash → Options block (Option A: leave as cash; Option B: SGOV/BIL); others → "No example ETF listed for this sleeve."
+- Added Total (Schwab slice) row at bottom of lineup; optional rounding note when diff from 100% is small
+
+Changed:
+- app/builder/page.tsx: render all lineup items; fallback copy for empty ETFs; total row
+
+Verification:
+- npm run build passes
+- Cash sleeve visible; total shows ~100%
+
+---
+
 ## 2026-01-21 — Remove convex equity from model portfolios and builder
 Completed:
 - lib/modelPortfolios.ts: removed convex_equity sleeve; merged weight into core_equity for all r1–r5
