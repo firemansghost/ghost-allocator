@@ -75,6 +75,14 @@ export default function Learn457OKCPage() {
             <li>BrokerageLink rules (sweep timing, minimums, restrictions)</li>
             <li>Distribution rules (separation, withdrawals, penalties/conditions)</li>
           </ul>
+          <p className="mt-3">
+            <Link
+              href="/learn/457/docs-checklist"
+              className="text-xs font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
+            >
+              Use the Plan Docs Checklist to collect these →
+            </Link>
+          </p>
         </GlassCard>
 
         {/* Voya Menu Reality */}

@@ -139,18 +139,23 @@ export default function Learn457Page() {
 
         {/* OKC Playbook callout */}
         <GlassCard className="p-5 sm:p-6 border-amber-400/30">
-          <h2 className="text-lg font-semibold text-zinc-50">OKC Playbook Coming Soon</h2>
+          <h2 className="text-lg font-semibold text-zinc-50">OKC Playbook</h2>
           <p className="mt-2 text-sm text-zinc-300 leading-relaxed">
-            We're working on an OKC-specific guide that will cover the realities of the Voya menu, Schwab sweep
-            mechanics, and OKC-specific workflow tips. This will help you navigate the actual implementation
-            details for Oklahoma City firefighters.
+            An OKC-specific guide covering the Voya menu, Schwab sweep mechanics, and workflow tips for Oklahoma City
+            firefighters. The template is live; plan-doc details are pending.
           </p>
-          <div className="mt-4">
+          <div className="mt-4 flex flex-wrap gap-4">
             <Link
               href="/learn/457/okc"
               className="inline-flex items-center text-sm font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-2 py-1"
             >
-              Learn more about the OKC Playbook →
+              Open OKC Playbook →
+            </Link>
+            <Link
+              href="/learn/457/docs-checklist"
+              className="inline-flex items-center text-xs font-medium text-zinc-400 hover:text-zinc-300 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-2 py-1"
+            >
+              Plan docs checklist →
             </Link>
           </div>
         </GlassCard>

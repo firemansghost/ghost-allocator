@@ -1,5 +1,16 @@
 # TASK LOG
 
+## 2026-01-21 — 457 Plan Docs Checklist page
+Completed:
+- app/learn/457/docs-checklist/page.tsx: new page (Where to look, 7-doc checklist with extract + plug-into-OKC links, What to send, Next step CTA)
+- Links from /learn/457 (OKC Playbook card), /learn/457/okc (What we still need card), /learn (457 Playbook Browse card)
+- Sitemap: added /learn/457/docs-checklist (priority 0.65, monthly)
+- No plan-specific claims, no hardcoded IRS limits; verify current IRS limits mentioned only
+
+Verification: npm run build, npm run lint; manual: page loads, links work, sitemap includes it
+
+---
+
 ## 2026-01-21 — Lane B: OKC 457 playbook template-first scaffold
 Completed:
 - app/learn/457/okc/page.tsx: replaced placeholder with structured playbook (Quick Start, What we need from plan docs, Voya Menu Reality, Schwab Sweep Reality, Cadence + Discipline, Common Mistakes, Next step CTA)

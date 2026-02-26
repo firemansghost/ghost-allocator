@@ -87,12 +87,20 @@ export default function LearnPage() {
               <p className="mt-2 text-xs text-zinc-300 leading-relaxed mb-3">
                 Everything you need to know about 457(b) retirement plans.
               </p>
-              <Link
-                href="/learn/457"
-                className="text-xs font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
-              >
-                Read more →
-              </Link>
+              <div className="flex flex-wrap gap-2">
+                <Link
+                  href="/learn/457"
+                  className="text-xs font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
+                >
+                  Read more →
+                </Link>
+                <Link
+                  href="/learn/457/docs-checklist"
+                  className="text-xs font-medium text-zinc-400 hover:text-zinc-300 underline-offset-4 hover:underline"
+                >
+                  Plan docs checklist →
+                </Link>
+              </div>
             </GlassCard>
 
             <GlassCard className="p-4 sm:p-5 transition transform hover:-translate-y-1 hover:border-amber-400/60">
