@@ -560,8 +560,24 @@ export default function Builder() {
                         : `${item.allocationPct}% of Voya portion`}
                     </span>
                   </li>
-                ))}
+                  ))}
               </ul>
+              {voyaImplementation.mix && voyaImplementation.mix.length > 0 && (() => {
+                const voyaTotal = voyaImplementation.mix!.reduce((s, i) => s + i.allocationPct, 0);
+                const diffFrom100 = Math.abs(voyaTotal - 100);
+                return (
+                  <div className="mt-2 pt-2 border-t border-zinc-700">
+                    <p className="text-xs font-semibold text-zinc-200">
+                      Total (Voya): {voyaTotal.toFixed(1)}%
+                    </p>
+                    {diffFrom100 < 0.5 && diffFrom100 > 0.01 && (
+                      <p className="text-[11px] text-zinc-500 mt-0.5">
+                        Note: totals may differ slightly due to rounding.
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
               <p className="mt-1 text-[11px] text-zinc-500">
                 This mix represents ~100% of your 457 balance. Percentages are matched on role (growth vs defensive), not exact sleeve labels.
               </p>
@@ -836,8 +852,8 @@ export default function Builder() {
                     and inflation bucket.
                   </p>
                   <p className="text-[11px] text-zinc-400 mt-1">
-                    Percentages below are of the Voya slice only (about{' '}
-                    {platformSplit.targetVoyaPct}% of your 457).
+                    These are inside-slice allocations. Your overall split is{' '}
+                    {platformSplit.targetVoyaPct}% Voya / {platformSplit.targetSchwabPct}% Schwab.
                   </p>
                   {voyaImplementation.note && (
                     <div className="mt-2 p-2 bg-amber-500/10 border border-amber-500/20 rounded text-[11px] text-amber-200">
@@ -860,6 +876,22 @@ export default function Builder() {
                     </li>
                   ))}
                 </ul>
+                {voyaImplementation.mix && voyaImplementation.mix.length > 0 && (() => {
+                  const voyaTotal = voyaImplementation.mix!.reduce((s, i) => s + i.allocationPct, 0);
+                  const diffFrom100 = Math.abs(voyaTotal - 100);
+                  return (
+                    <div className="mt-2 pt-2 border-t border-zinc-700">
+                      <p className="text-xs font-semibold text-zinc-200">
+                        Total (Voya slice): {voyaTotal.toFixed(1)}%
+                      </p>
+                      {diffFrom100 < 0.5 && diffFrom100 > 0.01 && (
+                        <p className="text-[11px] text-zinc-500 mt-0.5">
+                          Note: totals may differ slightly due to rounding.
+                        </p>
+                      )}
+                    </div>
+                  );
+                })()}
               </>
             </GlassCard>
             </div>
@@ -947,6 +979,9 @@ export default function Builder() {
               <p className="text-xs text-zinc-300 leading-relaxed">
                 These example ETFs would apply to the Schwab portion of your account. This is for
                 illustration only, not a recommendation.
+              </p>
+              <p className="text-[11px] text-zinc-400 mt-1">
+                Schwab slice allocations (percent of your Schwab portion).
               </p>
               
               {/* Customize: Optional Tilts (Schwab only) */}

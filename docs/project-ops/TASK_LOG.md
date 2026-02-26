@@ -1,5 +1,32 @@
 # TASK LOG
 
+## 2026-01-21 — Learn Basics v1
+Completed:
+- app/learn/basics/page.tsx: replaced stub with 5 modules (behavior, fees, diversification, drawdowns, implementation)
+- Hero intro + mini-TOC with jump links
+- GlassCard modules with anchor ids; cross-links to Glossary, Builder, 457, Models
+- app/learn/page.tsx: Finance Basics card active (Browse basics →)
+- app/sitemap.ts: added /learn/basics
+
+Verification: npm run build, npm run lint; manual: TOC anchors, mobile layout, cross-links
+
+---
+
+## 2026-01-21 — Builder clarity: slice totals + inside-slice explainer
+Completed:
+- Voya+Schwab: "These are inside-slice allocations. Your overall split is X% Voya / Y% Schwab." above Voya table
+- Schwab: "Schwab slice allocations (percent of your Schwab portion)." above Schwab lineup
+- Total (Voya slice) row for Voya+Schwab path
+- Total (Voya) row for Voya-only path
+- Schwab total row unchanged (already present)
+
+Verification:
+- npm run build
+- npm run lint
+- Manual: Voya-only shows Total (Voya); Voya+Schwab shows explainer, Total (Voya slice), Total (Schwab slice)
+
+---
+
 ## 2026-01-21 — Glossary v1
 Completed:
 - lib/content/glossary.ts: types + GLOSSARY_TERMS (~35 entries); categories: Basics, Builder & 457, Bonds & Rates, Equities, Macro, GhostRegime
