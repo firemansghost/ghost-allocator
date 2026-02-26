@@ -22,38 +22,42 @@ export default function LearnBasicsPage() {
           </p>
         </GlassCard>
 
-        {/* Mini-TOC */}
-        <GlassCard className="p-5 sm:p-6">
-          <h2 className="text-sm font-semibold text-zinc-200 mb-3">Jump to</h2>
-          <ul className="space-y-1.5 text-xs text-zinc-300">
-            <li>
-              <a href="#behavior" className="text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline">
-                Behavior &gt; brilliance
-              </a>
-            </li>
-            <li>
-              <a href="#fees" className="text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline">
-                Fees matter
-              </a>
-            </li>
-            <li>
-              <a href="#diversification" className="text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline">
-                Diversification + rebalancing
-              </a>
-            </li>
-            <li>
-              <a href="#drawdowns" className="text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline">
-                Drawdowns + sequence risk
-              </a>
-            </li>
-            <li>
-              <a href="#implementation" className="text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline">
-                Implementation rules
-              </a>
-            </li>
-          </ul>
-        </GlassCard>
+        {/* TOC + modules: 2-col on desktop (sticky TOC), stack on mobile */}
+        <div className="md:flex md:gap-8 md:items-start">
+          <aside className="md:sticky md:top-24 md:w-52 md:shrink-0 mb-8 md:mb-0">
+            <GlassCard className="p-5 sm:p-6">
+              <h2 className="text-sm font-semibold text-zinc-200 mb-3">Jump to</h2>
+              <ul className="space-y-1.5 text-xs text-zinc-300">
+                <li>
+                  <a href="#behavior" className="text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline">
+                    Behavior &gt; brilliance
+                  </a>
+                </li>
+                <li>
+                  <a href="#fees" className="text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline">
+                    Fees matter
+                  </a>
+                </li>
+                <li>
+                  <a href="#diversification" className="text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline">
+                    Diversification + rebalancing
+                  </a>
+                </li>
+                <li>
+                  <a href="#drawdowns" className="text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline">
+                    Drawdowns + sequence risk
+                  </a>
+                </li>
+                <li>
+                  <a href="#implementation" className="text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline">
+                    Implementation rules
+                  </a>
+                </li>
+              </ul>
+            </GlassCard>
+          </aside>
 
+          <div className="flex-1 min-w-0 space-y-8">
         {/* Module 1: Behavior > brilliance */}
         <GlassCard id="behavior" className="p-5 sm:p-6 scroll-mt-24">
           <h2 className="text-lg font-semibold text-zinc-50">Behavior &gt; brilliance</h2>
@@ -208,6 +212,39 @@ export default function LearnBasicsPage() {
             </ul>
           </div>
         </GlassCard>
+
+        {/* Next step CTA */}
+        <GlassCard className="p-5 sm:p-6">
+          <h2 className="text-lg font-semibold text-zinc-50">Next step</h2>
+          <p className="mt-2 text-sm text-zinc-300 leading-relaxed mb-4">
+            You've got the basics. Now pick a plan you can actually follow.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/onboarding"
+              className="inline-flex items-center text-sm font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
+            >
+              Build your plan →
+            </Link>
+            <Link
+              href="/models"
+              className="inline-flex items-center text-sm font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
+            >
+              View templates →
+            </Link>
+          </div>
+          <p className="mt-3">
+            <Link
+              href="/learn/457#in-5-minutes"
+              className="text-xs font-medium text-zinc-400 hover:text-zinc-300 underline-offset-4 hover:underline"
+            >
+              457 in 5 minutes →
+            </Link>
+          </p>
+        </GlassCard>
+
+          </div>
+        </div>
 
         {/* Closing */}
         <p className="text-[10px] text-zinc-500 italic text-center">

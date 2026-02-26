@@ -1,5 +1,14 @@
 # TASK LOG
 
+## 2026-01-21 — Learn Browse reorder + Basics sticky TOC + Next step CTA
+Completed:
+- app/learn/page.tsx: reordered Browse cards (457 Playbook, 457 in 5 min, Finance Basics, Glossary, Masterclass, Why Rules Beat Vibes)
+- app/learn/basics/page.tsx: sticky TOC on desktop (md:sticky md:top-24), 2-col layout; Next step CTA GlassCard with Build your plan, View templates, 457 in 5 minutes links
+
+Verification: npm run build, npm run lint; manual: Browse order, TOC sticky on desktop, CTA links
+
+---
+
 ## 2026-01-21 — Learn Basics v1
 Completed:
 - app/learn/basics/page.tsx: replaced stub with 5 modules (behavior, fees, diversification, drawdowns, implementation)

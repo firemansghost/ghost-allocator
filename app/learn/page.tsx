@@ -96,15 +96,15 @@ export default function LearnPage() {
             </GlassCard>
 
             <GlassCard className="p-4 sm:p-5 transition transform hover:-translate-y-1 hover:border-amber-400/60">
-              <h3 className="text-sm font-semibold text-zinc-50">Masterclass</h3>
+              <h3 className="text-sm font-semibold text-zinc-50">457 in 5 Minutes</h3>
               <p className="mt-2 text-xs text-zinc-300 leading-relaxed mb-3">
-                Deep dives into money, banking, the Fed, and the global dollar system.
+                The fastest, no-BS explanation of how a 457(b) works.
               </p>
               <Link
-                href="/learn/masterclass"
+                href="/learn/457#in-5-minutes"
                 className="text-xs font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
               >
-                Browse →
+                Read it →
               </Link>
             </GlassCard>
 
@@ -135,15 +135,15 @@ export default function LearnPage() {
             </GlassCard>
 
             <GlassCard className="p-4 sm:p-5 transition transform hover:-translate-y-1 hover:border-amber-400/60">
-              <h3 className="text-sm font-semibold text-zinc-50">457 in 5 Minutes</h3>
+              <h3 className="text-sm font-semibold text-zinc-50">Masterclass</h3>
               <p className="mt-2 text-xs text-zinc-300 leading-relaxed mb-3">
-                The fastest, no-BS explanation of how a 457(b) works.
+                Deep dives into money, banking, the Fed, and the global dollar system.
               </p>
               <Link
-                href="/learn/457#in-5-minutes"
+                href="/learn/masterclass"
                 className="text-xs font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
               >
-                Read it →
+                Browse →
               </Link>
             </GlassCard>
 
