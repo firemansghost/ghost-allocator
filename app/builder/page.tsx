@@ -853,7 +853,13 @@ export default function Builder() {
                   </p>
                   <p className="text-[11px] text-zinc-400 mt-1">
                     These are inside-slice allocations. Your overall split is{' '}
-                    {platformSplit.targetVoyaPct}% Voya / {platformSplit.targetSchwabPct}% Schwab.
+                    {platformSplit.targetVoyaPct}% Voya / {platformSplit.targetSchwabPct}% Schwab.{' '}
+                    <Link
+                      href="/learn/glossary#inside-slice-allocation"
+                      className="text-amber-400 hover:text-amber-300 underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-0.5"
+                    >
+                      What does inside-slice mean?
+                    </Link>
                   </p>
                   {voyaImplementation.note && (
                     <div className="mt-2 p-2 bg-amber-500/10 border border-amber-500/20 rounded text-[11px] text-amber-200">

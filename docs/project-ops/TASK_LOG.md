@@ -1,5 +1,15 @@
 # TASK LOG
 
+## 2026-01-21 — Lane C: added glossary links in Builder and GhostRegime
+Completed:
+- app/builder/page.tsx: "What does inside-slice mean?" link near Voya core funds inside-slice explainer → /learn/glossary#inside-slice-allocation
+- app/ghostregime/GhostRegimeClient.tsx: "What do Targets / Scales / Actual mean?" link beneath Targets/Scales/Actual block → /learn/glossary#targets-scales-actual
+- Glossary terms inside-slice-allocation and targets-scales-actual already existed
+
+Verification: npm run build, npm run lint; manual: Builder and GhostRegime links jump to correct glossary entries
+
+---
+
 ## 2026-01-21 — Homepage copy polish: GhostRegime + Model Portfolios normie-friendly
 Completed:
 - GhostRegime Tools card: new description (weekly weather report, when to stay aggressive vs play defense), CTA "Check GhostRegime →"

@@ -755,6 +755,14 @@ export function GhostRegimeClient({
             <div>Scales: {blocks.scales}</div>
             <div>Actual: {blocks.actual}</div>
           </div>
+          <p className="text-[10px] mt-1.5">
+            <Link
+              href="/learn/glossary#targets-scales-actual"
+              className="text-amber-400 hover:text-amber-300 underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-0.5"
+            >
+              What do Targets / Scales / Actual mean?
+            </Link>
+          </p>
           {(() => {
             const riskAxisDirection = data.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
             const riskStats = computeAxisStats(data.risk_receipts, riskAxisDirection);
