@@ -69,12 +69,21 @@ export default function HomePage() {
           </GlassCard>
           <GlassCard className="p-4 sm:p-5 transition transform hover:-translate-y-1 hover:border-amber-400/60 hover:shadow-[0_20px_60px_rgba(0,0,0,0.9)]">
             <p className="text-[11px] font-semibold text-amber-300 uppercase tracking-wide">Step 3</p>
-            <h3 className="mt-2 text-sm font-semibold text-zinc-50">See example funds</h3>
+            <h3 className="mt-2 text-sm font-semibold text-zinc-50">Review + Monitor</h3>
             <p className="mt-2 text-xs text-zinc-300 leading-relaxed">
-              Review sleeves and example funds/ETFs mapped to your plan. No options chains required.
+              See example funds/ETFs, then use GhostRegime as a weekly &quot;weather report&quot; to track risk posture.
             </p>
+            <Link
+              href="/ghostregime"
+              className="mt-3 inline-flex items-center text-xs font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-2 py-1"
+            >
+              Open GhostRegime →
+            </Link>
           </GlassCard>
         </div>
+        <p className="mt-3 text-center text-[11px] text-zinc-500">
+          Alerts are coming. For now: check GhostRegime weekly.
+        </p>
       </section>
 
       <section className="space-y-4">

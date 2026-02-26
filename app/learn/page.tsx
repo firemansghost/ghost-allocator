@@ -150,7 +150,7 @@ export default function LearnPage() {
             <GlassCard className="p-4 sm:p-5 transition transform hover:-translate-y-1 hover:border-amber-400/60">
               <h3 className="text-sm font-semibold text-zinc-50">Why Rules Beat Vibes</h3>
               <p className="mt-2 text-xs text-zinc-300 leading-relaxed mb-3">
-                A quick reality check on drawdowns and why systematic risk management matters.
+                A quick reality check on drawdowns and why systematic risk management matters. Use GhostRegime as a weekly posture check.
               </p>
               <Link
                 href="/ghostregime/how-it-works"

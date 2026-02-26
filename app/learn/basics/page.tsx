@@ -202,6 +202,9 @@ export default function LearnBasicsPage() {
               <li>
                 Check <Link href="/models" className="text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline">Models</Link> for reference templates.
               </li>
+              <li>
+                Check <Link href="/ghostregime" className="text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline">GhostRegime</Link> weekly to monitor risk posture (targets vs actual). Adjust new contributions first before doing big rebalances.
+              </li>
             </ul>
           </div>
           <div className="mt-4 space-y-2">

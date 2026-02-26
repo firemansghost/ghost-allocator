@@ -1,5 +1,15 @@
 # TASK LOG
 
+## 2026-01-21 — Monitor with GhostRegime messaging
+Completed:
+- app/learn/basics/page.tsx: added GhostRegime bullet to Implementation rules Do this next (check weekly, adjust contributions first)
+- app/page.tsx: Step 3 title "Review + Monitor", body mentions GhostRegime weekly weather report, Open GhostRegime link, "Alerts are coming. For now: check GhostRegime weekly."
+- app/learn/page.tsx: Why Rules Beat Vibes card — added "Use GhostRegime as a weekly posture check."
+
+Verification: npm run build, npm run lint; manual: Basics bullet, homepage Step 3, Learn hub card
+
+---
+
 ## 2026-01-21 — Learn Browse reorder + Basics sticky TOC + Next step CTA
 Completed:
 - app/learn/page.tsx: reordered Browse cards (457 Playbook, 457 in 5 min, Finance Basics, Glossary, Masterclass, Why Rules Beat Vibes)
