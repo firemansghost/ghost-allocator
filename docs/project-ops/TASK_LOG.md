@@ -1,5 +1,16 @@
 # TASK LOG
 
+## 2026-01-21 — Lane B: OKC 457 playbook template-first scaffold
+Completed:
+- app/learn/457/okc/page.tsx: replaced placeholder with structured playbook (Quick Start, What we need from plan docs, Voya Menu Reality, Schwab Sweep Reality, Cadence + Discipline, Common Mistakes, Next step CTA)
+- All plan-specific facts labeled "Placeholder — verify in plan docs"
+- Back to Learn link at top (Lane A pattern)
+- Sitemap: OKC playbook not in sitemap; leaving out until OKC-specific details are filled in (template page)
+
+Verification: npm run build, npm run lint; manual: page reads like guide-in-progress, no unverified claims
+
+---
+
 ## 2026-01-21 — Lane A: added Back to Learn links + Next step CTA cards on Learn pages
 Completed:
 - Back to Learn link (← Back to Learn) near top of glossary, 457, masterclass, basics
