@@ -1,5 +1,14 @@
 # TASK LOG
 
+## 2026-01-21 — Homepage copy polish: GhostRegime + Model Portfolios normie-friendly
+Completed:
+- GhostRegime Tools card: new description (weekly weather report, when to stay aggressive vs play defense), CTA "Check GhostRegime →"
+- Model Portfolios Tools card: removed "Coming Soon" badge, new description (pick template without questionnaire), CTA "View templates →"
+
+Verification: npm run build, npm run lint; manual: homepage cards read cleanly, CTAs work
+
+---
+
 ## 2026-01-21 — Learn hub: added Monitor with GhostRegime card
 Completed:
 - app/learn/page.tsx: new Browse card "Monitor with GhostRegime" (weekly weather report, targets vs actual, fewer train wrecks) with Open GhostRegime → link

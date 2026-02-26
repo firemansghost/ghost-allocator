@@ -106,30 +106,25 @@ export default function HomePage() {
           <GlassCard className="p-4 sm:p-5 transition transform hover:-translate-y-1 hover:border-amber-400/60 hover:shadow-[0_20px_60px_rgba(0,0,0,0.9)]">
             <h3 className="text-sm font-semibold text-zinc-50">GhostRegime</h3>
             <p className="mt-2 text-xs text-zinc-300 leading-relaxed">
-              Daily regime classification and rules-based exposure overlay. Shows targets vs actuals based on market conditions.
+              A weekly &quot;weather report&quot; for your portfolio. It tells you when to stay aggressive and when to play defense — based on market behavior, not vibes.
             </p>
             <Link
               href="/ghostregime"
               className="mt-4 inline-flex items-center text-xs font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-2 py-1"
             >
-              Open GhostRegime →
+              Check GhostRegime →
             </Link>
           </GlassCard>
           <GlassCard className="p-4 sm:p-5 transition transform hover:-translate-y-1 hover:border-amber-400/60 hover:shadow-[0_20px_60px_rgba(0,0,0,0.9)]">
-            <div className="flex items-start justify-between">
-              <h3 className="text-sm font-semibold text-zinc-50">Model Portfolios</h3>
-              <span className="inline-flex items-center rounded-full border border-amber-400/60 bg-amber-400/10 px-2 py-0.5 text-[10px] font-medium text-amber-300">
-                Coming Soon
-              </span>
-            </div>
+            <h3 className="text-sm font-semibold text-zinc-50">Model Portfolios</h3>
             <p className="mt-2 text-xs text-zinc-300 leading-relaxed">
-              Curated templates that combine Ghost Allocator planning with GhostRegime signals for simple rebalance guidance.
+              Don&apos;t want the questionnaire? Pick a Conservative / Moderate / Aggressive template and implement it with your plan options.
             </p>
             <Link
               href="/models"
               className="mt-4 inline-flex items-center text-xs font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-2 py-1"
             >
-              View Models →
+              View templates →
             </Link>
           </GlassCard>
         </div>
