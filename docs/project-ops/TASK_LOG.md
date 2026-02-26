@@ -1,5 +1,14 @@
 # TASK LOG
 
+## 2026-01-21 — Learn hub: added Monitor with GhostRegime card
+Completed:
+- app/learn/page.tsx: new Browse card "Monitor with GhostRegime" (weekly weather report, targets vs actual, fewer train wrecks) with Open GhostRegime → link
+- Placed after Glossary, before Masterclass
+
+Verification: npm run build, npm run lint; manual: /learn shows new card, link works
+
+---
+
 ## 2026-01-21 — Monitor with GhostRegime messaging
 Completed:
 - app/learn/basics/page.tsx: added GhostRegime bullet to Implementation rules Do this next (check weekly, adjust contributions first)

@@ -135,6 +135,19 @@ export default function LearnPage() {
             </GlassCard>
 
             <GlassCard className="p-4 sm:p-5 transition transform hover:-translate-y-1 hover:border-amber-400/60">
+              <h3 className="text-sm font-semibold text-zinc-50">Monitor with GhostRegime</h3>
+              <p className="mt-2 text-xs text-zinc-300 leading-relaxed mb-3">
+                Weekly portfolio &quot;weather report&quot;: targets vs actual, risk posture shifts, fewer 20% train wreck surprises.
+              </p>
+              <Link
+                href="/ghostregime"
+                className="text-xs font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
+              >
+                Open GhostRegime →
+              </Link>
+            </GlassCard>
+
+            <GlassCard className="p-4 sm:p-5 transition transform hover:-translate-y-1 hover:border-amber-400/60">
               <h3 className="text-sm font-semibold text-zinc-50">Masterclass</h3>
               <p className="mt-2 text-xs text-zinc-300 leading-relaxed mb-3">
                 Deep dives into money, banking, the Fed, and the global dollar system.
