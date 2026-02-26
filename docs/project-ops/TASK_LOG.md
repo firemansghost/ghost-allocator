@@ -1,5 +1,16 @@
 # TASK LOG
 
+## 2026-01-21 — Lane A: added Back to Learn links + Next step CTA cards on Learn pages
+Completed:
+- Back to Learn link (← Back to Learn) near top of glossary, 457, masterclass, basics
+- Glossary: Next step CTA (Build your plan, Check GhostRegime, Learn 457 basics)
+- 457: Next step CTA (Build your plan, View templates, Jump to 457 in 5 minutes)
+- Masterclass: Next step CTA (Open GhostRegime, Build your plan, Back to Learn)
+
+Verification: npm run build, npm run lint; manual: links work, CTAs render on mobile/desktop
+
+---
+
 ## 2026-01-21 — Lane C: added glossary links in Builder and GhostRegime
 Completed:
 - app/builder/page.tsx: "What does inside-slice mean?" link near Voya core funds inside-slice explainer → /learn/glossary#inside-slice-allocation

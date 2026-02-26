@@ -13,6 +13,12 @@ export default function LearnBasicsPage() {
   return (
     <div className="flex justify-center">
       <div className="w-full max-w-4xl space-y-8 pb-10">
+        <Link
+          href="/learn"
+          className="inline-flex items-center text-xs font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-1 -mt-2"
+        >
+          ← Back to Learn
+        </Link>
         {/* Hero intro */}
         <GlassCard className="p-6 sm:p-7">
           <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">Finance Basics</h1>

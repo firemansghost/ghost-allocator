@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import Link from 'next/link';
 import { GlassCard } from '@/components/GlassCard';
 import { useClipboardCopy } from '@/lib/builder/useClipboardCopy';
 import {
@@ -47,6 +48,12 @@ export function GlossaryContent() {
   return (
     <div className="flex justify-center">
       <div className="w-full max-w-4xl space-y-8 pb-10">
+        <Link
+          href="/learn"
+          className="inline-flex items-center text-xs font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-1 -mt-2"
+        >
+          ← Back to Learn
+        </Link>
         {/* Header */}
         <GlassCard className="p-6 sm:p-7">
           <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">Glossary</h1>
@@ -95,6 +102,36 @@ export function GlossaryContent() {
             ))
           )}
         </div>
+
+        {/* Next step CTA */}
+        <GlassCard className="p-5 sm:p-6">
+          <h2 className="text-lg font-semibold text-zinc-50">Next step</h2>
+          <p className="mt-2 text-sm text-zinc-300 leading-relaxed mb-4">
+            Now use this stuff in the real app — build a plan and sanity-check it with GhostRegime.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/onboarding"
+              className="inline-flex items-center rounded-full bg-amber-400 px-5 py-2 text-sm font-semibold text-black hover:bg-amber-300 transition shadow-md shadow-amber-400/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 min-h-[44px]"
+            >
+              Build your plan →
+            </Link>
+            <Link
+              href="/ghostregime"
+              className="inline-flex items-center rounded-md border border-zinc-600 text-zinc-300 px-4 py-2 text-sm font-medium hover:bg-zinc-800 hover:border-zinc-500 transition min-h-[44px]"
+            >
+              Check GhostRegime →
+            </Link>
+          </div>
+          <p className="mt-3">
+            <Link
+              href="/learn/457"
+              className="text-xs font-medium text-zinc-400 hover:text-zinc-300 underline-offset-4 hover:underline"
+            >
+              Learn 457 basics →
+            </Link>
+          </p>
+        </GlassCard>
       </div>
     </div>
   );
