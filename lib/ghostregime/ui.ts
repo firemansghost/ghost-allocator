@@ -117,20 +117,20 @@ export function formatBucketUtilizationLine(bucketPct: number, scale: number): s
 }
 
 /**
- * Format sleeve line for Allocations card: Today target • Max • Scale
- * Replaces bucket wording with clearer Today/Max framing.
+ * Format sleeve line for Allocations card: Starting point • Max • Brake
+ * Avoids bucket wording; Brake explains VAMS scaling.
  */
 export function formatSleeveLine(
-  todayTarget: number,
+  startingPointTarget: number,
   maxTarget: number,
   scale: number
 ): string {
-  const todayPct = (todayTarget * 100).toFixed(0);
+  const startPct = (startingPointTarget * 100).toFixed(0);
   const maxPct = (maxTarget * 100).toFixed(0);
   const scaleLabel = formatScaleLabel(scale);
-  const parts = [`Today target ${todayPct}%`, `Max ${maxPct}%`, `Scale ${scale.toFixed(1)}`];
+  const parts = [`Starting point ${startPct}%`, `Max ${maxPct}%`, `Brake ${scale.toFixed(1)}`];
   if (scale < 1) {
-    parts.push(scaleLabel);
+    parts.push(scale === 0 ? `${scaleLabel} → goes to cash` : scaleLabel);
   }
   return parts.join(' • ');
 }
@@ -352,7 +352,7 @@ function getStatusLabelForSummary(status: string): string {
 
 /**
  * Build share summary string for clipboard
- * Format: GhostRegime — date (UTC) — status; Regime | Risk; Max targets; Today targets; Scales; Actual
+ * Format: Hold now, Starting point, Brake, Max targets
  */
 export function buildShareSummary(
   data: GhostRegimeRow,
@@ -369,18 +369,18 @@ export function buildShareSummary(
   const lines = [
     header,
     `Regime: ${data.regime} | Risk: ${data.risk_regime}`,
+    `Hold now (Actual): ${blocks.actual}`,
+    `Starting point (before brake): ${blocks.targets}`,
+    `Brake (VAMS): ${blocks.scales}`,
     `Max targets: ${formatMaxTargets()}`,
-    `Today targets: ${blocks.targets}`,
-    `Scales: ${blocks.scales}`,
-    `Actual: ${blocks.actual}`,
   ];
 
   return lines.join('\n');
 }
 
 /**
- * Build micro-flow line showing Targets → Scales → Actual → Cash
- * Targets includes base cash when present so totals sum to 100%
+ * Build micro-flow line: Starting point → Brake → Hold now
+ * Avoids "Targets" wording; Hold now is the instruction.
  */
 export function buildMicroFlowLine(data: GhostRegimeRow | null): string | null {
   if (!data) return null;
@@ -396,18 +396,20 @@ export function buildMicroFlowLine(data: GhostRegimeRow | null): string | null {
   const btcActual = (data.btc_actual * 100).toFixed(0);
   const cash = (data.cash * 100).toFixed(0);
 
-  const stocksScale = formatScaleLabel(data.stocks_scale);
-  const goldScale = formatScaleLabel(data.gold_scale);
-  const btcScale = formatScaleLabel(data.btc_scale);
+  const stocksScale = formatScaleShort(data.stocks_scale);
+  const goldScale = formatScaleShort(data.gold_scale);
+  const btcScale = formatScaleShort(data.btc_scale);
 
-  const targets =
+  const startingPoint =
     breakdown.cashTarget >= 0.005
       ? `${stocksTarget}/${goldTarget}/${btcTarget} + ${cashTargetPct} cash`
       : `${stocksTarget}/${goldTarget}/${btcTarget}`;
-  const scales = `${stocksScale}/${goldScale}/${btcScale}`;
-  const actuals = `${stocksActual}/${goldActual}/${btcActual}`;
+  const brake = `${stocksScale}/${goldScale}/${btcScale}`;
+  const holdNowPart = parseFloat(cash) > 0.1
+    ? `${stocksActual}/${goldActual}/${btcActual} + ${cash} cash`
+    : `${stocksActual}/${goldActual}/${btcActual}`;
 
-  return `Today (${targets}) → Scales (${scales}) → Actual (${actuals}) → Cash (${cash})`;
+  return `Starting point (${startingPoint}) → Brake (${brake}) → Hold now (${holdNowPart})`;
 }
 
 /**

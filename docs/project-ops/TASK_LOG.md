@@ -1,5 +1,20 @@
 # TASK LOG
 
+## 2026-01-21 — GhostRegime clarity: Hold now primary, Starting point, Brake wording
+Completed:
+- Renamed "Today targets" → "Starting point (before brake)", "Actual" → "Hold now (Actual)", "Scales" → "Brake (VAMS)"
+- Reordered 4-line block: Hold now first, then Starting point, Brake, Max targets
+- Helper text: "Hold now is the instruction. The starting point can be reduced by the safety brake." + BTC example
+- formatSleeveLine: "Starting point" • "Max" • "Brake" • "off → goes to cash" when scale 0
+- Pills: Base cash (updated tooltip), "BTC off → +5% cash" replaces redundant BTC throttled + Cash from throttle
+- buildMicroFlowLine: "Starting point (...) → Brake (...) → Hold now (...)"
+- buildShareSummary: Hold now, Starting point, Brake, Max targets
+- No model changes
+
+Verification: npm run build, npm run lint
+
+---
+
 ## 2026-01-21 — GhostRegime clarity + KISS % of Max Exposure view
 Completed:
 - getMaxTargets(), formatMaxTargets(), pctOfMax() in lib/ghostregime/ui.ts

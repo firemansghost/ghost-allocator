@@ -788,11 +788,17 @@ export function GhostRegimeClient({
         return blocks ? (
         <div className="space-y-1">
           <div className="text-sm text-zinc-300 leading-relaxed font-mono space-y-0.5">
+            <div>Hold now (Actual): {blocks.actual}</div>
+            <div>Starting point (before brake): {blocks.targets}</div>
+            <div>Brake (VAMS): {blocks.scales}</div>
             <div>Max targets: {formatMaxTargets()}</div>
-            <div>Today targets: {blocks.targets}</div>
-            <div>Scales: {blocks.scales}</div>
-            <div>Actual: {blocks.actual}</div>
           </div>
+          <p className="text-xs text-zinc-500 mt-1.5">
+            Hold now is the instruction. The starting point can be reduced by the safety brake.
+          </p>
+          <p className="text-xs text-zinc-500">
+            Example: if BTC is off, its starting-point % becomes cash.
+          </p>
           <p className="text-[10px] mt-1.5">
             <Link
               href="/learn/glossary#targets-scales-actual"
@@ -818,7 +824,8 @@ export function GhostRegimeClient({
             const regimeConvictionIndex = computeRegimeConvictionIndex(riskConviction.index, inflConviction.index);
             const regimeConfidenceLabel = computeRegimeConfidenceLabel(riskStats.confidence.label, inflStats.confidence.label);
             const cashSources = getCashSources(data);
-            
+            const cashBreakdown = computeCashBreakdown(data);
+
             const actionableRead = buildActionableReadLine({
               regime: data.regime,
               risk_regime: data.risk_regime,
@@ -871,8 +878,8 @@ export function GhostRegimeClient({
                       regimeConvictionLabel={regimeConvictionLabel}
                       isCrowded={isCrowded}
                       btcScale={data.btc_scale}
-                      cashSources={cashSources}
-                      cashTargetPct={computeCashBreakdown(data).cashTarget}
+                      cashBreakdown={cashBreakdown}
+                      cashTargetPct={cashBreakdown.cashTarget}
                     />
                   </div>
                   {copyText && (
