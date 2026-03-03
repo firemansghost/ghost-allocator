@@ -1,5 +1,19 @@
 # TASK LOG
 
+## 2026-01-21 — Fix GhostRegime Targets/Scales/Actual math display + cash attribution
+Completed:
+- lib/ghostregime/ui.ts: computeCashBreakdown() (cashTarget, cashFromThrottles, throttleSourceNames)
+- buildTodaySnapshotBlocks: Targets includes "+ X cash" when base cash >= 0.5%
+- buildMicroFlowLine: Targets includes base cash when present
+- GhostRegimeClient: Allocations card shows "Base cash (posture): X%" and "Extra cash from throttling: X% (Stocks/Gold/Bitcoin)" instead of misleading "Cash created by throttling"
+- ActionableReadPills: Base cash pill when cashTarget > 0.5%
+- lib/ghostregime/__tests__/cashBreakdown.test.ts: locks down Risk Off case (30/30/5, scales 1/1/0, cash 40%)
+- No model changes
+
+Verification: npm run build, npm run lint, npm run test:cash-breakdown
+
+---
+
 ## 2026-01-21 — 457 Plan Docs Checklist page
 Completed:
 - app/learn/457/docs-checklist/page.tsx: new page (Where to look, 7-doc checklist with extract + plug-into-OKC links, What to send, Next step CTA)

@@ -111,6 +111,7 @@ export const COPY_BIGGEST_CHANGE_TOOLTIP = 'Copy biggest change';
 export const COPY_BIGGEST_CHANGE_COPIED = 'Copied';
 export const PREV_NOT_FOUND_INFO_TOOLTIP = 'Requested prev snapshot wasn\'t found. Using the nearest previous snapshot instead.';
 export const ACTIONABLE_CASH_PILL_TOOLTIP = 'Cash = leftover after scaling targets down; it sits unallocated until rebalance. Not cash "held in" the asset.';
+export const BASE_CASH_PILL_TOOLTIP = 'Cash implied by Risk Off targets; not created by VAMS throttles.';
 export const COMPARE_CONTEXT_LABEL = 'Context:';
 export const COMPARE_CONTEXT_VIEWING = 'Viewing';
 export const COMPARE_CONTEXT_COMPARING = 'Comparing to';

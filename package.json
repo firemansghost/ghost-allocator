@@ -11,6 +11,7 @@
     "lint:fix": "eslint . --fix",
     "test": "tsx lib/ghostregime/__tests__/regimeCore.test.ts",
     "test:ghostregime-ui": "tsx lib/ghostregime/__tests__/agreementDelta.test.ts",
+    "test:cash-breakdown": "tsx lib/ghostregime/__tests__/cashBreakdown.test.ts",
     "test:lineups": "tsx lib/schwabLineups.test.ts",
     "smoke:builder": "tsx scripts/smoke-builder.ts",
     "smoke:pages": "tsx scripts/smoke-pages.ts",

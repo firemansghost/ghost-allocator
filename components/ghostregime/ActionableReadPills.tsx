@@ -13,6 +13,7 @@ import {
   REGIME_CONVICTION_TOOLTIP,
   CROWDED_TOOLTIP,
   ACTIONABLE_CASH_PILL_TOOLTIP,
+  BASE_CASH_PILL_TOOLTIP,
 } from '@/lib/ghostregime/ghostregimePageCopy';
 import { formatCashPillLabel } from '@/lib/ghostregime/ui';
 
@@ -26,6 +27,8 @@ interface ActionableReadPillsProps {
   isCrowded?: boolean;
   btcScale: number;
   cashSources: string[];
+  /** Base cash (posture) as fraction 0–1; when > 0.5%, show Base cash pill */
+  cashTargetPct?: number;
 }
 
 export function ActionableReadPills({
@@ -38,6 +41,7 @@ export function ActionableReadPills({
   isCrowded,
   btcScale,
   cashSources,
+  cashTargetPct = 0,
 }: ActionableReadPillsProps) {
   const pills: Array<{ label: string; tooltip?: string }> = [];
   
@@ -78,8 +82,17 @@ export function ActionableReadPills({
     const scaleLabel = btcScale === 0.5 ? 'half size' : 'off';
     pills.push({ label: `BTC throttled (${scaleLabel})` });
   }
-  
-  // 7) Cash source
+
+  // 6b) Base cash (posture)
+  if (cashTargetPct > 0.005) {
+    const pct = (cashTargetPct * 100).toFixed(0);
+    pills.push({
+      label: `Base cash ${pct}%`,
+      tooltip: BASE_CASH_PILL_TOOLTIP,
+    });
+  }
+
+  // 7) Cash source (throttle)
   if (cashSources.length > 0) {
     pills.push({ 
       label: formatCashPillLabel(cashSources),

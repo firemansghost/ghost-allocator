@@ -26,6 +26,7 @@ import {
   formatBucketUtilizationLine,
   formatScaleLabel,
   getCashSources,
+  computeCashBreakdown,
   buildTodaySnapshotBlocks,
   buildShareSummary,
   buildMicroFlowLine,
@@ -834,6 +835,7 @@ export function GhostRegimeClient({
                       isCrowded={isCrowded}
                       btcScale={data.btc_scale}
                       cashSources={cashSources}
+                      cashTargetPct={computeCashBreakdown(data).cashTarget}
                     />
                   </div>
                   {copyText && (
@@ -1135,15 +1137,22 @@ export function GhostRegimeClient({
               />
             </div>
             {data.cash > 0.01 && (() => {
-              const cashSources = getCashSources(data);
-              if (cashSources.length > 0) {
-                return (
-                  <p className="text-[10px] text-zinc-500 mt-2 leading-relaxed">
-                    Cash created by throttling: {cashSources.join(', ')}.
-                  </p>
-                );
+              const breakdown = computeCashBreakdown(data);
+              const lines: string[] = [];
+              const cashTargetPct = (breakdown.cashTarget * 100).toFixed(1);
+              const cashFromThrottlesPct = (breakdown.cashFromThrottles * 100).toFixed(1);
+              if (breakdown.cashTarget > 0.005) {
+                lines.push(`Base cash (posture): ${cashTargetPct}%.`);
               }
-              return null;
+              if (breakdown.cashFromThrottles > 0.005 && breakdown.throttleSourceNames.length > 0) {
+                lines.push(`Extra cash from throttling: ${cashFromThrottlesPct}% (${breakdown.throttleSourceNames.join('/')}).`);
+              }
+              if (lines.length === 0) return null;
+              return (
+                <p className="text-[10px] text-zinc-500 mt-2 leading-relaxed">
+                  {lines.join(' ')}
+                </p>
+              );
             })()}
             {buildMicroFlowLine(data) && (
               <div className="mt-4 pt-4 border-t border-zinc-800">

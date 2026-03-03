@@ -92,6 +92,49 @@ export function formatBucketUtilizationLine(bucketPct: number, scale: number): s
 }
 
 /**
+ * Cash breakdown: base (posture) cash vs throttle cash
+ * Base cash = 1 - (stocks_target + gold_target + btc_target) — implied by Risk Off targets
+ * Throttle cash = sum of (target - actual) for each asset where scale < 1
+ */
+export interface CashBreakdown {
+  cashTarget: number;
+  cashFromStocks: number;
+  cashFromGold: number;
+  cashFromBtc: number;
+  cashFromThrottles: number;
+  cashTotal: number;
+  isConsistent: boolean;
+  /** Asset names contributing to throttle cash (for display) */
+  throttleSourceNames: string[];
+}
+
+export function computeCashBreakdown(data: GhostRegimeRow): CashBreakdown {
+  const cashTarget = Math.max(0, 1 - (data.stocks_target + data.gold_target + data.btc_target));
+  const cashFromStocks = Math.max(0, data.stocks_target - data.stocks_actual);
+  const cashFromGold = Math.max(0, data.gold_target - data.gold_actual);
+  const cashFromBtc = Math.max(0, data.btc_target - data.btc_actual);
+  const cashFromThrottles = cashFromStocks + cashFromGold + cashFromBtc;
+  const cashTotal = data.cash;
+  const isConsistent = Math.abs((cashTarget + cashFromThrottles) - cashTotal) < 0.005;
+
+  const throttleSourceNames: string[] = [];
+  if (cashFromStocks > 0.001) throttleSourceNames.push('Stocks');
+  if (cashFromGold > 0.001) throttleSourceNames.push('Gold');
+  if (cashFromBtc > 0.001) throttleSourceNames.push('Bitcoin');
+
+  return {
+    cashTarget,
+    cashFromStocks,
+    cashFromGold,
+    cashFromBtc,
+    cashFromThrottles,
+    cashTotal,
+    isConsistent,
+    throttleSourceNames,
+  };
+}
+
+/**
  * Get cash sources (assets contributing leftover cash)
  * Returns array of asset names where scale < 1 and target > 0
  */
@@ -217,6 +260,7 @@ function formatScaleShort(scale: number): string {
 /**
  * Build Today's Snapshot as structured blocks for 3-line display
  * Returns { targets, scales, actual } for compact formatting
+ * Targets includes implied base cash when present (so totals sum to 100%)
  */
 export function buildTodaySnapshotBlocks(data: GhostRegimeRow | null): {
   targets: string;
@@ -234,7 +278,13 @@ export function buildTodaySnapshotBlocks(data: GhostRegimeRow | null): {
   const btcActual = (data.btc_actual * 100).toFixed(0);
   const cash = (data.cash * 100).toFixed(0);
 
-  const targets = `${stocksTarget}/${goldTarget}/${btcTarget}`;
+  const breakdown = computeCashBreakdown(data);
+  const cashTargetPct = (breakdown.cashTarget * 100).toFixed(0);
+  const targets =
+    breakdown.cashTarget >= 0.005
+      ? `${stocksTarget}/${goldTarget}/${btcTarget} + ${cashTargetPct} cash`
+      : `${stocksTarget}/${goldTarget}/${btcTarget}`;
+
   const scales = [
     `Stocks ${formatScaleShort(data.stocks_scale)}`,
     `Gold ${formatScaleShort(data.gold_scale)}`,
@@ -285,28 +335,33 @@ export function buildShareSummary(
 
 /**
  * Build micro-flow line showing Targets → Scales → Actual → Cash
- * Format: "Targets (60/30/10) → Scales (full/full/half) → Actual (60/30/5) → Cash (5)"
+ * Targets includes base cash when present so totals sum to 100%
  */
 export function buildMicroFlowLine(data: GhostRegimeRow | null): string | null {
   if (!data) return null;
-  
+
+  const breakdown = computeCashBreakdown(data);
   const stocksTarget = (data.stocks_target * 100).toFixed(0);
   const goldTarget = (data.gold_target * 100).toFixed(0);
   const btcTarget = (data.btc_target * 100).toFixed(0);
-  
+  const cashTargetPct = (breakdown.cashTarget * 100).toFixed(0);
+
   const stocksActual = (data.stocks_actual * 100).toFixed(0);
   const goldActual = (data.gold_actual * 100).toFixed(0);
   const btcActual = (data.btc_actual * 100).toFixed(0);
   const cash = (data.cash * 100).toFixed(0);
-  
+
   const stocksScale = formatScaleLabel(data.stocks_scale);
   const goldScale = formatScaleLabel(data.gold_scale);
   const btcScale = formatScaleLabel(data.btc_scale);
-  
-  const targets = `${stocksTarget}/${goldTarget}/${btcTarget}`;
+
+  const targets =
+    breakdown.cashTarget >= 0.005
+      ? `${stocksTarget}/${goldTarget}/${btcTarget} + ${cashTargetPct} cash`
+      : `${stocksTarget}/${goldTarget}/${btcTarget}`;
   const scales = `${stocksScale}/${goldScale}/${btcScale}`;
   const actuals = `${stocksActual}/${goldActual}/${btcActual}`;
-  
+
   return `Targets (${targets}) → Scales (${scales}) → Actual (${actuals}) → Cash (${cash})`;
 }
 
