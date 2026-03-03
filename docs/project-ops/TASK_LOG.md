@@ -1,5 +1,17 @@
 # TASK LOG
 
+## 2026-01-21 — Builder: added Weekly check card linking to GhostRegime
+Completed:
+- GlassCard near bottom of /builder results (after Details behind the plan)
+- Title: "Weekly check (don't overthink it)"
+- Body: Check GhostRegime weekly (weather report), Risk Off → adjust contributions first, Risk On → keep DCA'ing
+- Links: Open GhostRegime → /ghostregime, How it works → /ghostregime/how-it-works
+- Optional note: "Alerts are coming later. For now: weekly manual check."
+
+Verification: npm run build, npm run lint
+
+---
+
 ## 2026-01-21 — GhostRegime pills: Cash now + remove Base cash (Option A)
 Completed:
 - Added "Cash now X%" pill when actual cash >= 1% (from Hold now, not starting point)

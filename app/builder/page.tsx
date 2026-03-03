@@ -1264,6 +1264,39 @@ export default function Builder() {
           </div>
         )}
       </details>
+
+      {/* Weekly check (monitor loop) */}
+      <GlassCard className="p-4 sm:p-5 space-y-3">
+        <h2 className="text-sm font-semibold text-zinc-50">
+          Weekly check (don&apos;t overthink it)
+        </h2>
+        <p className="text-xs text-zinc-300 leading-relaxed">
+          Check GhostRegime once a week. It&apos;s your portfolio &quot;weather report&quot;.
+        </p>
+        <p className="text-xs text-zinc-300 leading-relaxed">
+          If it flips Risk Off, adjust NEW contributions first before doing big rebalance moves.
+        </p>
+        <p className="text-xs text-zinc-300 leading-relaxed">
+          If it stays Risk On, keep DCA&apos;ing like an adult.
+        </p>
+        <div className="flex flex-wrap items-center gap-3 pt-1">
+          <Link
+            href="/ghostregime"
+            className="inline-flex items-center rounded-md border border-amber-400/60 bg-amber-400/10 px-3 py-1.5 text-xs font-medium text-amber-300 hover:bg-amber-400/20 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400/60"
+          >
+            Open GhostRegime →
+          </Link>
+          <Link
+            href="/ghostregime/how-it-works"
+            className="text-xs text-zinc-400 hover:text-zinc-200 underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-1"
+          >
+            How it works →
+          </Link>
+        </div>
+        <p className="text-xs text-zinc-500">
+          Alerts are coming later. For now: weekly manual check.
+        </p>
+      </GlassCard>
     </div>
   );
 }
