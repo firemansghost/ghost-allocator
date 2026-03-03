@@ -12,7 +12,7 @@ import {
   REGIME_CONFIDENCE_TOOLTIP,
   REGIME_CONVICTION_TOOLTIP,
   CROWDED_TOOLTIP,
-  BASE_CASH_PILL_TOOLTIP,
+  CASH_NOW_PILL_TOOLTIP,
   THROTTLE_OFF_PILL_TOOLTIP,
 } from '@/lib/ghostregime/ghostregimePageCopy';
 import type { CashBreakdown } from '@/lib/ghostregime/ui';
@@ -26,10 +26,8 @@ interface ActionableReadPillsProps {
   regimeConvictionLabel?: string | null; // Optional bucket label
   isCrowded?: boolean;
   btcScale: number;
-  /** Cash breakdown for throttle pills (e.g. "BTC off → +5% cash") */
+  /** Cash breakdown for throttle pills (e.g. "BTC off → +5% cash") and Cash now pill */
   cashBreakdown?: CashBreakdown | null;
-  /** Base cash (posture) as fraction 0–1; when > 0.5%, show Base cash pill */
-  cashTargetPct?: number;
 }
 
 const THROTTLE_LABELS: Record<string, string> = {
@@ -48,7 +46,6 @@ export function ActionableReadPills({
   isCrowded,
   btcScale,
   cashBreakdown,
-  cashTargetPct = 0,
 }: ActionableReadPillsProps) {
   const pills: Array<{ label: string; tooltip?: string }> = [];
 
@@ -84,16 +81,16 @@ export function ActionableReadPills({
     });
   }
 
-  // 6) Base cash (posture)
-  if (cashTargetPct > 0.005) {
-    const pct = (cashTargetPct * 100).toFixed(0);
+  // 6) Cash now X% (actual/hold-now cash; show when >= 1%)
+  if (cashBreakdown && cashBreakdown.cashTotal >= 0.01) {
+    const pct = (cashBreakdown.cashTotal * 100).toFixed(0);
     pills.push({
-      label: `Base cash ${pct}%`,
-      tooltip: BASE_CASH_PILL_TOOLTIP,
+      label: `Cash now ${pct}%`,
+      tooltip: CASH_NOW_PILL_TOOLTIP,
     });
   }
 
-  // 7) Throttle pills: "BTC off → +5% cash" (explanatory, replaces redundant BTC throttled + Cash from throttle)
+  // 7) Throttle pills: "BTC off → +5% cash" (explanatory)
   if (cashBreakdown && cashBreakdown.cashFromThrottles > 0.005) {
     const parts: string[] = [];
     if (cashBreakdown.cashFromBtc > 0.001) {

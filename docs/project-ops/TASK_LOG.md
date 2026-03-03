@@ -1,5 +1,29 @@
 # TASK LOG
 
+## 2026-01-21 — GhostRegime pills: Cash now + remove Base cash (Option A)
+Completed:
+- Added "Cash now X%" pill when actual cash >= 1% (from Hold now, not starting point)
+- Removed "Base cash" pill entirely
+- Kept "BTC off → +5% cash" explanatory pill (and Stocks/Gold when applicable)
+- Pill order: Regime/Risk context → Cash now → throttle pills
+- Allocations card cash breakdown text unchanged
+
+Verification: npm run build, npm run lint
+
+---
+
+## 2026-01-21 — Micro copy polish on GhostRegime (reduce jargon)
+Completed:
+- Renamed "Starting point (before brake)" → "Before the brake (FYI)" (visually subordinate: text-zinc-500 text-xs)
+- Cash breakdown: "Base cash (posture)" → "Base cash (from starting point)", "Extra cash from throttling" → "Extra cash from brake"
+- Inline cash: "posture" → "from starting point", "throttle" → "from brake"
+- % of Max view: added caption "Percent of max exposure (60/30/10 baseline)"
+- Allocations tooltip: removed "posture", updated to Before the brake / Hold now wording
+
+Verification: npm run build, npm run lint
+
+---
+
 ## 2026-01-21 — GhostRegime clarity: Hold now primary, Starting point, Brake wording
 Completed:
 - Renamed "Today targets" → "Starting point (before brake)", "Actual" → "Hold now (Actual)", "Scales" → "Brake (VAMS)"

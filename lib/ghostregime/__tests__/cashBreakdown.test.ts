@@ -56,7 +56,7 @@ describe('computeCashBreakdown', () => {
     const row = makeRow(0.30, 0.30, 0.05, 1, 1, 0, 0.40);
     const breakdown = computeCashBreakdown(row);
 
-    assert.strictEqual(breakdown.cashTarget, 0.35, 'Base cash (posture) should be 35%');
+    assert.strictEqual(breakdown.cashTarget, 0.35, 'Base cash (from starting point) should be 35%');
     assert.strictEqual(breakdown.cashFromThrottles, 0.05, 'Throttle cash should be 5% (BTC only)');
     assert.strictEqual(breakdown.cashFromStocks, 0, 'No cash from stocks');
     assert.strictEqual(breakdown.cashFromGold, 0, 'No cash from gold');

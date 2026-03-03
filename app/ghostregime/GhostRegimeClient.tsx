@@ -789,7 +789,7 @@ export function GhostRegimeClient({
         <div className="space-y-1">
           <div className="text-sm text-zinc-300 leading-relaxed font-mono space-y-0.5">
             <div>Hold now (Actual): {blocks.actual}</div>
-            <div>Starting point (before brake): {blocks.targets}</div>
+            <div className="text-zinc-500 text-xs">Before the brake (FYI): {blocks.targets}</div>
             <div>Brake (VAMS): {blocks.scales}</div>
             <div>Max targets: {formatMaxTargets()}</div>
           </div>
@@ -879,7 +879,6 @@ export function GhostRegimeClient({
                       isCrowded={isCrowded}
                       btcScale={data.btc_scale}
                       cashBreakdown={cashBreakdown}
-                      cashTargetPct={cashBreakdown.cashTarget}
                     />
                   </div>
                   {copyText && (
@@ -1144,7 +1143,7 @@ export function GhostRegimeClient({
         <GlassCard className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold text-zinc-50">
-                <Tooltip content="Today targets = posture (Risk On/Off). Max targets = full baseline. Actuals = what we hold after VAMS scales.">
+                <Tooltip content="Before the brake = Risk On/Off targets. Max targets = full baseline. Hold now = what we hold after Brake (VAMS).">
                   Allocations
                 </Tooltip>
               </h2>
@@ -1209,6 +1208,7 @@ export function GhostRegimeClient({
             </div>
             ) : (
             <div className="space-y-4">
+              <p className="text-[10px] text-zinc-500">Percent of max exposure (60/30/10 baseline)</p>
               {(() => {
                 const max = getMaxTargets();
                 const breakdown = computeCashBreakdown(data);
@@ -1225,9 +1225,9 @@ export function GhostRegimeClient({
                     <p className="text-[10px] text-zinc-500 pt-2 border-t border-zinc-800">
                       Cash: {(data.cash * 100).toFixed(0)}%
                       {(breakdown.cashTarget > 0.005 || breakdown.cashFromThrottles > 0.005) && (
-                        <> ({breakdown.cashTarget > 0.005 && `${(breakdown.cashTarget * 100).toFixed(0)}% posture`}
+                        <> ({breakdown.cashTarget > 0.005 && `${(breakdown.cashTarget * 100).toFixed(0)}% from starting point`}
                         {breakdown.cashTarget > 0.005 && breakdown.cashFromThrottles > 0.005 && ' + '}
-                        {breakdown.cashFromThrottles > 0.005 && `${(breakdown.cashFromThrottles * 100).toFixed(0)}% throttle`})</>
+                        {breakdown.cashFromThrottles > 0.005 && `${(breakdown.cashFromThrottles * 100).toFixed(0)}% from brake`})</>
                       )}
                     </p>
                   </>
@@ -1241,10 +1241,10 @@ export function GhostRegimeClient({
               const cashTargetPct = (breakdown.cashTarget * 100).toFixed(1);
               const cashFromThrottlesPct = (breakdown.cashFromThrottles * 100).toFixed(1);
               if (breakdown.cashTarget > 0.005) {
-                lines.push(`Base cash (posture): ${cashTargetPct}%.`);
+                lines.push(`Base cash (from starting point): ${cashTargetPct}%.`);
               }
               if (breakdown.cashFromThrottles > 0.005 && breakdown.throttleSourceNames.length > 0) {
-                lines.push(`Extra cash from throttling: ${cashFromThrottlesPct}% (${breakdown.throttleSourceNames.join('/')}).`);
+                lines.push(`Extra cash from brake: ${cashFromThrottlesPct}% (${breakdown.throttleSourceNames.join('/')}).`);
               }
               if (lines.length === 0) return null;
               return (

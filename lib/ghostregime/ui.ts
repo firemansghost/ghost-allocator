@@ -136,9 +136,9 @@ export function formatSleeveLine(
 }
 
 /**
- * Cash breakdown: base (posture) cash vs throttle cash
+ * Cash breakdown: base (from starting point) cash vs brake cash
  * Base cash = 1 - (stocks_target + gold_target + btc_target) — implied by Risk Off targets
- * Throttle cash = sum of (target - actual) for each asset where scale < 1
+ * Brake cash = sum of (target - actual) for each asset where scale < 1
  */
 export interface CashBreakdown {
   cashTarget: number;
@@ -221,7 +221,7 @@ export function formatCashPillLabel(sources: string[]): string {
     return `Cash from ${formatCashSourceLabel(sources[0])}`;
   }
   // Multiple sources: use generic label
-  return 'Cash from throttling';
+  return 'Cash from brake';
 }
 
 /**
@@ -370,7 +370,7 @@ export function buildShareSummary(
     header,
     `Regime: ${data.regime} | Risk: ${data.risk_regime}`,
     `Hold now (Actual): ${blocks.actual}`,
-    `Starting point (before brake): ${blocks.targets}`,
+    `Before the brake (FYI): ${blocks.targets}`,
     `Brake (VAMS): ${blocks.scales}`,
     `Max targets: ${formatMaxTargets()}`,
   ];
@@ -1435,9 +1435,9 @@ export function buildActionableReadLine(params: {
     parts.push(`BTC throttled (${scaleLabel})`);
   }
   
-  // Add cash from throttling
+  // Add cash from brake
   if (params.cashPct > 0.01 && params.cashSources.length > 0) {
-    parts.push(`Cash from throttling: ${params.cashSources.join(', ')}`);
+    parts.push(`Cash from brake: ${params.cashSources.join(', ')}`);
   }
   
   // Add Flip Watch
