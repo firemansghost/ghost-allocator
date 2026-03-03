@@ -1,5 +1,19 @@
 # TASK LOG
 
+## 2026-01-21 — GhostRegime clarity + KISS % of Max Exposure view
+Completed:
+- getMaxTargets(), formatMaxTargets(), pctOfMax() in lib/ghostregime/ui.ts
+- Top summary: "Max targets: 60/30/10" + "Today targets: ..."
+- buildShareSummary: Max targets + Today targets
+- Allocations card: formatSleeveLine (Today target • Max • Scale) replaces bucket wording
+- KISS toggle: Exposure vs % of Max; KISS shows pctOfMax bars + Cash (posture + throttle)
+- lib/ghostregime/__tests__/maxExposure.test.ts
+- No model/math changes
+
+Verification: npm run build, npm run lint, npm run test:max-exposure
+
+---
+
 ## 2026-01-21 — Fix GhostRegime Targets/Scales/Actual math display + cash attribution
 Completed:
 - lib/ghostregime/ui.ts: computeCashBreakdown() (cashTarget, cashFromThrottles, throttleSourceNames)

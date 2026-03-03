@@ -1,11 +1,36 @@
 /**
  * GhostRegime UI Helpers
- * 
+ *
  * Pure deterministic functions for formatting and deriving display information
  * for the GhostRegime page UI. No fetches, no hooks, no side effects.
  */
 
+import { ALLOCATION_TARGETS } from './config';
 import type { GhostRegimeRow, RegimeType, SignalReceipt } from './types';
+
+/**
+ * Max targets for display (full baseline 60/30/10).
+ * Display-only; does not change allocation math.
+ */
+export function getMaxTargets(): { stocks: number; gold: number; btc: number } {
+  return {
+    stocks: Math.max(ALLOCATION_TARGETS.STOCKS_RISK_ON, ALLOCATION_TARGETS.STOCKS_RISK_OFF),
+    gold: ALLOCATION_TARGETS.GOLD,
+    btc: Math.max(ALLOCATION_TARGETS.BTC_RISK_ON, ALLOCATION_TARGETS.BTC_RISK_OFF),
+  };
+}
+
+/** Format max targets as "60/30/10" */
+export function formatMaxTargets(): string {
+  const m = getMaxTargets();
+  return `${(m.stocks * 100).toFixed(0)}/${(m.gold * 100).toFixed(0)}/${(m.btc * 100).toFixed(0)}`;
+}
+
+/** Percent of max exposure: actual / maxTarget, clamped 0–100 */
+export function pctOfMax(actual: number, maxTarget: number): number {
+  if (maxTarget <= 0) return 0;
+  return Math.min(100, Math.max(0, (actual / maxTarget) * 100));
+}
 
 /**
  * Sort receipts by strength (absolute vote value) or keep default order
@@ -89,6 +114,25 @@ export function formatBucketUtilizationLine(bucketPct: number, scale: number): s
   const utilizationPct = (scale * 100).toFixed(0);
   const scaleLabel = formatScaleLabel(scale);
   return `${utilizationPct}% of your ${bucketPercent}% bucket (scale ${scale.toFixed(1)} • ${scaleLabel})`;
+}
+
+/**
+ * Format sleeve line for Allocations card: Today target • Max • Scale
+ * Replaces bucket wording with clearer Today/Max framing.
+ */
+export function formatSleeveLine(
+  todayTarget: number,
+  maxTarget: number,
+  scale: number
+): string {
+  const todayPct = (todayTarget * 100).toFixed(0);
+  const maxPct = (maxTarget * 100).toFixed(0);
+  const scaleLabel = formatScaleLabel(scale);
+  const parts = [`Today target ${todayPct}%`, `Max ${maxPct}%`, `Scale ${scale.toFixed(1)}`];
+  if (scale < 1) {
+    parts.push(scaleLabel);
+  }
+  return parts.join(' • ');
 }
 
 /**
@@ -308,7 +352,7 @@ function getStatusLabelForSummary(status: string): string {
 
 /**
  * Build share summary string for clipboard
- * Format: GhostRegime — date (UTC) — status; Regime | Risk; Targets; Scales; Actual
+ * Format: GhostRegime — date (UTC) — status; Regime | Risk; Max targets; Today targets; Scales; Actual
  */
 export function buildShareSummary(
   data: GhostRegimeRow,
@@ -325,7 +369,8 @@ export function buildShareSummary(
   const lines = [
     header,
     `Regime: ${data.regime} | Risk: ${data.risk_regime}`,
-    `Targets: ${blocks.targets}`,
+    `Max targets: ${formatMaxTargets()}`,
+    `Today targets: ${blocks.targets}`,
     `Scales: ${blocks.scales}`,
     `Actual: ${blocks.actual}`,
   ];
@@ -362,7 +407,7 @@ export function buildMicroFlowLine(data: GhostRegimeRow | null): string | null {
   const scales = `${stocksScale}/${goldScale}/${btcScale}`;
   const actuals = `${stocksActual}/${goldActual}/${btcActual}`;
 
-  return `Targets (${targets}) → Scales (${scales}) → Actual (${actuals}) → Cash (${cash})`;
+  return `Today (${targets}) → Scales (${scales}) → Actual (${actuals}) → Cash (${cash})`;
 }
 
 /**

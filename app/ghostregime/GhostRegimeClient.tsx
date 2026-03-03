@@ -25,8 +25,12 @@ import type { GhostRegimeRow, RegimeType } from '@/lib/ghostregime/types';
 import {
   formatBucketUtilizationLine,
   formatScaleLabel,
+  formatSleeveLine,
   getCashSources,
   computeCashBreakdown,
+  getMaxTargets,
+  formatMaxTargets,
+  pctOfMax,
   buildTodaySnapshotBlocks,
   buildShareSummary,
   buildMicroFlowLine,
@@ -134,6 +138,37 @@ import {
 } from '@/lib/ghostregime/ghostregimePageCopy';
 import Link from 'next/link';
 
+const colorClasses = {
+  amber: 'bg-amber-400',
+  blue: 'bg-blue-400',
+  purple: 'bg-purple-400',
+} as const;
+
+function KissBar({
+  label,
+  pct,
+  color,
+}: {
+  label: string;
+  pct: number;
+  color: 'amber' | 'blue' | 'purple';
+}) {
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center justify-between text-xs">
+        <span className="text-zinc-300 font-medium">{label}</span>
+        <span className="font-semibold text-zinc-200">{pct.toFixed(0)}% of max</span>
+      </div>
+      <div className="relative h-3 rounded-full bg-zinc-800/50 overflow-hidden">
+        <div
+          className={`h-full ${colorClasses[color]} transition-all duration-300`}
+          style={{ width: `${Math.min(100, pct)}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export interface HealthStatus {
   ok: boolean;
   status: 'OK' | 'WARN' | 'NOT_READY';
@@ -192,6 +227,7 @@ export function GhostRegimeClient({
   const compareTriggerRef = useRef<HTMLButtonElement | null>(null);
   const [showParity, setShowParity] = useState(false);
   const [parityEnabled, setParityEnabled] = useState(false);
+  const [allocationView, setAllocationView] = useState<'exposure' | 'pctOfMax'>('exposure');
 
   // Check if parity is enabled (client-side only)
   useEffect(() => {
@@ -752,7 +788,8 @@ export function GhostRegimeClient({
         return blocks ? (
         <div className="space-y-1">
           <div className="text-sm text-zinc-300 leading-relaxed font-mono space-y-0.5">
-            <div>Targets: {blocks.targets}</div>
+            <div>Max targets: {formatMaxTargets()}</div>
+            <div>Today targets: {blocks.targets}</div>
             <div>Scales: {blocks.scales}</div>
             <div>Actual: {blocks.actual}</div>
           </div>
@@ -1098,11 +1135,38 @@ export function GhostRegimeClient({
 
         {/* Row 1, Col 2: Allocations */}
         <GlassCard className="p-6">
-            <h2 className="text-sm font-semibold text-zinc-50 mb-4">
-              <Tooltip content="Targets = the plan (top-down, based on regime). Actuals = what we hold after VAMS scales things to 100% / 50% / 0%. The gap usually shows up as cash.">
-                Allocations
-              </Tooltip>
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-semibold text-zinc-50">
+                <Tooltip content="Today targets = posture (Risk On/Off). Max targets = full baseline. Actuals = what we hold after VAMS scales.">
+                  Allocations
+                </Tooltip>
+              </h2>
+              <div className="flex gap-1">
+                <button
+                  type="button"
+                  onClick={() => setAllocationView('exposure')}
+                  className={`px-2 py-1 text-[10px] font-medium rounded transition ${
+                    allocationView === 'exposure'
+                      ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40'
+                      : 'text-zinc-400 hover:text-zinc-300 border border-zinc-700 hover:border-zinc-600'
+                  }`}
+                >
+                  Exposure
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAllocationView('pctOfMax')}
+                  className={`px-2 py-1 text-[10px] font-medium rounded transition ${
+                    allocationView === 'pctOfMax'
+                      ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40'
+                      : 'text-zinc-400 hover:text-zinc-300 border border-zinc-700 hover:border-zinc-600'
+                  }`}
+                >
+                  % of Max
+                </button>
+              </div>
+            </div>
+            {allocationView === 'exposure' ? (
             <div className="space-y-4">
               <AllocationBar
                 label="Stocks"
@@ -1110,7 +1174,7 @@ export function GhostRegimeClient({
                 actual={data.stocks_actual}
                 scale={data.stocks_scale}
                 color="amber"
-                bucketScaleLine={formatBucketUtilizationLine(data.stocks_target, data.stocks_scale)}
+                bucketScaleLine={formatSleeveLine(data.stocks_target, getMaxTargets().stocks, data.stocks_scale)}
               />
               <AllocationBar
                 label="Gold"
@@ -1118,7 +1182,7 @@ export function GhostRegimeClient({
                 actual={data.gold_actual}
                 scale={data.gold_scale}
                 color="blue"
-                bucketScaleLine={formatBucketUtilizationLine(data.gold_target, data.gold_scale)}
+                bucketScaleLine={formatSleeveLine(data.gold_target, getMaxTargets().gold, data.gold_scale)}
               />
               <AllocationBar
                 label="Bitcoin"
@@ -1126,7 +1190,7 @@ export function GhostRegimeClient({
                 actual={data.btc_actual}
                 scale={data.btc_scale}
                 color="purple"
-                bucketScaleLine={formatBucketUtilizationLine(data.btc_target, data.btc_scale)}
+                bucketScaleLine={formatSleeveLine(data.btc_target, getMaxTargets().btc, data.btc_scale)}
               />
               <AllocationBar
                 label="Cash (unallocated / leftover)"
@@ -1136,7 +1200,35 @@ export function GhostRegimeClient({
                 isCash={true}
               />
             </div>
-            {data.cash > 0.01 && (() => {
+            ) : (
+            <div className="space-y-4">
+              {(() => {
+                const max = getMaxTargets();
+                const breakdown = computeCashBreakdown(data);
+                const stocksPct = pctOfMax(data.stocks_actual, max.stocks);
+                const goldPct = pctOfMax(data.gold_actual, max.gold);
+                const btcPct = pctOfMax(data.btc_actual, max.btc);
+                return (
+                  <>
+                    <div className="space-y-3">
+                      <KissBar label="Stocks" pct={stocksPct} color="amber" />
+                      <KissBar label="Gold" pct={goldPct} color="blue" />
+                      <KissBar label="Bitcoin" pct={btcPct} color="purple" />
+                    </div>
+                    <p className="text-[10px] text-zinc-500 pt-2 border-t border-zinc-800">
+                      Cash: {(data.cash * 100).toFixed(0)}%
+                      {(breakdown.cashTarget > 0.005 || breakdown.cashFromThrottles > 0.005) && (
+                        <> ({breakdown.cashTarget > 0.005 && `${(breakdown.cashTarget * 100).toFixed(0)}% posture`}
+                        {breakdown.cashTarget > 0.005 && breakdown.cashFromThrottles > 0.005 && ' + '}
+                        {breakdown.cashFromThrottles > 0.005 && `${(breakdown.cashFromThrottles * 100).toFixed(0)}% throttle`})</>
+                      )}
+                    </p>
+                  </>
+                );
+              })()}
+            </div>
+            )}
+            {allocationView === 'exposure' && data.cash > 0.01 && (() => {
               const breakdown = computeCashBreakdown(data);
               const lines: string[] = [];
               const cashTargetPct = (breakdown.cashTarget * 100).toFixed(1);
@@ -1154,7 +1246,7 @@ export function GhostRegimeClient({
                 </p>
               );
             })()}
-            {buildMicroFlowLine(data) && (
+            {allocationView === 'exposure' && buildMicroFlowLine(data) && (
               <div className="mt-4 pt-4 border-t border-zinc-800">
                 <p className="text-[10px] text-zinc-400 font-mono">
                   {buildMicroFlowLine(data)}
