@@ -1,5 +1,18 @@
 # TASK LOG
 
+## 2026-01-21 — GhostRegime Nerd Mode: remove bucket wording, match Hold/Brake/Max language
+Completed:
+- Nerd Mode Allocations: replaced formatBucketUtilizationLine with formatSleeveLine (shared with main Allocations card)
+- Lines now: "Stocks 30.0% (Starting point 30% • Max 60% • Brake 1.0)" etc.
+- BTC-off case: "Brake 0.0 • off → goes to cash"
+- Cash: "(unallocated/leftover)"
+- Added debug hint: "Debug view. Use 'Hold now' above for the practical instruction."
+- Updated Allocations tooltip to use Starting point / Max / Hold now wording
+
+Verification: npm run build, npm run lint
+
+---
+
 ## 2026-01-21 — Builder: added Weekly check card linking to GhostRegime
 Completed:
 - GlassCard near bottom of /builder results (after Details behind the plan)

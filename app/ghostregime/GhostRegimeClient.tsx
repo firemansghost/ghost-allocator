@@ -23,7 +23,6 @@ import { FreshnessBadge } from '@/components/ghostregime/FreshnessBadge';
 import { ParityPanel } from '@/components/ghostregime/ParityPanel';
 import type { GhostRegimeRow, RegimeType } from '@/lib/ghostregime/types';
 import {
-  formatBucketUtilizationLine,
   formatScaleLabel,
   formatSleeveLine,
   getCashSources,
@@ -1931,8 +1930,11 @@ export function GhostRegimeClient({
 
           {/* Advanced: Allocations */}
           <GlassCard className="p-4 sm:p-5 space-y-3">
+            <p className="text-xs text-zinc-500">
+              Debug view. Use &quot;Hold now&quot; above for the practical instruction.
+            </p>
             <h2 className="text-sm font-semibold text-zinc-50">
-              <Tooltip content="Targets = the plan (top-down, based on regime). Actuals = what we hold after VAMS scales things to 100% / 50% / 0%. The gap usually shows up as cash.">
+              <Tooltip content="Starting point = before brake (Risk On/Off). Max = full baseline. Hold now = actual after Brake (VAMS).">
                 Allocations
               </Tooltip>
             </h2>
@@ -1940,24 +1942,24 @@ export function GhostRegimeClient({
               <div className="flex justify-between">
                 <span className="text-zinc-300">Stocks</span>
                 <span className="text-zinc-100">
-                  {(data.stocks_actual * 100).toFixed(1)}% ({formatBucketUtilizationLine(data.stocks_target, data.stocks_scale)})
+                  {(data.stocks_actual * 100).toFixed(1)}% ({formatSleeveLine(data.stocks_target, getMaxTargets().stocks, data.stocks_scale)})
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-zinc-300">Gold</span>
                 <span className="text-zinc-100">
-                  {(data.gold_actual * 100).toFixed(1)}% ({formatBucketUtilizationLine(data.gold_target, data.gold_scale)})
+                  {(data.gold_actual * 100).toFixed(1)}% ({formatSleeveLine(data.gold_target, getMaxTargets().gold, data.gold_scale)})
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-zinc-300">BTC</span>
                 <span className="text-zinc-100">
-                  {(data.btc_actual * 100).toFixed(1)}% ({formatBucketUtilizationLine(data.btc_target, data.btc_scale)})
+                  {(data.btc_actual * 100).toFixed(1)}% ({formatSleeveLine(data.btc_target, getMaxTargets().btc, data.btc_scale)})
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-zinc-300">Cash</span>
-                <span className="text-zinc-100">{(data.cash * 100).toFixed(1)}% (unallocated)</span>
+                <span className="text-zinc-100">{(data.cash * 100).toFixed(1)}% (unallocated/leftover)</span>
               </div>
             </div>
           </GlassCard>
