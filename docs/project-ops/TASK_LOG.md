@@ -1,5 +1,16 @@
 # TASK LOG
 
+## 2026-01-21 — GhostRegime terminology consistency pass
+Completed:
+- Main page glossary link: "What do Targets / Scales / Actual mean?" → "What do Hold now / Brake / Max targets mean?"
+- /ghostregime/how-it-works: Step 1 (Max targets / Before the brake), Step 2 (Brake / Hold now); "targets vs actuals" → Hold now / Cash now
+- Glossary entry targets-scales-actual: term and short updated to new wording
+- No engine/API changes
+
+Verification: npm run build, npm run lint
+
+---
+
 ## 2026-01-21 — GhostRegime clarity: % of Max default, How It Works rewrite
 Completed:
 - Allocations card defaults to "% of Max" (persist choice in localStorage)

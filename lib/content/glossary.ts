@@ -339,10 +339,10 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
   },
   {
     id: 'targets-scales-actual',
-    term: 'Targets vs Scales vs Actual',
+    term: 'Hold now / Brake / Max targets',
     category: 'GhostRegime',
-    short: 'Targets: baseline weights. Scales: how much to take today (full/half/off). Actual: target × scale.',
-    why: 'The gap between target and actual often shows up as cash until you rebalance.',
+    short: 'Max targets: full-risk baseline (60/30/10). Before the brake: what the regime allows. Hold now: what you hold after the brake. Cash now: base cash + what the brake kicked out.',
+    why: 'Hold now is the practical instruction. The brake can cut exposure when volatility spikes.',
     related: ['regime', 'vams'],
   },
   {

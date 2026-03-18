@@ -98,8 +98,8 @@ export default function HowItWorksPage() {
             GhostRegime does two jobs:
           </p>
           <ol className="list-decimal list-inside space-y-1 ml-2">
-            <li>Sets the "target" risk level based on market conditions</li>
-            <li>Applies a safety brake if the trend weakens or volatility spikes</li>
+            <li>Sets <strong>Before the brake</strong> (what the regime would allow) based on market conditions</li>
+            <li>Applies the <strong>brake</strong> if the trend weakens or volatility spikes</li>
           </ol>
           <p className="italic">
             Think: gas pedal + brake pedal. Same car. Different road conditions.
@@ -107,12 +107,12 @@ export default function HowItWorksPage() {
         </div>
       </GlassCard>
 
-      {/* Step 1 — Top-Down Overlay */}
+      {/* Step 1 — Max targets / Before the brake */}
       <GlassCard className="p-6">
-        <h2 className="text-sm font-semibold text-zinc-50 mb-3">Step 1: Top-Down Risk Overlay (Targets)</h2>
+        <h2 className="text-sm font-semibold text-zinc-50 mb-3">Step 1: Max targets and Before the brake</h2>
         <div className="space-y-3 text-xs text-zinc-300 leading-relaxed">
           <p>
-            First, GhostRegime classifies the market into one of four regimes:
+            <strong>Max targets</strong> are your full-risk baseline (60/30/10). First, GhostRegime classifies the market into one of four regimes:
           </p>
           <ul className="list-disc list-inside space-y-1 ml-2">
             <li><strong>GOLDILOCKS</strong> (Risk On)</li>
@@ -121,39 +121,39 @@ export default function HowItWorksPage() {
             <li><strong>DEFLATION</strong> (Risk Off)</li>
           </ul>
           <p>
-            When the market is Risk On, we carry more exposure.
+            When the market is Risk On, we carry more exposure. When it&apos;s Risk Off, we carry less.
           </p>
           <p>
-            When the market is Risk Off, we carry less exposure.
+            <strong>Before the brake</strong> is what the regime would allow before any safety cuts — the starting point.
           </p>
           <div className="mt-3 p-2 rounded-md border border-amber-400/30 bg-amber-400/10">
             <p className="text-[11px] text-amber-200">
-              <strong>Plain-English:</strong> Risk On = conditions support taking risk. Risk Off = conditions say "maybe don't be a hero."
+              <strong>Plain-English:</strong> Risk On = conditions support taking risk. Risk Off = conditions say &quot;maybe don&apos;t be a hero.&quot;
             </p>
           </div>
         </div>
       </GlassCard>
 
-      {/* Step 2 — Bottom-Up Overlay */}
+      {/* Step 2 — Brake / Hold now */}
       <GlassCard className="p-6">
-        <h2 className="text-sm font-semibold text-zinc-50 mb-3">Step 2: Bottom-Up Overlay (Actuals)</h2>
+        <h2 className="text-sm font-semibold text-zinc-50 mb-3">Step 2: Brake (VAMS) and Hold now</h2>
         <div className="space-y-3 text-xs text-zinc-300 leading-relaxed">
           <p>
-            Next, GhostRegime looks at each asset's trend signal and adjusts your exposure:
+            Next, the <strong>brake</strong> (VAMS — volatility-adjusted momentum) looks at each asset&apos;s trend signal and can cut exposure:
           </p>
           <ul className="list-disc list-inside space-y-1 ml-2">
-            <li><strong>Bullish</strong> → hold 100% of the target</li>
-            <li><strong>Neutral</strong> → hold 50% of the target</li>
-            <li><strong>Bearish</strong> → hold 0% of the target (yes, cash is a position)</li>
+            <li><strong>Bullish</strong> → hold 100% of the starting point</li>
+            <li><strong>Neutral</strong> → hold 50% of the starting point</li>
+            <li><strong>Bearish</strong> → hold 0% (yes, cash is a position)</li>
           </ul>
           <p>
-            We call this the VAMS signal (volatility-adjusted momentum). Translation:
+            <strong>Hold now</strong> is what you should actually hold after the brake is applied — the practical instruction.
           </p>
           <p className="italic">
-            "Is the trend still working… and is it getting dangerously choppy?"
+            &quot;Is the trend still working… and is it getting dangerously choppy?&quot;
           </p>
           <p className="font-semibold text-amber-300 mt-3">
-            One-liner: When the market starts acting like a drunk raccoon, VAMS sobers the portfolio up.
+            One-liner: When the market starts acting like a drunk raccoon, the brake sobers the portfolio up.
           </p>
         </div>
       </GlassCard>
@@ -163,7 +163,7 @@ export default function HowItWorksPage() {
         <h2 className="text-sm font-semibold text-zinc-50 mb-3">What You Do With the Signal</h2>
         <div className="space-y-3 text-xs text-zinc-300 leading-relaxed">
           <p>
-            GhostRegime publishes "targets vs actuals." Your job is simple:
+            GhostRegime publishes <strong>Hold now</strong> (what to hold) and <strong>Cash now</strong> (base cash plus anything the brake kicked out). Your job is simple:
           </p>
           <ul className="list-disc list-inside space-y-1 ml-2">
             <li>If exposures increase, you DCA in (calmly, like an adult)</li>
@@ -187,7 +187,7 @@ export default function HowItWorksPage() {
             <div className="p-3 rounded-md border border-amber-400/30 bg-amber-400/10">
               <h3 className="text-xs font-semibold text-amber-300 mb-1">Option A: Rebalance on signal changes (recommended)</h3>
               <p className="text-[11px] text-zinc-300">
-                When GhostRegime changes exposure, you rebalance to match.
+                When GhostRegime changes Hold now, you rebalance to match.
               </p>
             </div>
             <div className="p-3 rounded-md border border-amber-400/30 bg-amber-400/10">
