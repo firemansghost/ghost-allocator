@@ -226,7 +226,11 @@ export function GhostRegimeClient({
   const compareTriggerRef = useRef<HTMLButtonElement | null>(null);
   const [showParity, setShowParity] = useState(false);
   const [parityEnabled, setParityEnabled] = useState(false);
-  const [allocationView, setAllocationView] = useState<'exposure' | 'pctOfMax'>('exposure');
+  const [allocationView, setAllocationView] = useState<'exposure' | 'pctOfMax'>(() => {
+    if (typeof window === 'undefined') return 'pctOfMax';
+    const stored = localStorage.getItem('ghost_regime_allocation_view');
+    return stored === 'exposure' ? 'exposure' : 'pctOfMax';
+  });
 
   // Check if parity is enabled (client-side only)
   useEffect(() => {
@@ -1149,7 +1153,10 @@ export function GhostRegimeClient({
               <div className="flex gap-1">
                 <button
                   type="button"
-                  onClick={() => setAllocationView('exposure')}
+                  onClick={() => {
+                    setAllocationView('exposure');
+                    localStorage.setItem('ghost_regime_allocation_view', 'exposure');
+                  }}
                   className={`px-2 py-1 text-[10px] font-medium rounded transition ${
                     allocationView === 'exposure'
                       ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40'
@@ -1160,7 +1167,10 @@ export function GhostRegimeClient({
                 </button>
                 <button
                   type="button"
-                  onClick={() => setAllocationView('pctOfMax')}
+                  onClick={() => {
+                    setAllocationView('pctOfMax');
+                    localStorage.setItem('ghost_regime_allocation_view', 'pctOfMax');
+                  }}
                   className={`px-2 py-1 text-[10px] font-medium rounded transition ${
                     allocationView === 'pctOfMax'
                       ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40'
@@ -1680,35 +1690,45 @@ export function GhostRegimeClient({
             <span className="text-amber-400 mt-0.5">•</span>
             <span>
               <strong className="text-zinc-200">
-                <Tooltip content="Targets = the plan (top-down, based on regime). Actuals = what we hold after VAMS scales things to 100% / 50% / 0%. The gap usually shows up as cash.">
-                  Targets (top-down)
+                <Tooltip content="Full-risk baseline: 60% stocks, 30% gold, 10% BTC.">
+                  Max targets
                 </Tooltip>
-              </strong>: Stocks and BTC scale up/down based on{' '}
-              <Tooltip content="Risk On: we give growth assets more leash. Risk Off: we cut exposure and play defense. Seatbelt, not bubble wrap.">
-                Risk On/Off
-              </Tooltip>
+              </strong>: Your full-risk baseline (60/30/10).
             </span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-amber-400 mt-0.5">•</span>
             <span>
               <strong className="text-zinc-200">
-                <Tooltip content="Targets = the plan (top-down, based on regime). Actuals = what we hold after VAMS scales things to 100% / 50% / 0%. The gap usually shows up as cash.">
-                  Actuals (bottom-up)
+                <Tooltip content="Risk On/Off targets before VAMS scales. The starting point.">
+                  Before the brake
                 </Tooltip>
-              </strong>:{' '}
-              <Tooltip content="Volatility-Adjusted Momentum Signal. Trend + a volatility filter. Bullish = 100% of target, Neutral = 50%, Bearish = 0%. It's how we avoid overreacting to every tiny wiggle.">
-                VAMS
-              </Tooltip> can reduce exposure to 50% or 0% when volatility is high
+              </strong>: What the regime would allow before any safety cuts.
             </span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-amber-400 mt-0.5">•</span>
-            <span><strong className="text-zinc-200">Cash:</strong> What's left when exposure is reduced — the portfolio's "I don't trust this market" expression</span>
+            <span>
+              <strong className="text-zinc-200">
+                <Tooltip content="What you hold after the brake (VAMS) is applied. The practical instruction.">
+                  Hold now
+                </Tooltip>
+              </strong>: What you should actually hold after the brake is applied.
+            </span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-amber-400 mt-0.5">•</span>
-            <span>Reality check: This won't protect you from every 2–5% wobble. It's built to help sidestep the 20% train wrecks — and get you back in when the trend turns.</span>
+            <span>
+              <strong className="text-zinc-200">
+                <Tooltip content="Base cash from the starting point plus whatever the brake released from risk assets.">
+                  Cash now
+                </Tooltip>
+              </strong>: Base cash plus anything the brake kicked out of risk assets.
+            </span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-amber-400 mt-0.5">•</span>
+            <span>Reality check: This won&apos;t save you from every 2–5% wobble. It&apos;s built to help sidestep the bigger train wrecks and get you back in when the trend turns.</span>
           </li>
         </ul>
       </GlassCard>

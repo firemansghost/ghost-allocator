@@ -1,5 +1,16 @@
 # TASK LOG
 
+## 2026-01-21 — GhostRegime clarity: % of Max default, How It Works rewrite
+Completed:
+- Allocations card defaults to "% of Max" (persist choice in localStorage)
+- How It Works card rewritten: Max targets, Before the brake, Hold now, Cash now
+- Reality-check line kept
+- No engine/math changes
+
+Verification: npm run build, npm run lint
+
+---
+
 ## 2026-01-21 — GhostRegime Nerd Mode: remove bucket wording, match Hold/Brake/Max language
 Completed:
 - Nerd Mode Allocations: replaced formatBucketUtilizationLine with formatSleeveLine (shared with main Allocations card)
