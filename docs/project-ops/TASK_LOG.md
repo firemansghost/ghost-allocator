@@ -1,5 +1,27 @@
 # TASK LOG
 
+## 2026-01-21 — GhostRegime polish: Cash now bar in % of Max view
+Completed:
+- % of Max Allocations: Cash now row with horizontal bar (zinc/neutral, not % of max)
+- Supporting breakdown text kept under cash bar
+- Caption clarified: risk sleeves vs actual cash %
+
+Verification: npm run build, npm run lint
+
+---
+
+## 2026-01-21 — GhostRegime clarity cleanup
+Completed:
+- % of Max hard default (no localStorage persistence)
+- Cash line added to % of Max view (Cash now X% + breakdown)
+- Top briefing simplified to 3 lines (Hold now, Why cash, Full-risk baseline)
+- Since last update line shortened (buildSimpleHistorySummary: Risk/Inflation agreement only)
+- "Use This Signal" → "What to do now"
+
+Verification: npm run build, npm run lint
+
+---
+
 ## 2026-01-21 — GhostRegime terminology consistency pass
 Completed:
 - Main page glossary link: "What do Targets / Scales / Actual mean?" → "What do Hold now / Brake / Max targets mean?"

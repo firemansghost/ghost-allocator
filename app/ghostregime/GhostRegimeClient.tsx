@@ -33,9 +33,10 @@ import {
   buildTodaySnapshotBlocks,
   buildShareSummary,
   buildMicroFlowLine,
+  buildWhyCashLine,
   REGIME_MAP,
   getRegimeMapPosition,
-  summarizeGhostRegimeChangeDetailed,
+  buildSimpleHistorySummary,
   describeAxisFromScores,
   formatVamsState,
   pickTopDrivers,
@@ -43,7 +44,6 @@ import {
   formatSignedNumber,
   computeAxisAgreement,
   formatAgreementBadge,
-  computeAgreementDelta,
   computeAgreementSeries,
   computeAxisStats,
   deriveVotedLabel,
@@ -168,6 +168,25 @@ function KissBar({
   );
 }
 
+/** Actual cash % — not "% of max"; neutral bar to read as posture, not a risk sleeve. */
+function CashNowBar({ pct }: { pct: number }) {
+  const w = Math.min(100, Math.max(0, pct));
+  return (
+    <div className="space-y-1 pt-1 border-t border-zinc-800/80">
+      <div className="flex items-center justify-between text-xs">
+        <span className="text-zinc-400 font-medium">Cash now</span>
+        <span className="font-semibold text-zinc-300">{pct.toFixed(0)}%</span>
+      </div>
+      <div className="relative h-3 rounded-full bg-zinc-800/50 overflow-hidden border border-zinc-700/40">
+        <div
+          className="h-full bg-zinc-500/70 transition-all duration-300"
+          style={{ width: `${w}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export interface HealthStatus {
   ok: boolean;
   status: 'OK' | 'WARN' | 'NOT_READY';
@@ -226,11 +245,7 @@ export function GhostRegimeClient({
   const compareTriggerRef = useRef<HTMLButtonElement | null>(null);
   const [showParity, setShowParity] = useState(false);
   const [parityEnabled, setParityEnabled] = useState(false);
-  const [allocationView, setAllocationView] = useState<'exposure' | 'pctOfMax'>(() => {
-    if (typeof window === 'undefined') return 'pctOfMax';
-    const stored = localStorage.getItem('ghost_regime_allocation_view');
-    return stored === 'exposure' ? 'exposure' : 'pctOfMax';
-  });
+  const [allocationView, setAllocationView] = useState<'exposure' | 'pctOfMax'>('pctOfMax');
 
   // Check if parity is enabled (client-side only)
   useEffect(() => {
@@ -495,21 +510,7 @@ export function GhostRegimeClient({
 
         if (validRows.length >= 2) {
           setHistoryAvailable(true);
-          const changes = summarizeGhostRegimeChangeDetailed(validRows[0], validRows[1]);
-          
-          // Add agreement trend lines if available
-          const agreementDelta = computeAgreementDelta(validRows[0], validRows[1]);
-          const agreementLines: string[] = [];
-          if (agreementDelta.risk) {
-            agreementLines.push(agreementDelta.risk.line);
-          }
-          if (agreementDelta.inflation) {
-            agreementLines.push(agreementDelta.inflation.line);
-          }
-          
-          // Combine all changes: agreement trends first, then other changes
-          const allChanges = [...agreementLines, ...changes];
-          const summary = allChanges.length > 0 ? allChanges.join('; ') : null;
+          const summary = buildSimpleHistorySummary(validRows[0], validRows[1]);
           setHistoryChangeSummary(summary);
         } else {
           setHistoryAvailable(false);
@@ -791,17 +792,10 @@ export function GhostRegimeClient({
         return blocks ? (
         <div className="space-y-1">
           <div className="text-sm text-zinc-300 leading-relaxed font-mono space-y-0.5">
-            <div>Hold now (Actual): {blocks.actual}</div>
-            <div className="text-zinc-500 text-xs">Before the brake (FYI): {blocks.targets}</div>
-            <div>Brake (VAMS): {blocks.scales}</div>
-            <div>Max targets: {formatMaxTargets()}</div>
+            <div><strong className="text-zinc-200">Hold now:</strong> {blocks.actual}</div>
+            <div className="text-xs text-zinc-400"><strong className="text-zinc-300">Why cash:</strong> {buildWhyCashLine(data)}</div>
+            <div><strong className="text-zinc-200">Full-risk baseline:</strong> {formatMaxTargets()}</div>
           </div>
-          <p className="text-xs text-zinc-500 mt-1.5">
-            Hold now is the instruction. The starting point can be reduced by the safety brake.
-          </p>
-          <p className="text-xs text-zinc-500">
-            Example: if BTC is off, its starting-point % becomes cash.
-          </p>
           <p className="text-[10px] mt-1.5">
             <Link
               href="/learn/glossary#targets-scales-actual"
@@ -1153,10 +1147,7 @@ export function GhostRegimeClient({
               <div className="flex gap-1">
                 <button
                   type="button"
-                  onClick={() => {
-                    setAllocationView('exposure');
-                    localStorage.setItem('ghost_regime_allocation_view', 'exposure');
-                  }}
+                  onClick={() => setAllocationView('exposure')}
                   className={`px-2 py-1 text-[10px] font-medium rounded transition ${
                     allocationView === 'exposure'
                       ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40'
@@ -1167,10 +1158,7 @@ export function GhostRegimeClient({
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    setAllocationView('pctOfMax');
-                    localStorage.setItem('ghost_regime_allocation_view', 'pctOfMax');
-                  }}
+                  onClick={() => setAllocationView('pctOfMax')}
                   className={`px-2 py-1 text-[10px] font-medium rounded transition ${
                     allocationView === 'pctOfMax'
                       ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40'
@@ -1217,28 +1205,35 @@ export function GhostRegimeClient({
             </div>
             ) : (
             <div className="space-y-4">
-              <p className="text-[10px] text-zinc-500">Percent of max exposure (60/30/10 baseline)</p>
+              <p className="text-[10px] text-zinc-500">
+                Risk sleeves: % of max (60/30/10 baseline). Cash now: actual % held.
+              </p>
               {(() => {
                 const max = getMaxTargets();
                 const breakdown = computeCashBreakdown(data);
                 const stocksPct = pctOfMax(data.stocks_actual, max.stocks);
                 const goldPct = pctOfMax(data.gold_actual, max.gold);
                 const btcPct = pctOfMax(data.btc_actual, max.btc);
+                const cashPct = data.cash * 100;
                 return (
                   <>
                     <div className="space-y-3">
                       <KissBar label="Stocks" pct={stocksPct} color="amber" />
                       <KissBar label="Gold" pct={goldPct} color="blue" />
                       <KissBar label="Bitcoin" pct={btcPct} color="purple" />
-                    </div>
-                    <p className="text-[10px] text-zinc-500 pt-2 border-t border-zinc-800">
-                      Cash: {(data.cash * 100).toFixed(0)}%
-                      {(breakdown.cashTarget > 0.005 || breakdown.cashFromThrottles > 0.005) && (
-                        <> ({breakdown.cashTarget > 0.005 && `${(breakdown.cashTarget * 100).toFixed(0)}% from starting point`}
-                        {breakdown.cashTarget > 0.005 && breakdown.cashFromThrottles > 0.005 && ' + '}
-                        {breakdown.cashFromThrottles > 0.005 && `${(breakdown.cashFromThrottles * 100).toFixed(0)}% from brake`})</>
+                      {data.cash > 0.01 && (
+                        <>
+                          <CashNowBar pct={cashPct} />
+                          {(breakdown.cashTarget > 0.005 || breakdown.cashFromThrottles > 0.005) && (
+                            <p className="text-[10px] text-zinc-500 mt-1 pl-0.5">
+                              {breakdown.cashTarget > 0.005 && `${(breakdown.cashTarget * 100).toFixed(0)}% from starting point`}
+                              {breakdown.cashTarget > 0.005 && breakdown.cashFromThrottles > 0.005 && ' + '}
+                              {breakdown.cashFromThrottles > 0.005 && `${(breakdown.cashFromThrottles * 100).toFixed(0)}% from brake`}
+                            </p>
+                          )}
+                        </>
                       )}
-                    </p>
+                    </div>
                   </>
                 );
               })()}
@@ -1735,7 +1730,7 @@ export function GhostRegimeClient({
 
       {/* Use This Signal - Posture guidance */}
       <GlassCard className="p-6 border-amber-400/30 bg-amber-400/5">
-        <h2 className="text-sm font-semibold text-zinc-50 mb-3">Use This Signal in Your Portfolio</h2>
+        <h2 className="text-sm font-semibold text-zinc-50 mb-3">What to do now</h2>
         <p className="text-xs text-zinc-300 leading-relaxed mb-3">
           For now: use GhostRegime as a posture check.
         </p>

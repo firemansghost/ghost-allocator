@@ -413,6 +413,42 @@ export function buildMicroFlowLine(data: GhostRegimeRow | null): string | null {
 }
 
 /**
+ * Build "Why cash" explanation for the 3-line briefing.
+ * Explains why cash is high or low in plain language.
+ */
+export function buildWhyCashLine(data: GhostRegimeRow): string {
+  const breakdown = computeCashBreakdown(data);
+  const riskLabel = data.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
+  const maxStr = formatMaxTargets();
+
+  const stocksTarget = (data.stocks_target * 100).toFixed(0);
+  const goldTarget = (data.gold_target * 100).toFixed(0);
+  const btcTarget = (data.btc_target * 100).toFixed(0);
+  const cashTargetPct = (breakdown.cashTarget * 100).toFixed(0);
+  const startingPoint =
+    breakdown.cashTarget >= 0.005
+      ? `${stocksTarget}/${goldTarget}/${btcTarget} + ${cashTargetPct} cash`
+      : `${stocksTarget}/${goldTarget}/${btcTarget}`;
+
+  if (data.cash < 0.05) {
+    return "Cash is low because we're near full risk.";
+  }
+
+  if (breakdown.cashFromThrottles > 0.005 && breakdown.throttleSourceNames.length > 0) {
+    const brakePct = (breakdown.cashFromThrottles * 100).toFixed(0);
+    const assetList =
+      breakdown.throttleSourceNames.length === 1
+        ? breakdown.throttleSourceNames[0]
+        : breakdown.throttleSourceNames.slice(0, -1).join(', ') +
+          ' and ' +
+          breakdown.throttleSourceNames[breakdown.throttleSourceNames.length - 1];
+    return `${riskLabel} cuts the full-risk mix down to ${startingPoint}, and ${assetList} ${breakdown.throttleSourceNames.length === 1 ? 'is' : 'are'} off today, so that extra ${brakePct}% stays in cash.`;
+  }
+
+  return `${riskLabel} cuts the full-risk mix down to ${startingPoint}.`;
+}
+
+/**
  * Regime Map Configuration
  * Maps regime types to their position in the 2x2 grid
  */
@@ -2005,6 +2041,45 @@ export function computeAgreementDelta(
   }
 
   return result;
+}
+
+/**
+ * Build a short, scannable "Since last update" summary.
+ * Uses agreement counts only (e.g. "Risk unchanged (2/3). Inflation unchanged (4/4).").
+ * Does not include regime changes, score deltas, or scale changes.
+ */
+export function buildSimpleHistorySummary(
+  currentRow: GhostRegimeRow,
+  previousRow: GhostRegimeRow
+): string | null {
+  const delta = computeAgreementDelta(currentRow, previousRow);
+  const parts: string[] = [];
+
+  if (delta.risk) {
+    const { current, prev, deltaPct } = delta.risk;
+    const currStr = `${current.agree}/${current.total}`;
+    if (Math.abs(deltaPct ?? 0) < 0.5) {
+      parts.push(`Risk unchanged (${currStr})`);
+    } else if ((deltaPct ?? 0) > 0) {
+      parts.push(`Risk improved (${prev.agree}/${prev.total} → ${currStr})`);
+    } else {
+      parts.push(`Risk worsened (${prev.agree}/${prev.total} → ${currStr})`);
+    }
+  }
+
+  if (delta.inflation) {
+    const { current, prev, deltaPct } = delta.inflation;
+    const currStr = `${current.agree}/${current.total}`;
+    if (Math.abs(deltaPct ?? 0) < 0.5) {
+      parts.push(`Inflation unchanged (${currStr})`);
+    } else if ((deltaPct ?? 0) > 0) {
+      parts.push(`Inflation improved (${prev.agree}/${prev.total} → ${currStr})`);
+    } else {
+      parts.push(`Inflation worsened (${prev.agree}/${prev.total} → ${currStr})`);
+    }
+  }
+
+  return parts.length > 0 ? parts.join('. ') : null;
 }
 
 /**
