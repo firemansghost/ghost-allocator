@@ -1,5 +1,17 @@
 # TASK LOG
 
+## 2026-01-21 — Builder / Models consistency and clarity pass
+Completed:
+- Aligned terminology: Voya balance (voya-only rows), Voya portion / Schwab portion (replaced user-facing “slice” for platform buckets); inside-slice explained consistently on Models + Builder
+- Models: intro + under-tab line for template → Onboarding/Builder → GhostRegime; CTAs “Personalize in Builder”, footer “Open Builder →” + Home; Voya+Schwab headings and cash rule copy tightened
+- Builder: personalized subtitle; Start here platform labels; Schwab cash fallback copy USFR-first (matches Models / Stable Value pairing); Weekly check bridge from personalized plan to GhostRegime
+- app/models/page.tsx metadata description updated
+- No portfolio math or allocation changes
+
+Verification: npm run build, npm run lint
+
+---
+
 ## 2026-01-21 — Models page polish (accordion, copy, USFR cash)
 Completed:
 - Branded chevron (amber SVG, rotate when open); first card open per tab on all breakpoints (no matchMedia)

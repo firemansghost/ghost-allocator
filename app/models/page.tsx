@@ -11,7 +11,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = buildMetadata({
   title: 'Model Portfolios - Ghost Allocator',
   description:
-    'Implementable templates using real OKC Voya funds. Conservative, Moderate, and Aggressive models for Voya-only and Voya+Schwab accounts.',
+    'Starting templates with real OKC Voya funds — Voya Only or Voya + Schwab. Use Builder for a personalized split; models show inside-slice fund and ETF mixes for education only.',
   path: '/models',
 });
 

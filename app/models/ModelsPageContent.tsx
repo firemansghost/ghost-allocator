@@ -65,7 +65,7 @@ export function ModelsPageContent() {
       <header className="space-y-2">
         <h1 className="text-2xl font-semibold tracking-tight">Model Portfolios</h1>
         <p className="text-sm text-zinc-300">
-          Implementable templates using real OKC Voya funds. Choose your platform to see allocations.
+          Starting templates using real OKC Voya funds. Pick a platform tab to see how the mix maps.
         </p>
       </header>
 
@@ -74,16 +74,17 @@ export function ModelsPageContent() {
         <div className="space-y-3">
           <h2 className="text-sm font-semibold text-zinc-50">Implementable Templates</h2>
           <p className="text-xs text-zinc-300 leading-relaxed">
-            These are implementable templates you can use as a starting point. Each shows real Voya
-            funds and, for Voya+Schwab, suggested Schwab ETFs. This page is for education and risk
-            framing — not financial advice.
+            Use these as starting templates — same risk bands as the Builder, but not personalized to
+            you. For your actual Voya vs Schwab split and targets, go through Onboarding → Builder.
+            Each view shows real Voya funds and, for Voya + Schwab, suggested Schwab ETFs. Education
+            and risk framing only — not financial advice.
           </p>
           <div className="flex flex-wrap gap-3 pt-2">
             <Link
               href="/onboarding"
               className="inline-flex items-center rounded-md bg-amber-400 px-4 py-2 text-xs font-semibold text-black hover:bg-amber-300 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
             >
-              Build my portfolio
+              Personalize in Builder
             </Link>
             <Link
               href="/learn"
@@ -120,6 +121,11 @@ export function ModelsPageContent() {
           Voya + Schwab
         </button>
       </div>
+
+      <p className="text-xs text-zinc-500">
+        Templates only — numbers here don&apos;t know your income floor or sweep cadence. Builder
+        personalizes the plan; GhostRegime is the weekly check after you implement.
+      </p>
 
       {/* Tab content */}
       {tab === 'voya_only' && (
@@ -220,13 +226,14 @@ export function ModelsPageContent() {
                 </summary>
                 <div className="px-5 sm:px-6 pb-5 sm:pb-6 pt-0 space-y-5">
                   <p className="text-xs text-zinc-400 border-l-2 border-amber-400/30 pl-3 leading-relaxed">
-                    These are inside-slice allocations. Use the Builder to get your actual Voya vs
-                    Schwab split.
+                    Inside-slice: each table is percent of that platform bucket (Voya portion or
+                    Schwab portion), not your whole 457. Your real Voya vs Schwab split comes from
+                    the Builder.
                   </p>
 
                   <div>
                     <h4 className="text-xs font-semibold text-zinc-300 mb-2">
-                      Voya slice (percent of Voya portion)
+                      Fund mix (% of Voya portion)
                     </h4>
                     <div className="overflow-x-auto">
                       <table className="w-full min-w-[280px] text-xs">
@@ -262,13 +269,13 @@ export function ModelsPageContent() {
                   </div>
 
                   <p className="text-[11px] text-zinc-500 leading-relaxed">
-                    Stable Value Option is the cash-like holding in Voya. USFR is the cash-equivalent
-                    parking spot in Schwab.
+                    Cash / cash-equivalent: Stable Value Option in Voya (cash-like). USFR in Schwab
+                    (cash-equivalent parking).
                   </p>
 
                   <div>
                     <h4 className="text-xs font-semibold text-zinc-300 mb-2">
-                      Schwab slice (percent of Schwab portion)
+                      Sleeve lineup (% of Schwab portion)
                     </h4>
                     <div className="overflow-x-auto">
                       <table className="w-full min-w-[280px] text-xs">
@@ -315,13 +322,19 @@ export function ModelsPageContent() {
         </div>
       )}
 
-      {/* Back Link */}
-      <div className="pt-4">
+      {/* Footer links */}
+      <div className="pt-4 flex flex-wrap gap-x-4 gap-y-2">
         <Link
-          href="/"
+          href="/onboarding"
           className="text-sm font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
         >
-          ← Back to Home
+          Open Builder →
+        </Link>
+        <Link
+          href="/"
+          className="text-sm font-medium text-zinc-400 hover:text-zinc-200 underline-offset-4 hover:underline"
+        >
+          ← Home
         </Link>
       </div>
     </div>

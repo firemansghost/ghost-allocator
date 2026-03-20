@@ -318,8 +318,8 @@ export default function Builder() {
           <h1 className="text-2xl font-semibold tracking-tight">Your Ghost Allocation</h1>
           <p className="mt-1 text-sm text-zinc-300">
             {platformSplit.platform === 'voya_only'
-              ? "Based on your answers and income floor, here's your Ghost sleeve blueprint and how to approximate it using the Voya 457 core menu."
-              : "Based on your answers and income floor, here's a post-60/40 Ghost sleeve allocation and how to implement it across Schwab ETFs and the Voya core menu."}
+              ? "Based on your answers and income floor, here's your personalized Ghost sleeve blueprint and how to approximate it using the Voya 457 core menu."
+              : "Based on your answers and income floor, here's your personalized post-60/40 Ghost sleeve allocation and how to implement it across Schwab ETFs and the Voya core menu."}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -363,8 +363,8 @@ export default function Builder() {
           <li>
             Your path:{' '}
             {platformSplit.platform === 'voya_only'
-              ? 'Voya-only (OKC Voya core menu).'
-              : 'Voya + Schwab (balance split + manual sweep).'}
+              ? 'Voya Only — OKC Voya core menu.'
+              : 'Voya + Schwab — balance split + manual sweep to BrokerageLink.'}
             {' '}
             <Link
               href="/onboarding"
@@ -556,7 +556,7 @@ export default function Builder() {
                     </div>
                     <span className="text-[11px] font-semibold text-amber-300">
                       {platformSplit.platform === 'voya_only'
-                        ? `${item.allocationPct}% of your 457`
+                        ? `${item.allocationPct}% of your Voya balance`
                         : `${item.allocationPct}% of Voya portion`}
                     </span>
                   </li>
@@ -579,7 +579,8 @@ export default function Builder() {
                 );
               })()}
               <p className="mt-1 text-[11px] text-zinc-500">
-                This mix represents ~100% of your 457 balance. Percentages are matched on role (growth vs defensive), not exact sleeve labels.
+                Voya-only means your OKC 457 is all in Voya — this mix is ~100% of your Voya balance.
+                Percentages are matched on role (growth vs defensive), not exact sleeve labels.
               </p>
             </>
           </GlassCard>
@@ -720,7 +721,7 @@ export default function Builder() {
                       Based on what you told us about your current Voya holdings, here's how to
                       get closer to the target mix.
                       {platformSplit.platform === 'voya_and_schwab' && (
-                        <> Numbers are percentages of the Voya slice of your 457, not the whole account.</>
+                        <> Numbers are percentages of your Voya portion (the Voya bucket of your 457), not the whole account.</>
                       )}
                     </p>
                     {voyaDeltaPlan.overweight.length > 0 || voyaDeltaPlan.underweight.length > 0 ? (
@@ -888,7 +889,7 @@ export default function Builder() {
                   return (
                     <div className="mt-2 pt-2 border-t border-zinc-700">
                       <p className="text-xs font-semibold text-zinc-200">
-                        Total (Voya slice): {voyaTotal.toFixed(1)}%
+                        Total (Voya portion): {voyaTotal.toFixed(1)}%
                       </p>
                       {diffFrom100 < 0.5 && diffFrom100 > 0.01 && (
                         <p className="text-[11px] text-zinc-500 mt-0.5">
@@ -915,7 +916,7 @@ export default function Builder() {
                 Schwab house model lineup ({platformSplit.targetSchwabPct}% of 457)
               </h2>
               <p className="text-xs text-zinc-300 leading-relaxed">
-                This is a house preset. Percentages are of your Schwab slice. This is for
+                This is a house preset. Percentages are of your Schwab portion. This is for
                 illustration only, not a recommendation.
               </p>
 
@@ -987,7 +988,7 @@ export default function Builder() {
                 illustration only, not a recommendation.
               </p>
               <p className="text-[11px] text-zinc-400 mt-1">
-                Schwab slice allocations (percent of your Schwab portion).
+                Each row below is percent of your Schwab portion (inside-slice, not your whole 457).
               </p>
               
               {/* Customize: Optional Tilts (Schwab only) */}
@@ -1036,7 +1037,7 @@ export default function Builder() {
                         </label>
                       </div>
                       <p className="text-xs text-zinc-400 mt-1">
-                        This adjusts the Schwab lineup only (percent of your Schwab slice).
+                        This adjusts the Schwab lineup only (percent of your Schwab portion).
                       </p>
                     </div>
                   </div>
@@ -1114,17 +1115,18 @@ export default function Builder() {
                           ) : isCash ? (
                             <div className="space-y-2 text-xs text-zinc-400">
                               <p>
-                                <span className="font-medium text-zinc-300">Option A (default):</span>{' '}
-                                Leave this portion as cash in the Schwab account (settlement/sweep).
+                                <span className="font-medium text-zinc-300">Standard here:</span>{' '}
+                                USFR as Schwab cash-equivalent — same rule as Model Portfolios (pairs
+                                with Stable Value Option in Voya).
                               </p>
                               <p>
-                                <span className="font-medium text-zinc-300">Option B:</span> If you
-                                prefer an instrument, park it in an ultra-short Treasury ETF like
-                                SGOV or BIL.
+                                <span className="font-medium text-zinc-300">If you skip the ETF:</span>{' '}
+                                settlement/sweep cash in the Schwab account is fine. Other ultra-short
+                                Treasury ETFs (e.g. SGOV, BIL) are alternatives if your plan allows.
                               </p>
                               <p className="text-[11px] text-zinc-500 italic">
-                                Note: ETFs can move slightly with rates and aren&apos;t the same as
-                                insured bank cash. Use what your plan allows.
+                                ETFs can move slightly with rates and aren&apos;t the same as insured
+                                bank cash.
                               </p>
                             </div>
                           ) : (
@@ -1145,7 +1147,7 @@ export default function Builder() {
                 return (
                   <div className="mt-3 pt-3 border-t border-zinc-700">
                     <p className="text-xs font-semibold text-zinc-200">
-                      Total (Schwab slice): {schwabTotal.toFixed(1)}%
+                      Total (Schwab portion): {schwabTotal.toFixed(1)}%
                     </p>
                     {diffFrom100 < 0.5 && diffFrom100 > 0.01 && (
                       <p className="text-[11px] text-zinc-500 mt-0.5">
@@ -1270,6 +1272,10 @@ export default function Builder() {
         <h2 className="text-sm font-semibold text-zinc-50">
           Weekly check (don&apos;t overthink it)
         </h2>
+        <p className="text-xs text-zinc-300 leading-relaxed">
+          You&apos;ve got a personalized plan on this page. After you implement it, GhostRegime is
+          the weekly habit — not another redesign, just a quick read on risk posture.
+        </p>
         <p className="text-xs text-zinc-300 leading-relaxed">
           Check GhostRegime once a week. It&apos;s your portfolio &quot;weather report&quot;.
         </p>
