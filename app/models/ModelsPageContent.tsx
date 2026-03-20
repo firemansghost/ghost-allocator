@@ -4,7 +4,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { GlassCard } from '@/components/GlassCard';
 import { buildVoyaImplementation } from '@/lib/voya';
@@ -12,10 +12,10 @@ import { selectModelPortfolio } from '@/lib/portfolioEngine';
 import { getStandardSchwabLineup } from '@/lib/schwabLineups';
 import type { QuestionnaireAnswers, RiskLevel } from '@/lib/types';
 
-const MODEL_TEMPLATES: { name: string; riskLevel: RiskLevel }[] = [
-  { name: 'Conservative', riskLevel: 2 },
-  { name: 'Moderate', riskLevel: 3 },
-  { name: 'Aggressive', riskLevel: 5 },
+const MODEL_TEMPLATES: { name: string; riskLevel: RiskLevel; tagline: string }[] = [
+  { name: 'Conservative', riskLevel: 2, tagline: 'More stability, less drama.' },
+  { name: 'Moderate', riskLevel: 3, tagline: 'Balanced growth with some ballast.' },
+  { name: 'Aggressive', riskLevel: 5, tagline: 'More upside, less cushion.' },
 ];
 
 function minimalAnswers(platform: 'voya_only' | 'voya_and_schwab'): QuestionnaireAnswers {
@@ -35,22 +35,30 @@ function minimalAnswers(platform: 'voya_only' | 'voya_and_schwab'): Questionnair
   };
 }
 
-/** Desktop (768px+): first card open by default. Mobile: closed. Avoids hydration mismatch. */
-function useFirstCardDefaultOpen() {
-  const [open, setOpen] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 768px)');
-    setOpen(mq.matches);
-    const handler = () => setOpen(mq.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
-  return open;
+function AccordionChevron() {
+  return (
+    <span
+      className="inline-flex shrink-0 text-amber-400/80 transition-transform duration-200 group-open:rotate-180"
+      aria-hidden
+    >
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="m6 9 6 6 6-6" />
+      </svg>
+    </span>
+  );
 }
 
 export function ModelsPageContent() {
   const [tab, setTab] = useState<'voya_only' | 'voya_schwab'>('voya_only');
-  const firstCardOpen = useFirstCardDefaultOpen();
 
   return (
     <div className="space-y-8">
@@ -116,24 +124,27 @@ export function ModelsPageContent() {
       {/* Tab content */}
       {tab === 'voya_only' && (
         <div className="space-y-4">
-          {MODEL_TEMPLATES.map(({ name, riskLevel }, index) => {
+          <p className="text-xs text-zinc-400">
+            These percentages are of your Voya balance.
+          </p>
+          {MODEL_TEMPLATES.map(({ name, riskLevel, tagline }, index) => {
             const impl = buildVoyaImplementation(minimalAnswers('voya_only'), riskLevel);
             const mix = impl.mix ?? [];
             const total = mix.reduce((s, m) => s + m.allocationPct, 0);
-            const isFirst = index === 0;
 
             return (
               <details
                 key={name}
-                open={isFirst ? firstCardOpen : undefined}
+                open={index === 0}
                 className="group rounded-2xl border border-amber-50/15 bg-neutral-900/60 backdrop-blur-xl shadow-[0_18px_45px_rgba(0,0,0,0.85)]"
               >
                 <summary className="cursor-pointer list-none p-5 sm:p-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded-2xl">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-zinc-50">{name}</h3>
-                    <span className="text-xs text-zinc-500 group-open:rotate-90 transition-transform">
-                      ▶
-                    </span>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="text-sm font-semibold text-zinc-50">{name}</h3>
+                      <p className="text-xs text-zinc-500 mt-0.5">{tagline}</p>
+                    </div>
+                    <AccordionChevron />
                   </div>
                 </summary>
                 <div className="px-5 sm:px-6 pb-5 sm:pb-6 pt-0">
@@ -177,7 +188,7 @@ export function ModelsPageContent() {
 
       {tab === 'voya_schwab' && (
         <div className="space-y-4">
-          {MODEL_TEMPLATES.map(({ name, riskLevel }, index) => {
+          {MODEL_TEMPLATES.map(({ name, riskLevel, tagline }, index) => {
             const impl = buildVoyaImplementation(minimalAnswers('voya_and_schwab'), riskLevel);
             const voyaMix = impl.mix ?? [];
             const voyaTotal = voyaMix.reduce((s, m) => s + m.allocationPct, 0);
@@ -191,24 +202,24 @@ export function ModelsPageContent() {
               'none'
             );
             const schwabTotal = schwabLineup.reduce((s, i) => s + i.weight, 0);
-            const isFirst = index === 0;
 
             return (
               <details
                 key={name}
-                open={isFirst ? firstCardOpen : undefined}
+                open={index === 0}
                 className="group rounded-2xl border border-amber-50/15 bg-neutral-900/60 backdrop-blur-xl shadow-[0_18px_45px_rgba(0,0,0,0.85)]"
               >
                 <summary className="cursor-pointer list-none p-5 sm:p-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded-2xl">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-zinc-50">{name}</h3>
-                    <span className="text-xs text-zinc-500 group-open:rotate-90 transition-transform">
-                      ▶
-                    </span>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="text-sm font-semibold text-zinc-50">{name}</h3>
+                      <p className="text-xs text-zinc-500 mt-0.5">{tagline}</p>
+                    </div>
+                    <AccordionChevron />
                   </div>
                 </summary>
                 <div className="px-5 sm:px-6 pb-5 sm:pb-6 pt-0 space-y-5">
-                  <p className="text-[11px] text-zinc-500">
+                  <p className="text-xs text-zinc-400 border-l-2 border-amber-400/30 pl-3 leading-relaxed">
                     These are inside-slice allocations. Use the Builder to get your actual Voya vs
                     Schwab split.
                   </p>
@@ -217,83 +228,88 @@ export function ModelsPageContent() {
                     <h4 className="text-xs font-semibold text-zinc-300 mb-2">
                       Voya slice (percent of Voya portion)
                     </h4>
-                  <div className="overflow-x-auto">
-                    <table className="w-full min-w-[280px] text-xs">
-                      <thead>
-                        <tr className="border-b border-zinc-700">
-                          <th className="text-left py-2 pr-4 font-semibold text-zinc-200">
-                            Fund name
-                          </th>
-                          <th className="text-right py-2 pr-4 font-semibold text-zinc-200">
-                            Allocation %
-                          </th>
-                          <th className="text-left py-2 font-semibold text-zinc-200">Role</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {voyaMix.map((item) => (
-                          <tr key={item.id} className="border-b border-zinc-800">
-                            <td className="py-2 pr-4 text-zinc-300">{item.name}</td>
-                            <td className="py-2 pr-4 text-right text-amber-300 font-medium">
-                              {item.allocationPct}%
-                            </td>
-                            <td className="py-2 text-zinc-400">{item.role}</td>
+                    <div className="overflow-x-auto">
+                      <table className="w-full min-w-[280px] text-xs">
+                        <thead>
+                          <tr className="border-b border-zinc-700">
+                            <th className="text-left py-2 pr-4 font-semibold text-zinc-200">
+                              Fund name
+                            </th>
+                            <th className="text-right py-2 pr-4 font-semibold text-zinc-200">
+                              Allocation %
+                            </th>
+                            <th className="text-left py-2 font-semibold text-zinc-200">Role</th>
                           </tr>
-                        ))}
-                        <tr className="border-t border-zinc-700 font-semibold">
-                          <td className="py-2 pr-4 text-zinc-200">Total</td>
-                          <td className="py-2 pr-4 text-right text-amber-300">{voyaTotal}%</td>
-                          <td className="py-2" />
-                        </tr>
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {voyaMix.map((item) => (
+                            <tr key={item.id} className="border-b border-zinc-800">
+                              <td className="py-2 pr-4 text-zinc-300">{item.name}</td>
+                              <td className="py-2 pr-4 text-right text-amber-300 font-medium">
+                                {item.allocationPct}%
+                              </td>
+                              <td className="py-2 text-zinc-400">{item.role}</td>
+                            </tr>
+                          ))}
+                          <tr className="border-t border-zinc-700 font-semibold">
+                            <td className="py-2 pr-4 text-zinc-200">Total</td>
+                            <td className="py-2 pr-4 text-right text-amber-300">{voyaTotal}%</td>
+                            <td className="py-2" />
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                </div>
 
-                <div>
-                  <h4 className="text-xs font-semibold text-zinc-300 mb-2">
-                    Schwab slice (percent of Schwab portion)
-                  </h4>
-                  <div className="overflow-x-auto">
-                    <table className="w-full min-w-[280px] text-xs">
-                      <thead>
-                        <tr className="border-b border-zinc-700">
-                          <th className="text-left py-2 pr-4 font-semibold text-zinc-200">
-                            Sleeve
-                          </th>
-                          <th className="text-right py-2 pr-4 font-semibold text-zinc-200">
-                            Weight %
-                          </th>
-                          <th className="text-left py-2 font-semibold text-zinc-200">
-                            Suggested ETF ticker(s)
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {schwabLineup.map((item) => (
-                          <tr key={item.id} className="border-b border-zinc-800">
-                            <td className="py-2 pr-4 text-zinc-300">{item.label}</td>
-                            <td className="py-2 pr-4 text-right text-amber-300 font-medium">
-                              {item.weight.toFixed(1)}%
-                            </td>
-                            <td className="py-2 text-zinc-400">
-                              {item.etfs?.map((e) => e.ticker).join(', ') ?? '—'}
-                            </td>
+                  <p className="text-[11px] text-zinc-500 leading-relaxed">
+                    Stable Value Option is the cash-like holding in Voya. USFR is the cash-equivalent
+                    parking spot in Schwab.
+                  </p>
+
+                  <div>
+                    <h4 className="text-xs font-semibold text-zinc-300 mb-2">
+                      Schwab slice (percent of Schwab portion)
+                    </h4>
+                    <div className="overflow-x-auto">
+                      <table className="w-full min-w-[280px] text-xs">
+                        <thead>
+                          <tr className="border-b border-zinc-700">
+                            <th className="text-left py-2 pr-4 font-semibold text-zinc-200">
+                              Sleeve
+                            </th>
+                            <th className="text-right py-2 pr-4 font-semibold text-zinc-200">
+                              Weight %
+                            </th>
+                            <th className="text-left py-2 font-semibold text-zinc-200">
+                              Suggested ETF ticker(s)
+                            </th>
                           </tr>
-                        ))}
-                        <tr className="border-t border-zinc-700 font-semibold">
-                          <td className="py-2 pr-4 text-zinc-200">Total</td>
-                          <td className="py-2 pr-4 text-right text-amber-300">
-                            {schwabTotal.toFixed(1)}%
-                          </td>
-                          <td className="py-2" />
-                        </tr>
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {schwabLineup.map((item) => (
+                            <tr key={item.id} className="border-b border-zinc-800">
+                              <td className="py-2 pr-4 text-zinc-300">{item.label}</td>
+                              <td className="py-2 pr-4 text-right text-amber-300 font-medium">
+                                {item.weight.toFixed(1)}%
+                              </td>
+                              <td className="py-2 text-zinc-400">
+                                {item.etfs?.map((e) => e.ticker).join(', ') ?? '—'}
+                              </td>
+                            </tr>
+                          ))}
+                          <tr className="border-t border-zinc-700 font-semibold">
+                            <td className="py-2 pr-4 text-zinc-200">Total</td>
+                            <td className="py-2 pr-4 text-right text-amber-300">
+                              {schwabTotal.toFixed(1)}%
+                            </td>
+                            <td className="py-2" />
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </details>
+              </details>
             );
           })}
         </div>

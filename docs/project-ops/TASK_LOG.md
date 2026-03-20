@@ -1,5 +1,16 @@
 # TASK LOG
 
+## 2026-01-21 — Models page polish (accordion, copy, USFR cash)
+Completed:
+- Branded chevron (amber SVG, rotate when open); first card open per tab on all breakpoints (no matchMedia)
+- Voya Only: "These percentages are of your Voya balance."; model taglines under titles
+- Voya + Schwab: inside-slice callout + Stable Value / USFR note between tables
+- lib/sleeves.ts: USFR for cash sleeve; sleeve name "Cash / cash-equivalent"
+
+Verification: npm run build, npm run lint, npm run test:lineups
+
+---
+
 ## 2026-01-21 — GhostRegime polish: Cash now bar in % of Max view
 Completed:
 - % of Max Allocations: Cash now row with horizontal bar (zinc/neutral, not % of max)

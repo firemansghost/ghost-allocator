@@ -43,7 +43,7 @@ export const sleeveDefinitions: Record<string, Omit<Sleeve, 'weight'>> = {
   },
   cash: {
     id: 'cash',
-    name: 'Cash',
+    name: 'Cash / cash-equivalent',
     description: 'Cash reserves for liquidity and optionality, allowing you to take advantage of opportunities during market dislocations.',
   },
 };
@@ -108,6 +108,12 @@ export const exampleETFs: ExampleETF[] = [
     name: 'iShares 1-3 Year Treasury Bond ETF',
     description: 'Short-duration Treasury bonds as rate hedge',
     sleeveId: 'rate_hedge',
+  },
+  {
+    ticker: 'USFR',
+    name: 'WisdomTree Floating Rate Treasury Fund',
+    description: 'Cash-equivalent parking in Schwab (floating-rate Treasuries)',
+    sleeveId: 'cash',
   },
 ];
 
