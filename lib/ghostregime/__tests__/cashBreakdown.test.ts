@@ -66,6 +66,14 @@ describe('computeCashBreakdown', () => {
     assert.strictEqual(breakdown.cashTotal, 0.40, 'Total cash 40%');
     assert.strictEqual(breakdown.isConsistent, true, '0.35 + 0.05 = 0.40');
   });
+
+  it('INFLATION KISS 8.0: targets 30/15/5 → base cash 50%', () => {
+    const row = makeRow(0.3, 0.15, 0.05, 1, 1, 1, 0.5);
+    row.regime = 'INFLATION';
+    const breakdown = computeCashBreakdown(row);
+    assert.strictEqual(breakdown.cashTarget, 0.5);
+    assert.strictEqual(breakdown.cashFromThrottles, 0);
+  });
 });
 
 describe('buildTodaySnapshotBlocks', () => {

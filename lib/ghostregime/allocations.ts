@@ -22,7 +22,10 @@ export function computeAllocations(
     riskRegime === 'RISK ON'
       ? ALLOCATION_TARGETS.STOCKS_RISK_ON
       : ALLOCATION_TARGETS.STOCKS_RISK_OFF;
-  const goldTarget = ALLOCATION_TARGETS.GOLD;
+  const goldTarget =
+    regime === 'INFLATION'
+      ? ALLOCATION_TARGETS.GOLD_INFLATION
+      : ALLOCATION_TARGETS.GOLD;
   const btcTarget =
     riskRegime === 'RISK ON'
       ? ALLOCATION_TARGETS.BTC_RISK_ON

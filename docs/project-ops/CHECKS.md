@@ -55,6 +55,14 @@
 - npm run ghostregime:why-btc-state -- --date YYYY-MM-DD --source api --base-url https://ghost-allocator.vercel.app
   NOTE: base-url must be root domain (NOT /ghostregime).
 
+### 7b) GhostRegime KISS allocation math (automated, post–KISS 8.0)
+Run after changing `lib/ghostregime/allocations.ts`, gold targets in `config.ts`, or `buildWhyCashLine`:
+- `npm run test:allocations` — regime targets + INFLATION reference (bearish/neutral/bearish) fixture
+- `npm run test:why-cash-copy` — “Why cash” must not claim a sleeve is off when exposure is non-zero
+- `npm run test:cash-breakdown` — base cash vs throttle attribution
+- `npm run test:max-exposure` — % of max display denominators
+- `npm run test:parity` — parity engine unit tests (opt-in snapshot/backtest require `RUN_PARITY_TESTS=1` + local `.local/reference`)
+
 ### 8) SEO sanity (manual)
 - /robots.txt loads
 - /sitemap.xml loads

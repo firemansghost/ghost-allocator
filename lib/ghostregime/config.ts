@@ -52,11 +52,13 @@ export const VOTE_THRESHOLDS = {
   UUP_INFLATION_THRESHOLD: -0.01, // When TR <= this, vote Inflation (-1)
 };
 
-// Allocation targets
+// Allocation targets (KISS 8.0 top-down: INFLATION uses 15% gold cap; other regimes use 30% gold)
 export const ALLOCATION_TARGETS = {
   STOCKS_RISK_ON: 0.6,
   STOCKS_RISK_OFF: 0.3,
   GOLD: 0.3,
+  /** INFLATION regime only — lower gold sleeve vs DEFLATION / risk-on */
+  GOLD_INFLATION: 0.15,
   BTC_RISK_ON: 0.1,
   BTC_RISK_OFF: 0.05,
 };

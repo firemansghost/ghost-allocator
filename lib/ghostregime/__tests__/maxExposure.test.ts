@@ -27,4 +27,10 @@ describe('pctOfMax', () => {
     assert.strictEqual(goldPct, 100, 'Gold at max target = 100% of max');
     assert.strictEqual(btcPct, 0, 'BTC at 0 = 0% of max');
   });
+
+  it('INFLATION neutral gold: actual 0.075 vs max gold sleeve 0.3 → 25% of max', () => {
+    const max = getMaxTargets();
+    const goldPct = pctOfMax(0.075, max.gold);
+    assert.ok(Math.abs(goldPct - 25) < 0.01, `Gold % of max should be ~25%, got ${goldPct}`);
+  });
 });

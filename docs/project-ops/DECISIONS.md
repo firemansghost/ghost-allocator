@@ -1,5 +1,19 @@
 # DECISIONS
 
+## 2026-03-24 — GhostRegime KISS 8.0: INFLATION uses 15% gold target (not 30%)
+Choice:
+- Top-down gold sleeve target in **INFLATION** is **15%**; all other regimes keep **30%** gold (risk-on and DEFLATION).
+- Production (`computeAllocations`) and parity harness (`computeKissTargets`) use the same split.
+
+Why:
+- Aligns with current 42 Macro KISS 8.0 workbook/slide rules (INFLATION is the special case for a lower gold cap).
+- Fixes inflated gold actuals when VAMS is bullish or neutral under INFLATION (previously used 30% × scale).
+
+Consequences:
+- Opt-in parity backtests (`RUN_PARITY_TESTS=1`) may need reference CSV/JSON regenerated from an 8.0 workbook if rows still encode old INFLATION gold.
+
+---
+
 ## 2026-01-21 — Removed convex equity; merged into core equity
 Choice:
 - Removed convex_equity sleeve from model portfolios and builder entirely.

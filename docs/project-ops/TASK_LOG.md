@@ -1,5 +1,25 @@
 # TASK LOG
 
+## 2026-03-24 — Forensic note: why the bad screenshot was 15/30/0 + 55, not 0/15/0 + 85
+The pre-fix **production** formula was always `actual_i = target_i × scale_i` with INFLATION gold target **30%** (stale). The numbers **15 / 30 / 0 + 55 cash** imply **VAMS scales: stocks neutral (0.5), gold bullish (1.0), bitcoin bearish (0)** — not bearish/neutral/bearish:
+- 0.30 × 0.5 = **15%** stocks, 0.30 × 1.0 = **30%** gold, 0.05 × 0 = **0%** BTC → cash **55%**.
+If stocks had been bearish (scale 0) with the same old targets, the old app would have shown **0 / 15 / 0 + 85** (gold 30% × 0.5 only). The screenshot therefore **does not match** the slide-deck narrative of VT bearish + gold neutral + BTC bearish unless live VAMS states differed from that narrative at capture time.
+Post-fix INFLATION + bearish/neutral/bearish: targets 30/15/5 → **0 / 7.5 / 0 + 92.5%** cash. No client cache of allocation math; latest snapshot comes from API/Blob (`cache: 'no-store'` on fetches). Regenerate opt-in `.local/reference` parity files if `RUN_PARITY_TESTS=1` backtest disagrees.
+
+---
+
+## 2026-03-24 — GhostRegime KISS 8.0 allocation parity
+Completed:
+- INFLATION regime: gold top-down target 15% (was 30%); DEFLATION / risk-on unchanged (`ALLOCATION_TARGETS.GOLD_INFLATION`, `computeAllocations`)
+- Parity engine `lib/ghostregime/parity/kissAlloc.ts`: same INFLATION/DEFLATION split for gold; tests updated + reference case (INFLATION, bearish/neutral/bearish) → 0 / 7.5% / 0 + 92.5% cash
+- `buildWhyCashLine`: regime starting point + VAMS brake labels (half size / full size / off); removed misleading “full-risk mix” and blanket “are off today”
+- Tests: `test:allocations`, `test:why-cash-copy`, max exposure + cash breakdown + parity unit tests
+- Opt-in backtest (`RUN_PARITY_TESTS=1`) may need reference workbook refresh if rows still use old gold rule
+
+Verification: npm run build, npm run lint, npm run test:allocations, npm run test:why-cash-copy, npm run test:cash-breakdown, npm run test:max-exposure, npm run test:parity
+
+---
+
 ## 2026-01-21 — Builder / Models consistency and clarity pass
 Completed:
 - Aligned terminology: Voya balance (voya-only rows), Voya portion / Schwab portion (replaced user-facing “slice” for platform buckets); inside-slice explained consistently on Models + Builder

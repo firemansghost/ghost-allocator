@@ -6,10 +6,11 @@
  * Pure, deterministic allocation engine that matches 42 Macro KISS workbook logic.
  * This is used for parity validation - NOT for normal GhostRegime computation.
  * 
- * KISS Behavior Spec (treat as truth inside parity harness):
+ * KISS 8.0 Behavior Spec (treat as truth inside parity harness):
  * 1. Regime → Targets
- *    - If Market Regime ∈ {GOLDILOCKS, REFLATION}: Stocks=0.60, Gold=0.30, Bitcoin=0.10
- *    - If Market Regime ∈ {INFLATION, DEFLATION}: Stocks=0.30, Gold=0.30, Bitcoin=0.05
+ *    - GOLDILOCKS, REFLATION: Stocks=0.60, Gold=0.30, Bitcoin=0.10
+ *    - INFLATION: Stocks=0.30, Gold=0.15, Bitcoin=0.05
+ *    - DEFLATION: Stocks=0.30, Gold=0.30, Bitcoin=0.05
  * 2. State → Scale
  *    - +2 → 1.0
  *    - 0 → 0.5
@@ -35,22 +36,26 @@ export function computeKissTargets(marketRegime: KissRegime): {
   gold: number;
   bitcoin: number;
 } {
-  const isRiskOn = marketRegime === 'GOLDILOCKS' || marketRegime === 'REFLATION';
-  
-  if (isRiskOn) {
+  if (marketRegime === 'GOLDILOCKS' || marketRegime === 'REFLATION') {
     return {
       stocks: 0.6,
       gold: 0.3,
       bitcoin: 0.1,
     };
-  } else {
-    // INFLATION or DEFLATION
+  }
+  if (marketRegime === 'INFLATION') {
     return {
       stocks: 0.3,
-      gold: 0.3,
+      gold: 0.15,
       bitcoin: 0.05,
     };
   }
+  // DEFLATION
+  return {
+    stocks: 0.3,
+    gold: 0.3,
+    bitcoin: 0.05,
+  };
 }
 
 /**

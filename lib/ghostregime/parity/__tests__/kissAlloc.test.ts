@@ -67,10 +67,10 @@ describe('Reference Allocation Engine', () => {
       assert.strictEqual(targets.bitcoin, 0.1);
     });
     
-    it('should return Risk Off targets for INFLATION', () => {
+    it('should return Risk Off targets for INFLATION (KISS 8.0 gold 15%)', () => {
       const targets = computeKissTargets('INFLATION');
       assert.strictEqual(targets.stocks, 0.3);
-      assert.strictEqual(targets.gold, 0.3);
+      assert.strictEqual(targets.gold, 0.15);
       assert.strictEqual(targets.bitcoin, 0.05);
     });
     
@@ -139,7 +139,7 @@ describe('Reference Allocation Engine', () => {
       });
       
       assert.strictEqual(result.stocks_target, 0.3);
-      assert.strictEqual(result.gold_target, 0.3);
+      assert.strictEqual(result.gold_target, 0.15);
       assert.strictEqual(result.bitcoin_target, 0.05);
       
       assert.strictEqual(result.stocks_scale, 0.5);
@@ -147,9 +147,22 @@ describe('Reference Allocation Engine', () => {
       assert.strictEqual(result.bitcoin_scale, 0.5);
       
       assert.strictEqual(result.stocks_actual, 0.15);
-      assert.strictEqual(result.gold_actual, 0.15);
+      assert.strictEqual(result.gold_actual, 0.075);
       assert.strictEqual(result.bitcoin_actual, 0.025);
-      assert.ok(Math.abs(result.cash - 0.675) < TOLERANCE, `Cash should be 0.675, got ${result.cash}`);
+      assert.ok(Math.abs(result.cash - 0.75) < TOLERANCE, `Cash should be 0.75, got ${result.cash}`);
+    });
+
+    it('INFLATION + VT bearish + gold neutral + BTC bearish (KISS 8.0 reference)', () => {
+      const result = computeKissAllocations({
+        marketRegime: 'INFLATION',
+        stocksState: -2,
+        goldState: 0,
+        bitcoinState: -2,
+      });
+      assert.strictEqual(result.stocks_actual, 0);
+      assert.ok(Math.abs(result.gold_actual - 0.075) < TOLERANCE);
+      assert.strictEqual(result.bitcoin_actual, 0);
+      assert.ok(Math.abs(result.cash - 0.925) < TOLERANCE, `Cash should be 0.925, got ${result.cash}`);
     });
   });
 });

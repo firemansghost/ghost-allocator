@@ -419,7 +419,6 @@ export function buildMicroFlowLine(data: GhostRegimeRow | null): string | null {
 export function buildWhyCashLine(data: GhostRegimeRow): string {
   const breakdown = computeCashBreakdown(data);
   const riskLabel = data.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
-  const maxStr = formatMaxTargets();
 
   const stocksTarget = (data.stocks_target * 100).toFixed(0);
   const goldTarget = (data.gold_target * 100).toFixed(0);
@@ -430,22 +429,22 @@ export function buildWhyCashLine(data: GhostRegimeRow): string {
       ? `${stocksTarget}/${goldTarget}/${btcTarget} + ${cashTargetPct} cash`
       : `${stocksTarget}/${goldTarget}/${btcTarget}`;
 
+  const brakeParts = [
+    `Stocks ${formatScaleLabel(data.stocks_scale)}`,
+    `Gold ${formatScaleLabel(data.gold_scale)}`,
+    `BTC ${formatScaleLabel(data.btc_scale)}`,
+  ].join(', ');
+
   if (data.cash < 0.05) {
     return "Cash is low because we're near full risk.";
   }
 
   if (breakdown.cashFromThrottles > 0.005 && breakdown.throttleSourceNames.length > 0) {
     const brakePct = (breakdown.cashFromThrottles * 100).toFixed(0);
-    const assetList =
-      breakdown.throttleSourceNames.length === 1
-        ? breakdown.throttleSourceNames[0]
-        : breakdown.throttleSourceNames.slice(0, -1).join(', ') +
-          ' and ' +
-          breakdown.throttleSourceNames[breakdown.throttleSourceNames.length - 1];
-    return `${riskLabel} cuts the full-risk mix down to ${startingPoint}, and ${assetList} ${breakdown.throttleSourceNames.length === 1 ? 'is' : 'are'} off today, so that extra ${brakePct}% stays in cash.`;
+    return `${riskLabel} regime starting point: ${startingPoint}. VAMS brake (${brakeParts}) scales sleeves down from those targets, so about ${brakePct}% ends up as cash on top of the ${cashTargetPct}% already implied by the target mix.`;
   }
 
-  return `${riskLabel} cuts the full-risk mix down to ${startingPoint}.`;
+  return `${riskLabel} regime starting point: ${startingPoint}. Brake: ${brakeParts}.`;
 }
 
 /**
