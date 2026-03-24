@@ -1,5 +1,33 @@
 # DECISIONS
 
+## 2026-03-24 — GhostRegime product positioning (copy): KISS-aligned targets, independent proxy-VAMS signals
+Choice:
+- **User-facing stance** is standardized: **KISS-style regime targets** + **independently computed proxy-VAMS sleeve signals** (SPY / GLD / BTC-USD). Durable copy lives in `lib/ghostregime/productPositioning.ts`.
+- Do **not** imply exact daily sleeve-state parity with any external model unless proven and explicitly documented.
+
+Why:
+- Audits and drift work showed symbol swaps alone do not establish external label parity; clarity beats implied “sameness.”
+
+Consequences:
+- GhostRegime / methodology / glossary / related surfaces should pull from the positioning file when updating hero or SEO copy.
+
+---
+
+## 2026-03-24 — GhostRegime sleeve states: surrogate VAMS, not guaranteed 42-published labels
+Choice:
+- **Production** sleeve states come from **surrogate VAMS** on **SPY**, **GLD**, and **BTC-USD** (see `lib/ghostregime/vams.ts`), not from ingesting 42 Macro’s published VT / GLDM / FBTC state labels.
+- **Allocation** targets follow KISS 8.0-style top-down rules (after the INFLATION gold fix); **signal layer** parity with 42 is explicitly **not** claimed unless instruments and thresholds match.
+
+Why:
+- Repo evidence: parity harness documents state math is **not** reverse-engineered from 42 (`docs/ghostregime/PARITY_REFERENCE.md`); instrument mismatch (SPY vs VT, GLD vs GLDM, spot vs FBTC) **explains** divergent bullish/neutral/bearish vs deck labels.
+- Prevents marketing/UX confusion: we should not imply “same sleeve states as 42” without Level 2 or 3 parity.
+
+Consequences:
+- Methodology and product copy should describe **proxy-based** VAMS honestly; optional future work: tighter symbol parity (Level 2) or published-state ingest (Level 3). See `docs/ghostregime/VAMS_KISS_SIGNAL_AUDIT.md`.
+- **User-facing stance:** KISS-aligned **targets**; **proxy** VAMS on **SPY / GLD / BTC-USD**; the Level-2 CLI compare (**VT / GLDM / FBTC** vs production) is **diagnostic only**, not a claim of matching any vendor’s internal daily states.
+
+---
+
 ## 2026-03-24 — GhostRegime KISS 8.0: INFLATION uses 15% gold target (not 30%)
 Choice:
 - Top-down gold sleeve target in **INFLATION** is **15%**; all other regimes keep **30%** gold (risk-on and DEFLATION).

@@ -132,9 +132,12 @@ import {
   REGIME_MAP_LEGEND_TOOLTIP,
   REGIME_MAP_METHODOLOGY_CTA,
   REGIME_MAP_METHODOLOGY_LINK,
+  REGIME_MAP_VAMS_PROXY_PREFIX,
+  REGIME_MAP_VAMS_PROXY_METHODOLOGY_LINK,
   GHOSTREGIME_METHODOLOGY_PILL_LABEL,
   GHOSTREGIME_METHODOLOGY_PILL_TOOLTIP,
 } from '@/lib/ghostregime/ghostregimePageCopy';
+import { GHOSTREGIME_PRODUCT_TAGLINE } from '@/lib/ghostregime/productPositioning';
 import Link from 'next/link';
 
 const colorClasses = {
@@ -561,7 +564,7 @@ export function GhostRegimeClient({
         <header className="space-y-2">
           <h1 className="text-2xl font-semibold tracking-tight">GhostRegime</h1>
           <p className="text-sm text-zinc-300">
-            Market regime classification and allocation system
+            {GHOSTREGIME_PRODUCT_TAGLINE}
           </p>
           {initialHealth && (
             <div className="mt-2">
@@ -628,7 +631,7 @@ export function GhostRegimeClient({
         <header className="space-y-2">
           <h1 className="text-2xl font-semibold tracking-tight">GhostRegime</h1>
           <p className="text-sm text-zinc-300">
-            Market regime classification and allocation system
+            {GHOSTREGIME_PRODUCT_TAGLINE}
           </p>
           {initialHealth && (
             <div className="mt-2">
@@ -690,7 +693,7 @@ export function GhostRegimeClient({
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">GhostRegime</h1>
           <p className="text-sm text-zinc-300 mt-1">
-            Rules-based signals for adjusting portfolio exposure
+            {GHOSTREGIME_PRODUCT_TAGLINE}
           </p>
           {healthStatus && (
             <div className="mt-2">
@@ -1000,6 +1003,16 @@ export function GhostRegimeClient({
                 {REGIME_MAP_METHODOLOGY_CTA}
               </Link>
             </div>
+            <p className="text-[10px] text-zinc-500 leading-snug mb-4">
+              {REGIME_MAP_VAMS_PROXY_PREFIX}{' '}
+              <Link
+                href="/ghostregime/methodology"
+                className="text-amber-400/90 hover:text-amber-300 underline underline-offset-2"
+              >
+                {REGIME_MAP_VAMS_PROXY_METHODOLOGY_LINK}
+              </Link>
+              .
+            </p>
             <div className="space-y-3">
               {/* X-axis labels */}
               <div className="grid grid-cols-3 gap-1">

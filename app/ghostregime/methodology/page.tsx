@@ -20,13 +20,18 @@ import {
   METHODOLOGY_REGIMES_AT_GLANCE_TITLE,
   METHODOLOGY_HOW_MAP_CHOSEN_TITLE,
   METHODOLOGY_HOW_ALLOCATIONS_TITLE,
+  METHODOLOGY_KISS_ALIGNMENT_SECTION_TITLE,
+  METHODOLOGY_KISS_ALIGNMENT_INTRO_PARAGRAPHS,
+  METHODOLOGY_VAMS_EXTERNAL_LABELS_NOTE,
   METHODOLOGY_HOW_MAP_CHOSEN_STEPS,
   METHODOLOGY_HOW_ALLOCATIONS_STEPS,
+  METHODOLOGY_SYMBOL_DISCLOSURE_LINES,
 } from '@/lib/ghostregime/methodologyCopy';
+import { GHOSTREGIME_SEO_DESCRIPTION } from '@/lib/ghostregime/productPositioning';
 
 export const metadata: Metadata = buildMetadata({
   title: 'GhostRegime Methodology - Ghost Allocator',
-  description: 'How GhostRegime works: Option B voting, VAMS scaling, regime classification, and allocation logic.',
+  description: GHOSTREGIME_SEO_DESCRIPTION,
   path: '/ghostregime/methodology',
 });
 
@@ -48,6 +53,9 @@ export default function MethodologyPage() {
         <nav className="space-y-1 text-sm">
           <a href="#overview" className="block text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline">
             Overview
+          </a>
+          <a href="#kiss-alignment" className="block text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline">
+            {METHODOLOGY_KISS_ALIGNMENT_SECTION_TITLE}
           </a>
           <a href="#regimes-at-a-glance" className="block text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline">
             Regimes at a glance
@@ -83,18 +91,39 @@ export default function MethodologyPage() {
         <div className="space-y-3 text-sm text-zinc-300 leading-relaxed">
           <p>
             GhostRegime is a rules-based system that classifies market conditions and adjusts portfolio exposure accordingly.
+            It uses <strong className="text-zinc-200">KISS-style regime targets</strong> for baseline weights and{' '}
+            <strong className="text-zinc-200">proxy-VAMS sleeve signals</strong> (SPY, GLD, BTC-USD) for scaling—not copied daily labels from an external model.
             It outputs a daily <strong className="text-zinc-200">Regime</strong> (macro backdrop: growth/inflation mix) and{' '}
             <strong className="text-zinc-200">Risk Regime</strong> (&quot;risk on&quot; or &quot;risk off&quot; translation).
           </p>
           <p>
             From these classifications, GhostRegime computes <strong className="text-zinc-200">scales</strong> (how much exposure to take today)
-            and applies them to <strong className="text-zinc-200">targets</strong> (baseline weights like 60/30/10) to produce{' '}
+            and applies them to <strong className="text-zinc-200">targets</strong> (regime-dependent baseline weights, not always a single 60/30/10 split) to produce{' '}
             <strong className="text-zinc-200">actual</strong> allocations.
           </p>
           <p className="text-zinc-400 italic">
             This is a daily model. Humans usually rebalance on a cadence, not every time a number twitches.
           </p>
         </div>
+        </GlassCard>
+      </div>
+
+      {/* Targets, KISS alignment, sleeve signals */}
+      <div id="kiss-alignment" className="scroll-mt-6">
+        <GlassCard className="p-4 sm:p-5">
+          <h2 className="text-lg font-semibold text-zinc-50 mb-3">
+            {METHODOLOGY_KISS_ALIGNMENT_SECTION_TITLE}
+          </h2>
+          <div className="space-y-3 text-sm text-zinc-300 leading-relaxed">
+            {METHODOLOGY_KISS_ALIGNMENT_INTRO_PARAGRAPHS.map((p, idx) => (
+              <p key={idx}>{p}</p>
+            ))}
+            <ul className="list-disc pl-5 space-y-1 text-zinc-400 text-xs">
+              {METHODOLOGY_SYMBOL_DISCLOSURE_LINES.map((line, idx) => (
+                <li key={idx}>{line}</li>
+              ))}
+            </ul>
+          </div>
         </GlassCard>
       </div>
 
@@ -234,6 +263,15 @@ export default function MethodologyPage() {
               </p>
             </div>
           </details>
+          <div className="mt-4 p-3 rounded border border-zinc-700/80 bg-zinc-900/40 text-xs text-zinc-400 leading-relaxed space-y-2">
+            <p className="font-medium text-zinc-300">Proxy symbols (this app)</p>
+            <ul className="list-disc pl-4 space-y-1">
+              {METHODOLOGY_SYMBOL_DISCLOSURE_LINES.map((line, idx) => (
+                <li key={idx}>{line}</li>
+              ))}
+            </ul>
+            <p className="text-zinc-500 italic pt-1">{METHODOLOGY_VAMS_EXTERNAL_LABELS_NOTE}</p>
+          </div>
         </div>
         </GlassCard>
       </div>

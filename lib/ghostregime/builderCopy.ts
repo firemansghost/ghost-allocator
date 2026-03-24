@@ -62,11 +62,11 @@ export interface GlossaryItem {
 export const BUILDER_GLOSSARY_ITEMS: GlossaryItem[] = [
   {
     term: 'Regime',
-    definition: 'macro backdrop (growth/inflation mix).',
+    definition: 'macro backdrop (growth/inflation mix); targets are KISS-style by regime.',
   },
   {
     term: 'Scales',
-    definition: "how much exposure we're taking today (1, 0.5, 0).",
+    definition: "how much exposure we're taking today (1, 0.5, 0) from proxy-VAMS sleeve signals.",
   },
   {
     term: 'Cash',

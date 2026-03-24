@@ -89,6 +89,9 @@ export function ParityPanel({ onClose, currentGhostRegime }: ParityPanelProps) {
           This panel shows allocations computed using external reference workbook logic.
           It validates that our allocation wiring matches the reference workbook.
         </p>
+        <p className="text-zinc-500">
+          Live GhostRegime uses KISS-style targets with independently computed proxy-VAMS sleeve states—this tool is for wiring checks, not a claim of daily label parity.
+        </p>
         <p className="text-amber-400/80">
           <strong>Note:</strong> This does NOT reverse-engineer reference state computation.
           It only validates allocation math when states are known.

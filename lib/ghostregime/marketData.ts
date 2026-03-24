@@ -23,6 +23,10 @@ const STOOQ_SYMBOL_MAP: Record<string, string> = {
   // VIX is now fetched from CBOE CSV (not Stooq)
   // PDBC fallback: DBC (Stooq proxy)
   'DBC': 'dbc.us',
+  // Level-2 VAMS diagnostics only (compare-vams-profiles script)
+  VT: 'vt.us',
+  GLDM: 'gldm.us',
+  FBTC: 'fbtc.us',
 };
 
 export interface MarketDataProvider {

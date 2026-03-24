@@ -1,5 +1,35 @@
 # TASK LOG
 
+## 2026-03-24 — GhostRegime product-positioning copy pass
+Completed:
+- `lib/ghostregime/productPositioning.ts` (tagline + SEO + methodology lead copy); methodology + main GhostRegime UI + how-it-works + home GhostRegime card + ParityPanel + glossary + builder glossary aligned
+- DECISIONS: positioning decision recorded
+
+---
+
+## 2026-03-24 — VAMS profile drift study script
+Completed:
+- `scripts/ghostregime/vams-profile-drift-study.ts` + `npm run ghostregime:vams-drift-study` — aggregates production vs closer-parity VAMS states over `--months` / `--end`, optional CSV and `--spot` dates; regime join from seed CSV when dates overlap
+- CHECKS.md: documented command
+
+---
+
+## 2026-03-24 — GhostRegime transparency + Level-2 VAMS diagnostics
+Completed:
+- Methodology copy + page: KISS alignment vs proxy VAMS; SPY/GLD/BTC-USD disclosure; glossary VAMS entry; dashboard line to methodology
+- `lib/ghostregime/vamsProfiles.ts` + `compareVamsProfiles`; Stooq mappings for VT/GLDM/FBTC; CLI `ghostregime:compare-vams-profiles` (synthetic unit tests, no network)
+- DECISIONS/CHECKS/TASK_LOG updated; rationale and limits in `docs/ghostregime/VAMS_KISS_SIGNAL_AUDIT.md`
+
+---
+
+## 2026-03-24 — VAMS vs KISS signal-layer audit (docs only)
+Completed:
+- Added `docs/ghostregime/VAMS_KISS_SIGNAL_AUDIT.md` (instrument map, difference matrix, March discrepancy, parity levels, recommendation: proxy + honest labeling; optional Level 2/3)
+- DECISIONS.md: surrogate VAMS not 42-published labels; PLAN.md gold targets corrected for KISS 8.0 INFLATION
+- No production VAMS code changes in this pass
+
+---
+
 ## 2026-03-24 — Forensic note: why the bad screenshot was 15/30/0 + 55, not 0/15/0 + 85
 The pre-fix **production** formula was always `actual_i = target_i × scale_i` with INFLATION gold target **30%** (stale). The numbers **15 / 30 / 0 + 55 cash** imply **VAMS scales: stocks neutral (0.5), gold bullish (1.0), bitcoin bearish (0)** — not bearish/neutral/bearish:
 - 0.30 × 0.5 = **15%** stocks, 0.30 × 1.0 = **30%** gold, 0.05 × 0 = **0%** BTC → cash **55%**.

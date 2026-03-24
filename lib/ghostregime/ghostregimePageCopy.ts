@@ -139,8 +139,14 @@ export const REGIME_MAP_LEGEND_SUMMARY = 'Legend';
 export const REGIME_MAP_LEGEND_TOOLTIP = 'Show the 4 regime descriptions.';
 export const REGIME_MAP_METHODOLOGY_CTA = 'Methodology →';
 export const REGIME_MAP_METHODOLOGY_LINK = 'Read methodology →';
+
+/** Prefix for regime map VAMS disclosure; pair with a link labeled REGIME_MAP_VAMS_PROXY_METHODOLOGY_LINK. */
+export const REGIME_MAP_VAMS_PROXY_PREFIX =
+  'Sleeve Brake = proxy-VAMS on SPY / GLD / BTC-USD — see';
+export const REGIME_MAP_VAMS_PROXY_METHODOLOGY_LINK = 'Methodology';
 export const GHOSTREGIME_METHODOLOGY_PILL_LABEL = 'Methodology';
-export const GHOSTREGIME_METHODOLOGY_PILL_TOOLTIP = 'How this model works.';
+export const GHOSTREGIME_METHODOLOGY_PILL_TOOLTIP =
+  'How GhostRegime works: KISS-style targets and proxy-VAMS sleeve scaling.';
 
 // Snapshot viewing
 export const VIEWING_SNAPSHOT_LABEL = 'Viewing snapshot:';

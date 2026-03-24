@@ -322,12 +322,21 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
 
   // GhostRegime
   {
+    id: 'kiss-aligned-targets',
+    term: 'KISS-aligned targets',
+    category: 'GhostRegime',
+    short:
+      'Regime-dependent baseline weights aligned with common KISS-style rules (e.g. GOLDILOCKS 60/30/10, INFLATION 30/15/5)—allocation math here, not copied external daily sleeve labels.',
+    why: 'Defines what you aim for before the Brake scales each sleeve.',
+    related: ['regime', 'targets-scales-actual', 'vams'],
+  },
+  {
     id: 'regime',
     term: 'Regime (GhostRegime)',
     category: 'GhostRegime',
     short: 'A market regime: GOLDILOCKS, REFLATION, INFLATION, or DEFLATION—based on risk and inflation signals.',
-    why: 'Different regimes favor different allocations; GhostRegime helps you tune exposure.',
-    related: ['risk-on-risk-off', 'targets-scales-actual'],
+    why: 'Different regimes favor different KISS-style targets; GhostRegime helps you tune exposure.',
+    related: ['kiss-aligned-targets', 'risk-on-risk-off', 'targets-scales-actual'],
   },
   {
     id: 'risk-on-risk-off',
@@ -341,17 +350,19 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     id: 'targets-scales-actual',
     term: 'Hold now / Brake / Max targets',
     category: 'GhostRegime',
-    short: 'Max targets: full-risk baseline (60/30/10). Before the brake: what the regime allows. Hold now: what you hold after the brake. Cash now: base cash + what the brake kicked out.',
-    why: 'Hold now is the practical instruction. The brake can cut exposure when volatility spikes.',
-    related: ['regime', 'vams'],
+    short:
+      'Max targets: KISS-style baseline by regime. Before the brake: what the regime allows. Hold now: after proxy-VAMS scaling. Cash now: base cash + what the brake kicked out.',
+    why: 'Hold now is the practical instruction. The Brake uses independently computed proxy-VAMS sleeve signals.',
+    related: ['kiss-aligned-targets', 'regime', 'vams'],
   },
   {
     id: 'vams',
-    term: 'VAMS (vol-adjusted max size)',
+    term: 'VAMS (Volatility-Adjusted Momentum Score)',
     category: 'GhostRegime',
-    short: 'A rule that scales exposure based on volatility—higher vol = lower exposure.',
-    why: 'Reduces the chance you’re overexposed when things get wild.',
-    related: ['targets-scales-actual', 'throttle'],
+    short:
+      'Momentum ÷ vol: trend from TR_126/TR_252 vs 63-day vol, mapped with ±0.5 thresholds to sleeve scale (1 / ½ / 0). In this app inputs are SPY, GLD, and BTC-USD—not “vol only.”',
+    why: 'Scales each sleeve down when momentum is weak or volatility is punishing, before applying targets.',
+    related: ['kiss-aligned-targets', 'targets-scales-actual', 'throttle'],
   },
   {
     id: 'throttle',

@@ -149,3 +149,6 @@ docs/KISS/
 
 # Generated reports (optional)
 reports/
+
+# Local scratch (e.g. drift-study CSV output)
+.tmp/

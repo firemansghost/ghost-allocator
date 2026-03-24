@@ -106,7 +106,7 @@ export default function HomePage() {
           <GlassCard className="p-4 sm:p-5 transition transform hover:-translate-y-1 hover:border-amber-400/60 hover:shadow-[0_20px_60px_rgba(0,0,0,0.9)]">
             <h3 className="text-sm font-semibold text-zinc-50">GhostRegime</h3>
             <p className="mt-2 text-xs text-zinc-300 leading-relaxed">
-              A weekly &quot;weather report&quot; for your portfolio. It tells you when to stay aggressive and when to play defense — based on market behavior, not vibes.
+              A weekly &quot;weather report&quot; with KISS-style regime targets and proxy-VAMS sleeve scaling—rules-based, not copied external daily labels.
             </p>
             <Link
               href="/ghostregime"

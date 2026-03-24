@@ -9,11 +9,11 @@ import { getServerBaseUrl } from '@/lib/server/baseUrl';
 import { buildMetadata } from '@/lib/seo';
 import type { Metadata } from 'next';
 import type { GhostRegimeRow } from '@/lib/ghostregime/types';
+import { GHOSTREGIME_SEO_DESCRIPTION } from '@/lib/ghostregime/productPositioning';
 
 export const metadata: Metadata = buildMetadata({
   title: 'GhostRegime - Ghost Allocator',
-  description:
-    'Market regime classification and allocation system. Rules-based signals for adjusting portfolio exposure.',
+  description: GHOSTREGIME_SEO_DESCRIPTION,
   path: '/ghostregime',
 });
 

@@ -54,6 +54,13 @@
 - npm run ghostregime:setup-reference
 - npm run ghostregime:why-btc-state -- --date YYYY-MM-DD --source api --base-url https://ghost-allocator.vercel.app
   NOTE: base-url must be root domain (NOT /ghostregime).
+- npm run ghostregime:compare-vams-profiles -- --date YYYY-MM-DD
+  - Optional: `--json` for machine-readable output. Requires network (Stooq); compares production VAMS (SPY/GLD/BTC-USD) vs diagnostic tickers (VT/GLDM/FBTC).
+- npm run ghostregime:vams-drift-study -- --months 12 --end YYYY-MM-DD [--csv path.csv] [--spot YYYY-MM-DD,YYYY-MM-DD]
+  - Aggregates prod vs closer-parity sleeve-state agreement over a window; optional regime join from `data/ghostregime/seed/ghostregime_replay_history.csv`. Network (Stooq).
+
+### 7a) GhostRegime VAMS signal audit (read-only)
+- Review `docs/ghostregime/VAMS_KISS_SIGNAL_AUDIT.md` after any change to `lib/ghostregime/vams.ts` symbols/thresholds or methodology claims.
 
 ### 7b) GhostRegime KISS allocation math (automated, post–KISS 8.0)
 Run after changing `lib/ghostregime/allocations.ts`, gold targets in `config.ts`, or `buildWhyCashLine`:

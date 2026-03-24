@@ -8,10 +8,11 @@ import { GlassCard } from '@/components/GlassCard';
 import DrawdownRealityCheck from '@/components/learn/DrawdownRealityCheck';
 import { buildMetadata } from '@/lib/seo';
 import type { Metadata } from 'next';
+import { GHOSTREGIME_SEO_DESCRIPTION } from '@/lib/ghostregime/productPositioning';
 
 export const metadata: Metadata = buildMetadata({
   title: 'How GhostRegime Works - Ghost Allocator',
-  description: 'A rules-based, long-only system that adjusts exposure when conditions change — without pretending we can predict the exact top or bottom.',
+  description: GHOSTREGIME_SEO_DESCRIPTION,
   path: '/ghostregime/how-it-works',
 });
 
@@ -21,7 +22,7 @@ export default function HowItWorksPage() {
       <header className="space-y-2">
         <h1 className="text-2xl font-semibold tracking-tight">How GhostRegime Works</h1>
         <p className="text-sm text-zinc-300">
-          A rules-based, long-only system that adjusts exposure when conditions change — without pretending we can predict the exact top or bottom.
+          KISS-style regime targets, proxy-VAMS sleeve scaling, long-only—without pretending we can predict the exact top or bottom.
         </p>
       </header>
 
@@ -41,8 +42,9 @@ export default function HowItWorksPage() {
         <h2 className="text-sm font-semibold text-zinc-50 mb-3">What GhostRegime Is</h2>
         <div className="space-y-3 text-xs text-zinc-300 leading-relaxed">
           <p>
-            GhostRegime is a portfolio "weather report" that helps you decide how much risk to carry right now — 
-            based on what markets are actually doing, not what some guy on YouTube "feels in his bones."
+            GhostRegime is a portfolio &quot;weather report&quot; that helps you decide how much risk to carry right now — 
+            based on what markets are actually doing, not what some guy on YouTube &quot;feels in his bones.&quot;
+            Targets follow a KISS-style regime map; the Brake uses our own proxy-VAMS signals (SPY, GLD, BTC-USD)—not copied daily sleeve labels from elsewhere.
           </p>
           <p>
             It's built for long-term investors who want:
@@ -112,7 +114,7 @@ export default function HowItWorksPage() {
         <h2 className="text-sm font-semibold text-zinc-50 mb-3">Step 1: Max targets and Before the brake</h2>
         <div className="space-y-3 text-xs text-zinc-300 leading-relaxed">
           <p>
-            <strong>Max targets</strong> are your full-risk baseline (60/30/10). First, GhostRegime classifies the market into one of four regimes:
+            <strong>Max targets</strong> are your full-risk baseline by regime (often 60/30/10 in calm regimes; INFLATION and others shift—see Methodology). First, GhostRegime classifies the market into one of four regimes:
           </p>
           <ul className="list-disc list-inside space-y-1 ml-2">
             <li><strong>GOLDILOCKS</strong> (Risk On)</li>
@@ -139,7 +141,7 @@ export default function HowItWorksPage() {
         <h2 className="text-sm font-semibold text-zinc-50 mb-3">Step 2: Brake (VAMS) and Hold now</h2>
         <div className="space-y-3 text-xs text-zinc-300 leading-relaxed">
           <p>
-            Next, the <strong>brake</strong> (VAMS — volatility-adjusted momentum) looks at each asset&apos;s trend signal and can cut exposure:
+            Next, the <strong>brake</strong> (proxy-VAMS — volatility-adjusted momentum on SPY, GLD, BTC-USD) looks at each sleeve&apos;s trend signal and can cut exposure:
           </p>
           <ul className="list-disc list-inside space-y-1 ml-2">
             <li><strong>Bullish</strong> → hold 100% of the starting point</li>

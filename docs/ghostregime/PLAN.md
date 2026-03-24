@@ -100,10 +100,10 @@ GhostRegime v1 is a market regime classifier + allocation system that operates i
   - 0 → 0.5
   - −2 → 0
 
-## Allocation Targets
+## Allocation Targets (KISS 8.0)
 
 - **Stocks target**: 0.6 if RISK ON else 0.3
-- **Gold target**: 0.3 always
+- **Gold target**: 0.15 if regime is INFLATION else 0.3
 - **BTC target**: 0.10 if RISK ON else 0.05
 
 **Allocation Math**:
