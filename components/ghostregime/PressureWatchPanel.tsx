@@ -69,8 +69,8 @@ export function PressureWatchPanel({
   const sleeveTagList = closestSleeveTags(closestSleeve);
 
   const innerClass = embedded
-    ? 'space-y-5'
-    : 'rounded-lg border border-amber-400/20 bg-zinc-900/40 px-3 py-3 space-y-5';
+    ? 'space-y-4'
+    : 'rounded-lg border border-amber-400/20 bg-zinc-900/40 px-3 py-3 space-y-4';
 
   return (
     <div className={innerClass}>
@@ -83,7 +83,7 @@ export function PressureWatchPanel({
         </div>
       )}
 
-      <section className="space-y-2.5 pb-5 border-b border-zinc-800/40">
+      <section className="space-y-2.5 pb-4 border-b border-zinc-800/40">
         <PressureAxisRow
           label={PRESSURE_WATCH_RISK_ROW_LABEL}
           flipLineText={formatRiskAxisFlipLine(riskScore, risk.distanceToZero)}
@@ -93,7 +93,7 @@ export function PressureWatchPanel({
         />
       </section>
 
-      <section className="space-y-2.5 pb-5 border-b border-zinc-800/40">
+      <section className="space-y-2.5 pb-4 border-b border-zinc-800/40">
         <PressureAxisRow
           label={PRESSURE_WATCH_INFL_ROW_LABEL}
           flipLineText={formatInflationAxisFlipLine(inflScore, inflation.distanceToZero)}
@@ -103,7 +103,7 @@ export function PressureWatchPanel({
         />
       </section>
 
-      <section className="rounded-md border border-zinc-800/55 bg-zinc-900/25 p-3.5 space-y-3">
+      <section className="rounded-md border border-zinc-800/50 bg-zinc-900/25 p-3 space-y-2.5">
         <p className="text-[10px] font-medium text-zinc-500 uppercase tracking-wide">{PRESSURE_WATCH_CLOSEST_LABEL}</p>
         {closestSleeve ? (
           <>

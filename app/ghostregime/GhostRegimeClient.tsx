@@ -36,7 +36,7 @@ import {
   buildTodaySnapshotBlocks,
   buildShareSummary,
   buildMicroFlowLine,
-  buildWhyCashLine,
+  buildPostureWhyCashBrief,
   REGIME_MAP,
   getRegimeMapPosition,
   buildSimpleHistorySummary,
@@ -775,6 +775,7 @@ export function GhostRegimeClient({
 
   return (
     <div className="space-y-6">
+      <div className="space-y-3">
       {/* Hero Summary Strip */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -875,51 +876,67 @@ export function GhostRegimeClient({
           router.push('/ghostregime');
         }}
       />
+      </div>
 
       {/* Posture snapshot */}
       {(() => {
         const blocks = buildTodaySnapshotBlocks(data);
         return blocks ? (
-        <GlassCard className="p-4 sm:p-5">
-          <div className="space-y-4">
-            <div>
-              <p className="text-[10px] text-zinc-500 uppercase tracking-wide mb-1.5">{POSTURE_HOLD_NOW_LABEL}</p>
-              <p className="text-lg font-mono text-zinc-100 tabular-nums tracking-tight">{blocks.actual}</p>
+        <div className="rounded-xl border border-zinc-800/50 bg-zinc-950/30 p-3 sm:p-4">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between lg:gap-6">
+            <div className="min-w-0 shrink-0 lg:max-w-[min(100%,22rem)]">
+              <p className="text-[10px] text-zinc-500 uppercase tracking-wide mb-1">{POSTURE_HOLD_NOW_LABEL}</p>
+              <p className="text-xl font-mono text-zinc-100 tabular-nums tracking-tight leading-tight">{blocks.actual}</p>
             </div>
-
-            <div className="grid grid-cols-1 gap-y-2.5 text-xs sm:grid-cols-[minmax(0,7.5rem)_1fr] sm:gap-x-4 sm:items-baseline">
-              <span className="text-[10px] text-zinc-500 uppercase tracking-wide">{POSTURE_STARTING_POINT_LABEL}</span>
-              <span className="font-mono text-zinc-300">{blocks.targets}</span>
-              <span className="text-[10px] text-zinc-500 uppercase tracking-wide">{POSTURE_BRAKE_LABEL}</span>
-              <span className="font-mono text-zinc-300">{blocks.scales}</span>
-              <span className="text-[10px] text-zinc-500 uppercase tracking-wide">{POSTURE_BASELINE_LABEL}</span>
-              <span className="text-[10px] font-mono text-zinc-500">{formatMaxTargets()}</span>
+            <div className="grid grid-cols-2 gap-x-3 gap-y-2.5 sm:grid-cols-4 flex-1 min-w-0 text-xs">
+              <div className="min-w-0">
+                <p className="text-[9px] text-zinc-500 uppercase tracking-wide mb-0.5">{POSTURE_STARTING_POINT_LABEL}</p>
+                <p className="font-mono text-zinc-300 text-[11px] sm:text-xs leading-snug break-words">{blocks.targets}</p>
+              </div>
+              <div className="min-w-0">
+                <p className="text-[9px] text-zinc-500 uppercase tracking-wide mb-0.5">{POSTURE_BRAKE_LABEL}</p>
+                <p className="font-mono text-zinc-300 text-[11px] sm:text-xs leading-snug break-words">{blocks.scales}</p>
+              </div>
+              <div className="min-w-0">
+                <p className="text-[9px] text-zinc-500 uppercase tracking-wide mb-0.5">{POSTURE_BASELINE_LABEL}</p>
+                <p className="text-[10px] font-mono text-zinc-500 leading-snug">{formatMaxTargets()}</p>
+              </div>
+              <div className="min-w-0">
+                <p className="text-[9px] text-zinc-500 uppercase tracking-wide mb-0.5">
+                  {SINCE_LAST_UPDATE_PREFIX.replace(/:\s*$/, '')}
+                </p>
+                {historyChangeSummary !== null && (
+                  <p className="text-[11px] text-zinc-400 leading-snug" title={historyChangeSummary}>
+                    {historyChangeSummary}
+                  </p>
+                )}
+                {historyChangeSummary === null && historyLoading && (
+                  <p className="text-[11px] text-zinc-500 italic">…</p>
+                )}
+                {historyChangeSummary === null && !historyLoading && historyAvailable && data && (
+                  <p className="text-[11px] text-zinc-500/90 italic leading-snug">{SINCE_LAST_UPDATE_NO_CHANGE}</p>
+                )}
+              </div>
             </div>
+          </div>
 
-            <div className="border-t border-zinc-800/50 pt-3">
-              <p className="text-[10px] text-zinc-500 mb-1">{POSTURE_WHY_CASH_LABEL}</p>
-              <p className="text-xs text-zinc-400 leading-snug max-w-prose">{buildWhyCashLine(data)}</p>
-            </div>
-
-            <p className="text-[10px]">
+          <div className="mt-3 pt-2.5 border-t border-zinc-800/40">
+            <div className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-2 sm:gap-y-1">
+              <span className="text-[10px] text-zinc-500 shrink-0">{POSTURE_WHY_CASH_LABEL}</span>
+              <p className="text-xs text-zinc-400 leading-snug min-w-0 flex-1 m-0">
+                {buildPostureWhyCashBrief(data)}
+              </p>
+              <span className="hidden sm:inline text-zinc-600 select-none" aria-hidden>
+                ·
+              </span>
               <Link
                 href="/learn/glossary#targets-scales-actual"
-                className="text-zinc-500 hover:text-amber-400/90 underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-0.5"
+                className="text-[10px] text-zinc-500 hover:text-amber-400/90 underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-0.5 shrink-0 self-start sm:self-center"
               >
                 {GLOSSARY_HOLD_BRAKE_MAX_LINK}
               </Link>
-            </p>
-
-            <div className="border-t border-zinc-800/50 pt-3">
-              {historyChangeSummary !== null && (
-                <p className="text-xs text-zinc-500 leading-snug">
-                  <span className="text-zinc-600">{SINCE_LAST_UPDATE_PREFIX}</span> {historyChangeSummary}
-                </p>
-              )}
-              {historyChangeSummary === null && !historyLoading && historyAvailable && data && (
-                <p className="text-xs text-zinc-500/90 italic">{SINCE_LAST_UPDATE_NO_CHANGE}</p>
-              )}
             </div>
+          </div>
 
           {(() => {
             const riskAxisDirection = data.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
@@ -979,10 +996,10 @@ export function GhostRegimeClient({
             const copyText = buildCopySnapshotText(data, actionableRead);
             
             return actionableRead ? (
-              <div className="space-y-2 border-t border-zinc-800/50 pt-3">
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+              <div className="mt-3 pt-2.5 border-t border-zinc-800/40">
+                <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
                   <div className="flex-1 min-w-0">
-                    <div className="text-[10px] text-zinc-500 mb-1.5">{ACTIONABLE_READ_PREFIX}</div>
+                    <div className="text-[10px] text-zinc-500 mb-1">{ACTIONABLE_READ_PREFIX}</div>
                     <ActionableReadPills
                       regime={data.regime}
                       riskRegime={data.risk_regime}
@@ -1044,7 +1061,7 @@ export function GhostRegimeClient({
           
           {/* Compare Panel */}
           {showCompare && prevRow && (
-            <div className="mt-3 pt-1 border-t border-zinc-800/40">
+            <div className="mt-2 pt-2 border-t border-zinc-800/40">
               <ComparePanel
                 currentRow={data}
                 prevRow={prevRow}
@@ -1088,8 +1105,7 @@ export function GhostRegimeClient({
               />
             </div>
           )}
-          </div>
-        </GlassCard>
+        </div>
         ) : null;
       })()}
 
@@ -1106,7 +1122,7 @@ export function GhostRegimeClient({
                 {REGIME_MAP_METHODOLOGY_CTA}
               </Link>
             </div>
-            <p className="text-[9px] text-zinc-600 leading-snug mb-4">
+            <p className="text-[9px] text-zinc-600 leading-snug mb-3">
               {REGIME_MAP_SLEEVE_NOTE_PREFIX}{' '}
               <Link
                 href="/ghostregime/methodology"
@@ -1583,10 +1599,10 @@ export function GhostRegimeClient({
       {/* Row 3: Regime overview | Why this regime */}
       <div className="grid gap-6 lg:grid-cols-2">
         <div id="regime-summary">
-          <GlassCard className="p-6">
-            <h2 className="text-sm font-semibold text-zinc-50 mb-3">{REGIME_OVERVIEW_TITLE}</h2>
-            <div className="space-y-3">
-              <div className="space-y-2.5 border-b border-zinc-800/80 pb-3">
+          <GlassCard className="p-5">
+            <h2 className="text-sm font-semibold text-zinc-50 mb-2.5">{REGIME_OVERVIEW_TITLE}</h2>
+            <div className="space-y-2.5">
+              <div className="space-y-2.5 border-b border-zinc-800/80 pb-2.5">
                 <div>
                   <p className="text-[10px] text-zinc-400 uppercase tracking-wide mb-1">
                     <Tooltip content="The model's read on the market &quot;weather&quot; (Goldilocks / Reflation / Inflation / Deflation). Not a prediction — a label for the lane we're driving in right now.">
@@ -1608,7 +1624,7 @@ export function GhostRegimeClient({
                   <p className="text-sm font-medium text-zinc-200">{data.infl_axis}</p>
                 </div>
               </div>
-              <div className="rounded-md border border-zinc-800/50 bg-zinc-900/25 p-2.5">
+              <div className="rounded-md border border-zinc-800/50 bg-zinc-900/25 p-2">
                 <div className="flex flex-wrap gap-2">
                 {dashboardMetrics.regimeConfidenceLabel && (
                   <Tooltip content={REGIME_CONFIDENCE_TOOLTIP}>
@@ -1684,10 +1700,10 @@ export function GhostRegimeClient({
           const hasHistoryButNotToday = !hasTodayReceipts && (riskSeries.length >= 2 || inflSeries.length >= 2);
 
           return (
-            <GlassCard className="p-6 border border-zinc-800/80">
+            <GlassCard className="p-5 border border-zinc-800/80">
               <p className="text-[10px] text-zinc-500 uppercase tracking-wide mb-1">Context</p>
               <h2 className="text-xs font-semibold text-zinc-400 mb-3 tracking-tight">{WHY_REGIME_TITLE}</h2>
-              <div className="space-y-2.5 text-xs text-zinc-300 leading-relaxed">
+              <div className="space-y-3 text-xs text-zinc-300 leading-relaxed">
                 {(() => {
                   const priorTradingRow = prevRow;
                   const riskDelta = priorTradingRow ? computeAxisStatDeltas(data, priorTradingRow, 'risk') : null;
@@ -1721,9 +1737,9 @@ export function GhostRegimeClient({
                   <p className="text-zinc-500 text-[10px] italic mt-2">{AGREEMENT_HISTORY_INSUFFICIENT_HINT}</p>
                 )}
                 <p className="text-amber-300/95 font-medium leading-snug">{axisDesc.regimeLine.replace(/\*\*/g, '')}</p>
-                <div className="mt-3 pt-3 border-t border-zinc-800/60 space-y-1.5">
+                <div className="mt-3 pt-3 border-t border-zinc-800/50 space-y-1">
                   {axisDesc.soWhatLines.map((line, idx) => (
-                    <p key={idx} className="text-[11px] text-zinc-500 italic leading-relaxed">
+                    <p key={idx} className="text-[11px] text-zinc-600 italic leading-relaxed">
                       {line}
                     </p>
                   ))}

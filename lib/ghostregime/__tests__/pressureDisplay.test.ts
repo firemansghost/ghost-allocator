@@ -13,12 +13,12 @@ import {
 
 const NEGL = 'Next flip impact: negligible at current targets';
 
-assert.strictEqual(formatRiskAxisFlipLine(0.5, 0.5), '0.50 from flip to Risk Off');
-assert.strictEqual(formatRiskAxisFlipLine(-0.3, 0.3), '0.30 from flip to Risk On');
+assert.strictEqual(formatRiskAxisFlipLine(0.5, 0.5), '0.50 from Risk Off');
+assert.strictEqual(formatRiskAxisFlipLine(-0.3, 0.3), '0.30 from Risk On');
 assert.strictEqual(formatRiskAxisFlipLine(0, 0), 'On the flip line');
 
-assert.strictEqual(formatInflationAxisFlipLine(0.2, 0.2), '0.20 from flip to Disinflation');
-assert.strictEqual(formatInflationAxisFlipLine(-0.4, 0.4), '0.40 from flip to Inflation');
+assert.strictEqual(formatInflationAxisFlipLine(0.2, 0.2), '0.20 from Disinflation');
+assert.strictEqual(formatInflationAxisFlipLine(-0.4, 0.4), '0.40 from Inflation');
 assert.strictEqual(formatInflationAxisFlipLine(0, 0), 'On the flip line');
 
 assert.deepStrictEqual(

@@ -448,6 +448,40 @@ export function buildWhyCashLine(data: GhostRegimeRow): string {
 }
 
 /**
+ * One-line "Why cash" for the posture summary band (same facts as buildWhyCashLine).
+ */
+export function buildPostureWhyCashBrief(data: GhostRegimeRow): string {
+  const breakdown = computeCashBreakdown(data);
+  const riskLabel = data.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
+
+  const stocksTarget = (data.stocks_target * 100).toFixed(0);
+  const goldTarget = (data.gold_target * 100).toFixed(0);
+  const btcTarget = (data.btc_target * 100).toFixed(0);
+  const cashTargetPct = (breakdown.cashTarget * 100).toFixed(0);
+  const startingPoint =
+    breakdown.cashTarget >= 0.005
+      ? `${stocksTarget}/${goldTarget}/${btcTarget} + ${cashTargetPct} cash`
+      : `${stocksTarget}/${goldTarget}/${btcTarget}`;
+
+  const brakeParts = [
+    `Stocks ${formatScaleLabel(data.stocks_scale)}`,
+    `Gold ${formatScaleLabel(data.gold_scale)}`,
+    `BTC ${formatScaleLabel(data.btc_scale)}`,
+  ].join(' · ');
+
+  if (data.cash < 0.05) {
+    return "Cash is low — we're near full risk.";
+  }
+
+  if (breakdown.cashFromThrottles > 0.005 && breakdown.throttleSourceNames.length > 0) {
+    const brakePct = (breakdown.cashFromThrottles * 100).toFixed(0);
+    return `${riskLabel} · ${startingPoint} · Brake: ${brakeParts} · ~${brakePct}% extra cash (on top of ${cashTargetPct}% mix).`;
+  }
+
+  return `${riskLabel} · ${startingPoint} · Brake: ${brakeParts}.`;
+}
+
+/**
  * Regime Map Configuration
  * Maps regime types to their position in the 2x2 grid
  */

@@ -60,15 +60,15 @@ const FLIP_IMPACT_EPS = 1e-6;
 /** Distance to score flip line at 0 (same as abs(score) in pressure helper). */
 export function formatRiskAxisFlipLine(score: number, distanceToZero: number): string {
   const d = distanceToZero.toFixed(2);
-  if (score > 0) return `${d} from flip to Risk Off`;
-  if (score < 0) return `${d} from flip to Risk On`;
+  if (score > 0) return `${d} from Risk Off`;
+  if (score < 0) return `${d} from Risk On`;
   return 'On the flip line';
 }
 
 export function formatInflationAxisFlipLine(score: number, distanceToZero: number): string {
   const d = distanceToZero.toFixed(2);
-  if (score > 0) return `${d} from flip to Disinflation`;
-  if (score < 0) return `${d} from flip to Inflation`;
+  if (score > 0) return `${d} from Disinflation`;
+  if (score < 0) return `${d} from Inflation`;
   return 'On the flip line';
 }
 

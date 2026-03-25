@@ -5,7 +5,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
 import type { GhostRegimeRow, SignalReceipt } from '../types';
-import { buildWhyCashLine } from '../ui';
+import { buildWhyCashLine, buildPostureWhyCashBrief } from '../ui';
 
 function row(partial: Partial<GhostRegimeRow> & Pick<GhostRegimeRow, 'stocks_actual' | 'gold_actual' | 'btc_actual' | 'cash'>): GhostRegimeRow {
   return {
@@ -49,5 +49,19 @@ describe('buildWhyCashLine', () => {
     const line = buildWhyCashLine(r);
     assert.match(line, /Stocks half size/i);
     assert.doesNotMatch(line, /Stocks off/i);
+  });
+});
+
+describe('buildPostureWhyCashBrief', () => {
+  it('mirrors brake semantics without claiming Stocks off when stocks_actual > 0', () => {
+    const r = row({
+      stocks_actual: 0.15,
+      gold_actual: 0.075,
+      btc_actual: 0,
+      cash: 0.775,
+    });
+    const brief = buildPostureWhyCashBrief(r);
+    assert.match(brief, /Stocks half/i);
+    assert.doesNotMatch(brief, /Stocks off/i);
   });
 });
