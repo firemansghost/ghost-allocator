@@ -21,11 +21,10 @@ import { ComparePanel } from '@/components/ghostregime/ComparePanel';
 import { GhostRegimeToolbar } from '@/components/ghostregime/GhostRegimeToolbar';
 import { FreshnessBadge } from '@/components/ghostregime/FreshnessBadge';
 import { ParityPanel } from '@/components/ghostregime/ParityPanel';
+import { PressureWatchPanel } from '@/components/ghostregime/PressureWatchPanel';
 import type { GhostRegimeRow, RegimeType } from '@/lib/ghostregime/types';
-import {
-  computeRegimeMovementPressure,
-  type AxisPressureDirection,
-} from '@/lib/ghostregime/flipWatchPressure';
+import { computeRegimeMovementPressure } from '@/lib/ghostregime/flipWatchPressure';
+import { formatPressureDirectionLabel } from '@/lib/ghostregime/pressureDisplay';
 import {
   formatScaleLabel,
   formatSleeveLine,
@@ -57,7 +56,7 @@ import {
   computeRegimeConvictionIndex,
   computeRegimeConfidenceLabel,
   computePrimaryDriver,
-  formatFlipWatchLabel,
+  formatRegimeConfirmationDisplay,
   computeAxisNetVote,
   buildActionableReadLine,
   computeAxisStatDeltas,
@@ -121,13 +120,18 @@ import {
   COPY_LINK_BUTTON,
   COPY_LINK_COPIED,
   BACK_TO_LATEST_LINK,
-  MOVEMENT_PRESSURE_TITLE,
-  MOVEMENT_PRESSURE_TOOLTIP,
-  MOVEMENT_PRESSURE_CLOSEST_LABEL,
-  MOVEMENT_PRESSURE_IF_STEP_TOOLTIP,
-  MOVEMENT_PRESSURE_NA,
-  MOVEMENT_PRESSURE_ADVANCED_TITLE,
-  MOVEMENT_PRESSURE_NO_SCORES,
+  PRESSURE_WATCH_TOOLTIP,
+  PRESSURE_WATCH_ADVANCED_TITLE,
+  PRESSURE_WATCH_NA,
+  PRESSURE_WATCH_NO_SCORES,
+  PRESSURE_WATCH_COL_SCORE,
+  PRESSURE_WATCH_COL_DIST,
+  PRESSURE_WATCH_COL_PRIOR,
+  PRESSURE_WATCH_IF_STEP_TOOLTIP,
+  PRESSURE_WATCH_ADVANCED_ONE_STEP_LABEL,
+  PRESSURE_WATCH_PRIOR_UNAVAILABLE,
+  REGIME_CONFIRMATION_CHIP_PREFIX,
+  REGIME_CONFIRMATION_STATUS_LABEL,
   COMPARE_LINK_LABEL,
   COMPARE_DISABLED_TOOLTIP,
   COMPARE_PREV_SNAPSHOT_TOOLTIP,
@@ -142,9 +146,8 @@ import {
   REGIME_MAP_LEGEND_SUMMARY,
   REGIME_MAP_LEGEND_TOOLTIP,
   REGIME_MAP_METHODOLOGY_CTA,
-  REGIME_MAP_METHODOLOGY_LINK,
-  REGIME_MAP_VAMS_PROXY_PREFIX,
-  REGIME_MAP_VAMS_PROXY_METHODOLOGY_LINK,
+  REGIME_MAP_SLEEVE_NOTE_PREFIX,
+  REGIME_MAP_METHODOLOGY_LINK_TEXT,
   GHOSTREGIME_METHODOLOGY_PILL_LABEL,
   GHOSTREGIME_METHODOLOGY_PILL_TOOLTIP,
 } from '@/lib/ghostregime/ghostregimePageCopy';
@@ -199,13 +202,6 @@ function CashNowBar({ pct }: { pct: number }) {
       </div>
     </div>
   );
-}
-
-function formatAxisPressureDir(d: AxisPressureDirection): string {
-  if (d === null) return 'prior row N/A';
-  if (d === 'up') return '↑ vs prior';
-  if (d === 'down') return '↓ vs prior';
-  return 'flat vs prior';
 }
 
 function formatPctDelta(v: number): string {
@@ -823,7 +819,9 @@ export function GhostRegimeClient({
         <div className="space-y-1">
           <div className="text-sm text-zinc-300 leading-relaxed font-mono space-y-0.5">
             <div><strong className="text-zinc-200">Hold now:</strong> {blocks.actual}</div>
-            <div className="text-xs text-zinc-400"><strong className="text-zinc-300">Why cash:</strong> {buildWhyCashLine(data)}</div>
+            <div className="text-xs text-zinc-400 leading-relaxed max-w-prose">
+              <strong className="text-zinc-300">Why cash:</strong> {buildWhyCashLine(data)}
+            </div>
             <div><strong className="text-zinc-200">Full-risk baseline:</strong> {formatMaxTargets()}</div>
           </div>
           <p className="text-[10px] mt-1.5">
@@ -1031,12 +1029,12 @@ export function GhostRegimeClient({
               </Link>
             </div>
             <p className="text-[10px] text-zinc-500 leading-snug mb-4">
-              {REGIME_MAP_VAMS_PROXY_PREFIX}{' '}
+              {REGIME_MAP_SLEEVE_NOTE_PREFIX}{' '}
               <Link
                 href="/ghostregime/methodology"
                 className="text-amber-400/90 hover:text-amber-300 underline underline-offset-2"
               >
-                {REGIME_MAP_VAMS_PROXY_METHODOLOGY_LINK}
+                {REGIME_MAP_METHODOLOGY_LINK_TEXT}
               </Link>
               .
             </p>
@@ -1180,7 +1178,7 @@ export function GhostRegimeClient({
         <GlassCard className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold text-zinc-50">
-                <Tooltip content="Before the brake = Risk On/Off targets. Max targets = full baseline. Hold now = what we hold after Brake (VAMS).">
+                <Tooltip content="Before the brake = Risk On/Off targets. Max = full baseline. Hold now = what we hold after the sleeve brake.">
                   Allocations
                 </Tooltip>
               </h2>
@@ -1658,7 +1656,7 @@ export function GhostRegimeClient({
             riskAgreement.pct,
             inflAgreement.pct
           );
-          const flipWatchLabel = formatFlipWatchLabel(data.flip_watch_status);
+          const regimeConfirmationLabel = formatRegimeConfirmationDisplay(data.flip_watch_status);
           const hasFlipWatch = data.flip_watch_status && data.flip_watch_status !== 'NONE';
           const movementPressure = computeRegimeMovementPressure(data, prevRow);
 
@@ -1666,7 +1664,7 @@ export function GhostRegimeClient({
             <div id="regime-summary">
               <GlassCard className="p-6">
                 <h2 className="text-sm font-semibold text-zinc-50 mb-4">{REGIME_SUMMARY_TITLE}</h2>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {regimeConfidenceLabel && (
                   <div>
                     <Tooltip content={REGIME_CONFIDENCE_TOOLTIP}>
@@ -1699,45 +1697,16 @@ export function GhostRegimeClient({
                     )}
                   </div>
                 )}
-                <div>
-                  <Tooltip content={FLIPWATCH_PILL_TOOLTIP}>
-                    <span className={`px-2 py-0.5 rounded border text-xs ${
-                      hasFlipWatch
-                        ? 'border-amber-400/30 bg-amber-400/10 text-amber-300/80'
-                        : 'border-zinc-700/50 bg-zinc-900/30 text-zinc-500'
-                    }`}>
-                      Flip Watch: {flipWatchLabel}
-                    </span>
-                  </Tooltip>
-                </div>
-                <div className="rounded-md border border-teal-500/30 bg-teal-950/25 px-2.5 py-2 space-y-1.5">
-                  <Tooltip content={MOVEMENT_PRESSURE_TOOLTIP}>
-                    <p className="text-[11px] font-semibold text-teal-200/90 cursor-help">{MOVEMENT_PRESSURE_TITLE}</p>
-                  </Tooltip>
-                  <p className="text-[10px] text-teal-100/80 leading-snug">
-                    Risk: |score| {movementPressure.risk.distanceToZero.toFixed(2)} from 0 ·{' '}
-                    {formatAxisPressureDir(movementPressure.risk.direction)}
-                    {movementPressure.risk.nearBalance ? ' · near balance' : ''}
-                  </p>
-                  <p className="text-[10px] text-teal-100/80 leading-snug">
-                    Inflation: |score| {movementPressure.inflation.distanceToZero.toFixed(2)} from 0 ·{' '}
-                    {formatAxisPressureDir(movementPressure.inflation.direction)}
-                    {movementPressure.inflation.nearBalance ? ' · near balance' : ''}
-                  </p>
-                  {movementPressure.closestSleeve ? (
-                    <Tooltip content={MOVEMENT_PRESSURE_IF_STEP_TOOLTIP}>
-                      <p className="text-[10px] text-teal-100/90 leading-snug cursor-help">
-                        <span className="font-medium">{MOVEMENT_PRESSURE_CLOSEST_LABEL}:</span>{' '}
-                        {movementPressure.closestSleeve.label} — {movementPressure.closestSleeve.distanceToBoundary.toFixed(2)} in score space;
-                        one-step Δ S/G/B/C {formatPctDelta(movementPressure.closestSleeve.deltaStocksActual)} /{' '}
-                        {formatPctDelta(movementPressure.closestSleeve.deltaGoldActual)} /{' '}
-                        {formatPctDelta(movementPressure.closestSleeve.deltaBtcActual)} / {formatPctDelta(movementPressure.closestSleeve.deltaCash)}
-                      </p>
+                <PressureWatchPanel movementPressure={movementPressure} />
+                {hasFlipWatch && regimeConfirmationLabel && (
+                  <div>
+                    <Tooltip content={FLIPWATCH_PILL_TOOLTIP}>
+                      <span className="px-2 py-0.5 rounded border border-amber-400/30 bg-amber-400/10 text-amber-300/80 text-xs">
+                        {REGIME_CONFIRMATION_CHIP_PREFIX} {regimeConfirmationLabel}
+                      </span>
                     </Tooltip>
-                  ) : (
-                    <p className="text-[10px] text-zinc-500">{MOVEMENT_PRESSURE_NO_SCORES}</p>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             </GlassCard>
             </div>
@@ -1763,7 +1732,7 @@ export function GhostRegimeClient({
             <span className="text-amber-400 mt-0.5">•</span>
             <span>
               <strong className="text-zinc-200">
-                <Tooltip content="Risk On/Off targets before VAMS scales. The starting point.">
+                <Tooltip content="Risk On/Off targets before the sleeve brake scales them. Your starting point.">
                   Before the brake
                 </Tooltip>
               </strong>: What the regime would allow before any safety cuts.
@@ -1773,7 +1742,7 @@ export function GhostRegimeClient({
             <span className="text-amber-400 mt-0.5">•</span>
             <span>
               <strong className="text-zinc-200">
-                <Tooltip content="What you hold after the brake (VAMS) is applied. The practical instruction.">
+                <Tooltip content="What you hold after the sleeve brake is applied—the practical instruction.">
                   Hold now
                 </Tooltip>
               </strong>: What you should actually hold after the brake is applied.
@@ -1845,7 +1814,7 @@ export function GhostRegimeClient({
         </div>
         <p className="text-[11px] text-zinc-500 ml-6">
           {showAdvanced 
-            ? "Receipts only: targets, actuals, VAMS states, and the 'what ran when' metadata. No new magic, just the paper trail."
+            ? "Receipts only: targets, actuals, sleeve brake states, and run metadata. No new magic—just the paper trail."
             : "If you read commit hashes for fun, welcome home. If not, nothing down here changes the signal."}
         </p>
       </div>
@@ -1960,7 +1929,7 @@ export function GhostRegimeClient({
               </p>
             </div>
             <div>
-              <p className="text-xs text-zinc-400 uppercase tracking-wide">Flip Watch</p>
+              <p className="text-xs text-zinc-400 uppercase tracking-wide">{REGIME_CONFIRMATION_STATUS_LABEL}</p>
               <p className="text-sm font-medium text-zinc-200">{data.flip_watch_status}</p>
             </div>
             {data.core_proxy_used && Object.keys(data.core_proxy_used).length > 0 && (
@@ -2017,7 +1986,7 @@ export function GhostRegimeClient({
               Debug view. Use &quot;Hold now&quot; above for the practical instruction.
             </p>
             <h2 className="text-sm font-semibold text-zinc-50">
-              <Tooltip content="Starting point = before brake (Risk On/Off). Max = full baseline. Hold now = actual after Brake (VAMS).">
+              <Tooltip content="Starting point = before the sleeve brake (Risk On/Off targets). Max = full baseline. Hold now = actual after the brake.">
                 Allocations
               </Tooltip>
             </h2>
@@ -2070,11 +2039,11 @@ export function GhostRegimeClient({
             </div>
           </GlassCard>
 
-          {/* Advanced: VAMS States */}
+          {/* Advanced: Sleeve brake states */}
           <GlassCard className="p-4 sm:p-5 space-y-3">
             <h2 className="text-sm font-semibold text-zinc-50">
-              <Tooltip content="Volatility-Adjusted Momentum Signal. Trend + a volatility filter. Bullish = 100% of target, Neutral = 50%, Bearish = 0%. It's how we avoid overreacting to every tiny wiggle.">
-                VAMS States
+              <Tooltip content="Sleeve brake states: trend plus a volatility filter. Bullish = full target, Neutral = half, Bearish = off—so we don’t chase every wiggle.">
+                Sleeve brake (states)
               </Tooltip>
             </h2>
             <div className="space-y-2 text-xs">
@@ -2099,10 +2068,10 @@ export function GhostRegimeClient({
             </div>
           </GlassCard>
 
-          {/* Advanced: Sleeve pressure (full sleeves; summary shows closest only) */}
+          {/* Advanced: Pressure Watch (full sleeves) */}
           <GlassCard className="p-4 sm:p-5 space-y-3">
             <h2 className="text-sm font-semibold text-zinc-50">
-              <Tooltip content={MOVEMENT_PRESSURE_TOOLTIP}>{MOVEMENT_PRESSURE_ADVANCED_TITLE}</Tooltip>
+              <Tooltip content={PRESSURE_WATCH_TOOLTIP}>{PRESSURE_WATCH_ADVANCED_TITLE}</Tooltip>
             </h2>
             {(() => {
               const mp = computeRegimeMovementPressure(data, prevRow);
@@ -2113,13 +2082,14 @@ export function GhostRegimeClient({
                       <p className="font-medium text-zinc-200">{s.label}</p>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 mt-1 text-zinc-400">
                         <span>
-                          VAMS score: {s.score === null ? MOVEMENT_PRESSURE_NA : s.score.toFixed(3)}
+                          {PRESSURE_WATCH_COL_SCORE}: {s.score === null ? PRESSURE_WATCH_NA : s.score.toFixed(3)}
                         </span>
                         <span>
-                          Dist to ±0.5 band: {s.distanceToBoundary === null ? MOVEMENT_PRESSURE_NA : s.distanceToBoundary.toFixed(3)}
+                          {PRESSURE_WATCH_COL_DIST}: {s.distanceToBoundary === null ? PRESSURE_WATCH_NA : s.distanceToBoundary.toFixed(3)}
                         </span>
                         <span className="sm:col-span-2">
-                          vs prior row: {s.direction === null ? MOVEMENT_PRESSURE_NA : formatAxisPressureDir(s.direction)}
+                          {PRESSURE_WATCH_COL_PRIOR}:{' '}
+                          {s.direction === null ? PRESSURE_WATCH_PRIOR_UNAVAILABLE : formatPressureDirectionLabel(s.direction)}
                         </span>
                       </div>
                       {s.deltaStocksActual !== null &&
@@ -2127,8 +2097,9 @@ export function GhostRegimeClient({
                         s.deltaBtcActual !== null &&
                         s.deltaCash !== null && (
                           <p className="text-[10px] text-zinc-500 mt-1">
-                            If one-step flip: Δ Stk {formatPctDelta(s.deltaStocksActual)} · Gl {formatPctDelta(s.deltaGoldActual)} · BTC{' '}
-                            {formatPctDelta(s.deltaBtcActual)} · Cash {formatPctDelta(s.deltaCash)}
+                            {PRESSURE_WATCH_ADVANCED_ONE_STEP_LABEL}: Stocks {formatPctDelta(s.deltaStocksActual)} · Gold{' '}
+                            {formatPctDelta(s.deltaGoldActual)} · Bitcoin {formatPctDelta(s.deltaBtcActual)} · Cash{' '}
+                            {formatPctDelta(s.deltaCash)}
                           </p>
                         )}
                     </div>

@@ -69,7 +69,8 @@ export const REGIME_CONFIDENCE_LABEL_PREFIX = 'Regime Confidence:';
 export const REGIME_CONFIDENCE_TOOLTIP = 'Heuristic from signal agreement + coverage. Not a probability.';
 export const PRIMARY_DRIVER_PREFIX = 'Primary driver:';
 export const PRIMARY_DRIVER_TOOLTIP = 'Which axis (Risk or Inflation) has the stronger signal today.';
-export const FLIPWATCH_PILL_TOOLTIP = 'Flip Watch reduces whipsaw by waiting for confirmation.';
+export const FLIPWATCH_PILL_TOOLTIP =
+  'Regime confirmation: waits for an extra day before treating a regime change as real. Different from Pressure Watch (distance to signal flips).';
 export const ACTIONABLE_READ_PREFIX = 'Actionable read:';
 export const CROWDED_LABEL = 'Crowded';
 export const CROWDED_TOOLTIP = 'Signals are piling onto one side. Could be clarity… or everyone running through the same door.';
@@ -140,13 +141,17 @@ export const REGIME_MAP_LEGEND_TOOLTIP = 'Show the 4 regime descriptions.';
 export const REGIME_MAP_METHODOLOGY_CTA = 'Methodology →';
 export const REGIME_MAP_METHODOLOGY_LINK = 'Read methodology →';
 
-/** Prefix for regime map VAMS disclosure; pair with a link labeled REGIME_MAP_VAMS_PROXY_METHODOLOGY_LINK. */
-export const REGIME_MAP_VAMS_PROXY_PREFIX =
-  'Sleeve Brake = proxy-VAMS on SPY / GLD / BTC-USD — see';
-export const REGIME_MAP_VAMS_PROXY_METHODOLOGY_LINK = 'Methodology';
+/** Regime map footnote (plain English); pair with REGIME_MAP_METHODOLOGY_LINK_TEXT. */
+export const REGIME_MAP_SLEEVE_NOTE_PREFIX =
+  'The brake scales Stocks, Gold, and Bitcoin using rules-based signals on liquid proxies (SPY, GLD, BTC-USD). Details:';
+export const REGIME_MAP_METHODOLOGY_LINK_TEXT = 'Methodology';
+/** @deprecated Use REGIME_MAP_SLEEVE_NOTE_PREFIX */
+export const REGIME_MAP_VAMS_PROXY_PREFIX = REGIME_MAP_SLEEVE_NOTE_PREFIX;
+/** @deprecated Use REGIME_MAP_METHODOLOGY_LINK_TEXT */
+export const REGIME_MAP_VAMS_PROXY_METHODOLOGY_LINK = REGIME_MAP_METHODOLOGY_LINK_TEXT;
 export const GHOSTREGIME_METHODOLOGY_PILL_LABEL = 'Methodology';
 export const GHOSTREGIME_METHODOLOGY_PILL_TOOLTIP =
-  'How GhostRegime works: KISS-style targets and proxy-VAMS sleeve scaling.';
+  'How GhostRegime works: regime targets, sleeve brake, and methodology.';
 
 // Snapshot viewing
 export const VIEWING_SNAPSHOT_LABEL = 'Viewing snapshot:';
@@ -159,14 +164,45 @@ export const COPY_SUMMARY_BUTTON = 'Copy summary';
 export const COPY_SUMMARY_COPIED = 'Copied';
 export const BACK_TO_LATEST_LINK = 'Back to latest';
 
-// Axis & sleeve pressure (distinct from regime-change Flip Watch status / flip_watch_status)
-export const MOVEMENT_PRESSURE_TITLE = 'Axis & sleeve pressure';
-export const MOVEMENT_PRESSURE_TOOLTIP =
-  'Risk/inflation: distance of each axis score from 0. Sleeves: distance in VAMS score space to the nearest ±0.5 band. Direction compares this row to the prior persisted trading row only. Not a forecast.';
-export const MOVEMENT_PRESSURE_CLOSEST_LABEL = 'Nearest VAMS band';
-export const MOVEMENT_PRESSURE_IF_STEP_TOOLTIP =
-  'If only this sleeve took one discrete VAMS step (same regime), approximate allocation deltas. Illustrative, not a prediction.';
-export const MOVEMENT_PRESSURE_NA = 'N/A';
-export const MOVEMENT_PRESSURE_ADVANCED_TITLE = 'Sleeve pressure (VAMS score space)';
-export const MOVEMENT_PRESSURE_NO_SCORES = 'Sleeve scores not on this snapshot — N/A until the next persisted row includes them.';
+// Pressure Watch (movement vs thresholds; distinct from flip_watch_status regime confirmation)
+export const PRESSURE_WATCH_TITLE = 'Pressure Watch';
+export const PRESSURE_WATCH_SUBTITLE = "What's changing";
+export const PRESSURE_WATCH_TOOLTIP =
+  'How far risk and inflation scores are from balanced (0), and how far sleeve signals are from the next threshold band. Compared to the prior trading snapshot only. Not a forecast.';
+export const PRESSURE_WATCH_RISK_ROW_LABEL = 'Risk';
+export const PRESSURE_WATCH_INFL_ROW_LABEL = 'Inflation';
+export const PRESSURE_WATCH_DISTANCE_TO_BALANCE = 'Distance to balance';
+export const PRESSURE_WATCH_DISTANCE_TO_FLIP = 'Distance to flip';
+export const PRESSURE_WATCH_CLOSEST_LABEL = 'Closest pressure point';
+export const PRESSURE_WATCH_ALLOC_IMPACT = 'If that sleeve flips next';
+export const PRESSURE_WATCH_IF_STEP_TOOLTIP =
+  'Illustrative: if only this sleeve moved one step across its band (same regime), approximate allocation change. Not a prediction.';
+export const PRESSURE_WATCH_ADVANCED_ONE_STEP_LABEL = 'If one sleeve flips next (illustrative)';
+export const PRESSURE_WATCH_NA = 'N/A';
+export const PRESSURE_WATCH_ADVANCED_TITLE = 'Pressure Watch — full detail';
+export const PRESSURE_WATCH_NO_SCORES =
+  'Sleeve signal data not on this snapshot yet — N/A until included on the next update.';
+export const PRESSURE_WATCH_TAG_NEAR_BALANCE = 'Near balance';
+export const PRESSURE_WATCH_TAG_NEAR_FLIP = 'Near flip';
+export const PRESSURE_WATCH_TAG_STABLE_VS_PRIOR = 'Stable vs prior';
+export const PRESSURE_WATCH_PRIOR_UNAVAILABLE = 'No prior snapshot';
+
+/** @deprecated Use PRESSURE_WATCH_* */
+export const MOVEMENT_PRESSURE_TITLE = PRESSURE_WATCH_TITLE;
+export const MOVEMENT_PRESSURE_TOOLTIP = PRESSURE_WATCH_TOOLTIP;
+export const MOVEMENT_PRESSURE_CLOSEST_LABEL = PRESSURE_WATCH_CLOSEST_LABEL;
+export const MOVEMENT_PRESSURE_IF_STEP_TOOLTIP = PRESSURE_WATCH_IF_STEP_TOOLTIP;
+export const MOVEMENT_PRESSURE_NA = PRESSURE_WATCH_NA;
+export const MOVEMENT_PRESSURE_ADVANCED_TITLE = PRESSURE_WATCH_ADVANCED_TITLE;
+export const MOVEMENT_PRESSURE_NO_SCORES = PRESSURE_WATCH_NO_SCORES;
+
+// Advanced detail: column labels
+export const PRESSURE_WATCH_COL_SCORE = 'Signal score';
+export const PRESSURE_WATCH_COL_DIST = 'Distance to band';
+export const PRESSURE_WATCH_COL_PRIOR = 'vs prior snapshot';
+
+/** Advanced / classification: regime flip confirmation (flip_watch_status), not Pressure Watch */
+export const REGIME_CONFIRMATION_STATUS_LABEL = 'Regime confirmation';
+/** Chip in Regime Summary when flip_watch_status is active */
+export const REGIME_CONFIRMATION_CHIP_PREFIX = 'Regime confirmation:';
 

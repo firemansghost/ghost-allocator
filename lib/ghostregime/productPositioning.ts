@@ -1,20 +1,20 @@
 /**
  * GhostRegime product positioning — durable copy anchor for marketing, methodology, and UI.
  *
- * Stance: **KISS-style regime targets** (allocation math by regime) and **independently computed
- * proxy-VAMS sleeve signals** (SPY / GLD / BTC-USD). Not a mirror of any external model’s published
- * daily sleeve labels unless we explicitly ingest them later.
+ * Public-facing strings favor plain English (“rules-based regime model,” “signals for exposure”).
+ * Internally, allocation still follows regime-specific targets and sleeve scaling (SPY / GLD / BTC-USD);
+ * methodology pages carry technical detail (VAMS, parity notes).
  *
  * When adding GhostRegime copy, prefer importing from here instead of re-inventing wording.
  */
 
 /** Hero strip, error/loading states, and shared subhead */
 export const GHOSTREGIME_PRODUCT_TAGLINE =
-  'KISS-style regime targets with independently computed proxy-VAMS sleeve signals.';
+  'Rules-based market regime model with signals for adjusting portfolio exposure.';
 
 /** Page metadata / SEO (search + link previews) */
 export const GHOSTREGIME_SEO_DESCRIPTION =
-  'KISS-style regime targets and proxy-VAMS sleeve scaling. Rules-based regime map—sleeve momentum is computed here, not copied from external daily labels.';
+  'Rules-based regime map and sleeve signals for portfolio exposure—not a price prediction. See methodology for how targets and the brake work.';
 
 /** Methodology page — first paragraph under KISS alignment section */
 export const METHODOLOGY_LEAD_PARAGRAPH =

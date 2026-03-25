@@ -1156,6 +1156,19 @@ export function formatFlipWatchLabel(flipWatch: string | null | undefined): stri
 }
 
 /**
+ * Friendly label for regime flip confirmation chip. Returns null when off or NONE.
+ */
+export function formatRegimeConfirmationDisplay(flipWatch: string | null | undefined): string | null {
+  if (!flipWatch || flipWatch === 'NONE') return null;
+  const labels: Record<string, string> = {
+    BREWING: 'Brewing',
+    PENDING_CONFIRMATION: 'Pending confirmation',
+    STRONG_FLIP: 'Strong flip',
+  };
+  return labels[flipWatch] ?? flipWatch;
+}
+
+/**
  * Format signed integer for display (e.g., +2, -1, 0)
  */
 export function formatSignedInt(n: number): string {
@@ -1475,9 +1488,8 @@ export function buildActionableReadLine(params: {
     parts.push(`Cash from brake: ${params.cashSources.join(', ')}`);
   }
   
-  // Add Flip Watch
   if (params.flipWatch && params.flipWatch !== 'NONE') {
-    parts.push(`Flip Watch: ON`);
+    parts.push('Regime confirmation: active');
   }
   
   if (parts.length === 0) {

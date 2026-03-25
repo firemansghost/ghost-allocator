@@ -1,5 +1,11 @@
 # TASK LOG
 
+## 2026-03-24 — GhostRegime main page UI polish (presentation)
+Completed:
+- Plain-English hero/SEO (`productPositioning`); regime map footnote + methodology pill tooltip; `PressureWatchPanel` + `pressureDisplay` (meters/tags, amber/zinc); Regime Summary: Pressure Watch before regime confirmation chip; hide confirmation when `NONE`; Advanced: renamed labels, softer tooltips; `buildActionableReadLine` copy for active confirmation; `formatRegimeConfirmationDisplay` in `ui.ts`
+
+---
+
 ## 2026-03-24 — GhostRegime axis & sleeve pressure layer
 Completed:
 - `lib/ghostregime/flipWatchPressure.ts` + optional VAMS scores on `GhostRegimeRow`; engine + replay loader; Regime Summary (closest sleeve only) + Advanced Details (full sleeves); `prevRow` for axis deltas + `historyRows` for agreement series; `npm run test:flip-pressure`
