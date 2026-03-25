@@ -159,3 +159,14 @@ export const COPY_SUMMARY_BUTTON = 'Copy summary';
 export const COPY_SUMMARY_COPIED = 'Copied';
 export const BACK_TO_LATEST_LINK = 'Back to latest';
 
+// Axis & sleeve pressure (distinct from regime-change Flip Watch status / flip_watch_status)
+export const MOVEMENT_PRESSURE_TITLE = 'Axis & sleeve pressure';
+export const MOVEMENT_PRESSURE_TOOLTIP =
+  'Risk/inflation: distance of each axis score from 0. Sleeves: distance in VAMS score space to the nearest ±0.5 band. Direction compares this row to the prior persisted trading row only. Not a forecast.';
+export const MOVEMENT_PRESSURE_CLOSEST_LABEL = 'Nearest VAMS band';
+export const MOVEMENT_PRESSURE_IF_STEP_TOOLTIP =
+  'If only this sleeve took one discrete VAMS step (same regime), approximate allocation deltas. Illustrative, not a prediction.';
+export const MOVEMENT_PRESSURE_NA = 'N/A';
+export const MOVEMENT_PRESSURE_ADVANCED_TITLE = 'Sleeve pressure (VAMS score space)';
+export const MOVEMENT_PRESSURE_NO_SCORES = 'Sleeve scores not on this snapshot — N/A until the next persisted row includes them.';
+

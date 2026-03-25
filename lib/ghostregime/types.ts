@@ -69,6 +69,10 @@ export interface GhostRegimeRow {
   stocks_vams_state: VamsState;
   gold_vams_state: VamsState;
   btc_vams_state: VamsState;
+  /** Persisted VAMS momentum/vol score (optional; older rows may omit — UI shows N/A for sleeve pressure) */
+  stocks_vams_score?: number;
+  gold_vams_score?: number;
+  btc_vams_score?: number;
   stocks_target: number;
   gold_target: number;
   btc_target: number;

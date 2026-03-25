@@ -15,7 +15,7 @@ import {
   SATELLITE_CONFIGS,
   DefaultSatelliteDataProvider,
 } from './satellites';
-import { computeAllVamsStates } from './vams';
+import { computeAllVamsStates, computeVamsScore } from './vams';
 import { computeAllocations } from './allocations';
 import { detectFlipWatch } from './flipWatch';
 import { getStorageAdapter } from './persistence';
@@ -173,6 +173,9 @@ export async function computeGhostRegime(
 
   // Compute VAMS states with asof_date
   const vamsStates = computeAllVamsStates(marketData, MARKET_SYMBOLS.BTC_USD, asofDate);
+  const stocksVamsScore = computeVamsScore(marketData, 'SPY', asofDate);
+  const goldVamsScore = computeVamsScore(marketData, 'GLD', asofDate);
+  const btcVamsScore = computeVamsScore(marketData, MARKET_SYMBOLS.BTC_USD, asofDate);
 
   // Compute allocations
   const allocations = computeAllocations(regime, vamsStates);
@@ -230,6 +233,9 @@ export async function computeGhostRegime(
     stocks_vams_state: vamsStates.stocks,
     gold_vams_state: vamsStates.gold,
     btc_vams_state: vamsStates.btc,
+    stocks_vams_score: stocksVamsScore,
+    gold_vams_score: goldVamsScore,
+    btc_vams_score: btcVamsScore,
     stocks_target: allocations.stocks_target,
     gold_target: allocations.gold_target,
     btc_target: allocations.btc_target,

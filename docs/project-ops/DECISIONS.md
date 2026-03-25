@@ -1,5 +1,18 @@
 # DECISIONS
 
+## 2026-03-24 — GhostRegime UI: axis & sleeve pressure vs regime-change Flip Watch
+Choice:
+- **Axis & sleeve pressure** (distance to 0 and to VAMS ±0.5 bands, direction vs **prior persisted trading row only**) is **separate** from **`flip_watch_status`** (regime-change confirmation). UI uses teal styling and copy under “Axis & sleeve pressure”; regime-change Flip Watch stays amber and unchanged.
+- **Optional** `stocks_vams_score` / `gold_vams_score` / `btc_vams_score` on persisted rows; **no inference** from state alone — missing scores show **N/A** for sleeve distance.
+
+Why:
+- Avoids conflating daily “how close to a flip” with the existing Flip Watch product.
+
+Consequences:
+- Logic unchanged; `lib/ghostregime/flipWatchPressure.ts` is display-only.
+
+---
+
 ## 2026-03-24 — GhostRegime product positioning (copy): KISS-aligned targets, independent proxy-VAMS signals
 Choice:
 - **User-facing stance** is standardized: **KISS-style regime targets** + **independently computed proxy-VAMS sleeve signals** (SPY / GLD / BTC-USD). Durable copy lives in `lib/ghostregime/productPositioning.ts`.

@@ -15,6 +15,7 @@
     "test:cash-breakdown": "tsx lib/ghostregime/__tests__/cashBreakdown.test.ts",
     "test:max-exposure": "tsx lib/ghostregime/__tests__/maxExposure.test.ts",
     "test:allocations": "tsx lib/ghostregime/__tests__/allocations.test.ts",
+    "test:flip-pressure": "tsx lib/ghostregime/__tests__/flipWatchPressure.test.ts",
     "test:why-cash-copy": "tsx lib/ghostregime/__tests__/whyCashCopy.test.ts",
     "test:lineups": "tsx lib/schwabLineups.test.ts",
     "smoke:builder": "tsx scripts/smoke-builder.ts",

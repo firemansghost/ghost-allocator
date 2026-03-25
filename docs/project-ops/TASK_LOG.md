@@ -1,5 +1,12 @@
 # TASK LOG
 
+## 2026-03-24 — GhostRegime axis & sleeve pressure layer
+Completed:
+- `lib/ghostregime/flipWatchPressure.ts` + optional VAMS scores on `GhostRegimeRow`; engine + replay loader; Regime Summary (closest sleeve only) + Advanced Details (full sleeves); `prevRow` for axis deltas + `historyRows` for agreement series; `npm run test:flip-pressure`
+- DECISIONS: pressure vs Flip Watch distinction
+
+---
+
 ## 2026-03-24 — GhostRegime product-positioning copy pass
 Completed:
 - `lib/ghostregime/productPositioning.ts` (tagline + SEO + methodology lead copy); methodology + main GhostRegime UI + how-it-works + home GhostRegime card + ParityPanel + glossary + builder glossary aligned

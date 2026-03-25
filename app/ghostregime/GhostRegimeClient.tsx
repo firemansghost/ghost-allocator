@@ -23,6 +23,10 @@ import { FreshnessBadge } from '@/components/ghostregime/FreshnessBadge';
 import { ParityPanel } from '@/components/ghostregime/ParityPanel';
 import type { GhostRegimeRow, RegimeType } from '@/lib/ghostregime/types';
 import {
+  computeRegimeMovementPressure,
+  type AxisPressureDirection,
+} from '@/lib/ghostregime/flipWatchPressure';
+import {
   formatScaleLabel,
   formatSleeveLine,
   getCashSources,
@@ -117,6 +121,13 @@ import {
   COPY_LINK_BUTTON,
   COPY_LINK_COPIED,
   BACK_TO_LATEST_LINK,
+  MOVEMENT_PRESSURE_TITLE,
+  MOVEMENT_PRESSURE_TOOLTIP,
+  MOVEMENT_PRESSURE_CLOSEST_LABEL,
+  MOVEMENT_PRESSURE_IF_STEP_TOOLTIP,
+  MOVEMENT_PRESSURE_NA,
+  MOVEMENT_PRESSURE_ADVANCED_TITLE,
+  MOVEMENT_PRESSURE_NO_SCORES,
   COMPARE_LINK_LABEL,
   COMPARE_DISABLED_TOOLTIP,
   COMPARE_PREV_SNAPSHOT_TOOLTIP,
@@ -188,6 +199,18 @@ function CashNowBar({ pct }: { pct: number }) {
       </div>
     </div>
   );
+}
+
+function formatAxisPressureDir(d: AxisPressureDirection): string {
+  if (d === null) return 'prior row N/A';
+  if (d === 'up') return '↑ vs prior';
+  if (d === 'down') return '↓ vs prior';
+  return 'flat vs prior';
+}
+
+function formatPctDelta(v: number): string {
+  const sign = v >= 0 ? '+' : '';
+  return `${sign}${(v * 100).toFixed(1)}%`;
 }
 
 export interface HealthStatus {
@@ -459,7 +482,13 @@ export function GhostRegimeClient({
         }
 
         const history: GhostRegimeRow[] = await response.json();
-        
+
+        const rowsForAgreement = history
+          .filter((row) => !row.stale && row.date)
+          .sort((a, b) => b.date.localeCompare(a.date))
+          .filter((row) => row.date !== data.date);
+        setHistoryRows(rowsForAgreement);
+
         // Get last 2 valid rows (sorted by date descending)
         // If viewing snapshot, find the row before the snapshot
         // If prev param is specified, use that instead of inferred
@@ -502,12 +531,10 @@ export function GhostRegimeClient({
           validRows = validRows.slice(0, 2);
         }
         
-        // Set prevRow if we have 2 rows
         if (validRows.length >= 2) {
           setPrevRow(validRows[1]);
           setPrevNotFoundHint(false);
-        } else if (validRows.length === 1 && !prevRow) {
-          // Only one row, no previous available
+        } else {
           setPrevRow(null);
         }
 
@@ -1313,10 +1340,9 @@ export function GhostRegimeClient({
               <h2 className="text-sm font-semibold text-zinc-50 mb-4">{WHY_REGIME_TITLE}</h2>
               <div className="space-y-3 text-xs text-zinc-300 leading-relaxed">
                 {(() => {
-                  // Find previous row for delta computation
-                  const prevRow = historyRows.length > 0 ? historyRows[0] : null;
-                  const riskDelta = prevRow ? computeAxisStatDeltas(data, prevRow, 'risk') : null;
-                  const inflDelta = prevRow ? computeAxisStatDeltas(data, prevRow, 'inflation') : null;
+                  const priorTradingRow = prevRow;
+                  const riskDelta = priorTradingRow ? computeAxisStatDeltas(data, priorTradingRow, 'risk') : null;
+                  const inflDelta = priorTradingRow ? computeAxisStatDeltas(data, priorTradingRow, 'inflation') : null;
                   
                   return (
                     <>
@@ -1634,7 +1660,8 @@ export function GhostRegimeClient({
           );
           const flipWatchLabel = formatFlipWatchLabel(data.flip_watch_status);
           const hasFlipWatch = data.flip_watch_status && data.flip_watch_status !== 'NONE';
-          
+          const movementPressure = computeRegimeMovementPressure(data, prevRow);
+
           return (
             <div id="regime-summary">
               <GlassCard className="p-6">
@@ -1682,6 +1709,34 @@ export function GhostRegimeClient({
                       Flip Watch: {flipWatchLabel}
                     </span>
                   </Tooltip>
+                </div>
+                <div className="rounded-md border border-teal-500/30 bg-teal-950/25 px-2.5 py-2 space-y-1.5">
+                  <Tooltip content={MOVEMENT_PRESSURE_TOOLTIP}>
+                    <p className="text-[11px] font-semibold text-teal-200/90 cursor-help">{MOVEMENT_PRESSURE_TITLE}</p>
+                  </Tooltip>
+                  <p className="text-[10px] text-teal-100/80 leading-snug">
+                    Risk: |score| {movementPressure.risk.distanceToZero.toFixed(2)} from 0 ·{' '}
+                    {formatAxisPressureDir(movementPressure.risk.direction)}
+                    {movementPressure.risk.nearBalance ? ' · near balance' : ''}
+                  </p>
+                  <p className="text-[10px] text-teal-100/80 leading-snug">
+                    Inflation: |score| {movementPressure.inflation.distanceToZero.toFixed(2)} from 0 ·{' '}
+                    {formatAxisPressureDir(movementPressure.inflation.direction)}
+                    {movementPressure.inflation.nearBalance ? ' · near balance' : ''}
+                  </p>
+                  {movementPressure.closestSleeve ? (
+                    <Tooltip content={MOVEMENT_PRESSURE_IF_STEP_TOOLTIP}>
+                      <p className="text-[10px] text-teal-100/90 leading-snug cursor-help">
+                        <span className="font-medium">{MOVEMENT_PRESSURE_CLOSEST_LABEL}:</span>{' '}
+                        {movementPressure.closestSleeve.label} — {movementPressure.closestSleeve.distanceToBoundary.toFixed(2)} in score space;
+                        one-step Δ S/G/B/C {formatPctDelta(movementPressure.closestSleeve.deltaStocksActual)} /{' '}
+                        {formatPctDelta(movementPressure.closestSleeve.deltaGoldActual)} /{' '}
+                        {formatPctDelta(movementPressure.closestSleeve.deltaBtcActual)} / {formatPctDelta(movementPressure.closestSleeve.deltaCash)}
+                      </p>
+                    </Tooltip>
+                  ) : (
+                    <p className="text-[10px] text-zinc-500">{MOVEMENT_PRESSURE_NO_SCORES}</p>
+                  )}
                 </div>
               </div>
             </GlassCard>
@@ -2042,6 +2097,45 @@ export function GhostRegimeClient({
                 </span>
               </div>
             </div>
+          </GlassCard>
+
+          {/* Advanced: Sleeve pressure (full sleeves; summary shows closest only) */}
+          <GlassCard className="p-4 sm:p-5 space-y-3">
+            <h2 className="text-sm font-semibold text-zinc-50">
+              <Tooltip content={MOVEMENT_PRESSURE_TOOLTIP}>{MOVEMENT_PRESSURE_ADVANCED_TITLE}</Tooltip>
+            </h2>
+            {(() => {
+              const mp = computeRegimeMovementPressure(data, prevRow);
+              return (
+                <div className="space-y-3 text-xs">
+                  {mp.sleeves.map((s) => (
+                    <div key={s.key} className="border-b border-zinc-800/80 pb-3 last:border-0 last:pb-0">
+                      <p className="font-medium text-zinc-200">{s.label}</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 mt-1 text-zinc-400">
+                        <span>
+                          VAMS score: {s.score === null ? MOVEMENT_PRESSURE_NA : s.score.toFixed(3)}
+                        </span>
+                        <span>
+                          Dist to ±0.5 band: {s.distanceToBoundary === null ? MOVEMENT_PRESSURE_NA : s.distanceToBoundary.toFixed(3)}
+                        </span>
+                        <span className="sm:col-span-2">
+                          vs prior row: {s.direction === null ? MOVEMENT_PRESSURE_NA : formatAxisPressureDir(s.direction)}
+                        </span>
+                      </div>
+                      {s.deltaStocksActual !== null &&
+                        s.deltaGoldActual !== null &&
+                        s.deltaBtcActual !== null &&
+                        s.deltaCash !== null && (
+                          <p className="text-[10px] text-zinc-500 mt-1">
+                            If one-step flip: Δ Stk {formatPctDelta(s.deltaStocksActual)} · Gl {formatPctDelta(s.deltaGoldActual)} · BTC{' '}
+                            {formatPctDelta(s.deltaBtcActual)} · Cash {formatPctDelta(s.deltaCash)}
+                          </p>
+                        )}
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
           </GlassCard>
 
           {/* Advanced: Signal Receipts */}

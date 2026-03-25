@@ -33,6 +33,12 @@ export function loadReplayHistory(): GhostRegimeRow[] {
     const cutoverDate = CUTOVER_DATE_UTC;
     const replayRows: GhostRegimeRow[] = [];
 
+    const optionalNum = (v: unknown): number | undefined => {
+      if (v === undefined || v === null || v === '') return undefined;
+      const n = Number(v);
+      return Number.isFinite(n) ? n : undefined;
+    };
+
     for (const record of records) {
       if (!record.date) continue;
 
@@ -60,6 +66,9 @@ export function loadReplayHistory(): GhostRegimeRow[] {
           stocks_vams_state: record.stocks_vams_state ?? 0,
           gold_vams_state: record.gold_vams_state ?? 0,
           btc_vams_state: record.btc_vams_state ?? 0,
+          stocks_vams_score: optionalNum(record.stocks_vams_score),
+          gold_vams_score: optionalNum(record.gold_vams_score),
+          btc_vams_score: optionalNum(record.btc_vams_score),
           stocks_target: record.stocks_target ?? 0,
           gold_target: record.gold_target ?? 0,
           btc_target: record.btc_target ?? 0,
