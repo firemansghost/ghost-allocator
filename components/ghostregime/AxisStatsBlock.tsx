@@ -83,7 +83,7 @@ export function AxisStatsBlock({
           <div className="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-zinc-400">
             <div className="flex items-center gap-2 min-w-0">
               <Tooltip content={stats.confidence.tooltip}>
-                <span className="px-2 py-0.5 rounded border border-amber-400/20 bg-amber-400/5 text-amber-300/80 whitespace-nowrap">
+                <span className="px-2 py-0.5 rounded border border-amber-400/14 bg-amber-400/[0.04] text-amber-300/75 whitespace-nowrap">
                   {CONFIDENCE_LABEL_PREFIX} {stats.confidence.label}
                 </span>
               </Tooltip>
@@ -91,7 +91,7 @@ export function AxisStatsBlock({
                 <>
                   <span className="text-zinc-600">•</span>
                   <Tooltip content={conviction.tooltip}>
-                    <span className="px-2 py-0.5 rounded border border-amber-400/15 bg-amber-400/3 text-amber-300/70 whitespace-nowrap">
+                    <span className="px-2 py-0.5 rounded border border-amber-400/12 bg-amber-400/[0.03] text-amber-300/65 whitespace-nowrap">
                       {conviction.label}
                     </span>
                   </Tooltip>
@@ -101,7 +101,7 @@ export function AxisStatsBlock({
                 <>
                   <span className="text-zinc-600">•</span>
                   <Tooltip content={CROWDED_TOOLTIP}>
-                    <span className="px-2 py-0.5 rounded border border-amber-400/10 bg-amber-400/2 text-amber-300/60 whitespace-nowrap">
+                    <span className="px-2 py-0.5 rounded border border-amber-400/8 bg-amber-400/[0.02] text-amber-300/55 whitespace-nowrap">
                       {CROWDED_LABEL}
                     </span>
                   </Tooltip>

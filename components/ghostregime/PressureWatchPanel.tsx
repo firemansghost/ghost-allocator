@@ -42,7 +42,7 @@ function TagPrimary({ children }: { children: ReactNode }) {
 /** Quieter — axis state tags */
 function TagSecondary({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex items-center rounded border border-zinc-700/50 bg-zinc-900/35 px-1.5 py-0.5 text-[8px] font-medium uppercase tracking-wide text-zinc-500">
+    <span className="inline-flex items-center rounded border border-zinc-800/45 bg-zinc-900/25 px-1.5 py-0.5 text-[8px] font-medium uppercase tracking-wide text-zinc-500/90">
       {children}
     </span>
   );
@@ -69,8 +69,8 @@ export function PressureWatchPanel({
   const sleeveTagList = closestSleeveTags(closestSleeve);
 
   const innerClass = embedded
-    ? 'space-y-4'
-    : 'rounded-lg border border-amber-400/20 bg-zinc-900/40 px-3 py-3 space-y-4';
+    ? 'space-y-5'
+    : 'rounded-lg border border-amber-400/20 bg-zinc-900/40 px-3 py-3 space-y-5';
 
   return (
     <div className={innerClass}>
@@ -83,7 +83,7 @@ export function PressureWatchPanel({
         </div>
       )}
 
-      <section className="space-y-2.5 pb-4 border-b border-zinc-800/40">
+      <section className="space-y-2.5 pb-4 border-b border-zinc-800/35">
         <PressureAxisRow
           label={PRESSURE_WATCH_RISK_ROW_LABEL}
           flipLineText={formatRiskAxisFlipLine(riskScore, risk.distanceToZero)}
@@ -93,7 +93,7 @@ export function PressureWatchPanel({
         />
       </section>
 
-      <section className="space-y-2.5 pb-4 border-b border-zinc-800/40">
+      <section className="space-y-2.5 pb-4 border-b border-zinc-800/35">
         <PressureAxisRow
           label={PRESSURE_WATCH_INFL_ROW_LABEL}
           flipLineText={formatInflationAxisFlipLine(inflScore, inflation.distanceToZero)}
@@ -103,8 +103,8 @@ export function PressureWatchPanel({
         />
       </section>
 
-      <section className="rounded-md border border-zinc-800/50 bg-zinc-900/25 p-3 space-y-2.5">
-        <p className="text-[10px] font-medium text-zinc-500 uppercase tracking-wide">{PRESSURE_WATCH_CLOSEST_LABEL}</p>
+      <section className="rounded-md border border-zinc-800/50 ring-1 ring-inset ring-amber-400/[0.06] bg-zinc-900/30 p-3 space-y-2.5">
+        <p className="text-[10px] font-medium text-zinc-400 uppercase tracking-wide">{PRESSURE_WATCH_CLOSEST_LABEL}</p>
         {closestSleeve ? (
           <>
             <div className="flex flex-wrap items-center gap-2">
@@ -161,20 +161,20 @@ function PressureAxisRow({
 }) {
   return (
     <div className="space-y-2.5">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
+      <div className="flex flex-wrap items-baseline justify-between gap-2 mb-0.5">
         <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-wide">{label}</span>
         <div className="flex flex-wrap items-center gap-1.5">
           {tags.includes('near_balance') && <TagSecondary>{PRESSURE_WATCH_TAG_NEAR_BALANCE}</TagSecondary>}
           {tags.includes('stable_vs_prior') && <TagSecondary>{PRESSURE_WATCH_TAG_STABLE_VS_PRIOR}</TagSecondary>}
         </div>
       </div>
-      <div className="h-1.5 w-full rounded-full bg-zinc-800/90 overflow-hidden">
+      <div className="h-1.5 w-full rounded-full bg-zinc-800/90 overflow-hidden mt-0.5">
         <div
           className="h-full rounded-full bg-amber-500/35 transition-all"
           style={{ width: `${meterFill * 100}%` }}
         />
       </div>
-      <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-zinc-400 pt-0.5">
+      <div className="flex flex-wrap gap-x-2.5 gap-y-1 text-[11px] text-zinc-400 pt-1">
         <span className="text-zinc-300">{flipLineText}</span>
         <span className="text-zinc-600">·</span>
         <span className="text-zinc-400">{directionVsPrior}</span>

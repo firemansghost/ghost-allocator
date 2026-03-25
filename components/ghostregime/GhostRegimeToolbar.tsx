@@ -66,10 +66,10 @@ export function GhostRegimeToolbar({
   onClearAsOf,
 }: GhostRegimeToolbarProps) {
   const ctrlBtn =
-    'px-2 py-1 text-[10px] rounded border border-zinc-800/80 bg-zinc-950/40 text-zinc-400 hover:bg-zinc-900/55 hover:text-zinc-300 hover:border-zinc-700/70 transition-colors';
+    'px-2 py-1 text-[10px] rounded border border-zinc-800/60 bg-zinc-950/35 text-zinc-400 hover:bg-zinc-900/50 hover:text-zinc-300 hover:border-zinc-700/55 transition-colors';
 
   return (
-    <div className="border-b border-zinc-800/35 pb-3">
+    <div className="border-b border-zinc-800/25 pb-3">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
       {/* Left side: Snapshot indicator only (freshness is in FreshnessBadge) */}
       <div className="flex items-center gap-3 text-xs text-zinc-500 flex-wrap">
@@ -99,7 +99,7 @@ export function GhostRegimeToolbar({
               onAsOfChange(selectedDate);
             }
           }}
-          className="px-2 py-1 text-[10px] rounded border border-zinc-800/80 bg-zinc-950/40 text-zinc-400 focus:outline-none focus:ring-1 focus:ring-amber-400/35"
+          className="px-2 py-1 text-[10px] rounded border border-zinc-800/60 bg-zinc-950/35 text-zinc-400 focus:outline-none focus:ring-1 focus:ring-amber-400/35"
         />
         
         {/* Back to latest link */}

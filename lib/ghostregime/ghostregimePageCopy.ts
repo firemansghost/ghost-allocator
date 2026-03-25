@@ -180,7 +180,7 @@ export const BACK_TO_LATEST_LINK = 'Back to latest';
 
 // Pressure Watch (movement vs thresholds; distinct from flip_watch_status regime confirmation)
 export const PRESSURE_WATCH_TITLE = 'Pressure Watch';
-export const PRESSURE_WATCH_SUBTITLE = "What's changing now";
+export const PRESSURE_WATCH_SUBTITLE = 'Pressure vs balance, at a glance';
 export const PRESSURE_WATCH_TOOLTIP =
   'How far risk and inflation scores are from balanced (0), and how far sleeve signals are from the next threshold band. Compared to the prior trading snapshot only. Not a forecast.';
 export const PRESSURE_WATCH_RISK_ROW_LABEL = 'Risk';

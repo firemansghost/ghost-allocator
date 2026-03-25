@@ -467,7 +467,7 @@ export function buildPostureWhyCashBrief(data: GhostRegimeRow): string {
     `Stocks ${formatScaleLabel(data.stocks_scale)}`,
     `Gold ${formatScaleLabel(data.gold_scale)}`,
     `BTC ${formatScaleLabel(data.btc_scale)}`,
-  ].join(' · ');
+  ].join(', ');
 
   if (data.cash < 0.05) {
     return "Cash is low — we're near full risk.";
@@ -475,10 +475,10 @@ export function buildPostureWhyCashBrief(data: GhostRegimeRow): string {
 
   if (breakdown.cashFromThrottles > 0.005 && breakdown.throttleSourceNames.length > 0) {
     const brakePct = (breakdown.cashFromThrottles * 100).toFixed(0);
-    return `${riskLabel} · ${startingPoint} · Brake: ${brakeParts} · ~${brakePct}% extra cash (on top of ${cashTargetPct}% mix).`;
+    return `${riskLabel}, ${startingPoint}. Brake: ${brakeParts}. ~${brakePct}% extra cash (on top of ${cashTargetPct}% mix).`;
   }
 
-  return `${riskLabel} · ${startingPoint} · Brake: ${brakeParts}.`;
+  return `${riskLabel}, ${startingPoint}. Brake: ${brakeParts}.`;
 }
 
 /**

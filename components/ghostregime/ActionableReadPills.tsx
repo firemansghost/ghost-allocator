@@ -114,9 +114,9 @@ export function ActionableReadPills({
   }
   
   const pillPrimary =
-    'px-2.5 py-1 rounded-md border border-amber-400/28 bg-amber-400/[0.08] text-amber-200/85 text-xs';
+    'px-2.5 py-1 rounded-md border border-amber-400/22 bg-amber-400/[0.06] text-amber-200/80 text-xs';
   const pillSecondary =
-    'px-2 py-0.5 rounded-md border border-zinc-700/45 bg-zinc-900/35 text-zinc-400 text-[11px] leading-snug';
+    'px-2 py-0.5 rounded-md border border-zinc-700/40 bg-zinc-900/30 text-zinc-400/95 text-[11px] leading-snug';
 
   return (
     <div className="flex flex-wrap items-center gap-1.5">
