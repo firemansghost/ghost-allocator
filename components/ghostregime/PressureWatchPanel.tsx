@@ -9,7 +9,6 @@ import {
   PRESSURE_WATCH_TOOLTIP,
   PRESSURE_WATCH_CLOSEST_LABEL,
   PRESSURE_WATCH_IF_STEP_TOOLTIP,
-  PRESSURE_WATCH_NA,
   PRESSURE_WATCH_NO_SCORES,
   PRESSURE_WATCH_TAG_NEAR_BALANCE,
   PRESSURE_WATCH_TAG_NEAR_FLIP,
@@ -31,9 +30,19 @@ import {
   sleeveMeterFill,
 } from '@/lib/ghostregime/pressureDisplay';
 
-function Tag({ children }: { children: ReactNode }) {
+/** Stronger — e.g. sleeve “Near flip” */
+function TagPrimary({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex items-center rounded border border-amber-400/25 bg-amber-400/5 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide text-amber-200/90">
+    <span className="inline-flex items-center rounded border border-amber-400/35 bg-amber-400/10 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide text-amber-200/95">
+      {children}
+    </span>
+  );
+}
+
+/** Quieter — axis state tags */
+function TagSecondary({ children }: { children: ReactNode }) {
+  return (
+    <span className="inline-flex items-center rounded border border-zinc-700/50 bg-zinc-900/35 px-1.5 py-0.5 text-[8px] font-medium uppercase tracking-wide text-zinc-500">
       {children}
     </span>
   );
@@ -60,8 +69,8 @@ export function PressureWatchPanel({
   const sleeveTagList = closestSleeveTags(closestSleeve);
 
   const innerClass = embedded
-    ? 'space-y-3'
-    : 'rounded-lg border border-amber-400/20 bg-zinc-900/40 px-3 py-3 space-y-3';
+    ? 'space-y-5'
+    : 'rounded-lg border border-amber-400/20 bg-zinc-900/40 px-3 py-3 space-y-5';
 
   return (
     <div className={innerClass}>
@@ -74,34 +83,37 @@ export function PressureWatchPanel({
         </div>
       )}
 
-      <PressureAxisRow
-        label={PRESSURE_WATCH_RISK_ROW_LABEL}
-        flipLineText={formatRiskAxisFlipLine(riskScore, risk.distanceToZero)}
-        directionVsPrior={formatRiskDirectionVsPrior(risk.direction)}
-        meterFill={axisMeterFill(risk.distanceToZero)}
-        tags={riskTags}
-      />
-      <PressureAxisRow
-        label={PRESSURE_WATCH_INFL_ROW_LABEL}
-        flipLineText={formatInflationAxisFlipLine(inflScore, inflation.distanceToZero)}
-        directionVsPrior={formatInflationDirectionVsPrior(inflation.direction)}
-        meterFill={axisMeterFill(inflation.distanceToZero)}
-        tags={inflTags}
-      />
+      <section className="space-y-2.5 pb-5 border-b border-zinc-800/40">
+        <PressureAxisRow
+          label={PRESSURE_WATCH_RISK_ROW_LABEL}
+          flipLineText={formatRiskAxisFlipLine(riskScore, risk.distanceToZero)}
+          directionVsPrior={formatRiskDirectionVsPrior(risk.direction)}
+          meterFill={axisMeterFill(risk.distanceToZero)}
+          tags={riskTags}
+        />
+      </section>
 
-      <div className="border-t border-zinc-800/80 pt-3 space-y-2">
+      <section className="space-y-2.5 pb-5 border-b border-zinc-800/40">
+        <PressureAxisRow
+          label={PRESSURE_WATCH_INFL_ROW_LABEL}
+          flipLineText={formatInflationAxisFlipLine(inflScore, inflation.distanceToZero)}
+          directionVsPrior={formatInflationDirectionVsPrior(inflation.direction)}
+          meterFill={axisMeterFill(inflation.distanceToZero)}
+          tags={inflTags}
+        />
+      </section>
+
+      <section className="rounded-md border border-zinc-800/55 bg-zinc-900/25 p-3.5 space-y-3">
+        <p className="text-[10px] font-medium text-zinc-500 uppercase tracking-wide">{PRESSURE_WATCH_CLOSEST_LABEL}</p>
         {closestSleeve ? (
           <>
-            <p className="text-[10px] font-medium text-zinc-400 uppercase tracking-wide">
-              {PRESSURE_WATCH_CLOSEST_LABEL}
-            </p>
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-sm font-medium text-zinc-100">{closestSleeve.label}</span>
-              {sleeveTagList.includes('near_flip') && <Tag>{PRESSURE_WATCH_TAG_NEAR_FLIP}</Tag>}
+              {sleeveTagList.includes('near_flip') && <TagPrimary>{PRESSURE_WATCH_TAG_NEAR_FLIP}</TagPrimary>}
             </div>
-            <div className="h-1.5 w-full max-w-xs rounded-full bg-zinc-800 overflow-hidden">
+            <div className="h-1.5 w-full max-w-xs rounded-full bg-zinc-800/90 overflow-hidden">
               <div
-                className="h-full rounded-full bg-amber-500/50 transition-all"
+                className="h-full rounded-full bg-amber-500/45 transition-all"
                 style={{ width: `${sleeveMeterFill(closestSleeve.distanceToBoundary) * 100}%` }}
               />
             </div>
@@ -113,7 +125,7 @@ export function PressureWatchPanel({
               )}
             </p>
             <Tooltip content={PRESSURE_WATCH_IF_STEP_TOOLTIP}>
-              <p className="text-[11px] text-zinc-300 leading-snug cursor-help">
+              <p className="text-[11px] text-zinc-300 leading-relaxed cursor-help">
                 {formatNextFlipImpactLine(
                   {
                     stocks: closestSleeve.deltaStocksActual,
@@ -129,7 +141,7 @@ export function PressureWatchPanel({
         ) : (
           <p className="text-[10px] text-zinc-500 leading-relaxed">{PRESSURE_WATCH_NO_SCORES}</p>
         )}
-      </div>
+      </section>
     </div>
   );
 }
@@ -148,24 +160,24 @@ function PressureAxisRow({
   tags: ('near_balance' | 'stable_vs_prior')[];
 }) {
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-2.5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-wide">{label}</span>
         <div className="flex flex-wrap items-center gap-1.5">
-          {tags.includes('near_balance') && <Tag>{PRESSURE_WATCH_TAG_NEAR_BALANCE}</Tag>}
-          {tags.includes('stable_vs_prior') && <Tag>{PRESSURE_WATCH_TAG_STABLE_VS_PRIOR}</Tag>}
+          {tags.includes('near_balance') && <TagSecondary>{PRESSURE_WATCH_TAG_NEAR_BALANCE}</TagSecondary>}
+          {tags.includes('stable_vs_prior') && <TagSecondary>{PRESSURE_WATCH_TAG_STABLE_VS_PRIOR}</TagSecondary>}
         </div>
       </div>
-      <div className="h-1.5 w-full rounded-full bg-zinc-800 overflow-hidden">
+      <div className="h-1.5 w-full rounded-full bg-zinc-800/90 overflow-hidden">
         <div
-          className="h-full rounded-full bg-amber-500/40 transition-all"
+          className="h-full rounded-full bg-amber-500/35 transition-all"
           style={{ width: `${meterFill * 100}%` }}
         />
       </div>
-      <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-zinc-400">
+      <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-zinc-400 pt-0.5">
         <span className="text-zinc-300">{flipLineText}</span>
-        <span className="text-zinc-500">·</span>
-        <span>{directionVsPrior}</span>
+        <span className="text-zinc-600">·</span>
+        <span className="text-zinc-400">{directionVsPrior}</span>
       </div>
     </div>
   );

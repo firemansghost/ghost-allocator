@@ -65,15 +65,19 @@ export function GhostRegimeToolbar({
   onAsOfChange,
   onClearAsOf,
 }: GhostRegimeToolbarProps) {
+  const ctrlBtn =
+    'px-2 py-1 text-[10px] rounded border border-zinc-800/80 bg-zinc-950/40 text-zinc-400 hover:bg-zinc-900/55 hover:text-zinc-300 hover:border-zinc-700/70 transition-colors';
+
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div className="border-b border-zinc-800/35 pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
       {/* Left side: Snapshot indicator only (freshness is in FreshnessBadge) */}
-      <div className="flex items-center gap-4 text-xs text-zinc-400 flex-wrap">
+      <div className="flex items-center gap-3 text-xs text-zinc-500 flex-wrap">
         {viewingSnapshot && (
           <Tooltip content={VIEWING_SNAPSHOT_TOOLTIP}>
-            <span className="inline-flex items-center gap-1 px-2 py-1 rounded border border-amber-400/20 bg-amber-400/5 text-amber-300/80">
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-zinc-700/45 bg-zinc-900/35 text-zinc-400">
               <span>{VIEWING_SNAPSHOT_LABEL}</span>
-              <span className="font-mono">{viewingSnapshot}</span>
+              <span className="font-mono text-zinc-500">{viewingSnapshot}</span>
             </span>
           </Tooltip>
         )}
@@ -83,7 +87,7 @@ export function GhostRegimeToolbar({
       </div>
       
       {/* Right side: Controls */}
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex items-center gap-1.5 flex-wrap">
         {/* Date Picker */}
         <input
           type="date"
@@ -95,14 +99,14 @@ export function GhostRegimeToolbar({
               onAsOfChange(selectedDate);
             }
           }}
-          className="px-2 py-1 text-[10px] rounded border border-zinc-700 bg-zinc-900/50 text-zinc-300 focus:outline-none focus:ring-1 focus:ring-amber-400/50"
+          className="px-2 py-1 text-[10px] rounded border border-zinc-800/80 bg-zinc-950/40 text-zinc-400 focus:outline-none focus:ring-1 focus:ring-amber-400/35"
         />
         
         {/* Back to latest link */}
         {viewingSnapshot && (
           <button
             onClick={onClearAsOf}
-            className="text-[10px] text-amber-400 hover:text-amber-300 underline-offset-2 hover:underline"
+            className="text-[10px] text-zinc-500 hover:text-amber-400/85 underline-offset-2 hover:underline"
           >
             {BACK_TO_LATEST_LINK}
           </button>
@@ -111,7 +115,7 @@ export function GhostRegimeToolbar({
         {/* Copy link button */}
         <button
           onClick={onCopyLink}
-          className="px-2 py-1 text-[10px] rounded border border-zinc-700 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800 hover:border-zinc-600 transition-colors"
+          className={ctrlBtn}
           aria-label={linkCopied ? COPY_LINK_COPIED : COPY_LINK_BUTTON}
         >
           {linkCopied ? COPY_LINK_COPIED : COPY_LINK_BUTTON}
@@ -120,7 +124,7 @@ export function GhostRegimeToolbar({
         {/* Copy summary button */}
         <button
           onClick={onCopySummary}
-          className="px-2 py-1 text-[10px] rounded border border-zinc-700 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800 hover:border-zinc-600 transition-colors"
+          className={ctrlBtn}
           aria-label={summaryCopied ? COPY_SUMMARY_COPIED : COPY_SUMMARY_BUTTON}
         >
           {summaryCopied ? COPY_SUMMARY_COPIED : COPY_SUMMARY_BUTTON}
@@ -132,7 +136,7 @@ export function GhostRegimeToolbar({
             <button
               ref={compareTriggerRef}
               onClick={onToggleCompare}
-              className="px-2 py-1 text-[10px] rounded border border-zinc-700 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800 hover:border-zinc-600 transition-colors"
+              className={ctrlBtn}
             >
               {COMPARE_LINK_LABEL}
             </button>
@@ -141,7 +145,7 @@ export function GhostRegimeToolbar({
           <Tooltip content={COMPARE_DISABLED_TOOLTIP}>
             <button
               disabled
-              className="px-2 py-1 text-[10px] rounded border border-zinc-800 bg-zinc-900/30 text-zinc-600 cursor-not-allowed"
+              className="px-2 py-1 text-[10px] rounded border border-zinc-800/60 bg-zinc-950/25 text-zinc-600 cursor-not-allowed"
               aria-label={COMPARE_DISABLED_TOOLTIP}
             >
               {COMPARE_LINK_LABEL}
@@ -151,6 +155,7 @@ export function GhostRegimeToolbar({
         
         {/* Methodology pill */}
         <MethodologyPillLink />
+      </div>
       </div>
     </div>
   );

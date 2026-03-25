@@ -8,7 +8,6 @@
 
 import { Tooltip } from '@/components/Tooltip';
 import {
-  ACTIONABLE_READ_PREFIX,
   REGIME_CONFIDENCE_TOOLTIP,
   REGIME_CONVICTION_TOOLTIP,
   CROWDED_TOOLTIP,
@@ -114,14 +113,16 @@ export function ActionableReadPills({
     return null;
   }
   
+  const pillPrimary =
+    'px-2.5 py-1 rounded-md border border-amber-400/28 bg-amber-400/[0.08] text-amber-200/85 text-xs';
+  const pillSecondary =
+    'px-2 py-0.5 rounded-md border border-zinc-700/45 bg-zinc-900/35 text-zinc-400 text-[11px] leading-snug';
+
   return (
     <div className="flex flex-wrap items-center gap-1.5">
       {pills.map((pill, idx) => {
-        const content = (
-          <span className="px-2.5 py-1 rounded border border-amber-400/15 bg-amber-400/3 text-amber-300/70 text-xs">
-            {pill.label}
-          </span>
-        );
+        const tierClass = idx < 2 ? pillPrimary : pillSecondary;
+        const content = <span className={tierClass}>{pill.label}</span>;
         
         return pill.tooltip ? (
           <Tooltip key={idx} content={pill.tooltip}>

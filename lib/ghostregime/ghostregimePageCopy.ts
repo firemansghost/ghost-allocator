@@ -65,6 +65,18 @@ export const CONVICTION_TOOLTIP_NA = 'Conviction is unavailable when net vote or
 export const REGIME_OVERVIEW_TITLE = 'Regime overview';
 /** @deprecated Use REGIME_OVERVIEW_TITLE */
 export const REGIME_SUMMARY_TITLE = REGIME_OVERVIEW_TITLE;
+
+/** Posture snapshot band (hero) */
+export const POSTURE_HOLD_NOW_LABEL = 'Hold now';
+export const POSTURE_STARTING_POINT_LABEL = 'Starting point';
+export const POSTURE_BRAKE_LABEL = 'Sleeve brake';
+export const POSTURE_BASELINE_LABEL = 'Full-risk baseline';
+export const POSTURE_WHY_CASH_LABEL = 'Why cash';
+export const GLOSSARY_HOLD_BRAKE_MAX_LINK = 'What do Hold now / Brake / Max targets mean?';
+export const SINCE_LAST_UPDATE_PREFIX = 'Since last update:';
+export const SINCE_LAST_UPDATE_NO_CHANGE =
+  'No change since the last update. Markets were boring. (Enjoy it.)';
+
 export const REGIME_CONVICTION_LABEL_PREFIX = 'Regime Conviction:';
 export const REGIME_CONVICTION_TOOLTIP = 'Combined strength of today\'s Risk + Inflation signals. Not a forecast.';
 export const REGIME_CONFIDENCE_LABEL_PREFIX = 'Regime Confidence:';

@@ -91,6 +91,14 @@ import {
   CONFIDENCE_TOOLTIP,
   COVERAGE_TOOLTIP,
   REGIME_OVERVIEW_TITLE,
+  POSTURE_HOLD_NOW_LABEL,
+  POSTURE_STARTING_POINT_LABEL,
+  POSTURE_BRAKE_LABEL,
+  POSTURE_BASELINE_LABEL,
+  POSTURE_WHY_CASH_LABEL,
+  GLOSSARY_HOLD_BRAKE_MAX_LINK,
+  SINCE_LAST_UPDATE_PREFIX,
+  SINCE_LAST_UPDATE_NO_CHANGE,
   PRESSURE_WATCH_TITLE,
   PRESSURE_WATCH_SUBTITLE,
   REGIME_CONVICTION_LABEL_PREFIX,
@@ -785,16 +793,16 @@ export function GhostRegimeClient({
             </div>
           )}
         </div>
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-2.5 flex-wrap">
           {/* Current Regime Chip */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-amber-400/30 bg-amber-400/10">
             <span className="text-[10px] text-zinc-400 uppercase tracking-wide">Current Regime</span>
             <span className="text-lg font-semibold text-amber-300">{data.regime}</span>
           </div>
-          {/* Risk Regime Chip */}
-          <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-zinc-700 bg-zinc-800/50">
-            <span className="text-[10px] text-zinc-400 uppercase tracking-wide">Risk</span>
-            <span className="text-sm font-medium text-zinc-200">{data.risk_regime}</span>
+          {/* Risk Regime Chip — secondary */}
+          <div className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md border border-zinc-800/80 bg-zinc-900/40">
+            <span className="text-[10px] text-zinc-500 uppercase tracking-wide">Risk</span>
+            <span className="text-xs font-medium text-zinc-400">{data.risk_regime}</span>
           </div>
         </div>
       </div>
@@ -868,26 +876,51 @@ export function GhostRegimeClient({
         }}
       />
 
-      {/* Today's Snapshot */}
+      {/* Posture snapshot */}
       {(() => {
         const blocks = buildTodaySnapshotBlocks(data);
         return blocks ? (
-        <div className="space-y-1">
-          <div className="text-sm text-zinc-300 leading-relaxed font-mono space-y-0.5">
-            <div><strong className="text-zinc-200">Hold now:</strong> {blocks.actual}</div>
-            <div className="text-xs text-zinc-400 leading-relaxed max-w-prose">
-              <strong className="text-zinc-300">Why cash:</strong> {buildWhyCashLine(data)}
+        <GlassCard className="p-4 sm:p-5">
+          <div className="space-y-4">
+            <div>
+              <p className="text-[10px] text-zinc-500 uppercase tracking-wide mb-1.5">{POSTURE_HOLD_NOW_LABEL}</p>
+              <p className="text-lg font-mono text-zinc-100 tabular-nums tracking-tight">{blocks.actual}</p>
             </div>
-            <div><strong className="text-zinc-200">Full-risk baseline:</strong> {formatMaxTargets()}</div>
-          </div>
-          <p className="text-[10px] mt-1.5">
-            <Link
-              href="/learn/glossary#targets-scales-actual"
-              className="text-amber-400 hover:text-amber-300 underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-0.5"
-            >
-              What do Hold now / Brake / Max targets mean?
-            </Link>
-          </p>
+
+            <div className="grid grid-cols-1 gap-y-2.5 text-xs sm:grid-cols-[minmax(0,7.5rem)_1fr] sm:gap-x-4 sm:items-baseline">
+              <span className="text-[10px] text-zinc-500 uppercase tracking-wide">{POSTURE_STARTING_POINT_LABEL}</span>
+              <span className="font-mono text-zinc-300">{blocks.targets}</span>
+              <span className="text-[10px] text-zinc-500 uppercase tracking-wide">{POSTURE_BRAKE_LABEL}</span>
+              <span className="font-mono text-zinc-300">{blocks.scales}</span>
+              <span className="text-[10px] text-zinc-500 uppercase tracking-wide">{POSTURE_BASELINE_LABEL}</span>
+              <span className="text-[10px] font-mono text-zinc-500">{formatMaxTargets()}</span>
+            </div>
+
+            <div className="border-t border-zinc-800/50 pt-3">
+              <p className="text-[10px] text-zinc-500 mb-1">{POSTURE_WHY_CASH_LABEL}</p>
+              <p className="text-xs text-zinc-400 leading-snug max-w-prose">{buildWhyCashLine(data)}</p>
+            </div>
+
+            <p className="text-[10px]">
+              <Link
+                href="/learn/glossary#targets-scales-actual"
+                className="text-zinc-500 hover:text-amber-400/90 underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-0.5"
+              >
+                {GLOSSARY_HOLD_BRAKE_MAX_LINK}
+              </Link>
+            </p>
+
+            <div className="border-t border-zinc-800/50 pt-3">
+              {historyChangeSummary !== null && (
+                <p className="text-xs text-zinc-500 leading-snug">
+                  <span className="text-zinc-600">{SINCE_LAST_UPDATE_PREFIX}</span> {historyChangeSummary}
+                </p>
+              )}
+              {historyChangeSummary === null && !historyLoading && historyAvailable && data && (
+                <p className="text-xs text-zinc-500/90 italic">{SINCE_LAST_UPDATE_NO_CHANGE}</p>
+              )}
+            </div>
+
           {(() => {
             const riskAxisDirection = data.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
             const riskStats = computeAxisStats(data.risk_receipts, riskAxisDirection);
@@ -946,9 +979,9 @@ export function GhostRegimeClient({
             const copyText = buildCopySnapshotText(data, actionableRead);
             
             return actionableRead ? (
-              <div className="space-y-2">
+              <div className="space-y-2 border-t border-zinc-800/50 pt-3">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <div className="text-[10px] text-zinc-500 mb-1.5">{ACTIONABLE_READ_PREFIX}</div>
                     <ActionableReadPills
                       regime={data.regime}
@@ -987,7 +1020,7 @@ export function GhostRegimeClient({
                           document.body.removeChild(textarea);
                         }
                       }}
-                      className="px-2 py-1 text-[10px] rounded border border-zinc-700 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800 hover:border-zinc-600 transition-colors self-start sm:self-center"
+                      className="px-2 py-1 text-[10px] rounded border border-zinc-800/80 bg-zinc-900/40 text-zinc-400 hover:bg-zinc-900/70 hover:text-zinc-300 hover:border-zinc-700/80 transition-colors self-start sm:self-center shrink-0"
                       aria-label={copied ? COPY_SNAPSHOT_COPIED : COPY_SNAPSHOT_BUTTON}
                     >
                       {copied ? COPY_SNAPSHOT_COPIED : COPY_SNAPSHOT_BUTTON}
@@ -1011,7 +1044,7 @@ export function GhostRegimeClient({
           
           {/* Compare Panel */}
           {showCompare && prevRow && (
-            <div className="mt-3">
+            <div className="mt-3 pt-1 border-t border-zinc-800/40">
               <ComparePanel
                 currentRow={data}
                 prevRow={prevRow}
@@ -1055,21 +1088,10 @@ export function GhostRegimeClient({
               />
             </div>
           )}
-        </div>
+          </div>
+        </GlassCard>
         ) : null;
       })()}
-
-      {/* What Changed Since Last Update */}
-      {historyChangeSummary !== null && (
-        <div className="text-xs text-zinc-400 leading-relaxed">
-          Since last update: {historyChangeSummary}
-        </div>
-      )}
-      {historyChangeSummary === null && !historyLoading && historyAvailable && data && (
-        <div className="text-xs text-zinc-500 italic">
-          No change since the last update. Markets were boring. (Enjoy it.)
-        </div>
-      )}
 
       {/* Main content: three 2-column rows (map/alloc → pressure/drivers → overview/why) */}
       <div className="grid gap-6 lg:grid-cols-2">
@@ -1079,16 +1101,16 @@ export function GhostRegimeClient({
               <h2 className="text-sm font-semibold text-zinc-50">Regime Map</h2>
               <Link
                 href="/ghostregime/methodology"
-                className="text-xs text-amber-400 hover:text-amber-300 underline underline-offset-2 font-medium"
+                className="text-[11px] text-zinc-500 hover:text-amber-400/85 underline underline-offset-2"
               >
                 {REGIME_MAP_METHODOLOGY_CTA}
               </Link>
             </div>
-            <p className="text-[10px] text-zinc-500 leading-snug mb-4">
+            <p className="text-[9px] text-zinc-600 leading-snug mb-4">
               {REGIME_MAP_SLEEVE_NOTE_PREFIX}{' '}
               <Link
                 href="/ghostregime/methodology"
-                className="text-amber-400/90 hover:text-amber-300 underline underline-offset-2"
+                className="text-zinc-500 hover:text-amber-400/80 underline underline-offset-2"
               >
                 {REGIME_MAP_METHODOLOGY_LINK_TEXT}
               </Link>
@@ -1363,8 +1385,8 @@ export function GhostRegimeClient({
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <GlassCard className="p-6">
-          <div className="mb-4">
+        <GlassCard className="p-6 ring-1 ring-inset ring-amber-400/[0.06]">
+          <div className="mb-5">
             <Tooltip content={PRESSURE_WATCH_TOOLTIP}>
               <h2 className="text-sm font-semibold text-zinc-50 cursor-help">{PRESSURE_WATCH_TITLE}</h2>
             </Tooltip>
@@ -1390,15 +1412,15 @@ export function GhostRegimeClient({
 
           return (
             <GlassCard className="p-6">
-              <h2 className="text-sm font-semibold text-zinc-50 mb-4">{TOP_DRIVERS_TITLE}</h2>
+              <h2 className="text-sm font-semibold text-zinc-50 mb-3">{TOP_DRIVERS_TITLE}</h2>
               {!hasReceipts ? (
                 <p className="text-xs text-zinc-400 mb-2">{TOP_DRIVERS_OLD_DATA_HINT}</p>
               ) : allVotesZero ? (
                 <p className="text-xs text-zinc-400 mb-2">{TOP_DRIVERS_NO_STRONG_DRIVERS}</p>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div>
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center justify-between mb-1.5">
                       <div className="flex items-center gap-2">
                         <h3 className="text-xs font-medium text-zinc-300">{TOP_DRIVERS_RISK_HEADER}</h3>
                         {(() => {
@@ -1481,7 +1503,7 @@ export function GhostRegimeClient({
                     )}
                   </div>
                   <div>
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center justify-between mb-1.5">
                       <div className="flex items-center gap-2">
                         <h3 className="text-xs font-medium text-zinc-300">{TOP_DRIVERS_INFLATION_HEADER}</h3>
                         {(() => {
@@ -1548,7 +1570,7 @@ export function GhostRegimeClient({
                       <p className="text-xs text-zinc-400 italic">No strong inflation drivers</p>
                     )}
                   </div>
-                  <p className="text-[10px] text-zinc-500 mt-3 pt-3 border-t border-zinc-800">
+                  <p className="text-[10px] text-zinc-500/90 mt-3 pt-3 border-t border-zinc-800/80 leading-snug">
                     {TOP_DRIVERS_FOOTNOTE}
                   </p>
                 </div>
@@ -1562,9 +1584,9 @@ export function GhostRegimeClient({
       <div className="grid gap-6 lg:grid-cols-2">
         <div id="regime-summary">
           <GlassCard className="p-6">
-            <h2 className="text-sm font-semibold text-zinc-50 mb-4">{REGIME_OVERVIEW_TITLE}</h2>
-            <div className="space-y-4">
-              <div className="space-y-3 border-b border-zinc-800/80 pb-4">
+            <h2 className="text-sm font-semibold text-zinc-50 mb-3">{REGIME_OVERVIEW_TITLE}</h2>
+            <div className="space-y-3">
+              <div className="space-y-2.5 border-b border-zinc-800/80 pb-3">
                 <div>
                   <p className="text-[10px] text-zinc-400 uppercase tracking-wide mb-1">
                     <Tooltip content="The model's read on the market &quot;weather&quot; (Goldilocks / Reflation / Inflation / Deflation). Not a prediction — a label for the lane we're driving in right now.">
@@ -1586,48 +1608,44 @@ export function GhostRegimeClient({
                   <p className="text-sm font-medium text-zinc-200">{data.infl_axis}</p>
                 </div>
               </div>
-              <div className="space-y-4">
+              <div className="rounded-md border border-zinc-800/50 bg-zinc-900/25 p-2.5">
+                <div className="flex flex-wrap gap-2">
                 {dashboardMetrics.regimeConfidenceLabel && (
-                  <div>
-                    <Tooltip content={REGIME_CONFIDENCE_TOOLTIP}>
-                      <span className="px-2 py-0.5 rounded border border-amber-400/20 bg-amber-400/5 text-amber-300/80 text-xs">
-                        {REGIME_CONFIDENCE_LABEL_PREFIX} {dashboardMetrics.regimeConfidenceLabel}
-                      </span>
-                    </Tooltip>
-                  </div>
+                  <Tooltip content={REGIME_CONFIDENCE_TOOLTIP}>
+                    <span className="inline-flex px-2 py-0.5 rounded-md border border-amber-400/12 bg-amber-400/[0.04] text-amber-200/70 text-[11px]">
+                      {REGIME_CONFIDENCE_LABEL_PREFIX} {dashboardMetrics.regimeConfidenceLabel}
+                    </span>
+                  </Tooltip>
                 )}
                 {dashboardMetrics.regimeConvictionIndex !== null && (
-                  <div>
-                    <Tooltip content={REGIME_CONVICTION_TOOLTIP}>
-                      <span className="px-2 py-0.5 rounded border border-amber-400/20 bg-amber-400/5 text-amber-300/80 text-xs">
-                        {REGIME_CONVICTION_LABEL_PREFIX} {dashboardMetrics.regimeConvictionIndex}
-                      </span>
-                    </Tooltip>
-                  </div>
+                  <Tooltip content={REGIME_CONVICTION_TOOLTIP}>
+                    <span className="inline-flex px-2 py-0.5 rounded-md border border-amber-400/12 bg-amber-400/[0.04] text-amber-200/70 text-[11px]">
+                      {REGIME_CONVICTION_LABEL_PREFIX} {dashboardMetrics.regimeConvictionIndex}
+                    </span>
+                  </Tooltip>
                 )}
                 {dashboardMetrics.primaryDriver.label !== 'n/a' && (
-                  <div className="space-y-1">
+                  <div className="flex min-w-0 flex-col gap-1 sm:max-w-[min(100%,20rem)]">
                     <Tooltip content={PRIMARY_DRIVER_TOOLTIP}>
-                      <span className="px-2 py-0.5 rounded border border-amber-400/20 bg-amber-400/5 text-amber-300/80 text-xs">
+                      <span className="inline-flex px-2 py-0.5 rounded-md border border-amber-400/12 bg-amber-400/[0.04] text-amber-200/70 text-[11px]">
                         {PRIMARY_DRIVER_PREFIX} {dashboardMetrics.primaryDriver.label}
                       </span>
                     </Tooltip>
                     {dashboardMetrics.primaryDriver.whyReason && (
-                      <p className="text-[10px] text-zinc-500">
+                      <p className="text-[10px] text-zinc-500 leading-snug">
                         Why: {dashboardMetrics.primaryDriver.whyReason}
                       </p>
                     )}
                   </div>
                 )}
                 {dashboardMetrics.hasFlipWatch && dashboardMetrics.regimeConfirmationLabel && (
-                  <div>
-                    <Tooltip content={FLIPWATCH_PILL_TOOLTIP}>
-                      <span className="px-2 py-0.5 rounded border border-amber-400/30 bg-amber-400/10 text-amber-300/80 text-xs">
-                        {REGIME_CONFIRMATION_CHIP_PREFIX} {dashboardMetrics.regimeConfirmationLabel}
-                      </span>
-                    </Tooltip>
-                  </div>
+                  <Tooltip content={FLIPWATCH_PILL_TOOLTIP}>
+                    <span className="inline-flex px-2 py-0.5 rounded-md border border-amber-400/20 bg-amber-400/[0.06] text-amber-200/75 text-[11px]">
+                      {REGIME_CONFIRMATION_CHIP_PREFIX} {dashboardMetrics.regimeConfirmationLabel}
+                    </span>
+                  </Tooltip>
                 )}
+                </div>
               </div>
             </div>
           </GlassCard>
@@ -1668,8 +1686,8 @@ export function GhostRegimeClient({
           return (
             <GlassCard className="p-6 border border-zinc-800/80">
               <p className="text-[10px] text-zinc-500 uppercase tracking-wide mb-1">Context</p>
-              <h2 className="text-xs font-semibold text-zinc-400 mb-4 tracking-tight">{WHY_REGIME_TITLE}</h2>
-              <div className="space-y-3 text-xs text-zinc-300 leading-relaxed">
+              <h2 className="text-xs font-semibold text-zinc-400 mb-3 tracking-tight">{WHY_REGIME_TITLE}</h2>
+              <div className="space-y-2.5 text-xs text-zinc-300 leading-relaxed">
                 {(() => {
                   const priorTradingRow = prevRow;
                   const riskDelta = priorTradingRow ? computeAxisStatDeltas(data, priorTradingRow, 'risk') : null;
@@ -1702,16 +1720,16 @@ export function GhostRegimeClient({
                 {hasTodayReceipts && !hasHistoryButNotToday && riskSeries.length < 2 && inflSeries.length < 2 && (
                   <p className="text-zinc-500 text-[10px] italic mt-2">{AGREEMENT_HISTORY_INSUFFICIENT_HINT}</p>
                 )}
-                <p className="text-amber-300 font-medium">{axisDesc.regimeLine.replace(/\*\*/g, '')}</p>
-                <div className="pt-2 space-y-1">
+                <p className="text-amber-300/95 font-medium leading-snug">{axisDesc.regimeLine.replace(/\*\*/g, '')}</p>
+                <div className="mt-3 pt-3 border-t border-zinc-800/60 space-y-1.5">
                   {axisDesc.soWhatLines.map((line, idx) => (
-                    <p key={idx} className="text-zinc-400 italic">
+                    <p key={idx} className="text-[11px] text-zinc-500 italic leading-relaxed">
                       {line}
                     </p>
                   ))}
                 </div>
 
-                <details className="mt-3 pt-3 border-t border-zinc-800">
+                <details className="mt-3 pt-3 border-t border-zinc-800/60">
                   <summary className="text-[10px] text-zinc-500 cursor-pointer hover:text-zinc-400">{LEGEND_TITLE}</summary>
                   <div className="mt-2 space-y-1.5 text-[10px] text-zinc-500">
                     <div className="flex items-center gap-1">
