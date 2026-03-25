@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { GlassCard } from '@/components/GlassCard';
 import { Tooltip } from '@/components/Tooltip';
@@ -90,7 +90,9 @@ import {
   CONFIDENCE_LABEL_PREFIX,
   CONFIDENCE_TOOLTIP,
   COVERAGE_TOOLTIP,
-  REGIME_SUMMARY_TITLE,
+  REGIME_OVERVIEW_TITLE,
+  PRESSURE_WATCH_TITLE,
+  PRESSURE_WATCH_SUBTITLE,
   REGIME_CONVICTION_LABEL_PREFIX,
   REGIME_CONVICTION_TOOLTIP,
   REGIME_CONFIDENCE_LABEL_PREFIX,
@@ -581,6 +583,60 @@ export function GhostRegimeClient({
     setPrevNotFoundHint(false);
   };
 
+  const dashboardMetrics = useMemo(() => {
+    if (!data) return null;
+    const riskAxisDirection = data.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
+    const riskStats = computeAxisStats(data.risk_receipts, riskAxisDirection);
+    const riskNetVote =
+      data.risk_receipts && data.risk_receipts.length > 0
+        ? computeAxisNetVote(data.risk_receipts, 'risk').net
+        : data.risk_score;
+    const riskConviction = computeConviction(
+      riskNetVote,
+      riskStats.totalSignals || (data.risk_receipts?.length ?? null)
+    );
+    const inflAxis = data.infl_axis === 'Inflation' ? 'Inflation' : 'Disinflation';
+    const inflStats = computeAxisStats(data.inflation_receipts, inflAxis);
+    const inflNetVote =
+      data.inflation_receipts && data.inflation_receipts.length > 0
+        ? computeAxisNetVote(data.inflation_receipts, 'inflation').net
+        : data.infl_score;
+    const inflConviction = computeConviction(
+      inflNetVote,
+      inflStats.totalSignals || (data.inflation_receipts?.length ?? null)
+    );
+
+    const regimeConvictionIndex = computeRegimeConvictionIndex(riskConviction.index, inflConviction.index);
+    const regimeConfidenceLabel = computeRegimeConfidenceLabel(
+      riskStats.confidence.label,
+      inflStats.confidence.label
+    );
+    const riskAgreement = computeAxisAgreement(data.risk_receipts, riskAxisDirection);
+    const inflAgreement = computeAxisAgreement(data.inflation_receipts, inflAxis);
+    const primaryDriver = computePrimaryDriver(
+      data.risk_score,
+      data.infl_score,
+      riskConviction.index,
+      inflConviction.index,
+      riskStats.confidence.label,
+      inflStats.confidence.label,
+      riskAgreement.pct,
+      inflAgreement.pct
+    );
+    const regimeConfirmationLabel = formatRegimeConfirmationDisplay(data.flip_watch_status);
+    const hasFlipWatch = Boolean(data.flip_watch_status && data.flip_watch_status !== 'NONE');
+    const movementPressure = computeRegimeMovementPressure(data, prevRow);
+
+    return {
+      regimeConvictionIndex,
+      regimeConfidenceLabel,
+      primaryDriver,
+      regimeConfirmationLabel,
+      hasFlipWatch,
+      movementPressure,
+    };
+  }, [data, prevRow]);
+
   if (notSeeded) {
     return (
       <div className="space-y-6">
@@ -691,6 +747,10 @@ export function GhostRegimeClient({
     return null;
   }
 
+  if (!dashboardMetrics) {
+    return null;
+  }
+
   // Format date for display (treat as calendar date, not UTC)
   const formatDate = (dateStr: string) => {
     // Parse YYYY-MM-DD as local calendar date to avoid timezone shift
@@ -704,10 +764,6 @@ export function GhostRegimeClient({
     const date = new Date(timestamp);
     return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
   };
-
-  // Check flip watch status
-  const flipWatchStatus = data?.flip_watch_status || 'NONE';
-  const hasFlipWatch = flipWatchStatus !== 'NONE';
 
   return (
     <div className="space-y-6">
@@ -1015,7 +1071,7 @@ export function GhostRegimeClient({
         </div>
       )}
 
-      {/* Main Content Grid - 2x2 layout on lg screens */}
+      {/* Main content: three 2-column rows (map/alloc → pressure/drivers → overview/why) */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Row 1, Col 1: Regime Map */}
         <GlassCard className="p-6">
@@ -1304,116 +1360,25 @@ export function GhostRegimeClient({
             )}
           </GlassCard>
 
-        {/* Row 2, Col 1: Why This Regime Today */}
-        {(() => {
-          const axisDesc = describeAxisFromScores(data);
-          const riskAxisDirection = data.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
-          const riskStats = computeAxisStats(data.risk_receipts, riskAxisDirection);
-          // Use net vote for conviction if receipts exist, otherwise fallback to axis score
-          const riskNetVote = data.risk_receipts && data.risk_receipts.length > 0
-            ? computeAxisNetVote(data.risk_receipts, 'risk').net
-            : data.risk_score;
-          const riskConviction = computeConviction(riskNetVote, riskStats.totalSignals || (data.risk_receipts?.length ?? null));
-          const inflAxis = data.infl_axis === 'Inflation' ? 'Inflation' : 'Disinflation';
-          const inflStats = computeAxisStats(data.inflation_receipts, inflAxis);
-          const inflNetVote = data.inflation_receipts && data.inflation_receipts.length > 0
-            ? computeAxisNetVote(data.inflation_receipts, 'inflation').net
-            : data.infl_score;
-          const inflConviction = computeConviction(inflNetVote, inflStats.totalSignals || (data.inflation_receipts?.length ?? null));
-          
-          // Compute agreement percentages for primary driver
-          const riskAgreement = computeAxisAgreement(data.risk_receipts, riskAxisDirection);
-          const inflAgreement = computeAxisAgreement(data.inflation_receipts, inflAxis);
-          
-          // Compute agreement series for history visualization
-          const allRows = data ? [data, ...historyRows] : historyRows;
-          const riskSeries = computeAgreementSeries(allRows, 'risk', 6);
-          const inflSeries = computeAgreementSeries(allRows, 'inflation', 6);
-          const hasTodayReceipts = (data.risk_receipts && data.risk_receipts.length > 0) || 
-                                   (data.inflation_receipts && data.inflation_receipts.length > 0);
-          const hasHistoryButNotToday = !hasTodayReceipts && (riskSeries.length >= 2 || inflSeries.length >= 2);
-          
-          return (
-            <GlassCard className="p-6">
-              <h2 className="text-sm font-semibold text-zinc-50 mb-4">{WHY_REGIME_TITLE}</h2>
-              <div className="space-y-3 text-xs text-zinc-300 leading-relaxed">
-                {(() => {
-                  const priorTradingRow = prevRow;
-                  const riskDelta = priorTradingRow ? computeAxisStatDeltas(data, priorTradingRow, 'risk') : null;
-                  const inflDelta = priorTradingRow ? computeAxisStatDeltas(data, priorTradingRow, 'inflation') : null;
-                  
-                  return (
-                    <>
-                      <AxisStatsBlock
-                        axisLine={axisDesc.riskLine.replace(/\*\*/g, '')}
-                        stats={riskStats}
-                        conviction={riskConviction}
-                        agreementSeries={riskSeries.length >= 2 ? riskSeries : undefined}
-                        deltaLine={riskDelta}
-                        axisName="Risk"
-                      />
-                      <AxisStatsBlock
-                        axisLine={axisDesc.inflationLine.replace(/\*\*/g, '')}
-                        stats={inflStats}
-                        conviction={inflConviction}
-                        agreementSeries={inflSeries.length >= 2 ? inflSeries : undefined}
-                        deltaLine={inflDelta}
-                        axisName="Inflation"
-                      />
-                    </>
-                  );
-                })()}
-                {/* Show agreement history hint once at bottom */}
-                {hasHistoryButNotToday && (
-                  <p className="text-zinc-500 text-[10px] italic mt-2">
-                    {AGREEMENT_HISTORY_HINT}
-                  </p>
-                )}
-                {hasTodayReceipts && !hasHistoryButNotToday && riskSeries.length < 2 && inflSeries.length < 2 && (
-                  <p className="text-zinc-500 text-[10px] italic mt-2">
-                    {AGREEMENT_HISTORY_INSUFFICIENT_HINT}
-                  </p>
-                )}
-                <p className="text-amber-300 font-medium">{axisDesc.regimeLine.replace(/\*\*/g, '')}</p>
-                <div className="pt-2 space-y-1">
-                  {axisDesc.soWhatLines.map((line, idx) => (
-                    <p key={idx} className="text-zinc-400 italic">{line}</p>
-                  ))}
-                </div>
-                
-                {/* Legend */}
-                <details className="mt-3 pt-3 border-t border-zinc-800">
-                  <summary className="text-[10px] text-zinc-500 cursor-pointer hover:text-zinc-400">
-                    {LEGEND_TITLE}
-                  </summary>
-                  <div className="mt-2 space-y-1.5 text-[10px] text-zinc-500">
-                    <div className="flex items-center gap-1">
-                      <strong className="text-zinc-400">Agreement:</strong>
-                      <Tooltip content={AGREEMENT_TOOLTIP}>
-                        <span className="cursor-help opacity-70 hover:opacity-100" aria-label={AGREEMENT_TOOLTIP}>ⓘ</span>
-                      </Tooltip>
-                      <span>{LEGEND_AGREEMENT}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <strong className="text-zinc-400">Coverage:</strong>
-                      <Tooltip content={COVERAGE_TOOLTIP}>
-                        <span className="cursor-help opacity-70 hover:opacity-100" aria-label={COVERAGE_TOOLTIP}>ⓘ</span>
-                      </Tooltip>
-                      <span>{LEGEND_COVERAGE}</span>
-                    </div>
-                    <div><strong className="text-zinc-400">Confidence:</strong> {LEGEND_CONFIDENCE}</div>
-                    <div><strong className="text-zinc-400">Conviction:</strong> {LEGEND_CONVICTION}</div>
-                    <div><strong className="text-zinc-400">Crowded:</strong> {LEGEND_CROWDED}</div>
-                    <div><strong className="text-zinc-400">Net vote:</strong> {LEGEND_NET_VOTE}</div>
-                    <div><strong className="text-zinc-400">Δ since last:</strong> {LEGEND_DELTA}</div>
-                  </div>
-                </details>
-              </div>
-            </GlassCard>
-          );
-        })()}
+      </div>
 
-        {/* Row 2, Col 2: Top Drivers Today */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <GlassCard className="p-6">
+          <div className="mb-4">
+            <Tooltip content={PRESSURE_WATCH_TOOLTIP}>
+              <h2 className="text-sm font-semibold text-zinc-50 cursor-help">{PRESSURE_WATCH_TITLE}</h2>
+            </Tooltip>
+            <p className="text-[10px] text-zinc-500 mt-1">{PRESSURE_WATCH_SUBTITLE}</p>
+          </div>
+          <PressureWatchPanel
+            embedded
+            movementPressure={dashboardMetrics.movementPressure}
+            riskScore={data.risk_score}
+            inflScore={data.infl_score}
+          />
+        </GlassCard>
+
+        {/* Top drivers today */}
         {(() => {
           const riskDrivers = pickTopDrivers(data.risk_receipts, 2);
           const inflationDrivers = pickTopDrivers(data.inflation_receipts, 2);
@@ -1593,123 +1558,199 @@ export function GhostRegimeClient({
         })()}
       </div>
 
-      {/* Regime Details and Regime Summary (below main grid) */}
+      {/* Row 3: Regime overview | Why this regime */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Regime Details */}
-        <GlassCard className="p-6">
-          <h2 className="text-sm font-semibold text-zinc-50 mb-4">Regime Classification</h2>
-          <div className="space-y-3">
-            <div>
-              <p className="text-[10px] text-zinc-400 uppercase tracking-wide mb-1">
-                <Tooltip content="The model's read on the market &quot;weather&quot; (Goldilocks / Reflation / Inflation / Deflation). Not a prediction — a label for the lane we're driving in right now.">
-                  Regime
-                </Tooltip>
-              </p>
-              <p className="text-xl font-semibold text-amber-300">{data.regime}</p>
-            </div>
-            <div>
-              <p className="text-[10px] text-zinc-400 uppercase tracking-wide mb-1">
-                <Tooltip content="Risk On: we give growth assets more leash. Risk Off: we cut exposure and play defense. Seatbelt, not bubble wrap.">
-                  Risk Regime
-                </Tooltip>
-              </p>
-              <p className="text-base font-medium text-zinc-200">{data.risk_regime}</p>
-            </div>
-            <div>
-              <p className="text-[10px] text-zinc-400 uppercase tracking-wide mb-1">Inflation Axis</p>
-              <p className="text-sm font-medium text-zinc-200">{data.infl_axis}</p>
-            </div>
-          </div>
-        </GlassCard>
-
-        {/* Regime Summary */}
-        {(() => {
-          // Compute overall regime metrics from Risk and Inflation stats
-          const riskAxisDirection = data.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
-          const riskStats = computeAxisStats(data.risk_receipts, riskAxisDirection);
-          // Use net vote for conviction if receipts exist, otherwise fallback to axis score
-          const riskNetVote = data.risk_receipts && data.risk_receipts.length > 0
-            ? computeAxisNetVote(data.risk_receipts, 'risk').net
-            : data.risk_score;
-          const riskConviction = computeConviction(riskNetVote, riskStats.totalSignals || (data.risk_receipts?.length ?? null));
-          const inflAxis = data.infl_axis === 'Inflation' ? 'Inflation' : 'Disinflation';
-          const inflStats = computeAxisStats(data.inflation_receipts, inflAxis);
-          const inflNetVote = data.inflation_receipts && data.inflation_receipts.length > 0
-            ? computeAxisNetVote(data.inflation_receipts, 'inflation').net
-            : data.infl_score;
-          const inflConviction = computeConviction(inflNetVote, inflStats.totalSignals || (data.inflation_receipts?.length ?? null));
-          
-          const regimeConvictionIndex = computeRegimeConvictionIndex(riskConviction.index, inflConviction.index);
-          const regimeConfidenceLabel = computeRegimeConfidenceLabel(riskStats.confidence.label, inflStats.confidence.label);
-          
-          // Compute agreement percentages for primary driver
-          const riskAgreement = computeAxisAgreement(data.risk_receipts, riskAxisDirection);
-          const inflAgreement = computeAxisAgreement(data.inflation_receipts, inflAxis);
-          
-          const primaryDriver = computePrimaryDriver(
-            data.risk_score,
-            data.infl_score,
-            riskConviction.index,
-            inflConviction.index,
-            riskStats.confidence.label,
-            inflStats.confidence.label,
-            riskAgreement.pct,
-            inflAgreement.pct
-          );
-          const regimeConfirmationLabel = formatRegimeConfirmationDisplay(data.flip_watch_status);
-          const hasFlipWatch = data.flip_watch_status && data.flip_watch_status !== 'NONE';
-          const movementPressure = computeRegimeMovementPressure(data, prevRow);
-
-          return (
-            <div id="regime-summary">
-              <GlassCard className="p-6">
-                <h2 className="text-sm font-semibold text-zinc-50 mb-4">{REGIME_SUMMARY_TITLE}</h2>
+        <div id="regime-summary">
+          <GlassCard className="p-6">
+            <h2 className="text-sm font-semibold text-zinc-50 mb-4">{REGIME_OVERVIEW_TITLE}</h2>
+            <div className="space-y-4">
+              <div className="space-y-3 border-b border-zinc-800/80 pb-4">
+                <div>
+                  <p className="text-[10px] text-zinc-400 uppercase tracking-wide mb-1">
+                    <Tooltip content="The model's read on the market &quot;weather&quot; (Goldilocks / Reflation / Inflation / Deflation). Not a prediction — a label for the lane we're driving in right now.">
+                      Regime
+                    </Tooltip>
+                  </p>
+                  <p className="text-xl font-semibold text-amber-300">{data.regime}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-zinc-400 uppercase tracking-wide mb-1">
+                    <Tooltip content="Risk On: we give growth assets more leash. Risk Off: we cut exposure and play defense. Seatbelt, not bubble wrap.">
+                      Risk Regime
+                    </Tooltip>
+                  </p>
+                  <p className="text-base font-medium text-zinc-200">{data.risk_regime}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-zinc-400 uppercase tracking-wide mb-1">Inflation Axis</p>
+                  <p className="text-sm font-medium text-zinc-200">{data.infl_axis}</p>
+                </div>
+              </div>
               <div className="space-y-4">
-                {regimeConfidenceLabel && (
+                {dashboardMetrics.regimeConfidenceLabel && (
                   <div>
                     <Tooltip content={REGIME_CONFIDENCE_TOOLTIP}>
                       <span className="px-2 py-0.5 rounded border border-amber-400/20 bg-amber-400/5 text-amber-300/80 text-xs">
-                        {REGIME_CONFIDENCE_LABEL_PREFIX} {regimeConfidenceLabel}
+                        {REGIME_CONFIDENCE_LABEL_PREFIX} {dashboardMetrics.regimeConfidenceLabel}
                       </span>
                     </Tooltip>
                   </div>
                 )}
-                {regimeConvictionIndex !== null && (
+                {dashboardMetrics.regimeConvictionIndex !== null && (
                   <div>
                     <Tooltip content={REGIME_CONVICTION_TOOLTIP}>
                       <span className="px-2 py-0.5 rounded border border-amber-400/20 bg-amber-400/5 text-amber-300/80 text-xs">
-                        {REGIME_CONVICTION_LABEL_PREFIX} {regimeConvictionIndex}
+                        {REGIME_CONVICTION_LABEL_PREFIX} {dashboardMetrics.regimeConvictionIndex}
                       </span>
                     </Tooltip>
                   </div>
                 )}
-                {primaryDriver.label !== 'n/a' && (
+                {dashboardMetrics.primaryDriver.label !== 'n/a' && (
                   <div className="space-y-1">
                     <Tooltip content={PRIMARY_DRIVER_TOOLTIP}>
                       <span className="px-2 py-0.5 rounded border border-amber-400/20 bg-amber-400/5 text-amber-300/80 text-xs">
-                        {PRIMARY_DRIVER_PREFIX} {primaryDriver.label}
+                        {PRIMARY_DRIVER_PREFIX} {dashboardMetrics.primaryDriver.label}
                       </span>
                     </Tooltip>
-                    {primaryDriver.whyReason && (
+                    {dashboardMetrics.primaryDriver.whyReason && (
                       <p className="text-[10px] text-zinc-500">
-                        Why: {primaryDriver.whyReason}
+                        Why: {dashboardMetrics.primaryDriver.whyReason}
                       </p>
                     )}
                   </div>
                 )}
-                <PressureWatchPanel movementPressure={movementPressure} />
-                {hasFlipWatch && regimeConfirmationLabel && (
+                {dashboardMetrics.hasFlipWatch && dashboardMetrics.regimeConfirmationLabel && (
                   <div>
                     <Tooltip content={FLIPWATCH_PILL_TOOLTIP}>
                       <span className="px-2 py-0.5 rounded border border-amber-400/30 bg-amber-400/10 text-amber-300/80 text-xs">
-                        {REGIME_CONFIRMATION_CHIP_PREFIX} {regimeConfirmationLabel}
+                        {REGIME_CONFIRMATION_CHIP_PREFIX} {dashboardMetrics.regimeConfirmationLabel}
                       </span>
                     </Tooltip>
                   </div>
                 )}
               </div>
-            </GlassCard>
             </div>
+          </GlassCard>
+        </div>
+
+        {/* Why this regime today */}
+        {(() => {
+          const axisDesc = describeAxisFromScores(data);
+          const riskAxisDirection = data.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
+          const riskStats = computeAxisStats(data.risk_receipts, riskAxisDirection);
+          const riskNetVote =
+            data.risk_receipts && data.risk_receipts.length > 0
+              ? computeAxisNetVote(data.risk_receipts, 'risk').net
+              : data.risk_score;
+          const riskConviction = computeConviction(
+            riskNetVote,
+            riskStats.totalSignals || (data.risk_receipts?.length ?? null)
+          );
+          const inflAxis = data.infl_axis === 'Inflation' ? 'Inflation' : 'Disinflation';
+          const inflStats = computeAxisStats(data.inflation_receipts, inflAxis);
+          const inflNetVote =
+            data.inflation_receipts && data.inflation_receipts.length > 0
+              ? computeAxisNetVote(data.inflation_receipts, 'inflation').net
+              : data.infl_score;
+          const inflConviction = computeConviction(
+            inflNetVote,
+            inflStats.totalSignals || (data.inflation_receipts?.length ?? null)
+          );
+
+          const allRows = data ? [data, ...historyRows] : historyRows;
+          const riskSeries = computeAgreementSeries(allRows, 'risk', 6);
+          const inflSeries = computeAgreementSeries(allRows, 'inflation', 6);
+          const hasTodayReceipts =
+            (data.risk_receipts && data.risk_receipts.length > 0) ||
+            (data.inflation_receipts && data.inflation_receipts.length > 0);
+          const hasHistoryButNotToday = !hasTodayReceipts && (riskSeries.length >= 2 || inflSeries.length >= 2);
+
+          return (
+            <GlassCard className="p-6 border border-zinc-800/80">
+              <p className="text-[10px] text-zinc-500 uppercase tracking-wide mb-1">Context</p>
+              <h2 className="text-xs font-semibold text-zinc-400 mb-4 tracking-tight">{WHY_REGIME_TITLE}</h2>
+              <div className="space-y-3 text-xs text-zinc-300 leading-relaxed">
+                {(() => {
+                  const priorTradingRow = prevRow;
+                  const riskDelta = priorTradingRow ? computeAxisStatDeltas(data, priorTradingRow, 'risk') : null;
+                  const inflDelta = priorTradingRow ? computeAxisStatDeltas(data, priorTradingRow, 'inflation') : null;
+
+                  return (
+                    <>
+                      <AxisStatsBlock
+                        axisLine={axisDesc.riskLine.replace(/\*\*/g, '')}
+                        stats={riskStats}
+                        conviction={riskConviction}
+                        agreementSeries={riskSeries.length >= 2 ? riskSeries : undefined}
+                        deltaLine={riskDelta}
+                        axisName="Risk"
+                      />
+                      <AxisStatsBlock
+                        axisLine={axisDesc.inflationLine.replace(/\*\*/g, '')}
+                        stats={inflStats}
+                        conviction={inflConviction}
+                        agreementSeries={inflSeries.length >= 2 ? inflSeries : undefined}
+                        deltaLine={inflDelta}
+                        axisName="Inflation"
+                      />
+                    </>
+                  );
+                })()}
+                {hasHistoryButNotToday && (
+                  <p className="text-zinc-500 text-[10px] italic mt-2">{AGREEMENT_HISTORY_HINT}</p>
+                )}
+                {hasTodayReceipts && !hasHistoryButNotToday && riskSeries.length < 2 && inflSeries.length < 2 && (
+                  <p className="text-zinc-500 text-[10px] italic mt-2">{AGREEMENT_HISTORY_INSUFFICIENT_HINT}</p>
+                )}
+                <p className="text-amber-300 font-medium">{axisDesc.regimeLine.replace(/\*\*/g, '')}</p>
+                <div className="pt-2 space-y-1">
+                  {axisDesc.soWhatLines.map((line, idx) => (
+                    <p key={idx} className="text-zinc-400 italic">
+                      {line}
+                    </p>
+                  ))}
+                </div>
+
+                <details className="mt-3 pt-3 border-t border-zinc-800">
+                  <summary className="text-[10px] text-zinc-500 cursor-pointer hover:text-zinc-400">{LEGEND_TITLE}</summary>
+                  <div className="mt-2 space-y-1.5 text-[10px] text-zinc-500">
+                    <div className="flex items-center gap-1">
+                      <strong className="text-zinc-400">Agreement:</strong>
+                      <Tooltip content={AGREEMENT_TOOLTIP}>
+                        <span className="cursor-help opacity-70 hover:opacity-100" aria-label={AGREEMENT_TOOLTIP}>
+                          ⓘ
+                        </span>
+                      </Tooltip>
+                      <span>{LEGEND_AGREEMENT}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <strong className="text-zinc-400">Coverage:</strong>
+                      <Tooltip content={COVERAGE_TOOLTIP}>
+                        <span className="cursor-help opacity-70 hover:opacity-100" aria-label={COVERAGE_TOOLTIP}>
+                          ⓘ
+                        </span>
+                      </Tooltip>
+                      <span>{LEGEND_COVERAGE}</span>
+                    </div>
+                    <div>
+                      <strong className="text-zinc-400">Confidence:</strong> {LEGEND_CONFIDENCE}
+                    </div>
+                    <div>
+                      <strong className="text-zinc-400">Conviction:</strong> {LEGEND_CONVICTION}
+                    </div>
+                    <div>
+                      <strong className="text-zinc-400">Crowded:</strong> {LEGEND_CROWDED}
+                    </div>
+                    <div>
+                      <strong className="text-zinc-400">Net vote:</strong> {LEGEND_NET_VOTE}
+                    </div>
+                    <div>
+                      <strong className="text-zinc-400">Δ since last:</strong> {LEGEND_DELTA}
+                    </div>
+                  </div>
+                </details>
+              </div>
+            </GlassCard>
           );
         })()}
       </div>
@@ -1827,9 +1868,9 @@ export function GhostRegimeClient({
 
       {showAdvanced && (
         <div className="grid gap-6 md:grid-cols-2">
-        {/* Regime Classification */}
+        {/* Regime overview (snapshot) */}
         <GlassCard className="p-4 sm:p-5 space-y-3">
-          <h2 className="text-sm font-semibold text-zinc-50">Regime Classification</h2>
+          <h2 className="text-sm font-semibold text-zinc-50">Regime overview</h2>
           <div className="space-y-2">
             <div>
               <p className="text-xs text-zinc-400 uppercase tracking-wide">As-of</p>

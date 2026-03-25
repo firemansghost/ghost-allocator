@@ -61,8 +61,10 @@ export const CONVICTION_TOOLTIP = '|net vote| per available signals. Not a proba
 export const CONVICTION_TOOLTIP_SPICY = '|net vote| per available signals. Not a probability or forecast. High conviction = signals piling onto one side today. Could be clarity… or a crowded trade.';
 export const CONVICTION_TOOLTIP_NA = 'Conviction is unavailable when net vote or signal count is missing.';
 
-// Regime Summary
-export const REGIME_SUMMARY_TITLE = 'Regime Summary';
+// Regime overview (merged classification + summary chips)
+export const REGIME_OVERVIEW_TITLE = 'Regime overview';
+/** @deprecated Use REGIME_OVERVIEW_TITLE */
+export const REGIME_SUMMARY_TITLE = REGIME_OVERVIEW_TITLE;
 export const REGIME_CONVICTION_LABEL_PREFIX = 'Regime Conviction:';
 export const REGIME_CONVICTION_TOOLTIP = 'Combined strength of today\'s Risk + Inflation signals. Not a forecast.';
 export const REGIME_CONFIDENCE_LABEL_PREFIX = 'Regime Confidence:';
@@ -166,7 +168,7 @@ export const BACK_TO_LATEST_LINK = 'Back to latest';
 
 // Pressure Watch (movement vs thresholds; distinct from flip_watch_status regime confirmation)
 export const PRESSURE_WATCH_TITLE = 'Pressure Watch';
-export const PRESSURE_WATCH_SUBTITLE = "What's changing";
+export const PRESSURE_WATCH_SUBTITLE = "What's changing now";
 export const PRESSURE_WATCH_TOOLTIP =
   'How far risk and inflation scores are from balanced (0), and how far sleeve signals are from the next threshold band. Compared to the prior trading snapshot only. Not a forecast.';
 export const PRESSURE_WATCH_RISK_ROW_LABEL = 'Risk';
@@ -177,6 +179,8 @@ export const PRESSURE_WATCH_CLOSEST_LABEL = 'Closest pressure point';
 export const PRESSURE_WATCH_ALLOC_IMPACT = 'If that sleeve flips next';
 export const PRESSURE_WATCH_IF_STEP_TOOLTIP =
   'Illustrative: if only this sleeve moved one step across its band (same regime), approximate allocation change. Not a prediction.';
+export const PRESSURE_WATCH_NEXT_FLIP_IMPACT_NEGLIGIBLE =
+  'Next flip impact: negligible at current targets';
 export const PRESSURE_WATCH_ADVANCED_ONE_STEP_LABEL = 'If one sleeve flips next (illustrative)';
 export const PRESSURE_WATCH_NA = 'N/A';
 export const PRESSURE_WATCH_ADVANCED_TITLE = 'Pressure Watch — full detail';
