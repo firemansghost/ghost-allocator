@@ -118,6 +118,17 @@ export interface GhostRegimeRow {
     resolvedIds: Record<string, string>;
     errors: Record<string, string>;
     proxies: Record<string, string>;
+    /** Stooq per-symbol fetch probe (HTTP status, body preview, outcome) */
+    stooq_probe?: Record<
+      string,
+      {
+        request_url_display: string;
+        http_status: number;
+        content_type: string | null;
+        body_preview: string;
+        outcome: string;
+      }
+    >;
   };
   /** Common market as-of used for sufficiency checks (YYYY-MM-DD), if computable */
   market_asof_date?: string | null;

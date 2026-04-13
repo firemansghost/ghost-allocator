@@ -43,15 +43,20 @@ export const GHOSTREGIME_HISTORY_REQUIREMENTS = {
 } as const;
 
 /**
- * Get provider name for a symbol
+ * Get provider name for a symbol (uses resolvedIds when BTC is served from CoinGecko fallback)
  */
-function getProviderName(symbol: string): string {
+function getProviderName(symbol: string, providerDiagnostics?: ProviderDiagnostics): string {
   if (symbol === MARKET_SYMBOLS.VIX) {
     return 'CBOE';
   } else if (symbol === MARKET_SYMBOLS.PDBC) {
     return 'AlphaVantage'; // May use DBC proxy from Stooq
+  } else if (
+    symbol === MARKET_SYMBOLS.BTC_USD &&
+    providerDiagnostics?.resolvedIds?.[symbol]?.startsWith('coingecko')
+  ) {
+    return 'CoinGecko';
   } else {
-    return 'Stooq'; // All other symbols (ETFs, BTC) use Stooq
+    return 'Stooq';
   }
 }
 
@@ -118,7 +123,7 @@ export function checkCoreSymbolStatus(
   for (const symbol of CORE_SYMBOLS) {
     const symbolData = getDataForSymbol(marketData, symbol);
     const latestDate = getLatestDate(marketData, symbol);
-    const provider = getProviderName(symbol);
+    const provider = getProviderName(symbol, providerDiagnostics);
     const obsAtAsof = asofDate ? obsAtOrBefore(marketData, symbol, asofDate) : symbolData.length;
 
     let ok = true;
@@ -189,7 +194,7 @@ export function checkCoreSymbolStatus(
   for (const symbol of VAMS_SYMBOLS) {
     const symbolData = getDataForSymbol(marketData, symbol);
     const latestDate = getLatestDate(marketData, symbol);
-    const provider = getProviderName(symbol);
+    const provider = getProviderName(symbol, providerDiagnostics);
 
     let entry: CoreSymbolStatus;
     if (status[symbol]) {

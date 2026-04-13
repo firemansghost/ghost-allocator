@@ -160,12 +160,13 @@ curl https://ghost-allocator.vercel.app/api/ghostregime/health
 2. Look for provider-specific errors:
    - **VIX (CBOE)**: Check if CSV URL is accessible
    - **PDBC (AlphaVantage)**: Check rate limits, API key validity
-   - **ETFs (Stooq)**: Check if symbol mapping is correct
+   - **ETFs (Stooq)**: Check if symbol mapping is correct; check `provider_diagnostics.stooq_probe` for HTTP/body/outcome
 
 **Provider-specific fixes**:
 - **AlphaVantage**: Verify `ALPHAVANTAGE_API_KEY` in Vercel env vars
 - **CBOE VIX**: Usually reliable, check if CSV format changed
-- **Stooq**: Usually reliable, check if symbol IDs changed
+- **Stooq**: Stooq may return **API-key / captcha instructions** (plaintext) instead of CSV when `STOOQ_API_KEY` is not set. Obtain a key via [Stooq get_apikey](https://stooq.com/q/d/?s=spy.us&get_apikey), then set `STOOQ_API_KEY` in Vercel. Responses are classified as `stooq_apikey_gate` in `stooq_probe`, not as “empty history” without explanation.
+- **BTC-USD**: If Stooq CSV fails, the provider tries **CoinGecko** for BTC only; ETFs still require Stooq (or another future source).
 
 ### Typical Provider Issues
 
@@ -179,8 +180,9 @@ curl https://ghost-allocator.vercel.app/api/ghostregime/health
 - **Network timeout**: Retry usually works
 
 **Stooq**:
+- **API key required**: Plaintext body starting with “Get your apikey” means CSV was not returned — configure `STOOQ_API_KEY`.
 - **Symbol mapping**: Verify `STOOQ_SYMBOL_MAP` in `lib/ghostregime/marketData.ts`
-- **Network issues**: Usually resolves quickly
+- **Diagnostics**: `provider_diagnostics.stooq_probe[symbol].body_preview` shows the first ~500 chars of the response; `outcome` distinguishes `stooq_apikey_gate`, `non_csv_unexpected`, `csv_ok`, etc.
 
 ## Environment Variables
 
@@ -191,6 +193,7 @@ curl https://ghost-allocator.vercel.app/api/ghostregime/health
 | `GHOSTREGIME_CRON_SECRET` | Secret for force mode; must match the value in GitHub Actions. If missing, force refresh returns 401. |
 | `BLOB_READ_WRITE_TOKEN` | Vercel Blob storage token. Required for persisting latest row and history. If missing, persistence fails and health can stay NOT_READY. |
 | `ALPHAVANTAGE_API_KEY` | AlphaVantage API key for PDBC (optional; falls back to DBC via Stooq if unset). |
+| `STOOQ_API_KEY` | Stooq CSV download API key (required when Stooq serves the captcha/API-key gate instead of CSV for `/q/d/l/`). Append to requests server-side; do not expose as `NEXT_PUBLIC_*`. |
 | `NEXT_PUBLIC_GHOSTREGIME_CUTOVER_DATE_UTC` | (Optional) Cutover date for seed vs persistence; default `2025-11-28T00:00:00Z`. |
 
 Seed presence is not an env var: the app expects the seed file at `data/ghostregime/seed/ghostregime_replay_history.csv` in the repo. If missing or empty, today/explain/history return 503 NOT_SEEDED and the daily workflow skips.

@@ -1,6 +1,7 @@
 /**
  * GhostRegime Market Data Provider
- * Working default implementation using Stooq (ETFs, BTC), CBOE (VIX), AlphaVantage (PDBC with DBC fallback)
+ * Stooq CSV for US ETFs (+ optional STOOQ_API_KEY when Stooq serves apikey/captcha gate),
+ * CoinGecko fallback for BTC-USD if Stooq fails, CBOE (VIX), AlphaVantage (PDBC with DBC/Stooq fallback)
  */
 
 import type { MarketDataPoint } from './types';
@@ -46,6 +47,93 @@ function calculateReturn(prevClose: number, currentClose: number): number {
   return (currentClose - prevClose) / prevClose;
 }
 
+/** Stooq daily CSV header (see https://stooq.com/q/d/l/) */
+const STOOQ_CSV_HEADER_RE = /^Date,Open,High,Low,Close,Volume/i;
+
+/**
+ * Stooq may return plaintext instructions (API key / captcha) instead of CSV when `apikey` is missing.
+ * See: https://stooq.com/q/d/?s=spy.us&get_apikey
+ */
+export function isStooqApiKeyGateBody(text: string): boolean {
+  const head = text.slice(0, 2500).toLowerCase();
+  return (
+    head.includes('get your apikey') ||
+    (head.includes('captcha') && head.includes('apikey')) ||
+    (head.includes('stooq') && head.includes('apikey') && head.includes('csv download link'))
+  );
+}
+
+function buildStooqCsvUrl(
+  stooqId: string,
+  startStr: string,
+  endStr: string
+): { fetchUrl: string; displayUrl: string } {
+  const base = `https://stooq.com/q/d/l/?s=${encodeURIComponent(stooqId)}&d1=${startStr}&d2=${endStr}&i=d`;
+  const apiKey = process.env.STOOQ_API_KEY?.trim();
+  if (apiKey) {
+    const q = `&apikey=${encodeURIComponent(apiKey)}`;
+    return { fetchUrl: `${base}${q}`, displayUrl: `${base}&apikey=<redacted>` };
+  }
+  return { fetchUrl: base, displayUrl: base };
+}
+
+export type StooqFetchOutcome =
+  | 'csv_ok'
+  | 'stooq_apikey_gate'
+  | 'non_csv_unexpected'
+  | 'http_not_ok'
+  | 'empty_body'
+  | 'header_only'
+  | 'zero_parsed_rows'
+  | 'fetch_threw';
+
+export interface StooqFetchDebug {
+  request_url_display: string;
+  http_status: number;
+  content_type: string | null;
+  body_preview: string;
+  outcome: StooqFetchOutcome;
+}
+
+function emptyStooqDebug(
+  displayUrl: string,
+  status: number,
+  ct: string | null,
+  preview: string,
+  outcome: StooqFetchOutcome
+): StooqFetchDebug {
+  return {
+    request_url_display: displayUrl,
+    http_status: status,
+    content_type: ct,
+    body_preview: preview.slice(0, 500),
+    outcome,
+  };
+}
+
+/** Human-readable line for provider_diagnostics.errors (not a substitute for structured stooq_probe). */
+export function formatStooqFailureHint(debug: StooqFetchDebug): string {
+  const p = debug.body_preview.replace(/\s+/g, ' ').trim().slice(0, 200);
+  switch (debug.outcome) {
+    case 'stooq_apikey_gate':
+      return `Stooq returned API-key/captcha instructions instead of CSV. Set env STOOQ_API_KEY (see https://stooq.com/q/d/?s=spy.us&get_apikey). Preview: ${p}`;
+    case 'non_csv_unexpected':
+      return `Stooq response was not CSV (unexpected first line or HTML). Preview: ${p}`;
+    case 'http_not_ok':
+      return `Stooq HTTP ${debug.http_status}. Preview: ${p}`;
+    case 'empty_body':
+      return 'Stooq returned an empty body.';
+    case 'header_only':
+      return 'Stooq CSV had only a header row (no data in range).';
+    case 'zero_parsed_rows':
+      return 'Stooq CSV parsed zero valid price rows.';
+    case 'fetch_threw':
+      return 'Stooq fetch threw (network/timeout).';
+    default:
+      return `Stooq outcome=${debug.outcome}. Preview: ${p}`;
+  }
+}
+
 /**
  * Fetch ETF data from Stooq
  * Stooq CSV format: Date,Open,High,Low,Close,Volume
@@ -57,28 +145,72 @@ async function fetchStooqData(
   stooqId: string,
   startDate: Date,
   endDate: Date
-): Promise<{ data: MarketDataPoint[]; resolvedId: string }> {
-  try {
-    // Stooq CSV URL format: https://stooq.com/q/d/l/?s={stooqId}&d1={start}&d2={end}&i=d
-    const startStr = startDate.toISOString().split('T')[0].replace(/-/g, '');
-    const endStr = endDate.toISOString().split('T')[0].replace(/-/g, '');
-    const url = `https://stooq.com/q/d/l/?s=${stooqId}&d1=${startStr}&d2=${endStr}&i=d`;
+): Promise<{ data: MarketDataPoint[]; resolvedId: string; debug: StooqFetchDebug }> {
+  const startStr = startDate.toISOString().split('T')[0].replace(/-/g, '');
+  const endStr = endDate.toISOString().split('T')[0].replace(/-/g, '');
+  const { fetchUrl, displayUrl } = buildStooqCsvUrl(stooqId, startStr, endStr);
 
-    const response = await fetch(url);
+  try {
+    const response = await fetch(fetchUrl);
+    const contentType = response.headers.get('content-type');
     if (!response.ok) {
-      throw new Error(`Stooq fetch failed: ${response.statusText}`);
+      const errBody = await response.text().catch(() => '');
+      return {
+        data: [],
+        resolvedId: stooqId,
+        debug: emptyStooqDebug(displayUrl, response.status, contentType, errBody, 'http_not_ok'),
+      };
     }
 
     const text = await response.text();
+    const preview = text.slice(0, 500);
+
+    if (!text.trim()) {
+      return {
+        data: [],
+        resolvedId: stooqId,
+        debug: emptyStooqDebug(displayUrl, response.status, contentType, '', 'empty_body'),
+      };
+    }
+
+    if (isStooqApiKeyGateBody(text)) {
+      return {
+        data: [],
+        resolvedId: stooqId,
+        debug: emptyStooqDebug(displayUrl, response.status, contentType, preview, 'stooq_apikey_gate'),
+      };
+    }
+
+    const headHtml = text.slice(0, 800).toLowerCase();
+    if (headHtml.includes('<!doctype') || headHtml.includes('<html')) {
+      return {
+        data: [],
+        resolvedId: stooqId,
+        debug: emptyStooqDebug(displayUrl, response.status, contentType, preview, 'non_csv_unexpected'),
+      };
+    }
+
     const lines = text.trim().split('\n');
+    const firstLine = (lines[0] ?? '').trim().replace(/^\uFEFF/, '');
+    if (!STOOQ_CSV_HEADER_RE.test(firstLine)) {
+      return {
+        data: [],
+        resolvedId: stooqId,
+        debug: emptyStooqDebug(displayUrl, response.status, contentType, preview, 'non_csv_unexpected'),
+      };
+    }
+
     if (lines.length < 2) {
-      return { data: [], resolvedId: stooqId };
+      return {
+        data: [],
+        resolvedId: stooqId,
+        debug: emptyStooqDebug(displayUrl, response.status, contentType, preview, 'header_only'),
+      };
     }
 
     const data: MarketDataPoint[] = [];
     let prevClose: number | null = null;
 
-    // Skip header line
     for (let i = 1; i < lines.length; i++) {
       const parts = lines[i].split(',');
       if (parts.length < 5) continue;
@@ -92,7 +224,7 @@ async function fetchStooqData(
       const returns = prevClose !== null ? calculateReturn(prevClose, close) : 0;
 
       data.push({
-        symbol, // Keep original symbol for consistency
+        symbol,
         date,
         close,
         returns,
@@ -101,13 +233,33 @@ async function fetchStooqData(
       prevClose = close;
     }
 
+    const sorted = data.sort((a, b) => a.date.getTime() - b.date.getTime());
+    if (sorted.length === 0) {
+      return {
+        data: [],
+        resolvedId: stooqId,
+        debug: emptyStooqDebug(displayUrl, response.status, contentType, preview, 'zero_parsed_rows'),
+      };
+    }
+
     return {
-      data: data.sort((a, b) => a.date.getTime() - b.date.getTime()),
+      data: sorted,
       resolvedId: stooqId,
+      debug: {
+        request_url_display: displayUrl,
+        http_status: response.status,
+        content_type: contentType,
+        body_preview: preview.slice(0, 200) + (text.length > 200 ? '…' : ''),
+        outcome: 'csv_ok',
+      },
     };
   } catch (error) {
     console.error(`Error fetching Stooq data for ${symbol} (${stooqId}):`, error);
-    return { data: [], resolvedId: stooqId };
+    return {
+      data: [],
+      resolvedId: stooqId,
+      debug: emptyStooqDebug(displayUrl, 0, null, (error as Error).message || '', 'fetch_threw'),
+    };
   }
 }
 
@@ -294,41 +446,39 @@ async function fetchAlphaVantagePdbc(
 }
 
 /**
- * Fetch BTC price from CoinGecko
+ * Fetch BTC price from CoinGecko (used when Stooq BTC CSV is unavailable)
  */
 async function fetchCoinGeckoBtc(
   startDate: Date,
   endDate: Date
-): Promise<MarketDataPoint[]> {
+): Promise<{ data: MarketDataPoint[]; error?: string }> {
   try {
-    // CoinGecko public API (no key required)
     const startTimestamp = Math.floor(startDate.getTime() / 1000);
     const endTimestamp = Math.floor(endDate.getTime() / 1000);
     const url = `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart/range?vs_currency=usd&from=${startTimestamp}&to=${endTimestamp}`;
 
     const response = await fetch(url);
     if (!response.ok) {
-      throw new Error(`CoinGecko fetch failed: ${response.statusText}`);
+      const t = await response.text().catch(() => '');
+      return {
+        data: [],
+        error: `CoinGecko HTTP ${response.status}: ${t.slice(0, 200)}`,
+      };
     }
 
     const json = await response.json();
     const prices = json.prices || [];
 
-    // CoinGecko returns hourly data - aggregate to daily closes (last price of each day UTC)
     const dailyCloses = new Map<string, number>();
     for (const [timestamp, price] of prices) {
       const close = price as number;
       if (isNaN(close)) continue;
 
       const date = new Date(timestamp);
-      // Use UTC date string as key (YYYY-MM-DD)
       const dateKey = date.toISOString().split('T')[0];
-      
-      // Keep the last price for each day (CoinGecko data is sorted by timestamp)
       dailyCloses.set(dateKey, close);
     }
 
-    // Convert to MarketDataPoint array, sorted by date
     const data: MarketDataPoint[] = [];
     const sortedDates = Array.from(dailyCloses.keys()).sort();
     let prevClose: number | null = null;
@@ -348,10 +498,14 @@ async function fetchCoinGeckoBtc(
       prevClose = close;
     }
 
-    return data;
+    if (data.length === 0) {
+      return { data: [], error: 'CoinGecko returned no prices in range' };
+    }
+
+    return { data };
   } catch (error) {
     console.error('Error fetching CoinGecko BTC data:', error);
-    return [];
+    return { data: [], error: (error as Error).message };
   }
 }
 
@@ -362,6 +516,8 @@ export interface ProviderDiagnostics {
   resolvedIds: Record<string, string>; // symbol -> resolved provider ID
   errors: Record<string, string>; // symbol -> error message
   proxies: Record<string, string>; // original symbol -> proxy symbol (e.g., "PDBC" -> "DBC")
+  /** Per fetch-key Stooq probe (symbol passed to fetch, e.g. SPY, DBC); body_preview shows why CSV failed */
+  stooq_probe?: Record<string, StooqFetchDebug>;
 }
 
 /**
@@ -372,6 +528,7 @@ export class DefaultMarketDataProvider implements MarketDataProvider {
     resolvedIds: {},
     errors: {},
     proxies: {},
+    stooq_probe: {},
   };
 
   /**
@@ -389,6 +546,7 @@ export class DefaultMarketDataProvider implements MarketDataProvider {
       resolvedIds: {},
       errors: {},
       proxies: {},
+      stooq_probe: {},
     };
   }
 
@@ -420,6 +578,10 @@ export class DefaultMarketDataProvider implements MarketDataProvider {
           const dbcStooqId = STOOQ_SYMBOL_MAP['DBC'];
           if (dbcStooqId) {
             const dbcResult = await fetchStooqData('DBC', dbcStooqId, startDate, endDate);
+            if (dbcResult.debug.outcome !== 'csv_ok') {
+              if (!this.diagnostics.stooq_probe) this.diagnostics.stooq_probe = {};
+              this.diagnostics.stooq_probe['DBC'] = dbcResult.debug;
+            }
             symbolData = dbcResult.data.map((point) => ({
               ...point,
               symbol: MARKET_SYMBOLS.PDBC, // Map DBC data to PDBC symbol
@@ -427,7 +589,7 @@ export class DefaultMarketDataProvider implements MarketDataProvider {
             this.diagnostics.proxies[MARKET_SYMBOLS.PDBC] = 'DBC';
             this.diagnostics.resolvedIds[MARKET_SYMBOLS.PDBC] = dbcResult.resolvedId;
             if (symbolData.length === 0) {
-              this.diagnostics.errors[symbol] = `AlphaVantage failed (${avResult.error || 'no data'}), DBC fallback also failed`;
+              this.diagnostics.errors[symbol] = `AlphaVantage failed (${avResult.error || 'no data'}). DBC (Stooq): ${formatStooqFailureHint(dbcResult.debug)}`;
             } else {
               // Note that we're using a proxy
               this.diagnostics.errors[symbol] = `Using DBC proxy (AlphaVantage: ${avResult.error || 'no data'})`;
@@ -438,16 +600,37 @@ export class DefaultMarketDataProvider implements MarketDataProvider {
           }
         }
       } else {
-        // ETF from Stooq - use mapped ID
         const stooqId = STOOQ_SYMBOL_MAP[symbol];
         if (!stooqId) {
           this.diagnostics.errors[symbol] = `No Stooq mapping for ${symbol}`;
-        } else {
+        } else if (symbol === MARKET_SYMBOLS.BTC_USD) {
           const result = await fetchStooqData(symbol, stooqId, startDate, endDate);
+          if (result.debug.outcome !== 'csv_ok') {
+            if (!this.diagnostics.stooq_probe) this.diagnostics.stooq_probe = {};
+            this.diagnostics.stooq_probe[symbol] = result.debug;
+          }
           symbolData = result.data;
           this.diagnostics.resolvedIds[symbol] = result.resolvedId;
           if (symbolData.length === 0) {
-            this.diagnostics.errors[symbol] = `No data returned from Stooq for ${stooqId}`;
+            const cg = await fetchCoinGeckoBtc(startDate, endDate);
+            if (cg.data.length > 0) {
+              symbolData = cg.data;
+              this.diagnostics.resolvedIds[symbol] = 'coingecko:bitcoin';
+            } else {
+              this.diagnostics.errors[symbol] =
+                formatStooqFailureHint(result.debug) + (cg.error ? ` ${cg.error}` : '');
+            }
+          }
+        } else {
+          const result = await fetchStooqData(symbol, stooqId, startDate, endDate);
+          if (result.debug.outcome !== 'csv_ok') {
+            if (!this.diagnostics.stooq_probe) this.diagnostics.stooq_probe = {};
+            this.diagnostics.stooq_probe[symbol] = result.debug;
+          }
+          symbolData = result.data;
+          this.diagnostics.resolvedIds[symbol] = result.resolvedId;
+          if (symbolData.length === 0) {
+            this.diagnostics.errors[symbol] = formatStooqFailureHint(result.debug);
           }
         }
       }
