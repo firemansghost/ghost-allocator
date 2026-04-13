@@ -4,7 +4,7 @@
 
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import { isStooqApiKeyGateBody } from '../marketData';
+import { isStooqApiKeyGateBody, isStooqDailyCsvHeader } from '../marketData';
 
 describe('isStooqApiKeyGateBody', () => {
   it('detects Stooq plaintext apikey instructions (live failure mode)', () => {
@@ -24,5 +24,19 @@ describe('isStooqApiKeyGateBody', () => {
       isStooqApiKeyGateBody('Date,Open,High,Low,Close,Volume\n2024-01-02,1,1,1,100,0'),
       false
     );
+  });
+});
+
+describe('isStooqDailyCsvHeader', () => {
+  it('accepts US equity header with Volume', () => {
+    assert.strictEqual(isStooqDailyCsvHeader('Date,Open,High,Low,Close,Volume'), true);
+  });
+
+  it('accepts BTC/crypto-style header without Volume (Stooq btcusd)', () => {
+    assert.strictEqual(isStooqDailyCsvHeader('Date,Open,High,Low,Close'), true);
+  });
+
+  it('rejects unrelated first line', () => {
+    assert.strictEqual(isStooqDailyCsvHeader('Not,a,csv'), false);
   });
 });

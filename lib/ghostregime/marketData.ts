@@ -47,8 +47,14 @@ function calculateReturn(prevClose: number, currentClose: number): number {
   return (currentClose - prevClose) / prevClose;
 }
 
-/** Stooq daily CSV header (see https://stooq.com/q/d/l/) */
-const STOOQ_CSV_HEADER_RE = /^Date,Open,High,Low,Close,Volume/i;
+/**
+ * Stooq daily CSV header (see https://stooq.com/q/d/l/).
+ * US equity series use `Date,Open,High,Low,Close,Volume`; some symbols (e.g. btcusd) omit Volume.
+ */
+export function isStooqDailyCsvHeader(firstLine: string): boolean {
+  const line = firstLine.trim().replace(/^\uFEFF/, '');
+  return /^Date,Open,High,Low,Close(?:,Volume)?$/i.test(line);
+}
 
 /**
  * Stooq may return plaintext instructions (API key / captcha) instead of CSV when `apikey` is missing.
@@ -118,7 +124,7 @@ export function formatStooqFailureHint(debug: StooqFetchDebug): string {
     case 'stooq_apikey_gate':
       return `Stooq returned API-key/captcha instructions instead of CSV. Set env STOOQ_API_KEY (see https://stooq.com/q/d/?s=spy.us&get_apikey). Preview: ${p}`;
     case 'non_csv_unexpected':
-      return `Stooq response was not CSV (unexpected first line or HTML). Preview: ${p}`;
+      return `Stooq response was not recognized as daily CSV (expected header Date,Open,High,Low,Close with optional Volume, or HTML/error body). Preview: ${p}`;
     case 'http_not_ok':
       return `Stooq HTTP ${debug.http_status}. Preview: ${p}`;
     case 'empty_body':
@@ -136,7 +142,7 @@ export function formatStooqFailureHint(debug: StooqFetchDebug): string {
 
 /**
  * Fetch ETF data from Stooq
- * Stooq CSV format: Date,Open,High,Low,Close,Volume
+ * Stooq CSV format: Date,Open,High,Low,Close[,Volume]
  * @param symbol - Original ticker symbol (e.g., "SPY")
  * @param stooqId - Resolved Stooq ID (e.g., "spy.us")
  */
@@ -192,7 +198,7 @@ async function fetchStooqData(
 
     const lines = text.trim().split('\n');
     const firstLine = (lines[0] ?? '').trim().replace(/^\uFEFF/, '');
-    if (!STOOQ_CSV_HEADER_RE.test(firstLine)) {
+    if (!isStooqDailyCsvHeader(firstLine)) {
       return {
         data: [],
         resolvedId: stooqId,
@@ -213,6 +219,7 @@ async function fetchStooqData(
 
     for (let i = 1; i < lines.length; i++) {
       const parts = lines[i].split(',');
+      // OHLC daily: 5 cols without Volume, 6 with Volume (close is index 4)
       if (parts.length < 5) continue;
 
       const dateStr = parts[0];
@@ -445,6 +452,9 @@ async function fetchAlphaVantagePdbc(
   }
 }
 
+/** Public CoinGecko `/market_chart/range` rejects very long windows (401 / rate limits). Chunk sub-ranges. */
+const COINGECKO_RANGE_CHUNK_SECONDS = 80 * 24 * 60 * 60; // 80 days — stays under typical free-tier caps
+
 /**
  * Fetch BTC price from CoinGecko (used when Stooq BTC CSV is unavailable)
  */
@@ -455,22 +465,46 @@ async function fetchCoinGeckoBtc(
   try {
     const startTimestamp = Math.floor(startDate.getTime() / 1000);
     const endTimestamp = Math.floor(endDate.getTime() / 1000);
-    const url = `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart/range?vs_currency=usd&from=${startTimestamp}&to=${endTimestamp}`;
 
-    const response = await fetch(url);
-    if (!response.ok) {
-      const t = await response.text().catch(() => '');
-      return {
-        data: [],
-        error: `CoinGecko HTTP ${response.status}: ${t.slice(0, 200)}`,
-      };
+    const pricePoints: [number, number][] = [];
+    let cursor = startTimestamp;
+    let lastError: string | undefined;
+
+    while (cursor < endTimestamp) {
+      const chunkEnd = Math.min(cursor + COINGECKO_RANGE_CHUNK_SECONDS, endTimestamp);
+      const url = `https://api.coingecko.com/api/v3/coins/bitcoin/market_chart/range?vs_currency=usd&from=${cursor}&to=${chunkEnd}`;
+
+      const response = await fetch(url, {
+        headers: {
+          Accept: 'application/json',
+          'User-Agent': 'ghost-allocator/ghostregime',
+        },
+      });
+      const bodyText = await response.text().catch(() => '');
+
+      if (!response.ok) {
+        lastError = `CoinGecko HTTP ${response.status} (chunk ${cursor}-${chunkEnd}): ${bodyText.slice(0, 240)}`;
+        return { data: [], error: lastError };
+      }
+
+      let json: { prices?: [number, number][] };
+      try {
+        json = JSON.parse(bodyText) as { prices?: [number, number][] };
+      } catch {
+        return { data: [], error: `CoinGecko invalid JSON (chunk ${cursor}-${chunkEnd})` };
+      }
+
+      for (const pair of json.prices || []) {
+        if (Array.isArray(pair) && pair.length >= 2) {
+          pricePoints.push([pair[0], pair[1]]);
+        }
+      }
+
+      cursor = chunkEnd + 1;
     }
 
-    const json = await response.json();
-    const prices = json.prices || [];
-
     const dailyCloses = new Map<string, number>();
-    for (const [timestamp, price] of prices) {
+    for (const [timestamp, price] of pricePoints) {
       const close = price as number;
       if (isNaN(close)) continue;
 
@@ -499,7 +533,7 @@ async function fetchCoinGeckoBtc(
     }
 
     if (data.length === 0) {
-      return { data: [], error: 'CoinGecko returned no prices in range' };
+      return { data: [], error: lastError || 'CoinGecko returned no prices in range' };
     }
 
     return { data };
