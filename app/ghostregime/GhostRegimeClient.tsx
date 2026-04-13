@@ -312,8 +312,11 @@ export function GhostRegimeClient({
       const prevParam = searchParams.get('prev');
       const { value: prev } = parsePrevParam(prevParam);
 
-      // SSR: we have initial data and no asof/prev — skip fetch
+      // Latest view (no explicit historical query): align client row with server props.
+      // Without this, SPA navigation from /ghostregime?asof=… back to /ghostregime can leave
+      // `data` stuck on the old snapshot while the URL clears — date picker shows history forever.
       if (!asof && !prev && initialToday) {
+        setData(initialToday);
         setLoading(false);
         return;
       }
