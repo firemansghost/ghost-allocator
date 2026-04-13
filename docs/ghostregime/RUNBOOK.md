@@ -10,6 +10,12 @@ GhostRegime is a market regime classifier that runs automatically via GitHub Act
 2. **Cutover** — Configurable via `NEXT_PUBLIC_GHOSTREGIME_CUTOVER_DATE_UTC`. Dates **after** cutover are not read from the seed.
 3. **Persistence** — For dates after cutover, the engine computes from live market data and writes the latest row to Vercel Blob storage. Reads (today, health, history) use this persisted state when available.
 
+### Resilience (last-known-good)
+
+- **Failed refresh does not overwrite blob “latest”** — The engine only calls `writeLatest` / `appendToHistory` when a new row is **valid** (`isValidPersistableSnapshot`) and **not stale** and **not debug**. Provider failures that return a **stale** response **never** write; the previous blob snapshot remains.
+- **API honesty** — Stale responses include `serve_metadata` (e.g. `refresh_outcome`, `persisted_snapshot_preserved`, `market_snapshot_lag_days`, `refresh_error_summary`) so operators and the UI can see carry-forward vs a fresh compute.
+- **Cold start** — If there is no persisted latest and live data is insufficient, the API returns **503** `GHOSTREGIME_NOT_READY` (no fake latest). The replay seed does not replace blob latest for post-cutover dates.
+
 If the seed is missing or empty, `/api/ghostregime/today`, `/explain`, and `/history` return `503` with `GHOSTREGIME_NOT_SEEDED`. If no latest row has ever been persisted, `/api/ghostregime/health` returns `503 NOT_READY`.
 
 ## Daily Workflow

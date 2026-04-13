@@ -2023,6 +2023,20 @@ export function GhostRegimeClient({
                 <p className="text-[11px] text-amber-300">
                   Stale data: {data.stale_reason || 'Unknown reason'}
                 </p>
+                {data.serve_metadata && (
+                  <p className="text-[10px] text-zinc-500 leading-relaxed">
+                    Serve: {data.serve_metadata.refresh_outcome.replace(/_/g, ' ')}
+                    {data.serve_metadata.persisted_snapshot_preserved
+                      ? ' — persisted latest on server was not replaced (last-known-good retained)'
+                      : ''}
+                    {typeof data.serve_metadata.market_snapshot_lag_days === 'number'
+                      ? ` · market snapshot lag ${data.serve_metadata.market_snapshot_lag_days}d`
+                      : ''}
+                    {data.serve_metadata.refresh_error_summary
+                      ? ` · ${data.serve_metadata.refresh_error_summary.slice(0, 220)}`
+                      : ''}
+                  </p>
+                )}
                 {data.missing_core_symbols && data.missing_core_symbols.length > 0 && (
                   <div>
                     <p className="text-[10px] text-zinc-400 uppercase tracking-wide">Missing symbols</p>

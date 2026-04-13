@@ -51,6 +51,28 @@ export interface HistoryCheckDetail {
   have_at_asof: number;
 }
 
+/**
+ * Serve-time only (not persisted): explains refresh vs carry-forward for operators and UI.
+ */
+export interface GhostRegimeServeMetadata {
+  run_date_utc: string;
+  latest_snapshot_date: string;
+  market_snapshot_lag_days: number;
+  refresh_attempt: 'read' | 'force';
+  refresh_outcome:
+    | 'computed_and_persisted'
+    | 'computed_not_persisted_debug'
+    | 'served_persisted_snapshot'
+    | 'stale_carry_forward_blob_unchanged'
+    | 'market_data_unavailable_carry_forward'
+    | 'replay_cutover'
+    | 'error_carry_forward_with_diagnostics';
+  /** True when persisted blob was intentionally not replaced (stale path, debug, or validation skip). */
+  persisted_snapshot_preserved: boolean;
+  stale_reason?: string;
+  refresh_error_summary?: string;
+}
+
 export interface CoreSymbolStatus {
   provider: string;
   last_date: string | null;
@@ -136,6 +158,8 @@ export interface GhostRegimeRow {
   fetch_window?: { start: string; end: string };
   /** Human-readable stale line (INSUFFICIENT_HISTORY / MISSING_CORE_SERIES / empty data) */
   stale_detail?: string;
+  /** Serve-time only: refresh outcome, lag, whether blob was preserved (not stored in blob latest) */
+  serve_metadata?: GhostRegimeServeMetadata;
   debug_votes?: DebugVotes; // Vote breakdown (only included when debug=1)
   debug_enabled?: boolean; // True when debug mode was used
   engine_version?: string; // Model version (e.g., ghostregime-v1.0.2) - served-time (current deploy)

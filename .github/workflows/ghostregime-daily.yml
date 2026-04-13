@@ -6,12 +6,21 @@ on:
   workflow_dispatch:  # Allow manual trigger
   # NOTE: No push/pull_request triggers - this workflow should only run on schedule or manual dispatch
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ghostregime-daily-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   refresh:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - name: "Guard - seed file and secrets"
         id: guard
@@ -75,6 +84,10 @@ jobs:
               if pd:
                   print("--- provider_diagnostics ---")
                   print(json.dumps(pd, indent=2, default=str))
+              sm = data.get("serve_metadata")
+              if sm:
+                  print("--- serve_metadata ---")
+                  print(json.dumps(sm, indent=2, default=str))
               miss = data.get("missing_core_symbols")
               if miss:
                   print("--- missing_core_symbols ---")
@@ -124,8 +137,10 @@ jobs:
               stale_reason = data.get('stale_reason','(no reason)')
               error_msg = f"❌ Stale=true: {stale_reason}"
               print(error_msg)
-              summary_lines.append(f"### ❌ Stale Data")
+              print("--- Note: HTTP 200 with stale=true means last-known-good snapshot was served; Vercel Blob latest was NOT overwritten. ---")
+              summary_lines.append(f"### ❌ Stale Data (refresh did not persist a new latest)")
               summary_lines.append(f"**Reason**: {stale_reason}")
+              summary_lines.append(f"**Blob latest**: preserved (not replaced on failed refresh)")
               summary_lines.extend(print_failure_diagnostics(data, "stale response"))
               
               if "missing_core_symbols" in data:
@@ -141,10 +156,17 @@ jobs:
 
           success_msg = f"✅ OK - Date: {data.get('date')}, Regime: {data.get('regime')}, Source: {data.get('data_source')}"
           print(success_msg)
+          sm_ok = data.get("serve_metadata")
+          if sm_ok:
+              print("--- serve_metadata (success) ---")
+              print(json.dumps(sm_ok, indent=2, default=str))
           summary_lines.append("### ✅ Success")
           summary_lines.append(f"**Date**: {data.get('date')}")
           summary_lines.append(f"**Regime**: {data.get('regime')}")
           summary_lines.append(f"**Source**: {data.get('data_source')}")
+          if sm_ok:
+              summary_lines.append(f"**serve_metadata.refresh_outcome**: `{sm_ok.get('refresh_outcome')}`")
+              summary_lines.append(f"**persisted_snapshot_preserved**: `{sm_ok.get('persisted_snapshot_preserved')}`")
           summary_lines.append(f"**Risk Score**: {data.get('risk_score', 'N/A')}")
           summary_lines.append(f"**Inflation Score**: {data.get('infl_score', 'N/A')}")
           

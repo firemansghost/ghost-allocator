@@ -4,7 +4,14 @@
  */
 
 import { formatISO, parseISO, isBefore, differenceInDays } from 'date-fns';
-import type { GhostRegimeRow, MarketDataPoint, SatelliteData, RegimeType, SignalReceipt } from './types';
+import type {
+  GhostRegimeRow,
+  GhostRegimeServeMetadata,
+  MarketDataPoint,
+  SatelliteData,
+  RegimeType,
+  SignalReceipt,
+} from './types';
 import {
   CUTOVER_DATE_UTC,
   MARKET_SYMBOLS,
@@ -42,6 +49,8 @@ import {
   formatStaleHistoryHumanSummary,
 } from './diagnostics';
 import type { ProviderDiagnostics } from './marketData';
+import { attachServeMetadata } from './serveMetadata';
+import { isValidPersistableSnapshot } from './persistGate';
 
 /** Structured fields attached to stale rows and NOT_READY errors for observability */
 function buildStaleObservationPayload(
@@ -390,7 +399,12 @@ export async function getGhostRegimeToday(includeDebug: boolean = false, force: 
     const runDateStr = formatISO(runDateUtc, { representation: 'date' });
     const todayRow = replayHistory.find((r) => r.date === runDateStr);
     if (todayRow) {
-      return todayRow;
+      return attachServeMetadata(todayRow, {
+        runDateUtc,
+        force,
+        refresh_outcome: 'replay_cutover',
+        persisted_snapshot_preserved: true,
+      });
     }
   }
 
@@ -434,22 +448,32 @@ export async function getGhostRegimeToday(includeDebug: boolean = false, force: 
       if (latest) {
         // Build diagnostics even with no data
         const diagnostics = checkCoreSymbolStatus(marketData, null, providerDiagnostics);
-        return {
-          ...latest,
-          run_date_utc: formatISO(runDateUtc, { representation: 'date' }),
-          stale: true,
-          stale_reason: 'MARKET_DATA_UNAVAILABLE',
-          missing_core_symbols: diagnostics.missingSymbols.length > 0 ? diagnostics.missingSymbols : coreSymbols,
-          core_symbol_status: diagnostics.status,
-          ...buildStaleObservationPayload(
-            diagnostics,
+        return attachServeMetadata(
+          {
+            ...latest,
+            run_date_utc: formatISO(runDateUtc, { representation: 'date' }),
+            stale: true,
+            stale_reason: 'MARKET_DATA_UNAVAILABLE',
+            missing_core_symbols: diagnostics.missingSymbols.length > 0 ? diagnostics.missingSymbols : coreSymbols,
+            core_symbol_status: diagnostics.status,
+            ...buildStaleObservationPayload(
+              diagnostics,
+              providerDiagnostics,
+              null,
+              startDate,
+              endDate,
+              'MARKET_DATA_UNAVAILABLE'
+            ),
+          },
+          {
+            runDateUtc,
+            force,
+            refresh_outcome: 'market_data_unavailable_carry_forward',
+            persisted_snapshot_preserved: true,
+            stale_reason: 'MARKET_DATA_UNAVAILABLE',
             providerDiagnostics,
-            null,
-            startDate,
-            endDate,
-            'MARKET_DATA_UNAVAILABLE'
-          ),
-        };
+          }
+        );
       }
       // No latest available - throw error with diagnostics attached
       const diagnostics = checkCoreSymbolStatus(marketData, null, providerDiagnostics);
@@ -486,27 +510,37 @@ export async function getGhostRegimeToday(includeDebug: boolean = false, force: 
         const staleReason = !asofDate 
           ? 'MISSING_CORE_SERIES' 
           : 'INSUFFICIENT_HISTORY';
-        return {
-          ...latest,
-          run_date_utc: formatISO(runDateUtc, { representation: 'date' }),
-          stale: true,
-          stale_reason: staleReason,
-          missing_core_symbols: diagnostics.missingSymbols,
-          core_symbol_status: diagnostics.status,
-          core_proxy_used: diagnostics.proxies,
-          data_source: 'persisted', // Serve-time field: served from persisted storage (but stale)
-          engine_version: MODEL_VERSION, // Current deploy version
-          build_commit: process.env.VERCEL_GIT_COMMIT_SHA || process.env.NEXT_PUBLIC_BUILD_COMMIT || 'unknown', // Current deploy commit
-          ...buildStaleObservationPayload(
-            diagnostics,
+        return attachServeMetadata(
+          {
+            ...latest,
+            run_date_utc: formatISO(runDateUtc, { representation: 'date' }),
+            stale: true,
+            stale_reason: staleReason,
+            missing_core_symbols: diagnostics.missingSymbols,
+            core_symbol_status: diagnostics.status,
+            core_proxy_used: diagnostics.proxies,
+            data_source: 'persisted', // Serve-time field: served from persisted storage (but stale)
+            engine_version: MODEL_VERSION, // Current deploy version
+            build_commit: process.env.VERCEL_GIT_COMMIT_SHA || process.env.NEXT_PUBLIC_BUILD_COMMIT || 'unknown', // Current deploy commit
+            ...buildStaleObservationPayload(
+              diagnostics,
+              providerDiagnostics,
+              asofDate,
+              startDate,
+              endDate,
+              staleReason
+            ),
+            // Preserve row metadata from latest
+          },
+          {
+            runDateUtc,
+            force,
+            refresh_outcome: 'stale_carry_forward_blob_unchanged',
+            persisted_snapshot_preserved: true,
+            stale_reason: staleReason,
             providerDiagnostics,
-            asofDate,
-            startDate,
-            endDate,
-            staleReason
-          ),
-          // Preserve row metadata from latest
-        };
+          }
+        );
       }
       // No latest available - throw error with diagnostics attached
       const notReadyError = new Error('GHOSTREGIME_NOT_READY') as Error & {
@@ -552,16 +586,25 @@ export async function getGhostRegimeToday(includeDebug: boolean = false, force: 
         // If we have data for this asof_date and it's not stale, return it
         // Preserve row metadata (do not overwrite with current deploy info)
         if (latestStr === asofDateStr && !latest.stale) {
-          return {
-            ...latest,
-            run_date_utc: formatISO(runDateUtc, { representation: 'date' }), // Update served timestamp
-            core_proxy_used: diagnostics.proxies, // Update proxy info if changed
-            data_source: 'persisted',
-            // Preserve row metadata (row_computed_at_utc, row_build_commit, row_engine_version)
-            // Add served-time metadata
-            engine_version: MODEL_VERSION, // Current deploy version
-            build_commit: process.env.VERCEL_GIT_COMMIT_SHA || process.env.NEXT_PUBLIC_BUILD_COMMIT || 'unknown', // Current deploy commit
-          };
+          return attachServeMetadata(
+            {
+              ...latest,
+              run_date_utc: formatISO(runDateUtc, { representation: 'date' }), // Update served timestamp
+              core_proxy_used: diagnostics.proxies, // Update proxy info if changed
+              data_source: 'persisted',
+              // Preserve row metadata (row_computed_at_utc, row_build_commit, row_engine_version)
+              // Add served-time metadata
+              engine_version: MODEL_VERSION, // Current deploy version
+              build_commit: process.env.VERCEL_GIT_COMMIT_SHA || process.env.NEXT_PUBLIC_BUILD_COMMIT || 'unknown', // Current deploy commit
+            },
+            {
+              runDateUtc,
+              force,
+              refresh_outcome: 'served_persisted_snapshot',
+              persisted_snapshot_preserved: true,
+              providerDiagnostics,
+            }
+          );
         }
       }
     }
@@ -603,27 +646,37 @@ export async function getGhostRegimeToday(includeDebug: boolean = false, force: 
       if (error instanceof Error && error.message === 'MISSING_TIEBREAK_INPUT') {
         // Return stale row with diagnostics
         if (latest) {
-          return {
-            ...latest,
-            run_date_utc: formatISO(runDateUtc, { representation: 'date' }),
-            stale: true,
-            stale_reason: 'MISSING_TIEBREAK_INPUT',
-            missing_core_symbols: ['PDBC'], // PDBC needed for tie-break
-            core_symbol_status: diagnostics.status,
-            core_proxy_used: diagnostics.proxies,
-            data_source: 'persisted', // Serve-time field: served from persisted storage (but stale)
-            engine_version: MODEL_VERSION, // Current deploy version
-            build_commit: process.env.VERCEL_GIT_COMMIT_SHA || process.env.NEXT_PUBLIC_BUILD_COMMIT || 'unknown', // Current deploy commit
-            ...buildStaleObservationPayload(
-              diagnostics,
+          return attachServeMetadata(
+            {
+              ...latest,
+              run_date_utc: formatISO(runDateUtc, { representation: 'date' }),
+              stale: true,
+              stale_reason: 'MISSING_TIEBREAK_INPUT',
+              missing_core_symbols: ['PDBC'], // PDBC needed for tie-break
+              core_symbol_status: diagnostics.status,
+              core_proxy_used: diagnostics.proxies,
+              data_source: 'persisted', // Serve-time field: served from persisted storage (but stale)
+              engine_version: MODEL_VERSION, // Current deploy version
+              build_commit: process.env.VERCEL_GIT_COMMIT_SHA || process.env.NEXT_PUBLIC_BUILD_COMMIT || 'unknown', // Current deploy commit
+              ...buildStaleObservationPayload(
+                diagnostics,
+                providerDiagnostics,
+                asofDate,
+                startDate,
+                endDate,
+                'MISSING_TIEBREAK_INPUT'
+              ),
+              // Preserve row metadata from latest
+            },
+            {
+              runDateUtc,
+              force,
+              refresh_outcome: 'stale_carry_forward_blob_unchanged',
+              persisted_snapshot_preserved: true,
+              stale_reason: 'MISSING_TIEBREAK_INPUT',
               providerDiagnostics,
-              asofDate,
-              startDate,
-              endDate,
-              'MISSING_TIEBREAK_INPUT'
-            ),
-            // Preserve row metadata from latest
-          };
+            }
+          );
         }
         throw new Error('GHOSTREGIME_NOT_READY');
       }
@@ -659,22 +712,44 @@ export async function getGhostRegimeToday(includeDebug: boolean = false, force: 
       row.data_source = 'computed';
     }
 
+    let refreshOutcome: GhostRegimeServeMetadata['refresh_outcome'] = 'computed_not_persisted_debug';
+    let persistedSnapshotPreserved = true;
+
     // Only persist if not stale AND not debug mode (debug responses should not pollute history)
     if (!row.stale && !includeDebug) {
-      // Strip serve-time-only fields before persisting (data_source, force_enabled, debug_enabled, build_commit, engine_version)
-      // These are computed at serve-time, not stored
-      // Note: run_date_utc is persisted (it's when the row was computed), but we update it when serving
       const { data_source, force_enabled, debug_enabled, build_commit, engine_version, ...persistableRow } = row;
-      
-      await storage.writeLatest(persistableRow);
-      await storage.appendToHistory(persistableRow);
-      await storage.writeMeta({
-        version: MODEL_VERSION,
-        lastUpdated: runDateUtc,
-      });
+
+      if (isValidPersistableSnapshot(persistableRow)) {
+        await storage.writeLatest(persistableRow);
+        await storage.appendToHistory(persistableRow);
+        await storage.writeMeta({
+          version: MODEL_VERSION,
+          lastUpdated: runDateUtc,
+        });
+        refreshOutcome = 'computed_and_persisted';
+        persistedSnapshotPreserved = false;
+      } else {
+        console.error('[GhostRegime] Persist skipped: invalid snapshot shape (blob latest unchanged)', {
+          date: persistableRow.date,
+        });
+        refreshOutcome = 'computed_not_persisted_debug';
+        persistedSnapshotPreserved = true;
+      }
+    } else if (includeDebug) {
+      refreshOutcome = 'computed_not_persisted_debug';
+      persistedSnapshotPreserved = true;
+    } else if (row.stale) {
+      refreshOutcome = 'stale_carry_forward_blob_unchanged';
+      persistedSnapshotPreserved = true;
     }
 
-    return row;
+    return attachServeMetadata(row, {
+      runDateUtc,
+      force,
+      refresh_outcome: refreshOutcome,
+      persisted_snapshot_preserved: persistedSnapshotPreserved,
+      providerDiagnostics,
+    });
   } catch (error) {
     console.error('Error computing GhostRegime:', error);
     
@@ -682,6 +757,7 @@ export async function getGhostRegimeToday(includeDebug: boolean = false, force: 
     if (latest) {
       let diagnostics: ReturnType<typeof checkCoreSymbolStatus> | null = null;
       let obsPayload: Record<string, unknown> = {};
+      let pdCatch: ProviderDiagnostics | undefined;
       try {
         const endDate = new Date();
         const startDate = new Date(endDate);
@@ -693,6 +769,7 @@ export async function getGhostRegimeToday(includeDebug: boolean = false, force: 
           endDate
         );
         const providerDiagnostics = defaultMarketDataProvider.getDiagnostics();
+        pdCatch = providerDiagnostics;
         if (marketData.length > 0) {
           const asofDate = computeAsofDate(marketData, coreSymbols);
           diagnostics = checkCoreSymbolStatus(marketData, asofDate, providerDiagnostics);
@@ -723,18 +800,30 @@ export async function getGhostRegimeToday(includeDebug: boolean = false, force: 
         }
       } catch {
         // Diagnostics failed — return top-level stale fields only
+        pdCatch = defaultMarketDataProvider.getDiagnostics();
       }
 
-      return {
-        ...latest,
-        run_date_utc: formatISO(runDateUtc, { representation: 'date' }),
-        stale: true,
-        stale_reason: error instanceof Error ? error.message : 'FETCH_ERROR',
-        missing_core_symbols: diagnostics?.missingSymbols || [],
-        core_symbol_status: diagnostics?.status || {},
-        core_proxy_used: diagnostics?.proxies || latest.core_proxy_used,
-        ...obsPayload,
-      };
+      const errMsg = error instanceof Error ? error.message : 'FETCH_ERROR';
+      return attachServeMetadata(
+        {
+          ...latest,
+          run_date_utc: formatISO(runDateUtc, { representation: 'date' }),
+          stale: true,
+          stale_reason: errMsg,
+          missing_core_symbols: diagnostics?.missingSymbols || [],
+          core_symbol_status: diagnostics?.status || {},
+          core_proxy_used: diagnostics?.proxies || latest.core_proxy_used,
+          ...obsPayload,
+        },
+        {
+          runDateUtc,
+          force,
+          refresh_outcome: 'error_carry_forward_with_diagnostics',
+          persisted_snapshot_preserved: true,
+          stale_reason: errMsg,
+          providerDiagnostics: pdCatch,
+        }
+      );
     }
     
     // Re-throw if it's a NOT_READY error
