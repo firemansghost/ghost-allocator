@@ -153,6 +153,19 @@ export interface GhostRegimeRow {
         outcome: string;
       }
     >;
+    /** Stooq vs Marketstack routing (ETF fallback) */
+    feed_routing?: Record<string, string>;
+    marketstack_probe?: Record<
+      string,
+      {
+        request_display: string;
+        http_status: number;
+        outcome: string;
+        body_preview?: string;
+        pages_fetched?: number;
+        api_message?: string;
+      }
+    >;
   };
   /** Common market as-of used for sufficiency checks (YYYY-MM-DD), if computable */
   market_asof_date?: string | null;

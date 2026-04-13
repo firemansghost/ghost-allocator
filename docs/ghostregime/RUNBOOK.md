@@ -31,6 +31,18 @@ If the seed is missing or empty, `/api/ghostregime/today`, `/explain`, and `/his
   3. Check health endpoint
   4. (Optional) Send Slack notification on failure
 
+### Pre-push verification (local)
+
+One command runs build, lint, and a focused set of GhostRegime unit tests (persist gate, diagnostics, Stooq parsing, URL/latest UX, Marketstack helpers, flip pressure, serve metadata):
+
+```bash
+npm run verify:ghostregime
+```
+
+### Marketstack fallback (optional)
+
+For **core US ETF symbols** (SPY, GLD, EEM, HYG, IEF, TIP, TLT, UUP), Stooq remains the **first** data source. If Stooq fails (gate, empty CSV, parse error, etc.), the engine may request **one** Marketstack EOD series per symbol **only for those tickers**, and only when `MARKETSTACK_ACCESS_KEY` is set in the deployment environment. **PDBC** and **BTC-USD** keep their existing AlphaVantage/DBC and Stooq→CoinGecko paths — they are not routed through Marketstack. The paid quota is limited; unused fallback does not consume Marketstack requests.
+
 ### Manual Execution
 
 **Via GitHub Actions UI**:

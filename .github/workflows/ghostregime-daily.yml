@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 1
 
@@ -61,6 +61,34 @@ jobs:
           import json
           import sys
           import os
+
+          SERVE_META_KEYS = [
+              ("refresh_attempt", "refresh_attempt"),
+              ("refresh_outcome", "refresh_outcome"),
+              ("persisted_snapshot_preserved", "persisted_snapshot_preserved"),
+              ("persist_rejected_reason", "persist_rejected_reason"),
+              ("latest_snapshot_date", "latest_snapshot_date"),
+              ("market_snapshot_lag_days", "market_snapshot_lag_days"),
+              ("run_date_utc", "run_date_utc"),
+              ("stale_reason", "stale_reason"),
+              ("refresh_error_summary", "refresh_error_summary"),
+          ]
+
+          def format_serve_metadata_lines(sm):
+              """Readable operator lines; omit keys that are absent."""
+              if sm is None:
+                  return ["- _serve_metadata_: _(not present — non-success path or older deploy)_"]
+              lines = []
+              for json_key, label in SERVE_META_KEYS:
+                  if json_key not in sm:
+                      continue
+                  val = sm.get(json_key)
+                  if val is None and json_key == "persist_rejected_reason":
+                      continue
+                  lines.append(f"- **{label}**: `{val}`")
+              if not lines:
+                  return ["- _serve_metadata_: _(empty object)_"]
+              return lines
 
           def print_failure_diagnostics(data, label):
               """Stdout + step summary: full JSON and structured stale/history fields."""
@@ -175,17 +203,18 @@ jobs:
           print(success_msg)
           sm_ok = data.get("serve_metadata")
           if sm_ok:
-              print("--- serve_metadata (success) ---")
+              print("--- serve_metadata (success, raw JSON) ---")
               print(json.dumps(sm_ok, indent=2, default=str))
           summary_lines.append("### ✅ Success")
-          summary_lines.append(f"**Date**: {data.get('date')}")
-          summary_lines.append(f"**Regime**: {data.get('regime')}")
-          summary_lines.append(f"**Source**: {data.get('data_source')}")
-          if sm_ok:
-              summary_lines.append(f"**serve_metadata.refresh_outcome**: `{sm_ok.get('refresh_outcome')}`")
-              summary_lines.append(f"**persisted_snapshot_preserved**: `{sm_ok.get('persisted_snapshot_preserved')}`")
-          summary_lines.append(f"**Risk Score**: {data.get('risk_score', 'N/A')}")
-          summary_lines.append(f"**Inflation Score**: {data.get('infl_score', 'N/A')}")
+          summary_lines.append(f"- **Row date**: `{data.get('date')}`")
+          summary_lines.append(f"- **Regime**: `{data.get('regime')}`")
+          summary_lines.append(f"- **data_source**: `{data.get('data_source')}`")
+          summary_lines.append("")
+          summary_lines.append("#### Serve metadata")
+          summary_lines.extend(format_serve_metadata_lines(sm_ok))
+          summary_lines.append("")
+          summary_lines.append(f"- **risk_score**: `{data.get('risk_score', 'N/A')}`")
+          summary_lines.append(f"- **infl_score**: `{data.get('infl_score', 'N/A')}`")
           
           with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
               f.write('\n'.join(summary_lines))

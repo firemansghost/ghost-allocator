@@ -6,6 +6,11 @@
 
 import type { MarketDataPoint } from './types';
 import { MARKET_SYMBOLS } from './config';
+import {
+  fetchMarketstackEod,
+  formatMarketstackFailureHint,
+  isMarketstackEtfFallbackSymbol,
+} from './marketstackEod';
 
 /**
  * Stooq symbol mapping (ticker -> Stooq ID)
@@ -552,6 +557,20 @@ export interface ProviderDiagnostics {
   proxies: Record<string, string>; // original symbol -> proxy symbol (e.g., "PDBC" -> "DBC")
   /** Per fetch-key Stooq probe (symbol passed to fetch, e.g. SPY, DBC); body_preview shows why CSV failed */
   stooq_probe?: Record<string, StooqFetchDebug>;
+  /** One line per symbol: primary Stooq outcome, optional Marketstack fallback result */
+  feed_routing?: Record<string, string>;
+  /** Marketstack EOD probe when fallback ran (or failed) */
+  marketstack_probe?: Record<
+    string,
+    {
+      request_display: string;
+      http_status: number;
+      outcome: string;
+      body_preview?: string;
+      pages_fetched?: number;
+      api_message?: string;
+    }
+  >;
 }
 
 /**
@@ -661,10 +680,53 @@ export class DefaultMarketDataProvider implements MarketDataProvider {
             if (!this.diagnostics.stooq_probe) this.diagnostics.stooq_probe = {};
             this.diagnostics.stooq_probe[symbol] = result.debug;
           }
-          symbolData = result.data;
-          this.diagnostics.resolvedIds[symbol] = result.resolvedId;
-          if (symbolData.length === 0) {
-            this.diagnostics.errors[symbol] = formatStooqFailureHint(result.debug);
+
+          const stooqUsable = result.debug.outcome === 'csv_ok' && result.data.length > 0;
+          if (stooqUsable) {
+            symbolData = result.data;
+            this.diagnostics.resolvedIds[symbol] = result.resolvedId;
+            this.diagnostics.feed_routing ??= {};
+            this.diagnostics.feed_routing[symbol] = 'Stooq (csv_ok)';
+          } else if (isMarketstackEtfFallbackSymbol(symbol)) {
+            const msKey = process.env.MARKETSTACK_ACCESS_KEY?.trim();
+            if (msKey) {
+              const ms = await fetchMarketstackEod(symbol, startDate, endDate, msKey);
+              this.diagnostics.marketstack_probe ??= {};
+              this.diagnostics.marketstack_probe[symbol] = {
+                request_display: ms.debug.request_display,
+                http_status: ms.debug.http_status,
+                outcome: ms.debug.outcome,
+                body_preview: ms.debug.body_preview,
+                pages_fetched: ms.debug.pages_fetched,
+                api_message: ms.debug.api_message,
+              };
+              if (ms.data.length > 0) {
+                symbolData = ms.data;
+                this.diagnostics.resolvedIds[symbol] = `marketstack:${symbol}`;
+                this.diagnostics.feed_routing ??= {};
+                this.diagnostics.feed_routing[symbol] =
+                  `Stooq (${result.debug.outcome}) → Marketstack (${ms.debug.outcome}, rows=${ms.data.length})`;
+              } else {
+                this.diagnostics.resolvedIds[symbol] = result.resolvedId;
+                this.diagnostics.errors[symbol] =
+                  `${formatStooqFailureHint(result.debug)} | Marketstack: ${formatMarketstackFailureHint(ms.debug)}`;
+                this.diagnostics.feed_routing ??= {};
+                this.diagnostics.feed_routing[symbol] =
+                  `Stooq (${result.debug.outcome}) → Marketstack failed (${ms.debug.outcome})`;
+              }
+            } else {
+              this.diagnostics.resolvedIds[symbol] = result.resolvedId;
+              this.diagnostics.errors[symbol] =
+                `${formatStooqFailureHint(result.debug)} (Marketstack fallback skipped: no MARKETSTACK_ACCESS_KEY)`;
+              this.diagnostics.feed_routing ??= {};
+              this.diagnostics.feed_routing[symbol] = `Stooq (${result.debug.outcome}); Marketstack not configured`;
+            }
+          } else {
+            symbolData = result.data;
+            this.diagnostics.resolvedIds[symbol] = result.resolvedId;
+            if (symbolData.length === 0) {
+              this.diagnostics.errors[symbol] = formatStooqFailureHint(result.debug);
+            }
           }
         }
       }

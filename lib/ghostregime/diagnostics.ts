@@ -55,6 +55,8 @@ function getProviderName(symbol: string, providerDiagnostics?: ProviderDiagnosti
     providerDiagnostics?.resolvedIds?.[symbol]?.startsWith('coingecko')
   ) {
     return 'CoinGecko';
+  } else if (providerDiagnostics?.resolvedIds?.[symbol]?.startsWith('marketstack:')) {
+    return 'Marketstack';
   } else {
     return 'Stooq';
   }
