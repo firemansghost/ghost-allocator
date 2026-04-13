@@ -38,6 +38,7 @@ export function buildServeMetadata(input: {
   persisted_snapshot_preserved: boolean;
   stale_reason?: string;
   providerDiagnostics?: ProviderDiagnostics;
+  persist_rejected_reason?: string;
 }): GhostRegimeServeMetadata {
   const runStr = formatISO(input.runDateUtc, { representation: 'date' });
   const snap = input.row.date;
@@ -48,6 +49,7 @@ export function buildServeMetadata(input: {
     refresh_attempt: input.force ? 'force' : 'read',
     refresh_outcome: input.refresh_outcome,
     persisted_snapshot_preserved: input.persisted_snapshot_preserved,
+    persist_rejected_reason: input.persist_rejected_reason,
     stale_reason: input.stale_reason,
     refresh_error_summary: extractRefreshErrorSummary(input.providerDiagnostics),
   };
@@ -63,6 +65,7 @@ export function attachServeMetadata(
     persisted_snapshot_preserved: boolean;
     stale_reason?: string;
     providerDiagnostics?: ProviderDiagnostics;
+    persist_rejected_reason?: string;
   }
 ): GhostRegimeRow {
   return {
@@ -75,6 +78,7 @@ export function attachServeMetadata(
       persisted_snapshot_preserved: args.persisted_snapshot_preserved,
       stale_reason: args.stale_reason,
       providerDiagnostics: args.providerDiagnostics,
+      persist_rejected_reason: args.persist_rejected_reason,
     }),
   };
 }

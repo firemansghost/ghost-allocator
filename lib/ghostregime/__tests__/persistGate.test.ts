@@ -4,7 +4,7 @@
 
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import { isValidPersistableSnapshot } from '../persistGate';
+import { getPersistSnapshotRejection, isValidPersistableSnapshot } from '../persistGate';
 import type { GhostRegimeRow } from '../types';
 
 function baseRow(): GhostRegimeRow {
@@ -51,5 +51,12 @@ describe('isValidPersistableSnapshot', () => {
     const r = baseRow();
     delete (r as Partial<GhostRegimeRow>).row_computed_at_utc;
     assert.strictEqual(isValidPersistableSnapshot(r), false);
+    assert.strictEqual(getPersistSnapshotRejection(r), 'missing_row_computed_at_utc');
+  });
+
+  it('rejects non-finite scores', () => {
+    const r = baseRow();
+    r.risk_score = NaN;
+    assert.strictEqual(getPersistSnapshotRejection(r)?.startsWith('invalid_risk_score'), true);
   });
 });

@@ -63,7 +63,7 @@ curl -H "x-ghostregime-cron: YOUR_SECRET" \
 ```
 - Recomputes fresh from market data
 - Persists if `stale=false`
-- `data_source: "computed_forced"`
+- `data_source: "computed_forced"` (persisted) vs `"computed_forced_unpersisted"` (compute succeeded but blob write was skipped — see `serve_metadata.persist_rejected_reason`)
 - Returns `401` if secret missing/invalid
 
 **Debug mode** (no persistence):

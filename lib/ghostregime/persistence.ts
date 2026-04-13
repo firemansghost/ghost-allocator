@@ -39,7 +39,7 @@ export class BlobStorageAdapter implements StorageAdapter {
     try {
       const blobKey = getBlobKey(BLOB_KEYS.HISTORY);
       const blob = await head(blobKey, { token: this.token });
-      const response = await fetch(blob.url);
+      const response = await fetch(blob.url, { cache: 'no-store' });
       if (!response.ok) return [];
 
       const text = await response.text();
@@ -55,7 +55,7 @@ export class BlobStorageAdapter implements StorageAdapter {
     try {
       const blobKey = getBlobKey(BLOB_KEYS.LATEST);
       const blob = await head(blobKey, { token: this.token });
-      const response = await fetch(blob.url);
+      const response = await fetch(blob.url, { cache: 'no-store' });
       if (!response.ok) return null;
 
       const json = await response.json();
@@ -70,7 +70,7 @@ export class BlobStorageAdapter implements StorageAdapter {
     try {
       const blobKey = getBlobKey(BLOB_KEYS.META);
       const blob = await head(blobKey, { token: this.token });
-      const response = await fetch(blob.url);
+      const response = await fetch(blob.url, { cache: 'no-store' });
       if (!response.ok) return null;
 
       const json = await response.json();

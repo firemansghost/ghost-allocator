@@ -50,7 +50,7 @@ import {
 } from './diagnostics';
 import type { ProviderDiagnostics } from './marketData';
 import { attachServeMetadata } from './serveMetadata';
-import { isValidPersistableSnapshot } from './persistGate';
+import { getPersistSnapshotRejection } from './persistGate';
 
 /** Structured fields attached to stale rows and NOT_READY errors for observability */
 function buildStaleObservationPayload(
@@ -714,12 +714,14 @@ export async function getGhostRegimeToday(includeDebug: boolean = false, force: 
 
     let refreshOutcome: GhostRegimeServeMetadata['refresh_outcome'] = 'computed_not_persisted_debug';
     let persistedSnapshotPreserved = true;
+    let persistRejectedReason: string | undefined;
 
     // Only persist if not stale AND not debug mode (debug responses should not pollute history)
     if (!row.stale && !includeDebug) {
       const { data_source, force_enabled, debug_enabled, build_commit, engine_version, ...persistableRow } = row;
 
-      if (isValidPersistableSnapshot(persistableRow)) {
+      const persistReject = getPersistSnapshotRejection(persistableRow);
+      if (persistReject === null) {
         await storage.writeLatest(persistableRow);
         await storage.appendToHistory(persistableRow);
         await storage.writeMeta({
@@ -729,11 +731,16 @@ export async function getGhostRegimeToday(includeDebug: boolean = false, force: 
         refreshOutcome = 'computed_and_persisted';
         persistedSnapshotPreserved = false;
       } else {
-        console.error('[GhostRegime] Persist skipped: invalid snapshot shape (blob latest unchanged)', {
+        persistRejectedReason = persistReject;
+        console.error('[GhostRegime] Persist skipped: persist gate rejected row (blob latest unchanged)', {
           date: persistableRow.date,
+          reason: persistReject,
         });
         refreshOutcome = 'computed_not_persisted_debug';
         persistedSnapshotPreserved = true;
+        if (force) {
+          row.data_source = 'computed_forced_unpersisted';
+        }
       }
     } else if (includeDebug) {
       refreshOutcome = 'computed_not_persisted_debug';
@@ -749,6 +756,7 @@ export async function getGhostRegimeToday(includeDebug: boolean = false, force: 
       refresh_outcome: refreshOutcome,
       persisted_snapshot_preserved: persistedSnapshotPreserved,
       providerDiagnostics,
+      persist_rejected_reason: persistRejectedReason,
     });
   } catch (error) {
     console.error('Error computing GhostRegime:', error);
