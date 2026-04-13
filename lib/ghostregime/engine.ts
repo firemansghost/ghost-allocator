@@ -5,7 +5,13 @@
 
 import { formatISO, parseISO, isBefore, differenceInDays } from 'date-fns';
 import type { GhostRegimeRow, MarketDataPoint, SatelliteData, RegimeType, SignalReceipt } from './types';
-import { CUTOVER_DATE_UTC, MARKET_SYMBOLS, MODEL_VERSION, TIEBREAK_RULE } from './config';
+import {
+  CUTOVER_DATE_UTC,
+  MARKET_SYMBOLS,
+  MODEL_VERSION,
+  TIEBREAK_RULE,
+  GHOSTREGIME_MARKET_FETCH_CALENDAR_DAYS,
+} from './config';
 import { loadReplayHistory } from './replayLoader';
 import { defaultMarketDataProvider } from './marketData';
 import { computeOptionBVotes, classifyRegime, mapToRiskRegime, applyStressOverride } from './regimeCore';
@@ -30,8 +36,42 @@ import {
   TR_63,
 } from './dataWindows';
 import type { RiskAxis, InflAxis } from './types';
-import { checkCoreSymbolStatus } from './diagnostics';
+import {
+  checkCoreSymbolStatus,
+  GHOSTREGIME_HISTORY_REQUIREMENTS,
+  formatStaleHistoryHumanSummary,
+} from './diagnostics';
 import type { ProviderDiagnostics } from './marketData';
+
+/** Structured fields attached to stale rows and NOT_READY errors for observability */
+function buildStaleObservationPayload(
+  diagnostics: ReturnType<typeof checkCoreSymbolStatus>,
+  providerDiagnostics: ProviderDiagnostics,
+  asofDate: Date | null,
+  fetchStart: Date,
+  fetchEnd: Date,
+  staleReason: string
+): Record<string, unknown> {
+  const base: Record<string, unknown> = {
+    history_requirements: { ...GHOSTREGIME_HISTORY_REQUIREMENTS },
+    provider_diagnostics: providerDiagnostics,
+    market_asof_date: asofDate ? formatISO(asofDate, { representation: 'date' }) : null,
+    fetch_window: {
+      start: formatISO(fetchStart, { representation: 'date' }),
+      end: formatISO(fetchEnd, { representation: 'date' }),
+    },
+  };
+  if (staleReason === 'INSUFFICIENT_HISTORY' || staleReason === 'MISSING_CORE_SERIES') {
+    base.stale_detail = formatStaleHistoryHumanSummary(staleReason, diagnostics);
+  } else if (staleReason === 'MARKET_DATA_UNAVAILABLE') {
+    base.stale_detail =
+      'No market rows returned for the configured fetch window (see core_symbol_status and provider_diagnostics).';
+  } else if (staleReason === 'MISSING_TIEBREAK_INPUT') {
+    base.stale_detail =
+      'Inflation tie-break requires PDBC (or DBC proxy) data at as-of; see core_symbol_status and provider_diagnostics.';
+  }
+  return base;
+}
 
 /**
  * Compute GhostRegime for a specific date (asof_date)
@@ -377,7 +417,7 @@ export async function getGhostRegimeToday(includeDebug: boolean = false, force: 
     // 400 trading days ≈ 1.6 years, so fetch 600 calendar days to ensure coverage
     const endDate = new Date();
     const startDate = new Date(endDate);
-    startDate.setDate(startDate.getDate() - 600); // ~600 calendar days = ~400+ trading days
+    startDate.setDate(startDate.getDate() - GHOSTREGIME_MARKET_FETCH_CALENDAR_DAYS);
 
     const allSymbols = Object.values(MARKET_SYMBOLS);
     const marketData = await defaultMarketDataProvider.getHistoricalPrices(
@@ -401,23 +441,33 @@ export async function getGhostRegimeToday(includeDebug: boolean = false, force: 
           stale_reason: 'MARKET_DATA_UNAVAILABLE',
           missing_core_symbols: diagnostics.missingSymbols.length > 0 ? diagnostics.missingSymbols : coreSymbols,
           core_symbol_status: diagnostics.status,
+          ...buildStaleObservationPayload(
+            diagnostics,
+            providerDiagnostics,
+            null,
+            startDate,
+            endDate,
+            'MARKET_DATA_UNAVAILABLE'
+          ),
         };
       }
       // No latest available - throw error with diagnostics attached
       const diagnostics = checkCoreSymbolStatus(marketData, null, providerDiagnostics);
       const notReadyError = new Error('GHOSTREGIME_NOT_READY') as Error & {
-        diagnostics?: {
-          asof_date_attempted: string | null;
-          missing_core_symbols: string[];
-          core_symbol_status: Record<string, any>;
-          provider_diagnostics?: ProviderDiagnostics;
-        };
+        diagnostics?: Record<string, unknown>;
       };
       notReadyError.diagnostics = {
         asof_date_attempted: null,
         missing_core_symbols: diagnostics.missingSymbols.length > 0 ? diagnostics.missingSymbols : coreSymbols,
         core_symbol_status: diagnostics.status,
-        provider_diagnostics: providerDiagnostics,
+        ...buildStaleObservationPayload(
+          diagnostics,
+          providerDiagnostics,
+          null,
+          startDate,
+          endDate,
+          'MARKET_DATA_UNAVAILABLE'
+        ),
       };
       throw notReadyError;
     }
@@ -447,23 +497,33 @@ export async function getGhostRegimeToday(includeDebug: boolean = false, force: 
           data_source: 'persisted', // Serve-time field: served from persisted storage (but stale)
           engine_version: MODEL_VERSION, // Current deploy version
           build_commit: process.env.VERCEL_GIT_COMMIT_SHA || process.env.NEXT_PUBLIC_BUILD_COMMIT || 'unknown', // Current deploy commit
+          ...buildStaleObservationPayload(
+            diagnostics,
+            providerDiagnostics,
+            asofDate,
+            startDate,
+            endDate,
+            staleReason
+          ),
           // Preserve row metadata from latest
         };
       }
       // No latest available - throw error with diagnostics attached
       const notReadyError = new Error('GHOSTREGIME_NOT_READY') as Error & {
-        diagnostics?: {
-          asof_date_attempted: string | null;
-          missing_core_symbols: string[];
-          core_symbol_status: Record<string, any>;
-          provider_diagnostics?: ProviderDiagnostics;
-        };
+        diagnostics?: Record<string, unknown>;
       };
       notReadyError.diagnostics = {
         asof_date_attempted: asofDate ? formatISO(asofDate, { representation: 'date' }) : null,
         missing_core_symbols: diagnostics.missingSymbols,
         core_symbol_status: diagnostics.status,
-        provider_diagnostics: providerDiagnostics,
+        ...buildStaleObservationPayload(
+          diagnostics,
+          providerDiagnostics,
+          asofDate,
+          startDate,
+          endDate,
+          !asofDate ? 'MISSING_CORE_SERIES' : 'INSUFFICIENT_HISTORY'
+        ),
       };
       throw notReadyError;
     }
@@ -543,19 +603,27 @@ export async function getGhostRegimeToday(includeDebug: boolean = false, force: 
       if (error instanceof Error && error.message === 'MISSING_TIEBREAK_INPUT') {
         // Return stale row with diagnostics
         if (latest) {
-        return {
-          ...latest,
-          run_date_utc: formatISO(runDateUtc, { representation: 'date' }),
-          stale: true,
-          stale_reason: 'MISSING_TIEBREAK_INPUT',
-          missing_core_symbols: ['PDBC'], // PDBC needed for tie-break
-          core_symbol_status: diagnostics.status,
-          core_proxy_used: diagnostics.proxies,
-          data_source: 'persisted', // Serve-time field: served from persisted storage (but stale)
-          engine_version: MODEL_VERSION, // Current deploy version
-          build_commit: process.env.VERCEL_GIT_COMMIT_SHA || process.env.NEXT_PUBLIC_BUILD_COMMIT || 'unknown', // Current deploy commit
-          // Preserve row metadata from latest
-        };
+          return {
+            ...latest,
+            run_date_utc: formatISO(runDateUtc, { representation: 'date' }),
+            stale: true,
+            stale_reason: 'MISSING_TIEBREAK_INPUT',
+            missing_core_symbols: ['PDBC'], // PDBC needed for tie-break
+            core_symbol_status: diagnostics.status,
+            core_proxy_used: diagnostics.proxies,
+            data_source: 'persisted', // Serve-time field: served from persisted storage (but stale)
+            engine_version: MODEL_VERSION, // Current deploy version
+            build_commit: process.env.VERCEL_GIT_COMMIT_SHA || process.env.NEXT_PUBLIC_BUILD_COMMIT || 'unknown', // Current deploy commit
+            ...buildStaleObservationPayload(
+              diagnostics,
+              providerDiagnostics,
+              asofDate,
+              startDate,
+              endDate,
+              'MISSING_TIEBREAK_INPUT'
+            ),
+            // Preserve row metadata from latest
+          };
         }
         throw new Error('GHOSTREGIME_NOT_READY');
       }
@@ -612,25 +680,49 @@ export async function getGhostRegimeToday(includeDebug: boolean = false, force: 
     
     // Return stale data if available with diagnostics
     if (latest) {
-      // Try to get diagnostics if we have market data
-      let diagnostics: { missingSymbols: string[]; status: Record<string, any>; proxies: Record<string, string> } | null = null;
+      let diagnostics: ReturnType<typeof checkCoreSymbolStatus> | null = null;
+      let obsPayload: Record<string, unknown> = {};
       try {
         const endDate = new Date();
         const startDate = new Date(endDate);
-        startDate.setDate(startDate.getDate() - 600); // Match main fetch window
+        startDate.setDate(startDate.getDate() - GHOSTREGIME_MARKET_FETCH_CALENDAR_DAYS);
         const allSymbols = Object.values(MARKET_SYMBOLS);
         const marketData = await defaultMarketDataProvider.getHistoricalPrices(
           allSymbols,
           startDate,
           endDate
         );
+        const providerDiagnostics = defaultMarketDataProvider.getDiagnostics();
         if (marketData.length > 0) {
           const asofDate = computeAsofDate(marketData, coreSymbols);
-          const providerDiagnostics = defaultMarketDataProvider.getDiagnostics();
           diagnostics = checkCoreSymbolStatus(marketData, asofDate, providerDiagnostics);
+          const payloadReason =
+            !asofDate
+              ? 'MISSING_CORE_SERIES'
+              : diagnostics && !diagnostics.allOk
+                ? 'INSUFFICIENT_HISTORY'
+                : 'DIAGNOSTICS_SNAPSHOT';
+          obsPayload = buildStaleObservationPayload(
+            diagnostics,
+            providerDiagnostics,
+            asofDate,
+            startDate,
+            endDate,
+            payloadReason
+          );
+        } else {
+          diagnostics = checkCoreSymbolStatus(marketData, null, providerDiagnostics);
+          obsPayload = buildStaleObservationPayload(
+            diagnostics,
+            providerDiagnostics,
+            null,
+            startDate,
+            endDate,
+            'MARKET_DATA_UNAVAILABLE'
+          );
         }
       } catch {
-        // Diagnostics failed, use basic error info
+        // Diagnostics failed — return top-level stale fields only
       }
 
       return {
@@ -641,6 +733,7 @@ export async function getGhostRegimeToday(includeDebug: boolean = false, force: 
         missing_core_symbols: diagnostics?.missingSymbols || [],
         core_symbol_status: diagnostics?.status || {},
         core_proxy_used: diagnostics?.proxies || latest.core_proxy_used,
+        ...obsPayload,
       };
     }
     

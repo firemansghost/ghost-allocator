@@ -52,6 +52,47 @@ jobs:
           import json
           import sys
           import os
+
+          def print_failure_diagnostics(data, label):
+              """Stdout + step summary: full JSON and structured stale/history fields."""
+              print(f"--- {label}: full response JSON ---")
+              print(json.dumps(data, indent=2, default=str))
+              stale_detail = data.get("stale_detail")
+              if stale_detail:
+                  print("--- stale_detail ---")
+                  print(stale_detail)
+              hr = data.get("history_requirements")
+              if hr:
+                  print("--- history_requirements ---")
+                  print(json.dumps(hr, indent=2))
+              m = data.get("market_asof_date")
+              fw = data.get("fetch_window")
+              if m is not None or fw:
+                  print("--- timing ---")
+                  print(f"market_asof_date: {m}")
+                  print(f"fetch_window: {fw}")
+              pd = data.get("provider_diagnostics")
+              if pd:
+                  print("--- provider_diagnostics ---")
+                  print(json.dumps(pd, indent=2, default=str))
+              miss = data.get("missing_core_symbols")
+              if miss:
+                  print("--- missing_core_symbols ---")
+                  print(", ".join(miss))
+              css = data.get("core_symbol_status")
+              if css:
+                  print("--- core_symbol_status (failed rows) ---")
+                  for sym, st in sorted(css.items()):
+                      if isinstance(st, dict) and not st.get("ok", True):
+                          print(f"  {sym}: {json.dumps(st, default=str)}")
+              summary_lines_extra = []
+              if stale_detail:
+                  summary_lines_extra.append(f"**Detail**: {stale_detail}")
+              if hr:
+                  summary_lines_extra.append(f"**History requirements**: `{json.dumps(hr)}`")
+              if fw:
+                  summary_lines_extra.append(f"**Fetch window**: `{json.dumps(fw)}`")
+              return summary_lines_extra
           
           with open('/tmp/refresh_response.json', 'r') as f:
               data = json.load(f)
@@ -65,6 +106,7 @@ jobs:
               print(error_msg)
               summary_lines.append(f"### ❌ Failed: {data['error']}")
               summary_lines.append(f"**Message**: {data.get('message','')}")
+              summary_lines.extend(print_failure_diagnostics(data, "error response"))
               
               # Include diagnostics if present
               if "missing_core_symbols" in data:
@@ -84,6 +126,7 @@ jobs:
               print(error_msg)
               summary_lines.append(f"### ❌ Stale Data")
               summary_lines.append(f"**Reason**: {stale_reason}")
+              summary_lines.extend(print_failure_diagnostics(data, "stale response"))
               
               if "missing_core_symbols" in data:
                   summary_lines.append(f"**Missing symbols**: {', '.join(data['missing_core_symbols'])}")
@@ -235,11 +278,20 @@ jobs:
                       }
                   })
           elif refresh_data.get("stale"):
+              stale_reason = refresh_data.get("stale_reason", "N/A")
+              detail = (refresh_data.get("stale_detail") or "")[:2800]
+              miss = refresh_data.get("missing_core_symbols") or []
+              miss_txt = ", ".join(miss) if miss else ""
+              text = f"*Stale Data*\n*Reason*: {stale_reason}"
+              if detail:
+                  text += f"\n*Detail*: {detail}"
+              if miss_txt:
+                  text += f"\n*Missing / failing symbols*: {miss_txt}"
               message["blocks"].append({
                   "type": "section",
                   "text": {
                       "type": "mrkdwn",
-                      "text": f"*Stale Data*\n*Reason*: {refresh_data.get('stale_reason', 'N/A')}"
+                      "text": text
                   }
               })
           

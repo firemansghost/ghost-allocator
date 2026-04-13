@@ -19,6 +19,12 @@ export const TR_63 = 63;
 export const TR_126 = 126;
 export const TR_252 = 252;
 
+/** Minimum observations at as-of (inclusive) for VAMS (TR_252 + vol_63 pipeline) */
+export const VAMS_MIN_OBSERVATIONS_AT_ASOF = 400;
+
+/** Calendar days fetched upstream for regime + VAMS history (~400+ trading days) */
+export const GHOSTREGIME_MARKET_FETCH_CALENDAR_DAYS = 600;
+
 // VAMS thresholds
 export const VAMS_THRESHOLD_HIGH = 0.5;
 export const VAMS_THRESHOLD_LOW = -0.5;

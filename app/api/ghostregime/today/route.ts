@@ -73,19 +73,8 @@ export async function GET(request: Request) {
     
     // Handle NOT_READY error with diagnostics
     if (error instanceof Error && error.message === 'GHOSTREGIME_NOT_READY') {
-      const errorWithDiagnostics = error as Error & {
-        diagnostics?: {
-          asof_date_attempted: string | null;
-          missing_core_symbols: string[];
-          core_symbol_status: Record<string, any>;
-          provider_diagnostics?: {
-            resolvedIds: Record<string, string>;
-            errors: Record<string, string>;
-            proxies: Record<string, string>;
-          };
-        };
-      };
-      
+      const errorWithDiagnostics = error as Error & { diagnostics?: Record<string, unknown> };
+
       return NextResponse.json(
         {
           error: 'GHOSTREGIME_NOT_READY',

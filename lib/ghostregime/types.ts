@@ -43,12 +43,28 @@ export interface AllocationOutput {
 export type RiskAxis = 'RiskOn' | 'RiskOff';
 export type InflAxis = 'Inflation' | 'Disinflation';
 
+/** Per-requirement history sufficiency (observations at or before as-of date) */
+export interface HistoryCheckDetail {
+  required: number;
+  met: boolean;
+  /** Observations available at/before as-of used for this check */
+  have_at_asof: number;
+}
+
 export interface CoreSymbolStatus {
   provider: string;
   last_date: string | null;
+  /** Total rows returned in the fetch window (all dates) */
   obs: number;
   ok: boolean;
   note?: string;
+  /** Observations at or before as-of (same basis as VAMS / TR window checks) */
+  obs_at_asof?: number;
+  checks?: {
+    tr_21?: HistoryCheckDetail;
+    tr_63?: HistoryCheckDetail;
+    vams?: HistoryCheckDetail;
+  };
 }
 
 export interface GhostRegimeRow {
@@ -90,6 +106,25 @@ export interface GhostRegimeRow {
   missing_core_symbols?: string[];
   core_symbol_status?: Record<string, CoreSymbolStatus>;
   core_proxy_used?: Record<string, string>; // Map of original symbol -> proxy symbol (e.g., "PDBC" -> "DBC")
+  /** Present when stale — static thresholds vs fetch window (see `GHOSTREGIME_HISTORY_REQUIREMENTS`) */
+  history_requirements?: {
+    fetch_window_calendar_days: number;
+    tr_21: number;
+    tr_63: number;
+    vams_min_observations_at_asof: number;
+  };
+  /** Resolved upstream IDs, per-symbol errors, proxies (when stale / NOT_READY) */
+  provider_diagnostics?: {
+    resolvedIds: Record<string, string>;
+    errors: Record<string, string>;
+    proxies: Record<string, string>;
+  };
+  /** Common market as-of used for sufficiency checks (YYYY-MM-DD), if computable */
+  market_asof_date?: string | null;
+  /** Calendar window used for the market fetch that produced diagnostics */
+  fetch_window?: { start: string; end: string };
+  /** Human-readable stale line (INSUFFICIENT_HISTORY / MISSING_CORE_SERIES / empty data) */
+  stale_detail?: string;
   debug_votes?: DebugVotes; // Vote breakdown (only included when debug=1)
   debug_enabled?: boolean; // True when debug mode was used
   engine_version?: string; // Model version (e.g., ghostregime-v1.0.2) - served-time (current deploy)
