@@ -17,6 +17,7 @@ jobs:
   refresh:
     runs-on: ubuntu-latest
     steps:
+      # Intentionally on actions/checkout@v5 (Node 24 runtime per upstream; avoids legacy Node 20 warnings from older majors).
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
@@ -74,20 +75,30 @@ jobs:
               ("refresh_error_summary", "refresh_error_summary"),
           ]
 
+          def has_meaningful_value(val):
+              """Skip None, '', and whitespace-only strings; keep False, 0, and other non-string scalars."""
+              if val is None:
+                  return False
+              if isinstance(val, bool):
+                  return True
+              if isinstance(val, (int, float)):
+                  return True
+              if isinstance(val, str):
+                  return len(val.strip()) > 0
+              return True
+
           def format_serve_metadata_lines(sm):
-              """Readable operator lines; omit keys that are absent."""
+              """Lines for GitHub summary; omit absent keys and blank/whitespace values."""
               if sm is None:
-                  return ["- _serve_metadata_: _(not present — non-success path or older deploy)_"]
+                  return ["- _serve_metadata_: _(not present — API omitted or older deploy)_"]
               lines = []
               for json_key, label in SERVE_META_KEYS:
                   if json_key not in sm:
                       continue
                   val = sm.get(json_key)
-                  if val is None and json_key == "persist_rejected_reason":
+                  if not has_meaningful_value(val):
                       continue
                   lines.append(f"- **{label}**: `{val}`")
-              if not lines:
-                  return ["- _serve_metadata_: _(empty object)_"]
               return lines
 
           def print_failure_diagnostics(data, label):
@@ -209,9 +220,11 @@ jobs:
           summary_lines.append(f"- **Row date**: `{data.get('date')}`")
           summary_lines.append(f"- **Regime**: `{data.get('regime')}`")
           summary_lines.append(f"- **data_source**: `{data.get('data_source')}`")
-          summary_lines.append("")
-          summary_lines.append("#### Serve metadata")
-          summary_lines.extend(format_serve_metadata_lines(sm_ok))
+          sm_lines = format_serve_metadata_lines(sm_ok)
+          if sm_lines:
+              summary_lines.append("")
+              summary_lines.append("#### Serve metadata")
+              summary_lines.extend(sm_lines)
           summary_lines.append("")
           summary_lines.append(f"- **risk_score**: `{data.get('risk_score', 'N/A')}`")
           summary_lines.append(f"- **infl_score**: `{data.get('infl_score', 'N/A')}`")
