@@ -3,14 +3,20 @@
  */
 
 export type YieldSleeveCategory =
+  | 'cash_tbills'
   | 'credit_income'
-  | 'bdc_income'
-  | 'cef_credit'
-  | 'midstream_income'
   | 'preferred_income'
+  | 'cef_credit'
+  | 'opportunistic_credit'
+  | 'special_situations_income'
+  | 'bdc_income'
+  | 'midstream_income'
+  | 'natural_resources_income'
   | 'option_income'
-  | 'crypto_yield_coming_soon'
-  | 'cash_tbills';
+  | 'crypto_yield_coming_soon';
+
+/** Category card id: includes combined cards not tied to a single row `sleeveType`. */
+export type GhostYieldCategoryCardId = YieldSleeveCategory | 'special_opportunistic_income';
 
 export type Confidence = 'high' | 'medium' | 'low' | 'illustrative';
 
@@ -27,7 +33,7 @@ export interface YieldEnvironmentInputs {
 }
 
 export interface GhostYieldCategoryMeta {
-  id: YieldSleeveCategory;
+  id: GhostYieldCategoryCardId;
   /** Public card title */
   label: string;
   /** Short skeptical framing for the category */
@@ -40,7 +46,10 @@ export interface GhostYieldCategoryMeta {
 export interface GhostYieldCandidateRaw {
   ticker: string;
   name: string;
+  /** Income sleeve — where the cash flow comes from. Not the legal wrapper; see `structureLabel`. */
   sleeveType: YieldSleeveCategory;
+  /** Fund vehicle (ETF, CEF, listed stock, etc.). */
+  structureLabel?: string;
   yieldSource: string;
   currentYield: number;
   secYield?: number;

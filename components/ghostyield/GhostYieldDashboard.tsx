@@ -28,9 +28,12 @@ export function GhostYieldDashboard() {
       <header className="space-y-3">
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-50">GhostYield</h1>
         <p className="text-sm text-zinc-300 max-w-3xl leading-relaxed">
-          Yield sleeve research dashboard — not a model portfolio, not a recommendation engine. GhostYield helps
-          compare how income-producing funds generate cash, what risks they layer on top of a core portfolio,
-          whether NAV is cooperating, and whether distributions look durable or stretched.
+          Yield sleeve research dashboard — not a model portfolio, not a recommendation engine.{' '}
+          <span className="text-zinc-200">
+            Phase 1 uses entirely static sample data (illustrative yields and traits) — no live market feeds.
+          </span>{' '}
+          GhostYield compares how income-producing funds generate cash, what risks they layer on top of a core
+          portfolio, whether NAV is cooperating, and whether distributions look durable or stretched.
         </p>
       </header>
 
@@ -73,7 +76,8 @@ export function GhostYieldDashboard() {
       <GlassCard className="p-4 sm:p-5">
         <h2 className="text-sm font-semibold text-zinc-200 mb-2">Methodology (Phase 1)</h2>
         <p className="text-sm text-zinc-400 leading-relaxed space-y-2">
-          Scores are deterministic rules on static sample rows — see <code className="text-amber-400/90">lib/ghostyield/scoring.ts</code>.
+          All figures on this page are Phase 1 placeholders. Scores are deterministic rules on static sample rows — see{' '}
+          <code className="text-amber-400/90">lib/ghostyield/scoring.ts</code>.
           Risk rises with high headline yield, leverage, NAV decay, rich premiums (where relevant), weak or
           uncertain distribution labels, low data confidence, and complex yield mechanics. Fit rewards clearer
           economics, steadier NAV, moderate yields, and transparent structure — still a toy model until vetted

@@ -5,7 +5,7 @@ import type { GhostYieldCategoryMeta } from '@/lib/ghostyield/types';
 
 export function SleeveCategoryCards({ categories }: { categories: GhostYieldCategoryMeta[] }) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
       {categories.map((c) => (
         <GlassCard
           key={c.id}

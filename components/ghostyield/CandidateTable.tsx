@@ -1,17 +1,7 @@
 'use client';
 
-import type { GhostYieldCandidate, YieldSleeveCategory } from '@/lib/ghostyield/types';
-
-const CATEGORY_LABEL: Record<YieldSleeveCategory, string> = {
-  credit_income: 'Credit Income',
-  bdc_income: 'BDC Income',
-  cef_credit: 'CEF Credit',
-  midstream_income: 'Midstream',
-  preferred_income: 'Preferred',
-  option_income: 'Option Income',
-  crypto_yield_coming_soon: 'Crypto (soon)',
-  cash_tbills: 'Cash / T-Bills',
-};
+import type { GhostYieldCandidate } from '@/lib/ghostyield/types';
+import { incomeSleeveLabel } from '@/lib/ghostyield/incomeSleeveLabels';
 
 function pct(y: number) {
   return `${(y * 100).toFixed(1)}%`;
@@ -32,7 +22,7 @@ export function CandidateTable({
         <thead>
           <tr className="border-b border-zinc-800/90 text-zinc-500">
             <th className="sticky left-0 z-[1] bg-zinc-950/95 px-3 py-2 font-medium">Ticker</th>
-            <th className="px-3 py-2 font-medium whitespace-nowrap">Category</th>
+            <th className="px-3 py-2 font-medium whitespace-nowrap min-w-[11rem]">Income sleeve</th>
             <th className="px-3 py-2 font-medium whitespace-nowrap">Yield</th>
             <th className="px-3 py-2 font-medium whitespace-nowrap">Risk</th>
             <th className="px-3 py-2 font-medium whitespace-nowrap">Fit</th>
@@ -54,12 +44,10 @@ export function CandidateTable({
                 <td className="sticky left-0 z-[1] bg-inherit px-3 py-2 font-mono font-medium text-zinc-200">
                   {row.ticker}
                 </td>
-                <td className="px-3 py-2 text-zinc-400 whitespace-nowrap">
-                  {CATEGORY_LABEL[row.sleeveType]}
+                <td className="px-3 py-2 text-zinc-400 whitespace-normal sm:whitespace-nowrap">
+                  {incomeSleeveLabel(row.sleeveType)}
                 </td>
-                <td className="px-3 py-2 text-zinc-300 tabular-nums whitespace-nowrap">
-                  {pct(row.currentYield)}
-                </td>
+                <td className="px-3 py-2 text-zinc-300 tabular-nums whitespace-nowrap">{pct(row.currentYield)}</td>
                 <td className="px-3 py-2 text-zinc-300 tabular-nums whitespace-nowrap">{row.riskScore}</td>
                 <td className="px-3 py-2 text-zinc-300 tabular-nums whitespace-nowrap">{row.fitScore}</td>
                 <td className="px-3 py-2 text-zinc-400 capitalize whitespace-nowrap">{row.distributionQuality}</td>

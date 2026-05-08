@@ -67,6 +67,11 @@ function categoryBaseRisk(cat: YieldSleeveCategory): number {
       return 24;
     case 'option_income':
       return 28;
+    case 'opportunistic_credit':
+    case 'special_situations_income':
+      return 31;
+    case 'natural_resources_income':
+      return 26;
     case 'crypto_yield_coming_soon':
       return 0;
     default:
@@ -102,10 +107,22 @@ function navTrendRiskPoints(nav1y?: number, nav3y?: number): number {
   return Math.min(28, p);
 }
 
-/** Premium to NAV on CEFs — rich pricing adds squeeze risk */
+/** Categories whose distributions are often quoted vs NAV (CEFs, many levered closed-end structures, BDC stock premiums). */
+function usesNavPremiumSchedule(sleeve?: YieldSleeveCategory): boolean {
+  return (
+    sleeve === 'cef_credit' ||
+    sleeve === 'bdc_income' ||
+    sleeve === 'midstream_income' ||
+    sleeve === 'opportunistic_credit' ||
+    sleeve === 'special_situations_income' ||
+    sleeve === 'natural_resources_income'
+  );
+}
+
+/** Premium to NAV — rich pricing adds squeeze risk where NAV quotes matter. */
 function premiumRiskPoints(premium?: number, sleeve?: YieldSleeveCategory): number {
   if (premium == null) return 0;
-  if (sleeve !== 'cef_credit' && sleeve !== 'bdc_income') {
+  if (!usesNavPremiumSchedule(sleeve)) {
     if (premium <= 0.02) return 0;
   }
   if (premium >= 0.18) return 16;
@@ -181,7 +198,7 @@ export function computeGhostYieldFitScore(row: GhostYieldCandidateRaw): number {
   else if (lev >= 1.15) fit -= 5;
 
   if (row.premiumDiscount != null) {
-    if (row.sleeveType === 'cef_credit') {
+    if (usesNavPremiumSchedule(row.sleeveType)) {
       if (row.premiumDiscount < -0.05) fit += 8;
       if (row.premiumDiscount > 0.12) fit -= 10;
     }

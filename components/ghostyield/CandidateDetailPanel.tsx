@@ -1,6 +1,7 @@
 'use client';
 
 import type { GhostYieldCandidate } from '@/lib/ghostyield/types';
+import { incomeSleeveLabel } from '@/lib/ghostyield/incomeSleeveLabels';
 import { GlassCard } from '@/components/GlassCard';
 
 function fmtPct(n: number | undefined) {
@@ -39,6 +40,10 @@ export function CandidateDetailPanel({ candidate }: { candidate: GhostYieldCandi
       </div>
 
       <div className="grid gap-2 text-xs sm:text-sm sm:grid-cols-2">
+        <DetailRow label="Income sleeve" value={incomeSleeveLabel(candidate.sleeveType)} wide />
+        {candidate.structureLabel ? (
+          <DetailRow label="Structure / wrapper" value={candidate.structureLabel} wide />
+        ) : null}
         <DetailRow label="Yield source" value={candidate.yieldSource} wide />
         <DetailRow label="Role" value={candidate.role} wide />
         <DetailRow label="Current yield (illustr.)" value={fmtPct(candidate.currentYield)} />
