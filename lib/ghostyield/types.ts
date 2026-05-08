@@ -37,7 +37,7 @@ export interface CandidateFreshnessResult {
   applyScoringPenalty: boolean;
 }
 
-/** Static inputs for Phase 1 environment gauge (no live macro feed). */
+/** Static inputs for Phase 2 environment gauge (no live macro feed). */
 export interface YieldEnvironmentInputs {
   /** 0 = easy financial conditions for credit; 100 = stressed */
   creditStress: number;
@@ -53,7 +53,7 @@ export interface GhostYieldCategoryMeta {
   label: string;
   /** Short skeptical framing for the category */
   blurb: string;
-  /** True = placeholder only (no sample tickers in Phase 1) */
+  /** True = placeholder only (no sample tickers in Phase 2 yet) */
   comingSoon?: boolean;
 }
 
@@ -69,7 +69,7 @@ export interface GhostYieldCandidateRaw {
   /** Headline / indicative yield (decimal). */
   currentYield: number;
   secYield?: number;
-  /** @deprecated Prefer navPerformance1Y when present; kept for Phase 1 samples. */
+  /** @deprecated Prefer navPerformance1Y when present; legacy static rows may still set navTrend1Y. */
   navTrend1Y?: number;
   /** @deprecated Prefer navPerformance3Y when present. */
   navTrend3Y?: number;

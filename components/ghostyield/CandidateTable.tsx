@@ -1,6 +1,6 @@
 'use client';
 
-import type { GhostYieldCandidate } from '@/lib/ghostyield/types';
+import type { DistributionQuality, GhostYieldCandidate } from '@/lib/ghostyield/types';
 import { incomeSleeveLabel } from '@/lib/ghostyield/incomeSleeveLabels';
 import { effectiveNavPerformance1Y } from '@/lib/ghostyield/candidateFields';
 
@@ -9,8 +9,19 @@ function pct(y: number | undefined) {
   return `${(y * 100).toFixed(1)}%`;
 }
 
-function distAbbr(q: string) {
-  return q.slice(0, 4);
+const DISTRIBUTION_QUALITY_LABEL: Record<DistributionQuality, string> = {
+  strong: 'Strong',
+  mixed: 'Mixed',
+  weak: 'Weak',
+  uncertain: 'Uncertain',
+};
+
+function DistributionBadge({ q }: { q: DistributionQuality }) {
+  return (
+    <span className="inline-block rounded border border-zinc-700/80 bg-zinc-900/60 px-1.5 py-0.5 text-[10px] font-medium text-zinc-300 sm:text-xs whitespace-nowrap">
+      {DISTRIBUTION_QUALITY_LABEL[q]}
+    </span>
+  );
 }
 
 function FreshnessBadge({ status }: { status: GhostYieldCandidate['freshness']['status'] }) {
@@ -56,7 +67,7 @@ export function CandidateTable({
             <th className="px-3 py-2 font-medium whitespace-nowrap">Yield</th>
             <th className="px-3 py-2 font-medium whitespace-nowrap">NAV 1Y</th>
             <th className="px-3 py-2 font-medium whitespace-nowrap">Prem/disc</th>
-            <th className="px-3 py-2 font-medium whitespace-nowrap">Dist</th>
+            <th className="px-3 py-2 font-medium whitespace-nowrap min-w-[5.5rem]">Dist</th>
             <th className="px-3 py-2 font-medium whitespace-nowrap">Data</th>
             <th className="px-3 py-2 font-medium whitespace-nowrap">Risk</th>
             <th className="px-3 py-2 font-medium whitespace-nowrap">Fit</th>
@@ -85,7 +96,9 @@ export function CandidateTable({
                 <td className="px-3 py-2 text-zinc-300 tabular-nums whitespace-nowrap">
                   {pct(row.premiumDiscount)}
                 </td>
-                <td className="px-3 py-2 text-zinc-400 capitalize whitespace-nowrap">{distAbbr(row.distributionQuality)}</td>
+                <td className="px-3 py-2 whitespace-nowrap">
+                  <DistributionBadge q={row.distributionQuality} />
+                </td>
                 <td className="px-3 py-2 whitespace-nowrap">
                   <FreshnessBadge status={row.freshness.status} />
                 </td>
