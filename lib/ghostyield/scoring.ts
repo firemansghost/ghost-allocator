@@ -1,5 +1,5 @@
 /**
- * GhostYield deterministic scoring (Phase 1).
+ * GhostYield deterministic scoring (Phase 2).
  *
  * Risk score 0–100: higher = riskier sleeve characteristics.
  * Fit score 0–100: higher = better fit as a satellite yield sleeve around a core portfolio.
@@ -8,6 +8,7 @@
  */
 
 import type {
+  CandidateFreshnessResult,
   Confidence,
   DistributionQuality,
   GhostYieldCandidate,
@@ -15,6 +16,13 @@ import type {
   YieldEnvironmentInputs,
   YieldSleeveCategory,
 } from './types';
+import { evaluateCandidateFreshness } from './dataFreshness';
+import {
+  effectiveDataConfidence,
+  effectiveNavPerformance1Y,
+  effectiveNavPerformance3Y,
+  expectsNavQuote,
+} from './candidateFields';
 
 function clampInt(n: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, Math.round(n)));
@@ -107,8 +115,71 @@ function navTrendRiskPoints(nav1y?: number, nav3y?: number): number {
   return Math.min(28, p);
 }
 
+/** High carry + NAV shrink */
+function highYieldNegativeNavPoints(row: GhostYieldCandidateRaw): number {
+  const nav1y = effectiveNavPerformance1Y(row);
+  if (nav1y == null || nav1y >= 0) return 0;
+  const y = Math.max(row.currentYield, row.distributionRate ?? 0);
+  if (y >= 0.11) return 12;
+  if (y >= 0.085) return 8;
+  if (y >= 0.07) return 4;
+  return 0;
+}
+
+/** Estimated ROC share + NAV decay */
+function rocNavStressPoints(row: GhostYieldCandidateRaw): number {
+  const roc = row.estimatedReturnOfCapitalPct;
+  const nav1y = effectiveNavPerformance1Y(row);
+  if (roc == null || nav1y == null || nav1y >= 0) return 0;
+  if (roc >= 0.35) return 14;
+  if (roc >= 0.2) return 8;
+  return 0;
+}
+
+/** Distribution materially above SEC yield when both known. */
+function distributionVersusSecPoints(row: GhostYieldCandidateRaw): number {
+  const d = row.distributionRate;
+  const s = row.secYield;
+  if (d == null || s == null) return 0;
+  if (d - s >= 0.04) return 12;
+  if (d - s >= 0.025) return 8;
+  return 0;
+}
+
+/** Payout looks high vs NAV trend (unsustainable heuristic). */
+function payoutVersusNavTrendPoints(row: GhostYieldCandidateRaw): number {
+  const d = row.distributionRate ?? row.currentYield;
+  const nav1y = effectiveNavPerformance1Y(row);
+  if (nav1y == null) return 0;
+  const gap = d - nav1y;
+  if (gap >= 0.12) return 14;
+  if (gap >= 0.08) return 10;
+  if (gap >= 0.06) return 6;
+  return 0;
+}
+
+function missingNavPoints(row: GhostYieldCandidateRaw): number {
+  return expectsNavQuote(row) && row.nav == null ? 14 : 0;
+}
+
+function freshnessDataPenalty(f: CandidateFreshnessResult): number {
+  if (!f.applyScoringPenalty) return 0;
+  switch (f.status) {
+    case 'illustrative':
+      return 6;
+    case 'missing':
+      return 14;
+    case 'stale':
+      return 12;
+    case 'caution':
+      return 7;
+    default:
+      return 4;
+  }
+}
+
 /** Categories whose distributions are often quoted vs NAV (CEFs, many levered closed-end structures, BDC stock premiums). */
-function usesNavPremiumSchedule(sleeve?: YieldSleeveCategory): boolean {
+export function usesNavPremiumSchedule(sleeve?: YieldSleeveCategory): boolean {
   return (
     sleeve === 'cef_credit' ||
     sleeve === 'bdc_income' ||
@@ -142,24 +213,37 @@ function yieldSourceComplexityPoints(yieldSource: string): number {
   return Math.min(22, p);
 }
 
-export function computeGhostYieldRiskScore(row: GhostYieldCandidateRaw): number {
+export function computeGhostYieldRiskScore(
+  row: GhostYieldCandidateRaw,
+  freshness: CandidateFreshnessResult
+): number {
+  const dc = effectiveDataConfidence(row);
+  const nav1y = effectiveNavPerformance1Y(row);
+  const nav3y = effectiveNavPerformance3Y(row);
+
   let score =
     categoryBaseRisk(row.sleeveType) +
     yieldRiskPoints(row.currentYield) +
     leverageRiskPoints(row.leverage) +
-    navTrendRiskPoints(row.navTrend1Y, row.navTrend3Y) +
+    navTrendRiskPoints(nav1y, nav3y) +
     premiumRiskPoints(row.premiumDiscount, row.sleeveType) +
     distributionQualityWeight(row.distributionQuality) +
-    confidencePenalty(row.confidence) +
-    yieldSourceComplexityPoints(row.yieldSource);
+    confidencePenalty(dc) +
+    yieldSourceComplexityPoints(row.yieldSource) +
+    highYieldNegativeNavPoints(row) +
+    rocNavStressPoints(row) +
+    distributionVersusSecPoints(row) +
+    payoutVersusNavTrendPoints(row) +
+    missingNavPoints(row) +
+    freshnessDataPenalty(freshness);
 
   return clampInt(score, 0, 100);
 }
 
-export function computeGhostYieldFitScore(row: GhostYieldCandidateRaw): number {
+export function computeGhostYieldFitScore(row: GhostYieldCandidateRaw, freshness: CandidateFreshnessResult): number {
+  const dc = effectiveDataConfidence(row);
   let fit = 72;
 
-  // Moderate yield bands score better than extremes
   const y = row.currentYield;
   if (y >= 0.06 && y <= 0.095) fit += 14;
   else if (y >= 0.045 && y < 0.06) fit += 8;
@@ -184,13 +268,15 @@ export function computeGhostYieldFitScore(row: GhostYieldCandidateRaw): number {
       break;
   }
 
-  if (row.navTrend1Y != null) {
-    if (row.navTrend1Y >= 0.02) fit += 8;
-    else if (row.navTrend1Y >= 0) fit += 3;
-    else if (row.navTrend1Y < -0.06) fit -= 14;
-    else if (row.navTrend1Y < 0) fit -= 6;
+  const nav1y = effectiveNavPerformance1Y(row);
+  const nav3y = effectiveNavPerformance3Y(row);
+  if (nav1y != null) {
+    if (nav1y >= 0.02) fit += 8;
+    else if (nav1y >= 0) fit += 3;
+    else if (nav1y < -0.06) fit -= 14;
+    else if (nav1y < 0) fit -= 6;
   }
-  if (row.navTrend3Y != null && row.navTrend3Y < -0.1) fit -= 8;
+  if (nav3y != null && nav3y < -0.1) fit -= 8;
 
   const lev = row.leverage ?? 1;
   if (lev <= 1.02) fit += 6;
@@ -209,7 +295,7 @@ export function computeGhostYieldFitScore(row: GhostYieldCandidateRaw): number {
     if (row.expenseRatio >= 0.025) fit -= 8;
   }
 
-  switch (row.confidence) {
+  switch (dc) {
     case 'high':
       fit += 6;
       break;
@@ -246,6 +332,20 @@ export function computeGhostYieldFitScore(row: GhostYieldCandidateRaw): number {
       break;
   }
 
+  if (freshness.status === 'fresh' && dc === 'high') fit += 4;
+  else if (freshness.status === 'fresh' && dc === 'medium') fit += 2;
+  else if (freshness.status === 'stale' || freshness.status === 'missing') fit -= 10;
+  else if (freshness.status === 'caution' || freshness.status === 'illustrative') fit -= 4;
+
+  const dRate = row.distributionRate;
+  const sec = row.secYield;
+  if (dRate != null && sec != null) {
+    const g = Math.abs(dRate - sec);
+    if (g <= 0.012) fit += 6;
+    else if (g <= 0.02) fit += 2;
+    else if (g >= 0.04) fit -= 6;
+  }
+
   return clampInt(fit, 0, 100);
 }
 
@@ -261,10 +361,17 @@ export function computeYieldEnvironmentScore(env: YieldEnvironmentInputs): numbe
   return clampInt(raw, 0, 100);
 }
 
-export function scoreCandidates(raw: GhostYieldCandidateRaw[]): GhostYieldCandidate[] {
-  return raw.map((r) => ({
-    ...r,
-    riskScore: computeGhostYieldRiskScore(r),
-    fitScore: computeGhostYieldFitScore(r),
-  }));
+export function scoreCandidates(
+  raw: GhostYieldCandidateRaw[],
+  referenceAsOf: string
+): GhostYieldCandidate[] {
+  return raw.map((r) => {
+    const freshness = evaluateCandidateFreshness(r, referenceAsOf);
+    return {
+      ...r,
+      freshness,
+      riskScore: computeGhostYieldRiskScore(r, freshness),
+      fitScore: computeGhostYieldFitScore(r, freshness),
+    };
+  });
 }

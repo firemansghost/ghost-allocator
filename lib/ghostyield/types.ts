@@ -1,5 +1,5 @@
 /**
- * GhostYield — yield sleeve research types (Phase 1 static sample only).
+ * GhostYield — yield sleeve research types (Phase 2: static sample + NAV/distribution/freshness fields).
  */
 
 export type YieldSleeveCategory =
@@ -22,6 +22,21 @@ export type Confidence = 'high' | 'medium' | 'low' | 'illustrative';
 
 export type DistributionQuality = 'strong' | 'mixed' | 'weak' | 'uncertain';
 
+/** Expected cadence for manual/static refresh UX. */
+export type UpdateFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'manual';
+
+export type DistributionFrequency = 'weekly' | 'monthly' | 'quarterly' | 'semiannual' | 'variable';
+
+/** Roll-up for badges and scoring penalties. */
+export type GhostYieldFreshnessStatus = 'fresh' | 'caution' | 'stale' | 'missing' | 'illustrative';
+
+export interface CandidateFreshnessResult {
+  status: GhostYieldFreshnessStatus;
+  warnings: string[];
+  /** When true, scoring applies a conservative data-quality penalty. */
+  applyScoringPenalty: boolean;
+}
+
 /** Static inputs for Phase 1 environment gauge (no live macro feed). */
 export interface YieldEnvironmentInputs {
   /** 0 = easy financial conditions for credit; 100 = stressed */
@@ -42,7 +57,7 @@ export interface GhostYieldCategoryMeta {
   comingSoon?: boolean;
 }
 
-/** Raw row before scoring (scores added by scoring.ts). */
+/** Raw row before scoring (scores and freshness added by scoring.ts). */
 export interface GhostYieldCandidateRaw {
   ticker: string;
   name: string;
@@ -51,9 +66,12 @@ export interface GhostYieldCandidateRaw {
   /** Fund vehicle (ETF, CEF, listed stock, etc.). */
   structureLabel?: string;
   yieldSource: string;
+  /** Headline / indicative yield (decimal). */
   currentYield: number;
   secYield?: number;
+  /** @deprecated Prefer navPerformance1Y when present; kept for Phase 1 samples. */
   navTrend1Y?: number;
+  /** @deprecated Prefer navPerformance3Y when present. */
   navTrend3Y?: number;
   premiumDiscount?: number;
   leverage?: number;
@@ -63,12 +81,43 @@ export interface GhostYieldCandidateRaw {
   mainRisks: string[];
   bestUseCase: string;
   avoidIf: string;
+  /** Legacy row-level as-of; use lineage dates when present. */
   dataAsOf: string;
   sourceLabel: string;
   confidence: Confidence;
+  /** Optional override for lineage-aware confidence; falls back to `confidence`. */
+  dataConfidence?: Confidence;
+
+  marketPrice?: number;
+  nav?: number;
+  navPerformance1M?: number;
+  navPerformance3M?: number;
+  /** Total return approximations (decimal); override navTrend1Y when set. */
+  navPerformance1Y?: number;
+  navPerformance3Y?: number;
+  marketPerformance1M?: number;
+  marketPerformance3M?: number;
+  marketPerformance1Y?: number;
+  marketPerformance3Y?: number;
+
+  latestDistributionAmount?: number;
+  latestDistributionDate?: string;
+  distributionFrequency?: DistributionFrequency;
+  /** Annualized distribution rate estimate (decimal), comparable to secYield. */
+  distributionRate?: number;
+  estimatedReturnOfCapitalPct?: number;
+  /** Optional illustrative: distribution yield minus NAV total return gap. */
+  navYieldSpread?: number;
+
+  navDataAsOf?: string;
+  distributionDataAsOf?: string;
+  quarterlyFundamentalDataAsOf?: string;
+  sourceUrl?: string;
+  updateFrequency?: UpdateFrequency;
 }
 
 export interface GhostYieldCandidate extends GhostYieldCandidateRaw {
   riskScore: number;
   fitScore: number;
+  freshness: CandidateFreshnessResult;
 }

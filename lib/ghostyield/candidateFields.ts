@@ -1,0 +1,43 @@
+/**
+ * Resolved candidate fields for scoring and freshness (Phase 2 static data).
+ */
+
+import type { Confidence, GhostYieldCandidateRaw } from './types';
+
+export function effectiveDataConfidence(row: GhostYieldCandidateRaw): Confidence {
+  return row.dataConfidence ?? row.confidence;
+}
+
+export function effectiveNavPerformance1Y(row: GhostYieldCandidateRaw): number | undefined {
+  return row.navPerformance1Y ?? row.navTrend1Y;
+}
+
+export function effectiveNavPerformance3Y(row: GhostYieldCandidateRaw): number | undefined {
+  return row.navPerformance3Y ?? row.navTrend3Y;
+}
+
+const ETF_MARK = /\betf\b/i;
+const CEF_MARK = /\bcef\b/i;
+
+export function structureLabelNorm(row: GhostYieldCandidateRaw): string {
+  return row.structureLabel?.trim() ?? '';
+}
+
+/** True when wrapper looks like ETF (for NAV expectations). */
+export function isEtfStructure(row: GhostYieldCandidateRaw): boolean {
+  return ETF_MARK.test(structureLabelNorm(row));
+}
+
+/** True when wrapper looks like closed-end fund. */
+export function isCefStructure(row: GhostYieldCandidateRaw): boolean {
+  return CEF_MARK.test(structureLabelNorm(row));
+}
+
+/** NAV is expected for these static structures (ETF + CEF). */
+export function expectsNavQuote(row: GhostYieldCandidateRaw): boolean {
+  return isEtfStructure(row) || isCefStructure(row);
+}
+
+export function canInferPremiumDiscount(row: GhostYieldCandidateRaw): boolean {
+  return row.marketPrice != null && row.nav != null && row.nav !== 0;
+}
