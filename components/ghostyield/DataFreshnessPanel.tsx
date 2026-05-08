@@ -82,9 +82,10 @@ export function DataFreshnessPanel({
       ) : null}
 
       <p className="text-xs text-zinc-500 leading-relaxed border-t border-zinc-800/80 pt-3">
-        Phase 2 still uses static/manual sample data. Live feeds, source validation, and automated NAV updates
-        are not active yet. These dates and figures are placeholders for UI and scoring logic only—not tax or
-        trade advice.
+        Phase 3 sample rows are loaded from manual JSON (
+        <code className="text-amber-400/80 text-[11px]">data/ghostyield/candidates.manual.json</code>
+        ). Live feeds, source validation, and automated NAV updates are not active yet. These dates and figures are
+        placeholders for UI and scoring logic only—not tax or trade advice.
       </p>
     </GlassCard>
   );

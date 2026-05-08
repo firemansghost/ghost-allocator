@@ -31,8 +31,8 @@ export function GhostYieldDashboard() {
         <p className="text-sm text-zinc-300 max-w-3xl leading-relaxed">
           Yield sleeve research dashboard — not a model portfolio, not a recommendation engine.{' '}
           <span className="text-zinc-200">
-            Phase 2 still uses static/manual sample data. Live feeds, source validation, and automated NAV updates
-            are not active yet.
+            Phase 3 uses a manually maintained JSON file for static sample rows. Live feeds, source validation,
+            and automated NAV updates are not active yet.
           </span>{' '}
           GhostYield compares how income-producing funds generate cash, what risks they layer on top of a core
           portfolio, whether NAV is cooperating, and whether distributions look durable or stretched.
@@ -57,7 +57,7 @@ export function GhostYieldDashboard() {
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
-          Candidate screener (static sample)
+          Candidate screener (Phase 3 manual JSON sample)
         </h2>
         <CandidateTable
           candidates={GHOSTYIELD_SCORED_CANDIDATES}
@@ -80,9 +80,10 @@ export function GhostYieldDashboard() {
       </div>
 
       <GlassCard className="p-4 sm:p-5">
-        <h2 className="text-sm font-semibold text-zinc-200 mb-2">Methodology (Phase 2)</h2>
+        <h2 className="text-sm font-semibold text-zinc-200 mb-2">Methodology (Phase 3)</h2>
         <p className="text-sm text-zinc-400 leading-relaxed">
-          Scores and badges are deterministic rules on static rows — see{' '}
+          Scores and badges are deterministic rules on static rows loaded from{' '}
+          <code className="text-amber-400/90">data/ghostyield/candidates.manual.json</code> — see{' '}
           <code className="text-amber-400/90">lib/ghostyield/scoring.ts</code> and{' '}
           <code className="text-amber-400/90">lib/ghostyield/dataFreshness.ts</code>. Risk rises with high headline
           yield, leverage, NAV decay, rich premiums, weak distribution labels, stale or missing figures, and gaps
