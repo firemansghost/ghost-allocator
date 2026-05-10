@@ -1,5 +1,5 @@
 /**
- * GhostYield Phase 3 — static illustrative candidates loaded from manual JSON (no live feeds).
+ * GhostYield Phase 4 — manual research snapshot loaded from JSON (no live feeds).
  */
 
 import type {

@@ -4,7 +4,7 @@ import type { DistributionQuality, GhostYieldCandidate } from '@/lib/ghostyield/
 import { incomeSleeveLabel } from '@/lib/ghostyield/incomeSleeveLabels';
 import { effectiveNavPerformance1Y } from '@/lib/ghostyield/candidateFields';
 
-function pct(y: number | undefined) {
+function pct(y: number | null | undefined) {
   if (y == null) return '—';
   return `${(y * 100).toFixed(1)}%`;
 }

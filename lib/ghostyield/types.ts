@@ -66,8 +66,8 @@ export interface GhostYieldCandidateRaw {
   /** Fund vehicle (ETF, CEF, listed stock, etc.). */
   structureLabel?: string;
   yieldSource: string;
-  /** Headline / indicative yield (decimal). */
-  currentYield: number;
+  /** Headline / indicative yield (decimal). Null when not verifiable from the cited source. */
+  currentYield: number | null;
   secYield?: number;
   /** @deprecated Prefer navPerformance1Y when present; legacy static rows may still set navTrend1Y. */
   navTrend1Y?: number;

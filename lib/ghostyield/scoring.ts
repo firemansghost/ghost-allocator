@@ -88,7 +88,8 @@ function categoryBaseRisk(cat: YieldSleeveCategory): number {
 }
 
 /** Yield level contribution: very high headline yield adds risk points */
-function yieldRiskPoints(currentYield: number): number {
+function yieldRiskPoints(currentYield: number | null | undefined): number {
+  if (currentYield == null) return 0;
   if (currentYield >= 0.14) return 28;
   if (currentYield >= 0.11) return 20;
   if (currentYield >= 0.085) return 12;
@@ -119,7 +120,7 @@ function navTrendRiskPoints(nav1y?: number, nav3y?: number): number {
 function highYieldNegativeNavPoints(row: GhostYieldCandidateRaw): number {
   const nav1y = effectiveNavPerformance1Y(row);
   if (nav1y == null || nav1y >= 0) return 0;
-  const y = Math.max(row.currentYield, row.distributionRate ?? 0);
+  const y = Math.max(row.currentYield ?? 0, row.distributionRate ?? 0);
   if (y >= 0.11) return 12;
   if (y >= 0.085) return 8;
   if (y >= 0.07) return 4;
@@ -148,7 +149,7 @@ function distributionVersusSecPoints(row: GhostYieldCandidateRaw): number {
 
 /** Payout looks high vs NAV trend (unsustainable heuristic). */
 function payoutVersusNavTrendPoints(row: GhostYieldCandidateRaw): number {
-  const d = row.distributionRate ?? row.currentYield;
+  const d = row.distributionRate ?? row.currentYield ?? 0;
   const nav1y = effectiveNavPerformance1Y(row);
   if (nav1y == null) return 0;
   const gap = d - nav1y;
@@ -245,11 +246,13 @@ export function computeGhostYieldFitScore(row: GhostYieldCandidateRaw, freshness
   let fit = 72;
 
   const y = row.currentYield;
-  if (y >= 0.06 && y <= 0.095) fit += 14;
-  else if (y >= 0.045 && y < 0.06) fit += 8;
-  else if (y > 0.11 && y < 0.14) fit -= 6;
-  else if (y >= 0.14) fit -= 14;
-  else if (y < 0.03) fit += 4;
+  if (y != null) {
+    if (y >= 0.06 && y <= 0.095) fit += 14;
+    else if (y >= 0.045 && y < 0.06) fit += 8;
+    else if (y > 0.11 && y < 0.14) fit -= 6;
+    else if (y >= 0.14) fit -= 14;
+    else if (y < 0.03) fit += 4;
+  }
 
   switch (row.distributionQuality) {
     case 'strong':
@@ -278,10 +281,12 @@ export function computeGhostYieldFitScore(row: GhostYieldCandidateRaw, freshness
   }
   if (nav3y != null && nav3y < -0.1) fit -= 8;
 
-  const lev = row.leverage ?? 1;
-  if (lev <= 1.02) fit += 6;
-  else if (lev >= 1.35) fit -= 12;
-  else if (lev >= 1.15) fit -= 5;
+  if (row.leverage != null) {
+    const lev = row.leverage;
+    if (lev <= 1.02) fit += 6;
+    else if (lev >= 1.35) fit -= 12;
+    else if (lev >= 1.15) fit -= 5;
+  }
 
   if (row.premiumDiscount != null) {
     if (usesNavPremiumSchedule(row.sleeveType)) {

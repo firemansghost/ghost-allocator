@@ -31,8 +31,9 @@ export function GhostYieldDashboard() {
         <p className="text-sm text-zinc-300 max-w-3xl leading-relaxed">
           Yield sleeve research dashboard — not a model portfolio, not a recommendation engine.{' '}
           <span className="text-zinc-200">
-            Phase 3 uses a manually maintained JSON file for static sample rows. Live feeds, source validation,
-            and automated NAV updates are not active yet.
+            Phase 4.1 keeps a manually maintained research snapshot: numeric fields are filled only when they can be
+            tied to the cited sponsor or linked filings; otherwise they are left null. Live feeds and automated source
+            validation are not active.
           </span>{' '}
           GhostYield compares how income-producing funds generate cash, what risks they layer on top of a core
           portfolio, whether NAV is cooperating, and whether distributions look durable or stretched.
@@ -57,7 +58,7 @@ export function GhostYieldDashboard() {
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
-          Candidate screener (Phase 3 manual JSON sample)
+          Candidate screener (Phase 4.1 manual JSON research snapshot)
         </h2>
         <CandidateTable
           candidates={GHOSTYIELD_SCORED_CANDIDATES}
@@ -80,15 +81,20 @@ export function GhostYieldDashboard() {
       </div>
 
       <GlassCard className="p-4 sm:p-5">
-        <h2 className="text-sm font-semibold text-zinc-200 mb-2">Methodology (Phase 3)</h2>
+        <h2 className="text-sm font-semibold text-zinc-200 mb-2">Methodology (Phase 4.1)</h2>
         <p className="text-sm text-zinc-400 leading-relaxed">
-          Scores and badges are deterministic rules on static rows loaded from{' '}
-          <code className="text-amber-400/90">data/ghostyield/candidates.manual.json</code> — see{' '}
-          <code className="text-amber-400/90">lib/ghostyield/scoring.ts</code> and{' '}
+          <span className="text-zinc-300">
+            Phase 4.1 is still a manual research snapshot, not a live data product. Unverifiable numbers stay null even
+            if a sponsor URL exists; live feeds and automated source validation are not active.
+          </span>{' '}
+          Rows in{' '}
+          <code className="text-amber-400/90">data/ghostyield/candidates.manual.json</code> carry sponsor links and
+          as-of fields for manual review — deterministic scoring still lives in{' '}
+          <code className="text-amber-400/90">lib/ghostyield/scoring.ts</code> and freshness rules in{' '}
           <code className="text-amber-400/90">lib/ghostyield/dataFreshness.ts</code>. Risk rises with high headline
           yield, leverage, NAV decay, rich premiums, weak distribution labels, stale or missing figures, and gaps
-          between payout and earnings-style yields. Fit rewards fresher data, steadier NAV, and cleaner payout
-          math on paper — still a toy model until vetted with live data.
+          between payout and earnings-style yields. Fit rewards fresher data, steadier NAV, and cleaner payout math on
+          paper — not a live model.
         </p>
       </GlassCard>
     </div>

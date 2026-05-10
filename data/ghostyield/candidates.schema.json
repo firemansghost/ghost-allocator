@@ -47,23 +47,48 @@
       },
       "structureLabel": { "type": "string" },
       "yieldSource": { "type": "string", "minLength": 1 },
-      "currentYield": { "type": "number", "minimum": 0, "maximum": 1 },
+      "currentYield": {
+        "anyOf": [
+          { "type": "null" },
+          { "type": "number", "minimum": 0, "maximum": 1 }
+        ]
+      },
       "secYield": {
         "anyOf": [
           { "type": "null" },
           { "type": "number", "minimum": 0, "maximum": 1 }
         ]
       },
-      "navTrend1Y": { "type": "number", "minimum": -1, "maximum": 1 },
-      "navTrend3Y": { "type": "number", "minimum": -1, "maximum": 1 },
+      "navTrend1Y": {
+        "anyOf": [
+          { "type": "null" },
+          { "type": "number", "minimum": -1, "maximum": 1 }
+        ]
+      },
+      "navTrend3Y": {
+        "anyOf": [
+          { "type": "null" },
+          { "type": "number", "minimum": -1, "maximum": 1 }
+        ]
+      },
       "premiumDiscount": {
         "anyOf": [
           { "type": "null" },
           { "type": "number", "minimum": -1, "maximum": 1 }
         ]
       },
-      "leverage": { "type": "number", "minimum": 0, "maximum": 1.5 },
-      "expenseRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+      "leverage": {
+        "anyOf": [
+          { "type": "null" },
+          { "type": "number", "minimum": 0, "maximum": 1.5 }
+        ]
+      },
+      "expenseRatio": {
+        "anyOf": [
+          { "type": "null" },
+          { "type": "number", "minimum": 0, "maximum": 1 }
+        ]
+      },
       "distributionQuality": {
         "type": "string",
         "enum": ["strong", "mixed", "weak", "uncertain"]
@@ -101,14 +126,54 @@
           { "type": "number", "minimum": 0 }
         ]
       },
-      "navPerformance1M": { "type": "number", "minimum": -1, "maximum": 1 },
-      "navPerformance3M": { "type": "number", "minimum": -1, "maximum": 1 },
-      "navPerformance1Y": { "type": "number", "minimum": -1, "maximum": 1 },
-      "navPerformance3Y": { "type": "number", "minimum": -1, "maximum": 1 },
-      "marketPerformance1M": { "type": "number", "minimum": -1, "maximum": 1 },
-      "marketPerformance3M": { "type": "number", "minimum": -1, "maximum": 1 },
-      "marketPerformance1Y": { "type": "number", "minimum": -1, "maximum": 1 },
-      "marketPerformance3Y": { "type": "number", "minimum": -1, "maximum": 1 },
+      "navPerformance1M": {
+        "anyOf": [
+          { "type": "null" },
+          { "type": "number", "minimum": -1, "maximum": 1 }
+        ]
+      },
+      "navPerformance3M": {
+        "anyOf": [
+          { "type": "null" },
+          { "type": "number", "minimum": -1, "maximum": 1 }
+        ]
+      },
+      "navPerformance1Y": {
+        "anyOf": [
+          { "type": "null" },
+          { "type": "number", "minimum": -1, "maximum": 1 }
+        ]
+      },
+      "navPerformance3Y": {
+        "anyOf": [
+          { "type": "null" },
+          { "type": "number", "minimum": -1, "maximum": 1 }
+        ]
+      },
+      "marketPerformance1M": {
+        "anyOf": [
+          { "type": "null" },
+          { "type": "number", "minimum": -1, "maximum": 1 }
+        ]
+      },
+      "marketPerformance3M": {
+        "anyOf": [
+          { "type": "null" },
+          { "type": "number", "minimum": -1, "maximum": 1 }
+        ]
+      },
+      "marketPerformance1Y": {
+        "anyOf": [
+          { "type": "null" },
+          { "type": "number", "minimum": -1, "maximum": 1 }
+        ]
+      },
+      "marketPerformance3Y": {
+        "anyOf": [
+          { "type": "null" },
+          { "type": "number", "minimum": -1, "maximum": 1 }
+        ]
+      },
       "latestDistributionAmount": {
         "anyOf": [
           { "type": "null" },
@@ -131,8 +196,18 @@
           { "type": "number", "minimum": 0, "maximum": 1 }
         ]
       },
-      "estimatedReturnOfCapitalPct": { "type": "number", "minimum": 0, "maximum": 1 },
-      "navYieldSpread": { "type": "number", "minimum": -1, "maximum": 1 },
+      "estimatedReturnOfCapitalPct": {
+        "anyOf": [
+          { "type": "null" },
+          { "type": "number", "minimum": 0, "maximum": 1 }
+        ]
+      },
+      "navYieldSpread": {
+        "anyOf": [
+          { "type": "null" },
+          { "type": "number", "minimum": -1, "maximum": 1 }
+        ]
+      },
       "navDataAsOf": {
         "anyOf": [
           { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },

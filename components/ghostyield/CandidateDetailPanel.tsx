@@ -6,12 +6,12 @@ import { incomeSleeveLabel } from '@/lib/ghostyield/incomeSleeveLabels';
 import { effectiveDataConfidence } from '@/lib/ghostyield/candidateFields';
 import { GlassCard } from '@/components/GlassCard';
 
-function fmtPct(n: number | undefined) {
+function fmtPct(n: number | null | undefined) {
   if (n == null) return '—';
   return `${(n * 100).toFixed(2)}%`;
 }
 
-function fmtNum(n: number | undefined, d = 2) {
+function fmtNum(n: number | null | undefined, d = 2) {
   if (n == null) return '—';
   return n.toFixed(d);
 }
