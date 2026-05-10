@@ -41,3 +41,29 @@ export function expectsNavQuote(row: GhostYieldCandidateRaw): boolean {
 export function canInferPremiumDiscount(row: GhostYieldCandidateRaw): boolean {
   return row.marketPrice != null && row.nav != null && row.nav !== 0;
 }
+
+/** Which yield field the screener column should display (UI only — does not mutate row data). */
+export type DisplayYieldKind = 'currentYield' | 'distributionRate' | 'secYield';
+
+export function effectiveDisplayYield(row: GhostYieldCandidateRaw): {
+  value: number | null;
+  kind: DisplayYieldKind | null;
+} {
+  if (row.currentYield != null) return { value: row.currentYield, kind: 'currentYield' };
+  if (row.distributionRate != null) return { value: row.distributionRate, kind: 'distributionRate' };
+  if (row.secYield != null) return { value: row.secYield, kind: 'secYield' };
+  return { value: null, kind: null };
+}
+
+export function displayYieldKindShortLabel(kind: DisplayYieldKind | null): string {
+  switch (kind) {
+    case 'currentYield':
+      return 'Current';
+    case 'distributionRate':
+      return 'Dist. rate';
+    case 'secYield':
+      return 'SEC';
+    default:
+      return '';
+  }
+}

@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 import type { GhostYieldCandidate } from '@/lib/ghostyield/types';
 import { incomeSleeveLabel } from '@/lib/ghostyield/incomeSleeveLabels';
-import { effectiveDataConfidence } from '@/lib/ghostyield/candidateFields';
+import { effectiveDataConfidence, effectiveDisplayYield } from '@/lib/ghostyield/candidateFields';
 import { GlassCard } from '@/components/GlassCard';
 
 function fmtPct(n: number | null | undefined) {
@@ -35,6 +35,7 @@ export function CandidateDetailPanel({ candidate }: { candidate: GhostYieldCandi
   const legacyOnly1y = candidate.navPerformance1Y == null && candidate.navTrend1Y != null;
   const legacyOnly3y = candidate.navPerformance3Y == null && candidate.navTrend3Y != null;
   const dc = effectiveDataConfidence(candidate);
+  const tableYield = effectiveDisplayYield(candidate);
 
   return (
     <GlassCard className="p-4 sm:p-5 space-y-4">
@@ -104,13 +105,38 @@ export function CandidateDetailPanel({ candidate }: { candidate: GhostYieldCandi
       </section>
 
       <section>
+        <h3 className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500 mb-2">Yield (screener column)</h3>
+        <p className="text-xs text-zinc-400 leading-relaxed mb-2">
+          {tableYield.kind === 'currentYield' ? (
+            <>
+              The table &ldquo;Yield&rdquo; column uses <span className="text-zinc-200">current yield</span> (
+              {fmtPct(tableYield.value)}).
+            </>
+          ) : tableYield.kind === 'distributionRate' ? (
+            <>
+              The table &ldquo;Yield&rdquo; column uses{' '}
+              <span className="text-zinc-200">distribution rate</span> as a fallback ({fmtPct(tableYield.value)}), since
+              current yield is not set for this row.
+            </>
+          ) : tableYield.kind === 'secYield' ? (
+            <>
+              The table &ldquo;Yield&rdquo; column uses <span className="text-zinc-200">SEC yield</span> as a fallback (
+              {fmtPct(tableYield.value)}), since current yield and distribution rate are not set.
+            </>
+          ) : (
+            <>The table &ldquo;Yield&rdquo; column has no value — all yield fields below are missing.</>
+          )}
+        </p>
+      </section>
+
+      <section>
         <h3 className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500 mb-2">Distributions (illustr.)</h3>
         <div className="grid gap-2 text-xs sm:text-sm sm:grid-cols-2">
           <DetailRow label="Latest distribution amount" value={fmtNum(candidate.latestDistributionAmount, 3)} />
           <DetailRow label="Latest distribution date" value={fmtDate(candidate.latestDistributionDate)} />
           <DetailRow label="Frequency" value={candidate.distributionFrequency ?? '—'} capitalize />
-          <DetailRow label="Distribution rate (annualized est.)" value={fmtPct(candidate.distributionRate)} />
-          <DetailRow label="Current yield (indicative)" value={fmtPct(candidate.currentYield)} />
+          <DetailRow label="Current yield" value={fmtPct(candidate.currentYield)} />
+          <DetailRow label="Distribution rate" value={fmtPct(candidate.distributionRate)} />
           <DetailRow label="SEC yield" value={fmtPct(candidate.secYield)} />
           <DetailRow label="Est. return of capital %" value={fmtPct(candidate.estimatedReturnOfCapitalPct)} />
           <DetailRow label="NAV / yield spread (illustr.)" value={fmtPct(candidate.navYieldSpread)} />

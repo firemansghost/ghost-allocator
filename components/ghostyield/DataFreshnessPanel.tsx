@@ -82,10 +82,11 @@ export function DataFreshnessPanel({
       ) : null}
 
       <p className="text-xs text-zinc-500 leading-relaxed border-t border-zinc-800/80 pt-3">
-        Phase 4.1 uses a manually maintained research snapshot in source{' '}
-        <code className="text-amber-400/80 text-[11px]">data/ghostyield/candidates.manual.json</code>; missing numeric
-        fields mean the value was not verified from the cited source at last review. Live feeds and automated source
-        validation are not active. Dates and figures support UI and scoring logic only—not tax or trade advice.
+        Phase 4.3 manual snapshot in{' '}
+        <code className="text-amber-400/80 text-[11px]">data/ghostyield/candidates.manual.json</code>. Some rows cite
+        CEF Connect as a secondary aggregation source (see per-row sourceLabel), not live sponsor feeds. Missing
+        numerics were not verified from the cited source. No automated source validation. For research / UI only—not tax
+        or trade advice.
       </p>
     </GlassCard>
   );

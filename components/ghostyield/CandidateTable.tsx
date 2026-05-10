@@ -2,7 +2,11 @@
 
 import type { DistributionQuality, GhostYieldCandidate } from '@/lib/ghostyield/types';
 import { incomeSleeveLabel } from '@/lib/ghostyield/incomeSleeveLabels';
-import { effectiveNavPerformance1Y } from '@/lib/ghostyield/candidateFields';
+import {
+  displayYieldKindShortLabel,
+  effectiveDisplayYield,
+  effectiveNavPerformance1Y,
+} from '@/lib/ghostyield/candidateFields';
 
 function pct(y: number | null | undefined) {
   if (y == null) return '—';
@@ -64,8 +68,12 @@ export function CandidateTable({
           <tr className="border-b border-zinc-800/90 text-zinc-500">
             <th className="sticky left-0 z-[1] bg-zinc-950/95 px-3 py-2 font-medium">Ticker</th>
             <th className="px-3 py-2 font-medium whitespace-nowrap min-w-[11rem]">Income sleeve</th>
-            <th className="px-3 py-2 font-medium whitespace-nowrap">Yield</th>
-            <th className="px-3 py-2 font-medium whitespace-nowrap">NAV 1Y</th>
+            <th
+              className="px-3 py-2 font-medium whitespace-nowrap"
+              title="Shows current yield when present; otherwise distribution rate, then SEC yield. The small suffix in each cell names which field is shown."
+            >
+              Yield
+            </th>
             <th className="px-3 py-2 font-medium whitespace-nowrap">Prem/disc</th>
             <th className="px-3 py-2 font-medium whitespace-nowrap min-w-[5.5rem]">Dist</th>
             <th className="px-3 py-2 font-medium whitespace-nowrap">Data</th>
@@ -77,6 +85,15 @@ export function CandidateTable({
           {candidates.map((row) => {
             const sel = row.ticker === selectedTicker;
             const nav1y = effectiveNavPerformance1Y(row);
+            const dy = effectiveDisplayYield(row);
+            const yieldTitle =
+              dy.kind === 'currentYield'
+                ? 'Current yield (indicative)'
+                : dy.kind === 'distributionRate'
+                  ? 'Distribution rate (annualized estimate). Current yield is not set for this row.'
+                  : dy.kind === 'secYield'
+                    ? 'SEC yield. Current yield and distribution rate are not set for this row.'
+                    : 'No yield figure on this row';
             return (
               <tr
                 key={row.ticker}
@@ -91,7 +108,15 @@ export function CandidateTable({
                 <td className="px-3 py-2 text-zinc-400 whitespace-normal sm:whitespace-nowrap">
                   {incomeSleeveLabel(row.sleeveType)}
                 </td>
-                <td className="px-3 py-2 text-zinc-300 tabular-nums whitespace-nowrap">{pct(row.currentYield)}</td>
+                <td
+                  className="px-3 py-2 text-zinc-300 tabular-nums whitespace-nowrap"
+                  title={yieldTitle}
+                >
+                  <span>{pct(dy.value)}</span>
+                  {dy.kind ? (
+                    <span className="text-[9px] text-zinc-500 ml-1">({displayYieldKindShortLabel(dy.kind)})</span>
+                  ) : null}
+                </td>
                 <td className="px-3 py-2 text-zinc-300 tabular-nums whitespace-nowrap">{pct(nav1y)}</td>
                 <td className="px-3 py-2 text-zinc-300 tabular-nums whitespace-nowrap">
                   {pct(row.premiumDiscount)}
