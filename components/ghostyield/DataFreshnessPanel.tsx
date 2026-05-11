@@ -27,9 +27,10 @@ export function DataFreshnessPanel({
   return (
     <GlassCard className="p-4 sm:p-5 space-y-3">
       <div>
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-amber-400/90">Source data QA</h2>
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-amber-400/90">Source & data quality</h2>
         <p className="text-[11px] text-zinc-500 mt-1 leading-snug">
-          As-of dates and status counts describe the manual snapshot, not how &ldquo;risky&rdquo; a fund is.
+          Data quality reflects how complete and fresh the sourced snapshot is. It is not an investment-risk rating.
+          Missing data does not automatically mean a bad fund; fresh data does not automatically mean a safe fund.
         </p>
       </div>
       <p className="text-[11px] text-zinc-500">
@@ -60,7 +61,7 @@ export function DataFreshnessPanel({
               <dd className="text-zinc-200 capitalize">{effectiveDataConfidence(selected)}</dd>
             </div>
             <div>
-              <dt className="text-zinc-500">Selected — data QA status</dt>
+              <dt className="text-zinc-500">Selected — snapshot quality status</dt>
               <dd className="text-zinc-200">{FRESHNESS_STATUS_LABEL[selected.freshness.status]}</dd>
             </div>
           </>
@@ -68,10 +69,10 @@ export function DataFreshnessPanel({
       </dl>
 
       <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
-        <CountPill label="Stale data" value={summary.staleCount} />
-        <CountPill label="Data gaps" value={summary.missingCount} />
-        <CountPill label="Low conf." value={summary.lowConfidenceCount} />
-        <CountPill label="Sample data" value={summary.illustrativeCount} />
+        <CountPill label="Stale rows" value={summary.staleCount} />
+        <CountPill label="Missing fields" value={summary.missingCount} />
+        <CountPill label="Low confidence" value={summary.lowConfidenceCount} />
+        <CountPill label="Sample rows" value={summary.illustrativeCount} />
       </div>
 
       {summary.topWarnings.length > 0 ? (
@@ -88,7 +89,7 @@ export function DataFreshnessPanel({
       ) : null}
 
       <p className="text-xs text-zinc-500 leading-relaxed border-t border-zinc-800/80 pt-3">
-        Phase 4.7 manual snapshot in{' '}
+        Phase 4.8 manual snapshot in{' '}
         <code className="text-amber-400/80 text-[11px]">data/ghostyield/candidates.manual.json</code>. Some rows cite
         CEF Connect as a secondary aggregation source (see per-row sourceLabel), not live sponsor feeds. Missing
         numerics were not verified from the cited source. No automated source validation. For sourcing rules and the CEF

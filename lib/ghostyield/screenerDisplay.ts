@@ -14,7 +14,7 @@ export const FRESHNESS_STATUS_LABEL: Record<GhostYieldFreshnessStatus, string> =
 
 /** Column header `title` / tooltip for the Data QA badges. */
 export const DATA_QA_COLUMN_TOOLTIP =
-  'Source snapshot status: how complete and current the cited manual JSON fields are. Not an investment-risk rating.';
+  'Source and data-quality status for this row in the manual snapshot (freshness and field completeness). These labels are not investment-risk ratings. Missing fields do not automatically mean a bad fund; fresh data does not automatically mean a safe fund.';
 
 /** Tooltip on individual freshness badges (redundant with column but helps mobile). */
 export function freshnessBadgeTitle(status: GhostYieldFreshnessStatus): string {
@@ -64,7 +64,7 @@ export function riskScoreBandShort(score: number): string {
 
 export function riskScoreTooltip(score: number): string {
   const w = riskScoreBandWord(score);
-  return `Risk Score ${score} — ${w}. Scale 0–100 (higher = riskier). Bands: 0–24 Low, 25–49 Moderate, 50–69 Elevated, 70–84 High, 85–100 Extreme.`;
+  return `Risk Score ${score} — ${w}. Scale 0–100 (higher = riskier). Bands: 0–24 Low, 25–49 Moderate, 50–69 Elevated, 70–84 High, 85–100 Extreme. Separate from Data QA (source snapshot quality on the row).`;
 }
 
 export type FitBandId = 'strong' | 'good' | 'watchlist' | 'weak';

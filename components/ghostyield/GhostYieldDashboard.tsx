@@ -42,7 +42,7 @@ export function GhostYieldDashboard() {
           headline yield. Not a model portfolio and not a recommendation engine.
         </p>
         <p className="text-xs text-zinc-500 max-w-2xl leading-relaxed">
-          Phase 4.7 uses a manually maintained JSON research snapshot. Live feeds and automated source validation are not
+          Phase 4.8 uses a manually maintained JSON research snapshot. Live feeds and automated source validation are not
           active yet.
         </p>
       </header>
@@ -65,14 +65,14 @@ export function GhostYieldDashboard() {
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
-          Candidate screener (Phase 4.7 manual JSON research snapshot)
+          Candidate screener (Phase 4.8 manual JSON research snapshot)
         </h2>
         <p className="text-xs text-zinc-400 leading-relaxed max-w-4xl border-l-2 border-zinc-700 pl-3">
-          <span className="text-zinc-300">Screener guide (Phase 4.6):</span> Yield uses the best available sourced
-          metric on each row: current yield, then distribution rate, then SEC yield. <span className="text-zinc-300">Payout</span>{' '}
-          reflects distribution quality from the snapshot. <span className="text-zinc-300">Data QA</span> reflects source-data
-          freshness and completeness —{' '}
-          <span className="text-zinc-200">not investment risk</span>.{' '}
+          <span className="text-zinc-300">Screener guide:</span> Yield uses the best available sourced metric on each row:
+          current yield, then distribution rate, then SEC yield. <span className="text-zinc-300">Payout</span> reflects
+          distribution quality from the snapshot. <span className="text-zinc-300">Data QA</span> reflects source-data
+          freshness and completeness — <span className="text-zinc-200">not investment risk</span> (gaps don&apos;t
+          automatically mean a bad fund; fresh doesn&apos;t automatically mean safe).{' '}
           <span className="text-zinc-300">Risk Score</span> is 0–100 where higher is riskier (sleeve and structure risk).
           <span className="text-zinc-300"> Fit Score</span> is 0–100 where higher is a cleaner fit as a yield sleeve. Hover
           column headers or scores for band definitions.
@@ -98,10 +98,17 @@ export function GhostYieldDashboard() {
       </div>
 
       <GlassCard className="p-4 sm:p-5">
-        <h2 className="text-sm font-semibold text-zinc-200 mb-2">Methodology & source data (Phase 4.7)</h2>
+        <h2 className="text-sm font-semibold text-zinc-200 mb-2">Methodology & source data (Phase 4.8)</h2>
         <div className="text-sm text-zinc-400 leading-relaxed space-y-3 max-w-4xl">
           <p className="text-zinc-300">
-            Manual JSON research snapshot only — not live pricing or feeds. Phase 4.7 keeps the same discipline: fields
+            <span className="text-zinc-200">Risk Score</span> is GhostYield&apos;s sleeve / investment risk estimate
+            (structure, leverage, distribution stress signals, etc.).{' '}
+            <span className="text-zinc-200">Data QA</span> (the Source & data quality column and badges) is only about how
+            complete and fresh the manual snapshot is for that row. Read them together — they answer different questions —
+            and do not treat one as a substitute for the other.
+          </p>
+          <p className="text-zinc-300">
+            Manual JSON research snapshot only — not live pricing or feeds. Phase 4.8 keeps the same discipline: fields
             are filled only when a number can be tied to a <span className="text-zinc-200">cited source</span> (sponsor
             page, factsheet PDF, CEF Connect summary, SEC filing, etc.); otherwise they stay{' '}
             <span className="text-zinc-200">null</span>. A Phase 4.4 refresh updated several ETF and option-income rows
@@ -115,7 +122,7 @@ export function GhostYieldDashboard() {
             chain. <span className="text-zinc-300">No automated source validation.</span>
           </p>
           <p>
-            Phase 4.6 clarifies screener columns so <span className="text-zinc-300">Data QA</span> (snapshot completeness)
+            Phase 4.8 clarifies screener copy so <span className="text-zinc-300">Data QA</span> (snapshot completeness)
             is not confused with <span className="text-zinc-300">Risk Score</span> (investment / sleeve risk). Rows in{' '}
             <code className="text-amber-400/90">data/ghostyield/candidates.manual.json</code> carry{' '}
             <span className="text-zinc-300">sourceUrl</span>, <span className="text-zinc-300">sourceLabel</span>, and

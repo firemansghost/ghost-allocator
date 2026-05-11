@@ -72,7 +72,8 @@ export function CandidateDetailPanel({ candidate }: { candidate: GhostYieldCandi
             Data snapshot warnings
           </h3>
           <p className="text-[10px] text-amber-200/70 mb-1.5 leading-snug">
-            About the cited JSON row (freshness / gaps), not a market risk grade for the security.
+            These flags describe the data row, not the investment itself. Missing snapshot fields are not a verdict on
+            fund quality.
           </p>
           <ul className="list-disc list-inside text-xs text-amber-100/90 space-y-0.5">
             {candidate.freshness.warnings.map((w) => (
