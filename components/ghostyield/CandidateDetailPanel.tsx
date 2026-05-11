@@ -3,7 +3,11 @@
 import type { ReactNode } from 'react';
 import type { GhostYieldCandidate } from '@/lib/ghostyield/types';
 import { incomeSleeveLabel } from '@/lib/ghostyield/incomeSleeveLabels';
-import { effectiveDataConfidence, effectiveDisplayYield } from '@/lib/ghostyield/candidateFields';
+import {
+  effectiveDataConfidence,
+  effectiveDisplayYield,
+  isListedBdcStock,
+} from '@/lib/ghostyield/candidateFields';
 import { GlassCard } from '@/components/GlassCard';
 
 function fmtPct(n: number | null | undefined) {
@@ -117,6 +121,14 @@ export function CandidateDetailPanel({ candidate }: { candidate: GhostYieldCandi
               The table &ldquo;Yield&rdquo; column uses{' '}
               <span className="text-zinc-200">distribution rate</span> as a fallback ({fmtPct(tableYield.value)}), since
               current yield is not set for this row.
+              {isListedBdcStock(candidate) ? (
+                <>
+                  {' '}
+                  For this listed BDC, that figure is{' '}
+                  <span className="text-zinc-200">NAV-based (annualized distribution ÷ NAV/sh per source)</span>, not a
+                  traded share-price yield unless you compute it separately.
+                </>
+              ) : null}
             </>
           ) : tableYield.kind === 'secYield' ? (
             <>
@@ -136,7 +148,14 @@ export function CandidateDetailPanel({ candidate }: { candidate: GhostYieldCandi
           <DetailRow label="Latest distribution date" value={fmtDate(candidate.latestDistributionDate)} />
           <DetailRow label="Frequency" value={candidate.distributionFrequency ?? '—'} capitalize />
           <DetailRow label="Current yield" value={fmtPct(candidate.currentYield)} />
-          <DetailRow label="Distribution rate" value={fmtPct(candidate.distributionRate)} />
+          <DetailRow
+            label={
+              isListedBdcStock(candidate) && candidate.distributionRate != null
+                ? 'Distribution rate (NAV/sh basis per source when applicable)'
+                : 'Distribution rate'
+            }
+            value={fmtPct(candidate.distributionRate)}
+          />
           <DetailRow label="SEC yield" value={fmtPct(candidate.secYield)} />
           <DetailRow label="Est. return of capital %" value={fmtPct(candidate.estimatedReturnOfCapitalPct)} />
           <DetailRow label="NAV / yield spread (illustr.)" value={fmtPct(candidate.navYieldSpread)} />

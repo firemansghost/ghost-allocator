@@ -42,6 +42,11 @@ export function canInferPremiumDiscount(row: GhostYieldCandidateRaw): boolean {
   return row.marketPrice != null && row.nav != null && row.nav !== 0;
 }
 
+/** Listed BDC common stock rows (not BDC ETFs: those use structureLabel ETF). */
+export function isListedBdcStock(row: GhostYieldCandidateRaw): boolean {
+  return row.sleeveType === 'bdc_income' && /listed bdc/i.test(structureLabelNorm(row));
+}
+
 /** Which yield field the screener column should display (UI only — does not mutate row data). */
 export type DisplayYieldKind = 'currentYield' | 'distributionRate' | 'secYield';
 
@@ -55,7 +60,13 @@ export function effectiveDisplayYield(row: GhostYieldCandidateRaw): {
   return { value: null, kind: null };
 }
 
-export function displayYieldKindShortLabel(kind: DisplayYieldKind | null): string {
+export function displayYieldKindShortLabel(
+  kind: DisplayYieldKind | null,
+  row?: GhostYieldCandidateRaw
+): string {
+  if (kind === 'distributionRate' && row != null && isListedBdcStock(row)) {
+    return 'Dist./NAV sh';
+  }
   switch (kind) {
     case 'currentYield':
       return 'Current';

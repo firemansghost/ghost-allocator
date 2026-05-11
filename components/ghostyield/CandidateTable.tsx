@@ -6,6 +6,7 @@ import {
   displayYieldKindShortLabel,
   effectiveDisplayYield,
   effectiveNavPerformance1Y,
+  isListedBdcStock,
 } from '@/lib/ghostyield/candidateFields';
 
 function pct(y: number | null | undefined) {
@@ -90,7 +91,9 @@ export function CandidateTable({
               dy.kind === 'currentYield'
                 ? 'Current yield (indicative)'
                 : dy.kind === 'distributionRate'
-                  ? 'Distribution rate (annualized estimate). Current yield is not set for this row.'
+                  ? isListedBdcStock(row)
+                    ? 'Distribution rate on this row: when sourced from filings it is often annualized dividend ÷ NAV per share (issuer / JSON definition), not market-price current yield. currentYield is not set.'
+                    : 'Distribution rate (annualized estimate). Current yield is not set for this row.'
                   : dy.kind === 'secYield'
                     ? 'SEC yield. Current yield and distribution rate are not set for this row.'
                     : 'No yield figure on this row';
@@ -114,7 +117,9 @@ export function CandidateTable({
                 >
                   <span>{pct(dy.value)}</span>
                   {dy.kind ? (
-                    <span className="text-[9px] text-zinc-500 ml-1">({displayYieldKindShortLabel(dy.kind)})</span>
+                    <span className="text-[9px] text-zinc-500 ml-1">
+                      ({displayYieldKindShortLabel(dy.kind, row)})
+                    </span>
                   ) : null}
                 </td>
                 <td className="px-3 py-2 text-zinc-300 tabular-nums whitespace-nowrap">{pct(nav1y)}</td>
