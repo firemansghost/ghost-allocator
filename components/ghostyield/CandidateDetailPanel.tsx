@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import type { GhostYieldCandidate } from '@/lib/ghostyield/types';
+import type { GhostYieldCandidate, GhostYieldScoreDriver } from '@/lib/ghostyield/types';
 import { incomeSleeveLabel } from '@/lib/ghostyield/incomeSleeveLabels';
 import {
   effectiveDataConfidence,
@@ -51,6 +51,36 @@ function Subheading({ children }: { children: ReactNode }) {
   );
 }
 
+function severityBadgeClass(s: GhostYieldScoreDriver['severity']) {
+  if (s === 'high') return 'border-amber-500/50 bg-amber-950/40 text-amber-200/95';
+  if (s === 'moderate') return 'border-zinc-600/60 bg-zinc-900/50 text-zinc-300';
+  return 'border-zinc-700/50 bg-zinc-950/40 text-zinc-400';
+}
+
+function impactDisplay(driver: GhostYieldScoreDriver) {
+  if (driver.type === 'risk') return 'Adds risk';
+  if (driver.impact === 'positive') return 'Helps fit';
+  if (driver.impact === 'negative') return 'Lowers fit';
+  return 'Neutral';
+}
+
+function ScoreDriverBlock({ driver }: { driver: GhostYieldScoreDriver }) {
+  return (
+    <div className="rounded-md border border-zinc-800/55 bg-zinc-950/25 px-2.5 py-2 space-y-1.5">
+      <div className="flex flex-wrap items-center gap-1.5 gap-y-1">
+        <span className="text-xs font-medium text-zinc-200">{driver.label}</span>
+        <span
+          className={`text-[9px] uppercase tracking-wide px-1.5 py-0.5 rounded border ${severityBadgeClass(driver.severity)}`}
+        >
+          {driver.severity}
+        </span>
+        <span className="text-[9px] uppercase tracking-wide text-zinc-500">{impactDisplay(driver)}</span>
+      </div>
+      <p className="text-[11px] text-zinc-400 leading-snug">{driver.explanation}</p>
+    </div>
+  );
+}
+
 export function CandidateDetailPanel({ candidate }: { candidate: GhostYieldCandidate | null }) {
   if (!candidate) {
     return (
@@ -97,6 +127,38 @@ export function CandidateDetailPanel({ candidate }: { candidate: GhostYieldCandi
           ) : null}
           <DetailRow label="Yield source" value={candidate.yieldSource} wide />
           <DetailRow label="Role" value={candidate.role} wide />
+        </div>
+      </DetailSection>
+
+      <DetailSection title="Score drivers">
+        <p className="text-[10px] text-zinc-500 leading-relaxed">
+          These drivers explain the current GhostYield model score. They are not buy/sell signals.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Subheading>Risk drivers</Subheading>
+            {candidate.riskDrivers.length === 0 ? (
+              <p className="text-[11px] text-zinc-500">No extra drivers beyond the overall model blend for this row.</p>
+            ) : (
+              <div className="space-y-2">
+                {candidate.riskDrivers.map((d, i) => (
+                  <ScoreDriverBlock key={`${d.label}-${i}`} driver={d} />
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="space-y-2">
+            <Subheading>Fit drivers</Subheading>
+            {candidate.fitDrivers.length === 0 ? (
+              <p className="text-[11px] text-zinc-500">No extra drivers beyond the overall model blend for this row.</p>
+            ) : (
+              <div className="space-y-2">
+                {candidate.fitDrivers.map((d, i) => (
+                  <ScoreDriverBlock key={`${d.label}-${i}`} driver={d} />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </DetailSection>
 

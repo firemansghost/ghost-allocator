@@ -166,8 +166,19 @@ export interface GhostYieldCandidateRaw {
   bdcMetrics?: GhostYieldBdcMetrics;
 }
 
+/** Plain-English line explaining one piece of the GhostYield risk/fit model (Phase 5.3). */
+export interface GhostYieldScoreDriver {
+  type: 'risk' | 'fit';
+  label: string;
+  impact: 'positive' | 'negative' | 'neutral';
+  severity: 'low' | 'moderate' | 'high';
+  explanation: string;
+}
+
 export interface GhostYieldCandidate extends GhostYieldCandidateRaw {
   riskScore: number;
   fitScore: number;
   freshness: CandidateFreshnessResult;
+  riskDrivers: GhostYieldScoreDriver[];
+  fitDrivers: GhostYieldScoreDriver[];
 }

@@ -18,6 +18,7 @@ import type {
   DistributionQuality,
   GhostYieldCandidate,
   GhostYieldCandidateRaw,
+  GhostYieldScoreDriver,
   YieldEnvironmentInputs,
   YieldSleeveCategory,
 } from './types';
@@ -514,6 +515,656 @@ export function computeGhostYieldFitScore(row: GhostYieldCandidateRaw, freshness
   return clampInt(fit, 0, 100);
 }
 
+/** Max score-driver bullets shown per column in the detail panel. */
+export const MAX_SCORE_DRIVERS = 4;
+
+export function riskSeverityFromPoints(points: number): 'low' | 'moderate' | 'high' {
+  if (points >= 12) return 'high';
+  if (points >= 6) return 'moderate';
+  return 'low';
+}
+
+export function fitSeverityFromPoints(absDelta: number): 'low' | 'moderate' | 'high' {
+  if (absDelta >= 10) return 'high';
+  if (absDelta >= 5) return 'moderate';
+  return 'low';
+}
+
+type RankedRisk = { driver: GhostYieldScoreDriver; points: number };
+type RankedFit = { driver: GhostYieldScoreDriver; delta: number; positive: boolean };
+
+function riskDriver(
+  label: string,
+  points: number,
+  explanation: string
+): GhostYieldScoreDriver {
+  return {
+    type: 'risk',
+    label,
+    impact: 'negative',
+    severity: riskSeverityFromPoints(points),
+    explanation,
+  };
+}
+
+function fitDriver(
+  label: string,
+  delta: number,
+  explanation: string
+): GhostYieldScoreDriver {
+  const positive = delta > 0;
+  return {
+    type: 'fit',
+    label,
+    impact: positive ? 'positive' : delta < 0 ? 'negative' : 'neutral',
+    severity: fitSeverityFromPoints(Math.abs(delta)),
+    explanation,
+  };
+}
+
+/** Mirrors reasons encoded in cefPayoutStressRiskPoints (same thresholds, plain English). */
+function cefPayoutStressExplanation(row: GhostYieldCandidateRaw): string {
+  const cef = row.cefMetrics;
+  if (!cef) return '';
+  const parts: string[] = [];
+  const dq = row.distributionQuality;
+  const distRate = cef.distributionRate ?? row.distributionRate;
+  if ((dq === 'weak' || dq === 'uncertain') && distRate != null && distRate > 0.12) {
+    parts.push('distribution rate is high while payout quality is weak or uncertain');
+  } else if (dq === 'weak' && distRate != null && distRate > 0.09) {
+    parts.push('distribution rate is elevated with weak payout quality');
+  }
+  if (cef.coverageRatio != null && cef.coverageRatio < 1.0) {
+    parts.push('structured coverage ratio is below one in the cited snapshot');
+  }
+  if (cef.uniiPerShare != null && cef.uniiPerShare < 0) {
+    parts.push('UNII per share is negative where sourced');
+  }
+  if (parts.length === 0) return 'Structured CEF payout metrics add stress in the model.';
+  return `The model adds stress because ${parts.join('; ')}.`;
+}
+
+/** Deterministic drivers aligned with existing scoring helpers — does not change numeric scores. */
+export function buildGhostYieldScoreDrivers(
+  row: GhostYieldCandidateRaw,
+  freshness: CandidateFreshnessResult
+): { riskDrivers: GhostYieldScoreDriver[]; fitDrivers: GhostYieldScoreDriver[] } {
+  const dc = effectiveDataConfidence(row);
+  const nav1y = effectiveNavPerformance1Y(row);
+  const nav3y = effectiveNavPerformance3Y(row);
+
+  const risks: RankedRisk[] = [];
+
+  const cat = categoryBaseRisk(row.sleeveType);
+  if (cat >= 14) {
+    const d = riskDriver(
+      'Sleeve category risk',
+      cat,
+      'This income sleeve sits in a structurally riskier category in the model (complexity and typical failure modes).'
+    );
+    risks.push({ driver: d, points: cat });
+  }
+
+  const yp = yieldRiskPoints(row.currentYield);
+  if (yp > 0) {
+    risks.push({
+      driver: riskDriver(
+        'Headline yield level',
+        yp,
+        'Very high quoted current yield lifts modeled risk because extreme carry often pairs with credit, leverage, or decay risk.'
+      ),
+      points: yp,
+    });
+  }
+
+  const levPts = structuralLeverageRiskPoints(row);
+  if (levPts > 0) {
+    let expl: string;
+    if (row.cefMetrics?.effectiveLeverage != null) {
+      expl =
+        'Effective CEF leverage (as a share of assets in the cited snapshot) raises modeled structural and NAV volatility risk.';
+    } else if (row.bdcMetrics?.debtToEquity != null) {
+      expl =
+        'BDC debt-to-equity from structured metrics is in a range the model treats as added balance-sheet risk.';
+    } else {
+      expl = 'Leverage (balance-sheet style where applicable) adds risk in the model at the current keyed level.';
+    }
+    risks.push({ driver: riskDriver('Leverage', levPts, expl), points: levPts });
+  }
+
+  const navTrendPts = navTrendRiskPoints(nav1y, nav3y);
+  if (navTrendPts > 0) {
+    risks.push({
+      driver: riskDriver(
+        'NAV trend stress',
+        navTrendPts,
+        'Negative or weak trailing NAV performance increases modeled risk that distributions are harder to sustain.'
+      ),
+      points: navTrendPts,
+    });
+  }
+
+  const premPts = premiumScheduleRiskPoints(row);
+  if (premPts > 0) {
+    const cefPrem = row.cefMetrics && (row.cefMetrics.premiumDiscount ?? row.premiumDiscount) != null;
+    risks.push({
+      driver: riskDriver(
+        cefPrem ? 'Premium to NAV' : 'Rich premium / pricing',
+        premPts,
+        cefPrem
+          ? 'Trading at a premium to NAV adds squeeze risk when the wrapper price is rich versus net asset value.'
+          : 'Premium or rich pricing versus NAV (where the sleeve uses NAV-based schedules) adds modeled risk.'
+      ),
+      points: premPts,
+    });
+  }
+
+  const dqPts = distributionQualityWeight(row.distributionQuality);
+  if (dqPts > 0) {
+    risks.push({
+      driver: riskDriver(
+        'Distribution quality',
+        dqPts,
+        `Distribution quality is ${row.distributionQuality} in the snapshot, so the model is more skeptical of payout durability.`
+      ),
+      points: dqPts,
+    });
+  }
+
+  const confPts = confidencePenalty(dc);
+  if (confPts > 0) {
+    risks.push({
+      driver: riskDriver(
+        'Data confidence',
+        confPts,
+        'Lower data confidence on the manual row increases modeled uncertainty and a small risk penalty.'
+      ),
+      points: confPts,
+    });
+  }
+
+  const ysc = yieldSourceComplexityPoints(row.yieldSource);
+  if (ysc > 0) {
+    risks.push({
+      driver: riskDriver(
+        row.sleeveType === 'option_income' ? 'Option-income complexity' : 'Yield-source complexity',
+        ysc,
+        row.sleeveType === 'option_income'
+          ? 'Option-income structures often bundle upside limits, path dependency, and overwrite drag the model treats as more complex.'
+          : 'The described yield source (length, ROC language, leverage, or options) adds a complexity risk tilt in the model.'
+      ),
+      points: ysc,
+    });
+  }
+
+  const hyn = highYieldNegativeNavPoints(row);
+  if (hyn > 0) {
+    risks.push({
+      driver: riskDriver(
+        'High payout vs falling NAV',
+        hyn,
+        'High carry alongside negative NAV trend triggers a stress signal that payouts may be harder to maintain.'
+      ),
+      points: hyn,
+    });
+  }
+
+  const roc = rocNavStressPoints(row);
+  if (roc > 0) {
+    risks.push({
+      driver: riskDriver(
+        'Return of capital + NAV decay',
+        roc,
+        'Estimated return-of-capital share combined with NAV decline adds modeled payout stress.'
+      ),
+      points: roc,
+    });
+  }
+
+  const dvs = distributionVersusSecPoints(row);
+  if (dvs > 0) {
+    risks.push({
+      driver: riskDriver(
+        'Distribution vs SEC yield gap',
+        dvs,
+        'Distribution rate materially above SEC yield (when both are keyed) raises a skepticism penalty in the model.'
+      ),
+      points: dvs,
+    });
+  }
+
+  const pvn = payoutVersusNavTrendPoints(row);
+  if (pvn > 0) {
+    risks.push({
+      driver: riskDriver(
+        'Payout vs NAV performance gap',
+        pvn,
+        'Payout appears high relative to recent NAV performance, which the model treats as sustainability risk.'
+      ),
+      points: pvn,
+    });
+  }
+
+  const mnav = missingNavPoints(row);
+  if (mnav > 0) {
+    risks.push({
+      driver: riskDriver(
+        'Missing NAV',
+        mnav,
+        'The row expects a NAV-style quote for this structure but none is keyed, so the model applies a data-risk penalty.'
+      ),
+      points: mnav,
+    });
+  }
+
+  const freshPts = freshnessDataPenalty(freshness);
+  if (freshPts > 0) {
+    risks.push({
+      driver: riskDriver(
+        'Stale or incomplete snapshot',
+        freshPts,
+        'Freshness or missing snapshot fields trigger a conservative scoring penalty, not a verdict on fund quality.'
+      ),
+      points: freshPts,
+    });
+  }
+
+  const cef = row.cefMetrics;
+  if (cef?.expenseRatioTotal != null) {
+    const erPts = cefExpenseBurdenRiskPoints(cef.expenseRatioTotal);
+    if (erPts > 0) {
+      risks.push({
+        driver: riskDriver(
+          'CEF expense burden',
+          erPts,
+          'Total expense ratio from structured CEF metrics is high enough to raise the hurdle for net investor outcomes in the model.'
+        ),
+        points: erPts,
+      });
+    }
+  }
+
+  const payStress = cefPayoutStressRiskPoints(row);
+  if (payStress > 0) {
+    risks.push({
+      driver: riskDriver('CEF payout stress', payStress, cefPayoutStressExplanation(row)),
+      points: payStress,
+    });
+  }
+
+  const bdc = row.bdcMetrics;
+  if (bdc?.dividendCoverageRatio != null) {
+    const cov = bdc.dividendCoverageRatio;
+    let pts = 0;
+    if (cov < 0.9) pts = 9;
+    else if (cov < 1.0) pts = 4;
+    if (pts > 0) {
+      risks.push({
+        driver: riskDriver(
+          'BDC dividend coverage',
+          pts,
+          'Structured dividend coverage below one (or well below one) increases modeled payout risk for this BDC snapshot.'
+        ),
+        points: pts,
+      });
+    }
+  }
+
+  if (bdc?.nonAccrualCostPct != null) {
+    const naPts = bdcNonAccrualRiskPoints(bdc.nonAccrualCostPct);
+    if (naPts > 0) {
+      risks.push({
+        driver: riskDriver(
+          'BDC non-accruals',
+          naPts,
+          'Non-accrual exposure as a share of portfolio cost is high enough to lift credit stress in the model.'
+        ),
+        points: naPts,
+      });
+    }
+  }
+
+  const sevOrder = (s: GhostYieldScoreDriver['severity']) => (s === 'high' ? 3 : s === 'moderate' ? 2 : 1);
+  risks.sort((a, b) => {
+    const sd = sevOrder(b.driver.severity) - sevOrder(a.driver.severity);
+    if (sd !== 0) return sd;
+    return b.points - a.points;
+  });
+  const riskDrivers = risks.slice(0, MAX_SCORE_DRIVERS).map((r) => r.driver);
+
+  if (row.sleeveType === 'crypto_yield_coming_soon') {
+    return {
+      riskDrivers,
+      fitDrivers: [
+        {
+          type: 'fit',
+          label: 'Crypto yield placeholder',
+          impact: 'negative',
+          severity: 'high',
+          explanation:
+            'This sleeve is a placeholder; the model sets satellite fit to zero rather than scoring it like a normal yield row.',
+        },
+      ],
+    };
+  }
+
+  const fits: RankedFit[] = [];
+
+  const y = row.currentYield;
+  if (y != null) {
+    let d = 0;
+    let label = 'Headline yield fit';
+    let expl = '';
+    if (y >= 0.06 && y <= 0.095) {
+      d = 14;
+      expl = 'Current yield sits in a range the model likes for a satellite sleeve without being extreme.';
+    } else if (y >= 0.045 && y < 0.06) {
+      d = 8;
+      expl = 'Current yield is moderately supportive of fit in the model.';
+    } else if (y > 0.11 && y < 0.14) {
+      d = -6;
+      expl = 'Current yield is high enough that the model trims fit slightly.';
+    } else if (y >= 0.14) {
+      d = -14;
+      expl = 'Very high current yield reduces modeled fit because carry extremes carry more wipeout risk.';
+    } else if (y < 0.03) {
+      d = 4;
+      expl = 'Lower headline yield modestly helps fit when you want less yield-chasing risk.';
+    }
+    if (d !== 0) fits.push({ driver: fitDriver(label, d, expl), delta: d, positive: d > 0 });
+  }
+
+  switch (row.distributionQuality) {
+    case 'strong':
+      fits.push({
+        driver: fitDriver('Distribution quality', 12, 'Strong payout quality in the snapshot boosts modeled fit.'),
+        delta: 12,
+        positive: true,
+      });
+      break;
+    case 'mixed':
+      fits.push({
+        driver: fitDriver('Distribution quality', 4, 'Mixed payout quality gives a modest positive nudge in the model.'),
+        delta: 4,
+        positive: true,
+      });
+      break;
+    case 'weak':
+      fits.push({
+        driver: fitDriver('Distribution quality', -10, 'Weak payout quality reduces fit because the model discounts headline yield.'),
+        delta: -10,
+        positive: false,
+      });
+      break;
+    case 'uncertain':
+      fits.push({
+        driver: fitDriver('Distribution quality', -14, 'Uncertain payout quality pulls fit down until the story is clearer.'),
+        delta: -14,
+        positive: false,
+      });
+      break;
+    default:
+      break;
+  }
+
+  if (nav1y != null) {
+    let d = 0;
+    let expl = '';
+    if (nav1y >= 0.02) {
+      d = 8;
+      expl = 'Strong one-year NAV trend supports fit in the model.';
+    } else if (nav1y >= 0) {
+      d = 3;
+      expl = 'Non-negative one-year NAV trend modestly helps fit.';
+    } else if (nav1y < -0.06) {
+      d = -14;
+      expl = 'Meaningfully negative one-year NAV trend hurts fit versus distributions.';
+    } else if (nav1y < 0) {
+      d = -6;
+      expl = 'Negative one-year NAV trend trims fit.';
+    }
+    if (d !== 0) {
+      fits.push({ driver: fitDriver('NAV trend', d, expl), delta: d, positive: d > 0 });
+    }
+  }
+  if (nav3y != null && nav3y < -0.1) {
+    fits.push({
+      driver: fitDriver('Longer NAV track record', -8, 'Weak three-year NAV trend reduces fit in the model.'),
+      delta: -8,
+      positive: false,
+    });
+  }
+
+  if (row.leverage != null) {
+    const lev = row.leverage;
+    let d = 0;
+    let expl = '';
+    if (lev <= 1.02) {
+      d = 6;
+      expl = 'Lower keyed leverage supports fit for balance-sheet-heavy sleeves.';
+    } else if (lev >= 1.35) {
+      d = -12;
+      expl = 'Very high leverage hurts fit in the model.';
+    } else if (lev >= 1.15) {
+      d = -5;
+      expl = 'Elevated leverage modestly reduces fit.';
+    }
+    if (d !== 0) fits.push({ driver: fitDriver('Leverage fit', d, expl), delta: d, positive: d > 0 });
+  }
+
+  const premiumForFit = row.cefMetrics?.premiumDiscount ?? row.premiumDiscount;
+  if (premiumForFit != null && usesNavPremiumSchedule(row.sleeveType)) {
+    let d = 0;
+    let expl = '';
+    if (premiumForFit < -0.05) {
+      d = 8;
+      expl = 'A discount to NAV helps modeled fit when sleeves are often priced off NAV.';
+    }
+    if (premiumForFit > 0.12) {
+      d = -10;
+      expl = 'A large premium to NAV reduces fit because the entry is rich versus net asset value.';
+    }
+    if (d !== 0) {
+      fits.push({
+        driver: fitDriver('Discount / premium to NAV', d, expl),
+        delta: d,
+        positive: d > 0,
+      });
+    }
+  }
+
+  const expenseForFit = row.cefMetrics?.expenseRatioTotal ?? row.expenseRatio;
+  if (expenseForFit != null) {
+    let d = 0;
+    let expl = '';
+    if (expenseForFit <= 0.005) {
+      d = 4;
+      expl = 'Very low expense ratio supports fit.';
+    }
+    if (expenseForFit >= 0.025) {
+      d = -8;
+      expl = 'Higher expense ratio drags fit because costs eat more of gross yield.';
+    }
+    if (d !== 0) {
+      fits.push({ driver: fitDriver('Expense ratio', d, expl), delta: d, positive: d > 0 });
+    }
+  }
+
+  switch (dc) {
+    case 'high':
+      fits.push({
+        driver: fitDriver('Data confidence', 6, 'High confidence on the cited snapshot improves fit in the model.'),
+        delta: 6,
+        positive: true,
+      });
+      break;
+    case 'medium':
+      fits.push({
+        driver: fitDriver('Data confidence', 2, 'Medium confidence is a small positive in the model.'),
+        delta: 2,
+        positive: true,
+      });
+      break;
+    case 'low':
+      fits.push({
+        driver: fitDriver('Data confidence', -8, 'Low data confidence trims fit.'),
+        delta: -8,
+        positive: false,
+      });
+      break;
+    case 'illustrative':
+      fits.push({
+        driver: fitDriver('Data confidence', -12, 'Illustrative rows are heavily discounted for fit.'),
+        delta: -12,
+        positive: false,
+      });
+      break;
+    default:
+      break;
+  }
+
+  const simpleSource =
+    row.yieldSource.length < 90 &&
+    !row.yieldSource.toLowerCase().includes(' roc') &&
+    !row.yieldSource.toLowerCase().includes('return of capital');
+  if (simpleSource) {
+    fits.push({
+      driver: fitDriver('Simple yield story', 4, 'A shorter, simpler yield description modestly helps fit.'),
+      delta: 4,
+      positive: true,
+    });
+  }
+
+  switch (row.sleeveType) {
+    case 'cash_tbills':
+      fits.push({
+        driver: fitDriver('Cash / T-bill role', 8, 'Cash-like sleeves score as straightforward ballast in the model.'),
+        delta: 8,
+        positive: true,
+      });
+      break;
+    case 'credit_income':
+      fits.push({
+        driver: fitDriver('Credit income role', 2, 'Bread-and-butter credit sleeves get a small role-based nudge.'),
+        delta: 2,
+        positive: true,
+      });
+      break;
+    default:
+      break;
+  }
+
+  if (freshness.status === 'fresh' && dc === 'high') {
+    fits.push({
+      driver: fitDriver('Fresh snapshot', 4, 'Fresh data with high confidence adds a small fit bonus.'),
+      delta: 4,
+      positive: true,
+    });
+  } else if (freshness.status === 'fresh' && dc === 'medium') {
+    fits.push({
+      driver: fitDriver('Fresh snapshot', 2, 'Fresh data with medium confidence helps a little.'),
+      delta: 2,
+      positive: true,
+    });
+  } else if (freshness.status === 'stale' || freshness.status === 'missing') {
+    fits.push({
+      driver: fitDriver('Snapshot freshness', -10, 'Stale or missing lineage fields reduce fit until the row is refreshed.'),
+      delta: -10,
+      positive: false,
+    });
+  } else if (freshness.status === 'caution' || freshness.status === 'illustrative') {
+    fits.push({
+      driver: fitDriver('Snapshot freshness', -4, 'Caution or illustrative freshness trims fit slightly.'),
+      delta: -4,
+      positive: false,
+    });
+  }
+
+  const dRate = row.distributionRate;
+  const sec = row.secYield;
+  if (dRate != null && sec != null) {
+    const g = Math.abs(dRate - sec);
+    let d = 0;
+    let expl = '';
+    if (g <= 0.012) {
+      d = 6;
+      expl = 'Distribution rate tracks SEC yield closely in the keyed fields, which the model likes.';
+    } else if (g <= 0.02) {
+      d = 2;
+      expl = 'SEC yield and distribution rate are reasonably aligned.';
+    } else if (g >= 0.04) {
+      d = -6;
+      expl = 'Large mismatch between distribution rate and SEC yield reduces fit.';
+    }
+    if (d !== 0) {
+      fits.push({ driver: fitDriver('SEC yield alignment', d, expl), delta: d, positive: d > 0 });
+    }
+  }
+
+  const cefFit = scoreCefMetricAdjustments(row).fit;
+  if (cefFit > 0) {
+    fits.push({
+      driver: fitDriver(
+        'Wide CEF discount',
+        cefFit,
+        'A wider discount to NAV with non-weak payout quality and OK NAV trend adds a modest fit bump in structured CEF rows.'
+      ),
+      delta: cefFit,
+      positive: true,
+    });
+  }
+
+  const bdcCov = row.bdcMetrics?.dividendCoverageRatio;
+  if (bdcCov != null) {
+    let d = 0;
+    let expl = '';
+    if (bdcCov >= 1.1) {
+      d = 4;
+      expl = 'Strong BDC dividend coverage from structured metrics helps fit.';
+    } else if (bdcCov >= 1.0) {
+      d = 2;
+      expl = 'Coverage at or above one in structured metrics is a modest positive for fit.';
+    }
+    if (d !== 0) {
+      fits.push({ driver: fitDriver('BDC dividend coverage', d, expl), delta: d, positive: true });
+    }
+  }
+
+  const fl = row.bdcMetrics?.firstLienPct;
+  if (fl != null) {
+    let d = 0;
+    let expl = '';
+    if (fl > 0.8) {
+      d = 4;
+      expl = 'High first-lien share in structured BDC metrics supports credit-quality fit.';
+    } else if (fl < 0.6) {
+      d = -3;
+      expl = 'Lower first-lien share modestly reduces fit versus more senior-secured portfolios.';
+    }
+    if (d !== 0) {
+      fits.push({ driver: fitDriver('BDC first-lien mix', d, expl), delta: d, positive: d > 0 });
+    }
+  }
+
+  const sevFit = (s: GhostYieldScoreDriver['severity']) => (s === 'high' ? 3 : s === 'moderate' ? 2 : 1);
+  fits.sort((a, b) => {
+    if (a.positive !== b.positive) return a.positive ? -1 : 1;
+    const sd = sevFit(b.driver.severity) - sevFit(a.driver.severity);
+    if (sd !== 0) return sd;
+    return Math.abs(b.delta) - Math.abs(a.delta);
+  });
+  const fitDrivers = fits.slice(0, MAX_SCORE_DRIVERS).map((f) => f.driver);
+
+  return { riskDrivers, fitDrivers };
+}
+
+export function getScoreDrivers(candidate: GhostYieldCandidate): {
+  risk: GhostYieldScoreDriver[];
+  fit: GhostYieldScoreDriver[];
+} {
+  return { risk: candidate.riskDrivers, fit: candidate.fitDrivers };
+}
+
 /**
  * Environment gauge: combines static stress knobs into one 0–100 reading.
  * Higher = more hostile backdrop for yield sleeves overall (tighter conditions).
@@ -532,11 +1183,14 @@ export function scoreCandidates(
 ): GhostYieldCandidate[] {
   return raw.map((r) => {
     const freshness = evaluateCandidateFreshness(r, referenceAsOf);
+    const { riskDrivers, fitDrivers } = buildGhostYieldScoreDrivers(r, freshness);
     return {
       ...r,
       freshness,
       riskScore: computeGhostYieldRiskScore(r, freshness),
       fitScore: computeGhostYieldFitScore(r, freshness),
+      riskDrivers,
+      fitDrivers,
     };
   });
 }
