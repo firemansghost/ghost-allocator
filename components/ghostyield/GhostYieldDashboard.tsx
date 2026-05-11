@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import Link from 'next/link';
 import { GlassCard } from '@/components/GlassCard';
 import {
   GHOSTYIELD_REFERENCE_AS_OF,
@@ -127,7 +128,15 @@ export function GhostYieldDashboard() {
       </div>
 
       <GlassCard className="p-4 sm:p-5">
-        <h2 className="text-sm font-semibold text-zinc-200 mb-2">Methodology & source data (v0.1)</h2>
+        <div className="flex flex-wrap items-start justify-between gap-3 mb-2">
+          <h2 className="text-sm font-semibold text-zinc-200">Methodology & source data (v0.1)</h2>
+          <Link
+            href="/income-factory/methodology"
+            className="text-xs font-medium text-amber-400/90 hover:text-amber-300 hover:underline decoration-amber-400/40 shrink-0"
+          >
+            How GhostYield scores yield sleeves →
+          </Link>
+        </div>
         <div className="text-sm text-zinc-400 leading-relaxed space-y-3 max-w-4xl">
           <p className="text-zinc-300">
             <span className="text-zinc-200">Risk Score</span> is GhostYield&apos;s sleeve / investment risk estimate
