@@ -142,6 +142,12 @@ export function GhostYieldDashboard() {
             number can be tied to a <span className="text-zinc-200">cited source</span>; otherwise they stay{' '}
             <span className="text-zinc-200">null</span>. Unverified fields remain null.
           </p>
+          <p className="text-zinc-300">
+            Selected closed-end and listed BDC snapshots may also store optional structured{' '}
+            <span className="text-zinc-200">cefMetrics</span> / <span className="text-zinc-200">bdcMetrics</span>{' '}
+            blocks so leverage, coverage, non-accruals, and NAV-relative dividend context do not have to live only in
+            generic yield-oriented columns.
+          </p>
           <p>
             Some closed-end rows cite <span className="text-zinc-300">CEF Connect</span> (Nuveen / Morningstar-style
             summaries) as an <span className="text-zinc-300">interim secondary</span> source for figures — always read each

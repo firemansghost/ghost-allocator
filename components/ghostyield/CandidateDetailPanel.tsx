@@ -31,6 +31,11 @@ function fmtDate(iso: string | undefined) {
   return iso.slice(0, 10);
 }
 
+function fmtStr(s: string | null | undefined) {
+  if (s == null || s.trim() === '') return '—';
+  return s;
+}
+
 function DetailSection({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="rounded-lg border border-zinc-800/65 bg-zinc-950/30 p-3 sm:p-4 space-y-3">
@@ -132,6 +137,41 @@ export function CandidateDetailPanel({ candidate }: { candidate: GhostYieldCandi
         </div>
       </DetailSection>
 
+      {candidate.cefMetrics ? (
+        <DetailSection title="CEF-specific metrics">
+          <div className="grid gap-2 text-xs sm:text-sm sm:grid-cols-2">
+            <DetailRow label="NAV (structured)" value={fmtNum(candidate.cefMetrics.nav, 2)} />
+            <DetailRow label="Market price (structured)" value={fmtNum(candidate.cefMetrics.marketPrice, 2)} />
+            <DetailRow
+              label="Premium / discount to NAV (structured)"
+              value={fmtPct(candidate.cefMetrics.premiumDiscount)}
+            />
+            <DetailRow label="Effective leverage" value={fmtNum(candidate.cefMetrics.effectiveLeverage, 4)} />
+            <DetailRow label="Leverage type" value={fmtStr(candidate.cefMetrics.leverageType)} />
+            <DetailRow label="Leverage as of" value={fmtDate(candidate.cefMetrics.leverageAsOf ?? undefined)} />
+            <DetailRow label="Distribution rate" value={fmtPct(candidate.cefMetrics.distributionRate)} />
+            <DetailRow label="Distribution rate basis" value={fmtStr(candidate.cefMetrics.distributionRateBasis)} />
+            <DetailRow
+              label="Latest distribution amount"
+              value={fmtNum(candidate.cefMetrics.latestDistributionAmount, 4)}
+            />
+            <DetailRow label="Distribution frequency" value={fmtStr(candidate.cefMetrics.distributionFrequency)} />
+            <DetailRow label="Expense ratio (total)" value={fmtPct(candidate.cefMetrics.expenseRatioTotal)} />
+            <DetailRow label="Expense ratio basis" value={fmtStr(candidate.cefMetrics.expenseRatioBasis)} />
+            <DetailRow label="Expense as of" value={fmtDate(candidate.cefMetrics.expenseAsOf ?? undefined)} />
+            <DetailRow label="Coverage ratio" value={fmtNum(candidate.cefMetrics.coverageRatio, 3)} />
+            <DetailRow label="UNII per share" value={fmtNum(candidate.cefMetrics.uniiPerShare, 4)} />
+            <DetailRow
+              label="Managed distribution policy"
+              value={fmtStr(candidate.cefMetrics.managedDistributionPolicy)}
+              wide
+            />
+            <DetailRow label="Return of capital note" value={fmtStr(candidate.cefMetrics.returnOfCapitalNote)} wide />
+            <DetailRow label="Source note" value={fmtStr(candidate.cefMetrics.sourceNote)} wide />
+          </div>
+        </DetailSection>
+      ) : null}
+
       <DetailSection title="Yield & distributions">
         <div className="space-y-2">
           <Subheading>Yield (screener column)</Subheading>
@@ -189,6 +229,52 @@ export function CandidateDetailPanel({ candidate }: { candidate: GhostYieldCandi
           </div>
         </div>
       </DetailSection>
+
+      {candidate.bdcMetrics ? (
+        <DetailSection title="BDC-specific metrics">
+          <div className="grid gap-2 text-xs sm:text-sm sm:grid-cols-2">
+            <DetailRow label="NAV per share" value={fmtNum(candidate.bdcMetrics.navPerShare, 2)} />
+            <DetailRow label="NAV as of" value={fmtDate(candidate.bdcMetrics.navAsOf ?? undefined)} />
+            <DetailRow label="Regular dividend" value={fmtNum(candidate.bdcMetrics.regularDividend, 4)} />
+            <DetailRow label="Supplemental dividend" value={fmtNum(candidate.bdcMetrics.supplementalDividend, 4)} />
+            <DetailRow
+              label="Latest dividend declared"
+              value={fmtNum(candidate.bdcMetrics.latestDividendDeclared, 4)}
+            />
+            <DetailRow
+              label="Latest dividend / payable date"
+              value={fmtDate(candidate.bdcMetrics.latestDividendPayableDate ?? undefined)}
+            />
+            <DetailRow label="Dividend frequency" value={fmtStr(candidate.bdcMetrics.dividendFrequency)} />
+            <DetailRow label="NII per share" value={fmtNum(candidate.bdcMetrics.niiPerShare, 4)} />
+            <DetailRow
+              label="Dividend coverage ratio"
+              value={fmtNum(candidate.bdcMetrics.dividendCoverageRatio, 3)}
+            />
+            <DetailRow label="Coverage basis" value={fmtStr(candidate.bdcMetrics.coverageBasis)} wide />
+            <DetailRow label="Debt / equity" value={fmtNum(candidate.bdcMetrics.debtToEquity, 2)} />
+            <DetailRow label="Net debt / equity" value={fmtNum(candidate.bdcMetrics.netDebtToEquity, 2)} />
+            <DetailRow label="Leverage as of" value={fmtDate(candidate.bdcMetrics.leverageAsOf ?? undefined)} />
+            <DetailRow label="Non-accrual (cost %)" value={fmtPct(candidate.bdcMetrics.nonAccrualCostPct)} />
+            <DetailRow
+              label="Non-accrual (fair value %)"
+              value={fmtPct(candidate.bdcMetrics.nonAccrualFairValuePct)}
+            />
+            <DetailRow label="First lien %" value={fmtPct(candidate.bdcMetrics.firstLienPct)} />
+            <DetailRow
+              label="Portfolio yield at fair value"
+              value={fmtPct(candidate.bdcMetrics.portfolioYieldAtFairValue)}
+            />
+            <DetailRow
+              label="Management (internal / external)"
+              value={fmtStr(candidate.bdcMetrics.internalExternalManagement)}
+              wide
+            />
+            <DetailRow label="Management fee note" value={fmtStr(candidate.bdcMetrics.managementFeeNote)} wide />
+            <DetailRow label="Source note" value={fmtStr(candidate.bdcMetrics.sourceNote)} wide />
+          </div>
+        </DetailSection>
+      ) : null}
 
       <DetailSection title="Source & data quality">
         {candidate.freshness.warnings.length > 0 ? (

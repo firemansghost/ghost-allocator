@@ -229,6 +229,105 @@
       "updateFrequency": {
         "type": "string",
         "enum": ["daily", "weekly", "monthly", "quarterly", "manual"]
+      },
+      "cefMetrics": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "nav": { "anyOf": [{ "type": "null" }, { "type": "number", "minimum": 0 }] },
+          "marketPrice": { "anyOf": [{ "type": "null" }, { "type": "number", "minimum": 0 }] },
+          "premiumDiscount": {
+            "anyOf": [{ "type": "null" }, { "type": "number", "minimum": -1, "maximum": 1 }]
+          },
+          "effectiveLeverage": {
+            "anyOf": [{ "type": "null" }, { "type": "number", "minimum": 0, "maximum": 2 }]
+          },
+          "leverageType": { "anyOf": [{ "type": "null" }, { "type": "string" }] },
+          "leverageAsOf": {
+            "anyOf": [
+              { "type": "null" },
+              { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" }
+            ]
+          },
+          "distributionRate": {
+            "anyOf": [{ "type": "null" }, { "type": "number", "minimum": 0, "maximum": 1 }]
+          },
+          "distributionRateBasis": { "anyOf": [{ "type": "null" }, { "type": "string" }] },
+          "latestDistributionAmount": {
+            "anyOf": [{ "type": "null" }, { "type": "number", "minimum": 0 }]
+          },
+          "distributionFrequency": { "anyOf": [{ "type": "null" }, { "type": "string" }] },
+          "expenseRatioTotal": {
+            "anyOf": [{ "type": "null" }, { "type": "number", "minimum": 0, "maximum": 1 }]
+          },
+          "expenseRatioBasis": { "anyOf": [{ "type": "null" }, { "type": "string" }] },
+          "expenseAsOf": {
+            "anyOf": [
+              { "type": "null" },
+              { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" }
+            ]
+          },
+          "coverageRatio": {
+            "anyOf": [{ "type": "null" }, { "type": "number", "minimum": 0, "maximum": 10 }]
+          },
+          "uniiPerShare": {
+            "anyOf": [{ "type": "null" }, { "type": "number", "minimum": -10, "maximum": 100 }]
+          },
+          "managedDistributionPolicy": { "anyOf": [{ "type": "null" }, { "type": "string" }] },
+          "returnOfCapitalNote": { "anyOf": [{ "type": "null" }, { "type": "string" }] },
+          "sourceNote": { "anyOf": [{ "type": "null" }, { "type": "string" }] }
+        }
+      },
+      "bdcMetrics": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "navPerShare": { "anyOf": [{ "type": "null" }, { "type": "number", "minimum": 0 }] },
+          "navAsOf": {
+            "anyOf": [
+              { "type": "null" },
+              { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" }
+            ]
+          },
+          "regularDividend": { "anyOf": [{ "type": "null" }, { "type": "number", "minimum": 0 }] },
+          "supplementalDividend": { "anyOf": [{ "type": "null" }, { "type": "number", "minimum": 0 }] },
+          "latestDividendDeclared": { "anyOf": [{ "type": "null" }, { "type": "number", "minimum": 0 }] },
+          "latestDividendPayableDate": {
+            "anyOf": [
+              { "type": "null" },
+              { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" }
+            ]
+          },
+          "dividendFrequency": { "anyOf": [{ "type": "null" }, { "type": "string" }] },
+          "niiPerShare": { "anyOf": [{ "type": "null" }, { "type": "number", "minimum": 0 }] },
+          "dividendCoverageRatio": {
+            "anyOf": [{ "type": "null" }, { "type": "number", "minimum": 0, "maximum": 10 }]
+          },
+          "coverageBasis": { "anyOf": [{ "type": "null" }, { "type": "string" }] },
+          "debtToEquity": { "anyOf": [{ "type": "null" }, { "type": "number", "minimum": 0, "maximum": 3 }] },
+          "netDebtToEquity": { "anyOf": [{ "type": "null" }, { "type": "number", "minimum": 0, "maximum": 3 }] },
+          "leverageAsOf": {
+            "anyOf": [
+              { "type": "null" },
+              { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" }
+            ]
+          },
+          "nonAccrualCostPct": {
+            "anyOf": [{ "type": "null" }, { "type": "number", "minimum": 0, "maximum": 1 }]
+          },
+          "nonAccrualFairValuePct": {
+            "anyOf": [{ "type": "null" }, { "type": "number", "minimum": 0, "maximum": 1 }]
+          },
+          "firstLienPct": {
+            "anyOf": [{ "type": "null" }, { "type": "number", "minimum": 0, "maximum": 1 }]
+          },
+          "portfolioYieldAtFairValue": {
+            "anyOf": [{ "type": "null" }, { "type": "number", "minimum": 0, "maximum": 1 }]
+          },
+          "internalExternalManagement": { "anyOf": [{ "type": "null" }, { "type": "string" }] },
+          "managementFeeNote": { "anyOf": [{ "type": "null" }, { "type": "string" }] },
+          "sourceNote": { "anyOf": [{ "type": "null" }, { "type": "string" }] }
+        }
       }
     }
   }

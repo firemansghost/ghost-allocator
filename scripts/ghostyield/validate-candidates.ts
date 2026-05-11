@@ -71,6 +71,109 @@ function isCefStructure(row: Row): boolean {
   return typeof row.structureLabel === 'string' && /\bCEF\b/i.test(row.structureLabel);
 }
 
+function isPlainObject(v: unknown): v is Row {
+  return v !== null && typeof v === 'object' && !Array.isArray(v);
+}
+
+function num(row: Row, key: string): number | undefined {
+  const v = row[key];
+  return typeof v === 'number' && Number.isFinite(v) ? v : undefined;
+}
+
+function isNonEmptyString(v: unknown): v is string {
+  return typeof v === 'string' && v.trim().length > 0;
+}
+
+function materiallyDiff(a: number, b: number, eps: number): boolean {
+  return Math.abs(a - b) > eps;
+}
+
+/** CEF rows that should carry structured `cefMetrics` (premium sleeves + CEF wrapper). */
+function expectsCefMetrics(row: Row): boolean {
+  const st = row.sleeveType;
+  if (typeof st !== 'string' || !isCefStructure(row)) return false;
+  return CEF_PREMIUM_SLEEVES.has(st) || st === 'cef_credit';
+}
+
+function isListedBdcRow(row: Row): boolean {
+  return (
+    row.sleeveType === 'bdc_income' &&
+    typeof row.structureLabel === 'string' &&
+    /listed bdc/i.test(row.structureLabel)
+  );
+}
+
+function cefBdcWarningsForRow(row: Row, prefix: string): string[] {
+  const w: string[] = [];
+
+  if (expectsCefMetrics(row) && !isPlainObject(row.cefMetrics)) {
+    w.push(`${prefix} cefMetrics missing for CEF row`);
+  }
+
+  if (isPlainObject(row.cefMetrics)) {
+    const cm = row.cefMetrics;
+    if (!isNonEmptyString(cm.sourceNote)) {
+      w.push(`${prefix} cefMetrics present but sourceNote is null or empty`);
+    }
+    const lev = num(row, 'leverage');
+    const eff = num(cm, 'effectiveLeverage');
+    if (lev !== undefined && eff !== undefined && materiallyDiff(lev, eff, 0.01)) {
+      w.push(
+        `${prefix} cefMetrics.effectiveLeverage (${eff}) differs from top-level leverage (${lev}) by >0.01`
+      );
+    }
+    const pdRow = num(row, 'premiumDiscount');
+    const pdM = num(cm, 'premiumDiscount');
+    if (pdRow !== undefined && pdM !== undefined && materiallyDiff(pdRow, pdM, 0.01)) {
+      w.push(
+        `${prefix} cefMetrics.premiumDiscount (${pdM}) differs from top-level premiumDiscount (${pdRow}) by >0.01`
+      );
+    }
+    const erRow = num(row, 'expenseRatio');
+    const erM = num(cm, 'expenseRatioTotal');
+    if (erRow !== undefined && erM !== undefined && materiallyDiff(erRow, erM, 0.01)) {
+      w.push(
+        `${prefix} cefMetrics.expenseRatioTotal (${erM}) differs from top-level expenseRatio (${erRow}) by >0.01`
+      );
+    }
+  }
+
+  if (isListedBdcRow(row) && !isPlainObject(row.bdcMetrics)) {
+    w.push(`${prefix} bdcMetrics missing for listed BDC row`);
+  }
+
+  if (isPlainObject(row.bdcMetrics)) {
+    const bm = row.bdcMetrics;
+    if (!isNonEmptyString(bm.sourceNote)) {
+      w.push(`${prefix} bdcMetrics present but sourceNote is null or empty`);
+    }
+    const nav = num(row, 'nav');
+    const navPs = num(bm, 'navPerShare');
+    if (nav !== undefined && navPs !== undefined && materiallyDiff(nav, navPs, 0.05)) {
+      w.push(
+        `${prefix} bdcMetrics.navPerShare (${navPs}) differs materially from top-level nav (${nav}) (>0.05 abs)`
+      );
+    }
+    const lda = num(row, 'latestDistributionAmount');
+    const reg = num(bm, 'regularDividend');
+    if (lda !== undefined && reg !== undefined && materiallyDiff(lda, reg, 0.01)) {
+      w.push(
+        `${prefix} bdcMetrics.regularDividend (${reg}) differs from latestDistributionAmount (${lda}) by >0.01`
+      );
+    }
+    if (isListedBdcRow(row)) {
+      if (bm.dividendCoverageRatio == null) {
+        w.push(`${prefix} listed BDC with bdcMetrics but dividendCoverageRatio is null`);
+      }
+      if (bm.nonAccrualCostPct == null) {
+        w.push(`${prefix} listed BDC with bdcMetrics but nonAccrualCostPct is null`);
+      }
+    }
+  }
+
+  return w;
+}
+
 function staleWarningsForRow(row: Row, ref: string): string[] {
   const warnings: string[] = [];
   const navAsOf = navAsOfIso(row);
@@ -184,6 +287,10 @@ function main(): void {
 
     for (const w of staleWarningsForRow(row, GHOSTYIELD_REFERENCE_AS_OF)) {
       warnings.push(`${prefix} ${w}`);
+    }
+
+    for (const w of cefBdcWarningsForRow(row, prefix)) {
+      warnings.push(w);
     }
   }
 

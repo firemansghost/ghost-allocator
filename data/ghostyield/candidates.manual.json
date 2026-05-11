@@ -209,7 +209,18 @@
     "structureLabel": "CEF",
     "ticker": "ARDC",
     "updateFrequency": "monthly",
-    "yieldSource": "Flexible credit sleeve inside a closed-end fund — loans, bonds, CLOs; manager and leverage matter."
+    "yieldSource": "Flexible credit sleeve inside a closed-end fund — loans, bonds, CLOs; manager and leverage matter.",
+    "cefMetrics": {
+      "nav": 13.67,
+      "marketPrice": 12.88,
+      "premiumDiscount": -0.0585,
+      "effectiveLeverage": 0.4048,
+      "distributionRate": 0.1049767,
+      "latestDistributionAmount": 0.1125,
+      "distributionFrequency": "monthly",
+      "expenseRatioTotal": 0.0526,
+      "sourceNote": "Mirrored from this row's top-level GhostYield fields and the CEF Connect citation in sourceLabel."
+    }
   },
   {
     "avoidIf": "You need FDIC safety.",
@@ -342,7 +353,27 @@
     "structureLabel": "Listed BDC (stock)",
     "ticker": "ARCC",
     "updateFrequency": "monthly",
-    "yieldSource": "BDC dividends from middle-market lending."
+    "yieldSource": "BDC dividends from middle-market lending.",
+    "bdcMetrics": {
+      "navPerShare": 19.94,
+      "navAsOf": "2025-12-31",
+      "regularDividend": 0.48,
+      "latestDividendDeclared": 0.48,
+      "latestDividendPayableDate": "2026-03-31",
+      "dividendFrequency": "quarterly",
+      "niiPerShare": 0.52,
+      "dividendCoverageRatio": 1.08,
+      "coverageBasis": "Q4'25 net investment income per share vs regular quarterly dividend (per 8-K exhibit).",
+      "debtToEquity": 1.12,
+      "netDebtToEquity": 1.08,
+      "leverageAsOf": "2025-12-31",
+      "nonAccrualCostPct": 0.018,
+      "nonAccrualFairValuePct": 0.012,
+      "firstLienPct": 0.61,
+      "portfolioYieldAtFairValue": 0.103,
+      "internalExternalManagement": "Externally managed (Ares affiliate); fees described in source filing.",
+      "sourceNote": "Mirrored from this row's top-level fields, sourceLabel, and mainRisks (Form 8-K exhibit as cited)."
+    }
   },
   {
     "avoidIf": "You want minimal leverage and zero complexity from incentive fees, or you dislike Blackstone-affiliate management alignment questions.",
@@ -388,7 +419,27 @@
     "structureLabel": "Listed BDC (stock)",
     "ticker": "BXSL",
     "updateFrequency": "monthly",
-    "yieldSource": "BDC lending and fee-related economics — dividend forward."
+    "yieldSource": "BDC lending and fee-related economics — dividend forward.",
+    "bdcMetrics": {
+      "navPerShare": 26.92,
+      "navAsOf": "2025-12-31",
+      "regularDividend": 0.77,
+      "latestDividendDeclared": 0.77,
+      "latestDividendPayableDate": "2026-04-24",
+      "dividendFrequency": "quarterly",
+      "niiPerShare": 0.8,
+      "dividendCoverageRatio": 1.04,
+      "coverageBasis": "Q4'25 net investment income vs regular quarterly dividend (issuer coverage 104% per 8-K exhibit).",
+      "debtToEquity": 1.3,
+      "netDebtToEquity": 1.27,
+      "leverageAsOf": "2025-12-31",
+      "nonAccrualCostPct": 0.006,
+      "nonAccrualFairValuePct": 0.005,
+      "firstLienPct": 0.976,
+      "portfolioYieldAtFairValue": 0.096,
+      "internalExternalManagement": "Externally managed (Blackstone Private Credit Strategies LLC); fees per filing.",
+      "sourceNote": "Mirrored from this row's top-level fields, sourceLabel, and mainRisks (Form 8-K exhibit as cited)."
+    }
   },
   {
     "avoidIf": "You want simple, low-leverage income.",
@@ -433,7 +484,16 @@
     "structureLabel": "CEF",
     "ticker": "KIO",
     "updateFrequency": "monthly",
-    "yieldSource": "Leveraged closed-end credit fund — distributions may include return of capital; premium to NAV can collapse."
+    "yieldSource": "Leveraged closed-end credit fund — distributions may include return of capital; premium to NAV can collapse.",
+    "cefMetrics": {
+      "nav": 11.86,
+      "marketPrice": 11,
+      "premiumDiscount": -0.0725,
+      "distributionRate": 0.132545,
+      "latestDistributionAmount": 0.1215,
+      "distributionFrequency": "monthly",
+      "sourceNote": "Mirrored from this row's top-level GhostYield fields and the KKR fund-facts citation in sourceLabel."
+    }
   },
   {
     "avoidIf": "You want low volatility.",
@@ -477,7 +537,18 @@
     "structureLabel": "CEF",
     "ticker": "EMO",
     "updateFrequency": "monthly",
-    "yieldSource": "Midstream / energy infrastructure cash flows; closed-end structure adds leverage and NAV volatility."
+    "yieldSource": "Midstream / energy infrastructure cash flows; closed-end structure adds leverage and NAV volatility.",
+    "cefMetrics": {
+      "nav": 56.91,
+      "marketPrice": 49.4,
+      "premiumDiscount": -0.1237,
+      "effectiveLeverage": 0.1957,
+      "distributionRate": 0.0866252,
+      "latestDistributionAmount": 0.36,
+      "distributionFrequency": "monthly",
+      "expenseRatioTotal": 0.0312,
+      "sourceNote": "Mirrored from this row's top-level GhostYield fields and the CEF Connect citation in sourceLabel."
+    }
   },
   {
     "avoidIf": "You fear prolonged commodity softness.",
@@ -521,7 +592,18 @@
     "structureLabel": "CEF",
     "ticker": "TYG",
     "updateFrequency": "monthly",
-    "yieldSource": "Energy infrastructure distributions — pipeline and related assets inside a CEF wrapper."
+    "yieldSource": "Energy infrastructure distributions — pipeline and related assets inside a CEF wrapper.",
+    "cefMetrics": {
+      "nav": 48.57,
+      "marketPrice": 46.36,
+      "premiumDiscount": 0.0043,
+      "effectiveLeverage": 0.2138,
+      "distributionRate": 0.1168512,
+      "latestDistributionAmount": 0.475,
+      "distributionFrequency": "monthly",
+      "expenseRatioTotal": 0.0313,
+      "sourceNote": "Mirrored from this row's top-level GhostYield fields and the CEF Connect citation in sourceLabel."
+    }
   },
   {
     "avoidIf": "You need daily transparency and scale.",
@@ -565,7 +647,18 @@
     "structureLabel": "CEF",
     "ticker": "SPE",
     "updateFrequency": "monthly",
-    "yieldSource": "Special situations and opportunistic positions — read filings; liquidity can be thin."
+    "yieldSource": "Special situations and opportunistic positions — read filings; liquidity can be thin.",
+    "cefMetrics": {
+      "nav": 16.09,
+      "marketPrice": 14.5,
+      "premiumDiscount": -0.1038,
+      "effectiveLeverage": 0.2464,
+      "distributionRate": 0.0904577,
+      "latestDistributionAmount": 0.1087,
+      "distributionFrequency": "monthly",
+      "expenseRatioTotal": 0.0186,
+      "sourceNote": "Mirrored from this row's top-level GhostYield fields and the CEF Connect citation in sourceLabel."
+    }
   },
   {
     "avoidIf": "You dislike activism-style events.",
@@ -610,7 +703,18 @@
     "structureLabel": "CEF",
     "ticker": "BRW",
     "updateFrequency": "monthly",
-    "yieldSource": "Event- and activism-adjacent credit sleeve — follow tender offers and proxy language."
+    "yieldSource": "Event- and activism-adjacent credit sleeve — follow tender offers and proxy language.",
+    "cefMetrics": {
+      "nav": 7.63,
+      "marketPrice": 6.88,
+      "premiumDiscount": -0.1007,
+      "effectiveLeverage": 0.1335,
+      "distributionRate": 0.1482558,
+      "latestDistributionAmount": 0.085,
+      "distributionFrequency": "monthly",
+      "expenseRatioTotal": 0.0582,
+      "sourceNote": "Mirrored from this row's top-level GhostYield fields and the CEF Connect citation in sourceLabel."
+    }
   },
   {
     "avoidIf": "You want zero commodity exposure.",
@@ -654,7 +758,18 @@
     "structureLabel": "CEF",
     "ticker": "PEO",
     "updateFrequency": "quarterly",
-    "yieldSource": "Natural resource equities — dividend policy tied to commodity cycles and corporate strategy."
+    "yieldSource": "Natural resource equities — dividend policy tied to commodity cycles and corporate strategy.",
+    "cefMetrics": {
+      "nav": 28.46,
+      "marketPrice": 25.32,
+      "premiumDiscount": -0.1103,
+      "effectiveLeverage": 0.007,
+      "distributionRate": 0.0817289,
+      "latestDistributionAmount": 0.52,
+      "distributionFrequency": "quarterly",
+      "expenseRatioTotal": 0.0062,
+      "sourceNote": "Mirrored from this row's top-level GhostYield fields and the CEF Connect citation in sourceLabel."
+    }
   },
   {
     "avoidIf": "You hate K-1s and complexity.",
@@ -698,7 +813,18 @@
     "structureLabel": "CEF",
     "ticker": "NML",
     "updateFrequency": "monthly",
-    "yieldSource": "MLP / midstream distributions — often K-1 or blocker structures; check tax packaging."
+    "yieldSource": "MLP / midstream distributions — often K-1 or blocker structures; check tax packaging.",
+    "cefMetrics": {
+      "nav": 11.36,
+      "marketPrice": 9.88,
+      "premiumDiscount": -0.1226,
+      "effectiveLeverage": 0.2132,
+      "distributionRate": 0.0835114,
+      "latestDistributionAmount": 0.0701,
+      "distributionFrequency": "monthly",
+      "expenseRatioTotal": 0.0107,
+      "sourceNote": "Mirrored from this row's top-level GhostYield fields and the CEF Connect citation in sourceLabel."
+    }
   },
   {
     "avoidIf": "You need non-cyclical income.",
@@ -742,7 +868,18 @@
     "structureLabel": "CEF",
     "ticker": "SRV",
     "updateFrequency": "monthly",
-    "yieldSource": "Midstream energy cash flows — storage and logistics economics; still cyclical."
+    "yieldSource": "Midstream energy cash flows — storage and logistics economics; still cyclical.",
+    "cefMetrics": {
+      "nav": 49.41,
+      "marketPrice": 47.57,
+      "premiumDiscount": -0.0302,
+      "effectiveLeverage": 0.1934,
+      "distributionRate": 0.1126878,
+      "latestDistributionAmount": 0.45,
+      "distributionFrequency": "monthly",
+      "expenseRatioTotal": 0.0432,
+      "sourceNote": "Mirrored from this row's top-level GhostYield fields and the CEF Connect citation in sourceLabel."
+    }
   },
   {
     "avoidIf": "You are overweight energy already.",
@@ -786,7 +923,18 @@
     "structureLabel": "CEF",
     "ticker": "KYN",
     "updateFrequency": "monthly",
-    "yieldSource": "Energy infrastructure portfolio — pipelines and related assets; closed-end fund leverage applies."
+    "yieldSource": "Energy infrastructure portfolio — pipelines and related assets; closed-end fund leverage applies.",
+    "cefMetrics": {
+      "nav": 16.04,
+      "marketPrice": 13.61,
+      "premiumDiscount": -0.1428,
+      "effectiveLeverage": 0.2402,
+      "distributionRate": 0.0741818,
+      "latestDistributionAmount": 0.085,
+      "distributionFrequency": "monthly",
+      "expenseRatioTotal": 0.033,
+      "sourceNote": "Mirrored from this row's top-level GhostYield fields and the CEF Connect citation in sourceLabel."
+    }
   },
   {
     "avoidIf": "You need full index upside.",

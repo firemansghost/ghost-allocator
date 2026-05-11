@@ -57,6 +57,52 @@ export interface GhostYieldCategoryMeta {
   comingSoon?: boolean;
 }
 
+/** Optional CEF wrapper metrics (manual snapshot; not all rows). */
+export interface GhostYieldCefMetrics {
+  nav?: number | null;
+  marketPrice?: number | null;
+  premiumDiscount?: number | null;
+  effectiveLeverage?: number | null;
+  leverageType?: string | null;
+  leverageAsOf?: string | null;
+  distributionRate?: number | null;
+  distributionRateBasis?: string | null;
+  latestDistributionAmount?: number | null;
+  distributionFrequency?: string | null;
+  expenseRatioTotal?: number | null;
+  expenseRatioBasis?: string | null;
+  expenseAsOf?: string | null;
+  coverageRatio?: number | null;
+  uniiPerShare?: number | null;
+  managedDistributionPolicy?: string | null;
+  returnOfCapitalNote?: string | null;
+  sourceNote?: string | null;
+}
+
+/** Optional listed BDC metrics (manual snapshot; not all rows). */
+export interface GhostYieldBdcMetrics {
+  navPerShare?: number | null;
+  navAsOf?: string | null;
+  regularDividend?: number | null;
+  supplementalDividend?: number | null;
+  latestDividendDeclared?: number | null;
+  latestDividendPayableDate?: string | null;
+  dividendFrequency?: string | null;
+  niiPerShare?: number | null;
+  dividendCoverageRatio?: number | null;
+  coverageBasis?: string | null;
+  debtToEquity?: number | null;
+  netDebtToEquity?: number | null;
+  leverageAsOf?: string | null;
+  nonAccrualCostPct?: number | null;
+  nonAccrualFairValuePct?: number | null;
+  firstLienPct?: number | null;
+  portfolioYieldAtFairValue?: number | null;
+  internalExternalManagement?: string | null;
+  managementFeeNote?: string | null;
+  sourceNote?: string | null;
+}
+
 /** Raw row before scoring (scores and freshness added by scoring.ts). */
 export interface GhostYieldCandidateRaw {
   ticker: string;
@@ -114,6 +160,10 @@ export interface GhostYieldCandidateRaw {
   quarterlyFundamentalDataAsOf?: string;
   sourceUrl?: string;
   updateFrequency?: UpdateFrequency;
+  /** Optional structured CEF fields (mirrors cited snapshot; does not replace generic columns). */
+  cefMetrics?: GhostYieldCefMetrics;
+  /** Optional structured listed-BDC fields (mirrors cited snapshot; does not replace generic columns). */
+  bdcMetrics?: GhostYieldBdcMetrics;
 }
 
 export interface GhostYieldCandidate extends GhostYieldCandidateRaw {
