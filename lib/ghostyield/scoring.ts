@@ -1,8 +1,13 @@
 /**
- * GhostYield deterministic scoring (Phase 2).
+ * GhostYield deterministic scoring (Phase 2 + Phase 5.2 structured metrics).
  *
  * Risk score 0–100: higher = riskier sleeve characteristics.
  * Fit score 0–100: higher = better fit as a satellite yield sleeve around a core portfolio.
+ *
+ * Phase 5.2: optional `cefMetrics` / `bdcMetrics` add modest, transparent adjustments. CEF blocks focus on structural
+ * leverage (asset-based %), premium-to-NAVrichness, expense burden, and payout/coverage stress. BDC blocks focus on
+ * dividend coverage, non-accrual credit quality, balance-sheet leverage (debt/equity), and first-lien portfolio tilt.
+ * Premium/discount and leverage slices are deduped when structured metrics replace generic inputs.
  *
  * Pure functions only — no I/O.
  */
@@ -105,6 +110,150 @@ function leverageRiskPoints(leverage?: number): number {
   return 0;
 }
 
+/**
+ * CEF structural leverage as fraction of assets (e.g. 0.25 = 25%). Tiered risk — does not use debt/equity thresholds.
+ */
+function cefStructuralLeverageRiskPoints(effectiveLeverage: number): number {
+  if (effectiveLeverage < 0.15) return 1;
+  if (effectiveLeverage < 0.25) return 4;
+  if (effectiveLeverage < 0.35) return 7;
+  if (effectiveLeverage <= 0.4) return 10;
+  return 13;
+}
+
+/** CEF premium risk only (discounts do not reduce risk here). */
+function cefPremiumDiscountRiskPointsFromPremium(premium: number): number {
+  if (premium <= 0) return 0;
+  if (premium > 0.1) return 10;
+  if (premium > 0.05) return 5;
+  return 0;
+}
+
+/** BDC regulatory-style debt/equity (e.g. 1.12 = 112%). Replaces generic leverageRiskPoints when structured. */
+function bdcDebtToEquityRiskPoints(debtToEquity: number): number {
+  if (debtToEquity < 1.0) return 3;
+  if (debtToEquity < 1.25) return 7;
+  if (debtToEquity < 1.5) return 11;
+  return 15;
+}
+
+function cefExpenseBurdenRiskPoints(expenseRatioTotal: number): number {
+  if (expenseRatioTotal > 0.05) return 8;
+  if (expenseRatioTotal > 0.04) return 5;
+  if (expenseRatioTotal > 0.025) return 3;
+  return 0;
+}
+
+/**
+ * CEF payout stress: high stated distribution rate with weak quality, thin coverage, or negative UNII.
+ * Adjustment weights `cefMetrics.distributionRate` when present.
+ */
+function cefPayoutStressRiskPoints(row: GhostYieldCandidateRaw): number {
+  const cef = row.cefMetrics;
+  if (!cef) return 0;
+  let p = 0;
+  const dq = row.distributionQuality;
+  const distRate = cef.distributionRate ?? row.distributionRate;
+  if ((dq === 'weak' || dq === 'uncertain') && distRate != null && distRate > 0.12) {
+    p += 4;
+  } else if (dq === 'weak' && distRate != null && distRate > 0.09) {
+    p += 2;
+  }
+  const cov = cef.coverageRatio;
+  if (cov != null && cov < 1.0) p += 4;
+  const unii = cef.uniiPerShare;
+  if (unii != null && unii < 0) p += 4;
+  return Math.min(14, p);
+}
+
+function bdcNonAccrualRiskPoints(pct: number): number {
+  if (pct >= 0.05) return 9;
+  if (pct >= 0.03) return 6;
+  if (pct >= 0.01) return 3;
+  return 0;
+}
+
+/**
+ * Extra CEF risk/fit from structured fields excluding leverage & premium (handled in main risk/fit to avoid double-count).
+ * CEF adjustments: expense burden + payout stress (risk); modest valuation fit when wide discount aligns with quality/NAV.
+ */
+export function scoreCefMetricAdjustments(row: GhostYieldCandidateRaw): { risk: number; fit: number } {
+  const cef = row.cefMetrics;
+  if (!cef) return { risk: 0, fit: 0 };
+
+  let risk = 0;
+  const er = cef.expenseRatioTotal;
+  if (er != null) risk += cefExpenseBurdenRiskPoints(er);
+  risk += cefPayoutStressRiskPoints(row);
+
+  let fit = 0;
+  const pd = cef.premiumDiscount ?? row.premiumDiscount;
+  const nav1y = effectiveNavPerformance1Y(row);
+  const navWeak = nav1y != null && nav1y < -0.03;
+  const qualWeak = row.distributionQuality === 'weak';
+  if (pd != null && pd < -0.1 && !qualWeak && !navWeak) {
+    fit += 3;
+  }
+
+  return { risk, fit };
+}
+
+/**
+ * BDC structured metrics: coverage, non-accruals, first-lien tilt (debt/equity risk is applied in main score).
+ * BDC adjustments: dividend coverage and non-accruals (risk); coverage and seniority (fit).
+ */
+export function scoreBdcMetricAdjustments(row: GhostYieldCandidateRaw): { risk: number; fit: number } {
+  const bdc = row.bdcMetrics;
+  if (!bdc) return { risk: 0, fit: 0 };
+
+  let risk = 0;
+  let fit = 0;
+
+  const cov = bdc.dividendCoverageRatio;
+  if (cov != null) {
+    if (cov < 0.9) risk += 9;
+    else if (cov < 1.0) risk += 4;
+
+    if (cov >= 1.1) fit += 4;
+    else if (cov >= 1.0) fit += 2;
+  }
+
+  const na = bdc.nonAccrualCostPct;
+  if (na != null) risk += bdcNonAccrualRiskPoints(na);
+
+  const fl = bdc.firstLienPct;
+  if (fl != null) {
+    if (fl > 0.8) fit += 4;
+    else if (fl < 0.6) fit -= 3;
+  }
+
+  return { risk, fit };
+}
+
+function structuralLeverageRiskPoints(row: GhostYieldCandidateRaw): number {
+  if (row.cefMetrics?.effectiveLeverage != null) {
+    return cefStructuralLeverageRiskPoints(row.cefMetrics.effectiveLeverage);
+  }
+  if (row.bdcMetrics?.debtToEquity != null) {
+    return bdcDebtToEquityRiskPoints(row.bdcMetrics.debtToEquity);
+  }
+  return leverageRiskPoints(row.leverage);
+}
+
+function premiumScheduleRiskPoints(row: GhostYieldCandidateRaw): number {
+  if (row.cefMetrics) {
+    const pd = row.cefMetrics.premiumDiscount ?? row.premiumDiscount;
+    if (pd == null) return 0;
+    return cefPremiumDiscountRiskPointsFromPremium(pd);
+  }
+  return premiumRiskPoints(row.premiumDiscount, row.sleeveType);
+}
+
+/** Listed BDC + null headline yield: NAV-quoted distributionRate must not drive generic payout stress heuristics. */
+function skipBdcNavQuotedDistributionStress(row: GhostYieldCandidateRaw): boolean {
+  return row.bdcMetrics != null && row.currentYield == null;
+}
+
 /** Negative NAV CAGR adds risk; positive reduces slightly */
 function navTrendRiskPoints(nav1y?: number, nav3y?: number): number {
   let p = 0;
@@ -118,6 +267,7 @@ function navTrendRiskPoints(nav1y?: number, nav3y?: number): number {
 
 /** High carry + NAV shrink */
 function highYieldNegativeNavPoints(row: GhostYieldCandidateRaw): number {
+  if (skipBdcNavQuotedDistributionStress(row)) return 0;
   const nav1y = effectiveNavPerformance1Y(row);
   if (nav1y == null || nav1y >= 0) return 0;
   const y = Math.max(row.currentYield ?? 0, row.distributionRate ?? 0);
@@ -149,6 +299,7 @@ function distributionVersusSecPoints(row: GhostYieldCandidateRaw): number {
 
 /** Payout looks high vs NAV trend (unsustainable heuristic). */
 function payoutVersusNavTrendPoints(row: GhostYieldCandidateRaw): number {
+  if (skipBdcNavQuotedDistributionStress(row)) return 0;
   const d = row.distributionRate ?? row.currentYield ?? 0;
   const nav1y = effectiveNavPerformance1Y(row);
   if (nav1y == null) return 0;
@@ -221,13 +372,15 @@ export function computeGhostYieldRiskScore(
   const dc = effectiveDataConfidence(row);
   const nav1y = effectiveNavPerformance1Y(row);
   const nav3y = effectiveNavPerformance3Y(row);
+  const cefAdj = scoreCefMetricAdjustments(row);
+  const bdcAdj = scoreBdcMetricAdjustments(row);
 
   let score =
     categoryBaseRisk(row.sleeveType) +
     yieldRiskPoints(row.currentYield) +
-    leverageRiskPoints(row.leverage) +
+    structuralLeverageRiskPoints(row) +
     navTrendRiskPoints(nav1y, nav3y) +
-    premiumRiskPoints(row.premiumDiscount, row.sleeveType) +
+    premiumScheduleRiskPoints(row) +
     distributionQualityWeight(row.distributionQuality) +
     confidencePenalty(dc) +
     yieldSourceComplexityPoints(row.yieldSource) +
@@ -236,7 +389,9 @@ export function computeGhostYieldRiskScore(
     distributionVersusSecPoints(row) +
     payoutVersusNavTrendPoints(row) +
     missingNavPoints(row) +
-    freshnessDataPenalty(freshness);
+    freshnessDataPenalty(freshness) +
+    cefAdj.risk +
+    bdcAdj.risk;
 
   return clampInt(score, 0, 100);
 }
@@ -244,6 +399,9 @@ export function computeGhostYieldRiskScore(
 export function computeGhostYieldFitScore(row: GhostYieldCandidateRaw, freshness: CandidateFreshnessResult): number {
   const dc = effectiveDataConfidence(row);
   let fit = 72;
+  const cefAdj = scoreCefMetricAdjustments(row);
+  const bdcAdj = scoreBdcMetricAdjustments(row);
+  fit += cefAdj.fit + bdcAdj.fit;
 
   const y = row.currentYield;
   if (y != null) {
@@ -288,16 +446,18 @@ export function computeGhostYieldFitScore(row: GhostYieldCandidateRaw, freshness
     else if (lev >= 1.15) fit -= 5;
   }
 
-  if (row.premiumDiscount != null) {
+  const premiumForFit = row.cefMetrics?.premiumDiscount ?? row.premiumDiscount;
+  if (premiumForFit != null) {
     if (usesNavPremiumSchedule(row.sleeveType)) {
-      if (row.premiumDiscount < -0.05) fit += 8;
-      if (row.premiumDiscount > 0.12) fit -= 10;
+      if (premiumForFit < -0.05) fit += 8;
+      if (premiumForFit > 0.12) fit -= 10;
     }
   }
 
-  if (row.expenseRatio != null) {
-    if (row.expenseRatio <= 0.005) fit += 4;
-    if (row.expenseRatio >= 0.025) fit -= 8;
+  const expenseForFit = row.cefMetrics?.expenseRatioTotal ?? row.expenseRatio;
+  if (expenseForFit != null) {
+    if (expenseForFit <= 0.005) fit += 4;
+    if (expenseForFit >= 0.025) fit -= 8;
   }
 
   switch (dc) {
