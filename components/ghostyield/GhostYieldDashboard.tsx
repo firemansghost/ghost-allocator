@@ -128,7 +128,7 @@ export function GhostYieldDashboard() {
       </div>
 
       <GlassCard className="p-4 sm:p-5">
-        <h2 className="text-sm font-semibold text-zinc-200 mb-2">Methodology & source data (Phase 4.8)</h2>
+        <h2 className="text-sm font-semibold text-zinc-200 mb-2">Methodology & source data (Phase 4.11)</h2>
         <div className="text-sm text-zinc-400 leading-relaxed space-y-3 max-w-4xl">
           <p className="text-zinc-300">
             <span className="text-zinc-200">Risk Score</span> is GhostYield&apos;s sleeve / investment risk estimate
@@ -138,7 +138,7 @@ export function GhostYieldDashboard() {
             and do not treat one as a substitute for the other.
           </p>
           <p className="text-zinc-300">
-            Manual JSON research snapshot only — not live pricing or feeds. Phase 4.8 keeps the same discipline: fields
+            Manual JSON research snapshot only — not live pricing or feeds. Phase 4.11 keeps the same discipline: fields
             are filled only when a number can be tied to a <span className="text-zinc-200">cited source</span> (sponsor
             page, factsheet PDF, CEF Connect summary, SEC filing, etc.); otherwise they stay{' '}
             <span className="text-zinc-200">null</span>. A Phase 4.4 refresh updated several ETF and option-income rows
@@ -152,7 +152,7 @@ export function GhostYieldDashboard() {
             chain. <span className="text-zinc-300">No automated source validation.</span>
           </p>
           <p>
-            Phase 4.8 clarifies screener copy so <span className="text-zinc-300">Data QA</span> (snapshot completeness)
+            Phase 4.11 clarifies screener copy so <span className="text-zinc-300">Data QA</span> (snapshot completeness)
             is not confused with <span className="text-zinc-300">Risk Score</span> (investment / sleeve risk). Rows in{' '}
             <code className="text-amber-400/90">data/ghostyield/candidates.manual.json</code> carry{' '}
             <span className="text-zinc-300">sourceUrl</span>, <span className="text-zinc-300">sourceLabel</span>, and
