@@ -88,11 +88,12 @@ export function DataFreshnessPanel({
       ) : null}
 
       <p className="text-xs text-zinc-500 leading-relaxed border-t border-zinc-800/80 pt-3">
-        Phase 4.4 manual snapshot in{' '}
+        Phase 4.7 manual snapshot in{' '}
         <code className="text-amber-400/80 text-[11px]">data/ghostyield/candidates.manual.json</code>. Some rows cite
         CEF Connect as a secondary aggregation source (see per-row sourceLabel), not live sponsor feeds. Missing
-        numerics were not verified from the cited source. No automated source validation. For research / UI only—not tax
-        or trade advice.
+        numerics were not verified from the cited source. No automated source validation. For sourcing rules and the CEF
+        caveat in full, see Methodology & source data at the bottom of this page. For research / UI only—not tax or trade
+        advice.
       </p>
     </GlassCard>
   );

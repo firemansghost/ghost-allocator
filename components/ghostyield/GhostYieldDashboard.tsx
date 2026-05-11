@@ -28,26 +28,31 @@ export function GhostYieldDashboard() {
     <div className="space-y-8">
       <header className="space-y-3">
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-50">GhostYield</h1>
-        <p className="text-sm text-zinc-300 max-w-3xl leading-relaxed">
-          Yield sleeve research dashboard — not a model portfolio, not a recommendation engine.{' '}
-          <span className="text-zinc-200">
-            Phase 4.2–4.4 keeps a manual research snapshot in JSON: numbers are filled only when tied to a cited source
-            (sponsor page, factsheet PDF, CEF Connect summary, or filing); otherwise null. Phase 4.4 refreshed several ETF
-            and option-income rows from sponsor PDFs and SEC documents. This is not live data and automated validation
-            is not active. Some closed-end rows cite CEF Connect as an interim aggregation source — see each row&apos;s
-            sourceLabel, not sponsor-primary.
-          </span>{' '}
-          GhostYield compares how income-producing funds generate cash, what risks they layer on top of a core
-          portfolio, whether NAV is cooperating, and whether distributions look durable or stretched.
+        <div className="flex flex-wrap gap-2">
+          <span className="inline-flex items-center rounded-md border border-amber-500/35 bg-amber-950/30 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-amber-200/90">
+            Manual snapshot
+          </span>
+          <span className="inline-flex items-center rounded-md border border-zinc-600/80 bg-zinc-900/45 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-zinc-400">
+            Not live data
+          </span>
+        </div>
+        <p className="text-sm text-zinc-300 max-w-2xl leading-relaxed">
+          GhostYield is a yield sleeve research dashboard for comparing income-producing funds around an existing
+          portfolio. It looks at yield source, NAV behavior, payout quality, data freshness, and sleeve risk — not just
+          headline yield. Not a model portfolio and not a recommendation engine.
+        </p>
+        <p className="text-xs text-zinc-500 max-w-2xl leading-relaxed">
+          Phase 4.7 uses a manually maintained JSON research snapshot. Live feeds and automated source validation are not
+          active yet.
         </p>
       </header>
 
       <GlassCard className="p-4 sm:p-5 border-amber-500/20 bg-amber-950/15">
-        <p className="text-sm text-zinc-200 leading-relaxed">
+        <p className="text-sm text-zinc-200 leading-relaxed max-w-3xl">
           <strong className="text-amber-200/95">Disclaimer:</strong> GhostYield does not recommend purchases or
-          allocations. It helps evaluate yield-producing sleeves by risk source, NAV behavior, distribution
-          quality, and current conditions. High headline yield can come with credit risk, NAV erosion, leverage,
-          option strategy drag, or return-of-capital mechanics. Research only. Not financial advice.
+          allocations. It helps you evaluate yield-producing sleeves by risk source, NAV behavior, distribution quality,
+          and current conditions. High headline yield can come with credit risk, NAV erosion, leverage, option strategy
+          drag, or return-of-capital mechanics. <strong className="text-zinc-100">Research only. Not financial advice.</strong>
         </p>
       </GlassCard>
 
@@ -60,7 +65,7 @@ export function GhostYieldDashboard() {
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
-          Candidate screener (Phase 4.4 manual JSON research snapshot)
+          Candidate screener (Phase 4.7 manual JSON research snapshot)
         </h2>
         <p className="text-xs text-zinc-400 leading-relaxed max-w-4xl border-l-2 border-zinc-700 pl-3">
           <span className="text-zinc-300">Screener guide (Phase 4.6):</span> Yield uses the best available sourced
@@ -93,22 +98,33 @@ export function GhostYieldDashboard() {
       </div>
 
       <GlassCard className="p-4 sm:p-5">
-        <h2 className="text-sm font-semibold text-zinc-200 mb-2">Methodology (Phase 4.4)</h2>
-        <p className="text-sm text-zinc-400 leading-relaxed">
-          <span className="text-zinc-300">
-            Manual research snapshot only — not live pricing or feeds. Rows may cite sponsor URLs, CEF Connect (Nuveen /
-            Morningstar summaries) as an interim secondary source for some CEF figures, or SEC links; sourceLabel on each
-            row states what was used. Unverifiable fields stay null.
-          </span>{' '}
-          Phase 4.6 clarifies screener columns so <span className="text-zinc-300">Data QA</span> (snapshot completeness)
-          is not confused with <span className="text-zinc-300">Risk Score</span> (investment/sleeve risk).{' '}
-          Rows in{' '}
-          <code className="text-amber-400/90">data/ghostyield/candidates.manual.json</code> carry source URLs and as-of
-          fields — scoring in{' '}
-          <code className="text-amber-400/90">lib/ghostyield/scoring.ts</code>, freshness in{' '}
-          <code className="text-amber-400/90">lib/ghostyield/dataFreshness.ts</code>. The screener Yield column prefers
-          current yield, then distribution rate, then SEC yield (see detail panel).
-        </p>
+        <h2 className="text-sm font-semibold text-zinc-200 mb-2">Methodology & source data (Phase 4.7)</h2>
+        <div className="text-sm text-zinc-400 leading-relaxed space-y-3 max-w-4xl">
+          <p className="text-zinc-300">
+            Manual JSON research snapshot only — not live pricing or feeds. Phase 4.7 keeps the same discipline: fields
+            are filled only when a number can be tied to a <span className="text-zinc-200">cited source</span> (sponsor
+            page, factsheet PDF, CEF Connect summary, SEC filing, etc.); otherwise they stay{' '}
+            <span className="text-zinc-200">null</span>. A Phase 4.4 refresh updated several ETF and option-income rows
+            from sponsor PDFs and SEC documents; the grid remains manually maintained and static.
+          </p>
+          <p>
+            Some closed-end rows cite <span className="text-zinc-300">CEF Connect</span> (Nuveen / Morningstar-style
+            summaries) as an <span className="text-zinc-300">interim secondary</span> source for figures — always read each
+            row&apos;s <span className="text-zinc-300">sourceLabel</span> and{' '}
+            <span className="text-zinc-300">sourceUrl</span> for what was actually used, not an assumed sponsor-primary
+            chain. <span className="text-zinc-300">No automated source validation.</span>
+          </p>
+          <p>
+            Phase 4.6 clarifies screener columns so <span className="text-zinc-300">Data QA</span> (snapshot completeness)
+            is not confused with <span className="text-zinc-300">Risk Score</span> (investment / sleeve risk). Rows in{' '}
+            <code className="text-amber-400/90">data/ghostyield/candidates.manual.json</code> carry{' '}
+            <span className="text-zinc-300">sourceUrl</span>, <span className="text-zinc-300">sourceLabel</span>, and
+            lineage as-of fields — scoring in{' '}
+            <code className="text-amber-400/90">lib/ghostyield/scoring.ts</code>, freshness in{' '}
+            <code className="text-amber-400/90">lib/ghostyield/dataFreshness.ts</code>. The screener Yield column prefers
+            current yield, then distribution rate, then SEC yield (see detail panel).
+          </p>
+        </div>
       </GlassCard>
     </div>
   );
