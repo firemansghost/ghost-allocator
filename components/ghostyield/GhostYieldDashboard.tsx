@@ -42,7 +42,7 @@ export function GhostYieldDashboard() {
           headline yield. Not a model portfolio and not a recommendation engine.
         </p>
         <p className="text-xs text-zinc-500 max-w-2xl leading-relaxed">
-          Phase 4.8 uses a manually maintained JSON research snapshot. Live feeds and automated source validation are not
+          Phase 4.11 uses a manually maintained JSON research snapshot. Live feeds and automated source validation are not
           active yet.
         </p>
       </header>
@@ -56,6 +56,36 @@ export function GhostYieldDashboard() {
         </p>
       </GlassCard>
 
+      <GlassCard className="p-4 sm:p-5 border-zinc-800/80 bg-zinc-950/35">
+        <h2 className="text-sm font-semibold text-zinc-200 mb-3">What GhostYield is — and is not</h2>
+        <div className="grid gap-4 sm:grid-cols-2 text-xs sm:text-sm">
+          <div className="space-y-2">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-400/85">GhostYield is</p>
+            <ul className="list-disc list-inside text-zinc-400 space-y-1 leading-snug">
+              <li>A yield sleeve research dashboard</li>
+              <li>
+                A way to compare income-producing funds by yield source, NAV behavior, payout quality, data quality, and
+                sleeve risk
+              </li>
+              <li>A tool for asking better questions before adding yield around an existing portfolio</li>
+            </ul>
+          </div>
+          <div className="space-y-2">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">GhostYield is not</p>
+            <ul className="list-disc list-inside text-zinc-400 space-y-1 leading-snug">
+              <li>A buy/sell recommendation engine</li>
+              <li>A complete portfolio builder</li>
+              <li>A promise that high yield equals high return</li>
+              <li>A substitute for reading fund documents, filings, and tax details</li>
+            </ul>
+          </div>
+        </div>
+        <p className="mt-3 text-[11px] text-zinc-500 italic border-t border-zinc-800/60 pt-3">
+          Yield is not magic. It is usually compensation for some kind of risk — including credit, leverage, NAV erosion,
+          option strategy drag, or return-of-capital mechanics.
+        </p>
+      </GlassCard>
+
       <YieldEnvironmentGauge env={GHOSTYIELD_SAMPLE_ENV} />
 
       <section className="space-y-3">
@@ -65,7 +95,7 @@ export function GhostYieldDashboard() {
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
-          Candidate screener (Phase 4.8 manual JSON research snapshot)
+          Candidate screener (Phase 4.11 manual JSON research snapshot)
         </h2>
         <p className="text-xs text-zinc-400 leading-relaxed max-w-4xl border-l-2 border-zinc-700 pl-3">
           <span className="text-zinc-300">Screener guide:</span> Yield uses the best available sourced metric on each row:
