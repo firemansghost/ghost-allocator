@@ -62,6 +62,16 @@ export function GhostYieldDashboard() {
         <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
           Candidate screener (Phase 4.4 manual JSON research snapshot)
         </h2>
+        <p className="text-xs text-zinc-400 leading-relaxed max-w-4xl border-l-2 border-zinc-700 pl-3">
+          <span className="text-zinc-300">Screener guide (Phase 4.6):</span> Yield uses the best available sourced
+          metric on each row: current yield, then distribution rate, then SEC yield. <span className="text-zinc-300">Payout</span>{' '}
+          reflects distribution quality from the snapshot. <span className="text-zinc-300">Data QA</span> reflects source-data
+          freshness and completeness —{' '}
+          <span className="text-zinc-200">not investment risk</span>.{' '}
+          <span className="text-zinc-300">Risk Score</span> is 0–100 where higher is riskier (sleeve and structure risk).
+          <span className="text-zinc-300"> Fit Score</span> is 0–100 where higher is a cleaner fit as a yield sleeve. Hover
+          column headers or scores for band definitions.
+        </p>
         <CandidateTable
           candidates={GHOSTYIELD_SCORED_CANDIDATES}
           selectedTicker={selectedTicker}
@@ -90,6 +100,8 @@ export function GhostYieldDashboard() {
             Morningstar summaries) as an interim secondary source for some CEF figures, or SEC links; sourceLabel on each
             row states what was used. Unverifiable fields stay null.
           </span>{' '}
+          Phase 4.6 clarifies screener columns so <span className="text-zinc-300">Data QA</span> (snapshot completeness)
+          is not confused with <span className="text-zinc-300">Risk Score</span> (investment/sleeve risk).{' '}
           Rows in{' '}
           <code className="text-amber-400/90">data/ghostyield/candidates.manual.json</code> carry source URLs and as-of
           fields — scoring in{' '}

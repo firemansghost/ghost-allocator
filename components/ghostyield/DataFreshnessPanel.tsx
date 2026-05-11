@@ -3,6 +3,7 @@
 import type { GhostYieldCandidate } from '@/lib/ghostyield/types';
 import { summarizePortfolioFreshness } from '@/lib/ghostyield/dataFreshness';
 import { effectiveDataConfidence } from '@/lib/ghostyield/candidateFields';
+import { FRESHNESS_STATUS_LABEL } from '@/lib/ghostyield/screenerDisplay';
 import { GlassCard } from '@/components/GlassCard';
 
 function fmtDate(iso: string | null) {
@@ -25,7 +26,12 @@ export function DataFreshnessPanel({
 
   return (
     <GlassCard className="p-4 sm:p-5 space-y-3">
-      <h2 className="text-xs font-semibold uppercase tracking-wide text-amber-400/90">Data freshness</h2>
+      <div>
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-amber-400/90">Source data QA</h2>
+        <p className="text-[11px] text-zinc-500 mt-1 leading-snug">
+          As-of dates and status counts describe the manual snapshot, not how &ldquo;risky&rdquo; a fund is.
+        </p>
+      </div>
       <p className="text-[11px] text-zinc-500">
         Reference as of (static):{' '}
         <span className="font-mono text-zinc-300">{referenceAsOf}</span>
@@ -54,18 +60,18 @@ export function DataFreshnessPanel({
               <dd className="text-zinc-200 capitalize">{effectiveDataConfidence(selected)}</dd>
             </div>
             <div>
-              <dt className="text-zinc-500">Selected — status</dt>
-              <dd className="text-zinc-200 capitalize">{selected.freshness.status}</dd>
+              <dt className="text-zinc-500">Selected — data QA status</dt>
+              <dd className="text-zinc-200">{FRESHNESS_STATUS_LABEL[selected.freshness.status]}</dd>
             </div>
           </>
         ) : null}
       </dl>
 
       <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
-        <CountPill label="Stale" value={summary.staleCount} />
-        <CountPill label="Missing" value={summary.missingCount} />
+        <CountPill label="Stale data" value={summary.staleCount} />
+        <CountPill label="Data gaps" value={summary.missingCount} />
         <CountPill label="Low conf." value={summary.lowConfidenceCount} />
-        <CountPill label="Illustrative" value={summary.illustrativeCount} />
+        <CountPill label="Sample data" value={summary.illustrativeCount} />
       </div>
 
       {summary.topWarnings.length > 0 ? (

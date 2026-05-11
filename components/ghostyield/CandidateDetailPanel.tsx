@@ -8,6 +8,12 @@ import {
   effectiveDisplayYield,
   isListedBdcStock,
 } from '@/lib/ghostyield/candidateFields';
+import {
+  fitScoreBandWord,
+  fitScoreTooltip,
+  riskScoreBandWord,
+  riskScoreTooltip,
+} from '@/lib/ghostyield/screenerDisplay';
 import { GlassCard } from '@/components/GlassCard';
 
 function fmtPct(n: number | null | undefined) {
@@ -49,14 +55,25 @@ export function CandidateDetailPanel({ candidate }: { candidate: GhostYieldCandi
           <span className="text-zinc-500 font-normal text-sm font-mono">— {candidate.name}</span>
         </h2>
         <p className="text-xs text-zinc-500 mt-1">
-          GhostYield Risk Score: <span className="text-zinc-300 font-medium">{candidate.riskScore}</span> · Fit
-          Score: <span className="text-zinc-300 font-medium">{candidate.fitScore}</span>
+          GhostYield Risk Score:{' '}
+          <span className="text-zinc-300 font-medium" title={riskScoreTooltip(candidate.riskScore)}>
+            {candidate.riskScore} ({riskScoreBandWord(candidate.riskScore)})
+          </span>{' '}
+          · Fit Score:{' '}
+          <span className="text-zinc-300 font-medium" title={fitScoreTooltip(candidate.fitScore)}>
+            {candidate.fitScore} ({fitScoreBandWord(candidate.fitScore)})
+          </span>
         </p>
       </div>
 
       {candidate.freshness.warnings.length > 0 ? (
         <div className="rounded-lg border border-amber-500/30 bg-amber-950/20 px-3 py-2">
-          <h3 className="text-[10px] font-semibold uppercase tracking-wide text-amber-400/90 mb-1">Data warnings</h3>
+          <h3 className="text-[10px] font-semibold uppercase tracking-wide text-amber-400/90 mb-1">
+            Data snapshot warnings
+          </h3>
+          <p className="text-[10px] text-amber-200/70 mb-1.5 leading-snug">
+            About the cited JSON row (freshness / gaps), not a market risk grade for the security.
+          </p>
           <ul className="list-disc list-inside text-xs text-amber-100/90 space-y-0.5">
             {candidate.freshness.warnings.map((w) => (
               <li key={w}>{w}</li>

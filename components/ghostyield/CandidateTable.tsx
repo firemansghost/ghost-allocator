@@ -8,6 +8,15 @@ import {
   effectiveNavPerformance1Y,
   isListedBdcStock,
 } from '@/lib/ghostyield/candidateFields';
+import {
+  DATA_QA_COLUMN_TOOLTIP,
+  FRESHNESS_STATUS_LABEL,
+  fitScoreBandShort,
+  fitScoreTooltip,
+  freshnessBadgeTitle,
+  riskScoreBandShort,
+  riskScoreTooltip,
+} from '@/lib/ghostyield/screenerDisplay';
 
 function pct(y: number | null | undefined) {
   if (y == null) return '—';
@@ -23,19 +32,17 @@ const DISTRIBUTION_QUALITY_LABEL: Record<DistributionQuality, string> = {
 
 function DistributionBadge({ q }: { q: DistributionQuality }) {
   return (
-    <span className="inline-block rounded border border-zinc-700/80 bg-zinc-900/60 px-1.5 py-0.5 text-[10px] font-medium text-zinc-300 sm:text-xs whitespace-nowrap">
+    <span
+      className="inline-block rounded border border-zinc-700/80 bg-zinc-900/60 px-1.5 py-0.5 text-[10px] font-medium text-zinc-300 sm:text-xs whitespace-nowrap"
+      title="Payout / distribution quality from the manual snapshot (durability signal), not source-data freshness."
+    >
       {DISTRIBUTION_QUALITY_LABEL[q]}
     </span>
   );
 }
 
 function FreshnessBadge({ status }: { status: GhostYieldCandidate['freshness']['status'] }) {
-  const label =
-    status === 'illustrative'
-      ? 'Sample'
-      : status === 'fresh'
-        ? 'Fresh'
-        : status.charAt(0).toUpperCase() + status.slice(1);
+  const label = FRESHNESS_STATUS_LABEL[status];
   const cls =
     status === 'fresh'
       ? 'bg-emerald-950/60 text-emerald-300/95 border-emerald-500/35'
@@ -45,9 +52,12 @@ function FreshnessBadge({ status }: { status: GhostYieldCandidate['freshness']['
           ? 'bg-orange-950/50 text-orange-200/95 border-orange-500/40'
           : status === 'missing'
             ? 'bg-red-950/40 text-red-200/95 border-red-500/35'
-            : 'bg-violet-950/40 text-violet-200/95 border-violet-500/35';
+            : 'bg-violet-950/40 text-violet-300/95 border-violet-500/35';
   return (
-    <span className={`inline-block rounded border px-1.5 py-0.5 text-[10px] font-medium sm:text-xs ${cls}`}>
+    <span
+      className={`inline-block rounded border px-1.5 py-0.5 text-[10px] font-medium sm:text-xs whitespace-nowrap ${cls}`}
+      title={freshnessBadgeTitle(status)}
+    >
       {label}
     </span>
   );
@@ -71,15 +81,40 @@ export function CandidateTable({
             <th className="px-3 py-2 font-medium whitespace-nowrap min-w-[11rem]">Income sleeve</th>
             <th
               className="px-3 py-2 font-medium whitespace-nowrap"
-              title="Shows current yield when present; otherwise distribution rate, then SEC yield. The small suffix in each cell names which field is shown."
+              title="Uses the best available sourced metric on the row: current yield, else distribution rate, else SEC yield. Small suffix in each cell names which field is shown."
             >
               Yield
             </th>
-            <th className="px-3 py-2 font-medium whitespace-nowrap">Prem/disc</th>
-            <th className="px-3 py-2 font-medium whitespace-nowrap min-w-[5.5rem]">Dist</th>
-            <th className="px-3 py-2 font-medium whitespace-nowrap">Data</th>
-            <th className="px-3 py-2 font-medium whitespace-nowrap">Risk</th>
-            <th className="px-3 py-2 font-medium whitespace-nowrap">Fit</th>
+            <th
+              className="px-3 py-2 font-medium whitespace-nowrap"
+              title="NAV total return approx. 1Y (illustrative), or legacy NAV trend when performance field is unset."
+            >
+              NAV 1Y
+            </th>
+            <th className="px-3 py-2 font-medium whitespace-nowrap" title="Premium or discount to NAV (illustrative), decimal shown as percent.">
+              Prem/disc
+            </th>
+            <th
+              className="px-3 py-2 font-medium whitespace-nowrap min-w-[5.5rem]"
+              title="Distribution / payout quality from the manual snapshot — not source-data QA."
+            >
+              Payout
+            </th>
+            <th className="px-3 py-2 font-medium whitespace-nowrap" title={DATA_QA_COLUMN_TOOLTIP}>
+              Data QA
+            </th>
+            <th
+              className="px-3 py-2 font-medium whitespace-nowrap"
+              title="GhostYield risk score 0–100 — higher is riskier (investment / sleeve risk, not data freshness)."
+            >
+              Risk Score
+            </th>
+            <th
+              className="px-3 py-2 font-medium whitespace-nowrap"
+              title="Fit score 0–100 — higher is a better fit as a yield sleeve under the static GhostYield scoring rules (not a data-QA grade)."
+            >
+              Fit Score
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -132,8 +167,14 @@ export function CandidateTable({
                 <td className="px-3 py-2 whitespace-nowrap">
                   <FreshnessBadge status={row.freshness.status} />
                 </td>
-                <td className="px-3 py-2 text-zinc-300 tabular-nums whitespace-nowrap">{row.riskScore}</td>
-                <td className="px-3 py-2 text-zinc-300 tabular-nums whitespace-nowrap">{row.fitScore}</td>
+                <td className="px-3 py-2 text-zinc-300 tabular-nums whitespace-nowrap" title={riskScoreTooltip(row.riskScore)}>
+                  <span>{row.riskScore}</span>
+                  <span className="ml-1 text-[9px] text-zinc-500 sm:text-[10px]">{riskScoreBandShort(row.riskScore)}</span>
+                </td>
+                <td className="px-3 py-2 text-zinc-300 tabular-nums whitespace-nowrap" title={fitScoreTooltip(row.fitScore)}>
+                  <span>{row.fitScore}</span>
+                  <span className="ml-1 text-[9px] text-zinc-500 sm:text-[10px]">{fitScoreBandShort(row.fitScore)}</span>
+                </td>
               </tr>
             );
           })}
