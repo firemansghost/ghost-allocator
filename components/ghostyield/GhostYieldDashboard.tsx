@@ -42,8 +42,7 @@ export function GhostYieldDashboard() {
           headline yield. Not a model portfolio and not a recommendation engine.
         </p>
         <p className="text-xs text-zinc-500 max-w-2xl leading-relaxed">
-          Phase 4.11 uses a manually maintained JSON research snapshot. Live feeds and automated source validation are not
-          active yet.
+          Current snapshot: v0.1 manual research data. Live feeds and automated source validation are not active yet.
         </p>
       </header>
 
@@ -95,7 +94,7 @@ export function GhostYieldDashboard() {
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
-          Candidate screener (Phase 4.11 manual JSON research snapshot)
+          Candidate screener (v0.1 manual research snapshot)
         </h2>
         <p className="text-xs text-zinc-400 leading-relaxed max-w-4xl border-l-2 border-zinc-700 pl-3">
           <span className="text-zinc-300">Screener guide:</span> Yield uses the best available sourced metric on each row:
@@ -128,7 +127,7 @@ export function GhostYieldDashboard() {
       </div>
 
       <GlassCard className="p-4 sm:p-5">
-        <h2 className="text-sm font-semibold text-zinc-200 mb-2">Methodology & source data (Phase 4.11)</h2>
+        <h2 className="text-sm font-semibold text-zinc-200 mb-2">Methodology & source data (v0.1)</h2>
         <div className="text-sm text-zinc-400 leading-relaxed space-y-3 max-w-4xl">
           <p className="text-zinc-300">
             <span className="text-zinc-200">Risk Score</span> is GhostYield&apos;s sleeve / investment risk estimate
@@ -138,11 +137,10 @@ export function GhostYieldDashboard() {
             and do not treat one as a substitute for the other.
           </p>
           <p className="text-zinc-300">
-            Manual JSON research snapshot only — not live pricing or feeds. Phase 4.11 keeps the same discipline: fields
-            are filled only when a number can be tied to a <span className="text-zinc-200">cited source</span> (sponsor
-            page, factsheet PDF, CEF Connect summary, SEC filing, etc.); otherwise they stay{' '}
-            <span className="text-zinc-200">null</span>. A Phase 4.4 refresh updated several ETF and option-income rows
-            from sponsor PDFs and SEC documents; the grid remains manually maintained and static.
+            This v0.1 snapshot uses manually maintained JSON rows — not live pricing or feeds. Some values were sourced from
+            sponsor pages, fact sheets, SEC filings, CEF Connect summaries, or fund documents. Fields are filled only when a
+            number can be tied to a <span className="text-zinc-200">cited source</span>; otherwise they stay{' '}
+            <span className="text-zinc-200">null</span>. Unverified fields remain null.
           </p>
           <p>
             Some closed-end rows cite <span className="text-zinc-300">CEF Connect</span> (Nuveen / Morningstar-style
@@ -152,8 +150,8 @@ export function GhostYieldDashboard() {
             chain. <span className="text-zinc-300">No automated source validation.</span>
           </p>
           <p>
-            Phase 4.11 clarifies screener copy so <span className="text-zinc-300">Data QA</span> (snapshot completeness)
-            is not confused with <span className="text-zinc-300">Risk Score</span> (investment / sleeve risk). Rows in{' '}
+            In the screener, <span className="text-zinc-300">Data QA</span> (source snapshot completeness) is labeled
+            separately from <span className="text-zinc-300">Risk Score</span> (investment / sleeve risk). Rows in{' '}
             <code className="text-amber-400/90">data/ghostyield/candidates.manual.json</code> carry{' '}
             <span className="text-zinc-300">sourceUrl</span>, <span className="text-zinc-300">sourceLabel</span>, and
             lineage as-of fields — scoring in{' '}

@@ -27,8 +27,8 @@ export function YieldEnvironmentGauge({ env }: { env: YieldEnvironmentInputs }) 
       </div>
       <p className="mt-3 text-sm text-zinc-300 leading-relaxed">{label}</p>
       <p className="mt-2 text-xs text-zinc-500">
-        Inputs are static/manual for Phase 4.11 (credit stress {env.creditStress}, rate pressure {env.ratePressure}, vol{' '}
-        {env.volRegime}).
+        Inputs are static/manual for the current v0.1 snapshot (credit stress {env.creditStress}, rate pressure{' '}
+        {env.ratePressure}, vol {env.volRegime}).
       </p>
     </GlassCard>
   );

@@ -1,5 +1,5 @@
 /**
- * GhostYield Phase 4 — manual research snapshot loaded from JSON (no live feeds).
+ * GhostYield v0.1 — manual research snapshot loaded from JSON (no live feeds).
  */
 
 import type {
