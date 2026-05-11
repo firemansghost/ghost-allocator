@@ -31,8 +31,9 @@ export function GhostYieldDashboard() {
         <p className="text-sm text-zinc-300 max-w-3xl leading-relaxed">
           Yield sleeve research dashboard — not a model portfolio, not a recommendation engine.{' '}
           <span className="text-zinc-200">
-            Phase 4.2–4.3 keeps a manual research snapshot in JSON: numbers are filled only when tied to a cited source
-            (sponsor page, CEF Connect summary, or filing); otherwise null. This is not live data and automated validation
+            Phase 4.2–4.4 keeps a manual research snapshot in JSON: numbers are filled only when tied to a cited source
+            (sponsor page, factsheet PDF, CEF Connect summary, or filing); otherwise null. Phase 4.4 refreshed several ETF
+            and option-income rows from sponsor PDFs and SEC documents. This is not live data and automated validation
             is not active. Some closed-end rows cite CEF Connect as an interim aggregation source — see each row&apos;s
             sourceLabel, not sponsor-primary.
           </span>{' '}
@@ -59,7 +60,7 @@ export function GhostYieldDashboard() {
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
-          Candidate screener (Phase 4.3 manual JSON research snapshot)
+          Candidate screener (Phase 4.4 manual JSON research snapshot)
         </h2>
         <CandidateTable
           candidates={GHOSTYIELD_SCORED_CANDIDATES}
@@ -82,7 +83,7 @@ export function GhostYieldDashboard() {
       </div>
 
       <GlassCard className="p-4 sm:p-5">
-        <h2 className="text-sm font-semibold text-zinc-200 mb-2">Methodology (Phase 4.3)</h2>
+        <h2 className="text-sm font-semibold text-zinc-200 mb-2">Methodology (Phase 4.4)</h2>
         <p className="text-sm text-zinc-400 leading-relaxed">
           <span className="text-zinc-300">
             Manual research snapshot only — not live pricing or feeds. Rows may cite sponsor URLs, CEF Connect (Nuveen /
