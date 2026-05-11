@@ -139,35 +139,64 @@ export function CandidateDetailPanel({ candidate }: { candidate: GhostYieldCandi
 
       {candidate.cefMetrics ? (
         <DetailSection title="CEF-specific metrics">
-          <div className="grid gap-2 text-xs sm:text-sm sm:grid-cols-2">
-            <DetailRow label="NAV (structured)" value={fmtNum(candidate.cefMetrics.nav, 2)} />
-            <DetailRow label="Market price (structured)" value={fmtNum(candidate.cefMetrics.marketPrice, 2)} />
-            <DetailRow
-              label="Premium / discount to NAV (structured)"
-              value={fmtPct(candidate.cefMetrics.premiumDiscount)}
-            />
-            <DetailRow label="Effective leverage" value={fmtNum(candidate.cefMetrics.effectiveLeverage, 4)} />
-            <DetailRow label="Leverage type" value={fmtStr(candidate.cefMetrics.leverageType)} />
-            <DetailRow label="Leverage as of" value={fmtDate(candidate.cefMetrics.leverageAsOf ?? undefined)} />
-            <DetailRow label="Distribution rate" value={fmtPct(candidate.cefMetrics.distributionRate)} />
-            <DetailRow label="Distribution rate basis" value={fmtStr(candidate.cefMetrics.distributionRateBasis)} />
-            <DetailRow
-              label="Latest distribution amount"
-              value={fmtNum(candidate.cefMetrics.latestDistributionAmount, 4)}
-            />
-            <DetailRow label="Distribution frequency" value={fmtStr(candidate.cefMetrics.distributionFrequency)} />
-            <DetailRow label="Expense ratio (total)" value={fmtPct(candidate.cefMetrics.expenseRatioTotal)} />
-            <DetailRow label="Expense ratio basis" value={fmtStr(candidate.cefMetrics.expenseRatioBasis)} />
-            <DetailRow label="Expense as of" value={fmtDate(candidate.cefMetrics.expenseAsOf ?? undefined)} />
-            <DetailRow label="Coverage ratio" value={fmtNum(candidate.cefMetrics.coverageRatio, 3)} />
-            <DetailRow label="UNII per share" value={fmtNum(candidate.cefMetrics.uniiPerShare, 4)} />
-            <DetailRow
-              label="Managed distribution policy"
-              value={fmtStr(candidate.cefMetrics.managedDistributionPolicy)}
-              wide
-            />
-            <DetailRow label="Return of capital note" value={fmtStr(candidate.cefMetrics.returnOfCapitalNote)} wide />
-            <DetailRow label="Source note" value={fmtStr(candidate.cefMetrics.sourceNote)} wide />
+          <p className="text-[10px] text-zinc-500 leading-relaxed">
+            CEF metrics focus on NAV discount/premium, leverage, distribution rate, and expense burden. Coverage/UNII may
+            be blank when not sourced.
+          </p>
+          <div className="space-y-4">
+            <div className="space-y-2 rounded-md border border-zinc-800/50 bg-zinc-950/25 p-2.5 sm:p-3">
+              <Subheading>Valuation / NAV</Subheading>
+              <div className="grid gap-2 text-xs sm:text-sm sm:grid-cols-2">
+                <DetailRow label="NAV (structured)" value={fmtNum(candidate.cefMetrics.nav, 2)} />
+                <DetailRow label="Market price (structured)" value={fmtNum(candidate.cefMetrics.marketPrice, 2)} />
+                <DetailRow
+                  label="Premium / discount to NAV (structured)"
+                  value={fmtPct(candidate.cefMetrics.premiumDiscount)}
+                />
+              </div>
+            </div>
+            <div className="space-y-2 rounded-md border border-zinc-800/50 bg-zinc-950/25 p-2.5 sm:p-3">
+              <Subheading>Leverage</Subheading>
+              <div className="grid gap-2 text-xs sm:text-sm sm:grid-cols-2">
+                <DetailRow label="Effective leverage" value={fmtNum(candidate.cefMetrics.effectiveLeverage, 4)} />
+                <DetailRow label="Leverage type" value={fmtStr(candidate.cefMetrics.leverageType)} />
+                <DetailRow label="Leverage as of" value={fmtDate(candidate.cefMetrics.leverageAsOf ?? undefined)} />
+              </div>
+            </div>
+            <div className="space-y-2 rounded-md border border-zinc-800/50 bg-zinc-950/25 p-2.5 sm:p-3">
+              <Subheading>Distribution</Subheading>
+              <div className="grid gap-2 text-xs sm:text-sm sm:grid-cols-2">
+                <DetailRow label="Distribution rate" value={fmtPct(candidate.cefMetrics.distributionRate)} />
+                <DetailRow label="Distribution rate basis" value={fmtStr(candidate.cefMetrics.distributionRateBasis)} />
+                <DetailRow
+                  label="Latest distribution amount"
+                  value={fmtNum(candidate.cefMetrics.latestDistributionAmount, 4)}
+                />
+                <DetailRow label="Distribution frequency" value={fmtStr(candidate.cefMetrics.distributionFrequency)} />
+              </div>
+            </div>
+            <div className="space-y-2 rounded-md border border-zinc-800/50 bg-zinc-950/25 p-2.5 sm:p-3">
+              <Subheading>Expenses / coverage</Subheading>
+              <div className="grid gap-2 text-xs sm:text-sm sm:grid-cols-2">
+                <DetailRow label="Expense ratio (total)" value={fmtPct(candidate.cefMetrics.expenseRatioTotal)} />
+                <DetailRow label="Expense ratio basis" value={fmtStr(candidate.cefMetrics.expenseRatioBasis)} />
+                <DetailRow label="Expense as of" value={fmtDate(candidate.cefMetrics.expenseAsOf ?? undefined)} />
+                <DetailRow label="Coverage ratio" value={fmtNum(candidate.cefMetrics.coverageRatio, 3)} />
+                <DetailRow label="UNII per share" value={fmtNum(candidate.cefMetrics.uniiPerShare, 4)} />
+                <DetailRow
+                  label="Managed distribution policy"
+                  value={fmtStr(candidate.cefMetrics.managedDistributionPolicy)}
+                  wide
+                />
+                <DetailRow label="Return of capital note" value={fmtStr(candidate.cefMetrics.returnOfCapitalNote)} wide />
+              </div>
+            </div>
+            <div className="space-y-2 rounded-md border border-zinc-800/50 bg-zinc-950/25 p-2.5 sm:p-3">
+              <Subheading>Source note</Subheading>
+              <div className="grid gap-2 text-xs sm:text-sm sm:grid-cols-2">
+                <DetailRow label="Source note" value={fmtStr(candidate.cefMetrics.sourceNote)} wide />
+              </div>
+            </div>
           </div>
         </DetailSection>
       ) : null}
@@ -207,6 +236,16 @@ export function CandidateDetailPanel({ candidate }: { candidate: GhostYieldCandi
         </div>
         <div className="space-y-3">
           <Subheading>Distributions (illustr.)</Subheading>
+          {isListedBdcStock(candidate) &&
+          candidate.bdcMetrics &&
+          candidate.latestDistributionDate &&
+          candidate.bdcMetrics.latestDividendPayableDate ? (
+            <p className="text-[10px] text-zinc-500 leading-relaxed border-l-2 border-amber-500/35 pl-2.5">
+              BDC-specific dividend fields may refer to declared or payable dates from filings. The{' '}
+              <span className="text-zinc-400">Latest distribution date</span> row below is the manually keyed distribution
+              snapshot for this row and may not match the filing payable date.
+            </p>
+          ) : null}
           <div className="grid gap-2 text-xs sm:text-sm sm:grid-cols-2">
             <DetailRow label="Latest distribution amount" value={fmtNum(candidate.latestDistributionAmount, 3)} />
             <DetailRow label="Latest distribution date" value={fmtDate(candidate.latestDistributionDate)} />
@@ -232,46 +271,70 @@ export function CandidateDetailPanel({ candidate }: { candidate: GhostYieldCandi
 
       {candidate.bdcMetrics ? (
         <DetailSection title="BDC-specific metrics">
-          <div className="grid gap-2 text-xs sm:text-sm sm:grid-cols-2">
-            <DetailRow label="NAV per share" value={fmtNum(candidate.bdcMetrics.navPerShare, 2)} />
-            <DetailRow label="NAV as of" value={fmtDate(candidate.bdcMetrics.navAsOf ?? undefined)} />
-            <DetailRow label="Regular dividend" value={fmtNum(candidate.bdcMetrics.regularDividend, 4)} />
-            <DetailRow label="Supplemental dividend" value={fmtNum(candidate.bdcMetrics.supplementalDividend, 4)} />
-            <DetailRow
-              label="Latest dividend declared"
-              value={fmtNum(candidate.bdcMetrics.latestDividendDeclared, 4)}
-            />
-            <DetailRow
-              label="Latest dividend / payable date"
-              value={fmtDate(candidate.bdcMetrics.latestDividendPayableDate ?? undefined)}
-            />
-            <DetailRow label="Dividend frequency" value={fmtStr(candidate.bdcMetrics.dividendFrequency)} />
-            <DetailRow label="NII per share" value={fmtNum(candidate.bdcMetrics.niiPerShare, 4)} />
-            <DetailRow
-              label="Dividend coverage ratio"
-              value={fmtNum(candidate.bdcMetrics.dividendCoverageRatio, 3)}
-            />
-            <DetailRow label="Coverage basis" value={fmtStr(candidate.bdcMetrics.coverageBasis)} wide />
-            <DetailRow label="Debt / equity" value={fmtNum(candidate.bdcMetrics.debtToEquity, 2)} />
-            <DetailRow label="Net debt / equity" value={fmtNum(candidate.bdcMetrics.netDebtToEquity, 2)} />
-            <DetailRow label="Leverage as of" value={fmtDate(candidate.bdcMetrics.leverageAsOf ?? undefined)} />
-            <DetailRow label="Non-accrual (cost %)" value={fmtPct(candidate.bdcMetrics.nonAccrualCostPct)} />
-            <DetailRow
-              label="Non-accrual (fair value %)"
-              value={fmtPct(candidate.bdcMetrics.nonAccrualFairValuePct)}
-            />
-            <DetailRow label="First lien %" value={fmtPct(candidate.bdcMetrics.firstLienPct)} />
-            <DetailRow
-              label="Portfolio yield at fair value"
-              value={fmtPct(candidate.bdcMetrics.portfolioYieldAtFairValue)}
-            />
-            <DetailRow
-              label="Management (internal / external)"
-              value={fmtStr(candidate.bdcMetrics.internalExternalManagement)}
-              wide
-            />
-            <DetailRow label="Management fee note" value={fmtStr(candidate.bdcMetrics.managementFeeNote)} wide />
-            <DetailRow label="Source note" value={fmtStr(candidate.bdcMetrics.sourceNote)} wide />
+          <p className="text-[10px] text-zinc-500 leading-relaxed">
+            BDC metrics focus on dividend coverage, credit quality, leverage, and NAV/share context. They are not the
+            same as ETF or CEF yield fields.
+          </p>
+          <div className="space-y-4">
+            <div className="space-y-2 rounded-md border border-zinc-800/50 bg-zinc-950/25 p-2.5 sm:p-3">
+              <Subheading>Dividend coverage</Subheading>
+              <div className="grid gap-2 text-xs sm:text-sm sm:grid-cols-2">
+                <DetailRow label="NAV per share" value={fmtNum(candidate.bdcMetrics.navPerShare, 2)} />
+                <DetailRow label="NAV as of" value={fmtDate(candidate.bdcMetrics.navAsOf ?? undefined)} />
+                <DetailRow label="Regular dividend" value={fmtNum(candidate.bdcMetrics.regularDividend, 4)} />
+                <DetailRow label="Supplemental dividend" value={fmtNum(candidate.bdcMetrics.supplementalDividend, 4)} />
+                <DetailRow
+                  label="Latest dividend declared"
+                  value={fmtNum(candidate.bdcMetrics.latestDividendDeclared, 4)}
+                />
+                <DetailRow
+                  label="Declared dividend payable date"
+                  value={fmtDate(candidate.bdcMetrics.latestDividendPayableDate ?? undefined)}
+                />
+                <DetailRow label="Dividend frequency" value={fmtStr(candidate.bdcMetrics.dividendFrequency)} />
+                <DetailRow label="NII per share" value={fmtNum(candidate.bdcMetrics.niiPerShare, 4)} />
+                <DetailRow
+                  label="Dividend coverage ratio"
+                  value={fmtNum(candidate.bdcMetrics.dividendCoverageRatio, 3)}
+                />
+                <DetailRow label="Coverage basis" value={fmtStr(candidate.bdcMetrics.coverageBasis)} wide />
+              </div>
+            </div>
+            <div className="space-y-2 rounded-md border border-zinc-800/50 bg-zinc-950/25 p-2.5 sm:p-3">
+              <Subheading>Credit quality</Subheading>
+              <div className="grid gap-2 text-xs sm:text-sm sm:grid-cols-2">
+                <DetailRow label="Non-accrual (cost %)" value={fmtPct(candidate.bdcMetrics.nonAccrualCostPct)} />
+                <DetailRow
+                  label="Non-accrual (fair value %)"
+                  value={fmtPct(candidate.bdcMetrics.nonAccrualFairValuePct)}
+                />
+                <DetailRow label="First lien %" value={fmtPct(candidate.bdcMetrics.firstLienPct)} />
+                <DetailRow
+                  label="Portfolio yield at fair value"
+                  value={fmtPct(candidate.bdcMetrics.portfolioYieldAtFairValue)}
+                />
+              </div>
+            </div>
+            <div className="space-y-2 rounded-md border border-zinc-800/50 bg-zinc-950/25 p-2.5 sm:p-3">
+              <Subheading>Leverage</Subheading>
+              <div className="grid gap-2 text-xs sm:text-sm sm:grid-cols-2">
+                <DetailRow label="Debt / equity" value={fmtNum(candidate.bdcMetrics.debtToEquity, 2)} />
+                <DetailRow label="Net debt / equity" value={fmtNum(candidate.bdcMetrics.netDebtToEquity, 2)} />
+                <DetailRow label="Leverage as of" value={fmtDate(candidate.bdcMetrics.leverageAsOf ?? undefined)} />
+              </div>
+            </div>
+            <div className="space-y-2 rounded-md border border-zinc-800/50 bg-zinc-950/25 p-2.5 sm:p-3">
+              <Subheading>Management / source</Subheading>
+              <div className="grid gap-2 text-xs sm:text-sm sm:grid-cols-2">
+                <DetailRow
+                  label="Management (internal / external)"
+                  value={fmtStr(candidate.bdcMetrics.internalExternalManagement)}
+                  wide
+                />
+                <DetailRow label="Management fee note" value={fmtStr(candidate.bdcMetrics.managementFeeNote)} wide />
+                <DetailRow label="Source note" value={fmtStr(candidate.bdcMetrics.sourceNote)} wide />
+              </div>
+            </div>
           </div>
         </DetailSection>
       ) : null}
