@@ -58,7 +58,7 @@ jobs:
           RESP="$(curl -sS --fail --retry 3 --retry-delay 5 -H "x-ghostregime-cron: ${CRON_SECRET}" "${URL}&cb=$(date +%s)")"
           echo "$RESP" > /tmp/refresh_response.json
 
-          python3 - <<PY
+          python3 - <<'PY'
           import json
           import sys
           import os
@@ -243,7 +243,7 @@ jobs:
           HEALTH_RESP="$(curl -sS --fail --retry 2 --retry-delay 3 "${HEALTH_URL}?cb=$(date +%s)")"
           echo "$HEALTH_RESP" > /tmp/health_response.json
 
-          python3 - <<PY
+          python3 - <<'PY'
           import json
           import sys
           import os
@@ -303,7 +303,7 @@ jobs:
             echo "::notice::SLACK_WEBHOOK_URL not set; skipping Slack notification."
             exit 0
           fi
-          python3 - <<PY
+          python3 - <<'PY'
           import json
           import os
           import urllib.request

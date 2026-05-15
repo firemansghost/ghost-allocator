@@ -41,7 +41,9 @@ npm run verify:ghostregime
 
 ### Marketstack fallback (optional)
 
-For **core US ETF symbols** (SPY, GLD, EEM, HYG, IEF, TIP, TLT, UUP), Stooq remains the **first** data source. If Stooq fails (gate, empty CSV, parse error, etc.), the engine may request **one** Marketstack EOD series per symbol **only for those tickers**, and only when `MARKETSTACK_ACCESS_KEY` is set in the deployment environment. **PDBC** and **BTC-USD** keep their existing AlphaVantage/DBC and Stooq→CoinGecko paths — they are not routed through Marketstack. The paid quota is limited; unused fallback does not consume Marketstack requests.
+For **core US ETF symbols** (SPY, GLD, EEM, HYG, IEF, TIP, TLT, UUP), Stooq remains the **first** data source. If Stooq fails (gate, empty CSV, parse error, etc.), the engine may request **one** Marketstack EOD series per symbol **only for those tickers**, and only when `MARKETSTACK_ACCESS_KEY` is set in the deployment environment (`lib/ghostregime/marketstackEod.ts` reads this env var). **PDBC** and **BTC-USD** keep their existing AlphaVantage/DBC and Stooq→CoinGecko paths — they are not routed through Marketstack. The paid quota is limited; unused fallback does not consume Marketstack requests.
+
+**Where to configure Marketstack (scheduled refresh):** The GitHub Actions daily workflow only **calls the live Vercel API** (`?force=1`). Market data is fetched **inside that deployment**, so `MARKETSTACK_ACCESS_KEY` must be set in **Vercel Production** (and Preview if you test there) — putting the key only in GitHub Actions secrets does **not** unlock Marketstack for production refresh. After adding or changing the key in Vercel, **redeploy Production** so new builds/deployments receive the updated env (env changes apply to new deployments).
 
 ### Manual Execution
 
@@ -212,6 +214,7 @@ curl https://ghost-allocator.vercel.app/api/ghostregime/health
 | `BLOB_READ_WRITE_TOKEN` | Vercel Blob storage token. Required for persisting latest row and history. If missing, persistence fails and health can stay NOT_READY. |
 | `ALPHAVANTAGE_API_KEY` | AlphaVantage API key for PDBC (optional; falls back to DBC via Stooq if unset). |
 | `STOOQ_API_KEY` | Stooq CSV download API key (required when Stooq serves the captcha/API-key gate instead of CSV for `/q/d/l/`). Append to requests server-side; do not expose as `NEXT_PUBLIC_*`. |
+| `MARKETSTACK_ACCESS_KEY` | Optional paid Marketstack fallback for core ETF symbols when Stooq fails. Required in Vercel Production for the live API used by the daily workflow. GitHub Actions secrets alone do not provide this env var to the deployed Vercel function. After adding/changing this env var, redeploy Production. |
 | `NEXT_PUBLIC_GHOSTREGIME_CUTOVER_DATE_UTC` | (Optional) Cutover date for seed vs persistence; default `2025-11-28T00:00:00Z`. |
 
 Seed presence is not an env var: the app expects the seed file at `data/ghostregime/seed/ghostregime_replay_history.csv` in the repo. If missing or empty, today/explain/history return 503 NOT_SEEDED and the daily workflow skips.
