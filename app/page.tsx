@@ -90,7 +90,7 @@ export default function HomePage() {
         <h2 className="text-center text-lg font-semibold tracking-tight">
           Tools
         </h2>
-        <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <GlassCard className="p-4 sm:p-5 transition transform hover:-translate-y-1 hover:border-amber-400/60 hover:shadow-[0_20px_60px_rgba(0,0,0,0.9)]">
             <h3 className="text-sm font-semibold text-zinc-50">Ghost Allocator</h3>
             <p className="mt-2 text-xs text-zinc-300 leading-relaxed">
@@ -126,6 +126,25 @@ export default function HomePage() {
               className="mt-4 inline-flex items-center text-xs font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-2 py-1"
             >
               Open GhostYield →
+            </Link>
+          </GlassCard>
+          <GlassCard className="p-4 sm:p-5 transition transform hover:-translate-y-1 hover:border-amber-400/60 hover:shadow-[0_20px_60px_rgba(0,0,0,0.9)]">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-sm font-semibold text-zinc-50">GhostFlow</h3>
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-amber-300">In development</span>
+            </div>
+            <p className="mt-2 text-xs text-zinc-300 leading-relaxed">
+              A passive pressure and market-structure fragility dashboard watching ETF flows, passive share, index
+              concentration, volatility mechanics, systematic-flow proxies, and the slow erosion of price discovery.
+            </p>
+            <p className="mt-2 text-[11px] text-zinc-500 leading-relaxed">
+              Not a crash predictor. A plumbing monitor for a market where autopilot keeps reaching for the wheel.
+            </p>
+            <Link
+              href="/ghostflow"
+              className="mt-4 inline-flex items-center text-xs font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-2 py-1"
+            >
+              Open GhostFlow →
             </Link>
           </GlassCard>
           <GlassCard className="p-4 sm:p-5 transition transform hover:-translate-y-1 hover:border-amber-400/60 hover:shadow-[0_20px_60px_rgba(0,0,0,0.9)]">
