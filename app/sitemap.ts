@@ -74,6 +74,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.6,
     },
     {
+      url: `${baseUrl}/what-is-risk`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.65,
+    },
+    {
       url: `${baseUrl}/learn`,
       lastModified: now,
       changeFrequency: 'monthly',

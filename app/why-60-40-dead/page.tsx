@@ -68,7 +68,10 @@ export default function Why6040Page() {
               </h3>
               <p className="mt-2 text-xs text-zinc-300 leading-relaxed">
                 In a stagflationary or high-inflation regime, bonds can lose value at the same time
-                as stocks. The negative correlation that made 60/40 work can break down.
+                as stocks. The negative correlation that made 60/40 work can break down.{' '}
+                <Link href="/what-is-risk#cash-not-safe" className="text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline">
+                  Why cash isn&apos;t automatically safe either →
+                </Link>
               </p>
             </GlassCard>
 
