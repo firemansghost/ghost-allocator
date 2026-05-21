@@ -164,7 +164,11 @@ export default function LearnBasicsPage() {
           </p>
           <p className="mt-2 text-sm text-zinc-300 leading-relaxed">
             <strong className="text-zinc-200">Why it matters:</strong> You can't control when markets crash, but
-            you can control whether you're forced to sell.
+            you can control whether you&apos;re forced to sell. For the broader risk frame, see{' '}
+            <Link href="/what-is-risk" className="text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline">
+              What Is Risk?
+            </Link>
+            .
           </p>
           <div className="mt-4 space-y-2">
             <h3 className="text-sm font-semibold text-zinc-200">Do this next</h3>

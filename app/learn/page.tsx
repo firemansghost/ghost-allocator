@@ -117,6 +117,19 @@ export default function LearnPage() {
             </GlassCard>
 
             <GlassCard className="p-4 sm:p-5 transition transform hover:-translate-y-1 hover:border-amber-400/60">
+              <h3 className="text-sm font-semibold text-zinc-50">What Is Risk?</h3>
+              <p className="mt-2 text-xs text-zinc-300 leading-relaxed mb-3">
+                Beyond volatility: expectation, outcome, and whether your plan can survive the gap.
+              </p>
+              <Link
+                href="/what-is-risk"
+                className="text-xs font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline"
+              >
+                Read the framework →
+              </Link>
+            </GlassCard>
+
+            <GlassCard className="p-4 sm:p-5 transition transform hover:-translate-y-1 hover:border-amber-400/60">
               <h3 className="text-sm font-semibold text-zinc-50">Finance Basics</h3>
               <p className="mt-2 text-xs text-zinc-300 leading-relaxed mb-3">
                 Foundational finance concepts for first responders: behavior, fees, diversification, drawdowns.
