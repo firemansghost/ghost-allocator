@@ -211,7 +211,6 @@ export function GhostFlowMethodology({
         <h3 className="text-base font-semibold text-zinc-100">What GhostFlow does not claim</h3>
         <ul className="mt-3 space-y-2 text-sm text-zinc-400 list-disc list-inside leading-relaxed">
           <li>Does not predict exact tops or bottoms or market crashes.</li>
-          <li>Does not reproduce proprietary Tier-1 Alpha, Mike Green, or other paid / proprietary flow models.</li>
           <li>Does not provide buy/sell recommendations.</li>
           <li>Does not treat model thresholds as guaranteed outcomes.</li>
           <li>Does not use live feeds — two manual public artifacts plus mock inputs elsewhere.</li>
