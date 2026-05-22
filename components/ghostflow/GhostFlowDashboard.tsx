@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { GlassCard } from '@/components/GlassCard';
-import { MOCK_GHOSTFLOW_SNAPSHOT, GHOSTFLOW_SNAPSHOT_AS_OF } from '@/data/ghostflow/mockGhostflowSnapshot';
+import { buildGhostFlowSnapshot } from '@/lib/ghostflow/buildSnapshot';
 import { scoreGhostFlowSnapshot } from '@/lib/ghostflow/scoring';
 import { GhostFlowScoreCard } from './GhostFlowScoreCard';
 import { GhostFlowSignalGrid } from './GhostFlowSignalGrid';
@@ -9,13 +9,25 @@ import { GhostFlowWatchlist } from './GhostFlowWatchlist';
 
 const BADGES = [
   'Static preview',
-  'No live feeds yet',
+  'Manual public artifacts, no live feeds',
+  '2 public signals',
   'Research only',
   'Not financial advice',
 ] as const;
 
 export function GhostFlowDashboard() {
-  const data = scoreGhostFlowSnapshot(MOCK_GHOSTFLOW_SNAPSHOT);
+  const { raw, meta } = buildGhostFlowSnapshot();
+  const scored = scoreGhostFlowSnapshot(raw);
+  const data = {
+    ...scored,
+    dataMix: meta.dataMix,
+    freshnessWarnings: meta.freshnessWarnings,
+    publicPassiveInputKeys: meta.publicPassiveInputKeys,
+    publicSignalCount: meta.publicSignalCount,
+  };
+
+  const volAsOf = meta.volRegimeAsOf;
+  const etfWeekEnded = meta.etfFlowAsOf;
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 px-1 sm:px-0">
@@ -49,20 +61,42 @@ export function GhostFlowDashboard() {
           GhostFlow tracks passive-flow pressure, ETF issuance, concentration, volatility mechanics, and systematic-flow
           proxies. It does not predict crashes — it watches whether price discovery is sharing the wheel with autopilot.
         </p>
-        <p className="text-xs text-zinc-500">Mock snapshot as of {GHOSTFLOW_SNAPSHOT_AS_OF}. Not live market data.</p>
+        <p className="text-xs text-zinc-500">
+          Mixed snapshot (v0.3): Volatility Regime uses CBOE VIX
+          {volAsOf ? ` as of ${volAsOf}` : ''}; ETF Net Issuance uses ICI domestic equity weekly estimated net issuance
+          {etfWeekEnded ? ` (week ended ${etfWeekEnded})` : ''}. Other inputs remain mock. Not live market data.
+        </p>
       </header>
+
+      {data.freshnessWarnings && data.freshnessWarnings.length > 0 && (
+        <GlassCard className="p-4 sm:p-5 border-amber-500/25 bg-amber-950/20">
+          <p className="text-xs font-semibold uppercase tracking-wide text-amber-300/90 mb-2">Data freshness</p>
+          <ul className="space-y-1.5 text-sm text-zinc-300 leading-relaxed list-disc list-inside">
+            {data.freshnessWarnings.map((w) => (
+              <li key={w}>{w}</li>
+            ))}
+          </ul>
+        </GlassCard>
+      )}
 
       <GlassCard className="p-4 sm:p-5 border-amber-500/20 bg-amber-950/15">
         <p className="text-sm text-zinc-200 leading-relaxed max-w-4xl">
-          <strong className="text-amber-200/95">Disclaimer:</strong> GhostFlow is for education and research only. Scores
-          and signals are illustrative mock inputs — not buy/sell advice, not a crash predictor, and not a substitute
+          <strong className="text-amber-200/95">Disclaimer:</strong> GhostFlow is for education and research only. Two
+          signals use manually updated public artifacts (CBOE VIX and ICI domestic equity ETF net issuance); remaining
+          scores and signals are static mock proxies — not buy/sell advice, not a crash predictor, and not a substitute
           for your own judgment.
         </p>
       </GlassCard>
 
       <GhostFlowScoreCard data={data} />
-      <GhostFlowSignalGrid signals={data.signals} />
-      <GhostFlowMethodology data={data} />
+      <GhostFlowSignalGrid signals={data.signals} dataMix={data.dataMix} publicSignalCount={data.publicSignalCount} />
+      <GhostFlowMethodology
+        data={data}
+        volRegimeAsOf={meta.volRegimeAsOf}
+        volRegimeSource={meta.volRegimeSource}
+        etfFlowAsOf={meta.etfFlowAsOf}
+        etfFlowSource={meta.etfFlowSource}
+      />
       <GhostFlowWatchlist />
     </div>
   );

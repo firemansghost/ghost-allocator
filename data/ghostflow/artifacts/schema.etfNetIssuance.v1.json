@@ -1,0 +1,78 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ghost-allocator.local/schemas/ghostflow-etf-net-issuance.v1.json",
+  "title": "GhostFlow ETF Net Issuance artifact v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifactVersion",
+    "signalId",
+    "asOf",
+    "source",
+    "seriesDefinition",
+    "updateFrequency",
+    "dataQuality",
+    "observations"
+  ],
+  "properties": {
+    "artifactVersion": {
+      "type": "string",
+      "const": "1"
+    },
+    "signalId": {
+      "type": "string",
+      "const": "etf-flow"
+    },
+    "asOf": {
+      "type": "string",
+      "format": "date"
+    },
+    "publishedAt": {
+      "type": "string",
+      "format": "date"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "url": { "type": "string", "format": "uri" },
+        "note": { "type": "string" }
+      }
+    },
+    "seriesDefinition": {
+      "type": "string",
+      "const": "domestic_equity_etf_estimated_weekly_net_issuance"
+    },
+    "updateFrequency": {
+      "type": "string",
+      "const": "weekly"
+    },
+    "dataQuality": {
+      "type": "string",
+      "enum": ["verified_manual", "manual_unverified"]
+    },
+    "observations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["domesticEquityNetIssuanceMillionsUsd"],
+      "properties": {
+        "domesticEquityNetIssuanceMillionsUsd": {
+          "type": "number",
+          "minimum": -50000,
+          "maximum": 80000
+        }
+      }
+    },
+    "optionalObservations": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "totalEtfNetIssuanceMillionsUsd": { "type": ["number", "null"] },
+        "equityEtfNetIssuanceMillionsUsd": { "type": ["number", "null"] },
+        "fourWeekAverageDomesticEquityMillionsUsd": { "type": ["number", "null"] }
+      }
+    }
+  }
+}

@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test": "tsx lib/ghostregime/__tests__/regimeCore.test.ts",
+    "test": "tsx lib/ghostregime/__tests__/regimeCore.test.ts && npm run test:ghostflow",
+    "test:ghostflow": "tsx lib/ghostflow/__tests__/scoring.test.ts && tsx lib/ghostflow/__tests__/volatilityRegime.test.ts && tsx lib/ghostflow/__tests__/etfNetIssuance.test.ts && tsx lib/ghostflow/__tests__/artifactFreshness.test.ts",
     "test:vams-profiles": "tsx lib/ghostregime/__tests__/vamsProfiles.test.ts",
     "test:ghostregime-ui": "tsx lib/ghostregime/__tests__/agreementDelta.test.ts",
     "test:cash-breakdown": "tsx lib/ghostregime/__tests__/cashBreakdown.test.ts",
@@ -37,6 +38,7 @@
     "check:no-reference-history": "node scripts/check-no-reference-history.mjs",
     "verify:reference-clean": "npm run check:no-reference-data && npm run check:no-reference-history && npm run check:parity-names",
     "ghostyield:validate": "tsx scripts/ghostyield/validate-candidates.ts",
+    "ghostflow:validate-artifacts": "tsx scripts/ghostflow/validate-artifacts.ts",
     "verify:ghostregime": "npm run build && npm run lint && npx tsx lib/ghostregime/__tests__/persistGate.test.ts && npx tsx lib/ghostregime/__tests__/diagnostics.test.ts && npx tsx lib/ghostregime/__tests__/stooqResponse.test.ts && npx tsx lib/ghostregime/__tests__/asofUrl.test.ts && npx tsx lib/ghostregime/__tests__/marketstackEod.test.ts && npx tsx lib/ghostregime/__tests__/flipWatchPressure.test.ts && npx tsx lib/ghostregime/__tests__/serveMetadata.test.ts"
   },
   "repository": {
