@@ -59,11 +59,14 @@ function dataQualityLabel(q: string | undefined): string {
 
 function artifactDateLabel(signalId: string): string {
   if (signalId === 'etf-flow') return 'Week ended';
-  if (signalId === 'active-index-flow') return 'Month ended';
+  if (signalId === 'active-index-flow' || signalId === 'concentration') return 'Month ended';
   return 'As of';
 }
 
 function publicSignalDescription(publicSignalCount: number): string {
+  if (publicSignalCount >= 4) {
+    return 'Volatility Regime (CBOE VIX), ETF Net Issuance Pressure (ICI domestic equity weekly estimated net issuance), Active vs Index Flow Differential (ICI monthly domestic-equity active/index net flows), and Index Concentration (SSGA SPY monthly fact sheet top-10 index weights) use manual public artifacts. All other signals remain illustrative mock values.';
+  }
   if (publicSignalCount >= 3) {
     return 'Volatility Regime (CBOE VIX), ETF Net Issuance Pressure (ICI domestic equity weekly estimated net issuance), and Active vs Index Flow Differential (ICI monthly domestic-equity active/index net flows) use manual public artifacts. All other signals remain illustrative mock values.';
   }
@@ -88,7 +91,7 @@ export function GhostFlowSignalGrid({
   return (
     <section className="space-y-3" aria-labelledby="ghostflow-signals-heading">
       <h2 id="ghostflow-signals-heading" className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
-        Signal grid (v0.4 mixed)
+        Signal grid (v0.5 mixed)
       </h2>
       <p className="text-xs text-zinc-500 leading-relaxed max-w-3xl">{publicSignalDescription(publicSignalCount)}</p>
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">

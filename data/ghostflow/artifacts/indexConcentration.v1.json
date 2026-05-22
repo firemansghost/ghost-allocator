@@ -1,0 +1,23 @@
+{
+  "artifactVersion": "1",
+  "signalId": "concentration",
+  "asOf": "2026-03-31",
+  "publishedAt": "2026-04-09",
+  "source": {
+    "name": "SSGA SPY US Monthly Fact Sheet",
+    "url": "https://www.ssga.com/library-content/products/factsheets/etfs/us/factsheet-us-en-spy.pdf",
+    "note": "Manual extract: sum of Top 10 holdings index weights from March 2026 US fact sheet. publishedAt reflects the PDF control/publication date observed in the SSGA fact sheet (Control # footer: ETF-SPY 20260409). Holdings are as of 2026-03-31."
+  },
+  "seriesDefinition": "sp500_index_top10_weight_percent",
+  "updateFrequency": "monthly",
+  "dataQuality": "verified_manual",
+  "observations": {
+    "sp500Top10IndexWeightPercent": 36.5
+  },
+  "optionalObservations": {
+    "sp500Top5IndexWeightPercent": 25.8,
+    "largestConstituentWeightPercent": 7.58,
+    "constituentCount": 503,
+    "sourceTable": "fact_sheet_top10_holdings"
+  }
+}

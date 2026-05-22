@@ -6,6 +6,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import Ajv from 'ajv';
 import { validateEtfNetIssuanceArtifact } from '../../lib/ghostflow/artifacts/etfNetIssuance';
+import { validateIndexConcentrationArtifact } from '../../lib/ghostflow/artifacts/indexConcentration';
 import { validateActiveIndexFlowArtifact } from '../../lib/ghostflow/artifacts/activeIndexFlow';
 import { validateVolatilityRegimeArtifact } from '../../lib/ghostflow/artifacts/volatilityRegime';
 import { GHOSTFLOW_REFERENCE_AS_OF } from '../../lib/ghostflow/reference';
@@ -41,6 +42,8 @@ function main(): void {
   const etfSchemaPath = join(root, 'data/ghostflow/artifacts/schema.etfNetIssuance.v1.json');
   const activeIndexPath = join(root, 'data/ghostflow/artifacts/activeIndexFlow.v1.json');
   const activeIndexSchemaPath = join(root, 'data/ghostflow/artifacts/schema.activeIndexFlow.v1.json');
+  const indexConcentrationPath = join(root, 'data/ghostflow/artifacts/indexConcentration.v1.json');
+  const indexConcentrationSchemaPath = join(root, 'data/ghostflow/artifacts/schema.indexConcentration.v1.json');
 
   if (!validateWithSchema('volatilityRegime.v1.json', volPath, volSchemaPath)) failed = true;
 
@@ -82,6 +85,23 @@ function main(): void {
     const diff = i - a;
     console.log(
       `GhostFlow rules: active-index-flow OK (diff $${(diff / 1000).toFixed(1)}B, month ended ${activeIndexRules.artifact.asOf})`
+    );
+  }
+
+  if (!validateWithSchema('indexConcentration.v1.json', indexConcentrationPath, indexConcentrationSchemaPath)) failed = true;
+
+  const indexConcentrationRules = validateIndexConcentrationArtifact(
+    loadJson(indexConcentrationPath),
+    GHOSTFLOW_REFERENCE_AS_OF
+  );
+  if (!indexConcentrationRules.ok) {
+    failed = true;
+    console.error('GhostFlow rules failed for concentration:');
+    for (const err of indexConcentrationRules.errors) console.error(`  - ${err}`);
+  } else {
+    const pct = indexConcentrationRules.artifact.observations.sp500Top10IndexWeightPercent;
+    console.log(
+      `GhostFlow rules: concentration OK (top-10 ${pct}%, month ended ${indexConcentrationRules.artifact.asOf})`
     );
   }
 

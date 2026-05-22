@@ -6,6 +6,8 @@ Manual refresh workflow for GhostFlow public-data artifacts. **No live fetches**
 
 **Active vs Index Flow Differential (v0.4):** see [ACTIVE_INDEX_ARTIFACT_RUNBOOK.md](./ACTIVE_INDEX_ARTIFACT_RUNBOOK.md).
 
+**Index Concentration (v0.5):** see [INDEX_CONCENTRATION_ARTIFACT_RUNBOOK.md](./INDEX_CONCENTRATION_ARTIFACT_RUNBOOK.md).
+
 ## Volatility Regime (CBOE VIX)
 
 ### Source
