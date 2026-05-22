@@ -60,19 +60,23 @@ function dataQualityLabel(q: string | undefined): string {
 export function GhostFlowSignalGrid({
   signals,
   dataMix = 'mock',
+  publicSignalCount = 0,
 }: {
   signals: ScoredGhostFlowSignal[];
   dataMix?: GhostFlowDataMix;
+  publicSignalCount?: number;
 }) {
   return (
     <section className="space-y-3" aria-labelledby="ghostflow-signals-heading">
       <h2 id="ghostflow-signals-heading" className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
-        Signal grid (v0.2 mixed)
+        Signal grid (v0.3 mixed)
       </h2>
       <p className="text-xs text-zinc-500 leading-relaxed max-w-3xl">
-        {dataMix === 'mixed'
-          ? 'Volatility Regime uses a manually updated CBOE VIX public artifact. All other signals remain illustrative mock values for this static preview.'
-          : 'All signals use illustrative mock values. Public artifact unavailable — vol-regime is on mock fallback.'}
+        {publicSignalCount >= 2
+          ? 'Volatility Regime (CBOE VIX) and ETF Net Issuance Pressure (ICI domestic equity weekly estimated net issuance) use manual public artifacts. All other signals remain illustrative mock values.'
+          : publicSignalCount === 1
+            ? 'One public artifact is wired; others remain mock. Check freshness warnings if an artifact is unavailable.'
+            : 'All signals use illustrative mock values — public artifacts unavailable.'}
       </p>
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
         {signals.map((sig) => (
@@ -101,13 +105,16 @@ export function GhostFlowSignalGrid({
                       {sig.freshnessStatus}
                     </span>
                   )}
-                  {sig.artifactAsOf && (
-                    <span className="text-zinc-500">As of {sig.artifactAsOf}</span>
-                  )}
                   {sig.dataQuality && (
                     <span className="text-zinc-500">{dataQualityLabel(sig.dataQuality)}</span>
                   )}
                 </div>
+              )}
+              {sig.dataStatus === 'public_proxy' && sig.artifactAsOf && (
+                <p className="text-[10px] text-zinc-500">
+                  {sig.id === 'etf-flow' ? 'Week ended' : 'As of'} {sig.artifactAsOf}
+                  {sig.artifactPublishedAt ? ` · Released ${sig.artifactPublishedAt}` : ''}
+                </p>
               )}
               {sig.dataStatus === 'public_proxy' && sig.sourceName && (
                 <p className="text-[10px] text-zinc-500 leading-relaxed">

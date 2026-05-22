@@ -49,6 +49,7 @@ export interface GhostFlowSignal {
   sourceNote?: string;
   dataQuality?: GhostFlowArtifactDataQuality;
   artifactAsOf?: string;
+  artifactPublishedAt?: string;
   freshnessStatus?: GhostFlowArtifactFreshnessStatus;
 }
 
@@ -111,4 +112,5 @@ export interface GhostFlowDashboardData {
   dataMix?: GhostFlowDataMix;
   freshnessWarnings?: string[];
   publicPassiveInputKeys?: Array<keyof PassivePressureInputs>;
+  publicSignalCount?: number;
 }

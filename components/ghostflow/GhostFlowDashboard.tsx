@@ -9,8 +9,8 @@ import { GhostFlowWatchlist } from './GhostFlowWatchlist';
 
 const BADGES = [
   'Static preview',
-  'Manual public artifact, no live feeds',
-  '1 public signal',
+  'Manual public artifacts, no live feeds',
+  '2 public signals',
   'Research only',
   'Not financial advice',
 ] as const;
@@ -23,9 +23,11 @@ export function GhostFlowDashboard() {
     dataMix: meta.dataMix,
     freshnessWarnings: meta.freshnessWarnings,
     publicPassiveInputKeys: meta.publicPassiveInputKeys,
+    publicSignalCount: meta.publicSignalCount,
   };
 
-  const volAsOf = meta.volRegimeAsOf ?? raw.asOf;
+  const volAsOf = meta.volRegimeAsOf;
+  const etfWeekEnded = meta.etfFlowAsOf;
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 px-1 sm:px-0">
@@ -60,8 +62,9 @@ export function GhostFlowDashboard() {
           proxies. It does not predict crashes — it watches whether price discovery is sharing the wheel with autopilot.
         </p>
         <p className="text-xs text-zinc-500">
-          Mixed snapshot: Volatility Regime uses CBOE VIX as of {volAsOf}; other inputs remain mock. Not live market
-          data.
+          Mixed snapshot (v0.3): Volatility Regime uses CBOE VIX
+          {volAsOf ? ` as of ${volAsOf}` : ''}; ETF Net Issuance uses ICI domestic equity weekly estimated net issuance
+          {etfWeekEnded ? ` (week ended ${etfWeekEnded})` : ''}. Other inputs remain mock. Not live market data.
         </p>
       </header>
 
@@ -78,15 +81,22 @@ export function GhostFlowDashboard() {
 
       <GlassCard className="p-4 sm:p-5 border-amber-500/20 bg-amber-950/15">
         <p className="text-sm text-zinc-200 leading-relaxed max-w-4xl">
-          <strong className="text-amber-200/95">Disclaimer:</strong> GhostFlow is for education and research only. One
-          signal (Volatility Regime) uses a manually updated CBOE VIX artifact; remaining scores and signals are static
-          mock proxies — not buy/sell advice, not a crash predictor, and not a substitute for your own judgment.
+          <strong className="text-amber-200/95">Disclaimer:</strong> GhostFlow is for education and research only. Two
+          signals use manually updated public artifacts (CBOE VIX and ICI domestic equity ETF net issuance); remaining
+          scores and signals are static mock proxies — not buy/sell advice, not a crash predictor, and not a substitute
+          for your own judgment.
         </p>
       </GlassCard>
 
       <GhostFlowScoreCard data={data} />
-      <GhostFlowSignalGrid signals={data.signals} dataMix={data.dataMix} />
-      <GhostFlowMethodology data={data} volRegimeAsOf={meta.volRegimeAsOf} volRegimeSource={meta.volRegimeSource} />
+      <GhostFlowSignalGrid signals={data.signals} dataMix={data.dataMix} publicSignalCount={data.publicSignalCount} />
+      <GhostFlowMethodology
+        data={data}
+        volRegimeAsOf={meta.volRegimeAsOf}
+        volRegimeSource={meta.volRegimeSource}
+        etfFlowAsOf={meta.etfFlowAsOf}
+        etfFlowSource={meta.etfFlowSource}
+      />
       <GhostFlowWatchlist />
     </div>
   );

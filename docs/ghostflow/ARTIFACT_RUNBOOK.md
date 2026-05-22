@@ -1,6 +1,8 @@
-# GhostFlow Artifact Runbook (v0.2)
+# GhostFlow Artifact Runbook (v0.2+)
 
-Manual refresh workflow for GhostFlow public-data artifacts. **No live fetches in v0.2** — all values are hand-edited into static JSON files committed to the repo.
+Manual refresh workflow for GhostFlow public-data artifacts. **No live fetches** — all values are hand-edited into static JSON files committed to the repo.
+
+**ETF Net Issuance (v0.3):** see [ETF_ARTIFACT_RUNBOOK.md](./ETF_ARTIFACT_RUNBOOK.md).
 
 ## Volatility Regime (CBOE VIX)
 
@@ -61,7 +63,7 @@ npm run lint
 npm run build
 ```
 
-Routine VIX refreshes only require updating the artifact JSON and `GHOSTFLOW_REFERENCE_AS_OF`. GhostFlow unit tests use fixed fixtures — you do **not** need to edit test files unless mapping, scoring, schema, or merge behavior changes.
+Routine artifact refreshes only require updating the relevant JSON file(s) and `GHOSTFLOW_REFERENCE_AS_OF`. GhostFlow unit tests use fixed fixtures — you do **not** need to edit test files unless mapping, scoring, schema, or merge behavior changes.
 
 ## Freshness states
 
