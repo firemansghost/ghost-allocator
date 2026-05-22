@@ -1,5 +1,5 @@
 /**
- * GhostFlow v0.5 — merge mock snapshot with validated public artifacts before scoring.
+ * GhostFlow v0.6 — merge mock snapshot with validated public artifacts before scoring.
  */
 
 import { MOCK_GHOSTFLOW_SNAPSHOT } from '@/data/ghostflow/mockGhostflowSnapshot';
@@ -31,6 +31,19 @@ import {
   loadIndexConcentrationArtifact,
   mapTop10WeightToNumericValue,
 } from './artifacts/indexConcentration';
+import {
+  buildPassiveShareProxyExplanation,
+  buildDistanceTo65Explanation,
+  deriveDistanceToModelZone,
+  evaluatePassiveShareProxyArtifactFreshness,
+  formatDistanceToModelZoneDisplay,
+  formatPassiveShareProxyDisplayValue,
+  loadPassiveShareProxyArtifact,
+  mapDistanceToZoneNumericValue,
+  mapIndexSharePercentToStructuralProxy,
+  PASSIVE_SHARE_PROXY_CARD_CAVEAT,
+  DISTANCE_TO_65_CARD_CAVEAT,
+} from './artifacts/passiveShareProxy';
 import type {
   ActiveIndexFlowArtifactV1,
   ApplyArtifactOutcome,
@@ -39,6 +52,7 @@ import type {
   GhostFlowPublicSignalMeta,
   GhostFlowSnapshotMeta,
   IndexConcentrationArtifactV1,
+  PassiveShareProxyArtifactV1,
   VolatilityRegimeArtifactV1,
 } from './artifacts/types';
 import {
@@ -264,6 +278,74 @@ export function applyIndexConcentrationArtifact(
   };
 }
 
+export function applyPassiveShareProxyArtifact(
+  raw: GhostFlowRawSnapshot,
+  artifact: PassiveShareProxyArtifactV1,
+  referenceAsOf: string
+): ApplyArtifactOutcome {
+  const freshness = evaluatePassiveShareProxyArtifactFreshness(artifact, referenceAsOf);
+  const indexSharePercent = artifact.observations.indexAssetSharePercent;
+  const structuralProxy = mapIndexSharePercentToStructuralProxy(indexSharePercent);
+  const distancePp = deriveDistanceToModelZone(indexSharePercent);
+
+  raw.passiveSharePercent = indexSharePercent;
+  raw.structuralFragility.passiveShareProxy = structuralProxy;
+  raw.asOf = bumpAsOf(raw.asOf, artifact.asOf);
+
+  raw.signals = replaceSignal(raw.signals, {
+    id: 'passive-share',
+    name: 'ICI Index Share Proxy',
+    value: formatPassiveShareProxyDisplayValue(indexSharePercent),
+    numericValue: structuralProxy,
+    explanation: buildPassiveShareProxyExplanation(indexSharePercent, structuralProxy),
+    cardCaveat: PASSIVE_SHARE_PROXY_CARD_CAVEAT,
+    dataStatus: 'public_proxy',
+    updateFrequencyTarget: 'Monthly (manual artifact)',
+    sourceName: artifact.source.name,
+    sourceUrl: artifact.source.url,
+    sourceNote: artifact.source.note,
+    dataQuality: artifact.dataQuality,
+    artifactAsOf: artifact.asOf,
+    artifactPublishedAt: artifact.publishedAt,
+    freshnessStatus: freshness.status,
+  });
+
+  raw.signals = replaceSignal(raw.signals, {
+    id: 'distance-65',
+    name: 'Distance to 65% Model Stress Zone',
+    value: formatDistanceToModelZoneDisplay(distancePp),
+    numericValue: mapDistanceToZoneNumericValue(distancePp),
+    explanation: buildDistanceTo65Explanation(distancePp),
+    cardCaveat: DISTANCE_TO_65_CARD_CAVEAT,
+    dataStatus: 'public_proxy',
+    updateFrequencyTarget: 'Derived (ICI Index Share Proxy)',
+    sourceName: artifact.source.name,
+    sourceUrl: artifact.source.url,
+    sourceNote: 'Derived from ICI Index Share Proxy artifact — not a separate manual artifact.',
+    dataQuality: artifact.dataQuality,
+    artifactAsOf: artifact.asOf,
+    artifactPublishedAt: artifact.publishedAt,
+    freshnessStatus: freshness.status,
+  });
+
+  const publicSignal: GhostFlowPublicSignalMeta = {
+    signalId: 'passive-share',
+    name: 'ICI Index Share Proxy',
+    sourceName: artifact.source.name,
+    sourceUrl: artifact.source.url,
+    asOf: artifact.asOf,
+    publishedAt: artifact.publishedAt,
+    freshnessStatus: freshness.status,
+  };
+
+  return {
+    raw,
+    warnings: freshness.warnings,
+    publicSignal,
+    publicStructuralInputKey: 'passiveShareProxy',
+  };
+}
+
 function buildMeta(
   raw: GhostFlowRawSnapshot,
   warnings: string[],
@@ -275,6 +357,7 @@ function buildMeta(
   const etfSignal = publicSignals.find((s) => s.signalId === 'etf-flow');
   const activeIndexSignal = publicSignals.find((s) => s.signalId === 'active-index-flow');
   const indexConcentrationSignal = publicSignals.find((s) => s.signalId === 'concentration');
+  const passiveShareSignal = publicSignals.find((s) => s.signalId === 'passive-share');
 
   return {
     raw,
@@ -293,6 +376,8 @@ function buildMeta(
       activeIndexFlowAsOf: activeIndexSignal?.asOf,
       indexConcentrationSource: indexConcentrationSignal ? 'public' : 'mock_fallback',
       indexConcentrationAsOf: indexConcentrationSignal?.asOf,
+      passiveShareProxySource: passiveShareSignal ? 'public' : 'mock_fallback',
+      passiveShareProxyAsOf: passiveShareSignal?.asOf,
     },
   };
 }
@@ -302,6 +387,7 @@ export interface BuildGhostFlowSnapshotWithArtifactsOptions {
   etf?: EtfNetIssuanceArtifactV1;
   activeIndex?: ActiveIndexFlowArtifactV1;
   indexConcentration?: IndexConcentrationArtifactV1;
+  passiveShare?: PassiveShareProxyArtifactV1;
   referenceAsOf: string;
 }
 
@@ -345,6 +431,14 @@ export function buildGhostFlowSnapshotWithArtifacts(
     warnings.push(...indexConcentration.warnings);
     if (indexConcentration.publicSignal) publicSignals.push(indexConcentration.publicSignal);
     if (indexConcentration.publicStructuralInputKey) publicStructuralInputKeys.push(indexConcentration.publicStructuralInputKey);
+  }
+
+  if (opts.passiveShare) {
+    const passiveShare = applyPassiveShareProxyArtifact(raw, opts.passiveShare, opts.referenceAsOf);
+    raw = passiveShare.raw;
+    warnings.push(...passiveShare.warnings);
+    if (passiveShare.publicSignal) publicSignals.push(passiveShare.publicSignal);
+    if (passiveShare.publicStructuralInputKey) publicStructuralInputKeys.push(passiveShare.publicStructuralInputKey);
   }
 
   return buildMeta(raw, warnings, publicSignals, publicPassiveInputKeys, publicStructuralInputKeys);
@@ -421,6 +515,24 @@ export function buildGhostFlowSnapshot(
   } else {
     warnings.push(
       `Index Concentration artifact invalid or missing (${indexConcentrationValidation.errors.join('; ')}). Using mock fallback for concentration signal.`
+    );
+  }
+
+  const passiveShareValidation = loadPassiveShareProxyArtifact();
+  if (passiveShareValidation.ok) {
+    const passiveShare = applyPassiveShareProxyArtifact(
+      raw,
+      passiveShareValidation.artifact,
+      referenceAsOf
+    );
+    raw = passiveShare.raw;
+    warnings.push(...passiveShare.warnings);
+    if (passiveShareValidation.warnings) warnings.push(...passiveShareValidation.warnings);
+    if (passiveShare.publicSignal) publicSignals.push(passiveShare.publicSignal);
+    if (passiveShare.publicStructuralInputKey) publicStructuralInputKeys.push(passiveShare.publicStructuralInputKey);
+  } else {
+    warnings.push(
+      `ICI Index Share Proxy artifact invalid or missing (${passiveShareValidation.errors.join('; ')}). Using mock fallback for passive-share signal, passiveShareProxy, passiveSharePercent, and distance-65.`
     );
   }
 

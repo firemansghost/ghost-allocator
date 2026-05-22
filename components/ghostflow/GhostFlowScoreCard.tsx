@@ -15,7 +15,7 @@ const PASSIVE_LABELS: { key: keyof GhostFlowDashboardData['passivePressureInputs
 ];
 
 const STRUCTURAL_LABELS: { key: keyof GhostFlowDashboardData['structuralFragilityInputs']; label: string }[] = [
-  { key: 'passiveShareProxy', label: 'Passive share proxy' },
+  { key: 'passiveShareProxy', label: 'ICI index share proxy' },
   { key: 'activeShareOffsetProxy', label: 'Active share / offset proxy' },
   { key: 'indexConcentration', label: 'Index concentration' },
   { key: 'breadthWeakness', label: 'Breadth weakness' },
@@ -69,7 +69,13 @@ export function GhostFlowScoreCard({ data }: { data: GhostFlowDashboardData }) {
           Composite = 50% Passive Pressure ({score.subScores.passivePressure}) + 50% Structural Fragility (
           {score.subScores.structuralFragility}). Not a forecast. Not financial advice.
         </p>
-        {isMixed && publicCount >= 4 && (
+        {isMixed && publicCount >= 5 && (
+          <p className="mt-2 text-xs text-amber-300/85">
+            Composite includes two public Passive Pressure sub-inputs and three public Structural Fragility sub-inputs.
+            Remaining inputs are static mock proxies.
+          </p>
+        )}
+        {isMixed && publicCount === 4 && (
           <p className="mt-2 text-xs text-amber-300/85">
             Composite includes two public Passive Pressure sub-inputs and two public Structural Fragility sub-inputs.
             Remaining inputs are static mock proxies.
@@ -174,11 +180,13 @@ export function GhostFlowScoreCard({ data }: { data: GhostFlowDashboardData }) {
             })}
           </ul>
           <p className="mt-2 text-[10px] text-zinc-600">
-            {publicStructuralCount >= 2
-              ? 'Two public sub-inputs (monthly active/index flow-tilt + index concentration); others are mock 0–100 proxies.'
-              : publicStructuralCount >= 1
-                ? 'One public sub-input; others are mock 0–100 proxies.'
-                : 'Input values are mock 0–100 proxies.'}
+            {publicStructuralCount >= 3
+              ? 'Three public sub-inputs (ICI index share, active/index flow-tilt, index concentration); others are mock 0–100 proxies.'
+              : publicStructuralCount >= 2
+                ? 'Two public sub-inputs (monthly active/index flow-tilt + index concentration); others are mock 0–100 proxies.'
+                : publicStructuralCount >= 1
+                  ? 'One public sub-input; others are mock 0–100 proxies.'
+                  : 'Input values are mock 0–100 proxies.'}
           </p>
         </GlassCard>
       </div>

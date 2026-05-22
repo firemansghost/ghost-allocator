@@ -16,6 +16,8 @@ export type ActiveIndexFlowSeriesDefinition = 'domestic_equity_active_index_mont
 
 export type IndexConcentrationSeriesDefinition = 'sp500_index_top10_weight_percent';
 
+export type PassiveShareProxySeriesDefinition = 'ici_domestic_equity_index_asset_share_percent';
+
 export interface ArtifactSource {
   name: string;
   url?: string;
@@ -166,6 +168,46 @@ export interface IndexConcentrationValidationError {
 
 export type IndexConcentrationValidation = IndexConcentrationValidationResult | IndexConcentrationValidationError;
 
+export interface PassiveShareProxyObservations {
+  activeDomesticEquityAssetsMillionsUsd: number;
+  indexDomesticEquityAssetsMillionsUsd: number;
+  indexAssetSharePercent: number;
+}
+
+export interface PassiveShareProxyOptionalObservations {
+  iciReportedIndexSharePercent?: number | null;
+  worldEquityActiveAssetsMillionsUsd?: number | null;
+  worldEquityIndexAssetsMillionsUsd?: number | null;
+  totalLongTermActiveAssetsMillionsUsd?: number | null;
+  totalLongTermIndexAssetsMillionsUsd?: number | null;
+}
+
+export interface PassiveShareProxyArtifactV1 {
+  artifactVersion: '1';
+  signalId: 'passive-share';
+  asOf: string;
+  publishedAt?: string;
+  source: ArtifactSource;
+  seriesDefinition: PassiveShareProxySeriesDefinition;
+  updateFrequency: 'monthly';
+  dataQuality: 'verified_manual' | 'manual_unverified';
+  observations: PassiveShareProxyObservations;
+  optionalObservations?: PassiveShareProxyOptionalObservations;
+}
+
+export interface PassiveShareProxyValidationResult {
+  ok: true;
+  artifact: PassiveShareProxyArtifactV1;
+  warnings?: string[];
+}
+
+export interface PassiveShareProxyValidationError {
+  ok: false;
+  errors: string[];
+}
+
+export type PassiveShareProxyValidation = PassiveShareProxyValidationResult | PassiveShareProxyValidationError;
+
 export interface ArtifactFreshnessResult {
   status: GhostFlowArtifactFreshnessStatus;
   ageDays: number;
@@ -205,6 +247,10 @@ export interface GhostFlowSnapshotMeta {
   indexConcentrationSource: 'public' | 'mock_fallback';
   /** @deprecated Prefer publicSignals */
   indexConcentrationAsOf?: string;
+  /** @deprecated Prefer publicSignals */
+  passiveShareProxySource: 'public' | 'mock_fallback';
+  /** @deprecated Prefer publicSignals */
+  passiveShareProxyAsOf?: string;
 }
 
 export interface GhostFlowBuildResult {

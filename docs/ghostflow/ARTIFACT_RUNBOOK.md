@@ -8,6 +8,8 @@ Manual refresh workflow for GhostFlow public-data artifacts. **No live fetches**
 
 **Index Concentration (v0.5):** see [INDEX_CONCENTRATION_ARTIFACT_RUNBOOK.md](./INDEX_CONCENTRATION_ARTIFACT_RUNBOOK.md).
 
+**ICI Index Share Proxy (v0.6):** see [PASSIVE_SHARE_PROXY_ARTIFACT_RUNBOOK.md](./PASSIVE_SHARE_PROXY_ARTIFACT_RUNBOOK.md).
+
 ## Volatility Regime (CBOE VIX)
 
 ### Source

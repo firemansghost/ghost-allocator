@@ -6,6 +6,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import Ajv from 'ajv';
 import { validateEtfNetIssuanceArtifact } from '../../lib/ghostflow/artifacts/etfNetIssuance';
+import { validatePassiveShareProxyArtifact } from '../../lib/ghostflow/artifacts/passiveShareProxy';
 import { validateIndexConcentrationArtifact } from '../../lib/ghostflow/artifacts/indexConcentration';
 import { validateActiveIndexFlowArtifact } from '../../lib/ghostflow/artifacts/activeIndexFlow';
 import { validateVolatilityRegimeArtifact } from '../../lib/ghostflow/artifacts/volatilityRegime';
@@ -44,6 +45,8 @@ function main(): void {
   const activeIndexSchemaPath = join(root, 'data/ghostflow/artifacts/schema.activeIndexFlow.v1.json');
   const indexConcentrationPath = join(root, 'data/ghostflow/artifacts/indexConcentration.v1.json');
   const indexConcentrationSchemaPath = join(root, 'data/ghostflow/artifacts/schema.indexConcentration.v1.json');
+  const passiveSharePath = join(root, 'data/ghostflow/artifacts/passiveShareProxy.v1.json');
+  const passiveShareSchemaPath = join(root, 'data/ghostflow/artifacts/schema.passiveShareProxy.v1.json');
 
   if (!validateWithSchema('volatilityRegime.v1.json', volPath, volSchemaPath)) failed = true;
 
@@ -102,6 +105,20 @@ function main(): void {
     const pct = indexConcentrationRules.artifact.observations.sp500Top10IndexWeightPercent;
     console.log(
       `GhostFlow rules: concentration OK (top-10 ${pct}%, month ended ${indexConcentrationRules.artifact.asOf})`
+    );
+  }
+
+  if (!validateWithSchema('passiveShareProxy.v1.json', passiveSharePath, passiveShareSchemaPath)) failed = true;
+
+  const passiveShareRules = validatePassiveShareProxyArtifact(loadJson(passiveSharePath), GHOSTFLOW_REFERENCE_AS_OF);
+  if (!passiveShareRules.ok) {
+    failed = true;
+    console.error('GhostFlow rules failed for passive-share:');
+    for (const err of passiveShareRules.errors) console.error(`  - ${err}`);
+  } else {
+    const pct = passiveShareRules.artifact.observations.indexAssetSharePercent;
+    console.log(
+      `GhostFlow rules: passive-share OK (ICI index share ${pct}%, month ended ${passiveShareRules.artifact.asOf})`
     );
   }
 
