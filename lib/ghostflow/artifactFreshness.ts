@@ -3,6 +3,7 @@
  *
  * Daily artifacts (VIX): trading days after asOf.
  * Weekly artifacts (ETF): calendar days after publishedAt (or asOf fallback).
+ * Monthly artifacts (Active/Index): calendar days after publishedAt (or asOf fallback).
  */
 
 import type { ArtifactFreshnessResult, GhostFlowArtifactFreshnessStatus } from './artifacts/types';
@@ -12,6 +13,9 @@ const DAILY_STALE_TRADING_DAYS = 5;
 
 const WEEKLY_CAUTION_CALENDAR_DAYS = 8;
 const WEEKLY_STALE_CALENDAR_DAYS = 14;
+
+const MONTHLY_FRESH_CALENDAR_DAYS = 35;
+const MONTHLY_CAUTION_CALENDAR_DAYS = 55;
 
 function parseUtcDay(iso: string): Date {
   const [y, m, d] = iso.slice(0, 10).split('-').map(Number);
@@ -49,6 +53,12 @@ function statusFromTradingDays(days: number): GhostFlowArtifactFreshnessStatus {
 function statusFromCalendarDays(days: number): GhostFlowArtifactFreshnessStatus {
   if (days <= 7) return 'fresh';
   if (days <= WEEKLY_STALE_CALENDAR_DAYS) return 'caution';
+  return 'stale';
+}
+
+function statusFromMonthlyCalendarDays(days: number): GhostFlowArtifactFreshnessStatus {
+  if (days <= MONTHLY_FRESH_CALENDAR_DAYS) return 'fresh';
+  if (days <= MONTHLY_CAUTION_CALENDAR_DAYS) return 'caution';
   return 'stale';
 }
 
@@ -90,6 +100,28 @@ export function evaluateWeeklyArtifactFreshness(
   } else if (status === 'stale') {
     warnings.push(
       `${label} artifact is ${calendarDaysStale} calendar days since release (stale threshold: >${WEEKLY_STALE_CALENDAR_DAYS}). Values shown are last manual update — refresh recommended.`
+    );
+  }
+
+  return { status, ageDays: calendarDaysStale, warnings };
+}
+
+export function evaluateMonthlyArtifactFreshness(
+  freshnessAnchor: string,
+  referenceAsOf: string,
+  label = 'Active vs Index Flow'
+): ArtifactFreshnessResult {
+  const calendarDaysStale = calendarDaysAfter(freshnessAnchor, referenceAsOf);
+  const status = statusFromMonthlyCalendarDays(calendarDaysStale);
+  const warnings: string[] = [];
+
+  if (status === 'caution') {
+    warnings.push(
+      `${label} artifact is ${calendarDaysStale} calendar days since release (caution threshold: ${MONTHLY_FRESH_CALENDAR_DAYS + 1}+).`
+    );
+  } else if (status === 'stale') {
+    warnings.push(
+      `${label} artifact is ${calendarDaysStale} calendar days since release (stale threshold: >${MONTHLY_CAUTION_CALENDAR_DAYS}). Values shown are last manual update — refresh recommended.`
     );
   }
 

@@ -112,5 +112,6 @@ export interface GhostFlowDashboardData {
   dataMix?: GhostFlowDataMix;
   freshnessWarnings?: string[];
   publicPassiveInputKeys?: Array<keyof PassivePressureInputs>;
+  publicStructuralInputKeys?: Array<keyof StructuralFragilityInputs>;
   publicSignalCount?: number;
 }

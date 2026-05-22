@@ -57,6 +57,25 @@ function dataQualityLabel(q: string | undefined): string {
   }
 }
 
+function artifactDateLabel(signalId: string): string {
+  if (signalId === 'etf-flow') return 'Week ended';
+  if (signalId === 'active-index-flow') return 'Month ended';
+  return 'As of';
+}
+
+function publicSignalDescription(publicSignalCount: number): string {
+  if (publicSignalCount >= 3) {
+    return 'Volatility Regime (CBOE VIX), ETF Net Issuance Pressure (ICI domestic equity weekly estimated net issuance), and Active vs Index Flow Differential (ICI monthly domestic-equity active/index net flows) use manual public artifacts. All other signals remain illustrative mock values.';
+  }
+  if (publicSignalCount === 2) {
+    return 'Two public artifacts are wired; others remain mock. Check freshness warnings if an artifact is unavailable.';
+  }
+  if (publicSignalCount === 1) {
+    return 'One public artifact is wired; others remain mock. Check freshness warnings if an artifact is unavailable.';
+  }
+  return 'All signals use illustrative mock values — public artifacts unavailable.';
+}
+
 export function GhostFlowSignalGrid({
   signals,
   dataMix = 'mock',
@@ -69,15 +88,9 @@ export function GhostFlowSignalGrid({
   return (
     <section className="space-y-3" aria-labelledby="ghostflow-signals-heading">
       <h2 id="ghostflow-signals-heading" className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
-        Signal grid (v0.3 mixed)
+        Signal grid (v0.4 mixed)
       </h2>
-      <p className="text-xs text-zinc-500 leading-relaxed max-w-3xl">
-        {publicSignalCount >= 2
-          ? 'Volatility Regime (CBOE VIX) and ETF Net Issuance Pressure (ICI domestic equity weekly estimated net issuance) use manual public artifacts. All other signals remain illustrative mock values.'
-          : publicSignalCount === 1
-            ? 'One public artifact is wired; others remain mock. Check freshness warnings if an artifact is unavailable.'
-            : 'All signals use illustrative mock values — public artifacts unavailable.'}
-      </p>
+      <p className="text-xs text-zinc-500 leading-relaxed max-w-3xl">{publicSignalDescription(publicSignalCount)}</p>
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
         {signals.map((sig) => (
           <GlassCard key={sig.id} className="p-4 flex flex-col min-w-0">
@@ -112,7 +125,7 @@ export function GhostFlowSignalGrid({
               )}
               {sig.dataStatus === 'public_proxy' && sig.artifactAsOf && (
                 <p className="text-[10px] text-zinc-500">
-                  {sig.id === 'etf-flow' ? 'Week ended' : 'As of'} {sig.artifactAsOf}
+                  {artifactDateLabel(sig.id)} {sig.artifactAsOf}
                   {sig.artifactPublishedAt ? ` · Released ${sig.artifactPublishedAt}` : ''}
                 </p>
               )}
