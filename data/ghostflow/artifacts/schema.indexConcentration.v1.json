@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ghost-allocator.local/schemas/ghostflow-index-concentration.v1.json",
+  "title": "GhostFlow Index Concentration artifact v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifactVersion",
+    "signalId",
+    "asOf",
+    "source",
+    "seriesDefinition",
+    "updateFrequency",
+    "dataQuality",
+    "observations"
+  ],
+  "properties": {
+    "artifactVersion": {
+      "type": "string",
+      "const": "1"
+    },
+    "signalId": {
+      "type": "string",
+      "const": "concentration"
+    },
+    "asOf": {
+      "type": "string",
+      "format": "date"
+    },
+    "publishedAt": {
+      "type": "string",
+      "format": "date"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "url": { "type": "string", "format": "uri" },
+        "note": { "type": "string" }
+      }
+    },
+    "seriesDefinition": {
+      "type": "string",
+      "const": "sp500_index_top10_weight_percent"
+    },
+    "updateFrequency": {
+      "type": "string",
+      "const": "monthly"
+    },
+    "dataQuality": {
+      "type": "string",
+      "enum": ["verified_manual", "manual_unverified"]
+    },
+    "observations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sp500Top10IndexWeightPercent"],
+      "properties": {
+        "sp500Top10IndexWeightPercent": {
+          "type": "number",
+          "minimum": 15,
+          "maximum": 50
+        }
+      }
+    },
+    "optionalObservations": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sp500Top5IndexWeightPercent": { "type": ["number", "null"] },
+        "largestConstituentWeightPercent": { "type": ["number", "null"] },
+        "constituentCount": { "type": ["number", "null"] },
+        "sourceTable": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

@@ -14,6 +14,8 @@ export type EtfNetIssuanceSeriesDefinition = 'domestic_equity_etf_estimated_week
 
 export type ActiveIndexFlowSeriesDefinition = 'domestic_equity_active_index_monthly_net_flows';
 
+export type IndexConcentrationSeriesDefinition = 'sp500_index_top10_weight_percent';
+
 export interface ArtifactSource {
   name: string;
   url?: string;
@@ -127,6 +129,43 @@ export interface ActiveIndexFlowValidationError {
 
 export type ActiveIndexFlowValidation = ActiveIndexFlowValidationResult | ActiveIndexFlowValidationError;
 
+export interface IndexConcentrationObservations {
+  sp500Top10IndexWeightPercent: number;
+}
+
+export interface IndexConcentrationOptionalObservations {
+  sp500Top5IndexWeightPercent?: number | null;
+  largestConstituentWeightPercent?: number | null;
+  constituentCount?: number | null;
+  sourceTable?: string | null;
+}
+
+export interface IndexConcentrationArtifactV1 {
+  artifactVersion: '1';
+  signalId: 'concentration';
+  asOf: string;
+  publishedAt?: string;
+  source: ArtifactSource;
+  seriesDefinition: IndexConcentrationSeriesDefinition;
+  updateFrequency: 'monthly';
+  dataQuality: 'verified_manual' | 'manual_unverified';
+  observations: IndexConcentrationObservations;
+  optionalObservations?: IndexConcentrationOptionalObservations;
+}
+
+export interface IndexConcentrationValidationResult {
+  ok: true;
+  artifact: IndexConcentrationArtifactV1;
+  warnings?: string[];
+}
+
+export interface IndexConcentrationValidationError {
+  ok: false;
+  errors: string[];
+}
+
+export type IndexConcentrationValidation = IndexConcentrationValidationResult | IndexConcentrationValidationError;
+
 export interface ArtifactFreshnessResult {
   status: GhostFlowArtifactFreshnessStatus;
   ageDays: number;
@@ -162,6 +201,10 @@ export interface GhostFlowSnapshotMeta {
   activeIndexFlowSource: 'public' | 'mock_fallback';
   /** @deprecated Prefer publicSignals */
   activeIndexFlowAsOf?: string;
+  /** @deprecated Prefer publicSignals */
+  indexConcentrationSource: 'public' | 'mock_fallback';
+  /** @deprecated Prefer publicSignals */
+  indexConcentrationAsOf?: string;
 }
 
 export interface GhostFlowBuildResult {

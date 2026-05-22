@@ -1,5 +1,5 @@
 /**
- * GhostFlow v0.4 — merge mock snapshot with validated public artifacts before scoring.
+ * GhostFlow v0.5 — merge mock snapshot with validated public artifacts before scoring.
  */
 
 import { MOCK_GHOSTFLOW_SNAPSHOT } from '@/data/ghostflow/mockGhostflowSnapshot';
@@ -21,6 +21,13 @@ import {
   loadEtfNetIssuanceArtifact,
   mapDomesticEquityIssuanceToNumericValue,
 } from './artifacts/etfNetIssuance';
+import {
+  buildIndexConcentrationExplanation,
+  evaluateIndexConcentrationArtifactFreshness,
+  formatIndexConcentrationDisplayValue,
+  loadIndexConcentrationArtifact,
+  mapTop10WeightToNumericValue,
+} from './artifacts/indexConcentration';
 import type {
   ActiveIndexFlowArtifactV1,
   ApplyArtifactOutcome,
@@ -28,6 +35,7 @@ import type {
   GhostFlowBuildResult,
   GhostFlowPublicSignalMeta,
   GhostFlowSnapshotMeta,
+  IndexConcentrationArtifactV1,
   VolatilityRegimeArtifactV1,
 } from './artifacts/types';
 import {
@@ -201,6 +209,53 @@ export function applyActiveIndexFlowArtifact(
   };
 }
 
+export function applyIndexConcentrationArtifact(
+  raw: GhostFlowRawSnapshot,
+  artifact: IndexConcentrationArtifactV1,
+  referenceAsOf: string
+): ApplyArtifactOutcome {
+  const freshness = evaluateIndexConcentrationArtifactFreshness(artifact, referenceAsOf);
+  const top10Weight = artifact.observations.sp500Top10IndexWeightPercent;
+  const numericValue = mapTop10WeightToNumericValue(top10Weight);
+
+  raw.structuralFragility.indexConcentration = numericValue;
+  raw.asOf = bumpAsOf(raw.asOf, artifact.asOf);
+
+  raw.signals = replaceSignal(raw.signals, {
+    id: 'concentration',
+    name: 'Index Concentration',
+    value: formatIndexConcentrationDisplayValue(top10Weight, numericValue),
+    numericValue,
+    explanation: buildIndexConcentrationExplanation(artifact, numericValue),
+    dataStatus: 'public_proxy',
+    updateFrequencyTarget: 'Monthly (manual artifact)',
+    sourceName: artifact.source.name,
+    sourceUrl: artifact.source.url,
+    sourceNote: artifact.source.note,
+    dataQuality: artifact.dataQuality,
+    artifactAsOf: artifact.asOf,
+    artifactPublishedAt: artifact.publishedAt,
+    freshnessStatus: freshness.status,
+  });
+
+  const publicSignal: GhostFlowPublicSignalMeta = {
+    signalId: 'concentration',
+    name: 'Index Concentration',
+    sourceName: artifact.source.name,
+    sourceUrl: artifact.source.url,
+    asOf: artifact.asOf,
+    publishedAt: artifact.publishedAt,
+    freshnessStatus: freshness.status,
+  };
+
+  return {
+    raw,
+    warnings: freshness.warnings,
+    publicSignal,
+    publicStructuralInputKey: 'indexConcentration',
+  };
+}
+
 function buildMeta(
   raw: GhostFlowRawSnapshot,
   warnings: string[],
@@ -211,6 +266,7 @@ function buildMeta(
   const volSignal = publicSignals.find((s) => s.signalId === 'vol-regime');
   const etfSignal = publicSignals.find((s) => s.signalId === 'etf-flow');
   const activeIndexSignal = publicSignals.find((s) => s.signalId === 'active-index-flow');
+  const indexConcentrationSignal = publicSignals.find((s) => s.signalId === 'concentration');
 
   return {
     raw,
@@ -227,6 +283,8 @@ function buildMeta(
       etfFlowAsOf: etfSignal?.asOf,
       activeIndexFlowSource: activeIndexSignal ? 'public' : 'mock_fallback',
       activeIndexFlowAsOf: activeIndexSignal?.asOf,
+      indexConcentrationSource: indexConcentrationSignal ? 'public' : 'mock_fallback',
+      indexConcentrationAsOf: indexConcentrationSignal?.asOf,
     },
   };
 }
@@ -235,6 +293,7 @@ export interface BuildGhostFlowSnapshotWithArtifactsOptions {
   vol?: VolatilityRegimeArtifactV1;
   etf?: EtfNetIssuanceArtifactV1;
   activeIndex?: ActiveIndexFlowArtifactV1;
+  indexConcentration?: IndexConcentrationArtifactV1;
   referenceAsOf: string;
 }
 
@@ -270,6 +329,14 @@ export function buildGhostFlowSnapshotWithArtifacts(
     warnings.push(...activeIndex.warnings);
     if (activeIndex.publicSignal) publicSignals.push(activeIndex.publicSignal);
     if (activeIndex.publicStructuralInputKey) publicStructuralInputKeys.push(activeIndex.publicStructuralInputKey);
+  }
+
+  if (opts.indexConcentration) {
+    const indexConcentration = applyIndexConcentrationArtifact(raw, opts.indexConcentration, opts.referenceAsOf);
+    raw = indexConcentration.raw;
+    warnings.push(...indexConcentration.warnings);
+    if (indexConcentration.publicSignal) publicSignals.push(indexConcentration.publicSignal);
+    if (indexConcentration.publicStructuralInputKey) publicStructuralInputKeys.push(indexConcentration.publicStructuralInputKey);
   }
 
   return buildMeta(raw, warnings, publicSignals, publicPassiveInputKeys, publicStructuralInputKeys);
@@ -328,6 +395,24 @@ export function buildGhostFlowSnapshot(
   } else {
     warnings.push(
       `Active vs Index Flow artifact invalid or missing (${activeIndexValidation.errors.join('; ')}). Using mock fallback for active-index-flow signal.`
+    );
+  }
+
+  const indexConcentrationValidation = loadIndexConcentrationArtifact();
+  if (indexConcentrationValidation.ok) {
+    const indexConcentration = applyIndexConcentrationArtifact(
+      raw,
+      indexConcentrationValidation.artifact,
+      referenceAsOf
+    );
+    raw = indexConcentration.raw;
+    warnings.push(...indexConcentration.warnings);
+    if (indexConcentrationValidation.warnings) warnings.push(...indexConcentrationValidation.warnings);
+    if (indexConcentration.publicSignal) publicSignals.push(indexConcentration.publicSignal);
+    if (indexConcentration.publicStructuralInputKey) publicStructuralInputKeys.push(indexConcentration.publicStructuralInputKey);
+  } else {
+    warnings.push(
+      `Index Concentration artifact invalid or missing (${indexConcentrationValidation.errors.join('; ')}). Using mock fallback for concentration signal.`
     );
   }
 

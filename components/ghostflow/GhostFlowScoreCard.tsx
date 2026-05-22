@@ -53,7 +53,7 @@ export function GhostFlowScoreCard({ data }: { data: GhostFlowDashboardData }) {
     <section className="space-y-4" aria-labelledby="ghostflow-score-heading">
       <GlassCard className="p-5 sm:p-6">
         <h2 id="ghostflow-score-heading" className="text-xs font-semibold uppercase tracking-wide text-amber-400/90">
-          GhostFlow Score (v0.4 mixed)
+          GhostFlow Score (v0.5 mixed)
         </h2>
         <div className="mt-3 flex flex-wrap items-end gap-4">
           <div className="text-5xl sm:text-6xl font-semibold tabular-nums text-zinc-100">{score.score}</div>
@@ -69,7 +69,13 @@ export function GhostFlowScoreCard({ data }: { data: GhostFlowDashboardData }) {
           Composite = 50% Passive Pressure ({score.subScores.passivePressure}) + 50% Structural Fragility (
           {score.subScores.structuralFragility}). Not a forecast. Not financial advice.
         </p>
-        {isMixed && publicCount >= 3 && (
+        {isMixed && publicCount >= 4 && (
+          <p className="mt-2 text-xs text-amber-300/85">
+            Composite includes two public Passive Pressure sub-inputs and two public Structural Fragility sub-inputs.
+            Remaining inputs are static mock proxies.
+          </p>
+        )}
+        {isMixed && publicCount === 3 && (
           <p className="mt-2 text-xs text-amber-300/85">
             Composite includes two public Passive Pressure sub-inputs and one public Structural Fragility sub-input.
             Remaining inputs are static mock proxies.
@@ -168,9 +174,11 @@ export function GhostFlowScoreCard({ data }: { data: GhostFlowDashboardData }) {
             })}
           </ul>
           <p className="mt-2 text-[10px] text-zinc-600">
-            {publicStructuralCount >= 1
-              ? 'One public sub-input (monthly active/index flow-tilt proxy); others are mock 0–100 proxies.'
-              : 'Input values are mock 0–100 proxies.'}
+            {publicStructuralCount >= 2
+              ? 'Two public sub-inputs (monthly active/index flow-tilt + index concentration); others are mock 0–100 proxies.'
+              : publicStructuralCount >= 1
+                ? 'One public sub-input; others are mock 0–100 proxies.'
+                : 'Input values are mock 0–100 proxies.'}
           </p>
         </GlassCard>
       </div>
