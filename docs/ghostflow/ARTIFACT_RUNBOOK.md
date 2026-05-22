@@ -61,6 +61,8 @@ npm run lint
 npm run build
 ```
 
+Routine VIX refreshes only require updating the artifact JSON and `GHOSTFLOW_REFERENCE_AS_OF`. GhostFlow unit tests use fixed fixtures — you do **not** need to edit test files unless mapping, scoring, schema, or merge behavior changes.
+
 ## Freshness states
 
 Evaluated as **trading days** between artifact `asOf` and `GHOSTFLOW_REFERENCE_AS_OF`:

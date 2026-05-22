@@ -4,7 +4,11 @@
 
 import assert from 'assert';
 import { evaluateArtifactFreshness, tradingDaysAfter } from '../artifactFreshness';
-import { buildGhostFlowSnapshot } from '../buildSnapshot';
+import { buildGhostFlowSnapshotWithArtifact } from '../buildSnapshot';
+import {
+  FIXTURE_STALE_REFERENCE_AS_OF,
+  FIXTURE_VOL_REGIME_MERGE,
+} from './fixtures/volatilityRegime';
 
 assert.strictEqual(tradingDaysAfter('2026-05-20', '2026-05-20'), 0);
 assert.strictEqual(tradingDaysAfter('2026-05-19', '2026-05-20'), 1);
@@ -30,8 +34,8 @@ assert.strictEqual(stale.status, 'stale');
 assert.strictEqual(stale.tradingDaysStale, 6);
 assert.ok(stale.warnings.some((w) => w.includes('stale')));
 
-// Stale artifact still public (not mock fallback)
-const staleBuilt = buildGhostFlowSnapshot('2026-05-28');
+// Stale artifact still public (not mock fallback) — fixed fixture dates
+const staleBuilt = buildGhostFlowSnapshotWithArtifact(FIXTURE_VOL_REGIME_MERGE, FIXTURE_STALE_REFERENCE_AS_OF);
 assert.strictEqual(staleBuilt.meta.volRegimeSource, 'public');
 assert.strictEqual(staleBuilt.meta.dataMix, 'mixed');
 const vol = staleBuilt.raw.signals.find((s) => s.id === 'vol-regime');
