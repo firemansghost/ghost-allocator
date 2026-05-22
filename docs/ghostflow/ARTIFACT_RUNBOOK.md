@@ -4,6 +4,8 @@ Manual refresh workflow for GhostFlow public-data artifacts. **No live fetches**
 
 **ETF Net Issuance (v0.3):** see [ETF_ARTIFACT_RUNBOOK.md](./ETF_ARTIFACT_RUNBOOK.md).
 
+**Active vs Index Flow Differential (v0.4):** see [ACTIVE_INDEX_ARTIFACT_RUNBOOK.md](./ACTIVE_INDEX_ARTIFACT_RUNBOOK.md).
+
 ## Volatility Regime (CBOE VIX)
 
 ### Source

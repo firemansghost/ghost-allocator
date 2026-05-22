@@ -6,6 +6,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import Ajv from 'ajv';
 import { validateEtfNetIssuanceArtifact } from '../../lib/ghostflow/artifacts/etfNetIssuance';
+import { validateActiveIndexFlowArtifact } from '../../lib/ghostflow/artifacts/activeIndexFlow';
 import { validateVolatilityRegimeArtifact } from '../../lib/ghostflow/artifacts/volatilityRegime';
 import { GHOSTFLOW_REFERENCE_AS_OF } from '../../lib/ghostflow/reference';
 
@@ -38,6 +39,8 @@ function main(): void {
   const volSchemaPath = join(root, 'data/ghostflow/artifacts/schema.volatilityRegime.v1.json');
   const etfPath = join(root, 'data/ghostflow/artifacts/etfNetIssuance.v1.json');
   const etfSchemaPath = join(root, 'data/ghostflow/artifacts/schema.etfNetIssuance.v1.json');
+  const activeIndexPath = join(root, 'data/ghostflow/artifacts/activeIndexFlow.v1.json');
+  const activeIndexSchemaPath = join(root, 'data/ghostflow/artifacts/schema.activeIndexFlow.v1.json');
 
   if (!validateWithSchema('volatilityRegime.v1.json', volPath, volSchemaPath)) failed = true;
 
@@ -63,6 +66,22 @@ function main(): void {
     const m = etfRules.artifact.observations.domesticEquityNetIssuanceMillionsUsd;
     console.log(
       `GhostFlow rules: etf-flow OK ($${(m / 1000).toFixed(1)}B domestic equity, week ended ${etfRules.artifact.asOf})`
+    );
+  }
+
+  if (!validateWithSchema('activeIndexFlow.v1.json', activeIndexPath, activeIndexSchemaPath)) failed = true;
+
+  const activeIndexRules = validateActiveIndexFlowArtifact(loadJson(activeIndexPath), GHOSTFLOW_REFERENCE_AS_OF);
+  if (!activeIndexRules.ok) {
+    failed = true;
+    console.error('GhostFlow rules failed for active-index-flow:');
+    for (const err of activeIndexRules.errors) console.error(`  - ${err}`);
+  } else {
+    const a = activeIndexRules.artifact.observations.activeDomesticEquityNetFlowMillionsUsd;
+    const i = activeIndexRules.artifact.observations.indexDomesticEquityNetFlowMillionsUsd;
+    const diff = i - a;
+    console.log(
+      `GhostFlow rules: active-index-flow OK (diff $${(diff / 1000).toFixed(1)}B, month ended ${activeIndexRules.artifact.asOf})`
     );
   }
 

@@ -6,6 +6,7 @@ import assert from 'assert';
 import {
   calendarDaysAfter,
   evaluateDailyArtifactFreshness,
+  evaluateMonthlyArtifactFreshness,
   evaluateWeeklyArtifactFreshness,
   tradingDaysAfter,
 } from '../artifactFreshness';
@@ -60,5 +61,26 @@ const staleBuilt = buildGhostFlowSnapshotWithArtifacts({
 });
 assert.strictEqual(staleBuilt.meta.etfFlowSource, 'public');
 assert.strictEqual(staleBuilt.raw.signals.find((s) => s.id === 'etf-flow')?.freshnessStatus, 'stale');
+
+// --- Monthly (Active/Index) calendar days from publishedAt ---
+const freshMonthly = evaluateMonthlyArtifactFreshness('2026-04-30', '2026-05-21');
+assert.strictEqual(freshMonthly.status, 'fresh');
+assert.strictEqual(freshMonthly.ageDays, 21);
+
+const freshEdgeMonthly = evaluateMonthlyArtifactFreshness('2026-04-30', '2026-06-04');
+assert.strictEqual(freshEdgeMonthly.status, 'fresh');
+assert.strictEqual(freshEdgeMonthly.ageDays, 35);
+
+const cautionMonthly = evaluateMonthlyArtifactFreshness('2026-04-30', '2026-06-05');
+assert.strictEqual(cautionMonthly.status, 'caution');
+assert.strictEqual(cautionMonthly.ageDays, 36);
+
+const cautionEdgeMonthly = evaluateMonthlyArtifactFreshness('2026-04-30', '2026-06-24');
+assert.strictEqual(cautionEdgeMonthly.status, 'caution');
+assert.strictEqual(cautionEdgeMonthly.ageDays, 55);
+
+const staleMonthly = evaluateMonthlyArtifactFreshness('2026-04-30', '2026-06-25');
+assert.strictEqual(staleMonthly.status, 'stale');
+assert.strictEqual(staleMonthly.ageDays, 56);
 
 console.log('ghostflow/artifactFreshness.test.ts: ok');

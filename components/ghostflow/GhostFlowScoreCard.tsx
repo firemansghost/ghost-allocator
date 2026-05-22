@@ -1,6 +1,10 @@
 import { GlassCard } from '@/components/GlassCard';
 import { GHOSTFLOW_SCORE_BANDS } from '@/lib/ghostflow/scoring';
-import type { GhostFlowDashboardData, PassivePressureInputs } from '@/lib/ghostflow/types';
+import type {
+  GhostFlowDashboardData,
+  PassivePressureInputs,
+  StructuralFragilityInputs,
+} from '@/lib/ghostflow/types';
 
 const PASSIVE_LABELS: { key: keyof GhostFlowDashboardData['passivePressureInputs']; label: string }[] = [
   { key: 'etfFundFlowImpulse', label: 'ETF / fund-flow impulse' },
@@ -25,16 +29,31 @@ function isPublicPassiveInput(
   return publicKeys?.includes(key) ?? false;
 }
 
+function isPublicStructuralInput(
+  key: keyof StructuralFragilityInputs,
+  publicKeys: Array<keyof StructuralFragilityInputs> | undefined
+): boolean {
+  return publicKeys?.includes(key) ?? false;
+}
+
 export function GhostFlowScoreCard({ data }: { data: GhostFlowDashboardData }) {
-  const { score, passivePressureInputs, structuralFragilityInputs, publicPassiveInputKeys } = data;
+  const {
+    score,
+    passivePressureInputs,
+    structuralFragilityInputs,
+    publicPassiveInputKeys,
+    publicStructuralInputKeys,
+  } = data;
   const isMixed = data.dataMix === 'mixed';
-  const publicCount = data.publicSignalCount ?? publicPassiveInputKeys?.length ?? 0;
+  const publicCount = data.publicSignalCount ?? 0;
+  const publicPassiveCount = publicPassiveInputKeys?.length ?? 0;
+  const publicStructuralCount = publicStructuralInputKeys?.length ?? 0;
 
   return (
     <section className="space-y-4" aria-labelledby="ghostflow-score-heading">
       <GlassCard className="p-5 sm:p-6">
         <h2 id="ghostflow-score-heading" className="text-xs font-semibold uppercase tracking-wide text-amber-400/90">
-          GhostFlow Score (v0.3 mixed)
+          GhostFlow Score (v0.4 mixed)
         </h2>
         <div className="mt-3 flex flex-wrap items-end gap-4">
           <div className="text-5xl sm:text-6xl font-semibold tabular-nums text-zinc-100">{score.score}</div>
@@ -50,15 +69,20 @@ export function GhostFlowScoreCard({ data }: { data: GhostFlowDashboardData }) {
           Composite = 50% Passive Pressure ({score.subScores.passivePressure}) + 50% Structural Fragility (
           {score.subScores.structuralFragility}). Not a forecast. Not financial advice.
         </p>
-        {isMixed && publicCount >= 2 && (
+        {isMixed && publicCount >= 3 && (
           <p className="mt-2 text-xs text-amber-300/85">
-            Composite includes two public Passive Pressure sub-inputs (ETF net issuance + options / volatility amplifier).
+            Composite includes two public Passive Pressure sub-inputs and one public Structural Fragility sub-input.
             Remaining inputs are static mock proxies.
+          </p>
+        )}
+        {isMixed && publicCount === 2 && publicPassiveCount === 2 && (
+          <p className="mt-2 text-xs text-amber-300/85">
+            Composite includes two public Passive Pressure sub-inputs. Remaining inputs are static mock proxies.
           </p>
         )}
         {isMixed && publicCount === 1 && (
           <p className="mt-2 text-xs text-amber-300/85">
-            Composite includes one public Passive Pressure sub-input. Remaining inputs are static mock proxies.
+            Composite includes one public sub-input. Remaining inputs are static mock proxies.
           </p>
         )}
         <div className="mt-4 pt-4 border-t border-zinc-800/80">
@@ -104,9 +128,9 @@ export function GhostFlowScoreCard({ data }: { data: GhostFlowDashboardData }) {
             })}
           </ul>
           <p className="mt-2 text-[10px] text-zinc-600">
-            {publicCount >= 2
+            {publicPassiveCount >= 2
               ? 'Two public sub-inputs; others are mock 0–100 proxies.'
-              : publicCount === 1
+              : publicPassiveCount === 1
                 ? 'One public sub-input; others are mock 0–100 proxies.'
                 : 'Input values are mock 0–100 proxies.'}
           </p>
@@ -121,16 +145,33 @@ export function GhostFlowScoreCard({ data }: { data: GhostFlowDashboardData }) {
             Tracks market-structure vulnerability — concentration, breadth, passive share, model-zone proximity.
           </p>
           <ul className="mt-3 space-y-1.5 text-[11px] text-zinc-500">
-            {STRUCTURAL_LABELS.map(({ key, label }) => (
-              <li key={key} className="flex justify-between gap-2">
-                <span>{label}</span>
-                <span className="tabular-nums text-zinc-400" title="Mock input 0–100">
-                  {structuralFragilityInputs[key]}
-                </span>
-              </li>
-            ))}
+            {STRUCTURAL_LABELS.map(({ key, label }) => {
+              const isPublic = isPublicStructuralInput(key, publicStructuralInputKeys);
+              return (
+                <li key={key} className="flex justify-between gap-2">
+                  <span>
+                    {label}
+                    {isPublic && (
+                      <span className="ml-1.5 text-[9px] font-semibold uppercase tracking-wide text-emerald-400/90">
+                        public
+                      </span>
+                    )}
+                  </span>
+                  <span
+                    className="tabular-nums text-zinc-400"
+                    title={isPublic ? 'Public manual artifact 0–100' : 'Mock input 0–100'}
+                  >
+                    {structuralFragilityInputs[key]}
+                  </span>
+                </li>
+              );
+            })}
           </ul>
-          <p className="mt-2 text-[10px] text-zinc-600">Input values are mock 0–100 proxies.</p>
+          <p className="mt-2 text-[10px] text-zinc-600">
+            {publicStructuralCount >= 1
+              ? 'One public sub-input (monthly active/index flow-tilt proxy); others are mock 0–100 proxies.'
+              : 'Input values are mock 0–100 proxies.'}
+          </p>
         </GlassCard>
       </div>
     </section>

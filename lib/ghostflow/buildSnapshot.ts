@@ -1,11 +1,19 @@
 /**
- * GhostFlow v0.3 — merge mock snapshot with validated public artifacts before scoring.
+ * GhostFlow v0.4 — merge mock snapshot with validated public artifacts before scoring.
  */
 
 import { MOCK_GHOSTFLOW_SNAPSHOT } from '@/data/ghostflow/mockGhostflowSnapshot';
 import { evaluateDailyArtifactFreshness } from '@/lib/ghostflow/artifactFreshness';
 import { GHOSTFLOW_REFERENCE_AS_OF } from '@/lib/ghostflow/reference';
 import type { GhostFlowRawSnapshot, GhostFlowSignal } from '@/lib/ghostflow/types';
+import {
+  buildActiveIndexFlowExplanation,
+  computeFlowDifferentialMillionsUsd,
+  evaluateActiveIndexArtifactFreshness,
+  formatActiveIndexFlowDisplayValue,
+  loadActiveIndexFlowArtifact,
+  mapFlowDifferentialToNumericValue,
+} from './artifacts/activeIndexFlow';
 import {
   buildEtfFlowExplanation,
   evaluateEtfArtifactFreshness,
@@ -14,6 +22,7 @@ import {
   mapDomesticEquityIssuanceToNumericValue,
 } from './artifacts/etfNetIssuance';
 import type {
+  ActiveIndexFlowArtifactV1,
   ApplyArtifactOutcome,
   EtfNetIssuanceArtifactV1,
   GhostFlowBuildResult,
@@ -143,14 +152,65 @@ export function applyEtfNetIssuanceArtifact(
   };
 }
 
+export function applyActiveIndexFlowArtifact(
+  raw: GhostFlowRawSnapshot,
+  artifact: ActiveIndexFlowArtifactV1,
+  referenceAsOf: string
+): ApplyArtifactOutcome {
+  const freshness = evaluateActiveIndexArtifactFreshness(artifact, referenceAsOf);
+  const active = artifact.observations.activeDomesticEquityNetFlowMillionsUsd;
+  const index = artifact.observations.indexDomesticEquityNetFlowMillionsUsd;
+  const differential = computeFlowDifferentialMillionsUsd(active, index);
+  const numericValue = mapFlowDifferentialToNumericValue(differential);
+
+  raw.structuralFragility.activeShareOffsetProxy = numericValue;
+  raw.asOf = bumpAsOf(raw.asOf, artifact.asOf);
+
+  raw.signals = replaceSignal(raw.signals, {
+    id: 'active-index-flow',
+    name: 'Active vs Index Flow Differential',
+    value: formatActiveIndexFlowDisplayValue(active, index, differential, numericValue),
+    numericValue,
+    explanation: buildActiveIndexFlowExplanation(artifact, differential, numericValue),
+    dataStatus: 'public_proxy',
+    updateFrequencyTarget: 'Monthly (manual artifact)',
+    sourceName: artifact.source.name,
+    sourceUrl: artifact.source.url,
+    sourceNote: artifact.source.note,
+    dataQuality: artifact.dataQuality,
+    artifactAsOf: artifact.asOf,
+    artifactPublishedAt: artifact.publishedAt,
+    freshnessStatus: freshness.status,
+  });
+
+  const publicSignal: GhostFlowPublicSignalMeta = {
+    signalId: 'active-index-flow',
+    name: 'Active vs Index Flow Differential',
+    sourceName: artifact.source.name,
+    sourceUrl: artifact.source.url,
+    asOf: artifact.asOf,
+    publishedAt: artifact.publishedAt,
+    freshnessStatus: freshness.status,
+  };
+
+  return {
+    raw,
+    warnings: freshness.warnings,
+    publicSignal,
+    publicStructuralInputKey: 'activeShareOffsetProxy',
+  };
+}
+
 function buildMeta(
   raw: GhostFlowRawSnapshot,
   warnings: string[],
   publicSignals: GhostFlowPublicSignalMeta[],
-  publicPassiveInputKeys: GhostFlowSnapshotMeta['publicPassiveInputKeys']
+  publicPassiveInputKeys: GhostFlowSnapshotMeta['publicPassiveInputKeys'],
+  publicStructuralInputKeys: GhostFlowSnapshotMeta['publicStructuralInputKeys']
 ): GhostFlowBuildResult {
   const volSignal = publicSignals.find((s) => s.signalId === 'vol-regime');
   const etfSignal = publicSignals.find((s) => s.signalId === 'etf-flow');
+  const activeIndexSignal = publicSignals.find((s) => s.signalId === 'active-index-flow');
 
   return {
     raw,
@@ -160,10 +220,13 @@ function buildMeta(
       publicSignalCount: publicSignals.length,
       publicSignals,
       publicPassiveInputKeys,
+      publicStructuralInputKeys,
       volRegimeSource: volSignal ? 'public' : 'mock_fallback',
       volRegimeAsOf: volSignal?.asOf,
       etfFlowSource: etfSignal ? 'public' : 'mock_fallback',
       etfFlowAsOf: etfSignal?.asOf,
+      activeIndexFlowSource: activeIndexSignal ? 'public' : 'mock_fallback',
+      activeIndexFlowAsOf: activeIndexSignal?.asOf,
     },
   };
 }
@@ -171,6 +234,7 @@ function buildMeta(
 export interface BuildGhostFlowSnapshotWithArtifactsOptions {
   vol?: VolatilityRegimeArtifactV1;
   etf?: EtfNetIssuanceArtifactV1;
+  activeIndex?: ActiveIndexFlowArtifactV1;
   referenceAsOf: string;
 }
 
@@ -182,6 +246,7 @@ export function buildGhostFlowSnapshotWithArtifacts(
   const warnings: string[] = [];
   const publicSignals: GhostFlowPublicSignalMeta[] = [];
   const publicPassiveInputKeys: GhostFlowSnapshotMeta['publicPassiveInputKeys'] = [];
+  const publicStructuralInputKeys: GhostFlowSnapshotMeta['publicStructuralInputKeys'] = [];
 
   if (opts.vol) {
     const vol = applyVolatilityRegimeArtifact(raw, opts.vol, opts.referenceAsOf);
@@ -199,7 +264,15 @@ export function buildGhostFlowSnapshotWithArtifacts(
     if (etf.publicPassiveInputKey) publicPassiveInputKeys.push(etf.publicPassiveInputKey);
   }
 
-  return buildMeta(raw, warnings, publicSignals, publicPassiveInputKeys);
+  if (opts.activeIndex) {
+    const activeIndex = applyActiveIndexFlowArtifact(raw, opts.activeIndex, opts.referenceAsOf);
+    raw = activeIndex.raw;
+    warnings.push(...activeIndex.warnings);
+    if (activeIndex.publicSignal) publicSignals.push(activeIndex.publicSignal);
+    if (activeIndex.publicStructuralInputKey) publicStructuralInputKeys.push(activeIndex.publicStructuralInputKey);
+  }
+
+  return buildMeta(raw, warnings, publicSignals, publicPassiveInputKeys, publicStructuralInputKeys);
 }
 
 /** @deprecated Use buildGhostFlowSnapshotWithArtifacts */
@@ -217,6 +290,7 @@ export function buildGhostFlowSnapshot(
   const warnings: string[] = [];
   const publicSignals: GhostFlowPublicSignalMeta[] = [];
   const publicPassiveInputKeys: GhostFlowSnapshotMeta['publicPassiveInputKeys'] = [];
+  const publicStructuralInputKeys: GhostFlowSnapshotMeta['publicStructuralInputKeys'] = [];
 
   const volValidation = loadVolatilityRegimeArtifact();
   if (volValidation.ok) {
@@ -244,5 +318,18 @@ export function buildGhostFlowSnapshot(
     );
   }
 
-  return buildMeta(raw, warnings, publicSignals, publicPassiveInputKeys);
+  const activeIndexValidation = loadActiveIndexFlowArtifact();
+  if (activeIndexValidation.ok) {
+    const activeIndex = applyActiveIndexFlowArtifact(raw, activeIndexValidation.artifact, referenceAsOf);
+    raw = activeIndex.raw;
+    warnings.push(...activeIndex.warnings);
+    if (activeIndex.publicSignal) publicSignals.push(activeIndex.publicSignal);
+    if (activeIndex.publicStructuralInputKey) publicStructuralInputKeys.push(activeIndex.publicStructuralInputKey);
+  } else {
+    warnings.push(
+      `Active vs Index Flow artifact invalid or missing (${activeIndexValidation.errors.join('; ')}). Using mock fallback for active-index-flow signal.`
+    );
+  }
+
+  return buildMeta(raw, warnings, publicSignals, publicPassiveInputKeys, publicStructuralInputKeys);
 }

@@ -2,15 +2,17 @@
  * GhostFlow — static public-data artifact types.
  */
 
-import type { PassivePressureInputs } from '../types';
+import type { PassivePressureInputs, StructuralFragilityInputs } from '../types';
 
 export type GhostFlowArtifactDataQuality = 'verified_manual' | 'manual_unverified' | 'mock_fallback';
 
 export type GhostFlowArtifactFreshnessStatus = 'fresh' | 'caution' | 'stale' | 'missing';
 
-export type GhostFlowUpdateFrequency = 'daily' | 'weekly';
+export type GhostFlowUpdateFrequency = 'daily' | 'weekly' | 'monthly';
 
 export type EtfNetIssuanceSeriesDefinition = 'domestic_equity_etf_estimated_weekly_net_issuance';
+
+export type ActiveIndexFlowSeriesDefinition = 'domestic_equity_active_index_monthly_net_flows';
 
 export interface ArtifactSource {
   name: string;
@@ -63,6 +65,31 @@ export interface EtfNetIssuanceArtifactV1 {
   optionalObservations?: EtfNetIssuanceOptionalObservations;
 }
 
+export interface ActiveIndexFlowObservations {
+  activeDomesticEquityNetFlowMillionsUsd: number;
+  indexDomesticEquityNetFlowMillionsUsd: number;
+}
+
+export interface ActiveIndexFlowOptionalObservations {
+  worldEquityActiveMillionsUsd?: number | null;
+  worldEquityIndexMillionsUsd?: number | null;
+  totalLongTermActiveMillionsUsd?: number | null;
+  totalLongTermIndexMillionsUsd?: number | null;
+}
+
+export interface ActiveIndexFlowArtifactV1 {
+  artifactVersion: '1';
+  signalId: 'active-index-flow';
+  asOf: string;
+  publishedAt?: string;
+  source: ArtifactSource;
+  seriesDefinition: ActiveIndexFlowSeriesDefinition;
+  updateFrequency: 'monthly';
+  dataQuality: 'verified_manual' | 'manual_unverified';
+  observations: ActiveIndexFlowObservations;
+  optionalObservations?: ActiveIndexFlowOptionalObservations;
+}
+
 export interface VolatilityRegimeValidationResult {
   ok: true;
   artifact: VolatilityRegimeArtifactV1;
@@ -87,6 +114,19 @@ export interface EtfNetIssuanceValidationError {
 
 export type EtfNetIssuanceValidation = EtfNetIssuanceValidationResult | EtfNetIssuanceValidationError;
 
+export interface ActiveIndexFlowValidationResult {
+  ok: true;
+  artifact: ActiveIndexFlowArtifactV1;
+  warnings?: string[];
+}
+
+export interface ActiveIndexFlowValidationError {
+  ok: false;
+  errors: string[];
+}
+
+export type ActiveIndexFlowValidation = ActiveIndexFlowValidationResult | ActiveIndexFlowValidationError;
+
 export interface ArtifactFreshnessResult {
   status: GhostFlowArtifactFreshnessStatus;
   ageDays: number;
@@ -109,6 +149,7 @@ export interface GhostFlowSnapshotMeta {
   publicSignalCount: number;
   publicSignals: GhostFlowPublicSignalMeta[];
   publicPassiveInputKeys: Array<keyof PassivePressureInputs>;
+  publicStructuralInputKeys: Array<keyof StructuralFragilityInputs>;
   /** @deprecated Prefer publicSignals */
   volRegimeSource: 'public' | 'mock_fallback';
   /** @deprecated Prefer publicSignals */
@@ -117,6 +158,10 @@ export interface GhostFlowSnapshotMeta {
   etfFlowSource: 'public' | 'mock_fallback';
   /** @deprecated Prefer publicSignals */
   etfFlowAsOf?: string;
+  /** @deprecated Prefer publicSignals */
+  activeIndexFlowSource: 'public' | 'mock_fallback';
+  /** @deprecated Prefer publicSignals */
+  activeIndexFlowAsOf?: string;
 }
 
 export interface GhostFlowBuildResult {
@@ -129,4 +174,5 @@ export interface ApplyArtifactOutcome {
   warnings: string[];
   publicSignal?: GhostFlowPublicSignalMeta;
   publicPassiveInputKey?: keyof PassivePressureInputs;
+  publicStructuralInputKey?: keyof StructuralFragilityInputs;
 }
