@@ -131,7 +131,7 @@ export default function HomePage() {
           <GlassCard className="p-4 sm:p-5 transition transform hover:-translate-y-1 hover:border-amber-400/60 hover:shadow-[0_20px_60px_rgba(0,0,0,0.9)]">
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="text-sm font-semibold text-zinc-50">GhostFlow</h3>
-              <span className="text-[10px] font-semibold uppercase tracking-wide text-amber-300">In development</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-amber-300">Static preview</span>
             </div>
             <p className="mt-2 text-xs text-zinc-300 leading-relaxed">
               A passive pressure and market-structure fragility dashboard watching ETF flows, passive share, index

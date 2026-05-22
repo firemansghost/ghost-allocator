@@ -1,10 +1,19 @@
 /**
- * GhostFlow v0.1 — static market-structure dashboard types (mock snapshot, no live feeds).
+ * GhostFlow — static market-structure dashboard types (mock snapshot + manual public artifacts).
  */
+
+import type {
+  GhostFlowArtifactDataQuality,
+  GhostFlowArtifactFreshnessStatus,
+} from './artifacts/types';
+
+export type { GhostFlowArtifactFreshnessStatus, GhostFlowArtifactDataQuality };
 
 export type GhostFlowSignalStatus = 'quiet' | 'watch' | 'elevated' | 'stress';
 
 export type GhostFlowDataStatus = 'mock' | 'public_proxy' | 'future_live';
+
+export type GhostFlowDataMix = 'mock' | 'mixed';
 
 /** Sub-inputs for Passive Pressure Score (each 0–100, higher = more mechanical pressure). */
 export interface PassivePressureInputs {
@@ -34,6 +43,13 @@ export interface GhostFlowSignal {
   explanation: string;
   dataStatus: GhostFlowDataStatus;
   updateFrequencyTarget: string;
+  /** Public artifact provenance (v0.2+). */
+  sourceName?: string;
+  sourceUrl?: string;
+  sourceNote?: string;
+  dataQuality?: GhostFlowArtifactDataQuality;
+  artifactAsOf?: string;
+  freshnessStatus?: GhostFlowArtifactFreshnessStatus;
 }
 
 export interface GhostFlowRawSnapshot {
@@ -91,4 +107,8 @@ export interface GhostFlowDashboardData {
   signals: ScoredGhostFlowSignal[];
   passivePressureInputs: PassivePressureInputs;
   structuralFragilityInputs: StructuralFragilityInputs;
+  /** v0.2 mixed mock/public snapshot metadata. */
+  dataMix?: GhostFlowDataMix;
+  freshnessWarnings?: string[];
+  publicPassiveInputKeys?: Array<keyof PassivePressureInputs>;
 }

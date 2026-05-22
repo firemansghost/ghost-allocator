@@ -4,6 +4,7 @@
 
 import assert from 'assert';
 import { MOCK_GHOSTFLOW_SNAPSHOT } from '@/data/ghostflow/mockGhostflowSnapshot';
+import { buildGhostFlowSnapshot } from '../buildSnapshot';
 import {
   computeGhostFlowScore,
   computePassivePressureScore,
@@ -51,5 +52,11 @@ const scored = scoreGhostFlowSnapshot(MOCK_GHOSTFLOW_SNAPSHOT);
 assert.strictEqual(scored.score.score, 62);
 assert.strictEqual(scored.signals.length, 8);
 assert.ok(scored.signals.every((s) => s.status));
+
+// v0.2 merged fixture (committed artifact VIX 17.44 as of 2026-05-20)
+const merged = buildGhostFlowSnapshot('2026-05-20');
+const mergedScored = scoreGhostFlowSnapshot(merged.raw);
+assert.strictEqual(mergedScored.score.score, 59);
+assert.strictEqual(mergedScored.score.subScores.passivePressure, 56);
 
 console.log('ghostflow/scoring.test.ts: ok');

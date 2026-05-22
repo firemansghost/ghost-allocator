@@ -1,5 +1,11 @@
 import { GlassCard } from '@/components/GlassCard';
-import type { GhostFlowDataStatus, GhostFlowSignalStatus, ScoredGhostFlowSignal } from '@/lib/ghostflow/types';
+import type {
+  GhostFlowArtifactFreshnessStatus,
+  GhostFlowDataMix,
+  GhostFlowDataStatus,
+  GhostFlowSignalStatus,
+  ScoredGhostFlowSignal,
+} from '@/lib/ghostflow/types';
 
 function statusStyles(status: GhostFlowSignalStatus): string {
   switch (status) {
@@ -25,15 +31,48 @@ function dataStatusLabel(s: GhostFlowDataStatus): string {
   }
 }
 
-export function GhostFlowSignalGrid({ signals }: { signals: ScoredGhostFlowSignal[] }) {
+function freshnessStyles(status: GhostFlowArtifactFreshnessStatus): string {
+  switch (status) {
+    case 'fresh':
+      return 'border-emerald-500/30 bg-emerald-950/20 text-emerald-200/90';
+    case 'caution':
+      return 'border-amber-500/35 bg-amber-950/30 text-amber-200/90';
+    case 'stale':
+      return 'border-orange-500/40 bg-orange-950/25 text-orange-200';
+    case 'missing':
+      return 'border-zinc-600/60 bg-zinc-900/50 text-zinc-400';
+  }
+}
+
+function dataQualityLabel(q: string | undefined): string {
+  switch (q) {
+    case 'verified_manual':
+      return 'Verified manual';
+    case 'manual_unverified':
+      return 'Manual (unverified)';
+    case 'mock_fallback':
+      return 'Mock fallback';
+    default:
+      return '—';
+  }
+}
+
+export function GhostFlowSignalGrid({
+  signals,
+  dataMix = 'mock',
+}: {
+  signals: ScoredGhostFlowSignal[];
+  dataMix?: GhostFlowDataMix;
+}) {
   return (
     <section className="space-y-3" aria-labelledby="ghostflow-signals-heading">
       <h2 id="ghostflow-signals-heading" className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
-        Signal grid (mock v0.1)
+        Signal grid (v0.2 mixed)
       </h2>
       <p className="text-xs text-zinc-500 leading-relaxed max-w-3xl">
-        All signals below use illustrative mock values for this static preview. Data status labels describe the intended
-        future source type — not a live feed today.
+        {dataMix === 'mixed'
+          ? 'Volatility Regime uses a manually updated CBOE VIX public artifact. All other signals remain illustrative mock values for this static preview.'
+          : 'All signals use illustrative mock values. Public artifact unavailable — vol-regime is on mock fallback.'}
       </p>
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
         {signals.map((sig) => (
@@ -48,9 +87,46 @@ export function GhostFlowSignalGrid({ signals }: { signals: ScoredGhostFlowSigna
             </div>
             <p className="mt-2 text-lg font-medium tabular-nums text-zinc-50 break-words">{sig.value}</p>
             <p className="mt-2 text-xs text-zinc-400 leading-relaxed flex-1">{sig.explanation}</p>
-            <div className="mt-3 pt-3 border-t border-zinc-800/80 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-zinc-500">
-              <span>Data: {dataStatusLabel(sig.dataStatus)}</span>
-              <span>Target: {sig.updateFrequencyTarget}</span>
+            <div className="mt-3 pt-3 border-t border-zinc-800/80 space-y-2">
+              <div className="flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-zinc-500">
+                <span>Data: {dataStatusLabel(sig.dataStatus)}</span>
+                <span>Target: {sig.updateFrequencyTarget}</span>
+              </div>
+              {sig.dataStatus === 'public_proxy' && (
+                <div className="flex flex-wrap gap-2 text-[10px]">
+                  {sig.freshnessStatus && (
+                    <span
+                      className={`rounded-md border px-1.5 py-0.5 font-semibold uppercase tracking-wide ${freshnessStyles(sig.freshnessStatus)}`}
+                    >
+                      {sig.freshnessStatus}
+                    </span>
+                  )}
+                  {sig.artifactAsOf && (
+                    <span className="text-zinc-500">As of {sig.artifactAsOf}</span>
+                  )}
+                  {sig.dataQuality && (
+                    <span className="text-zinc-500">{dataQualityLabel(sig.dataQuality)}</span>
+                  )}
+                </div>
+              )}
+              {sig.dataStatus === 'public_proxy' && sig.sourceName && (
+                <p className="text-[10px] text-zinc-500 leading-relaxed">
+                  Source:{' '}
+                  {sig.sourceUrl ? (
+                    <a
+                      href={sig.sourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-amber-400/90 hover:text-amber-300 underline-offset-2 hover:underline"
+                    >
+                      {sig.sourceName}
+                    </a>
+                  ) : (
+                    sig.sourceName
+                  )}
+                  {sig.sourceNote ? ` — ${sig.sourceNote}` : ''}
+                </p>
+              )}
             </div>
           </GlassCard>
         ))}

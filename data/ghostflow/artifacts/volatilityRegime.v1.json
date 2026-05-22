@@ -1,0 +1,21 @@
+{
+  "artifactVersion": "1",
+  "signalId": "vol-regime",
+  "asOf": "2026-05-20",
+  "publishedAt": "2026-05-20",
+  "source": {
+    "name": "CBOE VIX History",
+    "url": "https://cdn.cboe.com/api/global/us_indices/daily_prices/VIX_History.csv",
+    "note": "Manual extract: last trading-day VIX close from official CBOE CSV (Close column)."
+  },
+  "updateFrequency": "daily",
+  "dataQuality": "verified_manual",
+  "observations": {
+    "vixClose": 17.44
+  },
+  "optionalObservations": {
+    "vix9dClose": null,
+    "vix3mClose": null,
+    "spyRealizedVol21dAnn": null
+  }
+}
