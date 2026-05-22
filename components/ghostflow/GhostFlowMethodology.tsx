@@ -32,9 +32,10 @@ export function GhostFlowMethodology({
       <h2 id="ghostflow-methodology-heading" className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
         Methodology &amp; model zones
       </h2>
+      <p className="text-xs text-zinc-500">Current methodology: v0.5</p>
 
       <GlassCard className="p-4 sm:p-6">
-        <h3 className="text-base font-semibold text-zinc-100">v0.5 scoring model</h3>
+        <h3 className="text-base font-semibold text-zinc-100">Scoring model</h3>
         <div className="mt-3 space-y-3 text-sm text-zinc-400 leading-relaxed">
           <p>
             <strong className="text-zinc-300">GhostFlow Score</strong> = 50% Passive Pressure Score + 50% Structural
@@ -69,7 +70,7 @@ export function GhostFlowMethodology({
       </GlassCard>
 
       <GlassCard className="p-4 sm:p-6">
-        <h3 className="text-base font-semibold text-zinc-100">Index Concentration public artifact (v0.5)</h3>
+        <h3 className="text-base font-semibold text-zinc-100">Index Concentration public artifact</h3>
         <div className="mt-3 space-y-3 text-sm text-zinc-400 leading-relaxed">
           <p>
             <strong className="text-zinc-300">What it is:</strong> Sum of S&amp;P 500 index weights for the 10 largest
@@ -158,7 +159,8 @@ export function GhostFlowMethodology({
           <p className="text-xs text-zinc-500">
             <strong className="text-zinc-400">Stale policy (monthly):</strong> calendar days since PDF
             control/publication date (publishedAt, or month ended if absent): 0–35 = fresh; 36–55 = caution; &gt;55 =
-            stale. Valid stale artifacts still display with warning.
+            stale. Caution between monthly updates is expected for manual artifacts. Valid stale artifacts still
+            display with warning.
           </p>
           <p className="text-xs text-zinc-500 border-l-2 border-amber-500/35 pl-3">
             Cap-weight concentration can reflect earnings dominance, momentum, valuation, passive flows, or all of the
@@ -168,7 +170,7 @@ export function GhostFlowMethodology({
       </GlassCard>
 
       <GlassCard className="p-4 sm:p-6">
-        <h3 className="text-base font-semibold text-zinc-100">Active vs Index Flow Differential public artifact (v0.4)</h3>
+        <h3 className="text-base font-semibold text-zinc-100">Active vs Index Flow Differential public artifact</h3>
         <div className="mt-3 space-y-3 text-sm text-zinc-400 leading-relaxed">
           <p>
             <strong className="text-zinc-300">What it is:</strong> ICI monthly domestic-equity{' '}
@@ -255,8 +257,9 @@ export function GhostFlowMethodology({
           </p>
           <p className="text-xs text-zinc-500">
             <strong className="text-zinc-400">Stale policy (monthly):</strong> calendar days since ICI release date
-            (publishedAt, or month ended if absent): 0–35 = fresh; 36–55 = caution; &gt;55 = stale. Valid stale
-            artifacts still display with warning. ICI may revise prior months.
+            (publishedAt, or month ended if absent): 0–35 = fresh; 36–55 = caution; &gt;55 = stale. Caution between
+            monthly updates is expected for manual artifacts. Valid stale artifacts still display with warning. ICI may
+            revise prior months.
           </p>
           <p className="text-xs text-zinc-500 border-l-2 border-amber-500/35 pl-3">
             This is a flow-tilt proxy. Useful plumbing, not a full map of price discovery.
@@ -265,7 +268,7 @@ export function GhostFlowMethodology({
       </GlassCard>
 
       <GlassCard className="p-4 sm:p-6">
-        <h3 className="text-base font-semibold text-zinc-100">ETF Net Issuance public artifact (v0.3)</h3>
+        <h3 className="text-base font-semibold text-zinc-100">ETF Net Issuance public artifact</h3>
         <div className="mt-3 space-y-3 text-sm text-zinc-400 leading-relaxed">
           <p>
             <strong className="text-zinc-300">What it is:</strong> ICI{' '}
@@ -356,7 +359,7 @@ export function GhostFlowMethodology({
       </GlassCard>
 
       <GlassCard className="p-4 sm:p-6">
-        <h3 className="text-base font-semibold text-zinc-100">Volatility Regime public artifact (v0.2+)</h3>
+        <h3 className="text-base font-semibold text-zinc-100">Volatility Regime public artifact</h3>
         <div className="mt-3 space-y-3 text-sm text-zinc-400 leading-relaxed">
           <p>
             <strong className="text-zinc-300">Source:</strong>{' '}

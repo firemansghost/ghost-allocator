@@ -47,6 +47,8 @@ export interface GhostFlowSignal {
   sourceName?: string;
   sourceUrl?: string;
   sourceNote?: string;
+  /** One-line card caveat for public proxies (full disclaimers live in methodology). */
+  cardCaveat?: string;
   dataQuality?: GhostFlowArtifactDataQuality;
   artifactAsOf?: string;
   artifactPublishedAt?: string;

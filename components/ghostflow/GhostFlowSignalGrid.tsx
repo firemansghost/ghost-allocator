@@ -65,10 +65,10 @@ function artifactDateLabel(signalId: string): string {
 
 function publicSignalDescription(publicSignalCount: number): string {
   if (publicSignalCount >= 4) {
-    return 'Volatility Regime (CBOE VIX), ETF Net Issuance Pressure (ICI domestic equity weekly estimated net issuance), Active vs Index Flow Differential (ICI monthly domestic-equity active/index net flows), and Index Concentration (SSGA SPY monthly fact sheet top-10 index weights) use manual public artifacts. All other signals remain illustrative mock values.';
+    return 'Four signals use manual public artifacts (VIX, ICI ETF issuance, ICI active/index flows, SSGA SPY top-10 concentration). All other cards are mock proxies.';
   }
   if (publicSignalCount >= 3) {
-    return 'Volatility Regime (CBOE VIX), ETF Net Issuance Pressure (ICI domestic equity weekly estimated net issuance), and Active vs Index Flow Differential (ICI monthly domestic-equity active/index net flows) use manual public artifacts. All other signals remain illustrative mock values.';
+    return 'Three public artifacts are wired; others remain mock. Check freshness warnings if an artifact is unavailable.';
   }
   if (publicSignalCount === 2) {
     return 'Two public artifacts are wired; others remain mock. Check freshness warnings if an artifact is unavailable.';
@@ -91,10 +91,10 @@ export function GhostFlowSignalGrid({
   return (
     <section className="space-y-3" aria-labelledby="ghostflow-signals-heading">
       <h2 id="ghostflow-signals-heading" className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
-        Signal grid (v0.5 mixed)
+        Signal grid
       </h2>
       <p className="text-xs text-zinc-500 leading-relaxed max-w-3xl">{publicSignalDescription(publicSignalCount)}</p>
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {signals.map((sig) => (
           <GlassCard key={sig.id} className="p-4 flex flex-col min-w-0">
             <div className="flex flex-wrap items-start justify-between gap-2">
@@ -105,12 +105,24 @@ export function GhostFlowSignalGrid({
                 {sig.status}
               </span>
             </div>
-            <p className="mt-2 text-lg font-medium tabular-nums text-zinc-50 break-words">{sig.value}</p>
+            <p className="mt-2 text-base sm:text-lg font-medium tabular-nums text-zinc-50 break-words leading-snug">
+              {sig.value}
+            </p>
             <p className="mt-2 text-xs text-zinc-400 leading-relaxed flex-1">{sig.explanation}</p>
+            {sig.dataStatus === 'public_proxy' && sig.cardCaveat && (
+              <p className="mt-2 text-[11px] text-zinc-500 leading-relaxed border-l-2 border-amber-500/30 pl-2">
+                {sig.cardCaveat}
+              </p>
+            )}
             <div className="mt-3 pt-3 border-t border-zinc-800/80 space-y-2">
               <div className="flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-zinc-500">
                 <span>Data: {dataStatusLabel(sig.dataStatus)}</span>
-                <span>Target: {sig.updateFrequencyTarget}</span>
+                {dataMix === 'mock' && sig.dataStatus === 'mock' && (
+                  <span>Target: {sig.updateFrequencyTarget}</span>
+                )}
+                {sig.dataStatus === 'public_proxy' && sig.updateFrequencyTarget && (
+                  <span>{sig.updateFrequencyTarget.replace(' (manual artifact)', '')}</span>
+                )}
               </div>
               {sig.dataStatus === 'public_proxy' && (
                 <div className="flex flex-wrap gap-2 text-[10px]">
@@ -147,7 +159,6 @@ export function GhostFlowSignalGrid({
                   ) : (
                     sig.sourceName
                   )}
-                  {sig.sourceNote ? ` — ${sig.sourceNote}` : ''}
                 </p>
               )}
             </div>

@@ -78,11 +78,12 @@ export function buildVolRegimeExplanation(
 ): string {
   const band = vixBandLabel(artifact.observations.vixClose);
   return (
-    `CBOE VIX close as of ${artifact.asOf}: ${artifact.observations.vixClose.toFixed(2)}. ` +
-    `Mapped to a ${numericValue}/100 volatility amplifier proxy (${band} band). ` +
-    `This measures implied-vol plumbing — not passive flow and not a crash countdown.`
+    `CBOE VIX close ${artifact.observations.vixClose.toFixed(2)} mapped to a ${numericValue}/100 volatility amplifier (${band}).`
   );
 }
+
+export const VOL_REGIME_CARD_CAVEAT =
+  'Volatility amplifier proxy — not passive flow and not a crash countdown.';
 
 export function validateVolatilityRegimeArtifact(
   raw: unknown,

@@ -101,18 +101,13 @@ export function buildActiveIndexFlowExplanation(
   numericValue: number
 ): string {
   const band = flowDifferentialBandLabel(differentialMillionsUsd);
-  const active = artifact.observations.activeDomesticEquityNetFlowMillionsUsd;
-  const index = artifact.observations.indexDomesticEquityNetFlowMillionsUsd;
   return (
-    `ICI monthly domestic-equity active/index net flows for month ended ${artifact.asOf}: ` +
-    `Active ${formatFlowBillions(active)}, Index ${formatFlowBillions(index, true)}, ` +
-    `differential ${formatFlowBillions(differentialMillionsUsd, true)} ` +
-    `(index minus active; stored in millions USD). ` +
-    `Mapped to a ${numericValue}/100 flow-tilt proxy (${band}). ` +
-    `Public proxy only — not passive share, not active ownership, not true active-offset capacity, ` +
-    `and not a complete mechanical-flow model.`
+    `ICI monthly domestic-equity flow differential ${formatFlowBillions(differentialMillionsUsd, true)} mapped to ${numericValue}/100 flow-tilt proxy (${band}).`
   );
 }
+
+export const ACTIVE_INDEX_FLOW_CARD_CAVEAT =
+  'Public proxy only — not passive share or active ownership.';
 
 export function validateActiveIndexFlowArtifact(
   raw: unknown,

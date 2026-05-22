@@ -53,7 +53,7 @@ export function GhostFlowScoreCard({ data }: { data: GhostFlowDashboardData }) {
     <section className="space-y-4" aria-labelledby="ghostflow-score-heading">
       <GlassCard className="p-5 sm:p-6">
         <h2 id="ghostflow-score-heading" className="text-xs font-semibold uppercase tracking-wide text-amber-400/90">
-          GhostFlow Score (v0.5 mixed)
+          GhostFlow Score
         </h2>
         <div className="mt-3 flex flex-wrap items-end gap-4">
           <div className="text-5xl sm:text-6xl font-semibold tabular-nums text-zinc-100">{score.score}</div>

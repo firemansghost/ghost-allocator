@@ -7,6 +7,7 @@ import { evaluateDailyArtifactFreshness } from '@/lib/ghostflow/artifactFreshnes
 import { GHOSTFLOW_REFERENCE_AS_OF } from '@/lib/ghostflow/reference';
 import type { GhostFlowRawSnapshot, GhostFlowSignal } from '@/lib/ghostflow/types';
 import {
+  ACTIVE_INDEX_FLOW_CARD_CAVEAT,
   buildActiveIndexFlowExplanation,
   computeFlowDifferentialMillionsUsd,
   evaluateActiveIndexArtifactFreshness,
@@ -16,6 +17,7 @@ import {
 } from './artifacts/activeIndexFlow';
 import {
   buildEtfFlowExplanation,
+  ETF_FLOW_CARD_CAVEAT,
   evaluateEtfArtifactFreshness,
   formatEtfFlowDisplayValue,
   loadEtfNetIssuanceArtifact,
@@ -25,6 +27,7 @@ import {
   buildIndexConcentrationExplanation,
   evaluateIndexConcentrationArtifactFreshness,
   formatIndexConcentrationDisplayValue,
+  INDEX_CONCENTRATION_CARD_CAVEAT,
   loadIndexConcentrationArtifact,
   mapTop10WeightToNumericValue,
 } from './artifacts/indexConcentration';
@@ -43,6 +46,7 @@ import {
   formatVolRegimeDisplayValue,
   loadVolatilityRegimeArtifact,
   mapVixCloseToNumericValue,
+  VOL_REGIME_CARD_CAVEAT,
 } from './artifacts/volatilityRegime';
 
 function cloneSnapshot(base: GhostFlowRawSnapshot): GhostFlowRawSnapshot {
@@ -84,6 +88,7 @@ export function applyVolatilityRegimeArtifact(
     value: formatVolRegimeDisplayValue(vixClose),
     numericValue,
     explanation: buildVolRegimeExplanation(artifact, numericValue),
+    cardCaveat: VOL_REGIME_CARD_CAVEAT,
     dataStatus: 'public_proxy',
     updateFrequencyTarget: 'Daily (manual artifact)',
     sourceName: artifact.source.name,
@@ -131,6 +136,7 @@ export function applyEtfNetIssuanceArtifact(
     value: formatEtfFlowDisplayValue(millions, numericValue),
     numericValue,
     explanation: buildEtfFlowExplanation(artifact, numericValue),
+    cardCaveat: ETF_FLOW_CARD_CAVEAT,
     dataStatus: 'public_proxy',
     updateFrequencyTarget: 'Weekly (manual artifact)',
     sourceName: artifact.source.name,
@@ -180,6 +186,7 @@ export function applyActiveIndexFlowArtifact(
     value: formatActiveIndexFlowDisplayValue(active, index, differential, numericValue),
     numericValue,
     explanation: buildActiveIndexFlowExplanation(artifact, differential, numericValue),
+    cardCaveat: ACTIVE_INDEX_FLOW_CARD_CAVEAT,
     dataStatus: 'public_proxy',
     updateFrequencyTarget: 'Monthly (manual artifact)',
     sourceName: artifact.source.name,
@@ -227,6 +234,7 @@ export function applyIndexConcentrationArtifact(
     value: formatIndexConcentrationDisplayValue(top10Weight, numericValue),
     numericValue,
     explanation: buildIndexConcentrationExplanation(artifact, numericValue),
+    cardCaveat: INDEX_CONCENTRATION_CARD_CAVEAT,
     dataStatus: 'public_proxy',
     updateFrequencyTarget: 'Monthly (manual artifact)',
     sourceName: artifact.source.name,

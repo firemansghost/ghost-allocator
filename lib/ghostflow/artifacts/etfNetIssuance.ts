@@ -82,12 +82,11 @@ export function buildEtfFlowExplanation(
   const band = issuanceBandLabel(artifact.observations.domesticEquityNetIssuanceMillionsUsd);
   const billions = formatIssuanceBillions(artifact.observations.domesticEquityNetIssuanceMillionsUsd);
   return (
-    `ICI estimated weekly domestic equity ETF net issuance for week ended ${artifact.asOf}: ${billions} ` +
-    `(stored as ${artifact.observations.domesticEquityNetIssuanceMillionsUsd.toLocaleString('en-US')} millions USD). ` +
-    `Mapped to a ${numericValue}/100 flow-pressure proxy (${band}). ` +
-    `Public proxy only — not total ETF market flow, not passive share, not a complete mechanical-bid model.`
+    `ICI weekly domestic equity ETF net issuance ${billions} mapped to ${numericValue}/100 flow-pressure proxy (${band}).`
   );
 }
+
+export const ETF_FLOW_CARD_CAVEAT = 'Public proxy only — not passive share or total market flow.';
 
 export function validateEtfNetIssuanceArtifact(
   raw: unknown,

@@ -89,14 +89,12 @@ export function buildIndexConcentrationExplanation(
   const pct = artifact.observations.sp500Top10IndexWeightPercent;
   const band = top10ConcentrationBandLabel(pct);
   return (
-    `S&P 500 top-10 index weight sum for as-of ${artifact.asOf}: ${formatTop10WeightDisplay(pct)} ` +
-    `(largest 10 constituent index weights from SSGA SPY monthly fact sheet). ` +
-    `Mapped to a ${numericValue}/100 structural fragility proxy (${band}). ` +
-    `Public proxy only — not passive share, not ownership share, not proof passive flows caused concentration, ` +
-    `and not a crash countdown. Cap-weight concentration can reflect earnings dominance, momentum, valuation, ` +
-    `passive flows, or all of the above. Useful fragility context, not a verdict.`
+    `SSGA SPY fact sheet top-10 index weight ${formatTop10WeightDisplay(pct)} mapped to ${numericValue}/100 fragility proxy (${band}).`
   );
 }
+
+export const INDEX_CONCENTRATION_CARD_CAVEAT =
+  'Public proxy only — not proof passive flows caused concentration.';
 
 export function validateIndexConcentrationArtifact(
   raw: unknown,

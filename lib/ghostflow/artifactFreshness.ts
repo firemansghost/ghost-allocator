@@ -117,7 +117,7 @@ export function evaluateMonthlyArtifactFreshness(
 
   if (status === 'caution') {
     warnings.push(
-      `${label} artifact is ${calendarDaysStale} calendar days since release (caution threshold: ${MONTHLY_FRESH_CALENDAR_DAYS + 1}+).`
+      `${label} artifact is ${calendarDaysStale} calendar days since release (caution threshold: ${MONTHLY_FRESH_CALENDAR_DAYS + 1}+). This is expected for monthly manual artifacts between source updates.`
     );
   } else if (status === 'stale') {
     warnings.push(
