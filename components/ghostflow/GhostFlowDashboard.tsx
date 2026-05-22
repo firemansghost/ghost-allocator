@@ -65,14 +65,12 @@ export function GhostFlowDashboard() {
           proxies. It does not predict crashes — it watches whether price discovery is sharing the wheel with autopilot.
         </p>
         <p className="text-xs text-zinc-500">
-          Mixed snapshot (v0.5): Volatility Regime uses CBOE VIX
-          {volAsOf ? ` as of ${volAsOf}` : ''}; ETF Net Issuance uses ICI domestic equity weekly estimated net issuance
-          {etfWeekEnded ? ` (week ended ${etfWeekEnded})` : ''}; Active vs Index Flow Differential uses ICI monthly
-          domestic-equity active/index net flows
-          {activeIndexMonthEnded ? ` (month ended ${activeIndexMonthEnded})` : ''}; Index Concentration uses SSGA SPY
-          monthly fact sheet top-10 index weights
-          {indexConcentrationAsOf ? ` (as of ${indexConcentrationAsOf})` : ''}. Other inputs remain mock. Not live
-          market data.
+          Four public manual artifacts (VIX, ICI ETF issuance, ICI active/index flows, SSGA SPY top-10 concentration).
+          {volAsOf ? ` VIX as of ${volAsOf}.` : ''}
+          {etfWeekEnded ? ` ETF week ended ${etfWeekEnded}.` : ''}
+          {activeIndexMonthEnded ? ` Active/index month ended ${activeIndexMonthEnded}.` : ''}
+          {indexConcentrationAsOf ? ` Concentration month ended ${indexConcentrationAsOf}.` : ''} Other inputs remain
+          mock. Not live market data.
         </p>
       </header>
 
