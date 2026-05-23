@@ -16,6 +16,8 @@ export function GhostFlowMethodology({
   activeIndexFlowSource,
   indexConcentrationAsOf,
   indexConcentrationSource,
+  passiveShareProxyAsOf,
+  passiveShareProxySource,
 }: {
   data: GhostFlowDashboardData;
   volRegimeAsOf?: string;
@@ -26,23 +28,25 @@ export function GhostFlowMethodology({
   activeIndexFlowSource?: 'public' | 'mock_fallback';
   indexConcentrationAsOf?: string;
   indexConcentrationSource?: 'public' | 'mock_fallback';
+  passiveShareProxyAsOf?: string;
+  passiveShareProxySource?: 'public' | 'mock_fallback';
 }) {
   return (
     <section className="space-y-4" aria-labelledby="ghostflow-methodology-heading">
       <h2 id="ghostflow-methodology-heading" className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
         Methodology &amp; model zones
       </h2>
-      <p className="text-xs text-zinc-500">Current methodology: v0.5</p>
+      <p className="text-xs text-zinc-500">Current methodology: v0.6</p>
 
       <GlassCard className="p-4 sm:p-6">
         <h3 className="text-base font-semibold text-zinc-100">Scoring model</h3>
         <div className="mt-3 space-y-3 text-sm text-zinc-400 leading-relaxed">
           <p>
             <strong className="text-zinc-300">GhostFlow Score</strong> = 50% Passive Pressure Score + 50% Structural
-            Fragility Score. Weights are fixed and documented below. v0.5 wires two public Passive Pressure sub-inputs
-            (ETF net issuance from ICI + options / volatility amplifier from CBOE VIX) and two public Structural
-            Fragility sub-inputs (monthly active/index flow differential from ICI + monthly top-10 index concentration
-            from SSGA SPY fact sheet); all other inputs remain static mock proxies.
+            Fragility Score. Weights are fixed and documented below. v0.6 wires two public Passive Pressure sub-inputs
+            (ETF net issuance from ICI + options / volatility amplifier from CBOE VIX) and three public Structural
+            Fragility sub-inputs (ICI Index Share Proxy + monthly active/index flow differential from ICI + monthly
+            top-10 index concentration from SSGA SPY fact sheet); all other inputs remain static mock proxies.
           </p>
           <div className="grid gap-4 sm:grid-cols-2 text-xs">
             <div className="rounded-xl border border-zinc-800/80 bg-neutral-950/40 p-3">
@@ -58,7 +62,7 @@ export function GhostFlowMethodology({
             <div className="rounded-xl border border-zinc-800/80 bg-neutral-950/40 p-3">
               <p className="font-semibold text-zinc-300 mb-2">Structural Fragility</p>
               <ul className="space-y-1 text-zinc-500">
-                <li>30% passive share proxy</li>
+                <li>30% ICI index share proxy (public ICI monthly assets in v0.6)</li>
                 <li>20% active share / offset proxy (public ICI monthly flow-tilt in v0.4+)</li>
                 <li>20% index concentration (public SSGA SPY monthly top-10 weights in v0.5)</li>
                 <li>15% breadth weakness</li>
@@ -66,6 +70,66 @@ export function GhostFlowMethodology({
               </ul>
             </div>
           </div>
+        </div>
+      </GlassCard>
+
+      <GlassCard className="p-4 sm:p-6">
+        <h3 className="text-base font-semibold text-zinc-100">ICI Index Share Proxy public artifact</h3>
+        <div className="mt-3 space-y-3 text-sm text-zinc-400 leading-relaxed">
+          <p>
+            <strong className="text-zinc-300">What it is:</strong> ICI domestic equity index fund + ETF assets as a
+            share of active + index domestic equity fund assets, from the monthly Total Net Assets table (not the Flows
+            table). Stored as a percent (e.g. 63.2) and wired into the ICI index share structural sub-input using
+            identity mapping: <code className="text-zinc-300">round(percent)</code> clamped 0–100.
+          </p>
+          <p>
+            <strong className="text-zinc-300">What it is not:</strong> not true market passive share, not
+            Green/Krishnan/Sturm model passive share, not market ownership, not float ownership, not trading volume,
+            not marginal price-setting, and not proof of crash risk.
+          </p>
+          <p>
+            <strong className="text-zinc-300">Why domestic equity:</strong> cleaner equity market-structure proxy than
+            all long-term assets (which mix bond and hybrid index funds).
+          </p>
+          <p>
+            <strong className="text-zinc-300">Why assets not flows:</strong> share is a stock/level concept. ETF
+            issuance (v0.3) and active/index flow differential (v0.4) already cover flow pressure.
+          </p>
+          <p>
+            <strong className="text-zinc-300">Relationship to the 65% zone:</strong> 65% is an assumption-sensitive
+            model stress zone from published passive-flow research — not a guaranteed crash line. Distance-to-65 is
+            derived from this public proxy for context only, not a calibrated model forecast.
+          </p>
+          <p>
+            <strong className="text-zinc-300">Source:</strong>{' '}
+            <a
+              href="https://www.ici.org/research/stats/combined_active_index"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-amber-400/90 hover:text-amber-300 underline-offset-2 hover:underline"
+            >
+              ICI Active and Index Investing release
+            </a>{' '}
+            — Total Net Assets, Equity → Domestic equity, Active and Index columns. Manual artifact only; no live
+            fetches.
+          </p>
+          {passiveShareProxySource === 'public' && passiveShareProxyAsOf && (
+            <p className="text-xs text-amber-300/90">Current public artifact month ended {passiveShareProxyAsOf}.</p>
+          )}
+          {passiveShareProxySource === 'mock_fallback' && (
+            <p className="text-xs text-amber-300/90">
+              Public artifact unavailable — ICI Index Share Proxy is on mock fallback until the artifact is repaired.
+            </p>
+          )}
+          <p className="text-xs text-zinc-500">
+            <strong className="text-zinc-400">Stale policy (monthly):</strong> calendar days since ICI release date
+            (publishedAt, or month ended if absent): 0–35 = fresh; 36–55 = caution; &gt;55 = stale. Caution between
+            monthly updates is expected for manual artifacts.
+          </p>
+          <p className="text-xs text-zinc-500 border-l-2 border-amber-500/35 pl-3">
+            This is a public fund-industry proxy. Useful plumbing context, not the market&apos;s true passive ownership
+            map.
+          </p>
         </div>
       </GlassCard>
 
@@ -391,10 +455,11 @@ export function GhostFlowMethodology({
         <h3 className="text-base font-semibold text-zinc-100">Passive-share model stress zones</h3>
         <p className="mt-2 text-sm text-zinc-400 leading-relaxed">
           The <strong className="text-zinc-300">65% zone</strong> is drawn from published passive-flow research as an
-          assumption-sensitive stress zone. Passive-share level inputs remain mock in v0.5.
+          assumption-sensitive stress zone. Passive-share level display uses the public ICI Index Share Proxy when
+          available; model-zone proximity sub-input remains mock in v0.6.
         </p>
         <p className="mt-2 text-xs text-amber-300/90">
-          Current mock passive-share proxy: {data.passiveSharePercent}% ({data.passiveShareBand.rangeLabel} —{' '}
+          Current ICI Index Share Proxy: {data.passiveSharePercent}% ({data.passiveShareBand.rangeLabel} —{' '}
           {data.passiveShareBand.description})
         </p>
         <div className="mt-4 overflow-x-auto">
@@ -423,10 +488,10 @@ export function GhostFlowMethodology({
           <li>Does not predict exact tops or bottoms or market crashes.</li>
           <li>Does not provide buy/sell recommendations.</li>
           <li>Does not treat model thresholds as guaranteed outcomes.</li>
-          <li>Does not use live feeds — four manual public artifacts plus mock inputs elsewhere.</li>
+          <li>Does not use live feeds — five manual public artifacts plus mock inputs elsewhere.</li>
           <li>
-            Does not treat ETF net issuance, active/index flow differential, index concentration, or VIX as complete
-            mechanical-flow or passive-share measures.
+            Does not treat ETF net issuance, active/index flow differential, ICI Index Share Proxy, index
+            concentration, or VIX as complete mechanical-flow or true passive-share measures.
           </li>
         </ul>
         <p className="mt-3 text-sm text-zinc-500 border-l-2 border-amber-500/35 pl-3">

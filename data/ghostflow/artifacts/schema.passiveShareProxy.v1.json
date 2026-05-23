@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ghost-allocator.local/schemas/ghostflow-passive-share-proxy.v1.json",
+  "title": "GhostFlow Passive Share Proxy artifact v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifactVersion",
+    "signalId",
+    "asOf",
+    "source",
+    "seriesDefinition",
+    "updateFrequency",
+    "dataQuality",
+    "observations"
+  ],
+  "properties": {
+    "artifactVersion": {
+      "type": "string",
+      "const": "1"
+    },
+    "signalId": {
+      "type": "string",
+      "const": "passive-share"
+    },
+    "asOf": {
+      "type": "string",
+      "format": "date"
+    },
+    "publishedAt": {
+      "type": "string",
+      "format": "date"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "url": { "type": "string", "format": "uri" },
+        "note": { "type": "string" }
+      }
+    },
+    "seriesDefinition": {
+      "type": "string",
+      "const": "ici_domestic_equity_index_asset_share_percent"
+    },
+    "updateFrequency": {
+      "type": "string",
+      "const": "monthly"
+    },
+    "dataQuality": {
+      "type": "string",
+      "enum": ["verified_manual", "manual_unverified"]
+    },
+    "observations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "activeDomesticEquityAssetsMillionsUsd",
+        "indexDomesticEquityAssetsMillionsUsd",
+        "indexAssetSharePercent"
+      ],
+      "properties": {
+        "activeDomesticEquityAssetsMillionsUsd": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "indexDomesticEquityAssetsMillionsUsd": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "indexAssetSharePercent": {
+          "type": "number",
+          "minimum": 35,
+          "maximum": 85
+        }
+      }
+    },
+    "optionalObservations": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "iciReportedIndexSharePercent": { "type": ["number", "null"] },
+        "worldEquityActiveAssetsMillionsUsd": { "type": ["number", "null"] },
+        "worldEquityIndexAssetsMillionsUsd": { "type": ["number", "null"] },
+        "totalLongTermActiveAssetsMillionsUsd": { "type": ["number", "null"] },
+        "totalLongTermIndexAssetsMillionsUsd": { "type": ["number", "null"] }
+      }
+    }
+  }
+}

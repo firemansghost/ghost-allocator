@@ -59,11 +59,21 @@ function dataQualityLabel(q: string | undefined): string {
 
 function artifactDateLabel(signalId: string): string {
   if (signalId === 'etf-flow') return 'Week ended';
-  if (signalId === 'active-index-flow' || signalId === 'concentration') return 'Month ended';
+  if (
+    signalId === 'active-index-flow' ||
+    signalId === 'concentration' ||
+    signalId === 'passive-share' ||
+    signalId === 'distance-65'
+  ) {
+    return 'Month ended';
+  }
   return 'As of';
 }
 
 function publicSignalDescription(publicSignalCount: number): string {
+  if (publicSignalCount >= 5) {
+    return 'Five signals use manual public artifacts (VIX, ICI ETF issuance, ICI active/index flows, SSGA SPY top-10 concentration, ICI Index Share Proxy). Distance-to-65 is derived from the ICI Index Share Proxy — not a separate manual artifact. All other cards are mock proxies.';
+  }
   if (publicSignalCount >= 4) {
     return 'Four signals use manual public artifacts (VIX, ICI ETF issuance, ICI active/index flows, SSGA SPY top-10 concentration). All other cards are mock proxies.';
   }

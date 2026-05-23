@@ -9,8 +9,8 @@ import { GhostFlowWatchlist } from './GhostFlowWatchlist';
 
 const BADGES = [
   'Static preview',
+  '5 manual public artifacts',
   'Manual public artifacts, no live feeds',
-  '4 public signals',
   'Research only',
   'Not financial advice',
 ] as const;
@@ -31,6 +31,7 @@ export function GhostFlowDashboard() {
   const etfWeekEnded = meta.etfFlowAsOf;
   const activeIndexMonthEnded = meta.activeIndexFlowAsOf;
   const indexConcentrationAsOf = meta.indexConcentrationAsOf;
+  const passiveShareAsOf = meta.passiveShareProxyAsOf;
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 px-1 sm:px-0">
@@ -65,12 +66,14 @@ export function GhostFlowDashboard() {
           proxies. It does not predict crashes — it watches whether price discovery is sharing the wheel with autopilot.
         </p>
         <p className="text-xs text-zinc-500">
-          Four public manual artifacts (VIX, ICI ETF issuance, ICI active/index flows, SSGA SPY top-10 concentration).
+          Five public manual artifacts (VIX, ICI ETF issuance, ICI active/index flows, SSGA SPY top-10 concentration,
+          ICI Index Share Proxy).
           {volAsOf ? ` VIX as of ${volAsOf}.` : ''}
           {etfWeekEnded ? ` ETF week ended ${etfWeekEnded}.` : ''}
           {activeIndexMonthEnded ? ` Active/index month ended ${activeIndexMonthEnded}.` : ''}
-          {indexConcentrationAsOf ? ` Concentration month ended ${indexConcentrationAsOf}.` : ''} Other inputs remain
-          mock. Not live market data.
+          {indexConcentrationAsOf ? ` Concentration month ended ${indexConcentrationAsOf}.` : ''}
+          {passiveShareAsOf ? ` ICI Index Share Proxy month ended ${passiveShareAsOf}.` : ''} Distance-to-65 is
+          derived from the ICI Index Share Proxy. Other inputs remain mock. Not live market data.
         </p>
       </header>
 
@@ -87,11 +90,11 @@ export function GhostFlowDashboard() {
 
       <GlassCard className="p-4 sm:p-5 border-amber-500/20 bg-amber-950/15">
         <p className="text-sm text-zinc-200 leading-relaxed max-w-4xl">
-          <strong className="text-amber-200/95">Disclaimer:</strong> GhostFlow is for education and research only. Four
+          <strong className="text-amber-200/95">Disclaimer:</strong> GhostFlow is for education and research only. Five
           signals use manually updated public artifacts (CBOE VIX, ICI domestic equity ETF net issuance, ICI
-          domestic-equity active/index flow differential, and SSGA SPY monthly top-10 index concentration); remaining
-          scores and signals are static mock proxies — not buy/sell advice, not a crash predictor, and not a substitute
-          for your own judgment.
+          domestic-equity active/index flow differential, SSGA SPY monthly top-10 index concentration, and ICI Index
+          Share Proxy); remaining scores and signals are static mock proxies — not buy/sell advice, not a crash
+          predictor, and not a substitute for your own judgment.
         </p>
       </GlassCard>
 
@@ -107,6 +110,8 @@ export function GhostFlowDashboard() {
         activeIndexFlowSource={meta.activeIndexFlowSource}
         indexConcentrationAsOf={meta.indexConcentrationAsOf}
         indexConcentrationSource={meta.indexConcentrationSource}
+        passiveShareProxyAsOf={meta.passiveShareProxyAsOf}
+        passiveShareProxySource={meta.passiveShareProxySource}
       />
       <GhostFlowWatchlist />
     </div>

@@ -1,0 +1,26 @@
+{
+  "artifactVersion": "1",
+  "signalId": "passive-share",
+  "asOf": "2026-03-31",
+  "publishedAt": "2026-04-30",
+  "source": {
+    "name": "ICI Active and Index Investing",
+    "url": "https://www.ici.org/research/stats/combined_active_index",
+    "note": "Manual extract: Domestic equity Total Net Assets, Active and Index columns (not flows). indexAssetSharePercent = index / (active + index). ICI index asset share — not GKS market passive share."
+  },
+  "seriesDefinition": "ici_domestic_equity_index_asset_share_percent",
+  "updateFrequency": "monthly",
+  "dataQuality": "verified_manual",
+  "observations": {
+    "activeDomesticEquityAssetsMillionsUsd": 7537800,
+    "indexDomesticEquityAssetsMillionsUsd": 12945700,
+    "indexAssetSharePercent": 63.2
+  },
+  "optionalObservations": {
+    "iciReportedIndexSharePercent": 63.2,
+    "worldEquityActiveAssetsMillionsUsd": null,
+    "worldEquityIndexAssetsMillionsUsd": null,
+    "totalLongTermActiveAssetsMillionsUsd": null,
+    "totalLongTermIndexAssetsMillionsUsd": null
+  }
+}
