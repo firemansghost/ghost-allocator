@@ -72,7 +72,7 @@ function artifactDateLabel(signalId: string): string {
 
 function publicSignalDescription(publicSignalCount: number): string {
   if (publicSignalCount >= 5) {
-    return 'Five signals use manual public artifacts (VIX, ICI ETF issuance, ICI active/index flows, SSGA SPY top-10 concentration, ICI Index Share Proxy). Distance-to-65 is derived from the ICI Index Share Proxy — not a separate manual artifact. All other cards are mock proxies.';
+    return 'Five signals use manual public artifacts (VIX, ICI ETF issuance, ICI active/index flows, SSGA SPY top-10 concentration, ICI Index Share Proxy). Distance-to-65 is derived from the ICI Index Share Proxy — not a separate manual artifact and not a market-wide passive-share estimate. All other cards are mock proxies.';
   }
   if (publicSignalCount >= 4) {
     return 'Four signals use manual public artifacts (VIX, ICI ETF issuance, ICI active/index flows, SSGA SPY top-10 concentration). All other cards are mock proxies.';
@@ -93,10 +93,12 @@ export function GhostFlowSignalGrid({
   signals,
   dataMix = 'mock',
   publicSignalCount = 0,
+  passiveShareDenominatorWarning,
 }: {
   signals: ScoredGhostFlowSignal[];
   dataMix?: GhostFlowDataMix;
   publicSignalCount?: number;
+  passiveShareDenominatorWarning?: string;
 }) {
   return (
     <section className="space-y-3" aria-labelledby="ghostflow-signals-heading">
@@ -104,6 +106,11 @@ export function GhostFlowSignalGrid({
         Signal grid
       </h2>
       <p className="text-xs text-zinc-500 leading-relaxed max-w-3xl">{publicSignalDescription(publicSignalCount)}</p>
+      {passiveShareDenominatorWarning && (
+        <p className="text-xs text-amber-300/90 leading-relaxed max-w-3xl border-l-2 border-amber-500/35 pl-3">
+          {passiveShareDenominatorWarning}
+        </p>
+      )}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {signals.map((sig) => (
           <GlassCard key={sig.id} className="p-4 flex flex-col min-w-0">
