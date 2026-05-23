@@ -77,7 +77,7 @@ export function evaluateDailyArtifactFreshness(
     );
   } else if (status === 'stale') {
     warnings.push(
-      `${label} artifact is ${tradingDaysStale} trading days old (stale threshold: >${DAILY_STALE_TRADING_DAYS}). Values shown are last manual update — refresh recommended.`
+      `${label} artifact is ${tradingDaysStale} trading days old (stale threshold: >${DAILY_STALE_TRADING_DAYS}). Values shown are last manual update. Refresh recommended.`
     );
   }
 
@@ -99,7 +99,7 @@ export function evaluateWeeklyArtifactFreshness(
     );
   } else if (status === 'stale') {
     warnings.push(
-      `${label} artifact is ${calendarDaysStale} calendar days since release (stale threshold: >${WEEKLY_STALE_CALENDAR_DAYS}). Values shown are last manual update — refresh recommended.`
+      `${label} artifact is ${calendarDaysStale} calendar days since release (stale threshold: >${WEEKLY_STALE_CALENDAR_DAYS}). Values shown are last manual update. Refresh recommended.`
     );
   }
 
@@ -121,7 +121,7 @@ export function evaluateMonthlyArtifactFreshness(
     );
   } else if (status === 'stale') {
     warnings.push(
-      `${label} artifact is ${calendarDaysStale} calendar days since release (stale threshold: >${MONTHLY_CAUTION_CALENDAR_DAYS}). Values shown are last manual update — refresh recommended.`
+      `${label} artifact is ${calendarDaysStale} calendar days since release (stale threshold: >${MONTHLY_CAUTION_CALENDAR_DAYS}). Values shown are last manual update. Refresh recommended.`
     );
   }
 

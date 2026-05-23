@@ -64,7 +64,7 @@ export function GhostFlowDashboard() {
         </p>
         <p className="text-sm text-zinc-400 max-w-3xl leading-relaxed">
           GhostFlow tracks passive-flow pressure, ETF issuance, concentration, volatility mechanics, and systematic-flow
-          proxies. It does not predict crashes — it watches whether price discovery is sharing the wheel with autopilot.
+          proxies. It does not predict crashes. It watches whether price discovery is sharing the wheel with autopilot.
         </p>
         <p className="text-xs text-zinc-500">
           Five public manual artifacts (VIX, ICI ETF issuance, ICI active/index flows, SSGA SPY top-10 concentration,
@@ -74,7 +74,7 @@ export function GhostFlowDashboard() {
           {activeIndexMonthEnded ? ` Active/index month ended ${activeIndexMonthEnded}.` : ''}
           {indexConcentrationAsOf ? ` Concentration month ended ${indexConcentrationAsOf}.` : ''}
           {passiveShareAsOf
-            ? ` ICI fund/ETF index share proxy month ended ${passiveShareAsOf} — not a market-wide passive-share estimate.`
+            ? ` ICI fund/ETF index share proxy month ended ${passiveShareAsOf}, not a market-wide passive-share estimate.`
             : ''}{' '}
           Distance-to-65 is derived from that ICI proxy (proxy context only). Other inputs remain mock. Not live
           market data.
@@ -97,7 +97,7 @@ export function GhostFlowDashboard() {
           <strong className="text-amber-200/95">Disclaimer:</strong> GhostFlow is for education and research only. Five
           signals use manually updated public artifacts (CBOE VIX, ICI domestic equity ETF net issuance, ICI
           domestic-equity active/index flow differential, SSGA SPY monthly top-10 index concentration, and ICI fund/ETF
-          index share proxy); remaining scores and signals are static mock proxies — not buy/sell advice, not a crash
+          index share proxy); remaining scores and signals are static mock proxies. Not buy/sell advice, not a crash
           predictor, and not a substitute for your own judgment. The ICI proxy is not a market-wide passive-share
           estimate.
         </p>

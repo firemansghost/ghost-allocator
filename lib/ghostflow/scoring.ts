@@ -82,15 +82,15 @@ export const GHOSTFLOW_SCORE_BANDS: ReadonlyArray<{ min: number; max: number; la
 export function ghostFlowInterpretation(band: GhostFlowBand): string {
   switch (band) {
     case 'quiet_plumbing':
-      return 'Mechanical flows look subdued. Still not without trade-offs—just less reflexive on the margin.';
+      return 'Mechanical flows look subdued. Still not without trade-offs, just less reflexive on the margin.';
     case 'normal_mechanical':
       return 'Autopilot is present but not dominating the tape. Worth watching, not worth panicking.';
     case 'elevated_flow':
       return 'Flow pressure is building. Price discovery may be sharing the wheel more than usual.';
     case 'crowded_reflexive':
-      return 'Markets look more reflexive and flow-driven. Not apocalyptic—just less anchored to fundamentals.';
+      return 'Markets look more reflexive and flow-driven. Not apocalyptic, just less anchored to fundamentals.';
     case 'fragility_zone':
-      return 'Structure looks crowded and fragile on the model. Context for caution—not a crash countdown.';
+      return 'Structure looks crowded and fragile on the model. Context for caution, not a crash countdown.';
   }
 }
 
@@ -103,54 +103,78 @@ export function signalStatusFromValue(n: number): GhostFlowSignalStatus {
   return 'stress';
 }
 
+/** Display label for signal status badges (e.g. pre_stress → pre-stress). */
+export function signalStatusDisplayLabel(status: GhostFlowSignalStatus): string {
+  if (status === 'pre_stress') return 'pre-stress';
+  return status;
+}
+
+/** Distance-to-65 card status follows ICI index share band, not inverted numericValue. */
+export function signalStatusForDistanceTo65(passiveSharePercent: number): GhostFlowSignalStatus {
+  const band = passiveShareBand(passiveSharePercent);
+  switch (band.id) {
+    case 'normal':
+      return 'quiet';
+    case 'watch':
+      return 'watch';
+    case 'pre_stress':
+      return 'pre_stress';
+    case 'model_stress':
+      return 'elevated';
+    default:
+      return 'stress';
+  }
+}
+
 export function passiveShareBand(percent: number): PassiveShareBandInfo {
   const p = Math.max(0, percent);
   if (p < 50) {
     return {
       id: 'normal',
       rangeLabel: 'Below 50%',
-      description: 'Normal — passive share below early watch thresholds in the model framing.',
+      description: 'Normal: passive share below early watch thresholds in the model framing.',
     };
   }
   if (p < 60) {
     return {
       id: 'watch',
       rangeLabel: '50–60%',
-      description: 'Watch — passive share rising; mechanical bid influence may be increasing.',
+      description: 'Watch: passive share rising; mechanical bid influence may be increasing.',
     };
   }
   if (p < 65) {
     return {
       id: 'pre_stress',
       rangeLabel: '60–65%',
-      description: 'Pre-stress — approaching assumption-sensitive model zone; not yet at 65%.',
+      description: 'Pre-stress: below the assumption-sensitive model zone; not yet at 65%.',
     };
   }
   if (p < 75) {
     return {
       id: 'model_stress',
       rangeLabel: '65–75%',
-      description: 'Model Stress Zone — volatility may rise sharply in published passive-flow models; not a guaranteed crash line.',
+      description:
+        'Model Stress Zone: volatility may rise sharply in published passive-flow models; not a guaranteed crash line.',
     };
   }
   if (p < 87) {
     return {
       id: 'severe_fragility',
       rangeLabel: '75–87%',
-      description: 'Severe Fragility — model interpretation band for elevated structural vulnerability.',
+      description: 'Severe Fragility: model interpretation band for elevated structural vulnerability.',
     };
   }
   if (p < 91) {
     return {
       id: 'cubic_volatility',
       rangeLabel: '87–91%',
-      description: 'Cubic Volatility Zone — theoretical model band; highly assumption-sensitive.',
+      description: 'Cubic Volatility Zone: theoretical model band; highly assumption-sensitive.',
     };
   }
   return {
     id: 'theoretical_feller',
     rangeLabel: 'Above 91%',
-    description: 'Theoretical Feller Zone — model extreme; not treated as a forecast here.',
+    description: 'Theoretical Feller Zone: model extreme; not treated as a forecast here.',
   };
 }
 
@@ -161,7 +185,7 @@ export const PASSIVE_SHARE_BANDS: PassiveShareBandInfo[] = [
   {
     id: 'model_stress',
     rangeLabel: '65–75%',
-    description: 'Model Stress Zone — assumption-sensitive; not a guaranteed crash line',
+    description: 'Model Stress Zone (assumption-sensitive; not a guaranteed crash line)',
   },
   { id: 'severe_fragility', rangeLabel: '75–87%', description: 'Severe Fragility' },
   { id: 'cubic_volatility', rangeLabel: '87–91%', description: 'Cubic Volatility Zone' },
@@ -184,7 +208,10 @@ export function scoreGhostFlowSnapshot(raw: GhostFlowRawSnapshot): GhostFlowDash
 
   const signals: ScoredGhostFlowSignal[] = raw.signals.map((sig) => ({
     ...sig,
-    status: signalStatusFromValue(sig.numericValue),
+    status:
+      sig.id === 'distance-65'
+        ? signalStatusForDistanceTo65(raw.passiveSharePercent)
+        : signalStatusFromValue(sig.numericValue),
   }));
 
   return {

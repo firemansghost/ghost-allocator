@@ -41,7 +41,7 @@ export const MOCK_GHOSTFLOW_SNAPSHOT: GhostFlowRawSnapshot = {
       value: '7 pp',
       numericValue: 42,
       explanation:
-        'Seven percentage points below the 65% assumption-sensitive stress zone in published passive-flow research framing — not a countdown.',
+        'Seven percentage points below the 65% assumption-sensitive stress zone in published passive-flow research framing, not a countdown.',
       dataStatus: 'mock',
       updateFrequencyTarget: 'Monthly (future)',
     },

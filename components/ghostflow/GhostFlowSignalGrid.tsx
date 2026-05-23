@@ -6,6 +6,7 @@ import type {
   GhostFlowSignalStatus,
   ScoredGhostFlowSignal,
 } from '@/lib/ghostflow/types';
+import { signalStatusDisplayLabel } from '@/lib/ghostflow/scoring';
 
 function statusStyles(status: GhostFlowSignalStatus): string {
   switch (status) {
@@ -13,6 +14,8 @@ function statusStyles(status: GhostFlowSignalStatus): string {
       return 'border-zinc-600/60 bg-zinc-900/50 text-zinc-300';
     case 'watch':
       return 'border-amber-500/30 bg-amber-950/25 text-amber-200/90';
+    case 'pre_stress':
+      return 'border-amber-400/35 bg-amber-950/30 text-amber-100/95';
     case 'elevated':
       return 'border-amber-400/40 bg-amber-950/35 text-amber-200';
     case 'stress':
@@ -72,7 +75,7 @@ function artifactDateLabel(signalId: string): string {
 
 function publicSignalDescription(publicSignalCount: number): string {
   if (publicSignalCount >= 5) {
-    return 'Five signals use manual public artifacts (VIX, ICI ETF issuance, ICI active/index flows, SSGA SPY top-10 concentration, ICI Index Share Proxy). Distance-to-65 is derived from the ICI Index Share Proxy — not a separate manual artifact and not a market-wide passive-share estimate. All other cards are mock proxies.';
+    return 'Five signals use manual public artifacts (VIX, ICI ETF issuance, ICI active/index flows, SSGA SPY top-10 concentration, ICI Index Share Proxy). Distance-to-65 is derived from the ICI Index Share Proxy, not a separate manual artifact and not a market-wide passive-share estimate. All other cards are mock proxies.';
   }
   if (publicSignalCount >= 4) {
     return 'Four signals use manual public artifacts (VIX, ICI ETF issuance, ICI active/index flows, SSGA SPY top-10 concentration). All other cards are mock proxies.';
@@ -86,7 +89,7 @@ function publicSignalDescription(publicSignalCount: number): string {
   if (publicSignalCount === 1) {
     return 'One public artifact is wired; others remain mock. Check freshness warnings if an artifact is unavailable.';
   }
-  return 'All signals use illustrative mock values — public artifacts unavailable.';
+  return 'All signals use illustrative mock values. Public artifacts unavailable.';
 }
 
 export function GhostFlowSignalGrid({
@@ -119,7 +122,7 @@ export function GhostFlowSignalGrid({
               <span
                 className={`shrink-0 rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${statusStyles(sig.status)}`}
               >
-                {sig.status}
+                {signalStatusDisplayLabel(sig.status).toUpperCase()}
               </span>
             </div>
             <p className="mt-2 text-base sm:text-lg font-medium tabular-nums text-zinc-50 break-words leading-snug">

@@ -9,7 +9,7 @@ import type {
 
 export type { GhostFlowArtifactFreshnessStatus, GhostFlowArtifactDataQuality };
 
-export type GhostFlowSignalStatus = 'quiet' | 'watch' | 'elevated' | 'stress';
+export type GhostFlowSignalStatus = 'quiet' | 'watch' | 'elevated' | 'stress' | 'pre_stress';
 
 export type GhostFlowDataStatus = 'mock' | 'public_proxy' | 'future_live';
 
