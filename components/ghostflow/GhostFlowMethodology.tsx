@@ -5,6 +5,26 @@ import { ACTIVE_INDEX_DIFFERENTIAL_ANCHORS } from '@/lib/ghostflow/artifacts/act
 import { ETF_ISSUANCE_PROXY_ANCHORS } from '@/lib/ghostflow/artifacts/etfNetIssuance';
 import { VIX_PROXY_ANCHORS } from '@/lib/ghostflow/artifacts/volatilityRegime';
 import type { GhostFlowDashboardData } from '@/lib/ghostflow/types';
+import type { ReactNode } from 'react';
+
+function MethodologyDetailsSection({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <details className="group rounded-2xl border border-zinc-800/80 bg-neutral-950/30">
+      <summary className="cursor-pointer list-none p-4 sm:p-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded-2xl">
+        <div className="flex items-center justify-between gap-3">
+          <h3 className="text-base font-semibold text-zinc-100">{title}</h3>
+          <span
+            aria-hidden
+            className="text-zinc-500 text-xs shrink-0 transition-transform group-open:rotate-180"
+          >
+            ▼
+          </span>
+        </div>
+      </summary>
+      <div className="px-4 sm:px-6 pb-4 sm:pb-6 pt-0">{children}</div>
+    </details>
+  );
+}
 
 export function GhostFlowMethodology({
   data,
@@ -36,7 +56,7 @@ export function GhostFlowMethodology({
       <h2 id="ghostflow-methodology-heading" className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
         Methodology &amp; model zones
       </h2>
-      <p className="text-xs text-zinc-500">Current methodology: v0.6.2</p>
+      <p className="text-xs text-zinc-500">Current methodology: v0.6.3</p>
 
       <GlassCard className="p-4 sm:p-6">
         <h3 className="text-base font-semibold text-zinc-100">Scoring model</h3>
@@ -74,9 +94,10 @@ export function GhostFlowMethodology({
         </div>
       </GlassCard>
 
-      <GlassCard className="p-4 sm:p-6">
-        <h3 className="text-base font-semibold text-zinc-100">ICI Index Share Proxy public artifact</h3>
-        <div className="mt-3 space-y-3 text-sm text-zinc-400 leading-relaxed">
+      <p className="text-xs text-zinc-500">Methodology details: expand per artifact.</p>
+
+      <MethodologyDetailsSection title="ICI Index Share Proxy public artifact">
+        <div className="space-y-3 text-sm text-zinc-400 leading-relaxed">
           <p>
             <strong className="text-zinc-300">What it is:</strong> ICI domestic equity index fund + ETF assets as a
             share of active + index domestic equity fund assets, from the monthly Total Net Assets table (not the Flows
@@ -132,13 +153,12 @@ export function GhostFlowMethodology({
             map.
           </p>
         </div>
-      </GlassCard>
+      </MethodologyDetailsSection>
 
-      <GlassCard className="p-4 sm:p-6">
-        <h3 className="text-base font-semibold text-zinc-100">
-          Why {data.passiveSharePercent}% is not a market-wide passive-share estimate
-        </h3>
-        <div className="mt-3 space-y-3 text-sm text-zinc-400 leading-relaxed">
+      <MethodologyDetailsSection
+        title={`Why ${data.passiveSharePercent}% is not a market-wide passive-share estimate`}
+      >
+        <div className="space-y-3 text-sm text-zinc-400 leading-relaxed">
           <p>
             <strong className="text-zinc-300">{data.passiveSharePercent}%</strong> = ICI domestic equity index mutual
             fund + ETF assets divided by active + index domestic equity mutual fund + ETF assets. That is a narrow
@@ -160,11 +180,10 @@ export function GhostFlowMethodology({
             proxy for context only.
           </p>
         </div>
-      </GlassCard>
+      </MethodologyDetailsSection>
 
-      <GlassCard className="p-4 sm:p-6">
-        <h3 className="text-base font-semibold text-zinc-100">Index Concentration public artifact</h3>
-        <div className="mt-3 space-y-3 text-sm text-zinc-400 leading-relaxed">
+      <MethodologyDetailsSection title="Index Concentration public artifact">
+        <div className="space-y-3 text-sm text-zinc-400 leading-relaxed">
           <p>
             <strong className="text-zinc-300">What it is:</strong> Sum of S&amp;P 500 index weights for the 10 largest
             constituents, manually extracted from the SSGA SPY US monthly fact sheet. Stored as a percent (e.g. 36.5)
@@ -260,11 +279,10 @@ export function GhostFlowMethodology({
             above. Useful fragility context, not a verdict.
           </p>
         </div>
-      </GlassCard>
+      </MethodologyDetailsSection>
 
-      <GlassCard className="p-4 sm:p-6">
-        <h3 className="text-base font-semibold text-zinc-100">Active vs Index Flow Differential public artifact</h3>
-        <div className="mt-3 space-y-3 text-sm text-zinc-400 leading-relaxed">
+      <MethodologyDetailsSection title="Active vs Index Flow Differential public artifact">
+        <div className="space-y-3 text-sm text-zinc-400 leading-relaxed">
           <p>
             <strong className="text-zinc-300">What it is:</strong> ICI monthly domestic-equity{' '}
             <strong className="text-zinc-300">Active</strong> and <strong className="text-zinc-300">Index</strong> net
@@ -358,11 +376,10 @@ export function GhostFlowMethodology({
             This is a flow-tilt proxy. Useful plumbing, not a full map of price discovery.
           </p>
         </div>
-      </GlassCard>
+      </MethodologyDetailsSection>
 
-      <GlassCard className="p-4 sm:p-6">
-        <h3 className="text-base font-semibold text-zinc-100">ETF Net Issuance public artifact</h3>
-        <div className="mt-3 space-y-3 text-sm text-zinc-400 leading-relaxed">
+      <MethodologyDetailsSection title="ETF Net Issuance public artifact">
+        <div className="space-y-3 text-sm text-zinc-400 leading-relaxed">
           <p>
             <strong className="text-zinc-300">What it is:</strong> ICI{' '}
             <em>estimated weekly net issuance</em> for <strong className="text-zinc-300">domestic equity ETFs</strong>{' '}
@@ -449,11 +466,10 @@ export function GhostFlowMethodology({
             Plumbing gauge, not proof that autopilot dominates price discovery.
           </p>
         </div>
-      </GlassCard>
+      </MethodologyDetailsSection>
 
-      <GlassCard className="p-4 sm:p-6">
-        <h3 className="text-base font-semibold text-zinc-100">Volatility Regime public artifact</h3>
-        <div className="mt-3 space-y-3 text-sm text-zinc-400 leading-relaxed">
+      <MethodologyDetailsSection title="Volatility Regime public artifact">
+        <div className="space-y-3 text-sm text-zinc-400 leading-relaxed">
           <p>
             <strong className="text-zinc-300">Source:</strong>{' '}
             <a
@@ -478,14 +494,13 @@ export function GhostFlowMethodology({
             VIX mapping anchors: {VIX_PROXY_ANCHORS.map((a) => `${a.vix}→${a.proxy}`).join(', ')}.
           </p>
         </div>
-      </GlassCard>
+      </MethodologyDetailsSection>
 
-      <GlassCard className="p-4 sm:p-6">
-        <h3 className="text-base font-semibold text-zinc-100">ICI index share proxy model stress zones</h3>
-        <p className="mt-2 text-sm text-zinc-400 leading-relaxed">
+      <MethodologyDetailsSection title="ICI index share proxy model stress zones">
+        <p className="text-sm text-zinc-400 leading-relaxed">
           The <strong className="text-zinc-300">65% zone</strong> is drawn from published passive-flow research as an
           assumption-sensitive stress zone. The public ICI fund/ETF index share proxy supplies the level display when
-            available; model-zone proximity sub-input remains mock in v0.6.2. This is not a market-wide passive-share
+            available; model-zone proximity sub-input remains mock in v0.6.3. This is not a market-wide passive-share
           estimate.
         </p>
         <p className="mt-2 text-xs text-amber-300/90">
@@ -510,7 +525,7 @@ export function GhostFlowMethodology({
             </tbody>
           </table>
         </div>
-      </GlassCard>
+      </MethodologyDetailsSection>
 
       <GlassCard className="p-4 sm:p-6 border-zinc-800/80">
         <h3 className="text-base font-semibold text-zinc-100">What GhostFlow does not claim</h3>
