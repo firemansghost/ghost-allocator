@@ -154,16 +154,19 @@ assert.strictEqual(passiveSignal!.name, 'ICI Index Share Proxy');
 assert.strictEqual(passiveSignal!.dataStatus, 'public_proxy');
 assert.strictEqual(passiveSignal!.freshnessStatus, 'fresh');
 assert.ok(passiveSignal!.value.includes('ICI fund/ETF index share: 63.2%'));
-assert.ok(passiveSignal!.cardCaveat?.includes('Not a market-wide passive-share estimate'));
+assert.ok(passiveSignal!.cardCaveat?.includes('published passive-flow model input'));
 
 const distanceSignal = passiveOnly.raw.signals.find((s) => s.id === 'distance-65');
 assert.ok(distanceSignal);
 assert.strictEqual(distanceSignal!.dataStatus, 'public_proxy');
 assert.strictEqual(distanceSignal!.value, '1.8 pp');
-assert.ok(distanceSignal!.sourceNote?.includes('Derived'));
 assert.strictEqual(distanceSignal!.name, 'Distance to 65% Model Zone (Proxy Context)');
+assert.ok(distanceSignal!.sourceNote?.includes('Derived'));
 
 const passiveScored = scoreGhostFlowSnapshot(passiveOnly.raw);
+const distanceScored = passiveScored.signals.find((s) => s.id === 'distance-65');
+assert.ok(distanceScored);
+assert.strictEqual(distanceScored!.status, 'pre_stress');
 assert.strictEqual(
   passiveScored.score.subScores.structuralFragility,
   FIXTURE_PASSIVE_SHARE_MERGE_EXPECTED.passiveShareOnlyStructuralFragility

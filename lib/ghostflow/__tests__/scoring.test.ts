@@ -14,6 +14,7 @@ import {
   GHOSTFLOW_SCORE_BANDS,
   passiveShareBand,
   scoreGhostFlowSnapshot,
+  signalStatusForDistanceTo65,
   signalStatusFromValue,
 } from '../scoring';
 
@@ -44,6 +45,10 @@ assert.strictEqual(signalStatusFromValue(20), 'quiet');
 assert.strictEqual(signalStatusFromValue(40), 'watch');
 assert.strictEqual(signalStatusFromValue(58), 'elevated');
 assert.strictEqual(signalStatusFromValue(70), 'stress');
+
+assert.strictEqual(signalStatusForDistanceTo65(63.2), 'pre_stress');
+assert.strictEqual(signalStatusForDistanceTo65(58), 'watch');
+assert.strictEqual(passiveShareBand(63.2).description.includes('below the assumption-sensitive model zone'), true);
 
 assert.strictEqual(distanceToModelStressZone(58), 7);
 

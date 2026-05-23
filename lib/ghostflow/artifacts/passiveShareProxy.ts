@@ -75,12 +75,12 @@ export function buildPassiveShareProxyExplanation(indexAssetSharePercent: number
   return (
     `Index domestic equity mutual fund + ETF assets divided by active + index domestic equity mutual fund + ETF assets ` +
     `(${formatIndexSharePercentDisplay(indexAssetSharePercent)}; ${band.rangeLabel} band). ` +
-    `ICI index share structural sub-input ${structuralProxy}/100 — not a market-wide passive-share estimate.`
+    `ICI index share structural sub-input ${structuralProxy}/100, not a market-wide passive-share estimate.`
   );
 }
 
 export const PASSIVE_SHARE_PROXY_CARD_CAVEAT =
-  'Not a market-wide passive-share estimate or GKS model input.';
+  'Not a market-wide passive-share estimate or published passive-flow model input.';
 
 export const DISTANCE_TO_65_CARD_CAVEAT =
   'Derived from the ICI Index Share Proxy, not a market-wide passive-share estimate. 65% is an assumption-sensitive model stress zone, not a crash line.';
@@ -96,12 +96,12 @@ export function buildDistanceTo65Explanation(distancePp: number): string {
   if (distancePp <= 0) {
     return (
       `ICI Index Share Proxy is at or above the ${MODEL_STRESS_ZONE_THRESHOLD}% assumption-sensitive model stress zone ` +
-      `in published passive-flow research framing. Proxy context only — not a market-wide passive-share estimate or crash countdown.`
+      `in published passive-flow research framing. Proxy context only, not a market-wide passive-share estimate or crash countdown.`
     );
   }
   return (
     `${formatDistanceToModelZoneDisplay(distancePp)} below the ${MODEL_STRESS_ZONE_THRESHOLD}% assumption-sensitive ` +
-    `model stress zone, derived from the ICI Index Share Proxy (narrow fund/ETF denominator). Context only — not a market-wide passive-share estimate or calibrated forecast.`
+    `model stress zone, derived from the ICI Index Share Proxy (narrow fund/ETF denominator). Context only, not a market-wide passive-share estimate or calibrated forecast.`
   );
 }
 

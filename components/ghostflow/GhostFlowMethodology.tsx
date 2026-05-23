@@ -36,7 +36,7 @@ export function GhostFlowMethodology({
       <h2 id="ghostflow-methodology-heading" className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
         Methodology &amp; model zones
       </h2>
-      <p className="text-xs text-zinc-500">Current methodology: v0.6.1</p>
+      <p className="text-xs text-zinc-500">Current methodology: v0.6.2</p>
 
       <GlassCard className="p-4 sm:p-6">
         <h3 className="text-base font-semibold text-zinc-100">Scoring model</h3>
@@ -98,7 +98,7 @@ export function GhostFlowMethodology({
           </p>
           <p>
             <strong className="text-zinc-300">Relationship to the 65% zone:</strong> 65% is an assumption-sensitive
-            model stress zone from published passive-flow research — not a guaranteed crash line. Distance-to-65 is
+            model stress zone from published passive-flow research, not a guaranteed crash line. Distance-to-65 is
             derived from this public proxy for context only, not a calibrated model forecast.
           </p>
           <p>
@@ -111,7 +111,7 @@ export function GhostFlowMethodology({
             >
               ICI Active and Index Investing release
             </a>{' '}
-            — Total Net Assets, Equity → Domestic equity, Active and Index columns. Manual artifact only; no live
+            Total Net Assets, Equity → Domestic equity, Active and Index columns. Manual artifact only; no live
             fetches.
           </p>
           {passiveShareProxySource === 'public' && passiveShareProxyAsOf && (
@@ -119,7 +119,7 @@ export function GhostFlowMethodology({
           )}
           {passiveShareProxySource === 'mock_fallback' && (
             <p className="text-xs text-amber-300/90">
-              Public artifact unavailable — ICI Index Share Proxy is on mock fallback until the artifact is repaired.
+              Public artifact unavailable. ICI Index Share Proxy is on mock fallback until the artifact is repaired.
             </p>
           )}
           <p className="text-xs text-zinc-500">
@@ -147,7 +147,7 @@ export function GhostFlowMethodology({
           <p>
             Broader market-structure passive-share estimates try to approximate passive share across the equity market or
             price-setting ecosystem. Those wider definitions often land closer to the{' '}
-            <strong className="text-zinc-300">mid-50% range</strong> — not because GhostFlow is wrong, but because the
+            <strong className="text-zinc-300">mid-50% range</strong>, not because GhostFlow is wrong, but because the
             denominators differ.
           </p>
           <p>
@@ -156,7 +156,7 @@ export function GhostFlowMethodology({
           </p>
           <p>
             The <strong className="text-zinc-300">65% zone</strong> remains an assumption-sensitive model stress zone
-            from published passive-flow research — not a guaranteed crash line. Distance-to-65 is derived from this ICI
+            from published passive-flow research, not a guaranteed crash line. Distance-to-65 is derived from this ICI
             proxy for context only.
           </p>
         </div>
@@ -176,7 +176,7 @@ export function GhostFlowMethodology({
           </p>
           <p>
             <strong className="text-zinc-300">Why monthly:</strong> verified manual snapshot from the monthly fact
-            sheet — no live feeds in v0.5. The SSGA product page “Index Top Holdings” is a backup cross-check only.
+            sheet, no live feeds in v0.5. The SSGA product page “Index Top Holdings” is a backup cross-check only.
           </p>
           <p>
             <strong className="text-zinc-300">Why top 10:</strong> simple public concentration proxy; HHI and deeper
@@ -192,14 +192,14 @@ export function GhostFlowMethodology({
             >
               SSGA SPY US Monthly Fact Sheet
             </a>{' '}
-            — Top 10 holdings index weights. Manual artifact only; no live fetches.
+            Top 10 holdings index weights. Manual artifact only; no live fetches.
           </p>
           {indexConcentrationSource === 'public' && indexConcentrationAsOf && (
             <p className="text-xs text-amber-300/90">Current public artifact month ended {indexConcentrationAsOf}.</p>
           )}
           {indexConcentrationSource === 'mock_fallback' && (
             <p className="text-xs text-amber-300/90">
-              Public artifact unavailable — concentration is on mock fallback until the artifact is repaired.
+              Public artifact unavailable. Concentration is on mock fallback until the artifact is repaired.
             </p>
           )}
           <div className="overflow-x-auto">
@@ -277,13 +277,13 @@ export function GhostFlowMethodology({
           </p>
           <p>
             <strong className="text-zinc-300">Why monthly:</strong> ICI publishes the active/index split on a monthly
-            cadence. Weekly active/index decomposition is not available in ICI public tables — weekly refresh would
+            cadence. Weekly active/index decomposition is not available in ICI public tables; weekly refresh would
             imply fake precision.
           </p>
           <p>
             <strong className="text-zinc-300">Relationship to ETF artifact:</strong> the ETF artifact (v0.3) tracks
             weekly domestic-equity ETF creation/redemption pressure. This artifact tracks monthly style-flow tilt toward
-            index versus active — complementary dimensions, not redundant copies.
+            index versus active, complementary dimensions, not redundant copies.
           </p>
           <p>
             <strong className="text-zinc-300">Source:</strong>{' '}
@@ -295,14 +295,14 @@ export function GhostFlowMethodology({
             >
               ICI Active and Index Investing release
             </a>{' '}
-            — Flows table, Equity → Domestic equity, Active and Index columns. Manual artifact only; no live fetches.
+            Flows table, Equity → Domestic equity, Active and Index columns. Manual artifact only; no live fetches.
           </p>
           {activeIndexFlowSource === 'public' && activeIndexFlowAsOf && (
             <p className="text-xs text-amber-300/90">Current public artifact month ended {activeIndexFlowAsOf}.</p>
           )}
           {activeIndexFlowSource === 'mock_fallback' && (
             <p className="text-xs text-amber-300/90">
-              Public artifact unavailable — active-index-flow is on mock fallback until the artifact is repaired.
+              Public artifact unavailable. Active-index-flow is on mock fallback until the artifact is repaired.
             </p>
           )}
           <div className="overflow-x-auto">
@@ -366,7 +366,7 @@ export function GhostFlowMethodology({
           <p>
             <strong className="text-zinc-300">What it is:</strong> ICI{' '}
             <em>estimated weekly net issuance</em> for <strong className="text-zinc-300">domestic equity ETFs</strong>{' '}
-            — creation minus redemption from the industry&apos;s weekly release. Stored in millions USD; displayed as
+            creation minus redemption from the industry&apos;s weekly release. Stored in millions USD; displayed as
             rounded billions (e.g. $33.9B).
           </p>
           <p>
@@ -376,7 +376,7 @@ export function GhostFlowMethodology({
           </p>
           <p>
             <strong className="text-zinc-300">Why weekly:</strong> matches ICI release cadence. Daily refresh would imply
-            fake precision — the underlying series is a weekly estimate that may be revised.
+            fake precision. The underlying series is a weekly estimate that may be revised.
           </p>
           <p>
             <strong className="text-zinc-300">Source:</strong>{' '}
@@ -388,14 +388,14 @@ export function GhostFlowMethodology({
             >
               ICI Estimated ETF Net Issuance release
             </a>{' '}
-            — Equity → Domestic row. Manual artifact only; no live fetches.
+            Equity → Domestic row. Manual artifact only; no live fetches.
           </p>
           {etfFlowSource === 'public' && etfFlowAsOf && (
             <p className="text-xs text-amber-300/90">Current public artifact week ended {etfFlowAsOf}.</p>
           )}
           {etfFlowSource === 'mock_fallback' && (
             <p className="text-xs text-amber-300/90">
-              Public artifact unavailable — etf-flow is on mock fallback until the artifact is repaired.
+              Public artifact unavailable. Etf-flow is on mock fallback until the artifact is repaired.
             </p>
           )}
           <div className="overflow-x-auto">
@@ -464,7 +464,7 @@ export function GhostFlowMethodology({
             >
               CBOE VIX History CSV
             </a>{' '}
-            — manually updated daily close. VIX is a volatility amplifier proxy, not passive flow and not a crash
+            manually updated daily close. VIX is a volatility amplifier proxy, not passive flow and not a crash
             countdown.
           </p>
           {volRegimeSource === 'public' && volRegimeAsOf && (
@@ -485,11 +485,11 @@ export function GhostFlowMethodology({
         <p className="mt-2 text-sm text-zinc-400 leading-relaxed">
           The <strong className="text-zinc-300">65% zone</strong> is drawn from published passive-flow research as an
           assumption-sensitive stress zone. The public ICI fund/ETF index share proxy supplies the level display when
-          available; model-zone proximity sub-input remains mock in v0.6.1. This is not a market-wide passive-share
+            available; model-zone proximity sub-input remains mock in v0.6.2. This is not a market-wide passive-share
           estimate.
         </p>
         <p className="mt-2 text-xs text-amber-300/90">
-          Current ICI fund/ETF index share: {data.passiveSharePercent}% ({data.passiveShareBand.rangeLabel} —{' '}
+          Current ICI fund/ETF index share: {data.passiveSharePercent}% ({data.passiveShareBand.rangeLabel},{' '}
           {data.passiveShareBand.description})
         </p>
         <div className="mt-4 overflow-x-auto">
@@ -518,7 +518,7 @@ export function GhostFlowMethodology({
           <li>Does not predict exact tops or bottoms or market crashes.</li>
           <li>Does not provide buy/sell recommendations.</li>
           <li>Does not treat model thresholds as guaranteed outcomes.</li>
-          <li>Does not use live feeds — five manual public artifacts plus mock inputs elsewhere.</li>
+          <li>Does not use live feeds. Five manual public artifacts plus mock inputs elsewhere.</li>
           <li>
             Does not treat ETF net issuance, active/index flow differential, ICI Index Share Proxy, index
             concentration, or VIX as complete mechanical-flow or true passive-share measures.
@@ -526,7 +526,7 @@ export function GhostFlowMethodology({
           <li>Does not claim the ICI {data.passiveSharePercent}% proxy equals a market-wide passive-share estimate.</li>
         </ul>
         <p className="mt-3 text-sm text-zinc-500 border-l-2 border-amber-500/35 pl-3">
-          Think plumbing, not prophecy — pressure in the pipes, not a date for the flood.
+          Think plumbing, not prophecy: pressure in the pipes, not a date for the flood.
         </p>
       </GlassCard>
     </section>

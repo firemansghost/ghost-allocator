@@ -323,7 +323,7 @@ export function applyPassiveShareProxyArtifact(
     sourceName: artifact.source.name,
     sourceUrl: artifact.source.url,
     sourceNote:
-      'Derived from ICI Index Share Proxy — not a separate manual artifact and not a market-wide passive-share estimate.',
+      'Derived from ICI Index Share Proxy, not a separate manual artifact and not a market-wide passive-share estimate.',
     dataQuality: artifact.dataQuality,
     artifactAsOf: artifact.asOf,
     artifactPublishedAt: artifact.publishedAt,
