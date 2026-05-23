@@ -13,11 +13,12 @@ export const PUBLIC_ARTIFACT_SIGNAL_IDS = [
   'vol-regime',
   'active-index-flow',
   'concentration',
+  'breadth',
 ] as const;
 
 export const DERIVED_SIGNAL_IDS = ['distance-65'] as const;
 
-export const MOCK_SIGNAL_IDS = ['breadth', 'odte-options', 'systematic-flow'] as const;
+export const MOCK_SIGNAL_IDS = ['odte-options', 'systematic-flow'] as const;
 
 export interface GroupedSignals {
   publicArtifacts: ScoredGhostFlowSignal[];

@@ -10,6 +10,8 @@ Manual refresh workflow for GhostFlow public-data artifacts. **No live fetches**
 
 **ICI Index Share Proxy (v0.6):** see [PASSIVE_SHARE_PROXY_ARTIFACT_RUNBOOK.md](./PASSIVE_SHARE_PROXY_ARTIFACT_RUNBOOK.md).
 
+**Market Breadth Participation (v0.7):** see [BREADTH_ARTIFACT_RUNBOOK.md](./BREADTH_ARTIFACT_RUNBOOK.md).
+
 ## Volatility Regime (CBOE VIX)
 
 ### Source

@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ghost-allocator.local/schemas/ghostflow-market-breadth.v1.json",
+  "title": "GhostFlow Market Breadth Participation artifact v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifactVersion",
+    "signalId",
+    "asOf",
+    "source",
+    "seriesDefinition",
+    "updateFrequency",
+    "dataQuality",
+    "observations"
+  ],
+  "properties": {
+    "artifactVersion": {
+      "type": "string",
+      "const": "1"
+    },
+    "signalId": {
+      "type": "string",
+      "const": "breadth"
+    },
+    "asOf": {
+      "type": "string",
+      "format": "date"
+    },
+    "publishedAt": {
+      "type": "string",
+      "format": "date"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "url": { "type": "string", "format": "uri" },
+        "note": { "type": "string" }
+      }
+    },
+    "seriesDefinition": {
+      "type": "string",
+      "const": "sp500_percent_above_50_day_ma"
+    },
+    "updateFrequency": {
+      "type": "string",
+      "const": "daily"
+    },
+    "dataQuality": {
+      "type": "string",
+      "enum": ["verified_manual", "manual_unverified"]
+    },
+    "observations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sp500Above50DayMaPercent"],
+      "properties": {
+        "sp500Above50DayMaPercent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "optionalObservations": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sourceSymbol": { "type": ["string", "null"] },
+        "sp500Above200DayMaPercent": { "type": ["number", "null"] },
+        "backupSourceName": { "type": ["string", "null"] },
+        "backupReadingPercent": { "type": ["number", "null"] }
+      }
+    }
+  }
+}
