@@ -246,7 +246,7 @@ export function GhostFlowSignalGrid({
 
       <SignalSection
         title="Public manual artifacts"
-        intro="Hand-updated from CBOE, ICI, and SSGA sources. Proxy level shows mapped 0–100 pressure, not a live market alert."
+        intro="Hand-updated from public sources. Proxy level shows mapped 0–100 pressure, not a live market alert."
         signals={grouped.publicArtifacts}
         variant="public"
         dataMix={dataMix}
