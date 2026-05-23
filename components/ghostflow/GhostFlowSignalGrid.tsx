@@ -240,7 +240,7 @@ export function GhostFlowSignalGrid({
           Market-structure signals
         </h2>
         <p className="mt-2 text-xs text-zinc-500 leading-relaxed max-w-3xl">
-          Five manual public artifacts (no live feeds). Distance-to-65 is derived context, not a sixth artifact.
+          Six manual public artifacts (no live feeds). Distance-to-65 is derived context, not a seventh artifact.
         </p>
       </div>
 

@@ -1,5 +1,5 @@
 /**
- * GhostFlow v0.6 — merge mock snapshot with validated public artifacts before scoring.
+ * GhostFlow v0.7 — merge mock snapshot with validated public artifacts before scoring.
  */
 
 import { MOCK_GHOSTFLOW_SNAPSHOT } from '@/data/ghostflow/mockGhostflowSnapshot';
@@ -32,6 +32,14 @@ import {
   mapTop10WeightToNumericValue,
 } from './artifacts/indexConcentration';
 import {
+  buildMarketBreadthExplanation,
+  evaluateMarketBreadthArtifactFreshness,
+  formatMarketBreadthDisplayValue,
+  loadMarketBreadthArtifact,
+  mapSp500Above50MaToBreadthWeakness,
+  MARKET_BREADTH_CARD_CAVEAT,
+} from './artifacts/marketBreadth';
+import {
   buildPassiveShareProxyExplanation,
   buildDistanceTo65Explanation,
   deriveDistanceToModelZone,
@@ -53,6 +61,7 @@ import type {
   GhostFlowPublicSignalMeta,
   GhostFlowSnapshotMeta,
   IndexConcentrationArtifactV1,
+  MarketBreadthArtifactV1,
   PassiveShareProxyArtifactV1,
   VolatilityRegimeArtifactV1,
 } from './artifacts/types';
@@ -348,6 +357,54 @@ export function applyPassiveShareProxyArtifact(
   };
 }
 
+export function applyMarketBreadthArtifact(
+  raw: GhostFlowRawSnapshot,
+  artifact: MarketBreadthArtifactV1,
+  referenceAsOf: string
+): ApplyArtifactOutcome {
+  const freshness = evaluateMarketBreadthArtifactFreshness(artifact, referenceAsOf);
+  const strengthPercent = artifact.observations.sp500Above50DayMaPercent;
+  const numericValue = mapSp500Above50MaToBreadthWeakness(strengthPercent);
+
+  raw.structuralFragility.breadthWeakness = numericValue;
+  raw.asOf = bumpAsOf(raw.asOf, artifact.asOf);
+
+  raw.signals = replaceSignal(raw.signals, {
+    id: 'breadth',
+    name: 'Market Breadth Participation',
+    value: formatMarketBreadthDisplayValue(strengthPercent, numericValue),
+    numericValue,
+    explanation: buildMarketBreadthExplanation(artifact, numericValue),
+    cardCaveat: MARKET_BREADTH_CARD_CAVEAT,
+    dataStatus: 'public_proxy',
+    updateFrequencyTarget: 'Daily (manual artifact)',
+    sourceName: artifact.source.name,
+    sourceUrl: artifact.source.url,
+    sourceNote: artifact.source.note,
+    dataQuality: artifact.dataQuality,
+    artifactAsOf: artifact.asOf,
+    artifactPublishedAt: artifact.publishedAt,
+    freshnessStatus: freshness.status,
+  });
+
+  const publicSignal: GhostFlowPublicSignalMeta = {
+    signalId: 'breadth',
+    name: 'Market Breadth Participation',
+    sourceName: artifact.source.name,
+    sourceUrl: artifact.source.url,
+    asOf: artifact.asOf,
+    publishedAt: artifact.publishedAt,
+    freshnessStatus: freshness.status,
+  };
+
+  return {
+    raw,
+    warnings: freshness.warnings,
+    publicSignal,
+    publicStructuralInputKey: 'breadthWeakness',
+  };
+}
+
 function buildMeta(
   raw: GhostFlowRawSnapshot,
   warnings: string[],
@@ -360,6 +417,7 @@ function buildMeta(
   const activeIndexSignal = publicSignals.find((s) => s.signalId === 'active-index-flow');
   const indexConcentrationSignal = publicSignals.find((s) => s.signalId === 'concentration');
   const passiveShareSignal = publicSignals.find((s) => s.signalId === 'passive-share');
+  const breadthSignal = publicSignals.find((s) => s.signalId === 'breadth');
 
   return {
     raw,
@@ -380,6 +438,8 @@ function buildMeta(
       indexConcentrationAsOf: indexConcentrationSignal?.asOf,
       passiveShareProxySource: passiveShareSignal ? 'public' : 'mock_fallback',
       passiveShareProxyAsOf: passiveShareSignal?.asOf,
+      breadthSource: breadthSignal ? 'public' : 'mock_fallback',
+      breadthAsOf: breadthSignal?.asOf,
     },
   };
 }
@@ -390,6 +450,7 @@ export interface BuildGhostFlowSnapshotWithArtifactsOptions {
   activeIndex?: ActiveIndexFlowArtifactV1;
   indexConcentration?: IndexConcentrationArtifactV1;
   passiveShare?: PassiveShareProxyArtifactV1;
+  breadth?: MarketBreadthArtifactV1;
   referenceAsOf: string;
 }
 
@@ -441,6 +502,14 @@ export function buildGhostFlowSnapshotWithArtifacts(
     warnings.push(...passiveShare.warnings);
     if (passiveShare.publicSignal) publicSignals.push(passiveShare.publicSignal);
     if (passiveShare.publicStructuralInputKey) publicStructuralInputKeys.push(passiveShare.publicStructuralInputKey);
+  }
+
+  if (opts.breadth) {
+    const breadth = applyMarketBreadthArtifact(raw, opts.breadth, opts.referenceAsOf);
+    raw = breadth.raw;
+    warnings.push(...breadth.warnings);
+    if (breadth.publicSignal) publicSignals.push(breadth.publicSignal);
+    if (breadth.publicStructuralInputKey) publicStructuralInputKeys.push(breadth.publicStructuralInputKey);
   }
 
   return buildMeta(raw, warnings, publicSignals, publicPassiveInputKeys, publicStructuralInputKeys);
@@ -535,6 +604,20 @@ export function buildGhostFlowSnapshot(
   } else {
     warnings.push(
       `ICI Index Share Proxy artifact invalid or missing (${passiveShareValidation.errors.join('; ')}). Using mock fallback for passive-share signal, passiveShareProxy, passiveSharePercent, and distance-65.`
+    );
+  }
+
+  const breadthValidation = loadMarketBreadthArtifact();
+  if (breadthValidation.ok) {
+    const breadth = applyMarketBreadthArtifact(raw, breadthValidation.artifact, referenceAsOf);
+    raw = breadth.raw;
+    warnings.push(...breadth.warnings);
+    if (breadthValidation.warnings) warnings.push(...breadthValidation.warnings);
+    if (breadth.publicSignal) publicSignals.push(breadth.publicSignal);
+    if (breadth.publicStructuralInputKey) publicStructuralInputKeys.push(breadth.publicStructuralInputKey);
+  } else {
+    warnings.push(
+      `Market Breadth Participation artifact invalid or missing (${breadthValidation.errors.join('; ')}). Using mock fallback for breadth signal and breadthWeakness.`
     );
   }
 

@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "tsx lib/ghostregime/__tests__/regimeCore.test.ts && npm run test:ghostflow",
-    "test:ghostflow": "tsx lib/ghostflow/__tests__/scoring.test.ts && tsx lib/ghostflow/__tests__/volatilityRegime.test.ts && tsx lib/ghostflow/__tests__/etfNetIssuance.test.ts && tsx lib/ghostflow/__tests__/activeIndexFlow.test.ts && tsx lib/ghostflow/__tests__/indexConcentration.test.ts && tsx lib/ghostflow/__tests__/passiveShareProxy.test.ts && tsx lib/ghostflow/__tests__/artifactFreshness.test.ts",
+    "test:ghostflow": "tsx lib/ghostflow/__tests__/scoring.test.ts && tsx lib/ghostflow/__tests__/volatilityRegime.test.ts && tsx lib/ghostflow/__tests__/etfNetIssuance.test.ts && tsx lib/ghostflow/__tests__/activeIndexFlow.test.ts && tsx lib/ghostflow/__tests__/indexConcentration.test.ts && tsx lib/ghostflow/__tests__/passiveShareProxy.test.ts && tsx lib/ghostflow/__tests__/marketBreadth.test.ts && tsx lib/ghostflow/__tests__/artifactFreshness.test.ts",
     "test:vams-profiles": "tsx lib/ghostregime/__tests__/vamsProfiles.test.ts",
     "test:ghostregime-ui": "tsx lib/ghostregime/__tests__/agreementDelta.test.ts",
     "test:cash-breakdown": "tsx lib/ghostregime/__tests__/cashBreakdown.test.ts",

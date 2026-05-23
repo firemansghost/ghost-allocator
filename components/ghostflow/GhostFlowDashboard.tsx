@@ -10,7 +10,7 @@ import { GhostFlowWatchlist } from './GhostFlowWatchlist';
 
 const BADGES = [
   'Static preview',
-  '5 manual public artifacts',
+  '6 manual public artifacts',
   'Research only',
   'Not financial advice',
 ] as const;
@@ -32,9 +32,11 @@ export function GhostFlowDashboard() {
   const activeIndexMonthEnded = meta.activeIndexFlowAsOf;
   const indexConcentrationAsOf = meta.indexConcentrationAsOf;
   const passiveShareAsOf = meta.passiveShareProxyAsOf;
+  const breadthAsOf = meta.breadthAsOf;
 
   const dateParts: string[] = [];
   if (volAsOf) dateParts.push(`VIX as of ${volAsOf}`);
+  if (breadthAsOf) dateParts.push(`Breadth as of ${breadthAsOf}`);
   if (etfWeekEnded) dateParts.push(`ETF week ended ${etfWeekEnded}`);
   if (activeIndexMonthEnded) dateParts.push(`Active/index month ended ${activeIndexMonthEnded}`);
   if (indexConcentrationAsOf) dateParts.push(`Concentration month ended ${indexConcentrationAsOf}`);
@@ -79,11 +81,12 @@ export function GhostFlowDashboard() {
 
       <GlassCard className="p-4 sm:p-5 border-amber-500/20 bg-amber-950/15">
         <p className="text-sm text-zinc-200 leading-relaxed max-w-4xl">
-          <strong className="text-amber-200/95">Disclaimer:</strong> GhostFlow is for education and research only. Five
-          manually updated public artifacts (CBOE VIX, ICI ETF issuance, ICI active/index flows, SSGA SPY top-10
-          concentration, ICI fund/ETF index share proxy) feed part of the score; remaining inputs are static mock
-          proxies. Not financial advice, not a crash predictor, and not a substitute for your own judgment. The ICI
-          proxy is not a market-wide passive-share estimate.
+          <strong className="text-amber-200/95">Disclaimer:</strong> GhostFlow is for education and research only. Six
+          manually updated public artifacts (CBOE VIX, StockCharts S&P 500 % above 50-day MA breadth, ICI ETF issuance,
+          ICI active/index flows, SSGA SPY top-10 concentration, ICI fund/ETF index share proxy) feed part of the score;
+          remaining inputs are static mock proxies. Not financial advice, not a crash predictor, and not a substitute
+          for your own judgment. The ICI proxy is not a market-wide passive-share estimate. Breadth is a participation
+          proxy, not proof passive flows caused market narrowing.
         </p>
       </GlassCard>
 
@@ -114,6 +117,8 @@ export function GhostFlowDashboard() {
         indexConcentrationSource={meta.indexConcentrationSource}
         passiveShareProxyAsOf={meta.passiveShareProxyAsOf}
         passiveShareProxySource={meta.passiveShareProxySource}
+        breadthAsOf={meta.breadthAsOf}
+        breadthSource={meta.breadthSource}
       />
       <GhostFlowWatchlist />
     </div>

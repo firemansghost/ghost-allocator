@@ -10,6 +10,7 @@ import { validatePassiveShareProxyArtifact } from '../../lib/ghostflow/artifacts
 import { validateIndexConcentrationArtifact } from '../../lib/ghostflow/artifacts/indexConcentration';
 import { validateActiveIndexFlowArtifact } from '../../lib/ghostflow/artifacts/activeIndexFlow';
 import { validateVolatilityRegimeArtifact } from '../../lib/ghostflow/artifacts/volatilityRegime';
+import { validateMarketBreadthArtifact } from '../../lib/ghostflow/artifacts/marketBreadth';
 import { GHOSTFLOW_REFERENCE_AS_OF } from '../../lib/ghostflow/reference';
 
 const root = process.cwd();
@@ -119,6 +120,23 @@ function main(): void {
     const pct = passiveShareRules.artifact.observations.indexAssetSharePercent;
     console.log(
       `GhostFlow rules: passive-share OK (ICI index share ${pct}%, month ended ${passiveShareRules.artifact.asOf})`
+    );
+  }
+
+  const breadthPath = join(root, 'data/ghostflow/artifacts/marketBreadth.v1.json');
+  const breadthSchemaPath = join(root, 'data/ghostflow/artifacts/schema.marketBreadth.v1.json');
+
+  if (!validateWithSchema('marketBreadth.v1.json', breadthPath, breadthSchemaPath)) failed = true;
+
+  const breadthRules = validateMarketBreadthArtifact(loadJson(breadthPath), GHOSTFLOW_REFERENCE_AS_OF);
+  if (!breadthRules.ok) {
+    failed = true;
+    console.error('GhostFlow rules failed for breadth:');
+    for (const err of breadthRules.errors) console.error(`  - ${err}`);
+  } else {
+    const pct = breadthRules.artifact.observations.sp500Above50DayMaPercent;
+    console.log(
+      `GhostFlow rules: breadth OK (${pct}% above 50-day MA as of ${breadthRules.artifact.asOf})`
     );
   }
 

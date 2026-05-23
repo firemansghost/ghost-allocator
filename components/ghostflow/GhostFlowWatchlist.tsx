@@ -1,7 +1,6 @@
 import { GlassCard } from '@/components/GlassCard';
 
 const WATCH_TARGETS = [
-  'Market breadth',
   '0DTE / options volume',
   'CTA / vol-control proxy',
   'Levered ETF AUM and rebalance estimates',
@@ -18,8 +17,9 @@ export function GhostFlowWatchlist() {
       </h2>
       <GlassCard className="p-4 sm:p-6">
         <p className="text-sm text-zinc-400 leading-relaxed mb-4">
-          GhostFlow v0.6.3 uses five manual public artifacts and several mock proxy inputs. Future work will replace the
-          remaining mock signals one at a time, with source labels, freshness checks, and no proprietary assumptions.
+          GhostFlow v0.7 uses six manual public artifacts and two illustrative mock proxy inputs. Future work will
+          replace the remaining mock signals one at a time, with source labels, freshness checks, and no proprietary
+          assumptions.
         </p>
         <ul className="grid gap-2 sm:grid-cols-2 text-sm text-zinc-300">
           {WATCH_TARGETS.map((item) => (

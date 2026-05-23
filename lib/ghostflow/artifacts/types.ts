@@ -18,6 +18,8 @@ export type IndexConcentrationSeriesDefinition = 'sp500_index_top10_weight_perce
 
 export type PassiveShareProxySeriesDefinition = 'ici_domestic_equity_index_asset_share_percent';
 
+export type MarketBreadthSeriesDefinition = 'sp500_percent_above_50_day_ma';
+
 export interface ArtifactSource {
   name: string;
   url?: string;
@@ -208,6 +210,43 @@ export interface PassiveShareProxyValidationError {
 
 export type PassiveShareProxyValidation = PassiveShareProxyValidationResult | PassiveShareProxyValidationError;
 
+export interface MarketBreadthObservations {
+  sp500Above50DayMaPercent: number;
+}
+
+export interface MarketBreadthOptionalObservations {
+  sourceSymbol?: string | null;
+  sp500Above200DayMaPercent?: number | null;
+  backupSourceName?: string | null;
+  backupReadingPercent?: number | null;
+}
+
+export interface MarketBreadthArtifactV1 {
+  artifactVersion: '1';
+  signalId: 'breadth';
+  asOf: string;
+  publishedAt?: string;
+  source: ArtifactSource;
+  seriesDefinition: MarketBreadthSeriesDefinition;
+  updateFrequency: 'daily';
+  dataQuality: 'verified_manual' | 'manual_unverified';
+  observations: MarketBreadthObservations;
+  optionalObservations?: MarketBreadthOptionalObservations;
+}
+
+export interface MarketBreadthValidationResult {
+  ok: true;
+  artifact: MarketBreadthArtifactV1;
+  warnings?: string[];
+}
+
+export interface MarketBreadthValidationError {
+  ok: false;
+  errors: string[];
+}
+
+export type MarketBreadthValidation = MarketBreadthValidationResult | MarketBreadthValidationError;
+
 export interface ArtifactFreshnessResult {
   status: GhostFlowArtifactFreshnessStatus;
   ageDays: number;
@@ -251,6 +290,10 @@ export interface GhostFlowSnapshotMeta {
   passiveShareProxySource: 'public' | 'mock_fallback';
   /** @deprecated Prefer publicSignals */
   passiveShareProxyAsOf?: string;
+  /** @deprecated Prefer publicSignals */
+  breadthSource: 'public' | 'mock_fallback';
+  /** @deprecated Prefer publicSignals */
+  breadthAsOf?: string;
 }
 
 export interface GhostFlowBuildResult {

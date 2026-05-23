@@ -1,5 +1,6 @@
 import { GlassCard } from '@/components/GlassCard';
 import { PASSIVE_SHARE_BANDS } from '@/lib/ghostflow/scoring';
+import { BREADTH_STRENGTH_ANCHORS } from '@/lib/ghostflow/artifacts/marketBreadth';
 import { INDEX_CONCENTRATION_ANCHORS } from '@/lib/ghostflow/artifacts/indexConcentration';
 import { ACTIVE_INDEX_DIFFERENTIAL_ANCHORS } from '@/lib/ghostflow/artifacts/activeIndexFlow';
 import { ETF_ISSUANCE_PROXY_ANCHORS } from '@/lib/ghostflow/artifacts/etfNetIssuance';
@@ -38,6 +39,8 @@ export function GhostFlowMethodology({
   indexConcentrationSource,
   passiveShareProxyAsOf,
   passiveShareProxySource,
+  breadthAsOf,
+  breadthSource,
 }: {
   data: GhostFlowDashboardData;
   volRegimeAsOf?: string;
@@ -50,24 +53,27 @@ export function GhostFlowMethodology({
   indexConcentrationSource?: 'public' | 'mock_fallback';
   passiveShareProxyAsOf?: string;
   passiveShareProxySource?: 'public' | 'mock_fallback';
+  breadthAsOf?: string;
+  breadthSource?: 'public' | 'mock_fallback';
 }) {
   return (
     <section className="space-y-4" aria-labelledby="ghostflow-methodology-heading">
       <h2 id="ghostflow-methodology-heading" className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
         Methodology &amp; model zones
       </h2>
-      <p className="text-xs text-zinc-500">Current methodology: v0.6.3</p>
+      <p className="text-xs text-zinc-500">Current methodology: v0.7</p>
 
       <GlassCard className="p-4 sm:p-6">
         <h3 className="text-base font-semibold text-zinc-100">Scoring model</h3>
         <div className="mt-3 space-y-3 text-sm text-zinc-400 leading-relaxed">
           <p>
             <strong className="text-zinc-300">GhostFlow Score</strong> = 50% Passive Pressure Score + 50% Structural
-            Fragility Score. Weights are fixed and documented below. v0.6 wires two public Passive Pressure sub-inputs
-            (ETF net issuance from ICI + options / volatility amplifier from CBOE VIX) and three public Structural
+            Fragility Score. Weights are fixed and documented below. v0.7 wires two public Passive Pressure sub-inputs
+            (ETF net issuance from ICI + options / volatility amplifier from CBOE VIX) and four public Structural
             Fragility sub-inputs (ICI fund/ETF index share proxy + monthly active/index flow differential from ICI +
-            monthly top-10 index concentration from SSGA SPY fact sheet); all other inputs remain static mock proxies.
-            The ICI index share score input is not a market-wide passive-share estimate.
+            monthly top-10 index concentration from SSGA SPY fact sheet + daily S&P 500 % above 50-day MA breadth from
+            StockCharts); remaining inputs remain static mock proxies. The ICI index share score input is not a
+            market-wide passive-share estimate.
           </p>
           <div className="grid gap-4 sm:grid-cols-2 text-xs">
             <div className="rounded-xl border border-zinc-800/80 bg-neutral-950/40 p-3">
@@ -86,7 +92,7 @@ export function GhostFlowMethodology({
                 <li>30% ICI index share proxy (public ICI monthly assets in v0.6)</li>
                 <li>20% active share / offset proxy (public ICI monthly flow-tilt in v0.4+)</li>
                 <li>20% index concentration (public SSGA SPY monthly top-10 weights in v0.5)</li>
-                <li>15% breadth weakness</li>
+                <li>15% breadth weakness (public StockCharts $SPXA50R daily in v0.7)</li>
                 <li>15% model-zone proximity</li>
               </ul>
             </div>
@@ -496,11 +502,59 @@ export function GhostFlowMethodology({
         </div>
       </MethodologyDetailsSection>
 
+      <MethodologyDetailsSection title="Market Breadth Participation public artifact">
+        <div className="space-y-3 text-sm text-zinc-400 leading-relaxed">
+          <p>
+            <strong className="text-zinc-300">What it is:</strong> StockCharts{' '}
+            <a
+              href="https://stockcharts.com/freecharts/symbolsummary.html?sym=$SPXA50R"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-amber-400/90 hover:text-amber-300 underline-offset-2 hover:underline"
+            >
+              $SPXA50R
+            </a>{' '}
+            — the percentage of S&P 500 constituents trading above their own 50-day moving average. Mapped inversely
+            into the breadth weakness structural sub-input (higher participation → lower weakness score).
+          </p>
+          <p>
+            <strong className="text-zinc-300">Why 50DMA:</strong> More responsive to current participation than 200DMA,
+            which moves slowly and is better suited as optional context later. 50DMA breadth fits a daily manual
+            artifact without pretending to time crashes.
+          </p>
+          <p>
+            <strong className="text-zinc-300">Why not 200DMA yet:</strong> Deferred to optional observations only.
+            v0.7 keeps one scored series to avoid fake precision and mixed-vendor complexity.
+          </p>
+          <p>
+            <strong className="text-zinc-300">Pairs with Index Concentration:</strong> Concentration tracks cap-weight
+            top-10 dominance; breadth tracks how many names are in short-term uptrends. Both can flag a narrow market
+            or diverge — neither proves passive flows caused narrowing.
+          </p>
+          {breadthSource === 'public' && breadthAsOf && (
+            <p className="text-xs text-amber-300/90">Current public artifact as of {breadthAsOf}.</p>
+          )}
+          <p className="text-xs text-zinc-500">
+            <strong className="text-zinc-400">Mapping (strength % → weakness proxy):</strong>{' '}
+            {BREADTH_STRENGTH_ANCHORS.map((a) => `${a.strength}%→${a.weakness}`).join(', ')} (linear interpolation,
+            clamped 0–100).
+          </p>
+          <p className="text-xs text-zinc-500">
+            <strong className="text-zinc-400">Stale policy (daily):</strong> 0–2 trading days = fresh; 3–5 = caution;
+            &gt;5 = stale. Same rules as VIX.
+          </p>
+          <p className="text-xs text-zinc-500 border-l-2 border-amber-500/35 pl-3">
+            Participation proxy only — not a crash signal. Weak breadth can persist; strong breadth does not guarantee
+            safety. Structural context, not timing advice.
+          </p>
+        </div>
+      </MethodologyDetailsSection>
+
       <MethodologyDetailsSection title="ICI index share proxy model stress zones">
         <p className="text-sm text-zinc-400 leading-relaxed">
           The <strong className="text-zinc-300">65% zone</strong> is drawn from published passive-flow research as an
           assumption-sensitive stress zone. The public ICI fund/ETF index share proxy supplies the level display when
-            available; model-zone proximity sub-input remains mock in v0.6.3. This is not a market-wide passive-share
+            available; model-zone proximity sub-input remains mock in v0.7. This is not a market-wide passive-share
           estimate.
         </p>
         <p className="mt-2 text-xs text-amber-300/90">
@@ -533,10 +587,11 @@ export function GhostFlowMethodology({
           <li>Does not predict exact tops or bottoms or market crashes.</li>
           <li>Does not provide buy/sell recommendations.</li>
           <li>Does not treat model thresholds as guaranteed outcomes.</li>
-          <li>Does not use live feeds. Five manual public artifacts plus mock inputs elsewhere.</li>
+          <li>Does not use live feeds. Six manual public artifacts plus mock inputs elsewhere.</li>
           <li>
             Does not treat ETF net issuance, active/index flow differential, ICI Index Share Proxy, index
-            concentration, or VIX as complete mechanical-flow or true passive-share measures.
+            concentration, market breadth participation, or VIX as complete mechanical-flow or true passive-share
+            measures.
           </li>
           <li>Does not claim the ICI {data.passiveSharePercent}% proxy equals a market-wide passive-share estimate.</li>
         </ul>
