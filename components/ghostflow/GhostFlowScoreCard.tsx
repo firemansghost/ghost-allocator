@@ -154,7 +154,7 @@ export function GhostFlowScoreCard({ data }: { data: GhostFlowDashboardData }) {
             {score.subScores.structuralFragility}
           </p>
           <p className="mt-2 text-xs text-zinc-400 leading-relaxed">
-            Tracks market-structure vulnerability — concentration, breadth, passive share, model-zone proximity.
+            Tracks market-structure vulnerability — concentration, breadth, ICI index share proxy, model-zone proximity.
           </p>
           <ul className="mt-3 space-y-1.5 text-[11px] text-zinc-500">
             {STRUCTURAL_LABELS.map(({ key, label }) => {

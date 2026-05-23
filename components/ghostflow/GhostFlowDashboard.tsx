@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { GlassCard } from '@/components/GlassCard';
+import { buildPassiveShareDenominatorWarning } from '@/lib/ghostflow/artifacts/passiveShareProxy';
 import { buildGhostFlowSnapshot } from '@/lib/ghostflow/buildSnapshot';
 import { scoreGhostFlowSnapshot } from '@/lib/ghostflow/scoring';
 import { GhostFlowScoreCard } from './GhostFlowScoreCard';
@@ -72,8 +73,11 @@ export function GhostFlowDashboard() {
           {etfWeekEnded ? ` ETF week ended ${etfWeekEnded}.` : ''}
           {activeIndexMonthEnded ? ` Active/index month ended ${activeIndexMonthEnded}.` : ''}
           {indexConcentrationAsOf ? ` Concentration month ended ${indexConcentrationAsOf}.` : ''}
-          {passiveShareAsOf ? ` ICI Index Share Proxy month ended ${passiveShareAsOf}.` : ''} Distance-to-65 is
-          derived from the ICI Index Share Proxy. Other inputs remain mock. Not live market data.
+          {passiveShareAsOf
+            ? ` ICI fund/ETF index share proxy month ended ${passiveShareAsOf} — not a market-wide passive-share estimate.`
+            : ''}{' '}
+          Distance-to-65 is derived from that ICI proxy (proxy context only). Other inputs remain mock. Not live
+          market data.
         </p>
       </header>
 
@@ -92,14 +96,24 @@ export function GhostFlowDashboard() {
         <p className="text-sm text-zinc-200 leading-relaxed max-w-4xl">
           <strong className="text-amber-200/95">Disclaimer:</strong> GhostFlow is for education and research only. Five
           signals use manually updated public artifacts (CBOE VIX, ICI domestic equity ETF net issuance, ICI
-          domestic-equity active/index flow differential, SSGA SPY monthly top-10 index concentration, and ICI Index
-          Share Proxy); remaining scores and signals are static mock proxies — not buy/sell advice, not a crash
-          predictor, and not a substitute for your own judgment.
+          domestic-equity active/index flow differential, SSGA SPY monthly top-10 index concentration, and ICI fund/ETF
+          index share proxy); remaining scores and signals are static mock proxies — not buy/sell advice, not a crash
+          predictor, and not a substitute for your own judgment. The ICI proxy is not a market-wide passive-share
+          estimate.
         </p>
       </GlassCard>
 
       <GhostFlowScoreCard data={data} />
-      <GhostFlowSignalGrid signals={data.signals} dataMix={data.dataMix} publicSignalCount={data.publicSignalCount} />
+      <GhostFlowSignalGrid
+        signals={data.signals}
+        dataMix={data.dataMix}
+        publicSignalCount={data.publicSignalCount}
+        passiveShareDenominatorWarning={
+          meta.passiveShareProxySource === 'public'
+            ? buildPassiveShareDenominatorWarning(data.passiveSharePercent)
+            : undefined
+        }
+      />
       <GhostFlowMethodology
         data={data}
         volRegimeAsOf={meta.volRegimeAsOf}

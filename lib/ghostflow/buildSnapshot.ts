@@ -43,6 +43,7 @@ import {
   mapIndexSharePercentToStructuralProxy,
   PASSIVE_SHARE_PROXY_CARD_CAVEAT,
   DISTANCE_TO_65_CARD_CAVEAT,
+  DISTANCE_TO_65_SIGNAL_NAME,
 } from './artifacts/passiveShareProxy';
 import type {
   ActiveIndexFlowArtifactV1,
@@ -312,7 +313,7 @@ export function applyPassiveShareProxyArtifact(
 
   raw.signals = replaceSignal(raw.signals, {
     id: 'distance-65',
-    name: 'Distance to 65% Model Stress Zone',
+    name: DISTANCE_TO_65_SIGNAL_NAME,
     value: formatDistanceToModelZoneDisplay(distancePp),
     numericValue: mapDistanceToZoneNumericValue(distancePp),
     explanation: buildDistanceTo65Explanation(distancePp),
@@ -321,7 +322,8 @@ export function applyPassiveShareProxyArtifact(
     updateFrequencyTarget: 'Derived (ICI Index Share Proxy)',
     sourceName: artifact.source.name,
     sourceUrl: artifact.source.url,
-    sourceNote: 'Derived from ICI Index Share Proxy artifact — not a separate manual artifact.',
+    sourceNote:
+      'Derived from ICI Index Share Proxy — not a separate manual artifact and not a market-wide passive-share estimate.',
     dataQuality: artifact.dataQuality,
     artifactAsOf: artifact.asOf,
     artifactPublishedAt: artifact.publishedAt,

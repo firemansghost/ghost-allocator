@@ -36,7 +36,7 @@ export function GhostFlowMethodology({
       <h2 id="ghostflow-methodology-heading" className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
         Methodology &amp; model zones
       </h2>
-      <p className="text-xs text-zinc-500">Current methodology: v0.6</p>
+      <p className="text-xs text-zinc-500">Current methodology: v0.6.1</p>
 
       <GlassCard className="p-4 sm:p-6">
         <h3 className="text-base font-semibold text-zinc-100">Scoring model</h3>
@@ -45,8 +45,9 @@ export function GhostFlowMethodology({
             <strong className="text-zinc-300">GhostFlow Score</strong> = 50% Passive Pressure Score + 50% Structural
             Fragility Score. Weights are fixed and documented below. v0.6 wires two public Passive Pressure sub-inputs
             (ETF net issuance from ICI + options / volatility amplifier from CBOE VIX) and three public Structural
-            Fragility sub-inputs (ICI Index Share Proxy + monthly active/index flow differential from ICI + monthly
-            top-10 index concentration from SSGA SPY fact sheet); all other inputs remain static mock proxies.
+            Fragility sub-inputs (ICI fund/ETF index share proxy + monthly active/index flow differential from ICI +
+            monthly top-10 index concentration from SSGA SPY fact sheet); all other inputs remain static mock proxies.
+            The ICI index share score input is not a market-wide passive-share estimate.
           </p>
           <div className="grid gap-4 sm:grid-cols-2 text-xs">
             <div className="rounded-xl border border-zinc-800/80 bg-neutral-950/40 p-3">
@@ -129,6 +130,34 @@ export function GhostFlowMethodology({
           <p className="text-xs text-zinc-500 border-l-2 border-amber-500/35 pl-3">
             This is a public fund-industry proxy. Useful plumbing context, not the market&apos;s true passive ownership
             map.
+          </p>
+        </div>
+      </GlassCard>
+
+      <GlassCard className="p-4 sm:p-6">
+        <h3 className="text-base font-semibold text-zinc-100">
+          Why {data.passiveSharePercent}% is not a market-wide passive-share estimate
+        </h3>
+        <div className="mt-3 space-y-3 text-sm text-zinc-400 leading-relaxed">
+          <p>
+            <strong className="text-zinc-300">{data.passiveSharePercent}%</strong> = ICI domestic equity index mutual
+            fund + ETF assets divided by active + index domestic equity mutual fund + ETF assets. That is a narrow
+            fund-industry product-structure denominator.
+          </p>
+          <p>
+            Broader market-structure passive-share estimates try to approximate passive share across the equity market or
+            price-setting ecosystem. Those wider definitions often land closer to the{' '}
+            <strong className="text-zinc-300">mid-50% range</strong> — not because GhostFlow is wrong, but because the
+            denominators differ.
+          </p>
+          <p>
+            Read the ICI proxy as fund/ETF index-vs-active product mix, not total market passive ownership, float
+            ownership, trading volume, or Green/Krishnan/Sturm model passive-share input.
+          </p>
+          <p>
+            The <strong className="text-zinc-300">65% zone</strong> remains an assumption-sensitive model stress zone
+            from published passive-flow research — not a guaranteed crash line. Distance-to-65 is derived from this ICI
+            proxy for context only.
           </p>
         </div>
       </GlassCard>
@@ -452,14 +481,15 @@ export function GhostFlowMethodology({
       </GlassCard>
 
       <GlassCard className="p-4 sm:p-6">
-        <h3 className="text-base font-semibold text-zinc-100">Passive-share model stress zones</h3>
+        <h3 className="text-base font-semibold text-zinc-100">ICI index share proxy model stress zones</h3>
         <p className="mt-2 text-sm text-zinc-400 leading-relaxed">
           The <strong className="text-zinc-300">65% zone</strong> is drawn from published passive-flow research as an
-          assumption-sensitive stress zone. Passive-share level display uses the public ICI Index Share Proxy when
-          available; model-zone proximity sub-input remains mock in v0.6.
+          assumption-sensitive stress zone. The public ICI fund/ETF index share proxy supplies the level display when
+          available; model-zone proximity sub-input remains mock in v0.6.1. This is not a market-wide passive-share
+          estimate.
         </p>
         <p className="mt-2 text-xs text-amber-300/90">
-          Current ICI Index Share Proxy: {data.passiveSharePercent}% ({data.passiveShareBand.rangeLabel} —{' '}
+          Current ICI fund/ETF index share: {data.passiveSharePercent}% ({data.passiveShareBand.rangeLabel} —{' '}
           {data.passiveShareBand.description})
         </p>
         <div className="mt-4 overflow-x-auto">
@@ -493,6 +523,7 @@ export function GhostFlowMethodology({
             Does not treat ETF net issuance, active/index flow differential, ICI Index Share Proxy, index
             concentration, or VIX as complete mechanical-flow or true passive-share measures.
           </li>
+          <li>Does not claim the ICI {data.passiveSharePercent}% proxy equals a market-wide passive-share estimate.</li>
         </ul>
         <p className="mt-3 text-sm text-zinc-500 border-l-2 border-amber-500/35 pl-3">
           Think plumbing, not prophecy — pressure in the pipes, not a date for the flood.

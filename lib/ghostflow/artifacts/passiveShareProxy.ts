@@ -53,8 +53,7 @@ export function formatIndexSharePercentDisplay(indexAssetSharePercent: number): 
 }
 
 export function formatPassiveShareProxyDisplayValue(indexAssetSharePercent: number): string {
-  const band = passiveShareBand(indexAssetSharePercent);
-  return `${formatIndexSharePercentDisplay(indexAssetSharePercent)} · ${band.rangeLabel}`;
+  return `ICI fund/ETF index share: ${formatIndexSharePercentDisplay(indexAssetSharePercent)}`;
 }
 
 export function formatDistanceToModelZoneDisplay(distancePp: number): string {
@@ -74,30 +73,39 @@ export function passiveShareProxyFreshnessAnchor(artifact: PassiveShareProxyArti
 export function buildPassiveShareProxyExplanation(indexAssetSharePercent: number, structuralProxy: number): string {
   const band = passiveShareBand(indexAssetSharePercent);
   return (
-    `ICI domestic equity index fund+ETF assets are ${formatIndexSharePercentDisplay(indexAssetSharePercent)} ` +
-    `of active+index domestic equity fund assets (${band.rangeLabel} band). ` +
-    `Structural sub-input ${structuralProxy}/100.`
+    `Index domestic equity mutual fund + ETF assets divided by active + index domestic equity mutual fund + ETF assets ` +
+    `(${formatIndexSharePercentDisplay(indexAssetSharePercent)}; ${band.rangeLabel} band). ` +
+    `ICI index share structural sub-input ${structuralProxy}/100 — not a market-wide passive-share estimate.`
   );
 }
 
 export const PASSIVE_SHARE_PROXY_CARD_CAVEAT =
-  'ICI index asset share — not market passive share or GKS model input.';
+  'Not a market-wide passive-share estimate or GKS model input.';
 
 export const DISTANCE_TO_65_CARD_CAVEAT =
-  'Derived from ICI Index Share Proxy. 65% is an assumption-sensitive model stress zone, not a crash line.';
+  'Derived from the ICI Index Share Proxy, not a market-wide passive-share estimate. 65% is an assumption-sensitive model stress zone, not a crash line.';
+
+export function buildPassiveShareDenominatorWarning(indexAssetSharePercent: number): string {
+  const pct = formatIndexSharePercentDisplay(indexAssetSharePercent);
+  return (
+    `Broader market-structure estimates place passive share closer to the mid-50% range. GhostFlow's ${pct} ICI Index Share Proxy uses a narrower fund/ETF denominator, so the two numbers are not directly comparable.`
+  );
+}
 
 export function buildDistanceTo65Explanation(distancePp: number): string {
   if (distancePp <= 0) {
     return (
       `ICI Index Share Proxy is at or above the ${MODEL_STRESS_ZONE_THRESHOLD}% assumption-sensitive model stress zone ` +
-      `in published passive-flow research framing — not a crash countdown.`
+      `in published passive-flow research framing. Proxy context only — not a market-wide passive-share estimate or crash countdown.`
     );
   }
   return (
     `${formatDistanceToModelZoneDisplay(distancePp)} below the ${MODEL_STRESS_ZONE_THRESHOLD}% assumption-sensitive ` +
-    `model stress zone (derived from ICI Index Share Proxy). Context only — not a calibrated forecast.`
+    `model stress zone, derived from the ICI Index Share Proxy (narrow fund/ETF denominator). Context only — not a market-wide passive-share estimate or calibrated forecast.`
   );
 }
+
+export const DISTANCE_TO_65_SIGNAL_NAME = 'Distance to 65% Model Zone (Proxy Context)';
 
 export function validatePassiveShareProxyArtifact(
   raw: unknown,
