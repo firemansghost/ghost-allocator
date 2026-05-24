@@ -1,5 +1,7 @@
 # GhostFlow Artifact Runbook (v0.2+)
 
+**Start here for scheduled refreshes:** [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) — daily, weekly, and monthly operator checklists for all six v0.7 public artifacts.
+
 Manual refresh workflow for GhostFlow public-data artifacts. **No live fetches** — all values are hand-edited into static JSON files committed to the repo.
 
 **ETF Net Issuance (v0.3):** see [ETF_ARTIFACT_RUNBOOK.md](./ETF_ARTIFACT_RUNBOOK.md).
