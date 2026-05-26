@@ -47,6 +47,12 @@ function proxyLevelLabel(status: GhostFlowSignalStatus): string {
   return label;
 }
 
+/** Card title override for placeholder signals (UI only; does not change scoring). */
+export function signalCardDisplayName(sig: { id: string; name: string }): string {
+  if (sig.id === 'systematic-flow') return 'Future Systematic Flow Feed';
+  return sig.name;
+}
+
 /** Display badge text for signal cards (UI only; does not change scoring). */
 export function signalCardBadgeLabel(
   variant: SignalCardVariant,
