@@ -61,13 +61,13 @@ export function GhostFlowMethodology({
       <h2 id="ghostflow-methodology-heading" className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
         Methodology &amp; model zones
       </h2>
-      <p className="text-xs text-zinc-500">Current methodology: v0.7</p>
+      <p className="text-xs text-zinc-500">Current methodology: v0.8 (trust &amp; clarity pass; scoring unchanged from v0.7)</p>
 
       <GlassCard className="p-4 sm:p-6">
         <h3 className="text-base font-semibold text-zinc-100">Scoring model</h3>
         <div className="mt-3 space-y-3 text-sm text-zinc-400 leading-relaxed">
           <p>
-            <strong className="text-zinc-300">GhostFlow Score</strong> = 50% Passive Pressure Score + 50% Structural
+            <strong className="text-zinc-300">GhostFlow Research Composite</strong> = 50% Passive Pressure Score + 50% Structural
             Fragility Score. Weights are fixed and documented below. v0.7 wires two public Passive Pressure sub-inputs
             (ETF net issuance from ICI + options / volatility amplifier from CBOE VIX) and four public Structural
             Fragility sub-inputs (ICI fund/ETF index share proxy + monthly active/index flow differential from ICI +
