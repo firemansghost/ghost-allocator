@@ -9,8 +9,9 @@ export function GhostFlowCurrentRead({
   data: GhostFlowDashboardData;
   passiveShareProxySource?: 'public' | 'mock_fallback';
 }) {
-  const { score, passiveSharePercent } = data;
+  const { score, passiveSharePercent, signals } = data;
   const { publicCount, mockCount } = countScoreInputMix(data);
+  const distanceSignal = signals.find((s) => s.id === 'distance-65');
 
   const iciLine =
     passiveShareProxySource === 'public'
@@ -22,13 +23,19 @@ export function GhostFlowCurrentRead({
       <h2 className="text-xs font-semibold uppercase tracking-wide text-amber-400/90">Current read</h2>
       <div className="mt-3 space-y-2 text-sm text-zinc-300 leading-relaxed max-w-4xl">
         <p>
-          GhostFlow reads <strong className="text-zinc-100">{score.score}</strong> ·{' '}
-          <strong className="text-zinc-100">{score.bandLabel}</strong> ({publicCount} public and {mockCount} mock
-          score inputs).
+          GhostFlow research composite reads <strong className="text-zinc-100">{score.score}</strong> ·{' '}
+          <strong className="text-zinc-100">{score.bandLabel}</strong> ({publicCount} public artifact-driven and{' '}
+          {mockCount} static mock score inputs).
         </p>
+        {distanceSignal && passiveShareProxySource === 'public' && (
+          <p className="text-zinc-400">
+            Distance to 65% model zone: <strong className="text-zinc-200">{distanceSignal.value}</strong> below, derived
+            from ICI index-share proxy, not market-wide passive share.
+          </p>
+        )}
         <p className="text-zinc-400">{iciLine}</p>
         <p className="text-zinc-400">
-          Current read: elevated mechanical/structural pressure, not a crash forecast.
+          Current read: elevated mechanical/structural pressure in the research preview, not a crash forecast.
         </p>
       </div>
     </GlassCard>

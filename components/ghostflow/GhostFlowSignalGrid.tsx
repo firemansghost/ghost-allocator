@@ -139,7 +139,13 @@ function SignalCard({
       )}
       <div className="mt-3 pt-3 border-t border-zinc-800/80 space-y-2">
         {variant === 'mock' ? (
-          <p className="text-[10px] text-zinc-500">Mock proxy, not a current measured reading.</p>
+          <p className="text-[10px] text-zinc-500">
+            PLACEHOLDER card — illustrative future signal, not included in the current research composite score.
+          </p>
+        ) : variant === 'derived' ? (
+          <p className="text-[10px] text-zinc-500">
+            DERIVED from public ICI index-share context — displayed for reference, not a tenth score sub-input.
+          </p>
         ) : (
           <>
             <div className="flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-zinc-500">
@@ -240,7 +246,8 @@ export function GhostFlowSignalGrid({
           Market-structure signals
         </h2>
         <p className="mt-2 text-xs text-zinc-500 leading-relaxed max-w-3xl">
-          Six manual public artifacts (no live feeds). Distance-to-65 is derived context, not a seventh artifact.
+          Six manual public artifacts (no live feeds) feed the research composite. Distance-to-65 is derived context; two
+          PLACEHOLDER cards are not in the score.
         </p>
       </div>
 
@@ -261,8 +268,8 @@ export function GhostFlowSignalGrid({
       />
 
       <SignalSection
-        title="Illustrative mock proxies"
-        intro="Placeholder cards for signals not yet wired to public artifacts. They do not reflect current measured readings."
+        title="Placeholder signal cards"
+        intro="PLACEHOLDER cards for future signals (0DTE options, systematic flow). Not included in the research composite; not current measured readings."
         signals={grouped.mockProxies}
         variant="mock"
         dataMix={dataMix}

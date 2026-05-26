@@ -52,7 +52,8 @@ export function signalCardBadgeLabel(
   variant: SignalCardVariant,
   status: GhostFlowSignalStatus
 ): string | null {
-  if (variant === 'mock') return 'Placeholder';
+  if (variant === 'mock') return 'PLACEHOLDER';
+  if (variant === 'derived') return 'DERIVED';
   if (variant === 'public') return `Proxy level: ${proxyLevelLabel(status)}`;
   return signalStatusDisplayLabel(status).toUpperCase();
 }

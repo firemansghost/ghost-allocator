@@ -3,17 +3,14 @@ import { GlassCard } from '@/components/GlassCard';
 import { buildGhostFlowSnapshot } from '@/lib/ghostflow/buildSnapshot';
 import { scoreGhostFlowSnapshot } from '@/lib/ghostflow/scoring';
 import { GhostFlowCurrentRead } from './GhostFlowCurrentRead';
+import { GhostFlowFreshnessSummary } from './GhostFlowFreshnessSummary';
 import { GhostFlowScoreCard } from './GhostFlowScoreCard';
+import { GhostFlowScoreDrivers } from './GhostFlowScoreDrivers';
 import { GhostFlowSignalGrid } from './GhostFlowSignalGrid';
 import { GhostFlowMethodology } from './GhostFlowMethodology';
 import { GhostFlowWatchlist } from './GhostFlowWatchlist';
 
-const BADGES = [
-  'Static preview',
-  '6 manual public artifacts',
-  'Research only',
-  'Not financial advice',
-] as const;
+const HEADER_BADGES = ['Static preview', 'Research only', 'Not financial advice'] as const;
 
 export function GhostFlowDashboard() {
   const { raw, meta } = buildGhostFlowSnapshot();
@@ -55,7 +52,7 @@ export function GhostFlowDashboard() {
 
       <header className="space-y-3">
         <div className="flex flex-wrap gap-2">
-          {BADGES.map((badge) => (
+          {HEADER_BADGES.map((badge) => (
             <span
               key={badge}
               className="inline-flex items-center rounded-md border border-amber-500/30 bg-amber-950/25 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-amber-200/90"
@@ -68,33 +65,33 @@ export function GhostFlowDashboard() {
           GhostFlow: Passive Pressure Gauge
         </h1>
         <p className="text-sm font-medium text-zinc-300 max-w-3xl">
-          A market-structure dashboard for watching the mechanical bid underneath modern markets.
-        </p>
-        <p className="text-sm text-zinc-400 max-w-3xl leading-relaxed">
-          GhostFlow tracks passive-flow pressure, ETF issuance, concentration, volatility mechanics, and systematic-flow
-          proxies. It does not predict crashes. It watches whether price discovery is sharing the wheel with autopilot.
+          A market-structure research preview for watching the mechanical bid underneath modern markets.
         </p>
         {dateParts.length > 0 && (
           <p className="text-xs text-zinc-500">{dateParts.join(' · ')}</p>
         )}
       </header>
 
+      <GhostFlowCurrentRead data={data} passiveShareProxySource={meta.passiveShareProxySource} />
+
+      <GhostFlowScoreCard data={data} />
+
+      <GhostFlowFreshnessSummary publicSignals={meta.publicSignals} />
+
       <GlassCard className="p-4 sm:p-5 border-amber-500/20 bg-amber-950/15">
         <p className="text-sm text-zinc-200 leading-relaxed max-w-4xl">
-          <strong className="text-amber-200/95">Disclaimer:</strong> GhostFlow is for education and research only. Six
-          manually updated public artifacts (CBOE VIX, StockCharts S&P 500 % above 50-day MA breadth, ICI ETF issuance,
-          ICI active/index flows, SSGA SPY top-10 concentration, ICI fund/ETF index share proxy) feed part of the score;
-          remaining inputs are static mock proxies. Not financial advice, not a crash predictor, and not a substitute
-          for your own judgment. The ICI proxy is not a market-wide passive-share estimate. Breadth is a participation
-          proxy, not proof passive flows caused market narrowing.
+          <strong className="text-amber-200/95">Disclaimer:</strong> GhostFlow is an education and research preview
+          only—six manual public artifacts plus four static mock score inputs in the research composite. Not financial
+          advice.{' '}
+          <strong className="text-amber-200/90">Not a market-wide passive-share estimate.</strong>{' '}
+          <strong className="text-amber-200/90">Not a crash predictor.</strong> Breadth is participation context, not
+          proof passive flows caused narrowing. Full methodology below.
         </p>
       </GlassCard>
 
-      <GhostFlowCurrentRead data={data} passiveShareProxySource={meta.passiveShareProxySource} />
-
       {data.freshnessWarnings && data.freshnessWarnings.length > 0 && (
         <GlassCard className="p-4 sm:p-5 border-amber-500/25 bg-amber-950/20">
-          <p className="text-xs font-semibold uppercase tracking-wide text-amber-300/90 mb-2">Data freshness</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-amber-300/90 mb-2">Artifact freshness detail</p>
           <ul className="space-y-1.5 text-sm text-zinc-300 leading-relaxed list-disc list-inside">
             {data.freshnessWarnings.map((w) => (
               <li key={w}>{w}</li>
@@ -103,8 +100,8 @@ export function GhostFlowDashboard() {
         </GlassCard>
       )}
 
-      <GhostFlowScoreCard data={data} />
       <GhostFlowSignalGrid signals={data.signals} dataMix={data.dataMix} publicSignalCount={data.publicSignalCount} />
+      <GhostFlowScoreDrivers />
       <GhostFlowMethodology
         data={data}
         volRegimeAsOf={meta.volRegimeAsOf}
