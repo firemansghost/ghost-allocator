@@ -2,6 +2,7 @@ import { GlassCard } from '@/components/GlassCard';
 import {
   groupSignalsByPresentation,
   signalCardBadgeLabel,
+  signalCardDisplayName,
   type SignalCardVariant,
 } from '@/lib/ghostflow/signalPresentation';
 import type {
@@ -114,7 +115,7 @@ function SignalCard({
         <h3
           className={`text-sm font-semibold leading-snug ${variant === 'mock' ? 'text-zinc-400' : 'text-zinc-100'}`}
         >
-          {sig.name}
+          {signalCardDisplayName(sig)}
         </h3>
         {badgeLabel && (
           <span
@@ -144,7 +145,7 @@ function SignalCard({
           </p>
         ) : variant === 'derived' ? (
           <p className="text-[10px] text-zinc-500">
-            DERIVED from public ICI index-share context — displayed for reference, not a tenth score sub-input.
+            DERIVED from public ICI index-share context — displayed for reference, not an additional score sub-input.
           </p>
         ) : (
           <>

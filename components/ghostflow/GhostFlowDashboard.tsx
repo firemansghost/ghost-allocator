@@ -10,7 +10,7 @@ import { GhostFlowSignalGrid } from './GhostFlowSignalGrid';
 import { GhostFlowMethodology } from './GhostFlowMethodology';
 import { GhostFlowWatchlist } from './GhostFlowWatchlist';
 
-const HEADER_BADGES = ['Static preview', 'Research only', 'Not financial advice'] as const;
+const HEADER_BADGES = ['Static preview', 'Research only', 'Not a forecast', 'Not financial advice'] as const;
 
 export function GhostFlowDashboard() {
   const { raw, meta } = buildGhostFlowSnapshot();
