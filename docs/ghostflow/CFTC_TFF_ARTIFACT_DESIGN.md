@@ -1,7 +1,8 @@
 # CFTC TFF Artifact Design (GhostFlow v0.9d)
 
-**Status:** Artifact design only — not wired into GhostFlow scoring, `buildSnapshot`, or UI.  
+**Status:** v0.9e production artifact candidate validated — **not wired** into GhostFlow scoring, `buildSnapshot`, or UI (score merge deferred to v0.9f / v1.0).  
 **Prior work:** [CFTC_TFF_FEASIBILITY.md](./CFTC_TFF_FEASIBILITY.md) (v0.9c, **YELLOW**).  
+**Production file:** [`data/ghostflow/artifacts/systematicFlowProxy.v1.json`](../data/ghostflow/artifacts/systematicFlowProxy.v1.json)  
 **Example file:** [`data/ghostflow/artifacts/systematicFlowProxy.v1.example.json`](../data/ghostflow/artifacts/systematicFlowProxy.v1.example.json)  
 **Library:** [`lib/ghostflow/artifacts/systematicFlowProxy.ts`](../lib/ghostflow/artifacts/systematicFlowProxy.ts)
 
@@ -161,8 +162,9 @@ Implemented in `evaluateSystematicFlowProxyArtifactFreshness()` (design-ready; n
 Before wiring into `systematicStrategyPressure`:
 
 - [ ] JSON Schema `schema.systematicFlowProxy.v1.json`
-- [ ] Production `systematicFlowProxy.v1.json` (manual weekly refresh)
-- [ ] Entry in `scripts/ghostflow/validate-artifacts.ts`
+- [x] Production `systematicFlowProxy.v1.json` (manual weekly refresh; v0.9e candidate)
+- [x] Entry in `scripts/ghostflow/validate-artifacts.ts`
+- [x] Report alignment enforced in `validateSystematicFlowProxyArtifact`
 - [ ] `applySystematicFlowProxyArtifact` in `buildSnapshot.ts`
 - [ ] Mapper + merge unit tests with score snapshot
 - [ ] Caveat copy + score sub-input PUBLIC badge

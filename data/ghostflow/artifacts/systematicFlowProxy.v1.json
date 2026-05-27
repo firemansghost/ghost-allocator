@@ -1,0 +1,102 @@
+{
+  "artifactVersion": "1",
+  "signalId": "systematic-flow-proxy",
+  "asOf": "2026-05-19",
+  "publishedAt": "2026-05-22",
+  "source": {
+    "name": "CFTC Public Reporting Environment — TFF Futures Only",
+    "url": "https://publicreporting.cftc.gov/Commitments-of-Traders/TFF-Futures-Only/gpe5-46if/about_data",
+    "note": "Production artifact candidate; validated but not yet wired into GhostFlow score."
+  },
+  "seriesDefinition": "cftc_tff_futures_only_leveraged_funds_equity_basket",
+  "updateFrequency": "weekly",
+  "dataQuality": "verified_manual",
+  "datasetId": "gpe5-46if",
+  "scoreContracts": [
+    {
+      "cftcContractMarketCode": "13874A",
+      "contractMarketName": "E-MINI S&P 500",
+      "usedInScore": true,
+      "observations": {
+        "reportDate": "2026-05-19",
+        "reportWeek": "2026 Report Week 20",
+        "openInterestAll": 2068443,
+        "leveragedFundsLong": 164096,
+        "leveragedFundsShort": 565650,
+        "leveragedFundsSpread": 58729,
+        "changeLong": 15589,
+        "changeShort": -15295,
+        "changeSpread": 7567,
+        "pctOiLong": 7.9,
+        "pctOiShort": 27.3,
+        "pctOiSpread": 2.8
+      }
+    },
+    {
+      "cftcContractMarketCode": "209742",
+      "contractMarketName": "NASDAQ MINI",
+      "usedInScore": true,
+      "observations": {
+        "reportDate": "2026-05-19",
+        "reportWeek": "2026 Report Week 20",
+        "openInterestAll": 293186,
+        "leveragedFundsLong": 55696,
+        "leveragedFundsShort": 101067,
+        "leveragedFundsSpread": 7699,
+        "changeLong": 8419,
+        "changeShort": 1748,
+        "changeSpread": -4785,
+        "pctOiLong": 19.0,
+        "pctOiShort": 34.5,
+        "pctOiSpread": 2.6
+      }
+    },
+    {
+      "cftcContractMarketCode": "239742",
+      "contractMarketName": "RUSSELL E-MINI",
+      "usedInScore": true,
+      "observations": {
+        "reportDate": "2026-05-19",
+        "reportWeek": "2026 Report Week 20",
+        "openInterestAll": 421242,
+        "leveragedFundsLong": 63365,
+        "leveragedFundsShort": 130794,
+        "leveragedFundsSpread": 7765,
+        "changeLong": -16615,
+        "changeShort": -9817,
+        "changeSpread": 648,
+        "pctOiLong": 15.0,
+        "pctOiShort": 31.0,
+        "pctOiSpread": 1.8
+      }
+    }
+  ],
+  "vixContext": {
+    "cftcContractMarketCode": "1170E1",
+    "contractMarketName": "VIX FUTURES",
+    "usedInScore": false,
+    "observations": {
+      "reportDate": "2026-05-19",
+      "reportWeek": "2026 Report Week 20",
+      "openInterestAll": 440161,
+      "leveragedFundsLong": 76102,
+      "leveragedFundsShort": 128006,
+      "leveragedFundsSpread": 62343,
+      "changeLong": 4189,
+      "changeShort": 8514,
+      "changeSpread": 12229,
+      "pctOiLong": 17.3,
+      "pctOiShort": 29.1,
+      "pctOiSpread": 14.2
+    }
+  },
+  "basket": {
+    "basketNetContracts": -514354,
+    "basketOpenInterestAll": 2782871,
+    "basketNetPctOi": -18.5,
+    "basketAbsNetPctOi": 18.5,
+    "basketDirection": "net_short",
+    "basketWeeklyDeltaNetContracts": 30757,
+    "basketScore": 93
+  }
+}

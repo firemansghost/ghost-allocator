@@ -14,15 +14,13 @@ Per-artifact deep dives: see linked runbooks at the bottom of this page.
 |---------|------|-----------|----------------|
 | **Daily** | After US market close (~6:00 PM ET) | Volatility Regime (VIX) + Market Breadth Participation | Update [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) **after** both daily artifacts align to the same last trading day |
 | **Weekly** | After ICI ETF estimated net issuance release | ETF Net Issuance Pressure | Optional reference bump if you also run the daily pass |
-| **Weekly (future)** | After CFTC TFF Friday release | CFTC TFF Positioning Proxy | **Not production-scored yet** — example only; see [CFTC_TFF_ARTIFACT_DESIGN.md](./CFTC_TFF_ARTIFACT_DESIGN.md) |
+| **Weekly** | After CFTC TFF Friday release | CFTC TFF Positioning Proxy | Production candidate validated; **not merged into GhostFlow score yet** (v0.9f / v1.0) |
 | **Monthly** | After ICI combined active/index monthly release | Active vs Index Flow + ICI Index Share Proxy | Use ICI `publishedAt`; **flows table vs assets table** |
 | **Monthly** | After new SSGA SPY US monthly fact sheet PDF | Index Concentration | PDF month-end `asOf`; PDF control date `publishedAt` |
 
 **Daily group:** VIX + Market Breadth + `GHOSTFLOW_REFERENCE_AS_OF`
 
-**Weekly group:** ETF Net Issuance only
-
-**Weekly group (future):** CFTC TFF Positioning Proxy — design/example only until v0.9e merge
+**Weekly group:** ETF Net Issuance + CFTC TFF Positioning Proxy (production candidate; not scored yet)
 
 **Monthly group (ICI):** Active/Index Flow + ICI Index Share Proxy (same release, different tables)
 
@@ -67,18 +65,21 @@ Per-artifact deep dives: see linked runbooks at the bottom of this page.
 
 ---
 
-### 3. CFTC TFF Leveraged-Funds Positioning (weekly — future, not scored)
+### 3. CFTC TFF Leveraged-Funds Positioning (weekly — validated candidate, not scored)
 
 | Item | Detail |
 |------|--------|
-| **Example file only** | [`data/ghostflow/artifacts/systematicFlowProxy.v1.example.json`](../../data/ghostflow/artifacts/systematicFlowProxy.v1.example.json) |
-| **Production file** | `systematicFlowProxy.v1.json` — **do not create until v0.9e**; not in `ghostflow:validate-artifacts` yet |
+| **Production file** | [`data/ghostflow/artifacts/systematicFlowProxy.v1.json`](../../data/ghostflow/artifacts/systematicFlowProxy.v1.json) — included in `npm run ghostflow:validate-artifacts` |
+| **Example file** | [`data/ghostflow/artifacts/systematicFlowProxy.v1.example.json`](../../data/ghostflow/artifacts/systematicFlowProxy.v1.example.json) — design reference only; unit tests |
+| **Spike helper** | `npm run ghostflow:cftc-tff-spike` (operator-only; prints latest PRE rows) |
 | **Source** | [CFTC PRE TFF Futures Only](https://publicreporting.cftc.gov/Commitments-of-Traders/TFF-Futures-Only/gpe5-46if/about_data) (`gpe5-46if`) |
-| **MVP contracts** | `13874A` E-mini S&P 500, `209742` Nasdaq Mini, `239742` Russell E-mini |
-| **VIX context** | `1170E1` optional; **`usedInScore: false`** |
-| **`asOf` rule** | CFTC Tuesday report date (`report_date_as_yyyy_mm_dd`), ISO `YYYY-MM-DD` |
-| **`publishedAt` rule** | Friday COT release date |
-| **Status** | Artifact design v0.9d complete; **not wired** to GhostFlow composite |
+| **MVP contracts** | `13874A` E-mini S&P 500, `209742` Nasdaq Mini, `239742` Russell E-mini — all `usedInScore: true` |
+| **VIX context** | `1170E1` in `vixContext`; **`usedInScore: false`** |
+| **`asOf` rule** | CFTC Tuesday report date (`report_date_as_yyyy_mm_dd`); must equal every contract `observations.reportDate` |
+| **`publishedAt` rule** | Actual Friday CFTC release date for that report (not a guessed Saturday) |
+| **Report alignment** | All score contracts + VIX must share the same `reportWeek`; validator enforces alignment |
+| **Basket fields** | Recompute with `computeBasketMetrics(scoreContracts)` — do not hand-edit basket |
+| **Status** | v0.9e production candidate validated; **not wired** to GhostFlow composite until v0.9f / v1.0 |
 | **Deep dive** | [CFTC_TFF_ARTIFACT_DESIGN.md](./CFTC_TFF_ARTIFACT_DESIGN.md) · [CFTC_TFF_FEASIBILITY.md](./CFTC_TFF_FEASIBILITY.md) |
 
 ---
