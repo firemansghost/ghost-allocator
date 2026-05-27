@@ -2,6 +2,8 @@
 
 Operator runbook for manually refreshing GhostFlow public-data artifacts. **No live fetches, no scraping, no cron, no API routes** — values are hand-edited into static JSON files committed to the repo.
 
+**Related:** [DATA_ROADMAP.md](./DATA_ROADMAP.md) — v0.9 score-input sourcing plan (docs only).
+
 Per-artifact deep dives: see linked runbooks at the bottom of this page.
 
 ---
