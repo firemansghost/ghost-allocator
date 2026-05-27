@@ -39,6 +39,7 @@
     "verify:reference-clean": "npm run check:no-reference-data && npm run check:no-reference-history && npm run check:parity-names",
     "ghostyield:validate": "tsx scripts/ghostyield/validate-candidates.ts",
     "ghostflow:validate-artifacts": "tsx scripts/ghostflow/validate-artifacts.ts",
+    "ghostflow:cftc-tff-spike": "tsx scripts/ghostflow/cftc-tff-spike.ts",
     "ghostflow:check": "npm run ghostflow:validate-artifacts && npm run test:ghostflow",
     "verify:ghostregime": "npm run build && npm run lint && npx tsx lib/ghostregime/__tests__/persistGate.test.ts && npx tsx lib/ghostregime/__tests__/diagnostics.test.ts && npx tsx lib/ghostregime/__tests__/stooqResponse.test.ts && npx tsx lib/ghostregime/__tests__/asofUrl.test.ts && npx tsx lib/ghostregime/__tests__/marketstackEod.test.ts && npx tsx lib/ghostregime/__tests__/flipWatchPressure.test.ts && npx tsx lib/ghostregime/__tests__/serveMetadata.test.ts"
   },
