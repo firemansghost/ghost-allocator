@@ -1,8 +1,9 @@
 /**
- * GhostFlow v0.9d — CFTC TFF leveraged-funds positioning proxy (design only).
- * Pure validation/mapping helpers. No production artifact load, no network, no merge.
+ * GhostFlow v0.9d+ — CFTC TFF leveraged-funds positioning proxy.
+ * Pure validation/mapping helpers. Production load available; no buildSnapshot merge yet.
  */
 
+import systematicFlowProxyArtifactJson from '@/data/ghostflow/artifacts/systematicFlowProxy.v1.json';
 import { calendarDaysAfter } from '@/lib/ghostflow/artifactFreshness';
 import { GHOSTFLOW_REFERENCE_AS_OF } from '@/lib/ghostflow/reference';
 import type {
@@ -291,6 +292,50 @@ function reconcileBasket(
   }
 }
 
+function enforceReportAlignment(
+  asOf: string,
+  scoreContracts: SystematicFlowProxyScoreContract[],
+  vixContext: SystematicFlowProxyVixContext | undefined,
+  errors: string[]
+): void {
+  if (scoreContracts.length === 0) return;
+
+  const expectedWeek = scoreContracts[0]!.observations.reportWeek;
+
+  for (const contract of scoreContracts) {
+    const { cftcContractMarketCode, usedInScore, observations } = contract;
+    if (usedInScore !== true) {
+      errors.push(`Contract ${cftcContractMarketCode} must have usedInScore true.`);
+    }
+    if (observations.reportDate !== asOf) {
+      errors.push(
+        `Contract ${cftcContractMarketCode} reportDate ${observations.reportDate} must equal artifact asOf ${asOf}.`
+      );
+    }
+    if (observations.reportWeek !== expectedWeek) {
+      errors.push(
+        `Contract ${cftcContractMarketCode} reportWeek "${observations.reportWeek}" must match shared reportWeek "${expectedWeek}".`
+      );
+    }
+  }
+
+  if (vixContext) {
+    if (vixContext.usedInScore !== false) {
+      errors.push('vixContext.usedInScore must be false.');
+    }
+    if (vixContext.observations.reportDate !== asOf) {
+      errors.push(
+        `vixContext reportDate ${vixContext.observations.reportDate} must equal artifact asOf ${asOf}.`
+      );
+    }
+    if (vixContext.observations.reportWeek !== expectedWeek) {
+      errors.push(
+        `vixContext reportWeek "${vixContext.observations.reportWeek}" must match shared reportWeek "${expectedWeek}".`
+      );
+    }
+  }
+}
+
 export function systematicFlowProxyFreshnessAnchor(artifact: SystematicFlowProxyArtifactV1): string {
   return artifact.publishedAt ?? artifact.asOf;
 }
@@ -396,6 +441,14 @@ export function validateSystematicFlowProxyArtifact(
     return { ok: false, errors };
   }
 
+  if (typeof asOf === 'string' && parseIsoDate(asOf)) {
+    enforceReportAlignment(asOf, scoreContracts, vixContext, errors);
+  }
+
+  if (errors.length > 0) {
+    return { ok: false, errors };
+  }
+
   const computed = computeBasketMetrics(scoreContracts);
   const stored: SystematicFlowProxyBasket = {
     basketNetContracts: raw.basket.basketNetContracts as number,
@@ -459,4 +512,11 @@ export function validateSystematicFlowProxyArtifact(
   warnings.push(...freshness.warnings);
 
   return { ok: true, artifact, warnings: warnings.length > 0 ? warnings : undefined };
+}
+
+export function loadSystematicFlowProxyArtifact(): SystematicFlowProxyValidation {
+  return validateSystematicFlowProxyArtifact(
+    systematicFlowProxyArtifactJson,
+    GHOSTFLOW_REFERENCE_AS_OF
+  );
 }

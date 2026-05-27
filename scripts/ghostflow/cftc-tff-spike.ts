@@ -91,8 +91,10 @@ function buildSampleUrl(codes: readonly string[]): string {
       'lev_money_positions_spread',
       'change_in_lev_money_long',
       'change_in_lev_money_short',
+      'change_in_lev_money_spread',
       'pct_of_oi_lev_money_long',
       'pct_of_oi_lev_money_short',
+      'pct_of_oi_lev_money_spread',
     ].join(',')
   );
   return `${RESOURCE_URL}?$select=${select}&$where=${where}&$order=${encodeURIComponent('report_date_as_yyyy_mm_dd DESC')}&$limit=500`;
@@ -205,7 +207,8 @@ async function runCftcTffSpike(): Promise<void> {
           `  ${formatReportDate(row.report_date_as_yyyy_mm_dd)} week ${row.yyyy_report_week_ww ?? '?'} | ` +
             `OI ${row.open_interest_all} | lev long ${row.lev_money_positions_long} short ${row.lev_money_positions_short} ` +
             `spread ${row.lev_money_positions_spread} | Δlong ${row.change_in_lev_money_long} Δshort ${row.change_in_lev_money_short} | ` +
-            `net ${net ?? 'n/a'} (${netPct ?? 'n/a'}% OI) | pct OI L/S ${row.pct_of_oi_lev_money_long}/${row.pct_of_oi_lev_money_short}`
+            `net ${net ?? 'n/a'} (${netPct ?? 'n/a'}% OI) | pct OI L/S/spread ${row.pct_of_oi_lev_money_long}/${row.pct_of_oi_lev_money_short}/${row.pct_of_oi_lev_money_spread} | ` +
+            `Δspread ${row.change_in_lev_money_spread}`
         );
       }
       console.log('');

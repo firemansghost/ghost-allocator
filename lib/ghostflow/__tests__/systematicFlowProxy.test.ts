@@ -8,11 +8,15 @@ import {
   computeDeltaNetContracts,
   computeNetContracts,
   computeNetPctOi,
+  loadSystematicFlowProxyArtifact,
   mapBasketNetPctOiToPressureScore,
   resolveBasketDirection,
   validateSystematicFlowProxyArtifact,
   evaluateSystematicFlowProxyArtifactFreshness,
 } from '../artifacts/systematicFlowProxy';
+import { GHOSTFLOW_REFERENCE_AS_OF } from '../reference';
+import productionArtifact from '@/data/ghostflow/artifacts/systematicFlowProxy.v1.json';
+import type { SystematicFlowProxyArtifactV1 } from '../artifacts/types';
 import {
   cloneExample,
   FIXTURE_SYSTEMATIC_FLOW_PROXY_EXAMPLE,
@@ -99,5 +103,38 @@ badBasket.basket.basketNetContracts = 0;
 const basketResult = validateSystematicFlowProxyArtifact(badBasket);
 assert.ok(!basketResult.ok);
 assert.ok(basketResult.errors.some((e) => e.includes('basketNetContracts')));
+
+// --- Mismatched reportDate vs asOf ---
+const badReportDate = cloneExample();
+badReportDate.scoreContracts[0].observations.reportDate = '2026-05-12';
+const reportDateResult = validateSystematicFlowProxyArtifact(badReportDate);
+assert.ok(!reportDateResult.ok);
+assert.ok(reportDateResult.errors.some((e) => e.includes('reportDate') && e.includes('asOf')));
+
+// --- Mismatched reportWeek across contracts ---
+const badReportWeek = cloneExample();
+badReportWeek.scoreContracts[1].observations.reportWeek = '2026 Report Week 19';
+const reportWeekResult = validateSystematicFlowProxyArtifact(badReportWeek);
+assert.ok(!reportWeekResult.ok);
+assert.ok(reportWeekResult.errors.some((e) => e.includes('reportWeek')));
+
+// --- Production artifact validates ---
+const production = productionArtifact as SystematicFlowProxyArtifactV1;
+const prodValid = validateSystematicFlowProxyArtifact(production, GHOSTFLOW_REFERENCE_AS_OF);
+assert.ok(prodValid.ok, prodValid.ok ? '' : prodValid.errors.join('; '));
+assert.strictEqual(production.designOnly, undefined);
+assert.ok(
+  production.source.note?.includes('Production artifact candidate') &&
+    production.source.note?.includes('not yet wired')
+);
+assert.strictEqual(production.publishedAt, '2026-05-22');
+assert.strictEqual(production.basket.basketNetPctOi, -18.5);
+assert.strictEqual(production.basket.basketScore, 93);
+
+const prodFresh = evaluateSystematicFlowProxyArtifactFreshness(production, GHOSTFLOW_REFERENCE_AS_OF);
+assert.strictEqual(prodFresh.status, 'fresh');
+
+const loaded = loadSystematicFlowProxyArtifact();
+assert.ok(loaded.ok, loaded.ok ? '' : loaded.errors.join('; '));
 
 console.log('ghostflow/systematicFlowProxy.test.ts: ok');

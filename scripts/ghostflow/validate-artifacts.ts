@@ -11,6 +11,7 @@ import { validateIndexConcentrationArtifact } from '../../lib/ghostflow/artifact
 import { validateActiveIndexFlowArtifact } from '../../lib/ghostflow/artifacts/activeIndexFlow';
 import { validateVolatilityRegimeArtifact } from '../../lib/ghostflow/artifacts/volatilityRegime';
 import { validateMarketBreadthArtifact } from '../../lib/ghostflow/artifacts/marketBreadth';
+import { validateSystematicFlowProxyArtifact } from '../../lib/ghostflow/artifacts/systematicFlowProxy';
 import { GHOSTFLOW_REFERENCE_AS_OF } from '../../lib/ghostflow/reference';
 
 const root = process.cwd();
@@ -137,6 +138,22 @@ function main(): void {
     const pct = breadthRules.artifact.observations.sp500Above50DayMaPercent;
     console.log(
       `GhostFlow rules: breadth OK (${pct}% above 50-day MA as of ${breadthRules.artifact.asOf})`
+    );
+  }
+
+  const systematicPath = join(root, 'data/ghostflow/artifacts/systematicFlowProxy.v1.json');
+  const systematicRules = validateSystematicFlowProxyArtifact(
+    loadJson(systematicPath),
+    GHOSTFLOW_REFERENCE_AS_OF
+  );
+  if (!systematicRules.ok) {
+    failed = true;
+    console.error('GhostFlow rules failed for systematic-flow-proxy:');
+    for (const err of systematicRules.errors) console.error(`  - ${err}`);
+  } else {
+    const b = systematicRules.artifact.basket;
+    console.log(
+      `GhostFlow rules: systematic-flow-proxy OK (basket ${b.basketNetPctOi}% OI → score ${b.basketScore}, asOf ${systematicRules.artifact.asOf}, published ${systematicRules.artifact.publishedAt})`
     );
   }
 
