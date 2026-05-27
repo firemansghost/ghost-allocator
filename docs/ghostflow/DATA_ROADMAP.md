@@ -140,14 +140,15 @@ GhostFlow input promotion rules (all phases):
 | **v0.9d** | CFTC TFF artifact design (memo, example JSON, pure validator/mapper, tests) | **Done** — [CFTC_TFF_ARTIFACT_DESIGN.md](./CFTC_TFF_ARTIFACT_DESIGN.md), `systematicFlowProxy.v1.example.json`, `lib/ghostflow/artifacts/systematicFlowProxy.ts` |
 | **v0.9e** | CFTC TFF production artifact candidate (validated, not scored) | **Done** — `systematicFlowProxy.v1.json`, `loadSystematicFlowProxyArtifact()`, `ghostflow:validate-artifacts`, report-alignment validator, tests |
 | **v0.9f** | CFTC TFF display-only public signal card (`systematic-flow`) | **Done** — `applySystematicFlowProxyDisplayArtifact`, UI grouping/copy, `publicSignals` +7, no score wiring |
-| **v0.9g / v1.0** | Wire CFTC proxy into `systematicStrategyPressure` + score impact vs MOCK **62** | `scoring.ts` unchanged until approved; methodology + score card PUBLIC badge |
+| **v1.0a** | CFTC TFF historical calibration study (research only) | **Done** — [CFTC_TFF_CALIBRATION_STUDY.md](./CFTC_TFF_CALIBRATION_STUDY.md), `ghostflow:cftc-tff-history-study`, `lib/ghostflow/research/cftcTffHistory.ts` |
+| **v1.0g / later** | Wire CFTC proxy into score (if approved): rename, mapping choice, PUBLIC badge | `scoring.ts` weights unchanged unless separate approval; see calibration memo |
 | **v1.0+** | Deeper options (0DTE), levered ETF rebalance, retirement-flow sources | Larger sourcing, possible licensing |
 
 ---
 
 ## Open questions
 
-1. ~~**CFTC TFF mapping (v0.9d design):**~~ **Resolved in design:** `basketScore = clamp(round(abs(basketNetPctOi) * 5), 0, 100)` on ES/NQ/RTY basket; see [CFTC_TFF_ARTIFACT_DESIGN.md](./CFTC_TFF_ARTIFACT_DESIGN.md). Score wiring deferred to **v0.9g / v1.0**.
+1. ~~**CFTC TFF mapping (v0.9d design):**~~ **Resolved in design:** `basketScore = clamp(round(abs(basketNetPctOi) * 5), 0, 100)`. **Calibration (v1.0a):** [CFTC_TFF_CALIBRATION_STUDY.md](./CFTC_TFF_CALIBRATION_STUDY.md) — current week 91.5th \|%OI\| percentile; **25%** of weeks ≥80 under mapping A. Score wiring deferred to **v1.0g+**.
 2. ~~**`modelZoneProximity` mapping (v0.9b):**~~ **Resolved:** Reuse `mapDistanceToZoneNumericValue` as-is (documented in merge + methodology).
 3. **Levered ETF scope:** Which product universe and rebalance trigger (AUM threshold, index move, calendar) define `leveredEtfRebalancePressure`?
 4. **0DTE data path:** Public aggregate vs paid vendor; whether future options pressure replaces or supplements VIX-based `optionsVolatilityAmplifier`.

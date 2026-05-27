@@ -179,5 +179,6 @@ Before wiring into `systematicStrategyPressure`:
 ## Related
 
 - [CFTC_TFF_FEASIBILITY.md](./CFTC_TFF_FEASIBILITY.md)
+- [CFTC_TFF_CALIBRATION_STUDY.md](./CFTC_TFF_CALIBRATION_STUDY.md) — v1.0a historical calibration (research only)
 - [DATA_ROADMAP.md](./DATA_ROADMAP.md)
 - Spike: `npm run ghostflow:cftc-tff-spike`
