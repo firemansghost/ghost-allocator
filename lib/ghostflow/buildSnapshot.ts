@@ -63,8 +63,18 @@ import type {
   IndexConcentrationArtifactV1,
   MarketBreadthArtifactV1,
   PassiveShareProxyArtifactV1,
+  SystematicFlowProxyArtifactV1,
   VolatilityRegimeArtifactV1,
 } from './artifacts/types';
+import {
+  buildSystematicFlowDisplayExplanation,
+  evaluateSystematicFlowProxyArtifactFreshness,
+  formatSystematicFlowDisplayValue,
+  loadSystematicFlowProxyArtifact,
+  SYSTEMATIC_FLOW_DISPLAY_CARD_CAVEAT,
+  SYSTEMATIC_FLOW_DISPLAY_SIGNAL_ID,
+  SYSTEMATIC_FLOW_DISPLAY_SIGNAL_NAME,
+} from './artifacts/systematicFlowProxy';
 import {
   buildVolRegimeExplanation,
   formatVolRegimeDisplayValue,
@@ -407,6 +417,51 @@ export function applyMarketBreadthArtifact(
   };
 }
 
+/** Display-only CFTC TFF card — does not merge into passive/structural score inputs. */
+export function applySystematicFlowProxyDisplayArtifact(
+  raw: GhostFlowRawSnapshot,
+  artifact: SystematicFlowProxyArtifactV1,
+  referenceAsOf: string
+): ApplyArtifactOutcome {
+  const freshness = evaluateSystematicFlowProxyArtifactFreshness(artifact, referenceAsOf);
+  const { basket } = artifact;
+  const numericValue = basket.basketScore;
+
+  raw.signals = replaceSignal(raw.signals, {
+    id: SYSTEMATIC_FLOW_DISPLAY_SIGNAL_ID,
+    name: SYSTEMATIC_FLOW_DISPLAY_SIGNAL_NAME,
+    value: formatSystematicFlowDisplayValue(basket),
+    numericValue,
+    explanation: buildSystematicFlowDisplayExplanation(artifact),
+    cardCaveat: SYSTEMATIC_FLOW_DISPLAY_CARD_CAVEAT,
+    dataStatus: 'public_proxy',
+    updateFrequencyTarget: 'Weekly (manual artifact)',
+    sourceName: artifact.source.name,
+    sourceUrl: artifact.source.url,
+    sourceNote: artifact.source.note,
+    dataQuality: artifact.dataQuality,
+    artifactAsOf: artifact.asOf,
+    artifactPublishedAt: artifact.publishedAt,
+    freshnessStatus: freshness.status,
+  });
+
+  const publicSignal: GhostFlowPublicSignalMeta = {
+    signalId: SYSTEMATIC_FLOW_DISPLAY_SIGNAL_ID,
+    name: SYSTEMATIC_FLOW_DISPLAY_SIGNAL_NAME,
+    sourceName: artifact.source.name,
+    sourceUrl: artifact.source.url,
+    asOf: artifact.asOf,
+    publishedAt: artifact.publishedAt,
+    freshnessStatus: freshness.status,
+  };
+
+  return {
+    raw,
+    warnings: freshness.warnings,
+    publicSignal,
+  };
+}
+
 function buildMeta(
   raw: GhostFlowRawSnapshot,
   warnings: string[],
@@ -620,6 +675,23 @@ export function buildGhostFlowSnapshot(
   } else {
     warnings.push(
       `Market Breadth Participation artifact invalid or missing (${breadthValidation.errors.join('; ')}). Using mock fallback for breadth signal and breadthWeakness.`
+    );
+  }
+
+  const systematicValidation = loadSystematicFlowProxyArtifact();
+  if (systematicValidation.ok) {
+    const systematicDisplay = applySystematicFlowProxyDisplayArtifact(
+      raw,
+      systematicValidation.artifact,
+      referenceAsOf
+    );
+    raw = systematicDisplay.raw;
+    warnings.push(...systematicDisplay.warnings);
+    if (systematicValidation.warnings) warnings.push(...systematicValidation.warnings);
+    if (systematicDisplay.publicSignal) publicSignals.push(systematicDisplay.publicSignal);
+  } else {
+    warnings.push(
+      `CFTC TFF Positioning Proxy artifact invalid or missing (${systematicValidation.errors.join('; ')}). Using mock placeholder for systematic-flow card.`
     );
   }
 

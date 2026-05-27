@@ -76,8 +76,8 @@ export function GhostFlowScoreDrivers() {
         </div>
 
         <p className="text-xs text-amber-300/85 leading-relaxed border-t border-zinc-800/80 pt-3">
-          Model-zone proximity is a derived score input from the ICI index-share proxy (same distance-to-65 logic). Three
-          Passive Pressure sub-inputs remain static mock placeholders until measured sources are added.
+          The CFTC TFF positioning proxy is now displayed as a public artifact, but systematic strategy pressure remains
+          a static MOCK score input until a future score-wiring decision.
         </p>
       </GlassCard>
     </section>

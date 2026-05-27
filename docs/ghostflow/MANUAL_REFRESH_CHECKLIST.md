@@ -79,7 +79,8 @@ Per-artifact deep dives: see linked runbooks at the bottom of this page.
 | **`publishedAt` rule** | Actual Friday CFTC release date for that report (not a guessed Saturday) |
 | **Report alignment** | All score contracts + VIX must share the same `reportWeek`; validator enforces alignment |
 | **Basket fields** | Recompute with `computeBasketMetrics(scoreContracts)` — do not hand-edit basket |
-| **Status** | v0.9e production candidate validated; **not wired** to GhostFlow composite until v0.9f / v1.0 |
+| **Dashboard** | v0.9f: shown as display-only `systematic-flow` public card when artifact validates |
+| **Status** | Validated production artifact; **not wired** into Research Composite (`systematicStrategyPressure` remains MOCK **62**) until v0.9g / v1.0 |
 | **Deep dive** | [CFTC_TFF_ARTIFACT_DESIGN.md](./CFTC_TFF_ARTIFACT_DESIGN.md) · [CFTC_TFF_FEASIBILITY.md](./CFTC_TFF_FEASIBILITY.md) |
 
 ---
