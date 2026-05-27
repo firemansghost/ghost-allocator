@@ -193,7 +193,9 @@ Wiring is **moderate** on the composite but **large** on the sub-input display (
 
 ---
 
-## 8. Recommendation (future v1.0g+)
+## 8. Recommendation (future v1.0c)
+
+> **v1.0b decision:** Formal policy is in [CFTC_TFF_MAPPING_DECISION.md](./CFTC_TFF_MAPPING_DECISION.md) (formalizes this study’s findings; this memo remains supporting evidence). **Display card keeps Mapping A.** Score remains **display-only**. If wiring is product-approved in **v1.0c**, preferred score candidate is **Mapping C** (`scoreInput = min(80, basketScore)`) **after rename** — not under “Systematic strategy pressure.”
 
 **Default: remain display-only** until product explicitly approves score wiring with renamed copy and a chosen mapping policy.
 
@@ -238,6 +240,7 @@ Research JSON is **not** committed by default. Use `--out` locally for review on
 
 ## Related documents
 
+- [CFTC_TFF_MAPPING_DECISION.md](./CFTC_TFF_MAPPING_DECISION.md) — v1.0b mapping/product decision  
 - [DATA_ROADMAP.md](./DATA_ROADMAP.md) — phase tracking  
 - [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) — weekly artifact refresh  
 - [CFTC_TFF_ARTIFACT_DESIGN.md](./CFTC_TFF_ARTIFACT_DESIGN.md) — artifact schema and mapping definition
