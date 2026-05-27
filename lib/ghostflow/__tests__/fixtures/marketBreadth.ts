@@ -42,6 +42,6 @@ export const FIXTURE_MARKET_BREADTH_MERGE_EXPECTED = {
 
 /** Hexa-artifact fixture at reference 2026-05-21. */
 export const FIXTURE_HEXA_MERGE_EXPECTED = {
-  compositeScore: 58,
-  structuralFragility: 61,
+  compositeScore: 61,
+  structuralFragility: 67,
 } as const;

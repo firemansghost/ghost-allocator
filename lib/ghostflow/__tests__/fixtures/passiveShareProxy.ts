@@ -34,12 +34,14 @@ export const FIXTURE_PASSIVE_SHARE_MERGE_EXPECTED = {
   indexAssetSharePercent: 63.2,
   structuralProxy: 63,
   distancePp: 1.8,
+  /** mapDistanceToZoneNumericValue(1.8) — same as distance-65 signal numericValue. */
+  modelZoneProximity: 86,
   /** Passive-share only merge (mock structural inputs otherwise). */
-  passiveShareOnlyStructuralFragility: 62,
+  passiveShareOnlyStructuralFragility: 67,
 } as const;
 
 /** Penta-artifact fixture at reference 2026-05-21. */
 export const FIXTURE_PENTA_MERGE_EXPECTED = {
-  compositeScore: 60,
-  structuralFragility: 65,
+  compositeScore: 63,
+  structuralFragility: 70,
 } as const;

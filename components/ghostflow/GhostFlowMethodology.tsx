@@ -554,8 +554,8 @@ export function GhostFlowMethodology({
         <p className="text-sm text-zinc-400 leading-relaxed">
           The <strong className="text-zinc-300">65% zone</strong> is drawn from published passive-flow research as an
           assumption-sensitive stress zone. The public ICI fund/ETF index share proxy supplies the level display when
-            available; model-zone proximity sub-input remains mock in v0.7. This is not a market-wide passive-share
-          estimate.
+            available; model-zone proximity sub-input is derived from the same distance-to-65 mapping when the ICI
+          artifact is present (v0.9b). This is not a market-wide passive-share estimate.
         </p>
         <p className="mt-2 text-xs text-amber-300/90">
           Current ICI fund/ETF index share: {data.passiveSharePercent}% ({data.passiveShareBand.rangeLabel},{' '}
