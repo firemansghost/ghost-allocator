@@ -180,5 +180,6 @@ Before wiring into `systematicStrategyPressure`:
 
 - [CFTC_TFF_FEASIBILITY.md](./CFTC_TFF_FEASIBILITY.md)
 - [CFTC_TFF_CALIBRATION_STUDY.md](./CFTC_TFF_CALIBRATION_STUDY.md) — v1.0a historical calibration (research only)
+- [CFTC_TFF_MAPPING_DECISION.md](./CFTC_TFF_MAPPING_DECISION.md) — v1.0b mapping/score-wiring policy (decision record only)
 - [DATA_ROADMAP.md](./DATA_ROADMAP.md)
 - Spike: `npm run ghostflow:cftc-tff-spike`
