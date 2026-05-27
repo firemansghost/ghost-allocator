@@ -38,11 +38,23 @@ function formatReportDate(raw: string | undefined): string {
   return raw.slice(0, 10);
 }
 
+/** Fetch with timeout (AbortController — broader Node/runtime support than AbortSignal.timeout). */
+async function fetchWithTimeout(url: string, init: RequestInit, ms: number): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function fetchJson<T>(url: string, label: string): Promise<T> {
-  const res = await fetch(url, {
-    headers: { Accept: 'application/json' },
-    signal: AbortSignal.timeout(60_000),
-  });
+  const res = await fetchWithTimeout(
+    url,
+    { headers: { Accept: 'application/json' } },
+    60_000
+  );
   if (!res.ok) {
     const body = await res.text().catch(() => '');
     throw new Error(`${label}: HTTP ${res.status} ${res.statusText}${body ? ` — ${body.slice(0, 200)}` : ''}`);
@@ -115,7 +127,7 @@ function printDiagnostics(err: unknown): void {
   process.exitCode = 1;
 }
 
-async function main(): Promise<void> {
+async function runCftcTffSpike(): Promise<void> {
   console.log('GhostFlow v0.9c — CFTC TFF feasibility spike');
   console.log('Dataset: Traders in Financial Futures (TFF) — Futures Only');
   console.log(`Endpoint: ${RESOURCE_URL}`);
@@ -205,4 +217,6 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch(printDiagnostics);
+runCftcTffSpike().catch(printDiagnostics);
+
+export {};
