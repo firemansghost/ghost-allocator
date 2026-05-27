@@ -1,20 +1,21 @@
 /**
- * GhostFlow display helper: count public vs mock score sub-inputs (no scoring impact).
+ * GhostFlow display helper: count public / derived / mock score sub-inputs (no scoring impact).
  */
 
-import type { GhostFlowDashboardData } from './types';
+import { countScoreInputMixDetailed } from './scoreInputClassification';
 
-const TOTAL_SCORE_SUB_INPUTS = 10;
-
-export function countScoreInputMix(data: Pick<
-  GhostFlowDashboardData,
-  'publicPassiveInputKeys' | 'publicStructuralInputKeys'
->): { publicCount: number; mockCount: number; total: number } {
-  const publicCount =
-    (data.publicPassiveInputKeys?.length ?? 0) + (data.publicStructuralInputKeys?.length ?? 0);
+export function countScoreInputMix(passiveShareProxySource?: 'public' | 'mock_fallback'): {
+  publicCount: number;
+  derivedCount: number;
+  mockCount: number;
+  total: number;
+} {
+  const { publicArtifactCount, derivedScoreInputCount, mockScoreInputCount } =
+    countScoreInputMixDetailed(passiveShareProxySource);
   return {
-    publicCount,
-    mockCount: TOTAL_SCORE_SUB_INPUTS - publicCount,
-    total: TOTAL_SCORE_SUB_INPUTS,
+    publicCount: publicArtifactCount,
+    derivedCount: derivedScoreInputCount,
+    mockCount: mockScoreInputCount,
+    total: 10,
   };
 }

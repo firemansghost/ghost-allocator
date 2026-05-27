@@ -7,10 +7,14 @@ import { scoreGhostFlowSnapshot } from '../scoring';
 import { MOCK_GHOSTFLOW_SNAPSHOT } from '@/data/ghostflow/mockGhostflowSnapshot';
 import { buildGhostFlowSnapshotWithArtifacts } from '../buildSnapshot';
 import {
+  classifyStructuralScoreInput,
+} from '../scoreInputClassification';
+import {
   computeIndexAssetSharePercent,
   deriveDistanceToModelZone,
   formatDistanceToModelZoneDisplay,
   loadPassiveShareProxyArtifact,
+  mapDistanceToZoneNumericValue,
   mapIndexSharePercentToStructuralProxy,
   evaluatePassiveShareProxyArtifactFreshness,
   validatePassiveShareProxyArtifact,
@@ -145,8 +149,22 @@ assert.strictEqual(
 );
 assert.strictEqual(
   passiveOnly.raw.structuralFragility.modelZoneProximity,
-  MOCK_GHOSTFLOW_SNAPSHOT.structuralFragility.modelZoneProximity
+  mapDistanceToZoneNumericValue(
+    deriveDistanceToModelZone(FIXTURE_PASSIVE_SHARE_MERGE_EXPECTED.indexAssetSharePercent)
+  )
 );
+assert.strictEqual(
+  passiveOnly.raw.structuralFragility.modelZoneProximity,
+  FIXTURE_PASSIVE_SHARE_MERGE_EXPECTED.modelZoneProximity
+);
+
+const modelZoneMeta = classifyStructuralScoreInput(
+  'modelZoneProximity',
+  passiveOnly.meta.publicStructuralInputKeys,
+  passiveOnly.meta.passiveShareProxySource
+);
+assert.strictEqual(modelZoneMeta.badge, 'DERIVED');
+assert.ok(modelZoneMeta.derivedFootnote?.includes('distance-to-65'));
 
 const passiveSignal = passiveOnly.raw.signals.find((s) => s.id === 'passive-share');
 assert.ok(passiveSignal);

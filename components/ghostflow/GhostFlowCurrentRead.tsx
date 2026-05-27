@@ -10,7 +10,7 @@ export function GhostFlowCurrentRead({
   passiveShareProxySource?: 'public' | 'mock_fallback';
 }) {
   const { score, passiveSharePercent, signals } = data;
-  const { publicCount, mockCount } = countScoreInputMix(data);
+  const { publicCount, derivedCount, mockCount } = countScoreInputMix(passiveShareProxySource);
   const distanceSignal = signals.find((s) => s.id === 'distance-65');
 
   const iciLine =
@@ -24,8 +24,9 @@ export function GhostFlowCurrentRead({
       <div className="mt-3 space-y-2 text-sm text-zinc-300 leading-relaxed max-w-4xl">
         <p>
           GhostFlow research composite reads <strong className="text-zinc-100">{score.score}</strong> ·{' '}
-          <strong className="text-zinc-100">{score.bandLabel}</strong> ({publicCount} public artifact-driven and{' '}
-          {mockCount} static mock score inputs).
+          <strong className="text-zinc-100">{score.bandLabel}</strong> ({publicCount} public artifact-driven
+          {derivedCount > 0 ? `, ${derivedCount} derived score input` : ''}, and {mockCount} static mock score
+          inputs).
         </p>
         {distanceSignal && passiveShareProxySource === 'public' && (
           <p className="text-zinc-400">

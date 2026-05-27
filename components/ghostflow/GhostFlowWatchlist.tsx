@@ -17,8 +17,9 @@ export function GhostFlowWatchlist() {
       </h2>
       <GlassCard className="p-4 sm:p-6">
         <p className="text-sm text-zinc-400 leading-relaxed mb-4">
-          GhostFlow v0.8 uses six manual public artifacts and four static mock score inputs in the research composite,
-          plus two PLACEHOLDER signal cards not yet in the score. Future work will replace mock score inputs and
+          GhostFlow v0.9b uses six manual public artifacts, one derived score input (model-zone proximity from ICI
+          index share), and three static mock score inputs in the research composite, plus two PLACEHOLDER signal cards
+          not yet in the score. Future work will replace remaining mock score inputs and
           placeholder cards one at a time, with source labels, freshness checks, and no proprietary assumptions.
         </p>
         <ul className="grid gap-2 sm:grid-cols-2 text-sm text-zinc-300">

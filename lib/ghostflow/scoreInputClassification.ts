@@ -15,9 +15,12 @@ export type ScoreInputKind = 'passive' | 'structural';
 export interface ScoreInputRowMeta {
   badge: ScoreInputBadge;
   mockFootnote?: string;
+  derivedFootnote?: string;
 }
 
 const MOCK_FOOTNOTE = 'Static mock input included in research composite';
+const MODEL_ZONE_DERIVED_FOOTNOTE =
+  'Derived from ICI index-share distance-to-65 logic (same mapping as distance-to-65 context)';
 
 export function classifyPassiveScoreInput(
   key: keyof PassivePressureInputs,
@@ -31,12 +34,30 @@ export function classifyPassiveScoreInput(
 
 export function classifyStructuralScoreInput(
   key: keyof StructuralFragilityInputs,
-  publicKeys: Array<keyof StructuralFragilityInputs> | undefined
+  publicKeys: Array<keyof StructuralFragilityInputs> | undefined,
+  passiveShareProxySource?: 'public' | 'mock_fallback'
 ): ScoreInputRowMeta {
+  if (
+    key === 'modelZoneProximity' &&
+    passiveShareProxySource === 'public'
+  ) {
+    return { badge: 'DERIVED', derivedFootnote: MODEL_ZONE_DERIVED_FOOTNOTE };
+  }
   if (publicKeys?.includes(key)) {
     return { badge: 'PUBLIC' };
   }
   return { badge: 'MOCK', mockFootnote: MOCK_FOOTNOTE };
+}
+
+export function countScoreInputMixDetailed(passiveShareProxySource?: 'public' | 'mock_fallback'): {
+  publicArtifactCount: number;
+  derivedScoreInputCount: number;
+  mockScoreInputCount: number;
+} {
+  const publicArtifactCount = 6;
+  const derivedScoreInputCount = passiveShareProxySource === 'public' ? 1 : 0;
+  const mockScoreInputCount = 10 - publicArtifactCount - derivedScoreInputCount;
+  return { publicArtifactCount, derivedScoreInputCount, mockScoreInputCount };
 }
 
 export function scoreInputBadgeLabel(badge: ScoreInputBadge): string {
@@ -50,11 +71,9 @@ export function signalCardInputBadge(variant: 'public' | 'derived' | 'mock'): Sc
   return 'PUBLIC';
 }
 
-export function countMockScoreInputs(data: Pick<
-  GhostFlowDashboardData,
-  'publicPassiveInputKeys' | 'publicStructuralInputKeys'
->): number {
-  const publicCount =
-    (data.publicPassiveInputKeys?.length ?? 0) + (data.publicStructuralInputKeys?.length ?? 0);
-  return 10 - publicCount;
+export function countMockScoreInputs(
+  data: Pick<GhostFlowDashboardData, 'publicPassiveInputKeys' | 'publicStructuralInputKeys'>,
+  passiveShareProxySource?: 'public' | 'mock_fallback'
+): number {
+  return countScoreInputMixDetailed(passiveShareProxySource).mockScoreInputCount;
 }

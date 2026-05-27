@@ -297,9 +297,11 @@ export function applyPassiveShareProxyArtifact(
   const indexSharePercent = artifact.observations.indexAssetSharePercent;
   const structuralProxy = mapIndexSharePercentToStructuralProxy(indexSharePercent);
   const distancePp = deriveDistanceToModelZone(indexSharePercent);
+  const modelZoneProximity = mapDistanceToZoneNumericValue(distancePp);
 
   raw.passiveSharePercent = indexSharePercent;
   raw.structuralFragility.passiveShareProxy = structuralProxy;
+  raw.structuralFragility.modelZoneProximity = modelZoneProximity;
   raw.asOf = bumpAsOf(raw.asOf, artifact.asOf);
 
   raw.signals = replaceSignal(raw.signals, {

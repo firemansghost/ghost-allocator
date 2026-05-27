@@ -74,14 +74,15 @@ export function GhostFlowDashboard() {
 
       <GhostFlowCurrentRead data={data} passiveShareProxySource={meta.passiveShareProxySource} />
 
-      <GhostFlowScoreCard data={data} />
+      <GhostFlowScoreCard data={data} passiveShareProxySource={meta.passiveShareProxySource} />
 
       <GhostFlowFreshnessSummary publicSignals={meta.publicSignals} />
 
       <GlassCard className="p-4 sm:p-5 border-amber-500/20 bg-amber-950/15">
         <p className="text-sm text-zinc-200 leading-relaxed max-w-4xl">
           <strong className="text-amber-200/95">Disclaimer:</strong> GhostFlow is an education and research preview
-          only—six manual public artifacts plus four static mock score inputs in the research composite. Not financial
+          only—six manual public artifacts, one derived score input (model-zone proximity from ICI index share), and
+          three static mock score inputs in the research composite. Not financial
           advice.{' '}
           <strong className="text-amber-200/90">Not a market-wide passive-share estimate.</strong>{' '}
           <strong className="text-amber-200/90">Not a crash predictor.</strong> Breadth is participation context, not

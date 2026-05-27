@@ -3,9 +3,14 @@ import { GHOSTFLOW_SCORE_BANDS } from '@/lib/ghostflow/scoring';
 import {
   classifyPassiveScoreInput,
   classifyStructuralScoreInput,
+  countScoreInputMixDetailed,
 } from '@/lib/ghostflow/scoreInputClassification';
 import type { GhostFlowDashboardData } from '@/lib/ghostflow/types';
-import { GhostFlowTrustBadges } from './GhostFlowTrustBadges';
+import {
+  GhostFlowTrustBadges,
+  GHOSTFLOW_COVERAGE_BADGES_MIXED,
+  GHOSTFLOW_COVERAGE_SUMMARY,
+} from './GhostFlowTrustBadges';
 import { ScoreInputBadgePill } from './ScoreInputBadge';
 
 const PASSIVE_LABELS: { key: keyof GhostFlowDashboardData['passivePressureInputs']; label: string }[] = [
@@ -24,7 +29,13 @@ const STRUCTURAL_LABELS: { key: keyof GhostFlowDashboardData['structuralFragilit
   { key: 'modelZoneProximity', label: 'Model-zone proximity' },
 ];
 
-export function GhostFlowScoreCard({ data }: { data: GhostFlowDashboardData }) {
+export function GhostFlowScoreCard({
+  data,
+  passiveShareProxySource,
+}: {
+  data: GhostFlowDashboardData;
+  passiveShareProxySource?: 'public' | 'mock_fallback';
+}) {
   const {
     score,
     passivePressureInputs,
@@ -33,9 +44,11 @@ export function GhostFlowScoreCard({ data }: { data: GhostFlowDashboardData }) {
     publicStructuralInputKeys,
   } = data;
   const isMixed = data.dataMix === 'mixed';
+  const { derivedScoreInputCount, mockScoreInputCount } =
+    countScoreInputMixDetailed(passiveShareProxySource);
   const publicPassiveCount = publicPassiveInputKeys?.length ?? 0;
   const publicStructuralCount = publicStructuralInputKeys?.length ?? 0;
-  const mockScoreInputCount = 10 - publicPassiveCount - publicStructuralCount;
+  const hasDerivedModelZone = passiveShareProxySource === 'public';
 
   return (
     <section className="space-y-4" aria-labelledby="ghostflow-score-heading">
@@ -43,8 +56,13 @@ export function GhostFlowScoreCard({ data }: { data: GhostFlowDashboardData }) {
         <h2 id="ghostflow-score-heading" className="text-xs font-semibold uppercase tracking-wide text-amber-400/90">
           GhostFlow Research Composite
         </h2>
-        <div className="mt-2">
-          <GhostFlowTrustBadges />
+        <div className="mt-2 space-y-1.5">
+          {hasDerivedModelZone && (
+            <p className="text-[11px] font-medium text-zinc-400 tracking-wide">{GHOSTFLOW_COVERAGE_SUMMARY}</p>
+          )}
+          <GhostFlowTrustBadges
+            badges={hasDerivedModelZone ? GHOSTFLOW_COVERAGE_BADGES_MIXED : undefined}
+          />
         </div>
         <div className="mt-3 flex flex-wrap items-end gap-4">
           <div className="text-5xl sm:text-6xl font-semibold tabular-nums text-zinc-100">{score.score}</div>
@@ -60,12 +78,21 @@ export function GhostFlowScoreCard({ data }: { data: GhostFlowDashboardData }) {
           Research composite = 50% Passive Pressure ({score.subScores.passivePressure}) + 50% Structural Fragility (
           {score.subScores.structuralFragility}). Not a forecast. Not financial advice.
         </p>
-        {isMixed && (
+        {isMixed && hasDerivedModelZone && (
           <p className="mt-2 text-xs text-amber-300/85">
-            {publicPassiveCount} public Passive Pressure sub-input{publicPassiveCount === 1 ? '' : 's'} and{' '}
-            {publicStructuralCount} public Structural Fragility sub-input{publicStructuralCount === 1 ? '' : 's'} feed
-            this composite; {mockScoreInputCount} static mock input{mockScoreInputCount === 1 ? '' : 's'} remain
-            illustrative placeholders in the research composite.
+            {publicPassiveCount} public Passive Pressure sub-input{publicPassiveCount === 1 ? '' : 's'},{' '}
+            {publicStructuralCount} public Structural Fragility sub-input{publicStructuralCount === 1 ? '' : 's'},
+            and {derivedScoreInputCount} derived Structural sub-input (model-zone proximity from ICI index share)
+            feed this composite; {mockScoreInputCount} static mock input
+            {mockScoreInputCount === 1 ? '' : 's'} remain illustrative placeholders.
+          </p>
+        )}
+        {isMixed && !hasDerivedModelZone && (
+          <p className="mt-2 text-xs text-amber-300/85">
+            {publicPassiveCount + publicStructuralCount} public sub-input
+            {publicPassiveCount + publicStructuralCount === 1 ? '' : 's'} feed this composite;{' '}
+            {mockScoreInputCount} static mock input{mockScoreInputCount === 1 ? '' : 's'} remain illustrative
+            placeholders.
           </p>
         )}
         <div className="mt-4 pt-4 border-t border-zinc-800/80">
@@ -121,8 +148,8 @@ export function GhostFlowScoreCard({ data }: { data: GhostFlowDashboardData }) {
           </ul>
           {mockScoreInputCount > 0 && publicPassiveCount < PASSIVE_LABELS.length && (
             <p className="mt-2 text-[10px] text-zinc-600 leading-relaxed">
-              Static mock inputs in this pillar are not current measured readings; they are included only in the research
-              composite preview.
+              Static mock inputs in this pillar are not current measured readings; they are included only in the
+              research composite preview.
             </p>
           )}
         </GlassCard>
@@ -137,8 +164,13 @@ export function GhostFlowScoreCard({ data }: { data: GhostFlowDashboardData }) {
           </p>
           <ul className="mt-3 space-y-2 text-[11px] text-zinc-500">
             {STRUCTURAL_LABELS.map(({ key, label }) => {
-              const meta = classifyStructuralScoreInput(key, publicStructuralInputKeys);
+              const meta = classifyStructuralScoreInput(
+                key,
+                publicStructuralInputKeys,
+                passiveShareProxySource
+              );
               const isPublic = meta.badge === 'PUBLIC';
+              const isDerived = meta.badge === 'DERIVED';
               return (
                 <li key={key} className="flex justify-between gap-2 items-start">
                   <span className="min-w-0">
@@ -149,13 +181,18 @@ export function GhostFlowScoreCard({ data }: { data: GhostFlowDashboardData }) {
                     {meta.mockFootnote && (
                       <span className="block mt-0.5 text-[10px] text-zinc-600 leading-snug">{meta.mockFootnote}</span>
                     )}
+                    {meta.derivedFootnote && (
+                      <span className="block mt-0.5 text-[10px] text-zinc-600 leading-snug">{meta.derivedFootnote}</span>
+                    )}
                   </span>
                   <span
                     className="tabular-nums text-zinc-400 shrink-0"
                     title={
                       isPublic
                         ? 'Public manual artifact 0–100'
-                        : 'Illustrative 0–100 placeholder, not a current measured reading'
+                        : isDerived
+                          ? 'Derived 0–100 from ICI index-share distance-to-65 mapping'
+                          : 'Illustrative 0–100 placeholder, not a current measured reading'
                     }
                   >
                     {structuralFragilityInputs[key]}
@@ -164,11 +201,18 @@ export function GhostFlowScoreCard({ data }: { data: GhostFlowDashboardData }) {
               );
             })}
           </ul>
-          {publicStructuralCount < STRUCTURAL_LABELS.length && (
+          {hasDerivedModelZone ? (
             <p className="mt-2 text-[10px] text-zinc-600 leading-relaxed">
-              Model-zone proximity is a static mock sub-input in v0.8; distance-to-65 context is shown separately as
-              derived from the ICI index-share artifact.
+              Model-zone proximity is derived from the same ICI index-share distance-to-65 mapping as the context card
+              below; remaining static mock structural inputs are not current measured readings.
             </p>
+          ) : (
+            publicStructuralCount < STRUCTURAL_LABELS.length && (
+              <p className="mt-2 text-[10px] text-zinc-600 leading-relaxed">
+                Static mock structural inputs are not current measured readings; they are included only in the research
+                composite preview.
+              </p>
+            )
           )}
         </GlassCard>
       </div>
