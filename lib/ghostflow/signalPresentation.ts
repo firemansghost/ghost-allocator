@@ -3,7 +3,7 @@
  */
 
 import { signalStatusDisplayLabel } from './scoring';
-import type { GhostFlowSignalStatus, ScoredGhostFlowSignal } from './types';
+import type { GhostFlowDataStatus, GhostFlowSignalStatus, ScoredGhostFlowSignal } from './types';
 
 export type SignalCardVariant = 'public' | 'derived' | 'mock';
 
@@ -14,11 +14,12 @@ export const PUBLIC_ARTIFACT_SIGNAL_IDS = [
   'active-index-flow',
   'concentration',
   'breadth',
+  'systematic-flow',
 ] as const;
 
 export const DERIVED_SIGNAL_IDS = ['distance-65'] as const;
 
-export const MOCK_SIGNAL_IDS = ['odte-options', 'systematic-flow'] as const;
+export const MOCK_SIGNAL_IDS = ['odte-options'] as const;
 
 export interface GroupedSignals {
   publicArtifacts: ScoredGhostFlowSignal[];
@@ -28,17 +29,25 @@ export interface GroupedSignals {
 
 export function groupSignalsByPresentation(signals: ScoredGhostFlowSignal[]): GroupedSignals {
   const byId = new Map(signals.map((s) => [s.id, s]));
-  return {
-    publicArtifacts: PUBLIC_ARTIFACT_SIGNAL_IDS.map((id) => byId.get(id)).filter(
-      (s): s is ScoredGhostFlowSignal => s != null
-    ),
-    derivedContext: DERIVED_SIGNAL_IDS.map((id) => byId.get(id)).filter(
-      (s): s is ScoredGhostFlowSignal => s != null
-    ),
-    mockProxies: MOCK_SIGNAL_IDS.map((id) => byId.get(id)).filter(
-      (s): s is ScoredGhostFlowSignal => s != null
-    ),
-  };
+
+  const publicArtifacts = PUBLIC_ARTIFACT_SIGNAL_IDS.map((id) => byId.get(id)).filter(
+    (s): s is ScoredGhostFlowSignal => s != null && s.dataStatus === 'public_proxy'
+  );
+
+  const derivedContext = DERIVED_SIGNAL_IDS.map((id) => byId.get(id)).filter(
+    (s): s is ScoredGhostFlowSignal => s != null
+  );
+
+  const mockFromIds = MOCK_SIGNAL_IDS.map((id) => byId.get(id)).filter(
+    (s): s is ScoredGhostFlowSignal => s != null
+  );
+  const systematicFallback = byId.get('systematic-flow');
+  const mockProxies = [
+    ...mockFromIds,
+    ...(systematicFallback?.dataStatus === 'mock' ? [systematicFallback] : []),
+  ];
+
+  return { publicArtifacts, derivedContext, mockProxies };
 }
 
 function proxyLevelLabel(status: GhostFlowSignalStatus): string {
@@ -48,17 +57,27 @@ function proxyLevelLabel(status: GhostFlowSignalStatus): string {
 }
 
 /** Card title override for placeholder signals (UI only; does not change scoring). */
-export function signalCardDisplayName(sig: { id: string; name: string }): string {
-  if (sig.id === 'systematic-flow') return 'Future Systematic Flow Feed';
+export function signalCardDisplayName(sig: {
+  id: string;
+  name: string;
+  dataStatus: GhostFlowDataStatus;
+}): string {
+  if (sig.id === 'systematic-flow' && sig.dataStatus === 'mock') {
+    return 'Future Systematic Flow Feed';
+  }
   return sig.name;
 }
 
 /** Card body override for placeholder signals (UI only; does not change scoring). */
-export function signalCardExplanation(sig: { id: string; explanation: string }): string {
-  if (sig.id === 'systematic-flow') {
+export function signalCardExplanation(sig: {
+  id: string;
+  explanation: string;
+  dataStatus: GhostFlowDataStatus;
+}): string {
+  if (sig.id === 'systematic-flow' && sig.dataStatus === 'mock') {
     return (
-      'Future signal slot for a defensible positioning or systematic-pressure proxy. Current CFTC TFF work remains ' +
-      'artifact design only and is not included in this card or score.'
+      'Future signal slot for a defensible positioning or systematic-pressure proxy. Not a current measured ' +
+      'reading and not included in the Research Composite.'
     );
   }
   return sig.explanation;

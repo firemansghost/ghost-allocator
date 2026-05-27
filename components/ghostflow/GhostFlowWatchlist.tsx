@@ -17,10 +17,10 @@ export function GhostFlowWatchlist() {
       </h2>
       <GlassCard className="p-4 sm:p-6">
         <p className="text-sm text-zinc-400 leading-relaxed mb-4">
-          GhostFlow v0.9b uses six manual public artifacts, one derived score input (model-zone proximity from ICI
-          index share), and three static mock score inputs in the research composite, plus two PLACEHOLDER signal cards
-          not yet in the score. Future work will replace remaining mock score inputs and
-          placeholder cards one at a time, with source labels, freshness checks, and no proprietary assumptions.
+          GhostFlow uses six public score artifacts, one derived score input (model-zone proximity from ICI index
+          share), one display-only CFTC TFF public artifact, and three static mock score inputs in the research
+          composite, plus one PLACEHOLDER signal card (0DTE) not yet in the score. Future work may wire the CFTC
+          positioning proxy into systematic strategy pressure and replace remaining mock score inputs one at a time.
         </p>
         <ul className="grid gap-2 sm:grid-cols-2 text-sm text-zinc-300">
           {WATCH_TARGETS.map((item) => (

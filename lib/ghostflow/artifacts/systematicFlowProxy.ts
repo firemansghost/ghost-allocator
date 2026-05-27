@@ -47,6 +47,45 @@ const FRESHNESS_CAUTION_DAYS = 17;
 export const SYSTEMATIC_FLOW_PROXY_CARD_CAVEAT =
   'Leveraged-funds futures positioning proxy (CFTC TFF), not CTA/vol-control/systematic flow or measured market flow.';
 
+/** GhostFlow dashboard card id (display-only v0.9f; distinct from artifact signalId). */
+export const SYSTEMATIC_FLOW_DISPLAY_SIGNAL_ID = 'systematic-flow' as const;
+
+export const SYSTEMATIC_FLOW_DISPLAY_SIGNAL_NAME =
+  'CFTC Leveraged-Funds Positioning Proxy' as const;
+
+export const SYSTEMATIC_FLOW_DISPLAY_CARD_CAVEAT =
+  'Display-only CFTC TFF positioning proxy; not included in the Research Composite.';
+
+export function formatBasketDirectionLabel(
+  direction: SystematicFlowProxyBasketDirection
+): string {
+  switch (direction) {
+    case 'net_long':
+      return 'Net long';
+    case 'net_short':
+      return 'Net short';
+    case 'flat':
+      return 'Flat';
+  }
+}
+
+export function formatSystematicFlowDisplayValue(basket: SystematicFlowProxyBasket): string {
+  const pct = Math.abs(basket.basketNetPctOi).toFixed(1);
+  return `${formatBasketDirectionLabel(basket.basketDirection)} ${pct}% OI · pressure ${basket.basketScore}`;
+}
+
+export function buildSystematicFlowDisplayExplanation(artifact: SystematicFlowProxyArtifactV1): string {
+  const { basket } = artifact;
+  const direction = formatBasketDirectionLabel(basket.basketDirection).toLowerCase();
+  const pct = Math.abs(basket.basketNetPctOi).toFixed(1);
+  return (
+    `CFTC TFF leveraged-funds futures positioning proxy: ES/NQ/RTY basket is ${direction} ` +
+    `(${pct}% of combined open interest, mapped pressure ${basket.basketScore}). ` +
+    `Positioning is not measured market flow and is not a CTA, vol-control, or risk-parity read. ` +
+    `Display-only — not wired into the Research Composite.`
+  );
+}
+
 function clampInt(n: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, Math.round(n)));
 }

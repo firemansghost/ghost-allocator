@@ -88,6 +88,7 @@ function dataQualityLabel(q: string | undefined): string {
 
 function artifactDateLabel(signalId: string): string {
   if (signalId === 'etf-flow') return 'Week ended';
+  if (signalId === 'systematic-flow') return 'Positions as of';
   if (
     signalId === 'active-index-flow' ||
     signalId === 'concentration' ||
@@ -248,8 +249,8 @@ export function GhostFlowSignalGrid({
           Market-structure signals
         </h2>
         <p className="mt-2 text-xs text-zinc-500 leading-relaxed max-w-3xl">
-          Six manual public artifacts and one derived score input feed the research composite. The Distance-to-65 card is
-          shown as context; two PLACEHOLDER cards are not in the score.
+          Six public artifacts and one derived score input feed the research composite. One additional CFTC TFF public
+          artifact is display-only; the 0DTE PLACEHOLDER card is not in the score.
         </p>
       </div>
 
@@ -271,7 +272,7 @@ export function GhostFlowSignalGrid({
 
       <SignalSection
         title="Placeholder signal cards"
-        intro="PLACEHOLDER cards for future signals (0DTE options, systematic flow). Not included in the research composite; not current measured readings."
+        intro="PLACEHOLDER card for a future 0DTE options signal. Not included in the research composite; not a current measured reading."
         signals={grouped.mockProxies}
         variant="mock"
         dataMix={dataMix}
