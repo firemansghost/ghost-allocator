@@ -20,6 +20,10 @@ export type PassiveShareProxySeriesDefinition = 'ici_domestic_equity_index_asset
 
 export type MarketBreadthSeriesDefinition = 'sp500_percent_above_50_day_ma';
 
+export type SystematicFlowProxySeriesDefinition = 'cftc_tff_futures_only_leveraged_funds_equity_basket';
+
+export type SystematicFlowProxyBasketDirection = 'net_long' | 'net_short' | 'flat';
+
 export interface ArtifactSource {
   name: string;
   url?: string;
@@ -246,6 +250,76 @@ export interface MarketBreadthValidationError {
 }
 
 export type MarketBreadthValidation = MarketBreadthValidationResult | MarketBreadthValidationError;
+
+export interface SystematicFlowProxyContractObservation {
+  reportDate: string;
+  reportWeek: string;
+  openInterestAll: number;
+  leveragedFundsLong: number;
+  leveragedFundsShort: number;
+  leveragedFundsSpread: number;
+  changeLong: number;
+  changeShort: number;
+  changeSpread: number;
+  pctOiLong: number;
+  pctOiShort: number;
+  pctOiSpread: number;
+}
+
+export interface SystematicFlowProxyScoreContract {
+  cftcContractMarketCode: string;
+  contractMarketName: string;
+  usedInScore: true;
+  observations: SystematicFlowProxyContractObservation;
+}
+
+export interface SystematicFlowProxyVixContext {
+  cftcContractMarketCode: string;
+  contractMarketName: string;
+  usedInScore: false;
+  observations: SystematicFlowProxyContractObservation;
+}
+
+export interface SystematicFlowProxyBasket {
+  basketNetContracts: number;
+  basketOpenInterestAll: number;
+  basketNetPctOi: number;
+  basketAbsNetPctOi: number;
+  basketDirection: SystematicFlowProxyBasketDirection;
+  basketWeeklyDeltaNetContracts?: number;
+  basketScore: number;
+}
+
+export interface SystematicFlowProxyArtifactV1 {
+  artifactVersion: '1';
+  signalId: 'systematic-flow-proxy';
+  designOnly?: boolean;
+  asOf: string;
+  publishedAt: string;
+  source: ArtifactSource;
+  seriesDefinition: SystematicFlowProxySeriesDefinition;
+  updateFrequency: 'weekly';
+  dataQuality: 'verified_manual' | 'manual_unverified';
+  datasetId: string;
+  scoreContracts: SystematicFlowProxyScoreContract[];
+  vixContext?: SystematicFlowProxyVixContext;
+  basket: SystematicFlowProxyBasket;
+}
+
+export interface SystematicFlowProxyValidationResult {
+  ok: true;
+  artifact: SystematicFlowProxyArtifactV1;
+  warnings?: string[];
+}
+
+export interface SystematicFlowProxyValidationError {
+  ok: false;
+  errors: string[];
+}
+
+export type SystematicFlowProxyValidation =
+  | SystematicFlowProxyValidationResult
+  | SystematicFlowProxyValidationError;
 
 export interface ArtifactFreshnessResult {
   status: GhostFlowArtifactFreshnessStatus;

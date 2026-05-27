@@ -108,7 +108,7 @@ Shipped: `buildSnapshot.ts` merge, DERIVED classification, coverage **6 public /
 | **ICI ETF net issuance (existing)** | `etfFundFlowImpulse` | Weekly domestic equity row |
 | **StockCharts `$SPXA50R` + Barchart `$S5FI` cross-check (existing)** | `breadthWeakness` | Daily participation; vendor methodology may differ |
 | **SSGA SPY monthly fact sheet (existing)** | `indexConcentration` | Top-10 **index** weights, not fund weights |
-| **CFTC COT / TFF (research)** | `systematicStrategyPressure` (future) | Public weekly **futures positioning** proxy; v0.9c **YELLOW** — see [CFTC_TFF_FEASIBILITY.md](./CFTC_TFF_FEASIBILITY.md) |
+| **CFTC COT / TFF (design)** | `systematicStrategyPressure` (future) | Artifact design v0.9d — [CFTC_TFF_ARTIFACT_DESIGN.md](./CFTC_TFF_ARTIFACT_DESIGN.md); not production-scored yet |
 | **Issuer / fund AUM & rebalance docs (future)** | `leveredEtfRebalancePressure` | SSGA, ProShares, etc.; needs written rebalance methodology |
 | **OCC / Cboe / OPRA or commercial options data (future)** | `odte-options` placeholder → possible new input | Licensing and metric definition (gamma, 0DTE volume share) |
 | **Retirement / Flow of Funds (future)** | `retirementFlowPressureProxy` | Low confidence until source is validated |
@@ -137,14 +137,15 @@ GhostFlow input promotion rules (all phases):
 | **v0.9a** | This roadmap + optional checklist link | **Docs only** |
 | **v0.9b** | Wire `modelZoneProximity` from ICI distance-to-65 calculation | **Done** — `buildSnapshot.ts`, tests, UI copy/badges |
 | **v0.9c** | CFTC TFF feasibility spike: contracts, categories, lag, sample extract, mapping memo | **Done** — [CFTC_TFF_FEASIBILITY.md](./CFTC_TFF_FEASIBILITY.md), `scripts/ghostflow/cftc-tff-spike.ts` |
-| **v0.9d** | Optional CFTC systematic artifact + merge (if v0.9c passes) | New artifact JSON, schema, validate script, merge, tests |
+| **v0.9d** | CFTC TFF artifact design (memo, example JSON, pure validator/mapper, tests) | **Done** — [CFTC_TFF_ARTIFACT_DESIGN.md](./CFTC_TFF_ARTIFACT_DESIGN.md), `systematicFlowProxy.v1.example.json`, `lib/ghostflow/artifacts/systematicFlowProxy.ts` |
+| **v0.9e** | CFTC TFF production artifact + `buildSnapshot` merge (if approved) | `systematicFlowProxy.v1.json`, schema, validate-artifacts, merge, UI, score impact |
 | **v1.0+** | Deeper options (0DTE), levered ETF rebalance, retirement-flow sources | Larger sourcing, possible licensing |
 
 ---
 
 ## Open questions
 
-1. **CFTC TFF mapping (v0.9d):** Calibrate OI-weighted lev-funds **net % OI** basket (ES `13874A`, NQ mini `209742`, RTY mini `239742`) to 0–100 for `systematicStrategyPressure`; see [CFTC_TFF_FEASIBILITY.md](./CFTC_TFF_FEASIBILITY.md) §4–5.
+1. ~~**CFTC TFF mapping (v0.9d design):**~~ **Resolved in design:** `basketScore = clamp(round(abs(basketNetPctOi) * 5), 0, 100)` on ES/NQ/RTY basket; see [CFTC_TFF_ARTIFACT_DESIGN.md](./CFTC_TFF_ARTIFACT_DESIGN.md). Production calibration at merge (v0.9e).
 2. ~~**`modelZoneProximity` mapping (v0.9b):**~~ **Resolved:** Reuse `mapDistanceToZoneNumericValue` as-is (documented in merge + methodology).
 3. **Levered ETF scope:** Which product universe and rebalance trigger (AUM threshold, index move, calendar) define `leveredEtfRebalancePressure`?
 4. **0DTE data path:** Public aggregate vs paid vendor; whether future options pressure replaces or supplements VIX-based `optionsVolatilityAmplifier`.
@@ -154,7 +155,8 @@ GhostFlow input promotion rules (all phases):
 
 ## Related documents
 
-- [CFTC_TFF_FEASIBILITY.md](./CFTC_TFF_FEASIBILITY.md) — v0.9c TFF/COT feasibility (YELLOW; v0.9d design input)
+- [CFTC_TFF_FEASIBILITY.md](./CFTC_TFF_FEASIBILITY.md) — v0.9c TFF/COT feasibility (YELLOW)
+- [CFTC_TFF_ARTIFACT_DESIGN.md](./CFTC_TFF_ARTIFACT_DESIGN.md) — v0.9d artifact design (example JSON + validator; no score wiring)
 - [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) — operator refresh cadence for existing public artifacts
 - [ARTIFACT_RUNBOOK.md](./ARTIFACT_RUNBOOK.md) — CBOE VIX
 - [BREADTH_ARTIFACT_RUNBOOK.md](./BREADTH_ARTIFACT_RUNBOOK.md) — Market breadth
