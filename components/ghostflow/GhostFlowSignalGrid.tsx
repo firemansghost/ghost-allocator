@@ -3,6 +3,7 @@ import {
   groupSignalsByPresentation,
   signalCardBadgeLabel,
   signalCardDisplayName,
+  signalCardExplanation,
   type SignalCardVariant,
 } from '@/lib/ghostflow/signalPresentation';
 import type {
@@ -131,7 +132,7 @@ function SignalCard({
         {sig.value}
       </p>
       <p className={`mt-2 text-xs leading-relaxed flex-1 ${variant === 'mock' ? 'text-zinc-500' : 'text-zinc-400'}`}>
-        {sig.explanation}
+        {signalCardExplanation(sig)}
       </p>
       {sig.dataStatus === 'public_proxy' && sig.cardCaveat && (
         <p className="mt-2 text-[11px] text-zinc-500 leading-relaxed border-l-2 border-amber-500/30 pl-2">
@@ -247,8 +248,8 @@ export function GhostFlowSignalGrid({
           Market-structure signals
         </h2>
         <p className="mt-2 text-xs text-zinc-500 leading-relaxed max-w-3xl">
-          Six manual public artifacts (no live feeds) feed the research composite. Distance-to-65 is derived context; two
-          PLACEHOLDER cards are not in the score.
+          Six manual public artifacts and one derived score input feed the research composite. The Distance-to-65 card is
+          shown as context; two PLACEHOLDER cards are not in the score.
         </p>
       </div>
 
