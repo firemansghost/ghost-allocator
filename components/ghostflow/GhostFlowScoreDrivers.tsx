@@ -30,13 +30,18 @@ export function GhostFlowScoreDrivers() {
               <li>More index-tilted active/index flow differential (ICI monthly flows)</li>
             </ul>
             <p className="mt-3 text-[10px] font-semibold uppercase tracking-wide text-zinc-500 mb-2">
+              Derived score input
+            </p>
+            <ul className="space-y-1 text-zinc-300 text-xs list-disc list-inside">
+              <li>ICI index-share moving closer to the 65% model zone → higher model-zone proximity</li>
+            </ul>
+            <p className="mt-3 text-[10px] font-semibold uppercase tracking-wide text-zinc-500 mb-2">
               Static mock assumptions in the composite today
             </p>
             <ul className="space-y-1 text-zinc-400 text-xs list-disc list-inside">
               <li>Higher systematic strategy pressure placeholder</li>
               <li>Higher retirement-flow pressure placeholder</li>
               <li>Higher levered ETF rebalance pressure placeholder</li>
-              <li>Higher model-zone proximity placeholder</li>
             </ul>
           </div>
 
@@ -56,17 +61,23 @@ export function GhostFlowScoreDrivers() {
               <li>Active flows outpacing index flows in the monthly differential</li>
             </ul>
             <p className="mt-3 text-[10px] font-semibold uppercase tracking-wide text-zinc-500 mb-2">
+              Derived score input
+            </p>
+            <ul className="space-y-1 text-zinc-300 text-xs list-disc list-inside">
+              <li>ICI index-share moving farther below the 65% model zone → lower model-zone proximity</li>
+            </ul>
+            <p className="mt-3 text-[10px] font-semibold uppercase tracking-wide text-zinc-500 mb-2">
               Static mock assumptions in the composite today
             </p>
             <ul className="space-y-1 text-zinc-400 text-xs list-disc list-inside">
-              <li>Lower systematic, retirement-flow, levered-ETF, or model-zone placeholders</li>
+              <li>Lower systematic, retirement-flow, or levered-ETF placeholders</li>
             </ul>
           </div>
         </div>
 
         <p className="text-xs text-amber-300/85 leading-relaxed border-t border-zinc-800/80 pt-3">
-          Because this is a research preview, several inputs are static mock assumptions. In a live version, measured
-          systematic-flow, retirement-flow, and levered-ETF data would replace those placeholders.
+          Model-zone proximity is a derived score input from the ICI index-share proxy (same distance-to-65 logic). Three
+          Passive Pressure sub-inputs remain static mock placeholders until measured sources are added.
         </p>
       </GlassCard>
     </section>

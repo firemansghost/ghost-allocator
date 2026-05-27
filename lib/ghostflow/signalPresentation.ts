@@ -53,6 +53,17 @@ export function signalCardDisplayName(sig: { id: string; name: string }): string
   return sig.name;
 }
 
+/** Card body override for placeholder signals (UI only; does not change scoring). */
+export function signalCardExplanation(sig: { id: string; explanation: string }): string {
+  if (sig.id === 'systematic-flow') {
+    return (
+      'Future signal slot for a defensible positioning or systematic-pressure proxy. Current CFTC TFF work remains ' +
+      'artifact design only and is not included in this card or score.'
+    );
+  }
+  return sig.explanation;
+}
+
 /** Display badge text for signal cards (UI only; does not change scoring). */
 export function signalCardBadgeLabel(
   variant: SignalCardVariant,
