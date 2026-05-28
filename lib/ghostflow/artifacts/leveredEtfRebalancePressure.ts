@@ -4,8 +4,11 @@
  */
 
 import leveredEtfRebalancePressureArtifactJson from '@/data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.json';
+import { calendarDaysAfter } from '@/lib/ghostflow/artifactFreshness';
 import { GHOSTFLOW_REFERENCE_AS_OF } from '@/lib/ghostflow/reference';
 import type {
+  ArtifactFreshnessResult,
+  GhostFlowArtifactFreshnessStatus,
   LeveredEtfDominantDirection,
   LeveredEtfRebalanceDirection,
   LeveredEtfRebalanceObservationsV1,
@@ -73,6 +76,102 @@ export const DOMINANT_DIRECTION_MIXED_RATIO = 0.25;
 
 export const LEVERED_ETF_REBALANCE_CARD_CAVEAT =
   'Estimated levered/inverse ETF rebalance notional from AUM and single-session index move — not issuer-reported flow, exact trades, or options/gamma exposure.';
+
+const FRESHNESS_FRESH_DAYS = 10;
+const FRESHNESS_CAUTION_DAYS = 17;
+
+/** GhostFlow dashboard card id (display-only v1.1d; distinct from artifact signalId). */
+export const LEVERED_ETF_REBALANCE_DISPLAY_SIGNAL_ID = 'levered-etf-rebalance' as const;
+
+export const LEVERED_ETF_REBALANCE_DISPLAY_SIGNAL_NAME =
+  'Levered ETF Rebalance Pressure Proxy' as const;
+
+export const LEVERED_ETF_REBALANCE_DISPLAY_CARD_CAVEAT =
+  'Display-only levered ETF rebalance estimate; not included in the Research Composite.';
+
+export function formatLeveredEtfDominantDirectionLabel(
+  dominantDirection: LeveredEtfDominantDirection
+): string {
+  switch (dominantDirection) {
+    case 'buy_underlying':
+      return 'Est. buy';
+    case 'sell_underlying':
+      return 'Est. sell';
+    case 'mixed':
+      return 'Est. mixed';
+    case 'flat':
+      return 'Est. flat';
+  }
+}
+
+function formatNotionalBillions(absMillionsUsd: number): string {
+  const billions = absMillionsUsd / 1000;
+  return `$${billions.toFixed(2)}B`;
+}
+
+export function formatLeveredEtfRebalanceDisplayValue(
+  observations: LeveredEtfRebalanceObservationsV1
+): string {
+  const direction = formatLeveredEtfDominantDirectionLabel(observations.dominantDirection);
+  const notional = formatNotionalBillions(
+    Math.abs(observations.aggregateEstimatedRebalanceNotionalMillionsUsd)
+  );
+  const pct = observations.aggregateRebalancePctOfUniverseAum.toFixed(2);
+  return `${direction} ${notional} · ${pct}% of universe AUM`;
+}
+
+export function buildLeveredEtfRebalanceDisplayExplanation(
+  artifact: LeveredEtfRebalancePressureArtifactV1
+): string {
+  const { observations: o } = artifact;
+  const direction = formatLeveredEtfDominantDirectionLabel(o.dominantDirection).toLowerCase();
+  const notional = formatNotionalBillions(
+    Math.abs(o.aggregateEstimatedRebalanceNotionalMillionsUsd)
+  );
+  const pct = o.aggregateRebalancePctOfUniverseAum.toFixed(2);
+  return (
+    `Simplified daily-reset levered/inverse ETF rebalance estimate for the Tier-1 six-ticker universe: ` +
+    `${direction} ${notional} (${pct}% of tracked AUM in absolute estimated notional) from issuer AUM and a ` +
+    `single-session QQQ/SPY/IWM index move. Not issuer-reported rebalance flow, exact trade demand, or ` +
+    `options/gamma exposure. Score mapping is not final (mappingStatus: not_final) and this card is not ` +
+    `included in the Research Composite.`
+  );
+}
+
+export function leveredEtfRebalanceFreshnessAnchor(
+  artifact: LeveredEtfRebalancePressureArtifactV1
+): string {
+  return artifact.publishedAt ?? artifact.asOf;
+}
+
+function statusFromLeveredFreshnessDays(days: number): GhostFlowArtifactFreshnessStatus {
+  if (days <= FRESHNESS_FRESH_DAYS) return 'fresh';
+  if (days <= FRESHNESS_CAUTION_DAYS) return 'caution';
+  return 'stale';
+}
+
+export function evaluateLeveredEtfRebalanceArtifactFreshness(
+  artifact: LeveredEtfRebalancePressureArtifactV1,
+  referenceAsOf: string = GHOSTFLOW_REFERENCE_AS_OF
+): ArtifactFreshnessResult {
+  const anchor = leveredEtfRebalanceFreshnessAnchor(artifact);
+  const ageDays = calendarDaysAfter(anchor, referenceAsOf);
+  const status = statusFromLeveredFreshnessDays(ageDays);
+  const warnings: string[] = [];
+  const label = 'Levered ETF Rebalance Pressure';
+
+  if (status === 'caution') {
+    warnings.push(
+      `${label} artifact is ${ageDays} calendar days since release (caution: ${FRESHNESS_FRESH_DAYS + 1}–${FRESHNESS_CAUTION_DAYS} days).`
+    );
+  } else if (status === 'stale') {
+    warnings.push(
+      `${label} artifact is ${ageDays} calendar days since release (stale: >${FRESHNESS_CAUTION_DAYS} days). Refresh recommended.`
+    );
+  }
+
+  return { status, ageDays, warnings };
+}
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
   return v !== null && typeof v === 'object' && !Array.isArray(v);

@@ -76,8 +76,10 @@ export function GhostFlowScoreDrivers() {
         </div>
 
         <p className="text-xs text-amber-300/85 leading-relaxed border-t border-zinc-800/80 pt-3">
-          The CFTC TFF positioning proxy is now displayed as a public artifact, but systematic strategy pressure remains
-          a static MOCK score input until a future score-wiring decision.
+          The CFTC TFF positioning proxy is displayed as a public artifact, but systematic strategy pressure remains a
+          static MOCK score input until mapping and score-wiring are approved. The levered ETF rebalance artifact is
+          displayed publicly, but levered ETF rebalance pressure remains a static MOCK score input until mapping and
+          score-wiring are approved.
         </p>
       </GlassCard>
     </section>

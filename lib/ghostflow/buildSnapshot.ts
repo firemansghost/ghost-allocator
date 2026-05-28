@@ -63,9 +63,20 @@ import type {
   IndexConcentrationArtifactV1,
   MarketBreadthArtifactV1,
   PassiveShareProxyArtifactV1,
+  LeveredEtfRebalancePressureArtifactV1,
+  LeveredEtfRebalancePressureValidation,
   SystematicFlowProxyArtifactV1,
   VolatilityRegimeArtifactV1,
 } from './artifacts/types';
+import {
+  buildLeveredEtfRebalanceDisplayExplanation,
+  evaluateLeveredEtfRebalanceArtifactFreshness,
+  formatLeveredEtfRebalanceDisplayValue,
+  loadLeveredEtfRebalancePressureArtifact,
+  LEVERED_ETF_REBALANCE_DISPLAY_CARD_CAVEAT,
+  LEVERED_ETF_REBALANCE_DISPLAY_SIGNAL_ID,
+  LEVERED_ETF_REBALANCE_DISPLAY_SIGNAL_NAME,
+} from './artifacts/leveredEtfRebalancePressure';
 import {
   buildSystematicFlowDisplayExplanation,
   evaluateSystematicFlowProxyArtifactFreshness,
@@ -462,6 +473,84 @@ export function applySystematicFlowProxyDisplayArtifact(
   };
 }
 
+/** Display-only levered ETF rebalance card — does not merge into passive/structural score inputs. */
+export function applyLeveredEtfRebalanceDisplayArtifact(
+  raw: GhostFlowRawSnapshot,
+  artifact: LeveredEtfRebalancePressureArtifactV1,
+  referenceAsOf: string
+): ApplyArtifactOutcome {
+  const freshness = evaluateLeveredEtfRebalanceArtifactFreshness(artifact, referenceAsOf);
+  const { observations } = artifact;
+  const numericValue = observations.aggregateRebalancePctOfUniverseAum;
+
+  raw.signals = replaceSignal(raw.signals, {
+    id: LEVERED_ETF_REBALANCE_DISPLAY_SIGNAL_ID,
+    name: LEVERED_ETF_REBALANCE_DISPLAY_SIGNAL_NAME,
+    value: formatLeveredEtfRebalanceDisplayValue(observations),
+    numericValue,
+    explanation: buildLeveredEtfRebalanceDisplayExplanation(artifact),
+    cardCaveat: LEVERED_ETF_REBALANCE_DISPLAY_CARD_CAVEAT,
+    dataStatus: 'public_proxy',
+    updateFrequencyTarget: 'Weekly (manual artifact)',
+    sourceName: artifact.source.name,
+    sourceUrl: artifact.source.url,
+    sourceNote: artifact.source.note,
+    dataQuality: artifact.dataQuality,
+    artifactAsOf: artifact.asOf,
+    artifactPublishedAt: artifact.publishedAt,
+    freshnessStatus: freshness.status,
+  });
+
+  const publicSignal: GhostFlowPublicSignalMeta = {
+    signalId: LEVERED_ETF_REBALANCE_DISPLAY_SIGNAL_ID,
+    name: LEVERED_ETF_REBALANCE_DISPLAY_SIGNAL_NAME,
+    sourceName: artifact.source.name,
+    sourceUrl: artifact.source.url,
+    asOf: artifact.asOf,
+    publishedAt: artifact.publishedAt,
+    freshnessStatus: freshness.status,
+  };
+
+  return {
+    raw,
+    warnings: freshness.warnings,
+    publicSignal,
+  };
+}
+
+export function mergeLeveredEtfRebalanceDisplayIfValid(
+  raw: GhostFlowRawSnapshot,
+  validation: LeveredEtfRebalancePressureValidation,
+  referenceAsOf: string
+): {
+  raw: GhostFlowRawSnapshot;
+  warnings: string[];
+  publicSignal?: GhostFlowPublicSignalMeta;
+} {
+  if (!validation.ok) {
+    return {
+      raw,
+      warnings: [
+        `Levered ETF Rebalance Pressure artifact invalid or missing (${validation.errors.join('; ')}). No display card added.`,
+      ],
+    };
+  }
+
+  const result = applyLeveredEtfRebalanceDisplayArtifact(
+    raw,
+    validation.artifact,
+    referenceAsOf
+  );
+  const warnings = [...result.warnings];
+  if (validation.warnings) warnings.push(...validation.warnings);
+
+  return {
+    raw: result.raw,
+    warnings,
+    publicSignal: result.publicSignal,
+  };
+}
+
 function buildMeta(
   raw: GhostFlowRawSnapshot,
   warnings: string[],
@@ -694,6 +783,16 @@ export function buildGhostFlowSnapshot(
       `CFTC TFF Positioning Proxy artifact invalid or missing (${systematicValidation.errors.join('; ')}). Using mock placeholder for systematic-flow card.`
     );
   }
+
+  const leveredValidation = loadLeveredEtfRebalancePressureArtifact();
+  const leveredDisplay = mergeLeveredEtfRebalanceDisplayIfValid(
+    raw,
+    leveredValidation,
+    referenceAsOf
+  );
+  raw = leveredDisplay.raw;
+  warnings.push(...leveredDisplay.warnings);
+  if (leveredDisplay.publicSignal) publicSignals.push(leveredDisplay.publicSignal);
 
   return buildMeta(raw, warnings, publicSignals, publicPassiveInputKeys, publicStructuralInputKeys);
 }
