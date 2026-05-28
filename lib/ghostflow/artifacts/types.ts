@@ -321,6 +321,90 @@ export type SystematicFlowProxyValidation =
   | SystematicFlowProxyValidationResult
   | SystematicFlowProxyValidationError;
 
+export type LeveredEtfRebalanceObservationType =
+  'latest_session_snapshot_refreshed_manually';
+
+export type LeveredEtfRebalanceUniverseDefinition = 'tier1_six_ticker_3x_index_etf_v1';
+
+export type LeveredEtfDirection = 'long' | 'inverse';
+
+export type LeveredEtfUnderlyingIndex = 'Nasdaq-100' | 'S&P 500' | 'Russell 2000';
+
+export type LeveredEtfIndexProxyTicker = 'QQQ' | 'SPY' | 'IWM';
+
+export type LeveredEtfRebalanceDirection = 'buy_underlying' | 'sell_underlying' | 'flat';
+
+export type LeveredEtfDominantDirection =
+  | 'buy_underlying'
+  | 'sell_underlying'
+  | 'mixed'
+  | 'flat';
+
+export type LeveredEtfMappingStatus = 'not_final';
+
+export interface LeveredEtfRebalanceRowV1 {
+  ticker: string;
+  fundName: string;
+  issuer: string;
+  direction: LeveredEtfDirection;
+  signedLeverage: number;
+  leverageMultiple: number;
+  underlyingIndex: LeveredEtfUnderlyingIndex;
+  indexProxyTicker: LeveredEtfIndexProxyTicker;
+  aumMillionsUsd: number;
+  aumAsOf: string;
+  aumSourceName: string;
+  aumSourceUrl: string;
+  crossCheckSourceName: string;
+  crossCheckSourceUrl: string;
+  underlyingReturnPct: number;
+  returnAsOf: string;
+  returnSourceName: string;
+  returnSourceUrl: string;
+  estimatedRebalanceNotionalMillionsUsd: number;
+  estimatedRebalanceDirection: LeveredEtfRebalanceDirection;
+  usedInAggregate: true;
+}
+
+export interface LeveredEtfRebalanceObservationsV1 {
+  aggregateAumMillionsUsd: number;
+  aggregateEstimatedRebalanceNotionalMillionsUsd: number;
+  aggregateAbsRebalanceNotionalMillionsUsd: number;
+  aggregateRebalancePctOfUniverseAum: number;
+  dominantDirection: LeveredEtfDominantDirection;
+  mappingStatus: LeveredEtfMappingStatus;
+}
+
+export interface LeveredEtfRebalancePressureArtifactV1 {
+  artifactVersion: '1';
+  signalId: 'levered-etf-rebalance-pressure';
+  designOnly: true;
+  asOf: string;
+  publishedAt: string;
+  source: ArtifactSource;
+  observationType: LeveredEtfRebalanceObservationType;
+  universeDefinition: LeveredEtfRebalanceUniverseDefinition;
+  updateFrequency: 'weekly';
+  dataQuality: 'verified_manual' | 'manual_unverified';
+  etfRows: LeveredEtfRebalanceRowV1[];
+  observations: LeveredEtfRebalanceObservationsV1;
+}
+
+export interface LeveredEtfRebalancePressureValidationResult {
+  ok: true;
+  artifact: LeveredEtfRebalancePressureArtifactV1;
+  warnings?: string[];
+}
+
+export interface LeveredEtfRebalancePressureValidationError {
+  ok: false;
+  errors: string[];
+}
+
+export type LeveredEtfRebalancePressureValidation =
+  | LeveredEtfRebalancePressureValidationResult
+  | LeveredEtfRebalancePressureValidationError;
+
 export interface ArtifactFreshnessResult {
   status: GhostFlowArtifactFreshnessStatus;
   ageDays: number;

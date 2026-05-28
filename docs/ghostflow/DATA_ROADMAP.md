@@ -80,11 +80,11 @@ Shipped: `buildSnapshot.ts` merge, DERIVED classification, coverage **6 public /
 - **Not** a direct CTA / vol-control / systematic-flow estimate.
 - Target input (if promoted in v0.9d): `systematicStrategyPressure` (currently MOCK **62**).
 
-### C) Levered ETF rebalance pressure — methodology only
+### C) Levered ETF rebalance pressure (v1.1) — **v1.1a COMPLETE**
 
-- Document candidate approach (levered/inverse ETF AUM, issuer rebalance calendars, flow proxies) in a future runbook spike.
-- **Do not implement** artifact or merge in v0.9a–c.
-- Keep `leveredEtfRebalancePressure` MOCK until methodology and provenance pass guardrails.
+**Feasibility memo:** [LEVERED_ETF_REBALANCE_FEASIBILITY.md](./LEVERED_ETF_REBALANCE_FEASIBILITY.md)
+
+**Outcome:** **YELLOW** — Tier-1 universe **TQQQ/SQQQ, UPRO/SPXU, TNA/TZA**; manual AUM from issuer pages + index moves via Stooq/ETF proxies; estimated rebalance notional proxy feasible; mapping deferred to **v1.1b+**. Keep `leveredEtfRebalancePressure` MOCK (**55**) until **v1.1c–f** gates pass.
 
 ### D) Retirement-flow pressure — MOCK / research-only
 
@@ -109,7 +109,7 @@ Shipped: `buildSnapshot.ts` merge, DERIVED classification, coverage **6 public /
 | **StockCharts `$SPXA50R` + Barchart `$S5FI` cross-check (existing)** | `breadthWeakness` | Daily participation; vendor methodology may differ |
 | **SSGA SPY monthly fact sheet (existing)** | `indexConcentration` | Top-10 **index** weights, not fund weights |
 | **CFTC COT / TFF (production candidate)** | `systematicStrategyPressure` (future) | v0.9e — [`systematicFlowProxy.v1.json`](../data/ghostflow/artifacts/systematicFlowProxy.v1.json) validated via `ghostflow:validate-artifacts`; **not merged into score yet** |
-| **Issuer / fund AUM & rebalance docs (future)** | `leveredEtfRebalancePressure` | SSGA, ProShares, etc.; needs written rebalance methodology |
+| **Issuer fund pages + ETF directories (v1.1)** | `leveredEtfRebalancePressure` | ProShares/Direxion AUM; Stooq/SPY-QQQ-IWM for index moves — see [LEVERED_ETF_REBALANCE_FEASIBILITY.md](./LEVERED_ETF_REBALANCE_FEASIBILITY.md) |
 | **OCC / Cboe / OPRA or commercial options data (future)** | `odte-options` placeholder → possible new input | Licensing and metric definition (gamma, 0DTE volume share) |
 | **Retirement / Flow of Funds (future)** | `retirementFlowPressureProxy` | Low confidence until source is validated |
 
@@ -142,8 +142,14 @@ GhostFlow input promotion rules (all phases):
 | **v0.9f** | CFTC TFF display-only public signal card (`systematic-flow`) | **Done** — `applySystematicFlowProxyDisplayArtifact`, UI grouping/copy, `publicSignals` +7, no score wiring |
 | **v1.0a** | CFTC TFF historical calibration study (research only) | **Done** — [CFTC_TFF_CALIBRATION_STUDY.md](./CFTC_TFF_CALIBRATION_STUDY.md), `ghostflow:cftc-tff-history-study`, `lib/ghostflow/research/cftcTffHistory.ts` |
 | **v1.0b** | CFTC TFF mapping decision record | **Done** — [CFTC_TFF_MAPPING_DECISION.md](./CFTC_TFF_MAPPING_DECISION.md); display Mapping A; CFTC remains display-only |
-| **v1.0c** | Score-wiring implementation gate (if product-approved) | Rename sub-input; Mapping C `min(80, basketScore)`; PUBLIC badge; tests + methodology — see mapping decision §8 |
-| **v1.0+** | Deeper options (0DTE), levered ETF rebalance, retirement-flow sources | Larger sourcing, possible licensing |
+| **v1.0c** | CFTC score-wiring implementation gate (if product-approved) | Rename sub-input; Mapping C `min(80, basketScore)`; PUBLIC badge; tests + methodology — see mapping decision §8 |
+| **v1.1a** | Levered ETF rebalance pressure feasibility | **Done** — [LEVERED_ETF_REBALANCE_FEASIBILITY.md](./LEVERED_ETF_REBALANCE_FEASIBILITY.md); YELLOW; Tier-1 six-ticker universe |
+| **v1.1b** | Levered ETF artifact design | **Done** — [LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md](./LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md), `leveredEtfRebalancePressure.v1.example.json`, `lib/ghostflow/artifacts/leveredEtfRebalancePressure.ts`, tests |
+| **v1.1c** | Levered ETF production artifact candidate | `leveredEtfRebalancePressure.v1.json`, `validate-artifacts` |
+| **v1.1d** | Levered ETF display-only signal card | Display merge only (cf. CFTC v0.9f) |
+| **v1.1e** | Levered ETF mapping decision (if needed) | Docs only — after optional calibration |
+| **v1.1f** | Levered ETF score-wiring gate (if product-approved) | `buildSnapshot` merge; MOCK **55** replacement; methodology + tests |
+| **v1.0+** | Deeper options (0DTE), retirement-flow sources | Larger sourcing, possible licensing |
 
 ---
 
@@ -151,7 +157,7 @@ GhostFlow input promotion rules (all phases):
 
 1. ~~**CFTC TFF mapping (v0.9d design):**~~ **Resolved:** Display/artifact use Mapping A ([v0.9d design](./CFTC_TFF_ARTIFACT_DESIGN.md)). **Calibration (v1.0a):** [CFTC_TFF_CALIBRATION_STUDY.md](./CFTC_TFF_CALIBRATION_STUDY.md). **Decision (v1.0b):** [CFTC_TFF_MAPPING_DECISION.md](./CFTC_TFF_MAPPING_DECISION.md) — CFTC display-only; future score candidate Mapping C after rename; **v1.0c** gated on product approval.
 2. ~~**`modelZoneProximity` mapping (v0.9b):**~~ **Resolved:** Reuse `mapDistanceToZoneNumericValue` as-is (documented in merge + methodology).
-3. **Levered ETF scope:** Which product universe and rebalance trigger (AUM threshold, index move, calendar) define `leveredEtfRebalancePressure`?
+3. ~~**Levered ETF scope:**~~ **Resolved (v1.1a–b):** Tier-1 six-ticker universe; single-session `underlyingReturnPct`; formula in [LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md](./LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md). **Mapping not final** (`mappingStatus: not_final`); score wiring **v1.1f** gated.
 4. **0DTE data path:** Public aggregate vs paid vendor; whether future options pressure replaces or supplements VIX-based `optionsVolatilityAmplifier`.
 5. **Retirement flows:** Is any public series (ICI Flow of Funds, Federal Reserve Financial Accounts) worth a v1.0 research spike?
 
@@ -162,6 +168,8 @@ GhostFlow input promotion rules (all phases):
 - [CFTC_TFF_FEASIBILITY.md](./CFTC_TFF_FEASIBILITY.md) — v0.9c TFF/COT feasibility (YELLOW)
 - [CFTC_TFF_CALIBRATION_STUDY.md](./CFTC_TFF_CALIBRATION_STUDY.md) — v1.0a historical calibration (research)
 - [CFTC_TFF_MAPPING_DECISION.md](./CFTC_TFF_MAPPING_DECISION.md) — v1.0b mapping/product decision (display-only; v1.0c score gate)
+- [LEVERED_ETF_REBALANCE_FEASIBILITY.md](./LEVERED_ETF_REBALANCE_FEASIBILITY.md) — v1.1a levered ETF rebalance feasibility (YELLOW)
+- [LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md](./LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md) — v1.1b artifact design (example + validators; no score wiring)
 - [CFTC_TFF_ARTIFACT_DESIGN.md](./CFTC_TFF_ARTIFACT_DESIGN.md) — v0.9d design + v0.9e production candidate (validated; score wiring deferred to v1.0c)
 - [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) — operator refresh cadence for existing public artifacts
 - [ARTIFACT_RUNBOOK.md](./ARTIFACT_RUNBOOK.md) — CBOE VIX
