@@ -1,8 +1,10 @@
 /**
- * GhostFlow v1.1b — Levered ETF rebalance pressure artifact (design only).
- * Pure validation and estimate helpers. No production load or buildSnapshot merge.
+ * GhostFlow v1.1b/c — Levered ETF rebalance pressure artifact.
+ * Pure validation and estimate helpers. Production load available; no buildSnapshot merge yet.
  */
 
+import leveredEtfRebalancePressureArtifactJson from '@/data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.json';
+import { GHOSTFLOW_REFERENCE_AS_OF } from '@/lib/ghostflow/reference';
 import type {
   LeveredEtfDominantDirection,
   LeveredEtfRebalanceDirection,
@@ -14,6 +16,28 @@ import type {
 
 export const LEVERED_ETF_REBALANCE_EXAMPLE_ARTIFACT_PATH =
   'data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.example.json';
+
+export const LEVERED_ETF_REBALANCE_PRODUCTION_ARTIFACT_PATH =
+  'data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.json';
+
+export type LeveredEtfRebalanceValidationMode = 'example' | 'production';
+
+export interface LeveredEtfRebalanceValidateOptions {
+  mode?: LeveredEtfRebalanceValidationMode;
+  referenceAsOf?: string;
+}
+
+function normalizeValidateOptions(
+  options?: string | LeveredEtfRebalanceValidateOptions
+): { mode: LeveredEtfRebalanceValidationMode; referenceAsOf?: string } {
+  if (typeof options === 'string') {
+    return { mode: 'example', referenceAsOf: options };
+  }
+  return {
+    mode: options?.mode ?? 'example',
+    referenceAsOf: options?.referenceAsOf,
+  };
+}
 
 export const LEVERED_ETF_REBALANCE_SIGNAL_ID = 'levered-etf-rebalance-pressure' as const;
 
@@ -283,8 +307,9 @@ function parseEtfRow(raw: unknown, errors: string[]): LeveredEtfRebalanceRowV1 |
 
 export function validateLeveredEtfRebalancePressureArtifact(
   raw: unknown,
-  referenceAsOf?: string
+  options?: string | LeveredEtfRebalanceValidateOptions
 ): LeveredEtfRebalancePressureValidation {
+  const { mode, referenceAsOf } = normalizeValidateOptions(options);
   const errors: string[] = [];
   const warnings: string[] = [];
 
@@ -298,8 +323,12 @@ export function validateLeveredEtfRebalancePressureArtifact(
   if (raw.signalId !== LEVERED_ETF_REBALANCE_SIGNAL_ID) {
     errors.push(`signalId must be "${LEVERED_ETF_REBALANCE_SIGNAL_ID}".`);
   }
-  if (raw.designOnly !== true) {
-    errors.push('designOnly must be true for v1.1b example artifact.');
+  if (mode === 'example') {
+    if (raw.designOnly !== true) {
+      errors.push('designOnly must be true for example artifact (mode: example).');
+    }
+  } else if (raw.designOnly === true) {
+    errors.push('designOnly must not be true for production artifact (mode: production).');
   }
   if (raw.updateFrequency !== 'weekly') {
     errors.push('updateFrequency must be "weekly".');
@@ -352,7 +381,7 @@ export function validateLeveredEtfRebalancePressureArtifact(
   }
 
   if ('candidatePressureScore' in raw) {
-    errors.push('candidatePressureScore must not be present in v1.1b artifacts.');
+    errors.push('candidatePressureScore must not be present at artifact root.');
   }
 
   const rowsRaw = raw.etfRows;
@@ -446,7 +475,7 @@ export function validateLeveredEtfRebalancePressureArtifact(
   const artifact: LeveredEtfRebalancePressureArtifactV1 = {
     artifactVersion: '1',
     signalId: LEVERED_ETF_REBALANCE_SIGNAL_ID,
-    designOnly: true,
+    ...(mode === 'example' ? { designOnly: true as const } : {}),
     asOf: asOf as string,
     publishedAt: publishedAt as string,
     source: {
@@ -472,4 +501,11 @@ export function validateLeveredEtfRebalancePressureArtifact(
   };
 
   return warnings.length > 0 ? { ok: true, artifact, warnings } : { ok: true, artifact };
+}
+
+export function loadLeveredEtfRebalancePressureArtifact(): LeveredEtfRebalancePressureValidation {
+  return validateLeveredEtfRebalancePressureArtifact(leveredEtfRebalancePressureArtifactJson, {
+    mode: 'production',
+    referenceAsOf: GHOSTFLOW_REFERENCE_AS_OF,
+  });
 }

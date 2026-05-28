@@ -1,9 +1,10 @@
-# Levered ETF Rebalance Pressure — Artifact Design (GhostFlow v1.1b)
+# Levered ETF Rebalance Pressure — Artifact Design (GhostFlow v1.1b/c)
 
-**Status:** Design only — example JSON + pure validators; **not** in Research Composite, **not** in `validate-artifacts`, **no** production artifact.  
+**Status (v1.1c):** Validated **production artifact candidate** — **not** in Research Composite, **not** displayed in UI, **not** score-wired. Example JSON remains design-only.  
 **Prior work:** [LEVERED_ETF_REBALANCE_FEASIBILITY.md](./LEVERED_ETF_REBALANCE_FEASIBILITY.md) (v1.1a, **YELLOW**).  
-**Example file:** [`data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.example.json`](../data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.example.json)  
-**Library:** [`lib/ghostflow/artifacts/leveredEtfRebalancePressure.ts`](../lib/ghostflow/artifacts/leveredEtfRebalancePressure.ts)
+**Example file:** [`data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.example.json`](../data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.example.json) (`designOnly: true`)  
+**Production file:** [`data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.json`](../data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.json) (omit `designOnly`)  
+**Library:** [`lib/ghostflow/artifacts/leveredEtfRebalancePressure.ts`](../lib/ghostflow/artifacts/leveredEtfRebalancePressure.ts) — `loadLeveredEtfRebalancePressureArtifact()`, validation modes `example` \| `production`
 
 ---
 
@@ -66,7 +67,7 @@ SPXL, SPXS, SSO, SDS, QLD, QID — overlapping benchmarks with Tier-1; see feasi
 |-------|------|
 | `artifactVersion` | `"1"` |
 | `signalId` | `"levered-etf-rebalance-pressure"` |
-| `designOnly` | `true` (required in v1.1b) |
+| `designOnly` | **Example only:** `true` required (`mode: example`). **Production:** omit (forbidden `true` in `mode: production`) |
 | `asOf` / `publishedAt` | ISO `YYYY-MM-DD`; `publishedAt >= asOf` |
 | `updateFrequency` | `"weekly"` (artifact cadence; observation is single-session) |
 | `observationType` | `"latest_session_snapshot_refreshed_manually"` |
@@ -136,16 +137,18 @@ estimatedRebalanceNotionalMillionsUsd =
 |-------|--------|
 | Primary AUM | ProShares / Direxion fund pages |
 | Cross-check | ETF.com, ETFdb, Yahoo Finance `totalAssets` |
-| Index move | Stooq daily CSV or SPY/QQQ/IWM — **one session** per refresh |
+| Index move | StockAnalysis (or equivalent) QQQ/SPY/IWM **daily % change** — **one session** per refresh |
 
-Operator pastes values into JSON; no GhostFlow runtime fetch in v1.1b.
+Operator pastes values into JSON; no GhostFlow runtime fetch in v1.1b/c.
 
 ---
 
 ## 7. Validation rules
 
-Implemented in `validateLeveredEtfRebalancePressureArtifact(raw)`:
+Implemented in `validateLeveredEtfRebalancePressureArtifact(raw, { mode, referenceAsOf? })`:
 
+- **`mode: example`** — `designOnly` must be `true` (v1.1b example JSON)  
+- **`mode: production`** — `designOnly` must not be `true` (omit preferred); included in `npm run ghostflow:validate-artifacts`  
 - Structural fields per §4  
 - Exactly six tickers: TQQQ, SQQQ, UPRO, SPXU, TNA, TZA (no duplicates, no deferred)  
 - Direction / leverage consistency  
@@ -154,9 +157,10 @@ Implemented in `validateLeveredEtfRebalancePressureArtifact(raw)`:
 - Aggregates within tolerance (**0.1M** / **0.05** for pct)  
 - Rejects `candidatePressureScore` at root or in observations  
 - `mappingStatus` must be `not_final`  
-- `designOnly` must be `true`
 
-**Freshness:** Not implemented in v1.1b — deferred to v1.1c production artifact or v1.1d display card.
+**Freshness:** Not implemented in v1.1c — deferred to **v1.1d** display card.
+
+**Next gates:** **v1.1d** display-only card (no score); **v1.1e** mapping decision before score wiring; **v1.1f** score merge (if product-approved).
 
 ---
 
@@ -181,12 +185,13 @@ Do not promote `aggregateRebalancePctOfUniverseAum` as a live score sub-input un
 - [x] Design memo (this document)
 - [x] Example JSON `leveredEtfRebalancePressure.v1.example.json`
 - [x] Pure module + unit tests
-- [ ] **v1.1c** Production `leveredEtfRebalancePressure.v1.json` (`designOnly` removed)
-- [ ] JSON Schema `schema.leveredEtfRebalancePressure.v1.json` (optional v1.1c)
-- [ ] `scripts/ghostflow/validate-artifacts.ts` entry
-- [ ] Freshness helper (v1.1c or v1.1d)
-- [ ] **v1.1d** Display-only signal card in `buildSnapshot`
-- [ ] **v1.1e** Mapping decision memo (if needed)
+- [x] **v1.1c** Production `leveredEtfRebalancePressure.v1.json` (`designOnly` omitted)
+- [ ] JSON Schema `schema.leveredEtfRebalancePressure.v1.json` (optional)
+- [x] `scripts/ghostflow/validate-artifacts.ts` entry (production only; example not validated there)
+- [x] `loadLeveredEtfRebalancePressureArtifact()` (not used from `buildSnapshot` or UI in v1.1c)
+- [ ] Freshness helper (v1.1d)
+- [ ] **v1.1d** Display-only signal card in `buildSnapshot` (no score wiring)
+- [ ] **v1.1e** Mapping decision memo (required before score wiring)
 - [ ] **v1.1f** Score merge + PUBLIC badge + score-impact tests vs MOCK **55**
 - [ ] [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) operator row
 

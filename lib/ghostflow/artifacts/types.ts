@@ -378,7 +378,7 @@ export interface LeveredEtfRebalanceObservationsV1 {
 export interface LeveredEtfRebalancePressureArtifactV1 {
   artifactVersion: '1';
   signalId: 'levered-etf-rebalance-pressure';
-  designOnly: true;
+  designOnly?: true;
   asOf: string;
   publishedAt: string;
   source: ArtifactSource;

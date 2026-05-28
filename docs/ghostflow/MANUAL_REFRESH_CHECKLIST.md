@@ -86,6 +86,24 @@ Per-artifact deep dives: see linked runbooks at the bottom of this page.
 
 ---
 
+### 3b. Levered ETF Rebalance Pressure (weekly — validated candidate, not scored)
+
+| Item | Detail |
+|------|--------|
+| **Production file** | [`data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.json`](../../data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.json) — included in `npm run ghostflow:validate-artifacts` |
+| **Example file** | [`data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.example.json`](../../data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.example.json) — design reference only; unit tests (`mode: example`) |
+| **Universe** | TQQQ, SQQQ, UPRO, SPXU, TNA, TZA — `tier1_six_ticker_3x_index_etf_v1` |
+| **Primary AUM** | ProShares fund pages (TQQQ/SQQQ/UPRO/SPXU); StockAnalysis or Direxion for TNA/TZA |
+| **Index returns** | StockAnalysis QQQ/SPY/IWM history — **one session** `% change` per row `returnAsOf` |
+| **`asOf` rule** | Session date for index returns (ISO `YYYY-MM-DD`); aligns across QQQ/SPY/IWM rows |
+| **`publishedAt` rule** | Date when AUM sources were captured (may be after `asOf` if issuer AUM lags index session) |
+| **Row fields** | Recompute `estimatedRebalanceNotionalMillionsUsd` and `estimatedRebalanceDirection` via formula; recompute `observations` aggregates with `computeAggregateLeveredEtfRebalanceMetrics` |
+| **`dataQuality` rule** | `verified_manual` only if issuer AUM **and** cross-check reviewed for **all six** rows; else `manual_unverified` |
+| **Status** | v1.1c validated production candidate; **not wired** into Research Composite (`leveredEtfRebalancePressure` remains MOCK **55**); **no** UI card until **v1.1d**; mapping decision **v1.1e** before score wiring |
+| **Deep dive** | [LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md](./LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md) · [LEVERED_ETF_REBALANCE_FEASIBILITY.md](./LEVERED_ETF_REBALANCE_FEASIBILITY.md) |
+
+---
+
 ### 4. ETF Net Issuance Pressure (weekly)
 
 | Item | Detail |

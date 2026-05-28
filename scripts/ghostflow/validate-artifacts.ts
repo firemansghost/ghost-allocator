@@ -12,6 +12,7 @@ import { validateActiveIndexFlowArtifact } from '../../lib/ghostflow/artifacts/a
 import { validateVolatilityRegimeArtifact } from '../../lib/ghostflow/artifacts/volatilityRegime';
 import { validateMarketBreadthArtifact } from '../../lib/ghostflow/artifacts/marketBreadth';
 import { validateSystematicFlowProxyArtifact } from '../../lib/ghostflow/artifacts/systematicFlowProxy';
+import { validateLeveredEtfRebalancePressureArtifact } from '../../lib/ghostflow/artifacts/leveredEtfRebalancePressure';
 import { GHOSTFLOW_REFERENCE_AS_OF } from '../../lib/ghostflow/reference';
 
 const root = process.cwd();
@@ -154,6 +155,22 @@ function main(): void {
     const b = systematicRules.artifact.basket;
     console.log(
       `GhostFlow rules: systematic-flow-proxy OK (basket ${b.basketNetPctOi}% OI → score ${b.basketScore}, asOf ${systematicRules.artifact.asOf}, published ${systematicRules.artifact.publishedAt})`
+    );
+  }
+
+  const leveredPath = join(root, 'data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.json');
+  const leveredRules = validateLeveredEtfRebalancePressureArtifact(
+    loadJson(leveredPath),
+    { mode: 'production', referenceAsOf: GHOSTFLOW_REFERENCE_AS_OF }
+  );
+  if (!leveredRules.ok) {
+    failed = true;
+    console.error('GhostFlow rules failed for levered-etf-rebalance-pressure:');
+    for (const err of leveredRules.errors) console.error(`  - ${err}`);
+  } else {
+    const o = leveredRules.artifact.observations;
+    console.log(
+      `GhostFlow rules: levered-etf-rebalance-pressure OK (${o.dominantDirection}, ${o.aggregateRebalancePctOfUniverseAum}% of AUM abs rebalance est., asOf ${leveredRules.artifact.asOf}, published ${leveredRules.artifact.publishedAt})`
     );
   }
 
