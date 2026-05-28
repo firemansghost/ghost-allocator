@@ -84,7 +84,7 @@ Shipped: `buildSnapshot.ts` merge, DERIVED classification, coverage **6 public /
 
 **Feasibility memo:** [LEVERED_ETF_REBALANCE_FEASIBILITY.md](./LEVERED_ETF_REBALANCE_FEASIBILITY.md)
 
-**Outcome:** **YELLOW** — Tier-1 universe **TQQQ/SQQQ, UPRO/SPXU, TNA/TZA**; manual AUM from issuer pages + index moves via QQQ/SPY/IWM proxies; estimated rebalance notional proxy feasible. **v1.1c:** production artifact validated via `ghostflow:validate-artifacts`; **not scored**, **not displayed**. Keep `leveredEtfRebalancePressure` MOCK (**55**) until **v1.1d–f** gates pass.
+**Outcome:** **YELLOW** — Tier-1 universe **TQQQ/SQQQ, UPRO/SPXU, TNA/TZA**; manual AUM from issuer pages + index moves via QQQ/SPY/IWM proxies; estimated rebalance notional proxy feasible. **v1.1c:** production artifact validated via `ghostflow:validate-artifacts`. **v1.1d:** display-only public card (`levered-etf-rebalance`); **not scored**. Keep `leveredEtfRebalancePressure` MOCK (**55**) until **v1.1e–f** gates pass.
 
 ### D) Retirement-flow pressure — MOCK / research-only
 
@@ -146,7 +146,7 @@ GhostFlow input promotion rules (all phases):
 | **v1.1a** | Levered ETF rebalance pressure feasibility | **Done** — [LEVERED_ETF_REBALANCE_FEASIBILITY.md](./LEVERED_ETF_REBALANCE_FEASIBILITY.md); YELLOW; Tier-1 six-ticker universe |
 | **v1.1b** | Levered ETF artifact design | **Done** — [LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md](./LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md), `leveredEtfRebalancePressure.v1.example.json`, `lib/ghostflow/artifacts/leveredEtfRebalancePressure.ts`, tests |
 | **v1.1c** | Levered ETF production artifact candidate | `leveredEtfRebalancePressure.v1.json`, `validate-artifacts` |
-| **v1.1d** | Levered ETF display-only signal card | Display merge only (cf. CFTC v0.9f) |
+| **v1.1d** | Levered ETF display-only signal card | **Done** — `applyLeveredEtfRebalanceDisplayArtifact`, `levered-etf-rebalance` card, `publicSignalCount` +8, no score wiring |
 | **v1.1e** | Levered ETF mapping decision (if needed) | Docs only — after optional calibration |
 | **v1.1f** | Levered ETF score-wiring gate (if product-approved) | `buildSnapshot` merge; MOCK **55** replacement; methodology + tests |
 | **v1.0+** | Deeper options (0DTE), retirement-flow sources | Larger sourcing, possible licensing |

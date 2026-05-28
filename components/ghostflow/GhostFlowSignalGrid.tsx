@@ -1,7 +1,7 @@
 import { GlassCard } from '@/components/GlassCard';
 import {
   groupSignalsByPresentation,
-  signalCardBadgeLabel,
+  signalCardBadgeLabelForSignal,
   signalCardDisplayName,
   signalCardExplanation,
   type SignalCardVariant,
@@ -89,6 +89,7 @@ function dataQualityLabel(q: string | undefined): string {
 function artifactDateLabel(signalId: string): string {
   if (signalId === 'etf-flow') return 'Week ended';
   if (signalId === 'systematic-flow') return 'Positions as of';
+  if (signalId === 'levered-etf-rebalance') return 'Session';
   if (
     signalId === 'active-index-flow' ||
     signalId === 'concentration' ||
@@ -109,7 +110,7 @@ function SignalCard({
   variant: SignalCardVariant;
   dataMix: GhostFlowDataMix;
 }) {
-  const badgeLabel = signalCardBadgeLabel(variant, sig.status);
+  const badgeLabel = signalCardBadgeLabelForSignal(sig, variant);
 
   return (
     <GlassCard className={cardShellClass(variant)}>
@@ -256,7 +257,7 @@ export function GhostFlowSignalGrid({
 
       <SignalSection
         title="Public manual artifacts"
-        intro="Hand-updated from public sources. Proxy level shows mapped 0–100 pressure, not a live market alert."
+        intro="Hand-updated from public sources. Score-fed cards show mapped 0–100 proxy level; display-only cards (CFTC TFF, levered ETF rebalance) do not feed the composite."
         signals={grouped.publicArtifacts}
         variant="public"
         dataMix={dataMix}

@@ -15,6 +15,7 @@ export const PUBLIC_ARTIFACT_SIGNAL_IDS = [
   'concentration',
   'breadth',
   'systematic-flow',
+  'levered-etf-rebalance',
 ] as const;
 
 export const DERIVED_SIGNAL_IDS = ['distance-65'] as const;
@@ -92,4 +93,15 @@ export function signalCardBadgeLabel(
   if (variant === 'derived') return 'DERIVED';
   if (variant === 'public') return `Proxy level: ${proxyLevelLabel(status)}`;
   return signalStatusDisplayLabel(status).toUpperCase();
+}
+
+/** Per-signal badge override (e.g. display-only levered ETF card). */
+export function signalCardBadgeLabelForSignal(
+  sig: Pick<ScoredGhostFlowSignal, 'id' | 'dataStatus' | 'status'>,
+  variant: SignalCardVariant
+): string | null {
+  if (sig.id === 'levered-etf-rebalance' && sig.dataStatus === 'public_proxy') {
+    return 'DISPLAY ONLY';
+  }
+  return signalCardBadgeLabel(variant, sig.status);
 }
