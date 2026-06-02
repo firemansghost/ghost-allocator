@@ -152,3 +152,6 @@ reports/
 
 # Local scratch (e.g. drift-study CSV output)
 .tmp/
+
+# GhostFlow research script output (operator-local; --out)
+data/ghostflow/research/
