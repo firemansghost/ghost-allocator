@@ -99,8 +99,8 @@ Per-artifact deep dives: see linked runbooks at the bottom of this page.
 | **`publishedAt` rule** | Date when AUM sources were captured (may be after `asOf` if issuer AUM lags index session) |
 | **Row fields** | Recompute `estimatedRebalanceNotionalMillionsUsd` and `estimatedRebalanceDirection` via formula; recompute `observations` aggregates with `computeAggregateLeveredEtfRebalanceMetrics` |
 | **`dataQuality` rule** | `verified_manual` only if issuer AUM **and** cross-check reviewed for **all six** rows; else `manual_unverified` |
-| **Status** | v1.1d: shown as display-only `levered-etf-rebalance` public card when artifact validates; **not wired** into Research Composite (`leveredEtfRebalancePressure` remains MOCK **55**); mapping decision **v1.1e** before score wiring |
-| **Deep dive** | [LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md](./LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md) · [LEVERED_ETF_REBALANCE_FEASIBILITY.md](./LEVERED_ETF_REBALANCE_FEASIBILITY.md) |
+| **Status** | v1.1d: display-only `levered-etf-rebalance` card when artifact validates. **v1.1e:** mapping decision recorded — [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md); artifact remains display-only; `observations.mappingStatus` stays **not_final**; score input remains MOCK **55**. **v1.1e-calibration** required before **v1.1f** score-wiring gate |
+| **Deep dive** | [LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md](./LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md) · [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md) · [LEVERED_ETF_REBALANCE_FEASIBILITY.md](./LEVERED_ETF_REBALANCE_FEASIBILITY.md) |
 
 ---
 
