@@ -161,13 +161,13 @@ Display-only (A) preserves user visibility of rebalance pressure while the compo
 
 ## 11. Future implementation checklist
 
-### v1.1e-calibration (research only — next)
+### v1.1e-calibration (research only — done; full-history operator run optional)
 
-- [ ] Historical backfill or repeated manual weeks for `aggregateRebalancePctOfUniverseAum` and abs notional
-- [ ] Distribution stats (percentiles, tails, week-over-week stability)
-- [ ] Compare mapping options B–F on history (not only latest week)
-- [ ] Score-impact table over representative weeks (Passive, Composite, band)
-- [ ] Calibration memo (e.g. `LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md`) — parallel to [CFTC_TFF_CALIBRATION_STUDY.md](./CFTC_TFF_CALIBRATION_STUDY.md)
+- [x] Fixed-current-AUM return-sensitivity study — [LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md](./LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md) (`npm run ghostflow:levered-etf-rebalance-history-study`)
+- [x] Distribution + mapping comparison helpers (not true historical AUM calibration)
+- [x] Score-impact preview vs MOCK **55**
+- [ ] Full-history run (Stooq or `--returns-csv`) — paste results into calibration memo §7
+- [ ] Sparse AUM checkpoints / rolling-forward series (future)
 
 ### After calibration + mapping choice + product approval → v1.1f
 
@@ -186,4 +186,5 @@ Display-only (A) preserves user visibility of rebalance pressure while the compo
 - [LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md](./LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md) — schema and operator checklist  
 - [LEVERED_ETF_REBALANCE_FEASIBILITY.md](./LEVERED_ETF_REBALANCE_FEASIBILITY.md) — v1.1a feasibility  
 - [DATA_ROADMAP.md](./DATA_ROADMAP.md) — phase tracking (v1.1e / v1.1e-calibration / v1.1f)  
-- [CFTC_TFF_MAPPING_DECISION.md](./CFTC_TFF_MAPPING_DECISION.md) — parallel mapping-decision pattern (CFTC track)
+- [CFTC_TFF_MAPPING_DECISION.md](./CFTC_TFF_MAPPING_DECISION.md) — parallel mapping-decision pattern (CFTC track)  
+- [LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md](./LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md) — v1.1e-calibration supporting evidence (fixed-current-AUM stress test)

@@ -1,6 +1,6 @@
 # Levered ETF Rebalance Pressure — Artifact Design (GhostFlow v1.1b/c)
 
-**Status (v1.1e):** Validated **production artifact** with **display-only** public card (`levered-etf-rebalance`) — **not** in Research Composite, **not** score-wired (`mappingStatus: not_final`). **v1.1e mapping decision:** [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md) — display-only; MOCK **55** unchanged; **v1.1e-calibration** required before **v1.1f** score wiring. Example JSON remains design-only.  
+**Status (v1.1e-calibration):** Validated **production artifact** with **display-only** public card (`levered-etf-rebalance`) — **not** in Research Composite, **not** score-wired (`mappingStatus: not_final`). **v1.1e mapping:** [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md). **v1.1e-calibration:** [LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md](./LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md) — fixed-current-AUM return-sensitivity (not true historical AUM); MOCK **55** unchanged; **v1.1f** score gate only after product approval. Example JSON remains design-only.  
 **Prior work:** [LEVERED_ETF_REBALANCE_FEASIBILITY.md](./LEVERED_ETF_REBALANCE_FEASIBILITY.md) (v1.1a, **YELLOW**).  
 **Example file:** [`data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.example.json`](../data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.example.json) (`designOnly: true`)  
 **Production file:** [`data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.json`](../data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.json) (omit `designOnly`)  
@@ -192,7 +192,7 @@ Do not promote `aggregateRebalancePctOfUniverseAum` as a live score sub-input un
 - [x] Freshness helper + display card wiring (v1.1d)
 - [x] **v1.1d** Display-only signal card in `buildSnapshot` (`applyLeveredEtfRebalanceDisplayArtifact`; badge DISPLAY ONLY; no score wiring)
 - [x] **v1.1e** Mapping decision memo — [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md) (display-only; `mappingStatus` stays `not_final`)
-- [ ] **v1.1e-calibration** Historical calibration study (required before score wiring)
+- [x] **v1.1e-calibration** Fixed-current-AUM return-sensitivity study — [LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md](./LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md) (research-only; full-history operator run optional)
 - [ ] **v1.1f** Score merge + PUBLIC badge + score-impact tests vs MOCK **55** (after calibration + product approval)
 - [ ] [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) operator row
 
@@ -201,6 +201,7 @@ Do not promote `aggregateRebalancePctOfUniverseAum` as a live score sub-input un
 ## Related documents
 
 - [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md) — v1.1e mapping decision (display-only; calibration before v1.1f)  
+- [LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md](./LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md) — v1.1e-calibration return-sensitivity study  
 - [LEVERED_ETF_REBALANCE_FEASIBILITY.md](./LEVERED_ETF_REBALANCE_FEASIBILITY.md)  
 - [DATA_ROADMAP.md](./DATA_ROADMAP.md)  
 - [CFTC_TFF_ARTIFACT_DESIGN.md](./CFTC_TFF_ARTIFACT_DESIGN.md) — parallel design pattern
