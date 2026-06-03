@@ -71,17 +71,18 @@ The study evaluated whether Mapping A is too aggressive for score use and compar
 ## 5. Final v1.0b decision
 
 1. **CFTC TFF artifact remains display-only** for now (no `buildSnapshot` score merge).
-2. **Public display card keeps Mapping A** — `basketScore = clamp(round(abs(netPctOi) * 5), 0, 100)`.
-3. **Do not wire Mapping A** into the Research Composite under the old label **“Systematic strategy pressure”**.
-4. **If score wiring is product-approved later**, preferred score candidate is **Mapping C**:
+2. **UI badge (v1.3a):** Public `systematic-flow` card uses **DISPLAY ONLY** (presentation only); card body may still show Mapping A pressure (e.g. 93) — not a composite input.
+3. **Public display card keeps Mapping A** — `basketScore = clamp(round(abs(netPctOi) * 5), 0, 100)`.
+4. **Do not wire Mapping A** into the Research Composite under the old label **“Systematic strategy pressure”**.
+5. **If score wiring is product-approved later**, preferred score candidate is **Mapping C**:
    ```
    scoreInput = min(80, basketScore)
    ```
    where `basketScore` is the Mapping A value from the validated artifact.
-5. **Future wiring must rename** the passive score sub-input. Approved labels (either is acceptable; pick one primary in UI):
+6. **Future wiring must rename** the passive score sub-input. Approved labels (either is acceptable; pick one primary in UI):
    - **“CFTC leveraged-funds positioning proxy”** (primary recommendation)
    - **“Leveraged-funds futures positioning proxy”** (alternate)
-6. **Future wiring must include:** score-impact tests (composite + passive + band), methodology copy, card/score caveats, PUBLIC badge on the sub-input, and **fallback behavior** (on artifact load/validation failure: retain MOCK **62** and do not promote `publicPassiveInputKeys` — same pattern as other public artifact merges).
+7. **Future wiring must include:** score-impact tests (composite + passive + band), methodology copy, card/score caveats, PUBLIC badge on the sub-input, and **fallback behavior** (on artifact load/validation failure: retain MOCK **62** and do not promote `publicPassiveInputKeys` — same pattern as other public artifact merges).
 
 **Next implementation gate:** **v1.0c** — score-wiring implementation, **only if product-approved**. See §7 checklist.
 

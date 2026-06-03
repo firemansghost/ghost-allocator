@@ -61,19 +61,25 @@ export function GhostFlowMethodology({
       <h2 id="ghostflow-methodology-heading" className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
         Methodology &amp; model zones
       </h2>
-      <p className="text-xs text-zinc-500">Current methodology: v0.8 (trust &amp; clarity pass; scoring unchanged from v0.7)</p>
+      <p className="text-xs text-zinc-500">
+        Trust &amp; clarity pass v1.3a — scoring weights unchanged; display-only artifact cards documented separately
+        from composite inputs.
+      </p>
 
       <GlassCard className="p-4 sm:p-6">
         <h3 className="text-base font-semibold text-zinc-100">Scoring model</h3>
         <div className="mt-3 space-y-3 text-sm text-zinc-400 leading-relaxed">
           <p>
             <strong className="text-zinc-300">GhostFlow Research Composite</strong> = 50% Passive Pressure Score + 50% Structural
-            Fragility Score. Weights are fixed and documented below. v0.7 wires two public Passive Pressure sub-inputs
-            (ETF net issuance from ICI + options / volatility amplifier from CBOE VIX) and four public Structural
-            Fragility sub-inputs (ICI fund/ETF index share proxy + monthly active/index flow differential from ICI +
-            monthly top-10 index concentration from SSGA SPY fact sheet + daily S&P 500 % above 50-day MA breadth from
-            StockCharts); remaining inputs remain static mock proxies. The ICI index share score input is not a
-            market-wide passive-share estimate.
+            Fragility Score. Weights are fixed and documented below. The composite uses <strong className="text-zinc-300">six
+            score-fed public artifacts</strong> (ETF issuance, VIX, ICI index share, active/index flows, SPY concentration,
+            breadth), <strong className="text-zinc-300">one derived structural input</strong> (model-zone proximity from ICI
+            index share), and <strong className="text-zinc-300">three static MOCK passive inputs</strong> (systematic **62**,
+            retirement-flow **58**, levered ETF **55**). Three additional <strong className="text-zinc-300">display-only public
+            artifact cards</strong> (CFTC TFF positioning, levered ETF rebalance estimate, retirement asset growth) show
+            measured context but do <strong className="text-zinc-300">not</strong> feed the composite. One{' '}
+            <strong className="text-zinc-300">placeholder</strong> card (0DTE) is illustrative only. The ICI index share score
+            input is not a market-wide passive-share estimate.
           </p>
           <div className="grid gap-4 sm:grid-cols-2 text-xs">
             <div className="rounded-xl border border-zinc-800/80 bg-neutral-950/40 p-3">
@@ -587,7 +593,14 @@ export function GhostFlowMethodology({
           <li>Does not predict exact tops or bottoms or market crashes.</li>
           <li>Does not provide buy/sell recommendations.</li>
           <li>Does not treat model thresholds as guaranteed outcomes.</li>
-          <li>Does not use live feeds. Six manual public artifacts plus mock inputs elsewhere.</li>
+          <li>
+            Does not use live feeds. Six score-fed manual public artifacts plus three display-only public cards and static
+            MOCK composite inputs elsewhere.
+          </li>
+          <li>
+            Does not treat display-only CFTC, levered ETF rebalance, or retirement asset-growth cards as Research Composite
+            inputs — MOCK **62**, **55**, and **58** still drive those passive sub-inputs.
+          </li>
           <li>
             Does not treat ETF net issuance, active/index flow differential, ICI Index Share Proxy, index
             concentration, market breadth participation, or VIX as complete mechanical-flow or true passive-share

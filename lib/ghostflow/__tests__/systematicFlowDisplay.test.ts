@@ -10,6 +10,7 @@ import {
 } from '../artifacts/systematicFlowProxy';
 import {
   groupSignalsByPresentation,
+  signalCardBadgeLabelForSignal,
   signalCardDisplayName,
 } from '../signalPresentation';
 import { ghostFlowBandLabel, scoreGhostFlowSnapshot } from '../scoring';
@@ -57,6 +58,11 @@ assert.deepStrictEqual(
 );
 
 const publicSystematic = grouped.publicArtifacts.find((s) => s.id === 'systematic-flow')!;
+const scoredSystematic = scored.signals.find((s) => s.id === 'systematic-flow')!;
+assert.strictEqual(
+  signalCardBadgeLabelForSignal(scoredSystematic, 'public'),
+  'DISPLAY ONLY'
+);
 assert.strictEqual(
   signalCardDisplayName(publicSystematic),
   SYSTEMATIC_FLOW_DISPLAY_SIGNAL_NAME
