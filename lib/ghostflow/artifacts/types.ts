@@ -8,7 +8,7 @@ export type GhostFlowArtifactDataQuality = 'verified_manual' | 'manual_unverifie
 
 export type GhostFlowArtifactFreshnessStatus = 'fresh' | 'caution' | 'stale' | 'missing';
 
-export type GhostFlowUpdateFrequency = 'daily' | 'weekly' | 'monthly';
+export type GhostFlowUpdateFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly';
 
 export type EtfNetIssuanceSeriesDefinition = 'domestic_equity_etf_estimated_weekly_net_issuance';
 
@@ -404,6 +404,61 @@ export interface LeveredEtfRebalancePressureValidationError {
 export type LeveredEtfRebalancePressureValidation =
   | LeveredEtfRebalancePressureValidationResult
   | LeveredEtfRebalancePressureValidationError;
+
+export type RetirementFlowObservationType = 'quarterly_retirement_market_snapshot';
+
+export type RetirementFlowSeriesDefinition =
+  'ici_retirement_market_quarterly_assets_v1';
+
+export type RetirementFlowMappingStatus = 'not_final';
+
+export type RetirementFlowContributionSeasonFlag =
+  | 'payroll_peak'
+  | 'ira_contribution_season'
+  | 'neutral';
+
+export interface RetirementFlowPressureObservationsV1 {
+  totalRetirementMarketAssetsTrillionsUsd: number;
+  definedContributionAssetsTrillionsUsd: number;
+  iraAssetsTrillionsUsd: number;
+  mappingStatus: RetirementFlowMappingStatus;
+  targetDateFundAssetsBillionsUsd?: number;
+  priorQuarterTotalAssetsTrillionsUsd?: number;
+  priorYearTotalAssetsTrillionsUsd?: number;
+  quarterOverQuarterAssetGrowthPct?: number;
+  yearOverYearAssetGrowthPct?: number;
+  equityAllocationProxyPct?: number;
+  contributionSeasonFlag?: RetirementFlowContributionSeasonFlag;
+}
+
+export interface RetirementFlowPressureArtifactV1 {
+  artifactVersion: '1';
+  signalId: 'retirement-flow-pressure-proxy';
+  designOnly?: true;
+  asOf: string;
+  publishedAt: string;
+  source: ArtifactSource;
+  observationType: RetirementFlowObservationType;
+  seriesDefinition: RetirementFlowSeriesDefinition;
+  updateFrequency: 'quarterly';
+  dataQuality: 'verified_manual' | 'manual_unverified';
+  caveats: string[];
+  observations: RetirementFlowPressureObservationsV1;
+}
+
+export interface RetirementFlowPressureValidationResult {
+  ok: true;
+  artifact: RetirementFlowPressureArtifactV1;
+}
+
+export interface RetirementFlowPressureValidationError {
+  ok: false;
+  errors: string[];
+}
+
+export type RetirementFlowPressureProxyValidation =
+  | RetirementFlowPressureValidationResult
+  | RetirementFlowPressureValidationError;
 
 export interface ArtifactFreshnessResult {
   status: GhostFlowArtifactFreshnessStatus;
