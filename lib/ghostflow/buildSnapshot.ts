@@ -65,6 +65,8 @@ import type {
   PassiveShareProxyArtifactV1,
   LeveredEtfRebalancePressureArtifactV1,
   LeveredEtfRebalancePressureValidation,
+  RetirementFlowPressureArtifactV1,
+  RetirementFlowPressureProxyValidation,
   SystematicFlowProxyArtifactV1,
   VolatilityRegimeArtifactV1,
 } from './artifacts/types';
@@ -86,6 +88,15 @@ import {
   SYSTEMATIC_FLOW_DISPLAY_SIGNAL_ID,
   SYSTEMATIC_FLOW_DISPLAY_SIGNAL_NAME,
 } from './artifacts/systematicFlowProxy';
+import {
+  buildRetirementFlowDisplayExplanation,
+  evaluateRetirementFlowPressureArtifactFreshness,
+  formatRetirementFlowDisplayValue,
+  loadRetirementFlowPressureProxyArtifact,
+  RETIREMENT_FLOW_DISPLAY_CARD_CAVEAT,
+  RETIREMENT_FLOW_DISPLAY_SIGNAL_ID,
+  RETIREMENT_FLOW_DISPLAY_SIGNAL_NAME,
+} from './artifacts/retirementFlowPressureProxy';
 import {
   buildVolRegimeExplanation,
   formatVolRegimeDisplayValue,
@@ -551,6 +562,78 @@ export function mergeLeveredEtfRebalanceDisplayIfValid(
   };
 }
 
+/** Display-only retirement asset-growth card — does not merge into passive/structural score inputs. */
+export function applyRetirementFlowDisplayArtifact(
+  raw: GhostFlowRawSnapshot,
+  artifact: RetirementFlowPressureArtifactV1,
+  referenceAsOf: string
+): ApplyArtifactOutcome {
+  const freshness = evaluateRetirementFlowPressureArtifactFreshness(artifact, referenceAsOf);
+  const { observations } = artifact;
+  const numericValue = observations.quarterOverQuarterAssetGrowthPct ?? 0;
+
+  raw.signals = replaceSignal(raw.signals, {
+    id: RETIREMENT_FLOW_DISPLAY_SIGNAL_ID,
+    name: RETIREMENT_FLOW_DISPLAY_SIGNAL_NAME,
+    value: formatRetirementFlowDisplayValue(observations),
+    numericValue,
+    explanation: buildRetirementFlowDisplayExplanation(artifact),
+    cardCaveat: RETIREMENT_FLOW_DISPLAY_CARD_CAVEAT,
+    dataStatus: 'public_proxy',
+    updateFrequencyTarget: 'Quarterly (manual artifact)',
+    sourceName: artifact.source.name,
+    sourceUrl: artifact.source.url,
+    sourceNote: artifact.source.note,
+    dataQuality: artifact.dataQuality,
+    artifactAsOf: artifact.asOf,
+    artifactPublishedAt: artifact.publishedAt,
+    freshnessStatus: freshness.status,
+  });
+
+  const publicSignal: GhostFlowPublicSignalMeta = {
+    signalId: RETIREMENT_FLOW_DISPLAY_SIGNAL_ID,
+    name: RETIREMENT_FLOW_DISPLAY_SIGNAL_NAME,
+    sourceName: artifact.source.name,
+    sourceUrl: artifact.source.url,
+    asOf: artifact.asOf,
+    publishedAt: artifact.publishedAt,
+    freshnessStatus: freshness.status,
+  };
+
+  return {
+    raw,
+    warnings: freshness.warnings,
+    publicSignal,
+  };
+}
+
+export function mergeRetirementFlowDisplayIfValid(
+  raw: GhostFlowRawSnapshot,
+  validation: RetirementFlowPressureProxyValidation,
+  referenceAsOf: string
+): {
+  raw: GhostFlowRawSnapshot;
+  warnings: string[];
+  publicSignal?: GhostFlowPublicSignalMeta;
+} {
+  if (!validation.ok) {
+    return {
+      raw,
+      warnings: [
+        `Retirement Asset Growth Proxy artifact invalid or missing (${validation.errors.join('; ')}). No display card added.`,
+      ],
+    };
+  }
+
+  const result = applyRetirementFlowDisplayArtifact(raw, validation.artifact, referenceAsOf);
+
+  return {
+    raw: result.raw,
+    warnings: result.warnings,
+    publicSignal: result.publicSignal,
+  };
+}
+
 function buildMeta(
   raw: GhostFlowRawSnapshot,
   warnings: string[],
@@ -793,6 +876,16 @@ export function buildGhostFlowSnapshot(
   raw = leveredDisplay.raw;
   warnings.push(...leveredDisplay.warnings);
   if (leveredDisplay.publicSignal) publicSignals.push(leveredDisplay.publicSignal);
+
+  const retirementValidation = loadRetirementFlowPressureProxyArtifact();
+  const retirementDisplay = mergeRetirementFlowDisplayIfValid(
+    raw,
+    retirementValidation,
+    referenceAsOf
+  );
+  raw = retirementDisplay.raw;
+  warnings.push(...retirementDisplay.warnings);
+  if (retirementDisplay.publicSignal) publicSignals.push(retirementDisplay.publicSignal);
 
   return buildMeta(raw, warnings, publicSignals, publicPassiveInputKeys, publicStructuralInputKeys);
 }

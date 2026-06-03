@@ -1,12 +1,16 @@
 /**
  * GhostFlow v1.2b/c — Retirement flow pressure proxy artifact.
- * Pure validation and growth helpers. Production loader for validate-artifacts; no buildSnapshot merge.
+ * Pure validation, display helpers, and freshness. Display-only buildSnapshot merge; no score wiring.
  */
 
 import retirementFlowPressureProxyArtifactJson from '@/data/ghostflow/artifacts/retirementFlowPressureProxy.v1.json';
+import { calendarDaysAfter } from '@/lib/ghostflow/artifactFreshness';
 import { GHOSTFLOW_REFERENCE_AS_OF } from '@/lib/ghostflow/reference';
 import type {
+  ArtifactFreshnessResult,
+  GhostFlowArtifactFreshnessStatus,
   RetirementFlowPressureArtifactV1,
+  RetirementFlowPressureObservationsV1,
   RetirementFlowPressureProxyValidation,
 } from './types';
 
@@ -23,6 +27,18 @@ export const RETIREMENT_FLOW_OBSERVATION_TYPE =
 
 export const RETIREMENT_FLOW_SERIES_DEFINITION =
   'ici_retirement_market_quarterly_assets_v1' as const;
+
+export const RETIREMENT_FLOW_DISPLAY_SIGNAL_ID = 'retirement-asset-growth' as const;
+
+export const RETIREMENT_FLOW_DISPLAY_SIGNAL_NAME =
+  'Retirement Asset Growth Proxy' as const;
+
+export const RETIREMENT_FLOW_DISPLAY_CARD_CAVEAT =
+  'Display-only quarterly retirement asset-growth proxy; not live flow pressure and not included in the Research Composite.';
+
+/** Quarterly artifact freshness (calendar days after publishedAt). */
+const FRESHNESS_FRESH_DAYS = 45;
+const FRESHNESS_CAUTION_DAYS = 90;
 
 export type RetirementFlowValidationMode = 'example' | 'production';
 
@@ -351,4 +367,62 @@ export function loadRetirementFlowPressureProxyArtifact(): RetirementFlowPressur
     mode: 'production',
     referenceAsOf: GHOSTFLOW_REFERENCE_AS_OF,
   });
+}
+
+export function formatRetirementFlowDisplayValue(
+  observations: RetirementFlowPressureObservationsV1
+): string {
+  const total = observations.totalRetirementMarketAssetsTrillionsUsd;
+  const qoq = observations.quarterOverQuarterAssetGrowthPct ?? 0;
+  const yoy = observations.yearOverYearAssetGrowthPct ?? 0;
+  return `$${total.toFixed(1)}T retirement assets · QoQ +${qoq.toFixed(1)}% · YoY +${yoy.toFixed(1)}%`;
+}
+
+export function buildRetirementFlowDisplayExplanation(
+  artifact: RetirementFlowPressureArtifactV1
+): string {
+  const { observations: o } = artifact;
+  return (
+    `ICI Retirement Market Table 1 quarterly structural asset levels: $${o.totalRetirementMarketAssetsTrillionsUsd.toFixed(1)}T total ` +
+    `(IRA $${o.iraAssetsTrillionsUsd.toFixed(1)}T, DC $${o.definedContributionAssetsTrillionsUsd.toFixed(1)}T), ` +
+    `QoQ +${(o.quarterOverQuarterAssetGrowthPct ?? 0).toFixed(1)}%, YoY +${(o.yearOverYearAssetGrowthPct ?? 0).toFixed(1)}%. ` +
+    `Levels reflect market returns and revaluations, not isolated payroll contribution flow. ` +
+    `mappingStatus: ${o.mappingStatus}; not included in the Research Composite.`
+  );
+}
+
+export function retirementFlowFreshnessAnchor(
+  artifact: RetirementFlowPressureArtifactV1
+): string {
+  return artifact.publishedAt ?? artifact.asOf;
+}
+
+function statusFromRetirementFreshnessDays(days: number): GhostFlowArtifactFreshnessStatus {
+  if (days <= FRESHNESS_FRESH_DAYS) return 'fresh';
+  if (days <= FRESHNESS_CAUTION_DAYS) return 'caution';
+  return 'stale';
+}
+
+export function evaluateRetirementFlowPressureArtifactFreshness(
+  artifact: RetirementFlowPressureArtifactV1,
+  referenceAsOf: string = GHOSTFLOW_REFERENCE_AS_OF
+): ArtifactFreshnessResult {
+  const anchor = retirementFlowFreshnessAnchor(artifact);
+  const ageDays = calendarDaysAfter(anchor, referenceAsOf);
+  const status = statusFromRetirementFreshnessDays(ageDays);
+  const warnings: string[] = [];
+  const label = 'Retirement Asset Growth Proxy';
+
+  if (status === 'caution') {
+    warnings.push(
+      `${label} artifact is ${ageDays} calendar days since release (caution: ${FRESHNESS_FRESH_DAYS + 1}–${FRESHNESS_CAUTION_DAYS} days). ` +
+        `Normal quarterly ICI cadence — not a failed feed or score problem.`
+    );
+  } else if (status === 'stale') {
+    warnings.push(
+      `${label} artifact is ${ageDays} calendar days since release (stale: >${FRESHNESS_CAUTION_DAYS} days). Refresh recommended.`
+    );
+  }
+
+  return { status, ageDays, warnings };
 }

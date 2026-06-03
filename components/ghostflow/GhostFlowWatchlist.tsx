@@ -4,7 +4,7 @@ const WATCH_TARGETS = [
   '0DTE / options volume',
   'CTA / vol-control proxy',
   'Levered ETF rebalance pressure — display-only artifact; mapping not final (v1.1e)',
-  'Retirement-flow pressure',
+  'Retirement asset growth — display-only ICI quarterly artifact; mapping not final (v1.2e)',
   'Bond neglect / income replacement lens',
   'HHI or effective-number concentration metric',
 ];
@@ -18,10 +18,10 @@ export function GhostFlowWatchlist() {
       <GlassCard className="p-4 sm:p-6">
         <p className="text-sm text-zinc-400 leading-relaxed mb-4">
           GhostFlow uses six public score artifacts, one derived score input (model-zone proximity from ICI index
-          share), two display-only public artifacts (CFTC TFF positioning, levered ETF rebalance pressure), and three
-          static mock score inputs in the research composite, plus one PLACEHOLDER signal card (0DTE) not yet in the
-          score. Mapping for levered ETF rebalance (v1.1e) and score wiring (v1.1f) remain gated; CFTC score wiring is
-          separately product-gated.
+          share), three display-only public artifacts (CFTC TFF positioning, levered ETF rebalance pressure, retirement
+          asset growth), and three static mock score inputs in the research composite, plus one PLACEHOLDER signal card
+          (0DTE) not yet in the score. Retirement-flow pressure stays MOCK 58 (v1.2e display-only); levered mapping
+          (v1.1e) and score wiring (v1.1f / v1.2f) remain product-gated; CFTC score wiring is separately gated.
         </p>
         <ul className="grid gap-2 sm:grid-cols-2 text-sm text-zinc-300">
           {WATCH_TARGETS.map((item) => (

@@ -77,9 +77,10 @@ export function GhostFlowScoreDrivers() {
 
         <p className="text-xs text-amber-300/85 leading-relaxed border-t border-zinc-800/80 pt-3">
           The CFTC TFF positioning proxy is displayed as a public artifact, but systematic strategy pressure remains a
-          static MOCK score input until mapping and score-wiring are approved. The levered ETF rebalance artifact is
-          displayed publicly, but levered ETF rebalance pressure remains a static MOCK score input until mapping and
-          score-wiring are approved.
+          static MOCK score input until mapping and score-wiring are approved. The levered ETF rebalance and retirement
+          asset-growth artifacts are displayed publicly, but levered ETF rebalance pressure and retirement-flow pressure
+          remain static MOCK score inputs until mapping, overlap review, and score-wiring are explicitly approved (v1.2e
+          recommends display-only for retirement).
         </p>
       </GlassCard>
     </section>

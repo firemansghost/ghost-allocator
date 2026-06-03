@@ -32,7 +32,7 @@ Ten sub-inputs feed the research composite (50% Passive Pressure + 50% Structura
 | `etfFundFlowImpulse` | **PUBLIC** | ICI domestic equity ETF estimated net issuance (~$33.9B, week ended 2026-05-13) → 0–100 proxy via `etfNetIssuance` mapper | Weekly (manual artifact) | Yes (25% of passive pillar) | Medium–high — `verified_manual` |
 | `optionsVolatilityAmplifier` | **PUBLIC** | CBOE VIX close **16.7** (as of 2026-05-22) → 0–100 via `volatilityRegime` mapper | Daily (manual artifact) | Yes (20%) | High — `verified_manual` |
 | `systematicStrategyPressure` | **MOCK** | Static **62** from mock snapshot; display card [`systematic-flow`] when artifact validates — **not scored** | None (static) | Yes (20%) | Low — CFTC display-only separate ([v1.0b](./CFTC_TFF_MAPPING_DECISION.md)) |
-| `retirementFlowPressureProxy` | **MOCK** | Static **58** from mock snapshot; [v1.2c production candidate](../data/ghostflow/artifacts/retirementFlowPressureProxy.v1.json) validated — **not scored**, not displayed | None (static) | Yes (20%) | Low — [v1.2c](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md); **v1.2d** display decision |
+| `retirementFlowPressureProxy` | **MOCK** | Static **58** in composite; [v1.2c artifact](../data/ghostflow/artifacts/retirementFlowPressureProxy.v1.json) on display-only card `retirement-asset-growth` — **not scored** | None (static) | Yes (20%) | Low — display-only ([v1.2e](./RETIREMENT_FLOW_MAPPING_DECISION.md)); MOCK **58** |
 | `leveredEtfRebalancePressure` | **MOCK** | Static **55** from mock snapshot; display card [`levered-etf-rebalance`] when artifact validates — **not scored** | None (static) | Yes (15%) | Low — display-only artifact separate ([v1.1e](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md)) |
 
 ### Structural Fragility (5 sub-inputs)
@@ -160,7 +160,7 @@ GhostFlow input promotion rules (all phases):
 | **v1.2a** | Retirement-flow pressure feasibility | **Done** — [RETIREMENT_FLOW_FEASIBILITY.md](./RETIREMENT_FLOW_FEASIBILITY.md); YELLOW; MOCK **58** unchanged |
 | **v1.2b** | Retirement-flow artifact design | **Done** — [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md); example JSON + validator + tests; ICI row names **pending v1.2c** |
 | **v1.2c** | Retirement-flow production artifact candidate | **Done** — [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md) §2 ICI Table 1 lock; `retirementFlowPressureProxy.v1.json` + `validate-artifacts`; MOCK **58** unchanged |
-| **v1.2d** | Retirement display-only card / score-input decision | Preferred over score merge; overlap review |
+| **v1.2d** | Retirement display-only card | **Done** — `retirement-asset-growth`; `publicSignalCount` 9; MOCK **58** unchanged; overlap review before v1.2f |
 | **v1.2e** | Retirement calibration / mapping decision | **Done** — [RETIREMENT_FLOW_CALIBRATION_STUDY.md](./RETIREMENT_FLOW_CALIBRATION_STUDY.md) + [RETIREMENT_FLOW_MAPPING_DECISION.md](./RETIREMENT_FLOW_MAPPING_DECISION.md); display-only; MOCK **58**; `mappingStatus` **not_final** |
 | **v1.2f** | Retirement score-wiring gate (if product-approved) | Gated — discouraged without explicit product approval |
 | **v1.0+** | Deeper options (0DTE) | OCC / Cboe / OPRA or vendor |

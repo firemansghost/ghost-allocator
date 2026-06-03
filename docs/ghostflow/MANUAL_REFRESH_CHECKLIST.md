@@ -17,7 +17,7 @@ Per-artifact deep dives: see linked runbooks at the bottom of this page.
 | **Weekly** | After CFTC TFF Friday release | CFTC TFF Positioning Proxy | Production candidate validated; **not merged into GhostFlow score yet** (v0.9f / v1.0) |
 | **Monthly** | After ICI combined active/index monthly release | Active vs Index Flow + ICI Index Share Proxy | Use ICI `publishedAt`; **flows table vs assets table** |
 | **Monthly** | After new SSGA SPY US monthly fact sheet PDF | Index Concentration | PDF month-end `asOf`; PDF control date `publishedAt` |
-| **Quarterly** | After ICI Quarterly Retirement Market Data release | Retirement Flow Pressure Proxy | Production candidate validated; **not scored** (MOCK **58**); **not displayed** until v1.2d |
+| **Quarterly** | After ICI Quarterly Retirement Market Data release | Retirement Asset Growth Proxy | Display-only card `retirement-asset-growth`; **not scored** (MOCK **58**); `mappingStatus` **not_final** |
 
 **Daily group:** VIX + Market Breadth + `GHOSTFLOW_REFERENCE_AS_OF`
 
@@ -119,7 +119,7 @@ Per-artifact deep dives: see linked runbooks at the bottom of this page.
 | **`asOf` rule** | Quarter-end ISO date (e.g. `2025-12-31` for 2025-Q4) |
 | **`publishedAt` rule** | ICI statistical report release date (e.g. `2026-03-26`) |
 | **`dataQuality` rule** | `verified_manual` only after opening workbook and confirming Table 1 cells match release; else do not promote production JSON |
-| **Status** | v1.2c: validated production candidate. **Not** in Research Composite (`retirementFlowPressureProxy` MOCK **58**). **v1.2d** display-only card / score-input decision. **v1.2e** calibration before **v1.2f** score gate |
+| **Status** | v1.2d: display-only public card. **Not** in Research Composite (`retirementFlowPressureProxy` MOCK **58**). **v1.2e** mapping decision: display-only default. **v1.2f** score gate product-approved only |
 | **Deep dive** | [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md) · [RETIREMENT_FLOW_FEASIBILITY.md](./RETIREMENT_FLOW_FEASIBILITY.md) |
 
 ---

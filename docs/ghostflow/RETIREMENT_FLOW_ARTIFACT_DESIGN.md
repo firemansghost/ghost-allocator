@@ -1,6 +1,6 @@
 # Retirement Flow Pressure Proxy — Artifact Design (GhostFlow v1.2b)
 
-**Status (v1.2c):** Validated **production artifact candidate** + example JSON, loader, `validate-artifacts` — **no** `buildSnapshot` score merge. `retirementFlowPressureProxy` remains **MOCK 58**; `mappingStatus` **not_final**. **v1.2e:** [calibration](./RETIREMENT_FLOW_CALIBRATION_STUDY.md) + [mapping decision](./RETIREMENT_FLOW_MAPPING_DECISION.md) (research-only; display-only default).  
+**Status (v1.2d):** Validated production artifact + **display-only** card (`retirement-asset-growth`) — **no** score merge. `retirementFlowPressureProxy` remains **MOCK 58**; `mappingStatus` **not_final**. **v1.2e:** [calibration](./RETIREMENT_FLOW_CALIBRATION_STUDY.md) + [mapping decision](./RETIREMENT_FLOW_MAPPING_DECISION.md) (display-only default).  
 **Prior work:** [RETIREMENT_FLOW_FEASIBILITY.md](./RETIREMENT_FLOW_FEASIBILITY.md) (v1.2a, **YELLOW**).  
 **Example file:** [`data/ghostflow/artifacts/retirementFlowPressureProxy.v1.example.json`](../data/ghostflow/artifacts/retirementFlowPressureProxy.v1.example.json) (`designOnly: true`, `dataQuality: manual_unverified`)  
 **Production file:** [`data/ghostflow/artifacts/retirementFlowPressureProxy.v1.json`](../data/ghostflow/artifacts/retirementFlowPressureProxy.v1.json) (`dataQuality: verified_manual`; omit `designOnly`)  
@@ -156,31 +156,29 @@ YoY % = ((currentTotal − priorYearTotal) / priorYearTotal) × 100
 
 ---
 
-## 8. Proposed quarterly freshness (documentation only)
+## 8. Quarterly freshness (v1.2d)
 
-Not implemented in v1.2b (no `evaluateRetirementFlowPressureArtifactFreshness()`).
-
-Anchor: `publishedAt` (fallback `asOf`). Calendar days after anchor vs GhostFlow reference date:
+Implemented in `evaluateRetirementFlowPressureArtifactFreshness()` — anchor `publishedAt` (fallback `asOf`).
 
 | Status | Threshold |
 |--------|-----------|
-| **fresh** | ≤ 45 days |
-| **caution** | 46–90 days |
+| **fresh** | ≤ 45 calendar days after release |
+| **caution** | 46–90 days (wording notes **normal quarterly cadence**, not a failed feed or score problem) |
 | **stale** | > 90 days |
 
-**Implementation target:** v1.2c production artifact and/or v1.2d display card.
+At reference `2026-05-22` with `publishedAt` `2026-03-26`, status is typically **caution** (~57 days). Freshness affects display metadata and warnings only — not the Research Composite.
 
 ---
 
 ## 9. Display vs score policy
 
-| Layer | v1.2b |
+| Layer | v1.2d |
 |-------|--------|
-| Score / composite | **Unchanged** — MOCK **58**; no `buildSnapshot` merge |
-| Display card | **Not built** — no `signalPresentation` / component changes |
-| Public artifact | Example JSON only (`designOnly: true`) |
+| Score / composite | **Unchanged** — MOCK **58**; no `publicPassiveInputKey` |
+| Display card | **`retirement-asset-growth`** — `dataStatus: public_proxy`, badge **DISPLAY ONLY** |
+| Public artifact | Production JSON validated via `validate-artifacts` |
 
-**Product bias (from v1.2a):** Prefer **v1.2d display-only** card before any **v1.2f** composite promotion; quarterly structural proxy is a weak fit for 20% passive weight at weekly/daily peer cadence.
+**v1.2e** recommends **display-only** before any **v1.2f** composite promotion; quarterly structural proxy is a weak fit for 20% passive weight at weekly/daily peer cadence.
 
 ---
 
@@ -189,20 +187,19 @@ Anchor: `publishedAt` (fallback `asOf`). Calendar days after anchor vs GhostFlow
 | Phase | Deliverable | v1.2b |
 |-------|-------------|--------|
 | **v1.2b** | Design memo, example JSON, validator, tests | **Done (this doc)** |
-| **v1.2c** | Production `retirementFlowPressureProxy.v1.json`; verified ICI Table 1; `validate-artifacts` | **Done** — not scored, not displayed |
-| **v1.2d** | Display-only card; freshness helper; overlap review | Not started |
+| **v1.2c** | Production `retirementFlowPressureProxy.v1.json`; verified ICI Table 1; `validate-artifacts` | **Done** |
+| **v1.2d** | Display-only card `retirement-asset-growth`; quarterly freshness | **Done** — not scored |
 | **v1.2e** | Calibration / mapping decision | **Done** — display-only default; MOCK **58**; see mapping decision memo |
 | **v1.2f** | Score-wiring gate (product-approved only) | Not started |
 
 ---
 
-## 11. Not implemented in v1.2c
+## 11. Not implemented (post v1.2d)
 
-- `buildSnapshot.ts` merge or `publicPassiveInputKeys` retirement entry  
+- `buildSnapshot` score merge for `retirementFlowPressureProxy` or `publicPassiveInputKeys` entry  
 - `scoring.ts` changes  
-- `components/ghostflow/*` display card  
-- `signalPresentation` / freshness evaluation in code  
-- Extra `package.json` scripts (test wired via `test:ghostflow` only)
+- Final score mapper (v1.2e left `mappingStatus: not_final`)  
+- **v1.2f** score gate (product-approved only; discouraged by default)
 
 ---
 
