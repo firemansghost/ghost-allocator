@@ -16,6 +16,7 @@ export const PUBLIC_ARTIFACT_SIGNAL_IDS = [
   'breadth',
   'systematic-flow',
   'levered-etf-rebalance',
+  'retirement-asset-growth',
 ] as const;
 
 export const DERIVED_SIGNAL_IDS = ['distance-65'] as const;
@@ -101,6 +102,9 @@ export function signalCardBadgeLabelForSignal(
   variant: SignalCardVariant
 ): string | null {
   if (sig.id === 'levered-etf-rebalance' && sig.dataStatus === 'public_proxy') {
+    return 'DISPLAY ONLY';
+  }
+  if (sig.id === 'retirement-asset-growth' && sig.dataStatus === 'public_proxy') {
     return 'DISPLAY ONLY';
   }
   return signalCardBadgeLabel(variant, sig.status);

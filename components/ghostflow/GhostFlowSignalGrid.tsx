@@ -90,6 +90,7 @@ function artifactDateLabel(signalId: string): string {
   if (signalId === 'etf-flow') return 'Week ended';
   if (signalId === 'systematic-flow') return 'Positions as of';
   if (signalId === 'levered-etf-rebalance') return 'Session';
+  if (signalId === 'retirement-asset-growth') return 'Quarter ended';
   if (
     signalId === 'active-index-flow' ||
     signalId === 'concentration' ||
@@ -250,14 +251,15 @@ export function GhostFlowSignalGrid({
           Market-structure signals
         </h2>
         <p className="mt-2 text-xs text-zinc-500 leading-relaxed max-w-3xl">
-          Six public artifacts and one derived score input feed the research composite. One additional CFTC TFF public
-          artifact is display-only; the 0DTE PLACEHOLDER card is not in the score.
+          Six public score artifacts and one derived score input feed the research composite. Three additional public
+          artifacts are display-only (CFTC TFF positioning, levered ETF rebalance pressure, retirement asset growth).
+          The 0DTE PLACEHOLDER card is not in the score.
         </p>
       </div>
 
       <SignalSection
         title="Public manual artifacts"
-        intro="Hand-updated from public sources. Score-fed cards show mapped 0–100 proxy level; display-only cards (CFTC TFF, levered ETF rebalance) do not feed the composite."
+        intro="Hand-updated from public sources. Score-fed cards show mapped 0–100 proxy level where mapping is final. Display-only cards (CFTC TFF, levered ETF rebalance, retirement asset growth) do not feed the composite."
         signals={grouped.publicArtifacts}
         variant="public"
         dataMix={dataMix}

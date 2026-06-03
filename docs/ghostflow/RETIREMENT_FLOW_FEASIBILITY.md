@@ -208,7 +208,7 @@ Defer numeric claims until v1.2e picks mapping and a sample quarter.
 | **v1.2a** | This feasibility memo + roadmap | **None** — **current** |
 | **v1.2b** | Artifact design memo + example JSON + validator module + tests | **Done** — [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md); none |
 | **v1.2c** | Production artifact candidate + `ghostflow:validate-artifacts` | **Done** — [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md) §2; not scored |
-| **v1.2d** | Display-only card + score-input decision memo (**recommended**) | None |
+| **v1.2d** | Display-only card `retirement-asset-growth` | **Done** — none (MOCK **58** unchanged) |
 | **v1.2e** | Calibration / mapping decision (quarterly history) | **Done** — [RETIREMENT_FLOW_CALIBRATION_STUDY.md](./RETIREMENT_FLOW_CALIBRATION_STUDY.md) + [RETIREMENT_FLOW_MAPPING_DECISION.md](./RETIREMENT_FLOW_MAPPING_DECISION.md); display-only; MOCK **58** |
 | **v1.2f** | Score-wiring gate (**if product-approved**) | Gated — **discouraged** without explicit overlap review |
 
