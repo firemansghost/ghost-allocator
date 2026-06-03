@@ -1,12 +1,24 @@
 # GhostFlow Data Roadmap (v0.9 planning)
 
-Planning document for GhostFlow score-input sourcing. Builds on **v0.8** (research composite framing: six PUBLIC score sub-inputs, three MOCK passive score sub-inputs, one DERIVED structural sub-input, display-only public artifact cards for CFTC / levered ETF).
+Planning document for GhostFlow score-input sourcing. Builds on **v0.8** (research composite framing: six PUBLIC score sub-inputs, three MOCK passive score sub-inputs, one DERIVED structural sub-input, display-only public artifact cards for CFTC TFF, levered ETF rebalance, and retirement asset growth).
 
 **Baseline reference date:** [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) = `2026-05-22`.
 
 **Operator refresh:** [`MANUAL_REFRESH_CHECKLIST.md`](./MANUAL_REFRESH_CHECKLIST.md) · per-artifact runbooks at the bottom of that page.
 
 **Current research composite (production snapshot, reference 2026-05-22):** Composite **62** · Passive Pressure **58** · Structural Fragility **66** · band *Crowded / Reflexive*.
+
+### Current dashboard state (v1.3a)
+
+| Layer | Count | Notes |
+|-------|-------|--------|
+| **PUBLIC score artifacts** | **6** | vol-regime, etf-flow, passive-share, active-index-flow, concentration, breadth — merged into composite |
+| **DERIVED score input** | **1** | `modelZoneProximity` (from ICI index share) |
+| **MOCK score inputs** | **3** | `systematicStrategyPressure` **62**, `retirementFlowPressureProxy` **58**, `leveredEtfRebalancePressure` **55** |
+| **DISPLAY-ONLY public artifacts** | **3** | [`systematic-flow`](./CFTC_TFF_MAPPING_DECISION.md), [`levered-etf-rebalance`](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md), [`retirement-asset-growth`](./RETIREMENT_FLOW_MAPPING_DECISION.md) — cards only; not in composite |
+| **PLACEHOLDER card** | **1** | `odte-options` only |
+| **`publicSignalCount`** | **9** | Six score-fed + three display-only public signals in `meta.publicSignals` |
+| **Score-wiring gates** | — | **v1.0c** (CFTC), **v1.1f** (levered ETF), **v1.2f** (retirement) — product-approved only; discouraged by default |
 
 ---
 
@@ -59,6 +71,7 @@ Ten sub-inputs feed the research composite (50% Passive Pressure + 50% Structura
 |---------|----------|---------------------|----------|
 | `systematic-flow` | CFTC leveraged-funds positioning proxy | [`systematicFlowProxy.v1.json`](../data/ghostflow/artifacts/systematicFlowProxy.v1.json) | **No** — MOCK **62** still drives composite |
 | `levered-etf-rebalance` | Levered ETF Rebalance Pressure Proxy | [`leveredEtfRebalancePressure.v1.json`](../data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.json) | **No** — MOCK **55** still drives composite |
+| `retirement-asset-growth` | Retirement Asset Growth Proxy | [`retirementFlowPressureProxy.v1.json`](../data/ghostflow/artifacts/retirementFlowPressureProxy.v1.json) | **No** — MOCK **58** still drives composite |
 
 ### PLACEHOLDER signal cards (not in composite)
 
@@ -66,7 +79,7 @@ Ten sub-inputs feed the research composite (50% Passive Pressure + 50% Structura
 |---------|----------|-------------------|----------|
 | `odte-options` | 0DTE / Options Pressure | High gamma sensitivity (numeric **70**) | No |
 
-Do not confuse **display-only** CFTC / levered ETF cards with **MOCK** score sub-inputs **62** / **55** in the composite.
+Do not confuse **display-only** public cards (`systematic-flow`, `levered-etf-rebalance`, `retirement-asset-growth`) with **MOCK** composite sub-inputs **62** / **55** / **58** (`systematicStrategyPressure`, `leveredEtfRebalancePressure`, `retirementFlowPressureProxy`). Display cards may show 0–100 context readings that are **not** Research Composite inputs.
 
 ---
 
@@ -158,7 +171,7 @@ GhostFlow input promotion rules (all phases):
 | **v1.1e-calibration** | Levered ETF fixed-current-AUM return-sensitivity study (research only) | **Done** — [LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md](./LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md) incl. full-history Stooq run (N≈4099); not true historical AUM calibration; **v1.1f** gated on product approval |
 | **v1.1f** | Levered ETF score-wiring gate (if product-approved) | `buildSnapshot` merge; MOCK **55** replacement; methodology + tests — **after v1.1e-calibration** |
 | **v1.2a** | Retirement-flow pressure feasibility | **Done** — [RETIREMENT_FLOW_FEASIBILITY.md](./RETIREMENT_FLOW_FEASIBILITY.md); YELLOW; MOCK **58** unchanged |
-| **v1.2b** | Retirement-flow artifact design | **Done** — [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md); example JSON + validator + tests; ICI row names **pending v1.2c** |
+| **v1.2b** | Retirement-flow artifact design | **Done** — [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md); example JSON + validator + tests |
 | **v1.2c** | Retirement-flow production artifact candidate | **Done** — [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md) §2 ICI Table 1 lock; `retirementFlowPressureProxy.v1.json` + `validate-artifacts`; MOCK **58** unchanged |
 | **v1.2d** | Retirement display-only card | **Done** — `retirement-asset-growth`; `publicSignalCount` 9; MOCK **58** unchanged; overlap review before v1.2f |
 | **v1.2e** | Retirement calibration / mapping decision | **Done** — [RETIREMENT_FLOW_CALIBRATION_STUDY.md](./RETIREMENT_FLOW_CALIBRATION_STUDY.md) + [RETIREMENT_FLOW_MAPPING_DECISION.md](./RETIREMENT_FLOW_MAPPING_DECISION.md); display-only; MOCK **58**; `mappingStatus` **not_final** |

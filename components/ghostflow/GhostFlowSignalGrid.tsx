@@ -259,7 +259,7 @@ export function GhostFlowSignalGrid({
 
       <SignalSection
         title="Public manual artifacts"
-        intro="Hand-updated from public sources. Score-fed cards show mapped 0–100 proxy level where mapping is final. Display-only cards (CFTC TFF, levered ETF rebalance, retirement asset growth) do not feed the composite."
+        intro="Hand-updated from public sources. Score-fed cards show mapped 0–100 proxy level where mapping is final. Display-only cards (CFTC TFF, levered ETF rebalance, retirement asset growth) may show context metrics on the card but do not feed the Research Composite."
         signals={grouped.publicArtifacts}
         variant="public"
         dataMix={dataMix}

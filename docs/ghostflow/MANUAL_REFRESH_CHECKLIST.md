@@ -1,8 +1,10 @@
-# GhostFlow Manual Refresh Checklist (v0.7)
+# GhostFlow Manual Refresh Checklist (v1.3a)
 
 Operator runbook for manually refreshing GhostFlow public-data artifacts. **No live fetches, no scraping, no cron, no API routes** — values are hand-edited into static JSON files committed to the repo.
 
-**Related:** [DATA_ROADMAP.md](./DATA_ROADMAP.md) — v0.9 score-input sourcing plan (docs only).
+**Related:** [DATA_ROADMAP.md](./DATA_ROADMAP.md) — score-input sourcing and dashboard state.
+
+**Dashboard coverage (v1.3a):** **6** score-fed public artifacts · **3** display-only public artifact cards (CFTC `systematic-flow`, levered `levered-etf-rebalance`, retirement `retirement-asset-growth`) · **`publicSignalCount` 9** when all validate. Retirement is displayed publicly but **not scored** (`retirementFlowPressureProxy` MOCK **58**). Quarterly retirement freshness **caution** (46–90 days after release) reflects normal ICI quarterly cadence — not a failed feed or score problem.
 
 Per-artifact deep dives: see linked runbooks at the bottom of this page.
 
@@ -27,7 +29,7 @@ Per-artifact deep dives: see linked runbooks at the bottom of this page.
 
 **Monthly group (SSGA):** Index Concentration (separate SSGA fact sheet cadence)
 
-**Quarterly group (ICI Retirement Market):** Retirement Flow Pressure Proxy (Table 1 extract; display/score decisions deferred)
+**Quarterly group (ICI Retirement Market):** Retirement Asset Growth Proxy — display-only card; Table 1 extract; MOCK **58** in composite unchanged ([v1.2e](./RETIREMENT_FLOW_MAPPING_DECISION.md) display-only default)
 
 ---
 

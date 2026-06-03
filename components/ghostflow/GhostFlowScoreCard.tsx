@@ -84,7 +84,9 @@ export function GhostFlowScoreCard({
             {publicStructuralCount} public Structural Fragility sub-input{publicStructuralCount === 1 ? '' : 's'},
             and {derivedScoreInputCount} derived Structural sub-input (model-zone proximity from ICI index share)
             feed this composite; {mockScoreInputCount} static mock input
-            {mockScoreInputCount === 1 ? '' : 's'} remain illustrative placeholders.
+            {mockScoreInputCount === 1 ? '' : 's'} remain illustrative placeholders. Public display-only cards for CFTC
+            TFF positioning, levered ETF rebalance, and retirement asset growth are not score inputs — MOCK **62**, **55**,
+            and **58** still drive those composite sub-inputs (no score change from display cards).
           </p>
         )}
         {isMixed && !hasDerivedModelZone && (

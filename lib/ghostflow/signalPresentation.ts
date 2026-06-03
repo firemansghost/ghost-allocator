@@ -101,10 +101,12 @@ export function signalCardBadgeLabelForSignal(
   sig: Pick<ScoredGhostFlowSignal, 'id' | 'dataStatus' | 'status'>,
   variant: SignalCardVariant
 ): string | null {
-  if (sig.id === 'levered-etf-rebalance' && sig.dataStatus === 'public_proxy') {
-    return 'DISPLAY ONLY';
-  }
-  if (sig.id === 'retirement-asset-growth' && sig.dataStatus === 'public_proxy') {
+  if (
+    (sig.id === 'systematic-flow' ||
+      sig.id === 'levered-etf-rebalance' ||
+      sig.id === 'retirement-asset-growth') &&
+    sig.dataStatus === 'public_proxy'
+  ) {
     return 'DISPLAY ONLY';
   }
   return signalCardBadgeLabel(variant, sig.status);
