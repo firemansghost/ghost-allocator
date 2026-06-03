@@ -31,6 +31,8 @@ Per-artifact deep dives: see linked runbooks at the bottom of this page.
 
 **Quarterly group (ICI Retirement Market):** Retirement Asset Growth Proxy — display-only card; Table 1 extract; MOCK **58** in composite unchanged ([v1.2e](./RETIREMENT_FLOW_MAPPING_DECISION.md) display-only default)
 
+**Future sources (not active):** 0DTE / options (`odte-options`) remains a **PLACEHOLDER** card only — no manual refresh until **v1.4b** proves a source path ([ODTE_OPTIONS_FEASIBILITY.md](./ODTE_OPTIONS_FEASIBILITY.md)).
+
 ---
 
 ## Artifact operator tables
