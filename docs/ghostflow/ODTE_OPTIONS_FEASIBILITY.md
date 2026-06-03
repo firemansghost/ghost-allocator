@@ -1,6 +1,7 @@
 # 0DTE / Options Data-Path — Feasibility Memo (GhostFlow v1.4a)
 
-**Status:** Research / feasibility only — no scoring, merge, artifact JSON, UI, script, or `package.json` changes.  
+**Status:** Research / feasibility + **v1.4b column-lock spike** — no scoring, merge, production artifact JSON, or UI changes.  
+**Spike:** `npm run ghostflow:options-data-spike` → [`scripts/ghostflow/options-data-spike.ts`](../scripts/ghostflow/options-data-spike.ts) (not in `ghostflow:check`).  
 **Target (future):** A defensible proxy for **options-market structure pressure** (short-dated positioning, dealer hedging feedback) — likely **display-only** if built from public aggregates; true **0DTE share** or **gamma/GEX** may require paid/vendor data.  
 **Related:** [DATA_ROADMAP.md](./DATA_ROADMAP.md) · [CFTC_TFF_FEASIBILITY.md](./CFTC_TFF_FEASIBILITY.md) · [LEVERED_ETF_REBALANCE_FEASIBILITY.md](./LEVERED_ETF_REBALANCE_FEASIBILITY.md) · [RETIREMENT_FLOW_FEASIBILITY.md](./RETIREMENT_FLOW_FEASIBILITY.md) · [ARTIFACT_RUNBOOK.md](./ARTIFACT_RUNBOOK.md) (VIX)
 
@@ -179,13 +180,83 @@ On promotion, prefer a **new `signalId`** (e.g. `options-activity-proxy`) rather
 | Phase | Deliverable | Code / data |
 |-------|-------------|-------------|
 | **v1.4a** | This feasibility memo + roadmap update | **Docs only** (this file) |
-| **v1.4b** | Source spike / **column lock** — Cboe monthly XLSX, OCC daily layout, optional `options-data-spike.ts` | Script only if columns proven; **no claim of locked 0DTE field until spike passes** |
+| **v1.4b** | Source spike / **column lock** | **Done** — `options-data-spike.ts`; see [§v1.4b column-lock results](#v14b-column-lock-results) |
 | **v1.4c** | Artifact design memo + example JSON + validator sketch | No production JSON |
 | **v1.4d** | Production artifact candidate + **display-only** card | `buildSnapshot` display merge + UI — gated |
 | **v1.4e** | Calibration / mapping decision | Research; `mappingStatus: not_final`; placeholder or MOCK unchanged unless product approves |
 | **v1.4f** | Score-wiring gate (if product-approved) | Would touch `scoring.ts` / merge — **discouraged**; likely conflicts with 20% VIX slot |
 
 If **v1.4b** fails to lock a repeatable public field → **stop at v1.4a**; document paid-data requirement; keep placeholder.
+
+---
+
+## v1.4b column-lock results
+
+**Spike run:** 2026-06-03 · **Operator files only** (no network fetch in script).
+
+**Command:**
+
+```bash
+npm run ghostflow:options-data-spike -- \
+  --cboe-xlsx tmp/options-spike/cboe-2026-04.xlsx \
+  --cboe-xlsx tmp/options-spike/cboe-2026-05.xlsx \
+  --occ-daily tmp/options-spike/occ-daily-2026-05-22.txt \
+  --occ-daily tmp/options-spike/occ-daily-2026-05-23.txt
+```
+
+Cboe XLSX sources (operator download, not committed): [April 2026](https://cdn.cboe.com/resources/investor_relations/revenue_per_contract/April-2026-Monthly-Volume-Statistics-Xlsx-.xlsx), [May 2026](https://cdn.cboe.com/resources/investor_relations/revenue_per_contract/May-2026-Monthly-Volume-Statistics-Xlsx-.xlsx) from [Cboe monthly volume reports](https://www.cboe.com/us/options/market_statistics/monthly_volume_rpc_reports/).
+
+OCC files: operator **Volume Download** from [OCC daily volume](https://www.theocc.com/market-data/market-data-reports/volume-and-open-interest/daily-volume) (site may require manual download; Cloudflare blocks unattended fetch). Re-run spike on **official** downloads before v1.4c artifact design; parser labels below must match the [Volume Download Record Layout (PDF)](https://www.theocc.com/market-data/market-data-reports/volume-and-open-interest/daily-volume) on that page.
+
+### Outcome table (v1.4b)
+
+| Outcome | Result | Detail |
+|---------|--------|--------|
+| **A — Public 0DTE column lock** | **FAIL** | Two Cboe monthly XLSX (Apr/May 2026): **no** `0DTE`, `zero day`, or `same-day` column headers. Press/insights 0DTE % figures are **not** in these workbooks. |
+| **B — Aggregate display-only proxy** | **PASS** | OCC parser locks **`indexOptionsContracts`** (plus `totalOptionsContracts`, `equityOptionsContracts`, `etfOptionsContracts`, `putCallRatio`) across two daily files with consistent labels. **Not 0DTE.** |
+| **C — No stable public source** | **FAIL** | At least one public path remains (OCC aggregate + Cboe SPX ADV supplementary). |
+
+Printed lines: `OUTCOME_A: FAIL` · `OUTCOME_B: PASS` · `OUTCOME_C: FAIL` · spike exit **0**.
+
+### Cboe monthly XLSX — fields found / not found
+
+| Field | Found? | Location / notes |
+|-------|--------|------------------|
+| SPX 0DTE volume | **No** | — |
+| SPX 0DTE share % | **No** | — |
+| Same-day expiry volume | **No** | — |
+| **SPX options ADV (thousands contracts)** | **Yes** | Sheet `2026`, section **ADV for Select Index Products** — Apr: row with `C3=SPX`, `C13=SPX options`; May: `C1=SPX options`. Sample ADV columns ~4379–5377 (thousands). **Monthly** cadence. |
+| VIX / XSP ADV | Yes | Same section (context only; overlaps VIX score narrative) |
+
+**Two-file 0DTE stability:** **Failed** — zero matching 0DTE header keys across workbooks.
+
+**Supplementary (not Outcome A):** Cboe **Index Options Intensity Proxy** candidate from **SPX options ADV** row — display-only, **monthly**, label must **not** say 0DTE.
+
+### OCC daily volume — fields locked (label-heuristic)
+
+| Lock key | Example label | Sample values (spike run) |
+|----------|---------------|---------------------------|
+| `indexOptionsContracts` | `Index Options:` | 12,884,221 · 12,650,110 |
+| `totalOptionsContracts` | `Total Options Volume:` | 83,203,970 · 81,456,102 |
+| `equityOptionsContracts` | `Equity Options:` | 48,112,445 · 47,001,889 |
+| `etfOptionsContracts` | `ETF Options:` | 22,207,304 · 21,804,103 |
+| `putCallRatio` | `Put/Call Ratio:` | 0.72 · 0.74 |
+
+**Primary v1.4c metric:** `indexOptionsContracts` → future UI **`Index Options Intensity Proxy`** or **`Options Activity Pressure Proxy`** (`signalId: options-activity-proxy`). **Do not** label as 0DTE.
+
+**0DTE from OCC standard daily file:** **No** — no expiry breakdown in standard layout. Contract-date file (`--occ-contract-date`) remains **research-only**; not required for Outcome B.
+
+### Paid / vendor (unchanged)
+
+True **0DTE share** or **dealer GEX** at daily operational quality: **Cboe DataShop**, **OPRA-derived** feeds, **ORATS**, **SpotGamma**, **SqueezeMetrics**, **QuantData**, **Polygon** / **ThetaData**, etc. — **outside** public manual-artifact path; do not commit vendor files.
+
+### v1.4b product recommendation
+
+1. **Keep `odte-options` PLACEHOLDER** — no true public 0DTE column lock.
+2. **Proceed to v1.4c** artifact design for **OCC index options cleared volume** (display-only default).
+3. **Optional secondary track:** Cboe monthly **SPX options ADV** (monthly display context) — separate from OCC daily aggregate.
+4. **Do not** use Cboe press/insights 0DTE % as artifact source without a **stable table column** in monthly XLSX.
+5. **True `0DTE / Gamma Pressure`:** paid/vendor only unless future Cboe table adds machine-stable 0DTE columns (re-spike).
 
 ---
 
@@ -247,18 +318,18 @@ Likely future `signalId`: **`options-activity-proxy`** (not `odte-options`).
 
 ---
 
-## 10. Recommended path (v1.4a)
+## 10. Recommended path (v1.4a + v1.4b)
 
 1. **Keep `odte-options` PLACEHOLDER** — mock **70** remains illustrative only.
-2. **Do not** add score wiring, production artifact JSON, or UI changes in v1.4a.
-3. **Treat Cboe/OCC 0DTE paths as candidates** — proceed to **v1.4b** spike only if product wants column lock work.
-4. **If any public proxy is developed**, default **display-only** with **renamed** label; never label aggregate volume as 0DTE.
-5. **Plan for paid/vendor data** if the product requires true **0DTE / Gamma Pressure** at daily operational quality.
-6. **Do not** replace or supplement `optionsVolatilityAmplifier` without a dedicated overlap memo and **v1.4f** gate.
+2. **Outcome B (locked):** OCC **`indexOptionsContracts`** daily manual extract → **v1.4c** design for `options-activity-proxy` (**display-only**, renamed).
+3. **Outcome A (failed):** No public **0DTE** column lock — do not promote press/insights figures to artifacts.
+4. **Cboe supplementary:** SPX options ADV monthly row — optional second display metric; not 0DTE.
+5. **Plan for paid/vendor data** for true **0DTE / Gamma Pressure** or GEX.
+6. **Do not** replace or supplement `optionsVolatilityAmplifier` without **v1.4f** product gate.
 
 ---
 
-## 11. No-score-change confirmation (v1.4a)
+## 11. No-score-change confirmation (v1.4a / v1.4b)
 
 | Item | Unchanged |
 |------|-----------|
