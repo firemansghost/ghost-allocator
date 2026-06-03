@@ -120,7 +120,7 @@ Shipped: `buildSnapshot.ts` merge, DERIVED classification, coverage **6 public /
 **Outcome (v1.4b):** **Outcome A FAIL** — no stable **0DTE** columns in two Cboe monthly XLSX (Apr/May 2026). **Outcome B PASS** — OCC daily lock: **`indexOptionsContracts`** (+ total/equity/ETF/PCR). **Outcome C FAIL** — public aggregate path exists.
 
 - Keep `odte-options` as **PLACEHOLDER** until display card ships as renamed **`options-activity-proxy`** (v1.4d).
-- **v1.4c next:** artifact design for **Index Options Intensity Proxy** / **Options Activity Pressure Proxy** from OCC index cleared volume — **display-only**; **not** labeled 0DTE.
+- **v1.4c complete:** [OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md](./OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md) — example JSON + validator; OCC **`indexOptionsContracts`** primary; **no** production JSON, **no** display card, **no** score wiring.
 - Cboe monthly **SPX options ADV** (thousands contracts) — optional supplementary monthly context; **not** 0DTE.
 - True **0DTE / Gamma Pressure** or GEX: **paid/vendor** (DataShop, ORATS, SpotGamma, etc.).
 - **v1.4f** score-wiring discouraged (VIX overlap).
@@ -188,8 +188,8 @@ GhostFlow input promotion rules (all phases):
 | **v1.2f** | Retirement score-wiring gate (if product-approved) | Gated — discouraged without explicit product approval |
 | **v1.4a** | 0DTE / options data-path feasibility | **Done** — [ODTE_OPTIONS_FEASIBILITY.md](./ODTE_OPTIONS_FEASIBILITY.md); YELLOW leaning RED (true 0DTE/GEX); placeholder unchanged |
 | **v1.4b** | Options source spike / column lock | **Done** — `options-data-spike.ts`; Outcome A **FAIL**, B **PASS** (OCC `indexOptionsContracts`); Cboe SPX ADV supplementary |
-| **v1.4c** | Options activity artifact design | **Next** — example JSON + validator; OCC primary; `signalId: options-activity-proxy`; no production JSON |
-| **v1.4d** | Options production artifact + display-only card | `buildSnapshot` display merge + UI; `publicSignalCount` may increment; not scored |
+| **v1.4c** | Options activity artifact design | **Done** — [OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md](./OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md); example-only JSON; validator in `optionsActivityProxy.ts`; not in `ghostflow:check` |
+| **v1.4d** | Options production artifact + display-only card | `optionsActivityProxy.v1.json` + `buildSnapshot` display merge + UI card `options-activity-proxy` / **Index Options Intensity Proxy**; replace `odte-options` placeholder; not scored |
 | **v1.4e** | Options calibration / mapping decision | Display-only default; `mappingStatus: not_final` |
 | **v1.4f** | Options score-wiring gate (if product-approved) | Overlap with VIX `optionsVolatilityAmplifier` — discouraged |
 
@@ -227,3 +227,4 @@ GhostFlow input promotion rules (all phases):
 - [PASSIVE_SHARE_PROXY_ARTIFACT_RUNBOOK.md](./PASSIVE_SHARE_PROXY_ARTIFACT_RUNBOOK.md) — ICI index share + distance-to-65
 - [INDEX_CONCENTRATION_ARTIFACT_RUNBOOK.md](./INDEX_CONCENTRATION_ARTIFACT_RUNBOOK.md) — SSGA SPY concentration
 - [ODTE_OPTIONS_FEASIBILITY.md](./ODTE_OPTIONS_FEASIBILITY.md) — v1.4a 0DTE/options data-path feasibility (YELLOW leaning RED; placeholder unchanged)
+- [OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md](./OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md) — v1.4c OCC index options intensity proxy (design only; example JSON)

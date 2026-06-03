@@ -1,0 +1,39 @@
+{
+  "artifactVersion": "1",
+  "signalId": "options-activity-proxy",
+  "designOnly": true,
+  "asOf": "2026-05-22",
+  "publishedAt": "2026-05-22",
+  "source": {
+    "name": "OCC Daily Volume — Volume Download (design reference)",
+    "url": "https://www.theocc.com/market-data/market-data-reports/volume-and-open-interest/daily-volume",
+    "note": "EXAMPLE / DESIGN ONLY — illustrative OCC cleared contract counts for schema and validator tests. Not used in GhostFlow score, buildSnapshot, or dashboard. Production values require v1.4d operator verification from official OCC Volume Download files (Volume Download Record Layout PDF). Re-verify field labels with npm run ghostflow:options-data-spike."
+  },
+  "observationType": "occ_daily_volume_snapshot",
+  "seriesDefinition": "occ_daily_options_volume_v1",
+  "updateFrequency": "daily",
+  "dataQuality": "manual_unverified",
+  "caveats": [
+    "Aggregate OCC cleared options volume — not 0DTE, same-day expiry, or dealer gamma/GEX",
+    "Index options intensity proxy — not intraday hedging pressure or a trading signal",
+    "Not included in the Research Composite; mappingStatus not_final",
+    "Distinct from CBOE VIX-based optionsVolatilityAmplifier (vol level, not contract activity)",
+    "Illustrative counts only — operator must extract from verified OCC download in v1.4d"
+  ],
+  "observations": {
+    "totalOptionsContracts": 83203970,
+    "indexOptionsContracts": 12884221,
+    "equityOptionsContracts": 48112445,
+    "etfOptionsContracts": 22207304,
+    "putCallRatio": 0.72,
+    "indexShareOfTotalPct": 15.49,
+    "priorSessionIndexOptionsContracts": 12650110,
+    "indexOptionsDailyChangePct": 1.85,
+    "mappingStatus": "not_final"
+  },
+  "optionalObservations": {
+    "spxOptionsAdvThousands": 5036.04,
+    "spxAdvAsOfMonth": "2026-04",
+    "spxAdvSourceNote": "Supplementary Cboe monthly XLSX ADV for Select Index Products — not 0DTE; monthly cadence only"
+  }
+}
