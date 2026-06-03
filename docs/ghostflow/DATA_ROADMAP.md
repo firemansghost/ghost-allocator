@@ -1,12 +1,12 @@
 # GhostFlow Data Roadmap (v0.9 planning)
 
-Planning document for GhostFlow score-input sourcing. Builds on **v0.8** (research composite framing: six PUBLIC score sub-inputs, four MOCK score sub-inputs, two PLACEHOLDER signal cards).
+Planning document for GhostFlow score-input sourcing. Builds on **v0.8** (research composite framing: six PUBLIC score sub-inputs, three MOCK passive score sub-inputs, one DERIVED structural sub-input, display-only public artifact cards for CFTC / levered ETF).
 
 **Baseline reference date:** [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) = `2026-05-22`.
 
 **Operator refresh:** [`MANUAL_REFRESH_CHECKLIST.md`](./MANUAL_REFRESH_CHECKLIST.md) · per-artifact runbooks at the bottom of that page.
 
-**Current research composite (unchanged by this doc):** Composite **60** · Passive Pressure **58** · Structural Fragility **61** · band *Elevated Flow Pressure*.
+**Current research composite (production snapshot, reference 2026-05-22):** Composite **62** · Passive Pressure **58** · Structural Fragility **66** · band *Crowded / Reflexive*.
 
 ---
 
@@ -31,9 +31,9 @@ Ten sub-inputs feed the research composite (50% Passive Pressure + 50% Structura
 |-----------|--------|------------------------|----------------|----------|------------|
 | `etfFundFlowImpulse` | **PUBLIC** | ICI domestic equity ETF estimated net issuance (~$33.9B, week ended 2026-05-13) → 0–100 proxy via `etfNetIssuance` mapper | Weekly (manual artifact) | Yes (25% of passive pillar) | Medium–high — `verified_manual` |
 | `optionsVolatilityAmplifier` | **PUBLIC** | CBOE VIX close **16.7** (as of 2026-05-22) → 0–100 via `volatilityRegime` mapper | Daily (manual artifact) | Yes (20%) | High — `verified_manual` |
-| `systematicStrategyPressure` | **MOCK** | Static **62** from mock snapshot | None (static) | Yes (20%) | Low — illustrative only |
-| `retirementFlowPressureProxy` | **MOCK** | Static **58** from mock snapshot | None (static) | Yes (20%) | Low — no defensible public source yet |
-| `leveredEtfRebalancePressure` | **MOCK** | Static **55** from mock snapshot | None (static) | Yes (15%) | Low — methodology undefined |
+| `systematicStrategyPressure` | **MOCK** | Static **62** from mock snapshot; display card [`systematic-flow`] when artifact validates — **not scored** | None (static) | Yes (20%) | Low — CFTC display-only separate ([v1.0b](./CFTC_TFF_MAPPING_DECISION.md)) |
+| `retirementFlowPressureProxy` | **MOCK** | Static **58** from mock snapshot | None (static) | Yes (20%) | Low — [v1.2a feasibility](./RETIREMENT_FLOW_FEASIBILITY.md) **YELLOW**; quarterly structural path only |
+| `leveredEtfRebalancePressure` | **MOCK** | Static **55** from mock snapshot; display card [`levered-etf-rebalance`] when artifact validates — **not scored** | None (static) | Yes (15%) | Low — display-only artifact separate ([v1.1e](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md)) |
 
 ### Structural Fragility (5 sub-inputs)
 
@@ -43,7 +43,7 @@ Ten sub-inputs feed the research composite (50% Passive Pressure + 50% Structura
 | `activeShareOffsetProxy` | **PUBLIC** | ICI domestic equity active vs index **monthly net flows** (month ended 2026-03-31) → flow-tilt proxy | Monthly (manual artifact) | Yes (20%) | Medium–high — `verified_manual` |
 | `indexConcentration` | **PUBLIC** | SSGA SPY fact sheet **top-10 index weight 36.5%** (month ended 2026-03-31) | Monthly (manual artifact) | Yes (20%) | Medium–high — `verified_manual` |
 | `breadthWeakness` | **PUBLIC** | StockCharts `$SPXA50R` **58.0%** above 50-day MA (2026-05-22) → inverse weakness proxy | Daily (manual artifact) | Yes (15%) | Medium — `manual_unverified` (Barchart `$S5FI` cross-check gap ~1.2 pp) |
-| `modelZoneProximity` | **MOCK** | Static **52** from mock snapshot | None (static) | Yes (15%) | Low — **not** wired to ICI distance logic today |
+| `modelZoneProximity` | **DERIVED** | From ICI index share via `mapDistanceToZoneNumericValue` (same logic as `distance-65`; wired v0.9b) | Monthly (follows ICI passive-share artifact) | Yes (15%) | Medium — same ICI denominator caveats as passive-share |
 
 ### DERIVED signal (not a score sub-input)
 
@@ -51,16 +51,22 @@ Ten sub-inputs feed the research composite (50% Passive Pressure + 50% Structura
 |---------|--------|----------------|----------|----------|------------|
 | `distance-65` | **DERIVED** | **1.8 pp** below 65% model stress zone from ICI index share **63.2%** (`deriveDistanceToModelZone` + `mapDistanceToZoneNumericValue` in `passiveShareProxy.ts`) | Monthly (follows ICI passive-share artifact) | **No** (context card only) | Medium — same ICI denominator caveats as passive-share |
 
-**Known gap (v0.9b target):** When the ICI passive-share artifact merges, `distance-65` updates from live share data, but `modelZoneProximity` remains the mock snapshot value (**52**). Tests in `lib/ghostflow/__tests__/passiveShareProxy.test.ts` assert this behavior today.
+**v0.9b (complete):** `modelZoneProximity` is **DERIVED** from the merged ICI passive-share artifact (not mock **52**). Context card `distance-65` uses the same distance mapping but remains **not** a separate score sub-input.
+
+### Display-only public artifact cards (not in composite)
+
+| Signal id | UI label | Production artifact | In score |
+|---------|----------|---------------------|----------|
+| `systematic-flow` | CFTC leveraged-funds positioning proxy | [`systematicFlowProxy.v1.json`](../data/ghostflow/artifacts/systematicFlowProxy.v1.json) | **No** — MOCK **62** still drives composite |
+| `levered-etf-rebalance` | Levered ETF Rebalance Pressure Proxy | [`leveredEtfRebalancePressure.v1.json`](../data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.json) | **No** — MOCK **55** still drives composite |
 
 ### PLACEHOLDER signal cards (not in composite)
 
 | Signal id | UI label | Mock snapshot name | In score |
 |---------|----------|-------------------|----------|
 | `odte-options` | 0DTE / Options Pressure | High gamma sensitivity (numeric **70**) | No |
-| `systematic-flow` | Future Systematic Flow Feed | CTA / vol-control tilt (numeric **62**) | No |
 
-Do not confuse **Future Systematic Flow Feed** (placeholder card) with **Systematic strategy pressure** (MOCK score sub-input **62** in the composite).
+Do not confuse **display-only** CFTC / levered ETF cards with **MOCK** score sub-inputs **62** / **55** in the composite.
 
 ---
 
@@ -86,10 +92,11 @@ Shipped: `buildSnapshot.ts` merge, DERIVED classification, coverage **6 public /
 
 **Outcome:** **YELLOW** — Tier-1 universe **TQQQ/SQQQ, UPRO/SPXU, TNA/TZA**; manual AUM from issuer pages + index moves via QQQ/SPY/IWM proxies; estimated rebalance notional proxy feasible. **v1.1c:** production artifact validated via `ghostflow:validate-artifacts`. **v1.1d:** display-only public card (`levered-etf-rebalance`); **not scored**. **v1.1e:** mapping decision — display-only; `mappingStatus: not_final`; MOCK **55** unchanged. **v1.1e-calibration:** fixed-current-AUM return-sensitivity study **done** (full Stooq history since 2010-02-11). **v1.1f:** score-wiring gate only after product approval — still **not** approved.
 
-### D) Retirement-flow pressure — MOCK / research-only
+### D) Retirement-flow pressure (v1.2a) — **FEASIBILITY COMPLETE**
 
-- Keep `retirementFlowPressureProxy` MOCK until a defensible public source exists (ICI Flow of Funds, Z.1, or similar worth a v1.0 spike).
-- No v0.9 implementation target.
+**Feasibility memo:** [RETIREMENT_FLOW_FEASIBILITY.md](./RETIREMENT_FLOW_FEASIBILITY.md)
+
+**Outcome:** **YELLOW** — no retirement-labeled weekly **flow** series suitable for score without overlapping existing ICI artifacts. Best path: **quarterly ICI Retirement Market asset growth** (optional Z.1 cross-check) as a **structural** proxy — **display-only preferred** if developed; keep `retirementFlowPressureProxy` **MOCK 58** for now. **v1.2f** score-wiring gate only if product-approved after v1.2b–e.
 
 ### E) 0DTE / options — PLACEHOLDER until source selected
 
@@ -111,7 +118,7 @@ Shipped: `buildSnapshot.ts` merge, DERIVED classification, coverage **6 public /
 | **CFTC COT / TFF (production candidate)** | `systematicStrategyPressure` (future) | v0.9e — [`systematicFlowProxy.v1.json`](../data/ghostflow/artifacts/systematicFlowProxy.v1.json) validated via `ghostflow:validate-artifacts`; **not merged into score yet** |
 | **Issuer fund pages + index proxies (v1.1c production candidate)** | `leveredEtfRebalancePressure` (future) | [`leveredEtfRebalancePressure.v1.json`](../data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.json) validated via `ghostflow:validate-artifacts`; **not merged into score yet** — see [LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md](./LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md) |
 | **OCC / Cboe / OPRA or commercial options data (future)** | `odte-options` placeholder → possible new input | Licensing and metric definition (gamma, 0DTE volume share) |
-| **Retirement / Flow of Funds (future)** | `retirementFlowPressureProxy` | Low confidence until source is validated |
+| **ICI Retirement Market (v1.2b+ candidate)** | `retirementFlowPressureProxy` (display-first) | Quarterly assets — see [RETIREMENT_FLOW_FEASIBILITY.md](./RETIREMENT_FLOW_FEASIBILITY.md); do not double-count ICI equity flows |
 
 ---
 
@@ -150,7 +157,13 @@ GhostFlow input promotion rules (all phases):
 | **v1.1e** | Levered ETF mapping decision | **Done** — [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md); display-only; no score mapper selected |
 | **v1.1e-calibration** | Levered ETF fixed-current-AUM return-sensitivity study (research only) | **Done** — [LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md](./LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md) incl. full-history Stooq run (N≈4099); not true historical AUM calibration; **v1.1f** gated on product approval |
 | **v1.1f** | Levered ETF score-wiring gate (if product-approved) | `buildSnapshot` merge; MOCK **55** replacement; methodology + tests — **after v1.1e-calibration** |
-| **v1.0+** | Deeper options (0DTE), retirement-flow sources | Larger sourcing, possible licensing |
+| **v1.2a** | Retirement-flow pressure feasibility | **Done** — [RETIREMENT_FLOW_FEASIBILITY.md](./RETIREMENT_FLOW_FEASIBILITY.md); YELLOW; MOCK **58** unchanged |
+| **v1.2b** | Retirement-flow artifact design | Example JSON, validator module, tests |
+| **v1.2c** | Retirement-flow production artifact candidate | `retirementFlowPressureProxy.v1.json`, `validate-artifacts` |
+| **v1.2d** | Retirement display-only card / score-input decision | Preferred over score merge; overlap review |
+| **v1.2e** | Retirement calibration / mapping decision | Quarterly history; `mappingStatus` policy |
+| **v1.2f** | Retirement score-wiring gate (if product-approved) | Gated — discouraged without explicit product approval |
+| **v1.0+** | Deeper options (0DTE) | OCC / Cboe / OPRA or vendor |
 
 ---
 
@@ -160,7 +173,7 @@ GhostFlow input promotion rules (all phases):
 2. ~~**`modelZoneProximity` mapping (v0.9b):**~~ **Resolved:** Reuse `mapDistanceToZoneNumericValue` as-is (documented in merge + methodology).
 3. ~~**Levered ETF scope:**~~ **Resolved (v1.1a–b):** Tier-1 six-ticker universe; single-session `underlyingReturnPct`; formula in [LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md](./LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md). ~~**Levered ETF mapping (v1.1e):**~~ **Resolved:** [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md) — display-only; MOCK **55**. ~~**Levered ETF calibration (v1.1e-calibration):**~~ **Resolved:** [LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md](./LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md) — full fixed-current-AUM return-sensitivity run complete; **v1.1f** score wiring gated on product approval only.
 4. **0DTE data path:** Public aggregate vs paid vendor; whether future options pressure replaces or supplements VIX-based `optionsVolatilityAmplifier`.
-5. **Retirement flows:** Is any public series (ICI Flow of Funds, Federal Reserve Financial Accounts) worth a v1.0 research spike?
+5. ~~**Retirement flows:**~~ **Resolved (v1.2a):** [RETIREMENT_FLOW_FEASIBILITY.md](./RETIREMENT_FLOW_FEASIBILITY.md) — **YELLOW**; quarterly ICI Retirement Market structural proxy feasible for **display-only** track; **reject** scoring overlapping ICI equity flows; exact ICI tables / Z.1 lines / TDF data → **v1.2b**; composite membership → **v1.2d** decision.
 
 ---
 
@@ -169,6 +182,7 @@ GhostFlow input promotion rules (all phases):
 - [CFTC_TFF_FEASIBILITY.md](./CFTC_TFF_FEASIBILITY.md) — v0.9c TFF/COT feasibility (YELLOW)
 - [CFTC_TFF_CALIBRATION_STUDY.md](./CFTC_TFF_CALIBRATION_STUDY.md) — v1.0a historical calibration (research)
 - [CFTC_TFF_MAPPING_DECISION.md](./CFTC_TFF_MAPPING_DECISION.md) — v1.0b mapping/product decision (display-only; v1.0c score gate)
+- [RETIREMENT_FLOW_FEASIBILITY.md](./RETIREMENT_FLOW_FEASIBILITY.md) — v1.2a retirement-flow feasibility (YELLOW; display-first)
 - [LEVERED_ETF_REBALANCE_FEASIBILITY.md](./LEVERED_ETF_REBALANCE_FEASIBILITY.md) — v1.1a levered ETF rebalance feasibility (YELLOW)
 - [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md) — v1.1e mapping/product decision (display-only; v1.1e-calibration → v1.1f score gate)
 - [LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md](./LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md) — v1.1e-calibration return-sensitivity study (fixed-current-AUM; research-only)
