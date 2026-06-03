@@ -1,6 +1,6 @@
 # Retirement Flow Pressure Proxy — Artifact Design (GhostFlow v1.2b)
 
-**Status (v1.2c):** Validated **production artifact candidate** + example JSON, loader, `validate-artifacts` — **no** `buildSnapshot` merge, display card, or score wiring. `retirementFlowPressureProxy` remains **MOCK 58**.  
+**Status (v1.2c):** Validated **production artifact candidate** + example JSON, loader, `validate-artifacts` — **no** `buildSnapshot` score merge. `retirementFlowPressureProxy` remains **MOCK 58**; `mappingStatus` **not_final**. **v1.2e:** [calibration](./RETIREMENT_FLOW_CALIBRATION_STUDY.md) + [mapping decision](./RETIREMENT_FLOW_MAPPING_DECISION.md) (research-only; display-only default).  
 **Prior work:** [RETIREMENT_FLOW_FEASIBILITY.md](./RETIREMENT_FLOW_FEASIBILITY.md) (v1.2a, **YELLOW**).  
 **Example file:** [`data/ghostflow/artifacts/retirementFlowPressureProxy.v1.example.json`](../data/ghostflow/artifacts/retirementFlowPressureProxy.v1.example.json) (`designOnly: true`, `dataQuality: manual_unverified`)  
 **Production file:** [`data/ghostflow/artifacts/retirementFlowPressureProxy.v1.json`](../data/ghostflow/artifacts/retirementFlowPressureProxy.v1.json) (`dataQuality: verified_manual`; omit `designOnly`)  
@@ -191,7 +191,7 @@ Anchor: `publishedAt` (fallback `asOf`). Calendar days after anchor vs GhostFlow
 | **v1.2b** | Design memo, example JSON, validator, tests | **Done (this doc)** |
 | **v1.2c** | Production `retirementFlowPressureProxy.v1.json`; verified ICI Table 1; `validate-artifacts` | **Done** — not scored, not displayed |
 | **v1.2d** | Display-only card; freshness helper; overlap review | Not started |
-| **v1.2e** | Calibration / mapping decision | Not started |
+| **v1.2e** | Calibration / mapping decision | **Done** — display-only default; MOCK **58**; see mapping decision memo |
 | **v1.2f** | Score-wiring gate (product-approved only) | Not started |
 
 ---
@@ -209,4 +209,6 @@ Anchor: `publishedAt` (fallback `asOf`). Calendar days after anchor vs GhostFlow
 ## Related
 
 - [RETIREMENT_FLOW_FEASIBILITY.md](./RETIREMENT_FLOW_FEASIBILITY.md)  
+- [RETIREMENT_FLOW_CALIBRATION_STUDY.md](./RETIREMENT_FLOW_CALIBRATION_STUDY.md)  
+- [RETIREMENT_FLOW_MAPPING_DECISION.md](./RETIREMENT_FLOW_MAPPING_DECISION.md)  
 - [DATA_ROADMAP.md](./DATA_ROADMAP.md)

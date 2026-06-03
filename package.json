@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "tsx lib/ghostregime/__tests__/regimeCore.test.ts && npm run test:ghostflow",
-    "test:ghostflow": "tsx lib/ghostflow/__tests__/scoring.test.ts && tsx lib/ghostflow/__tests__/volatilityRegime.test.ts && tsx lib/ghostflow/__tests__/etfNetIssuance.test.ts && tsx lib/ghostflow/__tests__/activeIndexFlow.test.ts && tsx lib/ghostflow/__tests__/indexConcentration.test.ts && tsx lib/ghostflow/__tests__/passiveShareProxy.test.ts && tsx lib/ghostflow/__tests__/marketBreadth.test.ts && tsx lib/ghostflow/__tests__/systematicFlowProxy.test.ts && tsx lib/ghostflow/__tests__/systematicFlowDisplay.test.ts && tsx lib/ghostflow/__tests__/leveredEtfRebalanceDisplay.test.ts && tsx lib/ghostflow/__tests__/cftcTffHistory.test.ts && tsx lib/ghostflow/__tests__/leveredEtfRebalanceHistory.test.ts && tsx lib/ghostflow/__tests__/leveredEtfRebalancePressure.test.ts && tsx lib/ghostflow/__tests__/retirementFlowPressureProxy.test.ts && tsx lib/ghostflow/__tests__/artifactFreshness.test.ts",
+    "test:ghostflow": "tsx lib/ghostflow/__tests__/scoring.test.ts && tsx lib/ghostflow/__tests__/volatilityRegime.test.ts && tsx lib/ghostflow/__tests__/etfNetIssuance.test.ts && tsx lib/ghostflow/__tests__/activeIndexFlow.test.ts && tsx lib/ghostflow/__tests__/indexConcentration.test.ts && tsx lib/ghostflow/__tests__/passiveShareProxy.test.ts && tsx lib/ghostflow/__tests__/marketBreadth.test.ts && tsx lib/ghostflow/__tests__/systematicFlowProxy.test.ts && tsx lib/ghostflow/__tests__/systematicFlowDisplay.test.ts && tsx lib/ghostflow/__tests__/leveredEtfRebalanceDisplay.test.ts && tsx lib/ghostflow/__tests__/cftcTffHistory.test.ts && tsx lib/ghostflow/__tests__/leveredEtfRebalanceHistory.test.ts && tsx lib/ghostflow/__tests__/retirementFlowHistory.test.ts && tsx lib/ghostflow/__tests__/leveredEtfRebalancePressure.test.ts && tsx lib/ghostflow/__tests__/retirementFlowPressureProxy.test.ts && tsx lib/ghostflow/__tests__/artifactFreshness.test.ts",
     "test:vams-profiles": "tsx lib/ghostregime/__tests__/vamsProfiles.test.ts",
     "test:ghostregime-ui": "tsx lib/ghostregime/__tests__/agreementDelta.test.ts",
     "test:cash-breakdown": "tsx lib/ghostregime/__tests__/cashBreakdown.test.ts",
@@ -42,6 +42,7 @@
     "ghostflow:cftc-tff-spike": "tsx scripts/ghostflow/cftc-tff-spike.ts",
     "ghostflow:cftc-tff-history-study": "tsx scripts/ghostflow/cftc-tff-history-study.ts",
     "ghostflow:levered-etf-rebalance-history-study": "tsx scripts/ghostflow/levered-etf-rebalance-history-study.ts",
+    "ghostflow:retirement-flow-history-study": "tsx scripts/ghostflow/retirement-flow-history-study.ts",
     "ghostflow:check": "npm run ghostflow:validate-artifacts && npm run test:ghostflow",
     "verify:ghostregime": "npm run build && npm run lint && npx tsx lib/ghostregime/__tests__/persistGate.test.ts && npx tsx lib/ghostregime/__tests__/diagnostics.test.ts && npx tsx lib/ghostregime/__tests__/stooqResponse.test.ts && npx tsx lib/ghostregime/__tests__/asofUrl.test.ts && npx tsx lib/ghostregime/__tests__/marketstackEod.test.ts && npx tsx lib/ghostregime/__tests__/flipWatchPressure.test.ts && npx tsx lib/ghostregime/__tests__/serveMetadata.test.ts"
   },

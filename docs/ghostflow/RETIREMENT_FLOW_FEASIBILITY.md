@@ -17,7 +17,7 @@
 | Cadence fit | **Poor for score** — quarterly (best case) vs daily VIX / weekly ETF issuance |
 | Overlap control | **Risky** if reusing general ICI equity **flows** already scored elsewhere |
 | Manual artifact viability | **Feasible** for quarterly **structural** extract; not comparable to weekly ETF artifact |
-| Mapping honesty | **Achievable** with heavy caveats; deferred to **v1.2e** |
+| Mapping honesty | **Achievable** with heavy caveats; **v1.2e** → display-only default ([mapping decision](./RETIREMENT_FLOW_MAPPING_DECISION.md)) |
 
 **Why not GREEN:** No stable, non-overlapping, retirement-specific **flow** series at operable weekly/daily cadence for a 20% passive sub-input.  
 **Why not RED:** ICI Retirement Market and Financial Accounts provide citable **structural** proxies suitable for research and a possible **display-only** card.
@@ -209,7 +209,7 @@ Defer numeric claims until v1.2e picks mapping and a sample quarter.
 | **v1.2b** | Artifact design memo + example JSON + validator module + tests | **Done** — [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md); none |
 | **v1.2c** | Production artifact candidate + `ghostflow:validate-artifacts` | **Done** — [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md) §2; not scored |
 | **v1.2d** | Display-only card + score-input decision memo (**recommended**) | None |
-| **v1.2e** | Calibration / mapping decision (quarterly history) | None |
+| **v1.2e** | Calibration / mapping decision (quarterly history) | **Done** — [RETIREMENT_FLOW_CALIBRATION_STUDY.md](./RETIREMENT_FLOW_CALIBRATION_STUDY.md) + [RETIREMENT_FLOW_MAPPING_DECISION.md](./RETIREMENT_FLOW_MAPPING_DECISION.md); display-only; MOCK **58** |
 | **v1.2f** | Score-wiring gate (**if product-approved**) | Gated — **discouraged** without explicit overlap review |
 
 **Parallel (unchanged):** **v1.0c** CFTC · **v1.1f** levered ETF — separate product gates.
