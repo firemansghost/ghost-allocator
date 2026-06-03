@@ -460,6 +460,59 @@ export type RetirementFlowPressureProxyValidation =
   | RetirementFlowPressureValidationResult
   | RetirementFlowPressureValidationError;
 
+/** OCC daily cleared options volume — index intensity proxy (v1.4c design only). */
+export type OptionsActivityMappingStatus = 'not_final';
+
+export interface OptionsActivityProxyObservationsV1 {
+  totalOptionsContracts: number;
+  indexOptionsContracts: number;
+  indexShareOfTotalPct: number;
+  mappingStatus: OptionsActivityMappingStatus;
+  equityOptionsContracts?: number;
+  etfOptionsContracts?: number;
+  putCallRatio?: number;
+  priorSessionIndexOptionsContracts?: number;
+  indexOptionsDailyChangePct?: number;
+}
+
+/** Supplementary Cboe monthly context — not 0DTE; optional in v1.4c example. */
+export interface OptionsActivityOptionalObservationsV1 {
+  spxOptionsAdvThousands?: number;
+  spxAdvAsOfMonth?: string;
+  spxAdvSourceNote?: string;
+  [key: string]: unknown;
+}
+
+export interface OptionsActivityProxyArtifactV1 {
+  artifactVersion: '1';
+  signalId: 'options-activity-proxy';
+  designOnly?: true;
+  asOf: string;
+  publishedAt: string;
+  source: ArtifactSource;
+  observationType: 'occ_daily_volume_snapshot';
+  seriesDefinition: 'occ_daily_options_volume_v1';
+  updateFrequency: 'daily';
+  dataQuality: 'verified_manual' | 'manual_unverified';
+  caveats: string[];
+  observations: OptionsActivityProxyObservationsV1;
+  optionalObservations?: OptionsActivityOptionalObservationsV1;
+}
+
+export interface OptionsActivityProxyValidationResult {
+  ok: true;
+  artifact: OptionsActivityProxyArtifactV1;
+}
+
+export interface OptionsActivityProxyValidationError {
+  ok: false;
+  errors: string[];
+}
+
+export type OptionsActivityProxyValidation =
+  | OptionsActivityProxyValidationResult
+  | OptionsActivityProxyValidationError;
+
 export interface ArtifactFreshnessResult {
   status: GhostFlowArtifactFreshnessStatus;
   ageDays: number;

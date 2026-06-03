@@ -181,7 +181,7 @@ On promotion, prefer a **new `signalId`** (e.g. `options-activity-proxy`) rather
 |-------|-------------|-------------|
 | **v1.4a** | This feasibility memo + roadmap update | **Docs only** (this file) |
 | **v1.4b** | Source spike / **column lock** | **Done** — `options-data-spike.ts`; see [§v1.4b column-lock results](#v14b-column-lock-results) |
-| **v1.4c** | Artifact design memo + example JSON + validator sketch | No production JSON |
+| **v1.4c** | Artifact design memo + example JSON + validator | **Done** — [OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md](./OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md); no production JSON |
 | **v1.4d** | Production artifact candidate + **display-only** card | `buildSnapshot` display merge + UI — gated |
 | **v1.4e** | Calibration / mapping decision | Research; `mappingStatus: not_final`; placeholder or MOCK unchanged unless product approves |
 | **v1.4f** | Score-wiring gate (if product-approved) | Would touch `scoring.ts` / merge — **discouraged**; likely conflicts with 20% VIX slot |
@@ -253,7 +253,7 @@ True **0DTE share** or **dealer GEX** at daily operational quality: **Cboe DataS
 ### v1.4b product recommendation
 
 1. **Keep `odte-options` PLACEHOLDER** — no true public 0DTE column lock.
-2. **Proceed to v1.4c** artifact design for **OCC index options cleared volume** (display-only default).
+2. ~~**Proceed to v1.4c**~~ **v1.4c complete** — artifact design for **OCC index options cleared volume** (display-only default); see [OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md](./OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md).
 3. **Optional secondary track:** Cboe monthly **SPX options ADV** (monthly display context) — separate from OCC daily aggregate.
 4. **Do not** use Cboe press/insights 0DTE % as artifact source without a **stable table column** in monthly XLSX.
 5. **True `0DTE / Gamma Pressure`:** paid/vendor only unless future Cboe table adds machine-stable 0DTE columns (re-spike).
@@ -325,7 +325,8 @@ Likely future `signalId`: **`options-activity-proxy`** (not `odte-options`).
 3. **Outcome A (failed):** No public **0DTE** column lock — do not promote press/insights figures to artifacts.
 4. **Cboe supplementary:** SPX options ADV monthly row — optional second display metric; not 0DTE.
 5. **Plan for paid/vendor data** for true **0DTE / Gamma Pressure** or GEX.
-6. **Do not** replace or supplement `optionsVolatilityAmplifier` without **v1.4f** product gate.
+6. **v1.4d next:** production artifact + display card (`options-activity-proxy`); keep `odte-options` placeholder until then.
+7. **Do not** replace or supplement `optionsVolatilityAmplifier` without **v1.4f** product gate.
 
 ---
 
