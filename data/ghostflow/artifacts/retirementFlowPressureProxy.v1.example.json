@@ -1,0 +1,34 @@
+{
+  "artifactVersion": "1",
+  "signalId": "retirement-flow-pressure-proxy",
+  "designOnly": true,
+  "asOf": "2025-12-31",
+  "publishedAt": "2026-03-26",
+  "source": {
+    "name": "ICI Retirement Statistics — Quarterly Retirement Market Data (design reference)",
+    "url": "https://www.ici.org/research/stats/retirement",
+    "note": "EXAMPLE / DESIGN ONLY — illustrative quarterly retirement market asset levels for schema and validator tests. Not used in GhostFlow score or buildSnapshot. Production values and exact ICI table/row names require v1.2c operator verification from the current ICI release (e.g. The US Retirement Market quarterly workbook)."
+  },
+  "observationType": "quarterly_retirement_market_snapshot",
+  "seriesDefinition": "ici_retirement_market_quarterly_assets_v1",
+  "updateFrequency": "quarterly",
+  "dataQuality": "manual_unverified",
+  "caveats": [
+    "Structural retirement market assets — not measured payroll contribution flow or weekly equity flow",
+    "Quarterly cadence — not comparable to weekly ETF issuance or daily vol inputs",
+    "mappingStatus not_final — no score mapping; MOCK retirementFlowPressureProxy unchanged",
+    "Illustrative totals only — operator must re-extract from verified ICI rows in v1.2c"
+  ],
+  "observations": {
+    "totalRetirementMarketAssetsTrillionsUsd": 45,
+    "definedContributionAssetsTrillionsUsd": 12,
+    "iraAssetsTrillionsUsd": 17,
+    "targetDateFundAssetsBillionsUsd": 3200,
+    "priorQuarterTotalAssetsTrillionsUsd": 44,
+    "priorYearTotalAssetsTrillionsUsd": 42,
+    "quarterOverQuarterAssetGrowthPct": 2.3,
+    "yearOverYearAssetGrowthPct": 7.1,
+    "contributionSeasonFlag": "neutral",
+    "mappingStatus": "not_final"
+  }
+}

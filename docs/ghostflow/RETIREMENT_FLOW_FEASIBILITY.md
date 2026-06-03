@@ -2,7 +2,7 @@
 
 **Status:** Research / feasibility only — no scoring, merge, artifact JSON, UI, or script changes.  
 **Target (future):** A defensible public proxy for **recurring retirement-account equity demand pressure** (possibly **display-only** before any score use).  
-**Related:** [DATA_ROADMAP.md](./DATA_ROADMAP.md) · [LEVERED_ETF_REBALANCE_FEASIBILITY.md](./LEVERED_ETF_REBALANCE_FEASIBILITY.md) · [CFTC_TFF_FEASIBILITY.md](./CFTC_TFF_FEASIBILITY.md)
+**Related:** [DATA_ROADMAP.md](./DATA_ROADMAP.md) · [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md) (v1.2b) · [LEVERED_ETF_REBALANCE_FEASIBILITY.md](./LEVERED_ETF_REBALANCE_FEASIBILITY.md) · [CFTC_TFF_FEASIBILITY.md](./CFTC_TFF_FEASIBILITY.md)
 
 **Do not reopen:** CFTC **v1.0c** or levered ETF **v1.1f** score-wiring gates in this track.
 
@@ -138,7 +138,7 @@ https://www.ici.org/research/stats/retirement — quarterly tables on retirement
 
 ## 7. Candidate future artifact schema outline (design only)
 
-**Future path:** `data/ghostflow/artifacts/retirementFlowPressureProxy.v1.example.json` — **not created in v1.2a**.
+**v1.2b path:** [`data/ghostflow/artifacts/retirementFlowPressureProxy.v1.example.json`](../data/ghostflow/artifacts/retirementFlowPressureProxy.v1.example.json) — **created** (`designOnly: true`); see [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md).
 
 ```json
 {
@@ -154,7 +154,7 @@ https://www.ici.org/research/stats/retirement — quarterly tables on retirement
     "note": "Manual extract: quarterly retirement market assets — structural, not contribution flow"
   },
   "observationType": "quarterly_retirement_market_snapshot",
-  "seriesDefinition": "ici_retirement_market_assets_v1",
+  "seriesDefinition": "ici_retirement_market_quarterly_assets_v1",
   "observations": {
     "totalRetirementMarketAssetsTrillionsUsd": null,
     "iraAssetsTrillionsUsd": null,
@@ -206,7 +206,7 @@ Defer numeric claims until v1.2e picks mapping and a sample quarter.
 | Phase | Deliverable | Score impact |
 |-------|-------------|--------------|
 | **v1.2a** | This feasibility memo + roadmap | **None** — **current** |
-| **v1.2b** | Artifact design memo + example JSON + validator module + tests | None |
+| **v1.2b** | Artifact design memo + example JSON + validator module + tests | **Done** — [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md); none |
 | **v1.2c** | Production artifact candidate + `ghostflow:validate-artifacts` | None |
 | **v1.2d** | Display-only card + score-input decision memo (**recommended**) | None |
 | **v1.2e** | Calibration / mapping decision (quarterly history) | None |
@@ -218,9 +218,9 @@ Defer numeric claims until v1.2e picks mapping and a sample quarter.
 
 ---
 
-## 10. Open questions (for v1.2b)
+## 10. Open questions (for v1.2c+)
 
-1. **Exact ICI table and rows** — which Retirement Market tables are stable for manual extract (total assets, IRA, DC, 401(k)-type, target-date)?
+1. **Exact ICI table and rows** — deferred from v1.2b; operator must lock worksheet tabs/rows from current ICI *US Retirement Market* quarterly workbook (see [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md) §2).
 2. **Z.1 line codes** — which Financial Accounts series best proxy retirement-account equity exposure without duplicating household-wide equity?
 3. **Target-date fund data** — is ICI target-date fund assets (or flows) extractable quarterly, or annual only?
 4. **Composite membership** — should retirement ever be a **scored** sub-input, or remain **display-only / watchlist** structural context?
@@ -240,6 +240,7 @@ Defer numeric claims until v1.2e picks mapping and a sample quarter.
 ## Related documents
 
 - [DATA_ROADMAP.md](./DATA_ROADMAP.md) — phase tracking  
+- [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md) — v1.2b schema, validation, promotion checklist  
 - [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) — future operator row when artifact exists  
 - [ETF_ARTIFACT_RUNBOOK.md](./ETF_ARTIFACT_RUNBOOK.md) — weekly flow neighbor (do not double-count)  
 - [ACTIVE_INDEX_ARTIFACT_RUNBOOK.md](./ACTIVE_INDEX_ARTIFACT_RUNBOOK.md) — monthly flow neighbor (do not double-count)  
