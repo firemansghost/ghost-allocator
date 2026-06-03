@@ -1,18 +1,23 @@
 /**
- * GhostFlow v1.2b — Retirement flow pressure proxy artifact tests (no network).
+ * GhostFlow v1.2b/c — Retirement flow pressure proxy artifact tests (no network).
  */
 
 import assert from 'assert';
+import productionArtifact from '@/data/ghostflow/artifacts/retirementFlowPressureProxy.v1.json';
 import {
   computeQuarterOverQuarterAssetGrowthPct,
   computeYearOverYearAssetGrowthPct,
+  loadRetirementFlowPressureProxyArtifact,
   validateRetirementFlowPressureProxyArtifact,
 } from '../artifacts/retirementFlowPressureProxy';
+import type { RetirementFlowPressureArtifactV1 } from '../artifacts/types';
 import {
   cloneRetirementFlowExample,
   FIXTURE_RETIREMENT_FLOW_EXAMPLE,
   FIXTURE_RETIREMENT_FLOW_REFERENCE_AS_OF,
 } from './fixtures/retirementFlowPressureProxy';
+
+const production = productionArtifact as RetirementFlowPressureArtifactV1;
 
 // --- Growth helpers ---
 const qoq = computeQuarterOverQuarterAssetGrowthPct(45, 44);
@@ -27,6 +32,27 @@ const valid = validateRetirementFlowPressureProxyArtifact(
   { mode: 'example', referenceAsOf: FIXTURE_RETIREMENT_FLOW_REFERENCE_AS_OF }
 );
 assert.ok(valid.ok, valid.ok ? '' : valid.errors.join('; '));
+
+// --- Production artifact validates (production mode) ---
+const prodValid = validateRetirementFlowPressureProxyArtifact(production, {
+  mode: 'production',
+  referenceAsOf: FIXTURE_RETIREMENT_FLOW_REFERENCE_AS_OF,
+});
+assert.ok(prodValid.ok, prodValid.ok ? '' : prodValid.errors.join('; '));
+assert.strictEqual(production.designOnly, undefined);
+assert.strictEqual(production.dataQuality, 'verified_manual');
+assert.ok(
+  production.source.note?.includes(
+    'Production artifact candidate; validated but not yet displayed or wired into GhostFlow score'
+  )
+);
+assert.strictEqual(production.asOf, '2025-12-31');
+assert.strictEqual(production.publishedAt, '2026-03-26');
+assert.strictEqual(production.observations.totalRetirementMarketAssetsTrillionsUsd, 49.1);
+
+// --- Loader returns ok ---
+const loaded = loadRetirementFlowPressureProxyArtifact();
+assert.ok(loaded.ok, loaded.ok ? '' : loaded.errors.join('; '));
 
 // --- designOnly false fails in example mode ---
 const noDesign = cloneRetirementFlowExample();
@@ -61,19 +87,23 @@ const pubBeforeResult = validateRetirementFlowPressureProxyArtifact(pubBefore, {
 assert.ok(!pubBeforeResult.ok);
 assert.ok(pubBeforeResult.errors.some((e) => e.includes('publishedAt')));
 
-// --- negative total assets fails ---
-const negative = cloneRetirementFlowExample();
+// --- negative total assets fails (production clone) ---
+const negative = JSON.parse(JSON.stringify(production)) as RetirementFlowPressureArtifactV1;
 negative.observations.totalRetirementMarketAssetsTrillionsUsd = -1;
-const negativeResult = validateRetirementFlowPressureProxyArtifact(negative, { mode: 'example' });
+const negativeResult = validateRetirementFlowPressureProxyArtifact(negative, {
+  mode: 'production',
+});
 assert.ok(!negativeResult.ok);
 assert.ok(
   negativeResult.errors.some((e) => e.includes('totalRetirementMarketAssetsTrillionsUsd'))
 );
 
-// --- mappingStatus final fails ---
-const finalMapping = cloneRetirementFlowExample();
+// --- mappingStatus final fails (production) ---
+const finalMapping = JSON.parse(JSON.stringify(production)) as RetirementFlowPressureArtifactV1;
 (finalMapping.observations as { mappingStatus: string }).mappingStatus = 'final';
-const finalResult = validateRetirementFlowPressureProxyArtifact(finalMapping, { mode: 'example' });
+const finalResult = validateRetirementFlowPressureProxyArtifact(finalMapping, {
+  mode: 'production',
+});
 assert.ok(!finalResult.ok);
 assert.ok(finalResult.errors.some((e) => e.includes('mappingStatus')));
 
@@ -85,6 +115,13 @@ const mappedRootResult = validateRetirementFlowPressureProxyArtifact(mappedRoot,
 });
 assert.ok(!mappedRootResult.ok);
 assert.ok(mappedRootResult.errors.some((e) => e.includes('mappedPressureScore')));
+
+const mappedProd = JSON.parse(JSON.stringify(production)) as Record<string, unknown>;
+mappedProd.mappedPressureScore = 60;
+const mappedProdResult = validateRetirementFlowPressureProxyArtifact(mappedProd, {
+  mode: 'production',
+});
+assert.ok(!mappedProdResult.ok);
 
 const mappedObs = cloneRetirementFlowExample();
 (mappedObs.observations as Record<string, unknown>).mappedPressureScore = 60;
@@ -110,12 +147,20 @@ const mismatchResult = validateRetirementFlowPressureProxyArtifact(mismatch, { m
 assert.ok(!mismatchResult.ok);
 assert.ok(mismatchResult.errors.some((e) => e.includes('quarterOverQuarter')));
 
-// --- production mode rejects designOnly true ---
-const prodFail = validateRetirementFlowPressureProxyArtifact(
+// --- example fails production mode (designOnly) ---
+const exampleProdFail = validateRetirementFlowPressureProxyArtifact(
   FIXTURE_RETIREMENT_FLOW_EXAMPLE,
   { mode: 'production' }
 );
-assert.ok(!prodFail.ok);
-assert.ok(prodFail.errors.some((e) => e.includes('designOnly')));
+assert.ok(!exampleProdFail.ok);
+assert.ok(exampleProdFail.errors.some((e) => e.includes('designOnly')));
+
+// --- production with designOnly true fails production mode ---
+const prodWithDesign = { ...production, designOnly: true as const };
+const prodDesignFail = validateRetirementFlowPressureProxyArtifact(prodWithDesign, {
+  mode: 'production',
+});
+assert.ok(!prodDesignFail.ok);
+assert.ok(prodDesignFail.errors.some((e) => e.includes('designOnly')));
 
 console.log('ghostflow/retirementFlowPressureProxy.test.ts: ok');
