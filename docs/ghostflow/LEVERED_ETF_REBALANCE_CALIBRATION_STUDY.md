@@ -2,7 +2,7 @@
 
 **Status:** Research-only calibration support — **no score wiring**, no `buildSnapshot` merge, **not production artifact mutation**.  
 **Study type:** **Fixed-current-AUM return-sensitivity study** — **not true historical AUM calibration**.  
-**Run date:** 2026-05-20  
+**Run date:** 2026-06-02 (full-history Stooq run; smoke fixture 2026-05-20)  
 **Related:** [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md) · [LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md](./LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md) · production artifact [`leveredEtfRebalancePressure.v1.json`](../data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.json)
 
 ---
@@ -61,7 +61,7 @@ This supports mapping decisions in [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](.
 
 ## 5. Smoke validation run (fixture CSV, N = 4)
 
-Operator full-history run was blocked by Stooq API-key gate in this environment. A **smoke** run on the test fixture confirms plumbing and production cross-check.
+A **smoke** run on the test fixture confirms plumbing and production cross-check. Full-history results are in §7 (Stooq, since 2010-02-11).
 
 | Metric | Value |
 |--------|--------|
@@ -120,43 +120,112 @@ npm run ghostflow:levered-etf-rebalance-history-study -- --returns-csv path/to/r
 npm run ghostflow:levered-etf-rebalance-history-study -- --since 2015-01-01 --out data/ghostflow/research/leveredEtfSessions.v1.json
 ```
 
-After a full run, paste distribution, mapping, and percentile tables into §7–8 of this memo.
+Full-history run completed 2026-06-02 via Stooq (`STOOQ_API_KEY`). Results below.
 
 ---
 
-## 7. Full-history results (pending operator run)
+## 7. Full-history results (fixed-current-AUM return-sensitivity)
+
+**Command:** `npm run ghostflow:levered-etf-rebalance-history-study -- --since 2010-02-11`  
+**Return source:** Stooq daily close-to-close % — `qqq.us`, `spy.us`, `iwm.us`  
+**AUM mode:** `fixed-current` (production artifact snapshot; **not** time-varying AUM)
 
 | Metric | Value |
 |--------|--------|
-| Aligned sessions (N) | _pending — run with Stooq or full returns CSV_ |
-| Date range | _pending_ |
-| Skipped sessions | _pending_ |
-| Latest %AUM percentile (fixed-AUM) | _pending_ |
+| Proxy return rows loaded | **4,099** |
+| **Aligned sessions (N)** | **4,099** |
+| Skipped sessions | **0** |
+| **Date range** | **2010-02-12** → **2026-06-02** |
+
+### Latest session (2026-06-02)
+
+| Field | Value |
+|-------|--------|
+| `aggregateRebalancePctOfUniverseAum` | **2.8%** |
+| `aggregateAbsRebalanceNotionalMillionsUsd` | **1,351.85M** |
+| `aggregateEstimatedRebalanceNotionalMillionsUsd` | **+1,351.85M** |
+| `dominantDirection` | **buy_underlying** |
+| Percentile vs fixed-AUM history (% AUM) | **38.7th** |
+
+Production week **2026-05-22** reproduces artifact **2.78% / 1,343.67M / buy_underlying** within tolerance.
+
+### Direction mix (full history)
+
+| Direction | % of sessions |
+|-----------|----------------|
+| buy_underlying | **53.6%** |
+| sell_underlying | **41.5%** |
+| mixed | **4.9%** |
+| flat | **0%** |
+
+### Distributions
+
+| Series | min | p25 | median | p75 | max | mean |
+|--------|-----|-----|--------|-----|-----|------|
+| % of universe AUM | 0.09 | 1.8 | **3.9** | 7.6 | **75.98** | 5.6 |
+| Abs notional (M USD) | 42 | 856 | **1,901** | 3,666 | **36,733** | 2,720 |
+
+Early-era sessions use **today’s AUM** against **2010–2015 returns**, so tails (e.g. COVID March 2020) are **overstated** versus true historical AUM — another reason this is a stress test, not ground truth.
+
+### Top 5 sessions by % of universe AUM
+
+| Date | % AUM | Abs notional (M) | Dominant direction |
+|------|-------|------------------|------------------|
+| 2020-03-16 | **75.98%** | 36,733 | sell_underlying |
+| 2025-04-09 | **74.59%** | 36,065 | buy_underlying |
+| 2020-03-12 | **59.3%** | 28,670 | sell_underlying |
+| 2020-03-13 | **53.77%** | 25,996 | buy_underlying |
+| 2020-03-24 | **50.9%** | 24,609 | buy_underlying |
+
+### Bottom 5 sessions by % of universe AUM
+
+| Date | % AUM | Abs notional (M) | Dominant direction |
+|------|-------|------------------|------------------|
+| 2016-04-14 | **0.09%** | 44 | mixed |
+| 2017-11-10 | **0.09%** | 42 | sell_underlying |
+| 2010-03-12 | **0.12%** | 60 | buy_underlying |
+| 2011-06-13 | **0.12%** | 60 | mixed |
+| 2015-05-15 | **0.12%** | 56 | buy_underlying |
+
+### Full-history mapping comparison (latest session 2.8% AUM)
+
+| Mapping | Latest score | % sessions ≥70 | % sessions ≥80 | % sessions ≥90 | median | p90 |
+|---------|--------------|----------------|----------------|----------------|--------|-----|
+| **linear x10** on %AUM | **28** | 28.2% | 23.5% | 19.6% | 39 | 100 |
+| **linear x20** on %AUM | **56** | 54.2% | 49.7% | 45.2% | 79 | 100 |
+| **manual bands** on %AUM | **60** | 49.5% | 40.6% | 28.0% | 68 | 90 |
+| **capped linear x20** (cap 80) | **56** | 54.2% | 49.7% | **0%** | 79 | 80 |
+| **percentile rank** %AUM | **39** | 30.5% | 20.5% | 10.5% | 50 | 90 |
+
+**Readout:** Uncapped **linear ×20** would score **≥70** on **54%** of sessions (median mapped score **79**). Latest production-like week (**2.8% AUM**) maps to **L ≈ 56** under ×20 — near MOCK **55** by coincidence — but its **fixed-AUM percentile is only ~39th**, not “elevated vs history.” **Percentile** mapping for the latest week (**39**) sits **below** MOCK **55**.
 
 ---
 
 ## 8. Score-impact preview (peers fixed, levered MOCK 55 baseline)
 
-From smoke fixture latest mappings (illustrative only):
+From **full-history latest session** mappings (2026-06-02, 2.8% AUM). Not score wiring.
 
 | Case | L | Passive | Composite | Band |
 |------|---|---------|-----------|------|
 | MOCK (current) | **55** | **58** | **62** | Crowded / Reflexive |
-| linear x20 (latest) | 100 | 65 | 66 | Crowded / Reflexive |
-| capped x20 (latest) | 80 | 62 | 64 | Crowded / Reflexive |
-| percentile (latest) | 88 | 63 | 65 | Crowded / Reflexive |
+| linear x10 (latest) | **28** | **54** | **60** | Elevated Flow Pressure |
+| linear x20 (latest) | **56** | **58** | **62** | Crowded / Reflexive |
+| manual bands (latest) | **60** | **59** | **63** | Crowded / Reflexive |
+| capped x20 (latest) | **56** | **58** | **62** | Crowded / Reflexive |
+| percentile rank (latest) | **39** | **55** | **61** | Crowded / Reflexive |
 
-Wiring is **not approved**. Under uncapped linear ×20, a single large-return session can push L to **100** and composite +4 vs MOCK baseline.
+Wiring is **not approved**. Uncapped linear ×20 is **too hot** on history (~half of sessions ≥70). Latest-week ×20 ≈ MOCK is **not** calibration. Prefer **percentile** or **capped** mapping if v1.1f is ever approved.
 
 ---
 
 ## 9. Recommendation
 
-1. **Stay display-only** — artifact card remains informational; `mappingStatus: not_final`.
-2. **Treat fixed-current-AUM output as a stress test only** — not true historical AUM calibration.
-3. **Do not proceed to v1.1f score wiring** unless product explicitly approves after a **full-history** run and mapping review.
-4. If wiring is ever approved, prefer **percentile (F)** or **capped linear (D)** over uncapped ×k linear — consistent with [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md).
-5. **Parallel track:** collect weekly production artifacts over time for rolling-forward calibration (clean provenance).
+1. **Stay display-only** — artifact card remains informational; `mappingStatus: not_final`; `leveredEtfRebalancePressure` remains **MOCK 55**.
+2. **Treat fixed-current-AUM output as a stress test only** — not true historical AUM calibration (AUM frozen; COVID-era tails overstated).
+3. **Do not proceed to v1.1f score wiring** without explicit product approval — full-history run is complete; policy unchanged.
+4. **Reject uncapped linear ×20 for score use** — **54%** of sessions would map ≥70; median **79**; p90 hits **100**.
+5. If wiring is ever approved, prefer **percentile** or **capped linear (cap 80)** — latest week percentile score **39** vs ×20 **56** shows mappers diverge; percentile avoids arbitrary scale.
+6. **Parallel track:** collect weekly production artifacts over time for rolling-forward calibration (clean provenance).
 
 ---
 
