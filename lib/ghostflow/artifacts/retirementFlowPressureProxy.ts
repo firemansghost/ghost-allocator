@@ -1,8 +1,10 @@
 /**
- * GhostFlow v1.2b — Retirement flow pressure proxy artifact (design-only).
- * Pure validation and growth helpers. No production loader or buildSnapshot merge.
+ * GhostFlow v1.2b/c — Retirement flow pressure proxy artifact.
+ * Pure validation and growth helpers. Production loader for validate-artifacts; no buildSnapshot merge.
  */
 
+import retirementFlowPressureProxyArtifactJson from '@/data/ghostflow/artifacts/retirementFlowPressureProxy.v1.json';
+import { GHOSTFLOW_REFERENCE_AS_OF } from '@/lib/ghostflow/reference';
 import type {
   RetirementFlowPressureArtifactV1,
   RetirementFlowPressureProxyValidation,
@@ -10,6 +12,9 @@ import type {
 
 export const RETIREMENT_FLOW_EXAMPLE_ARTIFACT_PATH =
   'data/ghostflow/artifacts/retirementFlowPressureProxy.v1.example.json';
+
+export const RETIREMENT_FLOW_PRODUCTION_ARTIFACT_PATH =
+  'data/ghostflow/artifacts/retirementFlowPressureProxy.v1.json';
 
 export const RETIREMENT_FLOW_SIGNAL_ID = 'retirement-flow-pressure-proxy' as const;
 
@@ -339,4 +344,11 @@ export function validateRetirementFlowPressureProxyArtifact(
     ok: true,
     artifact: raw as unknown as RetirementFlowPressureArtifactV1,
   };
+}
+
+export function loadRetirementFlowPressureProxyArtifact(): RetirementFlowPressureProxyValidation {
+  return validateRetirementFlowPressureProxyArtifact(retirementFlowPressureProxyArtifactJson, {
+    mode: 'production',
+    referenceAsOf: GHOSTFLOW_REFERENCE_AS_OF,
+  });
 }

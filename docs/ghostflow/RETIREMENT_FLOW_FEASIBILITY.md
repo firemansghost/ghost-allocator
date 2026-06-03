@@ -207,7 +207,7 @@ Defer numeric claims until v1.2e picks mapping and a sample quarter.
 |-------|-------------|--------------|
 | **v1.2a** | This feasibility memo + roadmap | **None** — **current** |
 | **v1.2b** | Artifact design memo + example JSON + validator module + tests | **Done** — [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md); none |
-| **v1.2c** | Production artifact candidate + `ghostflow:validate-artifacts` | None |
+| **v1.2c** | Production artifact candidate + `ghostflow:validate-artifacts` | **Done** — [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md) §2; not scored |
 | **v1.2d** | Display-only card + score-input decision memo (**recommended**) | None |
 | **v1.2e** | Calibration / mapping decision (quarterly history) | None |
 | **v1.2f** | Score-wiring gate (**if product-approved**) | Gated — **discouraged** without explicit overlap review |
@@ -220,7 +220,7 @@ Defer numeric claims until v1.2e picks mapping and a sample quarter.
 
 ## 10. Open questions (for v1.2c+)
 
-1. **Exact ICI table and rows** — deferred from v1.2b; operator must lock worksheet tabs/rows from current ICI *US Retirement Market* quarterly workbook (see [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md) §2).
+1. ~~**Exact ICI table and rows**~~ **Resolved (v1.2c):** Table 1 in `ret_25_q4_data.xls` — see [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md) §2.
 2. **Z.1 line codes** — which Financial Accounts series best proxy retirement-account equity exposure without duplicating household-wide equity?
 3. **Target-date fund data** — is ICI target-date fund assets (or flows) extractable quarterly, or annual only?
 4. **Composite membership** — should retirement ever be a **scored** sub-input, or remain **display-only / watchlist** structural context?

@@ -13,6 +13,7 @@ import { validateVolatilityRegimeArtifact } from '../../lib/ghostflow/artifacts/
 import { validateMarketBreadthArtifact } from '../../lib/ghostflow/artifacts/marketBreadth';
 import { validateSystematicFlowProxyArtifact } from '../../lib/ghostflow/artifacts/systematicFlowProxy';
 import { validateLeveredEtfRebalancePressureArtifact } from '../../lib/ghostflow/artifacts/leveredEtfRebalancePressure';
+import { validateRetirementFlowPressureProxyArtifact } from '../../lib/ghostflow/artifacts/retirementFlowPressureProxy';
 import { GHOSTFLOW_REFERENCE_AS_OF } from '../../lib/ghostflow/reference';
 
 const root = process.cwd();
@@ -171,6 +172,26 @@ function main(): void {
     const o = leveredRules.artifact.observations;
     console.log(
       `GhostFlow rules: levered-etf-rebalance-pressure OK (${o.dominantDirection}, ${o.aggregateRebalancePctOfUniverseAum}% of AUM abs rebalance est., asOf ${leveredRules.artifact.asOf}, published ${leveredRules.artifact.publishedAt})`
+    );
+  }
+
+  const retirementPath = join(root, 'data/ghostflow/artifacts/retirementFlowPressureProxy.v1.json');
+  const retirementRules = validateRetirementFlowPressureProxyArtifact(
+    loadJson(retirementPath),
+    { mode: 'production', referenceAsOf: GHOSTFLOW_REFERENCE_AS_OF }
+  );
+  if (!retirementRules.ok) {
+    failed = true;
+    console.error('GhostFlow rules failed for retirement-flow-pressure-proxy:');
+    for (const err of retirementRules.errors) console.error(`  - ${err}`);
+  } else {
+    const o = retirementRules.artifact.observations;
+    const qoq =
+      o.quarterOverQuarterAssetGrowthPct != null
+        ? `, QoQ ${o.quarterOverQuarterAssetGrowthPct}%`
+        : '';
+    console.log(
+      `GhostFlow rules: retirement-flow-pressure-proxy OK ($${o.totalRetirementMarketAssetsTrillionsUsd}T total${qoq}, mappingStatus ${o.mappingStatus}, asOf ${retirementRules.artifact.asOf}, published ${retirementRules.artifact.publishedAt})`
     );
   }
 

@@ -1,9 +1,10 @@
 # Retirement Flow Pressure Proxy — Artifact Design (GhostFlow v1.2b)
 
-**Status (v1.2b):** Design memo, **example JSON only**, pure validator/helpers, and tests — **no** production artifact, loader, `validate-artifacts` integration, `buildSnapshot` merge, display card, or score wiring.  
+**Status (v1.2c):** Validated **production artifact candidate** + example JSON, loader, `validate-artifacts` — **no** `buildSnapshot` merge, display card, or score wiring. `retirementFlowPressureProxy` remains **MOCK 58**.  
 **Prior work:** [RETIREMENT_FLOW_FEASIBILITY.md](./RETIREMENT_FLOW_FEASIBILITY.md) (v1.2a, **YELLOW**).  
 **Example file:** [`data/ghostflow/artifacts/retirementFlowPressureProxy.v1.example.json`](../data/ghostflow/artifacts/retirementFlowPressureProxy.v1.example.json) (`designOnly: true`, `dataQuality: manual_unverified`)  
-**Library:** [`lib/ghostflow/artifacts/retirementFlowPressureProxy.ts`](../lib/ghostflow/artifacts/retirementFlowPressureProxy.ts) — `validateRetirementFlowPressureProxyArtifact(raw, { mode: 'example' | 'production' })`, growth helpers only
+**Production file:** [`data/ghostflow/artifacts/retirementFlowPressureProxy.v1.json`](../data/ghostflow/artifacts/retirementFlowPressureProxy.v1.json) (`dataQuality: verified_manual`; omit `designOnly`)  
+**Library:** [`lib/ghostflow/artifacts/retirementFlowPressureProxy.ts`](../lib/ghostflow/artifacts/retirementFlowPressureProxy.ts) — `validateRetirementFlowPressureProxyArtifact`, `loadRetirementFlowPressureProxyArtifact()`
 
 ---
 
@@ -27,20 +28,37 @@ It is **not**:
 
 | Role | Source | Use in v1.2b |
 |------|--------|----------------|
-| **Primary** | [ICI Retirement Statistics — Quarterly Retirement Market Data](https://www.ici.org/research/stats/retirement) | Selected path for quarterly retirement market **asset levels** (total market, DC, IRA, optional TDF) |
-| **Optional cross-check** | Fed Financial Accounts / Z.1 household retirement-related lines | Documented for v1.2c+ operator cross-check only — **not** in example JSON |
+| **Primary** | [ICI Quarterly Retirement Market Data](https://www.ici.org/research/statistics/quarterly-retirement-market-data) | Production extract from **Table 1** (v1.2c) |
+| **Optional cross-check** | Fed Financial Accounts / Z.1 | **Not used** in v1.2c MVP |
 
-**ICI release pattern (observed, not row-locked):** Quarterly statistical report and workbook, e.g. release *“Quarterly Retirement Market Data, Fourth Quarter 2025”* (Mar 2026) with report *“The US Retirement Market, Fourth Quarter 2025 (xls)”*.
+### ICI source lock (v1.2c — verified from official workbook)
 
-### Exact ICI table / row names — **pending v1.2c**
+| Item | Value |
+|------|--------|
+| **Release title** | Quarterly Retirement Market Data, Fourth Quarter 2025 |
+| **Release page** | https://www.ici.org/statistical-report/ret_25_q4 |
+| **Workbook download** | https://www.ici.org/statistical-report/ret_25_q4_data.xls |
+| **Workbook title (TOC)** | The US Retirement Market, Fourth Quarter 2025 |
+| **Quarter / `asOf`** | 2025-Q4 → `2025-12-31` |
+| **`publishedAt`** | `2026-03-26` |
+| **Worksheet** | `Table 1` |
+| **Table title (row 2)** | US Total Retirement Assets |
+| **Units in workbook** | Billions of dollars, end-of-period (artifact fields: **trillions** USD, ÷1000) |
+| **Table 1 note** | Components may not add to the total because of rounding; plan definitions in Table 1 footnotes |
 
-v1.2b **did not** lock exact worksheet tab names or row labels from the current ICI `.xls` workbook. Operators must extract and document them when promoting a production artifact in **v1.2c** before any production JSON is checked in.
+**Row / column mapping (production artifact):**
 
-Until verified:
+| Artifact field | Table 1 source |
+|----------------|----------------|
+| `totalRetirementMarketAssetsTrillionsUsd` | **Sum** of period row **2025:Q4** (sheet row 113): IRAs + DC plans + Private-sector DB + State/local government DB + Federal DB + Annuities = **49,124** billion → **$49.1T** (release headline) |
+| `iraAssetsTrillionsUsd` | Column **IRAs**, row **2025:Q4** = **19,220** billion → **$19.2T** |
+| `definedContributionAssetsTrillionsUsd` | Column **DC plans¹**, row **2025:Q4** = **14,197** billion → **$14.2T** |
+| `priorQuarterTotalAssetsTrillionsUsd` | Sum of row **2025:Q3** = **48,131** billion → **$48.1T** |
+| `priorYearTotalAssetsTrillionsUsd` | Sum of row **2024:Q4** = **44,171** billion → **$44.2T** |
+| `quarterOverQuarterAssetGrowthPct` | ICI release headline **2.1%** (consistent with Table 1 sums) |
+| `yearOverYearAssetGrowthPct` | ICI release headline **11.2%** (consistent with Table 1 sums) |
 
-- Keep `dataQuality: manual_unverified` on the example artifact  
-- Keep `mappingStatus: not_final`  
-- Do not treat illustrative totals in the example JSON as sourced production values  
+**Not in v1.2c MVP:** target-date fund assets, 401(k)-only subtotal, private-sector DC breakout, Z.1 cross-check.
 
 ---
 
@@ -171,19 +189,16 @@ Anchor: `publishedAt` (fallback `asOf`). Calendar days after anchor vs GhostFlow
 | Phase | Deliverable | v1.2b |
 |-------|-------------|--------|
 | **v1.2b** | Design memo, example JSON, validator, tests | **Done (this doc)** |
-| **v1.2c** | Production `retirementFlowPressureProxy.v1.json`; verified ICI rows; `validate-artifacts` | Not started |
+| **v1.2c** | Production `retirementFlowPressureProxy.v1.json`; verified ICI Table 1; `validate-artifacts` | **Done** — not scored, not displayed |
 | **v1.2d** | Display-only card; freshness helper; overlap review | Not started |
 | **v1.2e** | Calibration / mapping decision | Not started |
 | **v1.2f** | Score-wiring gate (product-approved only) | Not started |
 
 ---
 
-## 11. Not implemented in v1.2b
+## 11. Not implemented in v1.2c
 
-- Production artifact JSON under `data/ghostflow/artifacts/*.json` (non-example)  
-- `loadRetirementFlowPressureProxyArtifact()`  
-- `scripts/ghostflow/validate-artifacts.ts` registration  
-- `buildSnapshot.ts` merge  
+- `buildSnapshot.ts` merge or `publicPassiveInputKeys` retirement entry  
 - `scoring.ts` changes  
 - `components/ghostflow/*` display card  
 - `signalPresentation` / freshness evaluation in code  

@@ -1,0 +1,32 @@
+{
+  "artifactVersion": "1",
+  "signalId": "retirement-flow-pressure-proxy",
+  "asOf": "2025-12-31",
+  "publishedAt": "2026-03-26",
+  "source": {
+    "name": "ICI — The US Retirement Market, Fourth Quarter 2025 (Table 1)",
+    "url": "https://www.ici.org/statistical-report/ret_25_q4",
+    "note": "Production artifact candidate; validated but not yet displayed or wired into GhostFlow score. Workbook: ret_25_q4_data.xls (https://www.ici.org/statistical-report/ret_25_q4_data.xls). Worksheet: Table 1 — US Total Retirement Assets. Units: billions USD in workbook; artifact trillions USD (÷1000). Quarter: 2025-Q4 (period end 2025-12-31). Release published 2026-03-26. Total retirement market assets = sum of Table 1 components for period 2025:Q4 (row 113): IRAs + DC plans + Private-sector DB plans + State and local government DB plans + Federal DB plans + Annuities = 49,124 billion ($49.1T per release). IRA: column IRAs, row 2025:Q4 = 19,220 billion ($19.2T). DC: column DC plans1, row 2025:Q4 = 14,197 billion ($14.2T). Prior quarter total: sum 2025:Q3 row = 48,131 billion ($48.1T). Prior year total: sum 2024:Q4 row = 44,171 billion ($44.2T). QoQ/YoY growth % from ICI release headline (2.1%, 11.2%) consistent with Table 1 sums within reconciliation tolerance."
+  },
+  "observationType": "quarterly_retirement_market_snapshot",
+  "seriesDefinition": "ici_retirement_market_quarterly_assets_v1",
+  "updateFrequency": "quarterly",
+  "dataQuality": "verified_manual",
+  "caveats": [
+    "Structural retirement market assets from ICI Table 1 — not measured payroll contribution flow",
+    "Total assets are sum of Table 1 plan-type columns; components may not add due to rounding (ICI note)",
+    "Quarterly cadence — not comparable to weekly ETF issuance or daily vol inputs",
+    "mappingStatus not_final — no score mapping; retirementFlowPressureProxy remains MOCK 58",
+    "Validated production candidate only — not displayed and not wired into buildSnapshot or Research Composite"
+  ],
+  "observations": {
+    "totalRetirementMarketAssetsTrillionsUsd": 49.1,
+    "definedContributionAssetsTrillionsUsd": 14.2,
+    "iraAssetsTrillionsUsd": 19.2,
+    "priorQuarterTotalAssetsTrillionsUsd": 48.1,
+    "priorYearTotalAssetsTrillionsUsd": 44.2,
+    "quarterOverQuarterAssetGrowthPct": 2.1,
+    "yearOverYearAssetGrowthPct": 11.2,
+    "mappingStatus": "not_final"
+  }
+}
