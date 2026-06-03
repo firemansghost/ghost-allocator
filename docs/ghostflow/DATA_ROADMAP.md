@@ -111,18 +111,19 @@ Shipped: `buildSnapshot.ts` merge, DERIVED classification, coverage **6 public /
 
 **Outcome:** **YELLOW** — no retirement-labeled weekly **flow** series suitable for score without overlapping existing ICI artifacts. Best path: **quarterly ICI Retirement Market asset growth** (optional Z.1 cross-check) as a **structural** proxy — **display-only preferred** if developed; keep `retirementFlowPressureProxy` **MOCK 58** for now. **v1.2f** score-wiring gate only if product-approved after v1.2b–e.
 
-### E) 0DTE / options — PLACEHOLDER until source path proven (v1.4a COMPLETE)
+### E) 0DTE / options — PLACEHOLDER; OCC aggregate path locked (v1.4a + v1.4b COMPLETE)
 
-**Feasibility memo:** [ODTE_OPTIONS_FEASIBILITY.md](./ODTE_OPTIONS_FEASIBILITY.md)
+**Feasibility memo:** [ODTE_OPTIONS_FEASIBILITY.md](./ODTE_OPTIONS_FEASIBILITY.md) · **Spike:** `npm run ghostflow:options-data-spike`
 
-**Outcome (v1.4a):** **YELLOW leaning RED** for true public **0DTE / gamma (GEX)** at operational quality; **YELLOW** for public **aggregate** options activity as a **renamed display-only** proxy only; **RED** for free public GEX — **paid/vendor likely required** for true 0DTE/GEX.
+**Outcome (v1.4a):** **YELLOW leaning RED** for true public **0DTE / GEX**; **YELLOW** for aggregate display-only proxy.
 
-- Keep `odte-options` as a **PLACEHOLDER** signal card until **v1.4b** proves a stable source path (Cboe/OCC column lock or paid vendor).
-- Card `numericValue` **70** is **illustrative mock only** — not in composite, not in `publicSignals`, not in `publicPassiveInputKeys`.
-- Do not add to the 10 score sub-inputs without product approval and overlap review with **PUBLIC** `optionsVolatilityAmplifier` (CBOE VIX level, 20% passive).
-- **Candidate** public paths (not locked): Cboe monthly volume / press 0DTE disclosures; OCC daily/index volume aggregates — **v1.4b** source spike.
-- If a public aggregate proxy is developed: **rename** (e.g. Options Activity Pressure Proxy); **display-only by default**; reserve **0DTE / Gamma Pressure** for proven 0DTE or GEX provenance.
-- **v1.4f** score-wiring gate only if product-approved — discouraged; would overlap VIX narrative.
+**Outcome (v1.4b):** **Outcome A FAIL** — no stable **0DTE** columns in two Cboe monthly XLSX (Apr/May 2026). **Outcome B PASS** — OCC daily lock: **`indexOptionsContracts`** (+ total/equity/ETF/PCR). **Outcome C FAIL** — public aggregate path exists.
+
+- Keep `odte-options` as **PLACEHOLDER** until display card ships as renamed **`options-activity-proxy`** (v1.4d).
+- **v1.4c next:** artifact design for **Index Options Intensity Proxy** / **Options Activity Pressure Proxy** from OCC index cleared volume — **display-only**; **not** labeled 0DTE.
+- Cboe monthly **SPX options ADV** (thousands contracts) — optional supplementary monthly context; **not** 0DTE.
+- True **0DTE / Gamma Pressure** or GEX: **paid/vendor** (DataShop, ORATS, SpotGamma, etc.).
+- **v1.4f** score-wiring discouraged (VIX overlap).
 
 ---
 
@@ -137,7 +138,9 @@ Shipped: `buildSnapshot.ts` merge, DERIVED classification, coverage **6 public /
 | **SSGA SPY monthly fact sheet (existing)** | `indexConcentration` | Top-10 **index** weights, not fund weights |
 | **CFTC COT / TFF (production candidate)** | `systematicStrategyPressure` (future) | v0.9e — [`systematicFlowProxy.v1.json`](../data/ghostflow/artifacts/systematicFlowProxy.v1.json) validated via `ghostflow:validate-artifacts`; **not merged into score yet** |
 | **Issuer fund pages + index proxies (v1.1c production candidate)** | `leveredEtfRebalancePressure` (future) | [`leveredEtfRebalancePressure.v1.json`](../data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.json) validated via `ghostflow:validate-artifacts`; **not merged into score yet** — see [LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md](./LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md) |
-| **OCC / Cboe / OPRA or commercial options data (future)** | `odte-options` placeholder → possible `options-activity-proxy` display card | See [ODTE_OPTIONS_FEASIBILITY.md](./ODTE_OPTIONS_FEASIBILITY.md); v1.4b column lock; paid vendor for GEX |
+| **OCC daily volume (v1.4b locked)** | `options-activity-proxy` display card (future) | `indexOptionsContracts` — [ODTE_OPTIONS_FEASIBILITY.md](./ODTE_OPTIONS_FEASIBILITY.md) §v1.4b; operator Volume Download |
+| **Cboe monthly XLSX (supplementary)** | Optional SPX ADV context | SPX options ADV row; **no** 0DTE columns in Apr/May 2026 XLSX |
+| **Paid vendor (0DTE / GEX)** | True 0DTE or gamma only with license | Outside public repo artifacts |
 | **ICI Retirement Market (v1.2b+ candidate)** | `retirementFlowPressureProxy` (display-first) | Quarterly assets — see [RETIREMENT_FLOW_FEASIBILITY.md](./RETIREMENT_FLOW_FEASIBILITY.md); do not double-count ICI equity flows |
 
 ---
@@ -184,8 +187,8 @@ GhostFlow input promotion rules (all phases):
 | **v1.2e** | Retirement calibration / mapping decision | **Done** — [RETIREMENT_FLOW_CALIBRATION_STUDY.md](./RETIREMENT_FLOW_CALIBRATION_STUDY.md) + [RETIREMENT_FLOW_MAPPING_DECISION.md](./RETIREMENT_FLOW_MAPPING_DECISION.md); display-only; MOCK **58**; `mappingStatus` **not_final** |
 | **v1.2f** | Retirement score-wiring gate (if product-approved) | Gated — discouraged without explicit product approval |
 | **v1.4a** | 0DTE / options data-path feasibility | **Done** — [ODTE_OPTIONS_FEASIBILITY.md](./ODTE_OPTIONS_FEASIBILITY.md); YELLOW leaning RED (true 0DTE/GEX); placeholder unchanged |
-| **v1.4b** | Options source spike / column lock (Cboe monthly, OCC layouts) | Optional `options-data-spike.ts`; no locked 0DTE field until spike passes |
-| **v1.4c** | Options activity artifact design | Example JSON + validator sketch; `signalId: options-activity-proxy`; no production JSON |
+| **v1.4b** | Options source spike / column lock | **Done** — `options-data-spike.ts`; Outcome A **FAIL**, B **PASS** (OCC `indexOptionsContracts`); Cboe SPX ADV supplementary |
+| **v1.4c** | Options activity artifact design | **Next** — example JSON + validator; OCC primary; `signalId: options-activity-proxy`; no production JSON |
 | **v1.4d** | Options production artifact + display-only card | `buildSnapshot` display merge + UI; `publicSignalCount` may increment; not scored |
 | **v1.4e** | Options calibration / mapping decision | Display-only default; `mappingStatus: not_final` |
 | **v1.4f** | Options score-wiring gate (if product-approved) | Overlap with VIX `optionsVolatilityAmplifier` — discouraged |
@@ -197,7 +200,7 @@ GhostFlow input promotion rules (all phases):
 1. ~~**CFTC TFF mapping (v0.9d design):**~~ **Resolved:** Display/artifact use Mapping A ([v0.9d design](./CFTC_TFF_ARTIFACT_DESIGN.md)). **Calibration (v1.0a):** [CFTC_TFF_CALIBRATION_STUDY.md](./CFTC_TFF_CALIBRATION_STUDY.md). **Decision (v1.0b):** [CFTC_TFF_MAPPING_DECISION.md](./CFTC_TFF_MAPPING_DECISION.md) — CFTC display-only; future score candidate Mapping C after rename; **v1.0c** gated on product approval.
 2. ~~**`modelZoneProximity` mapping (v0.9b):**~~ **Resolved:** Reuse `mapDistanceToZoneNumericValue` as-is (documented in merge + methodology).
 3. ~~**Levered ETF scope:**~~ **Resolved (v1.1a–b):** Tier-1 six-ticker universe; single-session `underlyingReturnPct`; formula in [LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md](./LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md). ~~**Levered ETF mapping (v1.1e):**~~ **Resolved:** [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md) — display-only; MOCK **55**. ~~**Levered ETF calibration (v1.1e-calibration):**~~ **Resolved:** [LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md](./LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md) — full fixed-current-AUM return-sensitivity run complete; **v1.1f** score wiring gated on product approval only.
-4. **0DTE data path:** **Partially resolved (v1.4a):** [ODTE_OPTIONS_FEASIBILITY.md](./ODTE_OPTIONS_FEASIBILITY.md) — placeholder remains; public aggregate → renamed display-only candidate; true 0DTE/GEX → paid/vendor likely; Cboe/OCC **candidate** paths for **v1.4b** spike. Open: column lock, whether any future card supplements vs replaces VIX (v1.4f gate).
+4. **0DTE data path:** **Mostly resolved (v1.4b):** [ODTE_OPTIONS_FEASIBILITY.md](./ODTE_OPTIONS_FEASIBILITY.md) — **no** public 0DTE column lock; **OCC index volume** locked for display-only proxy; placeholder until v1.4d; true 0DTE/GEX → paid/vendor. Open: v1.4f VIX overlap if score wiring ever requested.
 5. ~~**Retirement flows:**~~ **Resolved (v1.2a–b):** [RETIREMENT_FLOW_FEASIBILITY.md](./RETIREMENT_FLOW_FEASIBILITY.md) + [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md) — **YELLOW**; ICI Retirement Market primary; exact ICI table/rows → **v1.2c** operator extract; composite membership → **v1.2d** decision.
 
 ---

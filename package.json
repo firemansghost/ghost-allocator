@@ -43,6 +43,7 @@
     "ghostflow:cftc-tff-history-study": "tsx scripts/ghostflow/cftc-tff-history-study.ts",
     "ghostflow:levered-etf-rebalance-history-study": "tsx scripts/ghostflow/levered-etf-rebalance-history-study.ts",
     "ghostflow:retirement-flow-history-study": "tsx scripts/ghostflow/retirement-flow-history-study.ts",
+    "ghostflow:options-data-spike": "tsx scripts/ghostflow/options-data-spike.ts",
     "ghostflow:check": "npm run ghostflow:validate-artifacts && npm run test:ghostflow",
     "verify:ghostregime": "npm run build && npm run lint && npx tsx lib/ghostregime/__tests__/persistGate.test.ts && npx tsx lib/ghostregime/__tests__/diagnostics.test.ts && npx tsx lib/ghostregime/__tests__/stooqResponse.test.ts && npx tsx lib/ghostregime/__tests__/asofUrl.test.ts && npx tsx lib/ghostregime/__tests__/marketstackEod.test.ts && npx tsx lib/ghostregime/__tests__/flipWatchPressure.test.ts && npx tsx lib/ghostregime/__tests__/serveMetadata.test.ts"
   },
