@@ -55,7 +55,20 @@ Do **not** use (except in clear negation, e.g. “not a tripwire”):
 
 ## 65–85% possible unstable operating zone (caveated)
 
-Some endgame narratives describe higher passive-share bands as **possibly** more reflexive or fragile in **model** terms. GhostFlow band labels in methodology (e.g. 65–75%, 75–87%) reflect **illustrative model interpretation**, not verified market law. **v1.6b** may add a Passive Endgame Scenario explainer; **v1.6a does not** implement that ladder.
+Some endgame narratives describe higher passive-share bands as **possibly** more reflexive or fragile in **model** terms. GhostFlow band labels in methodology (e.g. 65–75%, 75–87%) reflect **illustrative model interpretation**, not verified market law. **v1.6b** adds the educational explainer — see [PASSIVE_ENDGAME_SCENARIOS.md](./PASSIVE_ENDGAME_SCENARIOS.md).
+
+---
+
+## Scenario language (v1.6b)
+
+| Rule | Language |
+|------|----------|
+| Role | **Educational explainer** — not scored, not in `publicSignals`, not a forecast |
+| Order | Scenarios **do not have to happen in sequence** |
+| Tone | **Possible pathways, not predictions**; same avoid-list as above |
+| UI | Dashboard teaser + Methodology `#ghostflow-endgame-scenarios` |
+
+Full copy: [PASSIVE_ENDGAME_SCENARIOS.md](./PASSIVE_ENDGAME_SCENARIOS.md).
 
 ---
 
@@ -74,16 +87,20 @@ Some endgame narratives describe higher passive-share bands as **possibly** more
 
 ---
 
-## Out of scope (v1.6a)
+## Delivered in v1.6b
+
+- [PASSIVE_ENDGAME_SCENARIOS.md](./PASSIVE_ENDGAME_SCENARIOS.md) — six-scenario educational ladder (UI + doc); not scored
+
+## Out of scope (ongoing)
 
 | Item | Deferred phase |
 |------|----------------|
 | Treasury Plumbing section | v1.7a feasibility |
 | Treasury basis trade / bond neglect data | v1.7b+ |
-| Passive Endgame Scenario ladder / explainer UI | v1.6b |
 | Scoring weight or mapper changes | Not approved |
 | New artifacts or data sources | Not approved |
 | Live fetching / runtime feeds | Not approved |
+| Scenario prediction engine | Not approved |
 
 ---
 

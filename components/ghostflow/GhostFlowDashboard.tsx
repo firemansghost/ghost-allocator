@@ -8,6 +8,7 @@ import { GhostFlowScoreCard } from './GhostFlowScoreCard';
 import { GhostFlowScoreDrivers } from './GhostFlowScoreDrivers';
 import { GhostFlowSignalGrid } from './GhostFlowSignalGrid';
 import { GhostFlowMethodology } from './GhostFlowMethodology';
+import { GhostFlowPassiveEndgameScenarios } from './GhostFlowPassiveEndgameScenarios';
 import { GhostFlowWatchlist } from './GhostFlowWatchlist';
 
 const HEADER_BADGES = ['Static preview', 'Research only', 'Not a forecast', 'Not financial advice'] as const;
@@ -100,6 +101,8 @@ export function GhostFlowDashboard() {
           </ul>
         </GlassCard>
       )}
+
+      <GhostFlowPassiveEndgameScenarios variant="teaser" />
 
       <GhostFlowSignalGrid signals={data.signals} dataMix={data.dataMix} publicSignalCount={data.publicSignalCount} />
       <GhostFlowScoreDrivers />

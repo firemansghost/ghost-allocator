@@ -7,6 +7,7 @@ import { ETF_ISSUANCE_PROXY_ANCHORS } from '@/lib/ghostflow/artifacts/etfNetIssu
 import { VIX_PROXY_ANCHORS } from '@/lib/ghostflow/artifacts/volatilityRegime';
 import type { GhostFlowDashboardData } from '@/lib/ghostflow/types';
 import type { ReactNode } from 'react';
+import { GhostFlowPassiveEndgameScenarios } from './GhostFlowPassiveEndgameScenarios';
 
 function MethodologyDetailsSection({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -88,6 +89,8 @@ export function GhostFlowMethodology({
           </p>
         </div>
       </GlassCard>
+
+      <GhostFlowPassiveEndgameScenarios variant="full" />
 
       <GlassCard className="p-4 sm:p-6">
         <h3 className="text-base font-semibold text-zinc-100">Scoring model</h3>
