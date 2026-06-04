@@ -202,6 +202,9 @@ GhostFlow input promotion rules (all phases):
 | **v1.5a** | Current-state audit / release checkpoint | **Done** — docs alignment with live dashboard; scores **62 / 58 / 66** unchanged; canonical state at top of this roadmap |
 | **v1.6a** | Passive stress-zone language audit | **Done** — [PASSIVE_STRESS_ZONE_LANGUAGE.md](./PASSIVE_STRESS_ZONE_LANGUAGE.md); model-stress zone not tripwire; copy only |
 | **v1.6b** | Passive Endgame Scenario explainer | **Done** — [PASSIVE_ENDGAME_SCENARIOS.md](./PASSIVE_ENDGAME_SCENARIOS.md); educational UI + doc; not scored; no new artifacts |
+| **v1.7a** | Treasury Plumbing feasibility | **Done** — [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md); docs-only; separate future lane; no cards/artifacts/score wiring |
+
+**Treasury Plumbing (future lane):** Not part of the equity Research Composite, `publicSignalCount`, or Passive Pressure. Basis-trade stress and long-end income lens are display-only candidates for a separate dashboard section (v1.7e+). See [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md).
 
 ---
 
@@ -212,6 +215,7 @@ GhostFlow input promotion rules (all phases):
 3. ~~**Levered ETF scope:**~~ **Resolved (v1.1a–b):** Tier-1 six-ticker universe; single-session `underlyingReturnPct`; formula in [LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md](./LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md). ~~**Levered ETF mapping (v1.1e):**~~ **Resolved:** [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md) — display-only; MOCK **55**. ~~**Levered ETF calibration (v1.1e-calibration):**~~ **Resolved:** [LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md](./LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md) — full fixed-current-AUM return-sensitivity run complete; **v1.1f** score wiring gated on product approval only.
 4. **0DTE data path:** **Display proxy shipped (v1.4d–e):** OCC Index/Others via `options-activity-proxy` — [mapping decision](./OPTIONS_ACTIVITY_MAPPING_DECISION.md) locks display-only; true 0DTE/GEX → paid/vendor; **v1.4f** score gate discouraged (VIX overlap).
 5. ~~**Retirement flows:**~~ **Resolved (v1.2a–b):** [RETIREMENT_FLOW_FEASIBILITY.md](./RETIREMENT_FLOW_FEASIBILITY.md) + [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md) — **YELLOW**; ICI Retirement Market primary; exact ICI table/rows → **v1.2c** operator extract; composite membership → **v1.2d** decision.
+6. **Treasury Plumbing (v1.7a):** [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md) — **YELLOW** basis-trade proxy (CFTC UST futures after contract discovery); **YELLOW–GREEN** bond-neglect display (FRED yields/curve). Open: **Treasury CFTC PRE contract discovery** (v1.7a.1 spike); **Bond Neglect primary source lock** (FRED core vs ETF flows). Treasury lane **separate from equity composite** — no merge into `buildSnapshot` or `publicSignalCount` by default.
 
 ---
 
@@ -241,3 +245,4 @@ GhostFlow input promotion rules (all phases):
 - [OPTIONS_ACTIVITY_MAPPING_DECISION.md](./OPTIONS_ACTIVITY_MAPPING_DECISION.md) — v1.4e display-only mapping decision; v1.4f gated
 - [PASSIVE_STRESS_ZONE_LANGUAGE.md](./PASSIVE_STRESS_ZONE_LANGUAGE.md) — v1.6a passive-share / model-stress-zone phrasebook
 - [PASSIVE_ENDGAME_SCENARIOS.md](./PASSIVE_ENDGAME_SCENARIOS.md) — v1.6b educational passive-endgame scenario explainer (not scored)
+- [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md) — v1.7a Treasury Plumbing feasibility (separate lane; docs-only; no score/artifact/UI)

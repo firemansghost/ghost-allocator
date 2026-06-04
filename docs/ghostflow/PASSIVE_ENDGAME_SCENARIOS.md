@@ -108,9 +108,9 @@ Global caveat (each scenario): *Illustrative pathway from passive-flow research 
 - Narrative band; not a GhostFlow score.
 - May align with extreme vol/breadth on dashboard.
 - Outcome uncertain.
-- **Treasury Plumbing:** deferred v1.7a+.
+- **Treasury Plumbing:** feasibility complete in v1.7a ([TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md)) — **future lane only**; not a live dashboard section; basis-trade proxy + long-end income lens are display-only candidates when shipped (v1.7e+).
 
-**Indicators:** `vol-regime`, `breadth` (when stress visible); Treasury — future
+**Indicators:** `vol-regime`, `breadth` (when stress visible); Treasury Plumbing — future (see feasibility memo)
 
 ### 6. Structural Reform
 
@@ -145,7 +145,7 @@ Global caveat (each scenario): *Illustrative pathway from passive-flow research 
 
 - Cap-weight vs equal-weight spread
 - Dedicated correlation / liquidity index
-- Treasury Plumbing (v1.7a feasibility)
+- Treasury Plumbing (v1.7a feasibility done — UI lane v1.7e+; [memo](./TREASURY_PLUMBING_FEASIBILITY.md))
 
 ---
 
@@ -153,7 +153,7 @@ Global caveat (each scenario): *Illustrative pathway from passive-flow research 
 
 | Item | Notes |
 |------|--------|
-| Treasury Plumbing | v1.7a feasibility |
+| Treasury Plumbing | v1.7a feasibility done; cards v1.7e+ — [memo](./TREASURY_PLUMBING_FEASIBILITY.md) |
 | New data sources / artifacts | Not approved |
 | Scoring / `publicSignals` / new `signalId` | Not approved |
 | Scenario prediction engine | Not approved |

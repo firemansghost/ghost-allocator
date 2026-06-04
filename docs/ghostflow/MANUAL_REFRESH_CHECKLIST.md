@@ -6,6 +6,8 @@ Operator runbook for manually refreshing GhostFlow public-data artifacts. **No l
 
 **Dashboard coverage (v1.5a):** **6** score-fed public artifacts · **4** display-only public artifact cards (CFTC `systematic-flow`, levered `levered-etf-rebalance`, retirement `retirement-asset-growth`, OCC `options-activity-proxy`) · **`publicSignalCount` 10** when all validate · **0** placeholder cards when artifacts validate. Display-only cards (including options activity) do **not** refresh or change the Research Composite — MOCK **62** / **55** / **58** and VIX still drive scored sub-inputs. Quarterly retirement freshness **caution** (46–90 days after release) reflects normal ICI quarterly cadence — not a failed feed or score problem.
 
+**Treasury Plumbing:** No refresh cadence yet; v1.7a is feasibility only ([TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md)).
+
 Per-artifact deep dives: see linked runbooks at the bottom of this page.
 
 ---
