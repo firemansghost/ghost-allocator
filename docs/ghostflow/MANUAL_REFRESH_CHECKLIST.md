@@ -31,7 +31,7 @@ Per-artifact deep dives: see linked runbooks at the bottom of this page.
 
 **Quarterly group (ICI Retirement Market):** Retirement Asset Growth Proxy — display-only card; Table 1 extract; MOCK **58** in composite unchanged ([v1.2e](./RETIREMENT_FLOW_MAPPING_DECISION.md) display-only default)
 
-**Future sources (not active):** 0DTE / options (`odte-options`) remains **PLACEHOLDER** until v1.4d display card. **v1.4c** artifact design complete (example only): [OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md](./OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md). **v1.4b** locked OCC **`indexOptionsContracts`** for future `options-activity-proxy` / **Index Options Intensity Proxy** — operator downloads [OCC daily volume](https://www.theocc.com/market-data/market-data-reports/volume-and-open-interest/daily-volume); verify with `npm run ghostflow:options-data-spike`. No 0DTE manual extract on public OCC standard file.
+**Options activity (v1.4d — display-only):** Download OCC Daily Volume Statistics CSV per session, e.g. `https://marketdata.theocc.com/daily-volume-statistics?reportDate=YYYYMMDD&format=csv` → save under `tmp/options-spike/occ-volume-download-YYYY-MM-DD.csv` → `npm run ghostflow:options-data-spike -- --occ-daily <file>` → update [`optionsActivityProxy.v1.json`](../data/ghostflow/artifacts/optionsActivityProxy.v1.json). Maps **Index/Others** to `indexOptionsContracts`. Not 0DTE/GEX; not scored. See [OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md](./OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md).
 
 ---
 

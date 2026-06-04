@@ -16,7 +16,7 @@ Planning document for GhostFlow score-input sourcing. Builds on **v0.8** (resear
 | **DERIVED score input** | **1** | `modelZoneProximity` (from ICI index share) |
 | **MOCK score inputs** | **3** | `systematicStrategyPressure` **62**, `retirementFlowPressureProxy` **58**, `leveredEtfRebalancePressure` **55** |
 | **DISPLAY-ONLY public artifacts** | **3** | [`systematic-flow`](./CFTC_TFF_MAPPING_DECISION.md), [`levered-etf-rebalance`](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md), [`retirement-asset-growth`](./RETIREMENT_FLOW_MAPPING_DECISION.md) — cards only; not in composite |
-| **PLACEHOLDER card** | **1** | `odte-options` only |
+| **PLACEHOLDER card** | **0** | Replaced by `options-activity-proxy` display card (v1.4d) |
 | **`publicSignalCount`** | **9** | Six score-fed + three display-only public signals in `meta.publicSignals` |
 | **Score-wiring gates** | — | **v1.0c** (CFTC), **v1.1f** (levered ETF), **v1.2f** (retirement) — product-approved only; discouraged by default |
 
@@ -119,8 +119,8 @@ Shipped: `buildSnapshot.ts` merge, DERIVED classification, coverage **6 public /
 
 **Outcome (v1.4b):** **Outcome A FAIL** — no stable **0DTE** columns in two Cboe monthly XLSX (Apr/May 2026). **Outcome B PASS** — OCC daily lock: **`indexOptionsContracts`** (+ total/equity/ETF/PCR). **Outcome C FAIL** — public aggregate path exists.
 
-- Keep `odte-options` as **PLACEHOLDER** until display card ships as renamed **`options-activity-proxy`** (v1.4d).
-- **v1.4c complete:** [OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md](./OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md) — example JSON + validator; OCC **`indexOptionsContracts`** primary; **no** production JSON, **no** display card, **no** score wiring.
+- **v1.4d complete:** Production [`optionsActivityProxy.v1.json`](../data/ghostflow/artifacts/optionsActivityProxy.v1.json) + display card **`options-activity-proxy`** / **Index Options Intensity Proxy** (OCC Daily Volume Statistics; Index/Others column); official preflight via `ghostflow:options-data-spike`; **no** score wiring.
+- **v1.4c complete:** [OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md](./OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md) — example JSON + validator.
 - Cboe monthly **SPX options ADV** (thousands contracts) — optional supplementary monthly context; **not** 0DTE.
 - True **0DTE / Gamma Pressure** or GEX: **paid/vendor** (DataShop, ORATS, SpotGamma, etc.).
 - **v1.4f** score-wiring discouraged (VIX overlap).
@@ -189,8 +189,8 @@ GhostFlow input promotion rules (all phases):
 | **v1.4a** | 0DTE / options data-path feasibility | **Done** — [ODTE_OPTIONS_FEASIBILITY.md](./ODTE_OPTIONS_FEASIBILITY.md); YELLOW leaning RED (true 0DTE/GEX); placeholder unchanged |
 | **v1.4b** | Options source spike / column lock | **Done** — `options-data-spike.ts`; Outcome A **FAIL**, B **PASS** (OCC `indexOptionsContracts`); Cboe SPX ADV supplementary |
 | **v1.4c** | Options activity artifact design | **Done** — [OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md](./OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md); example-only JSON; validator in `optionsActivityProxy.ts`; not in `ghostflow:check` |
-| **v1.4d** | Options production artifact + display-only card | `optionsActivityProxy.v1.json` + `buildSnapshot` display merge + UI card `options-activity-proxy` / **Index Options Intensity Proxy**; replace `odte-options` placeholder; not scored |
-| **v1.4e** | Options calibration / mapping decision | Display-only default; `mappingStatus: not_final` |
+| **v1.4d** | Options production artifact + display-only card | **Done** — official OCC CSV preflight; `publicSignalCount` **10**; `odte-options` placeholder suppressed; not scored |
+| **v1.4e** | Options calibration / mapping decision | **Next** — display-only default; `mappingStatus: not_final` |
 | **v1.4f** | Options score-wiring gate (if product-approved) | Overlap with VIX `optionsVolatilityAmplifier` — discouraged |
 
 ---
@@ -200,7 +200,7 @@ GhostFlow input promotion rules (all phases):
 1. ~~**CFTC TFF mapping (v0.9d design):**~~ **Resolved:** Display/artifact use Mapping A ([v0.9d design](./CFTC_TFF_ARTIFACT_DESIGN.md)). **Calibration (v1.0a):** [CFTC_TFF_CALIBRATION_STUDY.md](./CFTC_TFF_CALIBRATION_STUDY.md). **Decision (v1.0b):** [CFTC_TFF_MAPPING_DECISION.md](./CFTC_TFF_MAPPING_DECISION.md) — CFTC display-only; future score candidate Mapping C after rename; **v1.0c** gated on product approval.
 2. ~~**`modelZoneProximity` mapping (v0.9b):**~~ **Resolved:** Reuse `mapDistanceToZoneNumericValue` as-is (documented in merge + methodology).
 3. ~~**Levered ETF scope:**~~ **Resolved (v1.1a–b):** Tier-1 six-ticker universe; single-session `underlyingReturnPct`; formula in [LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md](./LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md). ~~**Levered ETF mapping (v1.1e):**~~ **Resolved:** [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md) — display-only; MOCK **55**. ~~**Levered ETF calibration (v1.1e-calibration):**~~ **Resolved:** [LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md](./LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md) — full fixed-current-AUM return-sensitivity run complete; **v1.1f** score wiring gated on product approval only.
-4. **0DTE data path:** **Mostly resolved (v1.4b):** [ODTE_OPTIONS_FEASIBILITY.md](./ODTE_OPTIONS_FEASIBILITY.md) — **no** public 0DTE column lock; **OCC index volume** locked for display-only proxy; placeholder until v1.4d; true 0DTE/GEX → paid/vendor. Open: v1.4f VIX overlap if score wiring ever requested.
+4. **0DTE data path:** **Display proxy shipped (v1.4d):** OCC Index/Others via `options-activity-proxy`; true 0DTE/GEX → paid/vendor. Open: v1.4e mapping; v1.4f score gate discouraged (VIX overlap).
 5. ~~**Retirement flows:**~~ **Resolved (v1.2a–b):** [RETIREMENT_FLOW_FEASIBILITY.md](./RETIREMENT_FLOW_FEASIBILITY.md) + [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md) — **YELLOW**; ICI Retirement Market primary; exact ICI table/rows → **v1.2c** operator extract; composite membership → **v1.2d** decision.
 
 ---
@@ -227,4 +227,4 @@ GhostFlow input promotion rules (all phases):
 - [PASSIVE_SHARE_PROXY_ARTIFACT_RUNBOOK.md](./PASSIVE_SHARE_PROXY_ARTIFACT_RUNBOOK.md) — ICI index share + distance-to-65
 - [INDEX_CONCENTRATION_ARTIFACT_RUNBOOK.md](./INDEX_CONCENTRATION_ARTIFACT_RUNBOOK.md) — SSGA SPY concentration
 - [ODTE_OPTIONS_FEASIBILITY.md](./ODTE_OPTIONS_FEASIBILITY.md) — v1.4a 0DTE/options data-path feasibility (YELLOW leaning RED; placeholder unchanged)
-- [OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md](./OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md) — v1.4c OCC index options intensity proxy (design only; example JSON)
+- [OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md](./OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md) — v1.4c/d OCC index options intensity proxy (production JSON + display card v1.4d)

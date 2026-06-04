@@ -85,8 +85,9 @@ export function GhostFlowScoreCard({
             and {derivedScoreInputCount} derived Structural sub-input (model-zone proximity from ICI index share)
             feed this composite; {mockScoreInputCount} static mock input
             {mockScoreInputCount === 1 ? '' : 's'} remain illustrative placeholders. Public display-only cards for CFTC
-            TFF positioning, levered ETF rebalance, and retirement asset growth are not score inputs — MOCK **62**, **55**,
-            and **58** still drive those composite sub-inputs (no score change from display cards).
+            TFF positioning, levered ETF rebalance, retirement asset growth, and OCC index options intensity are not score
+            inputs — MOCK **62**, **55**, and **58** still drive those composite sub-inputs; VIX still feeds options/vol at
+            20% (no score change from display cards).
           </p>
         )}
         {isMixed && !hasDerivedModelZone && (

@@ -91,6 +91,7 @@ function artifactDateLabel(signalId: string): string {
   if (signalId === 'systematic-flow') return 'Positions as of';
   if (signalId === 'levered-etf-rebalance') return 'Session';
   if (signalId === 'retirement-asset-growth') return 'Quarter ended';
+  if (signalId === 'options-activity-proxy') return 'Session';
   if (
     signalId === 'active-index-flow' ||
     signalId === 'concentration' ||
@@ -251,15 +252,15 @@ export function GhostFlowSignalGrid({
           Market-structure signals
         </h2>
         <p className="mt-2 text-xs text-zinc-500 leading-relaxed max-w-3xl">
-          Six public score artifacts and one derived score input feed the research composite. Three additional public
-          artifacts are display-only (CFTC TFF positioning, levered ETF rebalance pressure, retirement asset growth).
-          The 0DTE PLACEHOLDER card is not in the score.
+          Six public score artifacts and one derived score input feed the research composite. Four additional public
+          artifacts are display-only (CFTC TFF positioning, levered ETF rebalance pressure, retirement asset growth,
+          OCC index options intensity). No placeholder signal cards when the options activity artifact is valid.
         </p>
       </div>
 
       <SignalSection
         title="Public manual artifacts"
-        intro="Hand-updated from public sources. Score-fed cards show mapped 0–100 proxy level where mapping is final. Display-only cards (CFTC TFF, levered ETF rebalance, retirement asset growth) may show context metrics on the card but do not feed the Research Composite."
+        intro="Hand-updated from public sources. Score-fed cards show mapped 0–100 proxy level where mapping is final. Display-only cards (CFTC TFF, levered ETF rebalance, retirement asset growth, index options intensity) may show context metrics on the card but do not feed the Research Composite."
         signals={grouped.publicArtifacts}
         variant="public"
         dataMix={dataMix}
@@ -273,13 +274,15 @@ export function GhostFlowSignalGrid({
         dataMix={dataMix}
       />
 
-      <SignalSection
-        title="Placeholder signal cards"
-        intro="PLACEHOLDER card for a future 0DTE options signal. Not included in the research composite; not a current measured reading."
-        signals={grouped.mockProxies}
-        variant="mock"
-        dataMix={dataMix}
-      />
+      {grouped.mockProxies.length > 0 && (
+        <SignalSection
+          title="Placeholder signal cards"
+          intro="Illustrative placeholder cards not included in the research composite."
+          signals={grouped.mockProxies}
+          variant="mock"
+          dataMix={dataMix}
+        />
+      )}
     </section>
   );
 }

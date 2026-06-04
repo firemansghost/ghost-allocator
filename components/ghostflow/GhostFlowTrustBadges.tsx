@@ -3,12 +3,12 @@ const TRUST_BADGE_CLASS =
 
 /** Single-line coverage summary for the GhostFlow preview (v0.9f). */
 export const GHOSTFLOW_COVERAGE_SUMMARY =
-  '6 public score artifacts · 1 derived score input · 3 display-only public artifacts · 3 static mock score inputs' as const;
+  '6 public score artifacts · 1 derived score input · 4 display-only public artifacts · 3 static mock score inputs' as const;
 
 export const GHOSTFLOW_COVERAGE_BADGES_MIXED = [
   '6 public score artifacts',
   '1 derived score input',
-  '3 display-only public artifacts',
+  '4 display-only public artifacts',
   '3 static mock score inputs',
   'Research preview',
   'Not a forecast',

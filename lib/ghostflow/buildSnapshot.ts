@@ -65,6 +65,8 @@ import type {
   PassiveShareProxyArtifactV1,
   LeveredEtfRebalancePressureArtifactV1,
   LeveredEtfRebalancePressureValidation,
+  OptionsActivityProxyArtifactV1,
+  OptionsActivityProxyValidation,
   RetirementFlowPressureArtifactV1,
   RetirementFlowPressureProxyValidation,
   SystematicFlowProxyArtifactV1,
@@ -97,6 +99,15 @@ import {
   RETIREMENT_FLOW_DISPLAY_SIGNAL_ID,
   RETIREMENT_FLOW_DISPLAY_SIGNAL_NAME,
 } from './artifacts/retirementFlowPressureProxy';
+import {
+  buildOptionsActivityDisplayExplanation,
+  evaluateOptionsActivityArtifactFreshness,
+  formatOptionsActivityCardValue,
+  loadOptionsActivityProxyArtifact,
+  OPTIONS_ACTIVITY_DISPLAY_CARD_CAVEAT,
+  OPTIONS_ACTIVITY_DISPLAY_SIGNAL_ID,
+  OPTIONS_ACTIVITY_DISPLAY_SIGNAL_NAME,
+} from './artifacts/optionsActivityProxy';
 import {
   buildVolRegimeExplanation,
   formatVolRegimeDisplayValue,
@@ -634,6 +645,80 @@ export function mergeRetirementFlowDisplayIfValid(
   };
 }
 
+/** Display-only OCC index options intensity card — does not merge into passive/structural score inputs. */
+export function applyOptionsActivityDisplayArtifact(
+  raw: GhostFlowRawSnapshot,
+  artifact: OptionsActivityProxyArtifactV1,
+  referenceAsOf: string
+): ApplyArtifactOutcome {
+  const freshness = evaluateOptionsActivityArtifactFreshness(artifact, referenceAsOf);
+  const { observations } = artifact;
+  const numericValue = observations.indexShareOfTotalPct;
+
+  raw.signals = replaceSignal(raw.signals, {
+    id: OPTIONS_ACTIVITY_DISPLAY_SIGNAL_ID,
+    name: OPTIONS_ACTIVITY_DISPLAY_SIGNAL_NAME,
+    value: formatOptionsActivityCardValue(observations),
+    numericValue,
+    explanation: buildOptionsActivityDisplayExplanation(artifact),
+    cardCaveat: OPTIONS_ACTIVITY_DISPLAY_CARD_CAVEAT,
+    dataStatus: 'public_proxy',
+    updateFrequencyTarget: 'Daily (manual artifact)',
+    sourceName: artifact.source.name,
+    sourceUrl: artifact.source.url,
+    sourceNote: artifact.source.note,
+    dataQuality: artifact.dataQuality,
+    artifactAsOf: artifact.asOf,
+    artifactPublishedAt: artifact.publishedAt,
+    freshnessStatus: freshness.status,
+  });
+
+  raw.signals = raw.signals.filter((s) => s.id !== 'odte-options');
+
+  const publicSignal: GhostFlowPublicSignalMeta = {
+    signalId: OPTIONS_ACTIVITY_DISPLAY_SIGNAL_ID,
+    name: OPTIONS_ACTIVITY_DISPLAY_SIGNAL_NAME,
+    sourceName: artifact.source.name,
+    sourceUrl: artifact.source.url,
+    asOf: artifact.asOf,
+    publishedAt: artifact.publishedAt,
+    freshnessStatus: freshness.status,
+  };
+
+  return {
+    raw,
+    warnings: freshness.warnings,
+    publicSignal,
+  };
+}
+
+export function mergeOptionsActivityDisplayIfValid(
+  raw: GhostFlowRawSnapshot,
+  validation: OptionsActivityProxyValidation,
+  referenceAsOf: string
+): {
+  raw: GhostFlowRawSnapshot;
+  warnings: string[];
+  publicSignal?: GhostFlowPublicSignalMeta;
+} {
+  if (!validation.ok) {
+    return {
+      raw,
+      warnings: [
+        `Index Options Intensity Proxy artifact invalid or missing (${validation.errors.join('; ')}). No display card added.`,
+      ],
+    };
+  }
+
+  const result = applyOptionsActivityDisplayArtifact(raw, validation.artifact, referenceAsOf);
+
+  return {
+    raw: result.raw,
+    warnings: result.warnings,
+    publicSignal: result.publicSignal,
+  };
+}
+
 function buildMeta(
   raw: GhostFlowRawSnapshot,
   warnings: string[],
@@ -886,6 +971,16 @@ export function buildGhostFlowSnapshot(
   raw = retirementDisplay.raw;
   warnings.push(...retirementDisplay.warnings);
   if (retirementDisplay.publicSignal) publicSignals.push(retirementDisplay.publicSignal);
+
+  const optionsValidation = loadOptionsActivityProxyArtifact();
+  const optionsDisplay = mergeOptionsActivityDisplayIfValid(
+    raw,
+    optionsValidation,
+    referenceAsOf
+  );
+  raw = optionsDisplay.raw;
+  warnings.push(...optionsDisplay.warnings);
+  if (optionsDisplay.publicSignal) publicSignals.push(optionsDisplay.publicSignal);
 
   return buildMeta(raw, warnings, publicSignals, publicPassiveInputKeys, publicStructuralInputKeys);
 }

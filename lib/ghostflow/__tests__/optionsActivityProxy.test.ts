@@ -7,15 +7,24 @@ import {
   computeDailyChangePct,
   computeIndexShareOfTotalPct,
   formatOptionsActivityDisplayValue,
+  loadOptionsActivityProxyArtifact,
   reconcileDailyChangePct,
   reconcileIndexSharePct,
   validateOptionsActivityProxyArtifact,
 } from '@/lib/ghostflow/artifacts/optionsActivityProxy';
+import productionJson from '@/data/ghostflow/artifacts/optionsActivityProxy.v1.json';
 import {
   cloneOptionsActivityExample,
   FIXTURE_OPTIONS_ACTIVITY_EXAMPLE,
   FIXTURE_OPTIONS_ACTIVITY_REFERENCE_ASOF,
 } from '@/lib/ghostflow/__tests__/fixtures/optionsActivityProxy';
+
+// --- production artifact validates in production mode ---
+const productionOk = validateOptionsActivityProxyArtifact(productionJson, { mode: 'production' });
+assert.ok(productionOk.ok, productionOk.ok ? '' : productionOk.errors.join('; '));
+
+const loaderOk = loadOptionsActivityProxyArtifact();
+assert.ok(loaderOk.ok);
 
 // --- example validates in example mode ---
 const exampleOk = validateOptionsActivityProxyArtifact(FIXTURE_OPTIONS_ACTIVITY_EXAMPLE, {
@@ -159,6 +168,6 @@ assert.strictEqual(
 assert.strictEqual(computeDailyChangePct(12_884_221, 12_650_110), ((12_884_221 - 12_650_110) / 12_650_110) * 100);
 assert.ok(reconcileIndexSharePct(15.49, 12_884_221, 83_203_970));
 assert.ok(reconcileDailyChangePct(1.85, 12_884_221, 12_650_110));
-assert.ok(formatOptionsActivityDisplayValue(FIXTURE_OPTIONS_ACTIVITY_EXAMPLE.observations).includes('index contracts'));
+assert.ok(formatOptionsActivityDisplayValue(FIXTURE_OPTIONS_ACTIVITY_EXAMPLE.observations).includes('Index'));
 
 console.log('ghostflow/optionsActivityProxy.test.ts: ok');
