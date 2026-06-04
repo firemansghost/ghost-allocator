@@ -513,6 +513,94 @@ export type OptionsActivityProxyValidation =
   | OptionsActivityProxyValidationResult
   | OptionsActivityProxyValidationError;
 
+/** CFTC TFF Treasury futures positioning — v1.7b design only. */
+export type TreasuryFuturesMappingStatus = 'not_final';
+
+export type TreasuryFuturesDirection = 'net_long' | 'net_short' | 'flat';
+
+export type TreasuryFuturesContractRole =
+  | 'core'
+  | 'optional_context'
+  | 'funding_context'
+  | 'deferred';
+
+export type TreasuryFuturesTenor = '2Y' | '5Y' | '10Y' | '30Y' | 'ultra_10Y' | 'ultra_30Y';
+
+export interface TreasuryFuturesContractRowV1 {
+  contractMarketName: string;
+  cftcContractMarketCode: string;
+  tenor: TreasuryFuturesTenor;
+  role: TreasuryFuturesContractRole;
+  includeInBasket: boolean;
+  usedInAggregate: boolean;
+  reportDate: string;
+  reportWeek: string;
+  openInterestAll: number;
+  levMoneyLong: number;
+  levMoneyShort: number;
+  levMoneySpread: number;
+  levMoneyNet: number;
+  levMoneyNetPctOi: number;
+  levMoneyGross: number;
+  levMoneyGrossPctOi: number;
+  changeLevMoneyLong?: number;
+  changeLevMoneyShort?: number;
+  levMoneyWowDeltaNet?: number;
+  assetManagerLong: number;
+  assetManagerShort: number;
+  assetManagerSpread: number;
+  assetManagerNet: number;
+  assetManagerNetPctOi: number;
+  levVsAssetManagerSpread: number;
+  direction: TreasuryFuturesDirection;
+}
+
+export interface TreasuryFuturesPositioningObservationsV1 {
+  reportWeek: string;
+  basketContractCount: number;
+  basketOpenInterestAll: number;
+  basketLevMoneyNet: number;
+  basketLevMoneyNetPctOi: number;
+  basketLevMoneyGrossPctOi: number;
+  basketAssetManagerNetPctOi: number;
+  basketLevVsAssetManagerSpread: number;
+  basketDirection: TreasuryFuturesDirection;
+  basketWowDeltaNet?: number;
+  mappingStatus: TreasuryFuturesMappingStatus;
+}
+
+export interface TreasuryFuturesPositioningArtifactV1 {
+  artifactVersion: '1';
+  signalId: 'treasury-futures-positioning-proxy';
+  designOnly?: true;
+  asOf: string;
+  publishedAt: string;
+  source: ArtifactSource;
+  observationType: 'cftc_tff_treasury_futures_positioning_snapshot';
+  seriesDefinition: 'cftc_tff_futures_only_treasury_leveraged_funds_basket_v1';
+  updateFrequency: 'weekly';
+  dataQuality: 'verified_manual' | 'manual_unverified';
+  datasetId: string;
+  mappingStatus: TreasuryFuturesMappingStatus;
+  caveats: string[];
+  contracts: TreasuryFuturesContractRowV1[];
+  observations: TreasuryFuturesPositioningObservationsV1;
+}
+
+export interface TreasuryFuturesPositioningValidationResult {
+  ok: true;
+  artifact: TreasuryFuturesPositioningArtifactV1;
+}
+
+export interface TreasuryFuturesPositioningValidationError {
+  ok: false;
+  errors: string[];
+}
+
+export type TreasuryFuturesPositioningValidation =
+  | TreasuryFuturesPositioningValidationResult
+  | TreasuryFuturesPositioningValidationError;
+
 export interface ArtifactFreshnessResult {
   status: GhostFlowArtifactFreshnessStatus;
   ageDays: number;
