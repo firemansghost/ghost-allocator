@@ -201,6 +201,7 @@ GhostFlow input promotion rules (all phases):
 | **v1.4f** | Options score-wiring gate (if product-approved) | **Gated / discouraged** — VIX overlap; explicit product approval required |
 | **v1.5a** | Current-state audit / release checkpoint | **Done** — docs alignment with live dashboard; scores **62 / 58 / 66** unchanged; canonical state at top of this roadmap |
 | **v1.6a** | Passive stress-zone language audit | **Done** — [PASSIVE_STRESS_ZONE_LANGUAGE.md](./PASSIVE_STRESS_ZONE_LANGUAGE.md); model-stress zone not tripwire; copy only |
+| **v1.6b** | Passive Endgame Scenario explainer | **Done** — [PASSIVE_ENDGAME_SCENARIOS.md](./PASSIVE_ENDGAME_SCENARIOS.md); educational UI + doc; not scored; no new artifacts |
 
 ---
 
@@ -239,3 +240,4 @@ GhostFlow input promotion rules (all phases):
 - [OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md](./OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md) — v1.4c/d OCC index options intensity proxy (production JSON + display card v1.4d)
 - [OPTIONS_ACTIVITY_MAPPING_DECISION.md](./OPTIONS_ACTIVITY_MAPPING_DECISION.md) — v1.4e display-only mapping decision; v1.4f gated
 - [PASSIVE_STRESS_ZONE_LANGUAGE.md](./PASSIVE_STRESS_ZONE_LANGUAGE.md) — v1.6a passive-share / model-stress-zone phrasebook
+- [PASSIVE_ENDGAME_SCENARIOS.md](./PASSIVE_ENDGAME_SCENARIOS.md) — v1.6b educational passive-endgame scenario explainer (not scored)
