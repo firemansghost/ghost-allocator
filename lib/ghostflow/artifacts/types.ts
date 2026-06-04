@@ -601,6 +601,77 @@ export type TreasuryFuturesPositioningValidation =
   | TreasuryFuturesPositioningValidationResult
   | TreasuryFuturesPositioningValidationError;
 
+/** FRED Treasury long-end income lens — v1.7c design only. */
+export type TreasuryLongEndMappingStatus = 'not_final';
+
+export type TreasuryLongEndSourceSeriesRole = 'primary' | 'context';
+
+export interface TreasuryLongEndIncomeLensSourceSeriesV1 {
+  id: string;
+  label: string;
+  url: string;
+  role: TreasuryLongEndSourceSeriesRole;
+}
+
+export interface TreasuryLongEndIncomeLensSourceV1 {
+  name: string;
+  url: string;
+  note: string;
+  series: TreasuryLongEndIncomeLensSourceSeriesV1[];
+}
+
+export interface TreasuryLongEndIncomeLensObservationsV1 {
+  thirtyYearNominalYieldPct: number;
+  thirtyYearTipsRealYieldPct: number;
+  tenYearBreakevenInflationPct?: number;
+  twoYearYieldPct?: number;
+  fiveYearYieldPct?: number;
+  tenYearYieldPct?: number;
+  curve2s30sPct?: number;
+  curve5s30sPct?: number;
+  curve10s30sPct?: number;
+  nominalYieldPercentile?: number | null;
+  realYieldPercentile?: number | null;
+  mappingStatus: TreasuryLongEndMappingStatus;
+}
+
+export interface TreasuryLongEndIncomeLensOptionalObservationsV1 {
+  longDurationTreasuryEtfFlowMillionsUsd?: number | null;
+  longDurationTreasuryEtfAumMillionsUsd?: number | null;
+  termPremiumPct?: number | null;
+}
+
+export interface TreasuryLongEndIncomeLensArtifactV1 {
+  artifactVersion: '1';
+  signalId: 'treasury-long-end-income-lens';
+  designOnly?: true;
+  asOf: string;
+  publishedAt: string;
+  source: TreasuryLongEndIncomeLensSourceV1;
+  observationType: 'treasury_long_end_income_snapshot';
+  seriesDefinition: 'fred_treasury_long_end_income_lens_v1';
+  updateFrequency: 'daily';
+  dataQuality: 'verified_manual' | 'manual_unverified';
+  mappingStatus: TreasuryLongEndMappingStatus;
+  caveats: string[];
+  observations: TreasuryLongEndIncomeLensObservationsV1;
+  optionalObservations?: TreasuryLongEndIncomeLensOptionalObservationsV1;
+}
+
+export interface TreasuryLongEndIncomeLensValidationResult {
+  ok: true;
+  artifact: TreasuryLongEndIncomeLensArtifactV1;
+}
+
+export interface TreasuryLongEndIncomeLensValidationError {
+  ok: false;
+  errors: string[];
+}
+
+export type TreasuryLongEndIncomeLensValidation =
+  | TreasuryLongEndIncomeLensValidationResult
+  | TreasuryLongEndIncomeLensValidationError;
+
 export interface ArtifactFreshnessResult {
   status: GhostFlowArtifactFreshnessStatus;
   ageDays: number;

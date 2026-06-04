@@ -1,0 +1,82 @@
+{
+  "artifactVersion": "1",
+  "signalId": "treasury-long-end-income-lens",
+  "designOnly": true,
+  "asOf": "2026-05-22",
+  "publishedAt": "2026-05-22",
+  "source": {
+    "name": "FRED — U.S. Treasury constant maturity and TIPS yields (design reference)",
+    "url": "https://fred.stlouisfed.org/",
+    "note": "EXAMPLE / DESIGN ONLY — illustrative rate levels for schema and validator tests; not operator-verified FRED extracts. Candidate series IDs in source.series must be verified at each FRED series page before v1.7d production. Example values are not production data.",
+    "series": [
+      {
+        "id": "DGS30",
+        "label": "Market Yield on U.S. Treasury Securities at 30-Year Constant Maturity",
+        "url": "https://fred.stlouisfed.org/series/DGS30",
+        "role": "primary"
+      },
+      {
+        "id": "DFII30",
+        "label": "Market Yield on U.S. Treasury Inflation-Indexed Securities at 30-Year Maturity",
+        "url": "https://fred.stlouisfed.org/series/DFII30",
+        "role": "primary"
+      },
+      {
+        "id": "DGS2",
+        "label": "Market Yield on U.S. Treasury Securities at 2-Year Constant Maturity",
+        "url": "https://fred.stlouisfed.org/series/DGS2",
+        "role": "context"
+      },
+      {
+        "id": "DGS5",
+        "label": "Market Yield on U.S. Treasury Securities at 5-Year Constant Maturity",
+        "url": "https://fred.stlouisfed.org/series/DGS5",
+        "role": "context"
+      },
+      {
+        "id": "DGS10",
+        "label": "Market Yield on U.S. Treasury Securities at 10-Year Constant Maturity",
+        "url": "https://fred.stlouisfed.org/series/DGS10",
+        "role": "context"
+      },
+      {
+        "id": "T10YIE",
+        "label": "10-Year Breakeven Inflation Rate",
+        "url": "https://fred.stlouisfed.org/series/T10YIE",
+        "role": "context"
+      }
+    ]
+  },
+  "observationType": "treasury_long_end_income_snapshot",
+  "seriesDefinition": "fred_treasury_long_end_income_lens_v1",
+  "updateFrequency": "daily",
+  "dataQuality": "manual_unverified",
+  "mappingStatus": "not_final",
+  "caveats": [
+    "Not investment advice and not a recommendation to buy or sell Treasury securities or bond funds.",
+    "Not a duration allocation signal — yield levels alone do not prove income neglect or investor behavior.",
+    "Nominal and real yields can move for different macro reasons; duration risk remains.",
+    "Display-only future default for Treasury Plumbing; not included in the GhostFlow Research Composite.",
+    "mappingStatus not_final; no scored pressure mapping in v1.7c.",
+    "Illustrative FRED-aligned example values only — operator must verify series IDs and extract official values in v1.7d."
+  ],
+  "observations": {
+    "thirtyYearNominalYieldPct": 4.72,
+    "thirtyYearTipsRealYieldPct": 2.08,
+    "tenYearBreakevenInflationPct": 2.31,
+    "twoYearYieldPct": 4.18,
+    "fiveYearYieldPct": 4.34,
+    "tenYearYieldPct": 4.49,
+    "curve2s30sPct": 0.54,
+    "curve5s30sPct": 0.38,
+    "curve10s30sPct": 0.23,
+    "nominalYieldPercentile": null,
+    "realYieldPercentile": null,
+    "mappingStatus": "not_final"
+  },
+  "optionalObservations": {
+    "longDurationTreasuryEtfFlowMillionsUsd": null,
+    "longDurationTreasuryEtfAumMillionsUsd": null,
+    "termPremiumPct": null
+  }
+}

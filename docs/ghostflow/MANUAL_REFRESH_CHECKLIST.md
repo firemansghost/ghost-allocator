@@ -6,7 +6,7 @@ Operator runbook for manually refreshing GhostFlow public-data artifacts. **No l
 
 **Dashboard coverage (v1.5a):** **6** score-fed public artifacts · **4** display-only public artifact cards (CFTC `systematic-flow`, levered `levered-etf-rebalance`, retirement `retirement-asset-growth`, OCC `options-activity-proxy`) · **`publicSignalCount` 10** when all validate · **0** placeholder cards when artifacts validate. Display-only cards (including options activity) do **not** refresh or change the Research Composite — MOCK **62** / **55** / **58** and VIX still drive scored sub-inputs. Quarterly retirement freshness **caution** (46–90 days after release) reflects normal ICI quarterly cadence — not a failed feed or score problem.
 
-**Treasury Plumbing:** No operator refresh yet; v1.7b example artifact only ([TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md](./TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md)); production refresh table deferred to v1.7d+.
+**Treasury Plumbing:** No operator refresh yet; v1.7b–c example artifacts only ([TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md](./TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md), [BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md](./BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md)); daily FRED yield extract for `treasury-long-end-income-lens` is **v1.7d+** only; production refresh table deferred to v1.7d+.
 
 Per-artifact deep dives: see linked runbooks at the bottom of this page.
 

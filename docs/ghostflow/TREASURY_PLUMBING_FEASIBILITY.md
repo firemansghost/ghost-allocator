@@ -186,7 +186,7 @@
 | **v1.7a** | Treasury Plumbing Feasibility — **this memo; docs-only** | None |
 | **v1.7a.1** | Treasury CFTC PRE spike — `ghostflow:treasury-cftc-pre-spike`; contract discovery **GREEN** | None |
 | **v1.7b** | Treasury Futures Positioning artifact design — [TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md](./TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md) + example JSON + validator/tests | None |
-| **v1.7c** | Bond Neglect / Long-End Income artifact design — memo + example JSON only | None |
+| **v1.7c** | Bond Neglect / Long-End Income artifact design — [BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md](./BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md) + example JSON + validator/tests; FRED IDs **candidate** until v1.7d operator lock | None |
 | **v1.7d** | Production artifact candidates — JSON + validators | Display path only |
 | **v1.7e** | Display-only Treasury Plumbing section — separate UI lane | Cards only; not scored |
 | **v1.7f** | Calibration / mapping decision | Display thresholds; score gate still off |
