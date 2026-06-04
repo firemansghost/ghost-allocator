@@ -6,7 +6,8 @@
 - **No scoring** — Research Composite, Passive Pressure, and Structural Fragility unchanged.
 - **No artifacts** — no example JSON, no production JSON, no validators in this phase.
 - **No UI cards** — no dashboard section, no placeholder cards, no Treasury Plumbing lane on the live grid.
-- **No data pipeline** — no spike scripts, no runtime/live fetching, no operator refresh table for Treasury yet.
+- **v1.7a.1 research spike** — `npm run ghostflow:treasury-cftc-pre-spike` (contract discovery only; not in `ghostflow:check`).
+- **No production data pipeline** — no artifacts, no dashboard runtime fetching, no operator refresh table for Treasury yet.
 - **Treasury Plumbing remains a separate future lane** — not merged into the equity GhostFlow Research Composite, `publicSignalCount`, or Passive Pressure.
 
 ---
@@ -37,7 +38,7 @@
 **Clear statements:**
 
 - Existing **CFTC PRE infrastructure** (`cftc-tff-spike.ts`, TFF feasibility memos, manual artifact pattern) provides a **reusable research pattern** for weekly public extracts.
-- **Treasury futures contract discovery is not yet done** — equity spike codes (e.g. `13874A`) do not transfer; v1.7a.1 is an optional research-only Treasury PRE spike, separately approved.
+- **Treasury futures contract discovery complete (v1.7a.1)** — equity spike codes (e.g. `13874A`) do not transfer; UST futures use separate PRE names/codes (see v1.7a.1 findings below).
 - **Treasury CFTC must not relabel or extend** the existing **`systematic-flow`** equity card — that card stays equity-index-only per [CFTC_TFF_MAPPING_DECISION.md](./CFTC_TFF_MAPPING_DECISION.md).
 
 ---
@@ -63,7 +64,68 @@
 | **Primary dealer / financing data** | Public manual (Fed H.4.1, dealer surveys); some series delayed | Weekly / monthly | Dealer positioning, repo volumes (where published) | **Proxy** — indirect | Medium — operator burden | Medium — expert audience | Not suitable |
 | **FRED stress proxies** (e.g. yield curve, credit spreads, financial conditions) | Live public | Daily–monthly | Yields, spreads, NFCI | **Proxy** — macro context only | Feasible | Medium — support lens only | Poor — duplicates other pillars |
 
-**Conclusion — Treasury Basis Trade Stress:** **YELLOW** — feasible as a **public proxy** after **dedicated Treasury CFTC contract discovery** (v1.7a.1 / v1.7b), combined with funding/vol/OI context fields. **Not feasible** as full basis-trade measurement or as an extension of the equity `systematic-flow` card.
+**Conclusion — Treasury Basis Trade Stress:** **YELLOW → GREEN (CFTC path, v1.7a.1)** — TFF Futures Only (`gpe5-46if`) exposes liquid **UST** note/bond contracts with full leveraged-funds and asset-manager fields at weekly cadence. Proceed to **v1.7b** artifact design (example JSON only) with proxy copy and basket dedup rules. Still **not** full basis-trade measurement; still **not** an extension of equity `systematic-flow`.
+
+---
+
+## v1.7a.1 — Treasury CFTC PRE spike (research only)
+
+**Script:** `npm run ghostflow:treasury-cftc-pre-spike` → [`scripts/ghostflow/treasury-cftc-pre-spike.ts`](../scripts/ghostflow/treasury-cftc-pre-spike.ts)
+
+**Scope:** Research-only contract discovery for a future Treasury Basis Trade Stress display-only proxy. Console output by default; optional `--out` under `data/ghostflow/research/` (gitignored). **Not** in `ghostflow:check`. **Does not** measure the full cash-futures basis trade, repo specialness, CTD, or financing terms.
+
+### Dataset queried
+
+| Item | Value |
+|------|--------|
+| Primary | **TFF — Futures Only** `gpe5-46if` |
+| Endpoint | `https://publicreporting.cftc.gov/resource/gpe5-46if.json` |
+| Alternate (if gaps) | TFF Futures+Options `yw9f-hn96` — not required after v1.7a.1 run |
+| Latest report date (spike run) | **2026-05-26** (week 2026 Report Week 21) |
+
+### Field availability (metadata + rows)
+
+| Field group | Status |
+|-------------|--------|
+| Report date / week | Present (`report_date_as_yyyy_mm_dd`, `yyyy_report_week_ww`) |
+| Contract identity | Present (`contract_market_name`, `cftc_contract_market_code`, `commodity_name`) |
+| Open interest | Present (`open_interest_all`) |
+| Leveraged funds L/S/spread/changes/%OI | **All present** (12 columns) |
+| Asset manager L/S/spread/changes/%OI | **All present** on UST rows (12 columns) |
+
+**Search note:** CFTC uses short names (`UST 10Y NOTE`, `T-NOTES` commodity) — not long strings like `10-YEAR U.S. TREASURY NOTES`. Default spike search includes `UST`, `T-NOTE`, `T-NOTES`, `T-BOND`, and searches both `contract_market_name` and `commodity_name`.
+
+### Discovered Treasury futures (FutOnly, Tier 1–eligible)
+
+| Contract | CFTC code | Commodity | Latest report |
+|----------|-----------|-----------|---------------|
+| UST 2Y NOTE | `042601` | T-NOTES, 1-2 YEAR | 2026-05-26 |
+| UST 5Y NOTE | `044601` | T-NOTES, 4-6 YEAR | 2026-05-26 |
+| UST 10Y NOTE | `043602` | T-NOTES, 6.5-10 YEAR | 2026-05-26 |
+| ULTRA UST 10Y | `043607` | T-NOTES, 6.5-10 YEAR | 2026-05-26 |
+| UST BOND | `020601` | T-BONDS | 2026-05-26 |
+| ULTRA UST BOND / ULTRA US T BOND | `020604` | T-BONDS | 2026-05-26 |
+
+**Sample positioning (2026-05-26, leveraged funds net % OI):** 2Y **−35.7%** · 5Y **−30.2%** · 10Y **−32.1%** · Ultra 10Y **−8.8%** · UST Bond **−16.0%** · Ultra Bond **−34.4%** — all **net_short** vs 1.0 pp flat threshold. Asset managers net **long** on the same contracts (display context only).
+
+### Recommended Tier 1 basket (v1.7b design — one listing per tenor)
+
+| Tenor | Primary code | Alternate (context / do not double-count OI) |
+|-------|--------------|-----------------------------------------------|
+| 2Y | `042601` UST 2Y NOTE | — |
+| 5Y | `044601` UST 5Y NOTE | — |
+| 10Y | `043602` UST 10Y NOTE | `043607` ULTRA UST 10Y (pick one for basket OI) |
+| Long bond | `020601` UST BOND | `020604` ULTRA UST BOND (pick one for basket OI) |
+
+**Deferred:** 3Y UST note — no distinct FutOnly row in discovery search. **Excluded from basket:** DTCC Repo, ERIS swaps, MICRO 10 YEAR YIELD, Eurodollar legacy.
+
+**Funding context (separate future lens, not default basis basket):** FED FUNDS `045601`, SOFR `134741`/`134742`, ERIS SOFR swaps — spike lists under funding-context bucket when searched.
+
+### Feasibility verdict (v1.7a.1)
+
+**GREEN** — ≥3 Tier-1 UST contracts with full leveraged-funds fields and report within 21 days of run.
+
+**v1.7b gate:** Proceed to Treasury Basis Trade **artifact design** (memo + example JSON only) using `gpe5-46if` and the Tier-1 codes above. Maintain approved proxy copy; do not merge into equity composite or `systematic-flow`.
 
 ---
 
@@ -122,7 +184,7 @@
 | Phase | Scope | Score / UI |
 |-------|--------|------------|
 | **v1.7a** | Treasury Plumbing Feasibility — **this memo; docs-only** | None |
-| **v1.7a.1** | Optional Treasury CFTC PRE spike — research-only script; **separately approved** | None |
+| **v1.7a.1** | Treasury CFTC PRE spike — `ghostflow:treasury-cftc-pre-spike`; contract discovery **GREEN** | None |
 | **v1.7b** | Treasury Basis Trade artifact design — memo + example JSON only | None |
 | **v1.7c** | Bond Neglect / Long-End Income artifact design — memo + example JSON only | None |
 | **v1.7d** | Production artifact candidates — JSON + validators | Display path only |
