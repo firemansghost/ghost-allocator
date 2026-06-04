@@ -1,10 +1,12 @@
 # Treasury Basis Trade / Futures Positioning Artifact Design (GhostFlow v1.7b)
 
-**Status:** v1.7b artifact design only — example JSON + pure validator/tests. **Not** production data, display card, score wiring, or `validate-artifacts` registration.
+**Status:** v1.7d production artifact candidate — [`treasuryFuturesPositioningProxy.v1.json`](../data/ghostflow/artifacts/treasuryFuturesPositioningProxy.v1.json) + loader + `validate-artifacts`. **Not** display card, score wiring, or `buildSnapshot` merge.
 
 **Prior work:** [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md) (v1.7a) · v1.7a.1 CFTC PRE spike (`npm run ghostflow:treasury-cftc-pre-spike`)
 
 **Example file:** [`data/ghostflow/artifacts/treasuryFuturesPositioningProxy.v1.example.json`](../data/ghostflow/artifacts/treasuryFuturesPositioningProxy.v1.example.json) (`designOnly: true`)
+
+**Production file:** [`data/ghostflow/artifacts/treasuryFuturesPositioningProxy.v1.json`](../data/ghostflow/artifacts/treasuryFuturesPositioningProxy.v1.json) (`dataQuality: manual_unverified`; omit `designOnly`)
 
 **Library:** [`lib/ghostflow/artifacts/treasuryFuturesPositioningProxy.ts`](../lib/ghostflow/artifacts/treasuryFuturesPositioningProxy.ts)
 
@@ -166,21 +168,24 @@ Tests: [`lib/ghostflow/__tests__/treasuryFuturesPositioningProxy.test.ts`](../li
 
 | Phase | Scope |
 |-------|--------|
-| **v1.7d** | Production artifact candidate JSON + `validate-artifacts` registration |
+| **v1.7d** | Production artifact candidate JSON + `validate-artifacts` registration — **done** (positioning proxy) |
 | **v1.7e** | Display-only Treasury Plumbing dashboard section |
 | **v1.7f** | Calibration / mapping decision |
 | **v1.7g** | Separate Treasury score gate — discouraged; product-approved only |
 
 ---
 
-## 9. Not implemented (v1.7b)
+## 9. Not implemented (v1.7d)
 
-- Production `treasuryFuturesPositioningProxy.v1.json`
-- `loadTreasuryFuturesPositioningProxyArtifact()`
 - `buildSnapshot` / `publicSignalCount` / score sub-input
-- Display card / UI lane
-- `scripts/ghostflow/validate-artifacts.ts` entry
+- Display card / Treasury Plumbing UI lane (v1.7e)
 - Runtime dashboard fetching
+
+## 9a. Implemented (v1.7d)
+
+- Production `treasuryFuturesPositioningProxy.v1.json` — CFTC extract asOf **2026-05-26** via `ghostflow:treasury-cftc-pre-spike` (2026-06-04)
+- `loadTreasuryFuturesPositioningProxyArtifact()`
+- `scripts/ghostflow/validate-artifacts.ts` entry
 
 ---
 
