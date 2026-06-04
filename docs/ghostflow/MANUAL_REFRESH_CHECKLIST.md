@@ -1,10 +1,10 @@
-# GhostFlow Manual Refresh Checklist (v1.3a)
+# GhostFlow Manual Refresh Checklist (v1.5a — after v1.4e)
 
 Operator runbook for manually refreshing GhostFlow public-data artifacts. **No live fetches, no scraping, no cron, no API routes** — values are hand-edited into static JSON files committed to the repo.
 
-**Related:** [DATA_ROADMAP.md](./DATA_ROADMAP.md) — score-input sourcing and dashboard state.
+**Related:** [DATA_ROADMAP.md](./DATA_ROADMAP.md) — score-input sourcing and canonical dashboard state (v1.5a checkpoint).
 
-**Dashboard coverage (v1.3a):** **6** score-fed public artifacts · **3** display-only public artifact cards (CFTC `systematic-flow`, levered `levered-etf-rebalance`, retirement `retirement-asset-growth`) · **`publicSignalCount` 9** when all validate. Retirement is displayed publicly but **not scored** (`retirementFlowPressureProxy` MOCK **58**). Quarterly retirement freshness **caution** (46–90 days after release) reflects normal ICI quarterly cadence — not a failed feed or score problem.
+**Dashboard coverage (v1.5a):** **6** score-fed public artifacts · **4** display-only public artifact cards (CFTC `systematic-flow`, levered `levered-etf-rebalance`, retirement `retirement-asset-growth`, OCC `options-activity-proxy`) · **`publicSignalCount` 10** when all validate · **0** placeholder cards when artifacts validate. Display-only cards (including options activity) do **not** refresh or change the Research Composite — MOCK **62** / **55** / **58** and VIX still drive scored sub-inputs. Quarterly retirement freshness **caution** (46–90 days after release) reflects normal ICI quarterly cadence — not a failed feed or score problem.
 
 Per-artifact deep dives: see linked runbooks at the bottom of this page.
 
@@ -15,13 +15,14 @@ Per-artifact deep dives: see linked runbooks at the bottom of this page.
 | Cadence | When | Artifacts | Reference date |
 |---------|------|-----------|----------------|
 | **Daily** | After US market close (~6:00 PM ET) | Volatility Regime (VIX) + Market Breadth Participation | Update [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) **after** both daily artifacts align to the same last trading day |
+| **Daily** | After OCC session volume is published | Index Options Intensity Proxy (`options-activity-proxy`) | Display-only — updates [`optionsActivityProxy.v1.json`](../data/ghostflow/artifacts/optionsActivityProxy.v1.json) only; **not** scored; not 0DTE/GEX ([OPTIONS_ACTIVITY_MAPPING_DECISION.md](./OPTIONS_ACTIVITY_MAPPING_DECISION.md)) |
 | **Weekly** | After ICI ETF estimated net issuance release | ETF Net Issuance Pressure | Optional reference bump if you also run the daily pass |
 | **Weekly** | After CFTC TFF Friday release | CFTC TFF Positioning Proxy | Production candidate validated; **not merged into GhostFlow score yet** (v0.9f / v1.0) |
 | **Monthly** | After ICI combined active/index monthly release | Active vs Index Flow + ICI Index Share Proxy | Use ICI `publishedAt`; **flows table vs assets table** |
 | **Monthly** | After new SSGA SPY US monthly fact sheet PDF | Index Concentration | PDF month-end `asOf`; PDF control date `publishedAt` |
 | **Quarterly** | After ICI Quarterly Retirement Market Data release | Retirement Asset Growth Proxy | Display-only card `retirement-asset-growth`; **not scored** (MOCK **58**); `mappingStatus` **not_final** |
 
-**Daily group:** VIX + Market Breadth + `GHOSTFLOW_REFERENCE_AS_OF`
+**Daily group:** VIX + Market Breadth + OCC Index Options Intensity (display-only) + `GHOSTFLOW_REFERENCE_AS_OF` (when running the full daily pass)
 
 **Weekly group:** ETF Net Issuance + CFTC TFF Positioning Proxy (production candidate; not scored yet)
 

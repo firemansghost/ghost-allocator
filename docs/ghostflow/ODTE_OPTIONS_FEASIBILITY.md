@@ -333,7 +333,9 @@ Likely future `signalId`: **`options-activity-proxy`** (not `odte-options`).
 
 ## 11. No-score-change confirmation (v1.4a / v1.4b)
 
-| Item | Unchanged |
+Historical snapshot at feasibility close — superseded for live dashboard by §11a.
+
+| Item | Unchanged (v1.4a/b) |
 |------|-----------|
 | Research Composite | **62** |
 | Passive Pressure | **58** |
@@ -341,9 +343,29 @@ Likely future `signalId`: **`options-activity-proxy`** (not `odte-options`).
 | Band | Crowded / Reflexive |
 | `optionsVolatilityAmplifier` | PUBLIC via VIX artifact |
 | `odte-options` | PLACEHOLDER only; not in composite |
-| `publicSignalCount` | **9** |
+| `publicSignalCount` | **9** (pre–v1.4d) |
 | Score gates v1.0c / v1.1f / v1.2f | Unchanged |
 | Future v1.4f | Options score wiring **not** approved by this memo |
+
+---
+
+## 11a. Current dashboard state (after v1.4e — v1.5a checkpoint)
+
+Live dashboard alignment ([DATA_ROADMAP.md](./DATA_ROADMAP.md) canonical block · [OPTIONS_ACTIVITY_MAPPING_DECISION.md](./OPTIONS_ACTIVITY_MAPPING_DECISION.md)):
+
+| Item | Current |
+|------|---------|
+| Research Composite | **62** |
+| Passive Pressure | **58** |
+| Structural Fragility | **66** |
+| Band | Crowded / Reflexive |
+| `publicSignalCount` | **10** |
+| Display-only public artifacts | **4** — CFTC, levered ETF, retirement, `options-activity-proxy` |
+| `odte-options` | **Suppressed** when production options artifact validates; not an active placeholder card |
+| `optionsVolatilityAmplifier` | Score-fed via **VIX** only |
+| `options-activity-proxy` | Display-only; OCC Index/Others; not 0DTE/GEX |
+| **v1.4f** score wiring | **Not approved**; discouraged (VIX overlap) |
+| True 0DTE / GEX | **Paid/vendor** only — not shipped in public repo |
 
 ---
 
