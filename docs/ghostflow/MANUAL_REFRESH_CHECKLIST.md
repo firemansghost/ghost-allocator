@@ -177,8 +177,10 @@ Per-artifact deep dives: see linked runbooks at the bottom of this page.
 | **`publishedAt` rule** | **ICI release date** |
 | **`dataQuality` rule** | `verified_manual` after verifying assets + share vs ICI published column; `manual_unverified` if not verified |
 | **Cross-check** | Formula: index / (active + index) × 100; optional ICI “Index as a % of Total” column |
-| **Common mistakes** | Using **flows** table instead of assets; treating as market-wide passive share |
+| **Common mistakes** | Using **flows** table instead of assets; treating as market-wide passive share; treating refresh as a **crash countdown** or precise tripwire |
 | **Deep dive** | [PASSIVE_SHARE_PROXY_ARTIFACT_RUNBOOK.md](./PASSIVE_SHARE_PROXY_ARTIFACT_RUNBOOK.md) |
+
+**v1.6a language:** Passive-share refresh updates **model-stress-zone context** (60–65% framing; ~65% reference for distance display) — a **pressure gauge**, not a crash forecast. See [PASSIVE_STRESS_ZONE_LANGUAGE.md](./PASSIVE_STRESS_ZONE_LANGUAGE.md).
 
 ---
 
@@ -284,4 +286,5 @@ Include the relevant `asOf` / week ended / month ended dates in the commit body 
 - [ETF_ARTIFACT_RUNBOOK.md](./ETF_ARTIFACT_RUNBOOK.md) — ETF Net Issuance
 - [ACTIVE_INDEX_ARTIFACT_RUNBOOK.md](./ACTIVE_INDEX_ARTIFACT_RUNBOOK.md) — Active vs Index Flow
 - [PASSIVE_SHARE_PROXY_ARTIFACT_RUNBOOK.md](./PASSIVE_SHARE_PROXY_ARTIFACT_RUNBOOK.md) — ICI Index Share Proxy
+- [PASSIVE_STRESS_ZONE_LANGUAGE.md](./PASSIVE_STRESS_ZONE_LANGUAGE.md) — v1.6a model-stress-zone phrasebook
 - [INDEX_CONCENTRATION_ARTIFACT_RUNBOOK.md](./INDEX_CONCENTRATION_ARTIFACT_RUNBOOK.md) — Index Concentration

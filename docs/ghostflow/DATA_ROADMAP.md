@@ -63,7 +63,7 @@ Ten sub-inputs feed the research composite (50% Passive Pressure + 50% Structura
 
 | Signal id | Status | Source / value | Cadence | In score | Confidence |
 |---------|--------|----------------|----------|----------|------------|
-| `distance-65` | **DERIVED** | **1.8 pp** below 65% model stress zone from ICI index share **63.2%** (`deriveDistanceToModelZone` + `mapDistanceToZoneNumericValue` in `passiveShareProxy.ts`) | Monthly (follows ICI passive-share artifact) | **No** (context card only) | Medium — same ICI denominator caveats as passive-share |
+| `distance-65` | **DERIVED** | **1.8 pp** below ~65% model-stress-zone reference from ICI index share **63.2%** (60–65% framing; not a tripwire — [PASSIVE_STRESS_ZONE_LANGUAGE.md](./PASSIVE_STRESS_ZONE_LANGUAGE.md)) | Monthly (follows ICI passive-share artifact) | **No** (context card only) | Medium — same ICI denominator caveats as passive-share |
 
 **v0.9b (complete):** `modelZoneProximity` is **DERIVED** from the merged ICI passive-share artifact (not mock **52**). Context card `distance-65` uses the same distance mapping but remains **not** a separate score sub-input.
 
@@ -200,6 +200,7 @@ GhostFlow input promotion rules (all phases):
 | **v1.4e-calibration** | Options OCC history study (optional, research only) | **Future** — Index/Others percentiles for display context; not required for v1.4e; excluded from `ghostflow:check` |
 | **v1.4f** | Options score-wiring gate (if product-approved) | **Gated / discouraged** — VIX overlap; explicit product approval required |
 | **v1.5a** | Current-state audit / release checkpoint | **Done** — docs alignment with live dashboard; scores **62 / 58 / 66** unchanged; canonical state at top of this roadmap |
+| **v1.6a** | Passive stress-zone language audit | **Done** — [PASSIVE_STRESS_ZONE_LANGUAGE.md](./PASSIVE_STRESS_ZONE_LANGUAGE.md); model-stress zone not tripwire; copy only |
 
 ---
 
@@ -237,3 +238,4 @@ GhostFlow input promotion rules (all phases):
 - [ODTE_OPTIONS_FEASIBILITY.md](./ODTE_OPTIONS_FEASIBILITY.md) — v1.4a 0DTE/options data-path feasibility (YELLOW leaning RED; display proxy shipped v1.4d–e)
 - [OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md](./OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md) — v1.4c/d OCC index options intensity proxy (production JSON + display card v1.4d)
 - [OPTIONS_ACTIVITY_MAPPING_DECISION.md](./OPTIONS_ACTIVITY_MAPPING_DECISION.md) — v1.4e display-only mapping decision; v1.4f gated
+- [PASSIVE_STRESS_ZONE_LANGUAGE.md](./PASSIVE_STRESS_ZONE_LANGUAGE.md) — v1.6a passive-share / model-stress-zone phrasebook

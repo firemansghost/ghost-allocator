@@ -62,9 +62,32 @@ export function GhostFlowMethodology({
         Methodology &amp; model zones
       </h2>
       <p className="text-xs text-zinc-500">
-        Trust &amp; clarity pass v1.5a — scoring weights unchanged; display-only artifact cards documented separately
-        from composite inputs.
+        Trust &amp; clarity pass v1.6a — scoring weights unchanged; passive-share thresholds documented as model-stress
+        zones (not tripwires). Display-only artifact cards documented separately from composite inputs.
       </p>
+
+      <GlassCard className="p-4 sm:p-6 border-amber-500/20">
+        <h3 className="text-base font-semibold text-zinc-100">Passive stress zones &amp; proxy framing (v1.6a)</h3>
+        <div className="mt-3 space-y-2 text-sm text-zinc-400 leading-relaxed">
+          <p>
+            GhostFlow treats passive-share thresholds as <strong className="text-zinc-300">model-stress zones</strong>,
+            not precise tripwires. No single public metric perfectly measures true passive control of market pricing or{' '}
+            <strong className="text-zinc-300">active price-discovery capital</strong>.
+          </p>
+          <p>
+            Experts often frame the danger zone around <strong className="text-zinc-300">60–65%</strong>, depending on
+            definition and denominator. <strong className="text-zinc-300">~65%</strong> is a reference point in published
+            framing, not a guaranteed trigger. Some endgame models describe{' '}
+            <strong className="text-zinc-300">~65–85%</strong> as a possible unstable operating zone — possible pathways,
+            not predictions.
+          </p>
+          <p>
+            GhostFlow is a <strong className="text-zinc-300">pressure gauge</strong>, not a countdown clock to a crash
+            date and not investment advice. Passive <strong className="text-zinc-300">adoption</strong> may be linear, but
+            passive <strong className="text-zinc-300">market impact</strong> can become convex as the active pool shrinks.
+          </p>
+        </div>
+      </GlassCard>
 
       <GlassCard className="p-4 sm:p-6">
         <h3 className="text-base font-semibold text-zinc-100">Scoring model</h3>
@@ -131,9 +154,11 @@ export function GhostFlowMethodology({
             issuance (v0.3) and active/index flow differential (v0.4) already cover flow pressure.
           </p>
           <p>
-            <strong className="text-zinc-300">Relationship to the 65% zone:</strong> 65% is an assumption-sensitive
-            model stress zone from published passive-flow research, not a guaranteed crash line. Distance-to-65 is
-            derived from this public proxy for context only, not a calibrated model forecast.
+            <strong className="text-zinc-300">Model-stress zones (60–65% framing):</strong> published passive-flow research
+            often discusses stress around <strong className="text-zinc-300">60–65%</strong>, not one exact tick. GhostFlow
+            uses <strong className="text-zinc-300">~65%</strong> only as a reference for distance context — not a
+            tripwire or crash line. The distance card is derived from this public proxy for context only, not a calibrated
+            forecast.
           </p>
           <p>
             <strong className="text-zinc-300">Source:</strong>{' '}
@@ -188,9 +213,10 @@ export function GhostFlowMethodology({
             ownership, trading volume, or Green/Krishnan/Sturm model passive-share input.
           </p>
           <p>
-            The <strong className="text-zinc-300">65% zone</strong> remains an assumption-sensitive model stress zone
-            from published passive-flow research, not a guaranteed crash line. Distance-to-65 is derived from this ICI
-            proxy for context only.
+            Model-stress-zone framing (often <strong className="text-zinc-300">60–65%</strong> in published research, with{' '}
+            <strong className="text-zinc-300">~65%</strong> as a reference for distance display) applies to narrative context
+            only — not proof this ICI % equals market-wide passive control. Distance-to-zone is derived from this ICI proxy
+            for context only.
           </p>
         </div>
       </MethodologyDetailsSection>
@@ -559,10 +585,16 @@ export function GhostFlowMethodology({
 
       <MethodologyDetailsSection title="ICI index share proxy model stress zones">
         <p className="text-sm text-zinc-400 leading-relaxed">
-          The <strong className="text-zinc-300">65% zone</strong> is drawn from published passive-flow research as an
-          assumption-sensitive stress zone. The public ICI fund/ETF index share proxy supplies the level display when
-            available; model-zone proximity sub-input is derived from the same distance-to-65 mapping when the ICI
-          artifact is present (v0.9b). This is not a market-wide passive-share estimate.
+          GhostFlow uses published passive-flow framing where <strong className="text-zinc-300">~65%</strong> is a{' '}
+          <strong className="text-zinc-300">reference point</strong> inside a broader{' '}
+          <strong className="text-zinc-300">60–65% model-stress zone</strong> (definition- and denominator-dependent) — not
+          a precise tripwire. The public ICI fund/ETF index share proxy supplies the level display when available;
+          model-zone proximity is derived from the same distance mapping when the ICI artifact is present (v0.9b). This is
+          not a market-wide passive-share estimate or active price-discovery capital map.
+        </p>
+        <p className="mt-2 text-xs text-zinc-500">
+          Band table below uses the same illustrative model bands as scoring helpers. Bands describe model interpretation,
+          not forecast outcomes or crash timing.
         </p>
         <p className="mt-2 text-xs text-amber-300/90">
           Current ICI fund/ETF index share: {data.passiveSharePercent}% ({data.passiveShareBand.rangeLabel},{' '}
@@ -591,9 +623,9 @@ export function GhostFlowMethodology({
       <GlassCard className="p-4 sm:p-6 border-zinc-800/80">
         <h3 className="text-base font-semibold text-zinc-100">What GhostFlow does not claim</h3>
         <ul className="mt-3 space-y-2 text-sm text-zinc-400 list-disc list-inside leading-relaxed">
-          <li>Does not predict exact tops or bottoms or market crashes.</li>
-          <li>Does not provide buy/sell recommendations.</li>
-          <li>Does not treat model thresholds as guaranteed outcomes.</li>
+          <li>Does not predict exact tops or bottoms, market crashes, or crash dates (pressure gauge, not countdown clock).</li>
+          <li>Does not provide buy/sell recommendations or allocation advice.</li>
+          <li>Does not treat model-stress zones or ~65% reference levels as guaranteed outcomes or precise tripwires.</li>
           <li>
             Does not use live feeds. Six score-fed manual public artifacts plus four display-only public cards and static MOCK
             composite inputs elsewhere.

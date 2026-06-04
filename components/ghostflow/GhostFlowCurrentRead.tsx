@@ -30,8 +30,9 @@ export function GhostFlowCurrentRead({
         </p>
         {distanceSignal && passiveShareProxySource === 'public' && (
           <p className="text-zinc-400">
-            Distance to 65% model zone: <strong className="text-zinc-200">{distanceSignal.value}</strong> below, derived
-            from ICI index-share proxy, not market-wide passive share.
+            Distance to model-stress-zone reference (~65% in published framing, 60–65% zone depending on definition):{' '}
+            <strong className="text-zinc-200">{distanceSignal.value}</strong> below — derived from ICI index-share
+            proxy only, not market-wide passive share. Pressure gauge context, not a crash countdown.
           </p>
         )}
         <p className="text-zinc-400">{iciLine}</p>

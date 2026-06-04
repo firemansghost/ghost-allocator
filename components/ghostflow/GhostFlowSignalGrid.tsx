@@ -268,7 +268,7 @@ export function GhostFlowSignalGrid({
 
       <SignalSection
         title="Derived context"
-        intro="Derived from the ICI Index Share Proxy. The 65% zone is an assumption-sensitive model stress reference, not a crash line."
+        intro="Derived from the ICI Index Share Proxy. Shows gap to a model-stress-zone reference (~65% in published framing; broader 60–65% zone depending on definition). Public proxy only — not a tripwire, crash countdown, or forecast."
         signals={grouped.derivedContext}
         variant="derived"
         dataMix={dataMix}
