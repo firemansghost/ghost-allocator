@@ -172,17 +172,25 @@ Do **not** claim or store:
 
 ---
 
-## 10. v1.4e — calibration / mapping
+## 10. v1.4e — mapping decision (complete)
 
-- Display-only default (mirror CFTC / levered / retirement)
-- `mappingStatus` stays `not_final` until explicit mapping decision memo
-- No MOCK score replacement without product approval
+**Memo:** [OPTIONS_ACTIVITY_MAPPING_DECISION.md](./OPTIONS_ACTIVITY_MAPPING_DECISION.md)
+
+| Item | Decision |
+|------|----------|
+| Role | **Display-only** — Option A selected |
+| **`mappingStatus`** | Remains **`not_final`** |
+| Final 0–100 mapper | **None selected** |
+| Score wiring | **Not approved** in v1.4e |
+| **v1.4f** | **Discouraged / product-gated** (VIX overlap, semantic mismatch) |
+
+Optional future **v1.4e-calibration** (OCC history percentiles for display context only) does not change this decision.
 
 ---
 
 ## 11. v1.4f — score gate (discouraged)
 
-Wiring into Passive Pressure overlaps narratively with **`optionsVolatilityAmplifier`** (VIX / vol level at 20%). **Discouraged** unless product explicitly replaces or reallocates that slot.
+Wiring into Passive Pressure overlaps narratively with **`optionsVolatilityAmplifier`** (VIX / vol level at 20%). **Not approved** by v1.4e mapping decision. Proceed only with explicit product approval, calibration, and reweight/replace analysis — see mapping decision §11.
 
 ---
 
@@ -207,4 +215,5 @@ Wiring into Passive Pressure overlaps narratively with **`optionsVolatilityAmpli
 
 - [ODTE_OPTIONS_FEASIBILITY.md](./ODTE_OPTIONS_FEASIBILITY.md)
 - [DATA_ROADMAP.md](./DATA_ROADMAP.md) §E, v1.4c–f ladder
-- [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) — future OCC daily refresh (v1.4d+)
+- [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) — OCC daily refresh (display-only artifact)
+- [OPTIONS_ACTIVITY_MAPPING_DECISION.md](./OPTIONS_ACTIVITY_MAPPING_DECISION.md) — v1.4e display-only decision

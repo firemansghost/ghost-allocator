@@ -31,7 +31,7 @@ Per-artifact deep dives: see linked runbooks at the bottom of this page.
 
 **Quarterly group (ICI Retirement Market):** Retirement Asset Growth Proxy — display-only card; Table 1 extract; MOCK **58** in composite unchanged ([v1.2e](./RETIREMENT_FLOW_MAPPING_DECISION.md) display-only default)
 
-**Options activity (v1.4d — display-only):** Download OCC Daily Volume Statistics CSV per session, e.g. `https://marketdata.theocc.com/daily-volume-statistics?reportDate=YYYYMMDD&format=csv` → save under `tmp/options-spike/occ-volume-download-YYYY-MM-DD.csv` → `npm run ghostflow:options-data-spike -- --occ-daily <file>` → update [`optionsActivityProxy.v1.json`](../data/ghostflow/artifacts/optionsActivityProxy.v1.json). Maps **Index/Others** to `indexOptionsContracts`. Not 0DTE/GEX; not scored. See [OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md](./OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md).
+**Options activity (v1.4d — display-only):** Download OCC Daily Volume Statistics CSV per session, e.g. `https://marketdata.theocc.com/daily-volume-statistics?reportDate=YYYYMMDD&format=csv` → save under `tmp/options-spike/occ-volume-download-YYYY-MM-DD.csv` → `npm run ghostflow:options-data-spike -- --occ-daily <file>` → update [`optionsActivityProxy.v1.json`](../data/ghostflow/artifacts/optionsActivityProxy.v1.json). Maps **Index/Others** to `indexOptionsContracts`. Refresh updates the **display-only** artifact and card only — **not** the Research Composite ([OPTIONS_ACTIVITY_MAPPING_DECISION.md](./OPTIONS_ACTIVITY_MAPPING_DECISION.md)). Not 0DTE/GEX; not scored.
 
 ---
 
