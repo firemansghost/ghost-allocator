@@ -38,7 +38,7 @@
 
 Those labels are reserved for true 0DTE/GEX provenance (likely paid/vendor).
 
-The existing dashboard placeholder `odte-options` stays **PLACEHOLDER** until v1.4d replaces it with `options-activity-proxy` and the renamed card.
+**v1.4d shipped:** Production card `options-activity-proxy` replaces the retired `odte-options` placeholder in the live UI when [`optionsActivityProxy.v1.json`](../data/ghostflow/artifacts/optionsActivityProxy.v1.json) validates; `odte-options` is **suppressed** (mock snapshot fallback only if the artifact is missing).
 
 ---
 

@@ -1,6 +1,6 @@
 # GhostFlow Data Roadmap (v0.9 planning)
 
-Planning document for GhostFlow score-input sourcing. Builds on **v0.8** (research composite framing: six PUBLIC score sub-inputs, three MOCK passive score sub-inputs, one DERIVED structural sub-input, display-only public artifact cards for CFTC TFF, levered ETF rebalance, and retirement asset growth).
+Planning document for GhostFlow score-input sourcing. Builds on **v0.8** (research composite framing: six PUBLIC score sub-inputs, three MOCK passive score sub-inputs, one DERIVED structural sub-input, display-only public artifact cards for CFTC TFF, levered ETF rebalance, retirement asset growth, and OCC index options intensity).
 
 **Baseline reference date:** [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) = `2026-05-22`.
 
@@ -8,17 +8,19 @@ Planning document for GhostFlow score-input sourcing. Builds on **v0.8** (resear
 
 **Current research composite (production snapshot, reference 2026-05-22):** Composite **62** · Passive Pressure **58** · Structural Fragility **66** · band *Crowded / Reflexive*.
 
-### Current dashboard state (v1.3a)
+### Current dashboard state (v1.5a — after v1.4e)
+
+Canonical release checkpoint. Scores unchanged from v1.4d reference snapshot.
 
 | Layer | Count | Notes |
 |-------|-------|--------|
 | **PUBLIC score artifacts** | **6** | vol-regime, etf-flow, passive-share, active-index-flow, concentration, breadth — merged into composite |
 | **DERIVED score input** | **1** | `modelZoneProximity` (from ICI index share) |
 | **MOCK score inputs** | **3** | `systematicStrategyPressure` **62**, `retirementFlowPressureProxy` **58**, `leveredEtfRebalancePressure` **55** |
-| **DISPLAY-ONLY public artifacts** | **3** | [`systematic-flow`](./CFTC_TFF_MAPPING_DECISION.md), [`levered-etf-rebalance`](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md), [`retirement-asset-growth`](./RETIREMENT_FLOW_MAPPING_DECISION.md) — cards only; not in composite |
-| **PLACEHOLDER card** | **0** | Replaced by `options-activity-proxy` display card (v1.4d) |
-| **`publicSignalCount`** | **9** | Six score-fed + three display-only public signals in `meta.publicSignals` |
-| **Score-wiring gates** | — | **v1.0c** (CFTC), **v1.1f** (levered ETF), **v1.2f** (retirement) — product-approved only; discouraged by default |
+| **DISPLAY-ONLY public artifacts** | **4** | [`systematic-flow`](./CFTC_TFF_MAPPING_DECISION.md), [`levered-etf-rebalance`](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md), [`retirement-asset-growth`](./RETIREMENT_FLOW_MAPPING_DECISION.md), [`options-activity-proxy`](./OPTIONS_ACTIVITY_MAPPING_DECISION.md) — cards only; not in composite |
+| **PLACEHOLDER cards** | **0** | When production artifacts validate; see retired `odte-options` note below |
+| **`publicSignalCount`** | **10** | Six score-fed public cards + four display-only public signals in `meta.publicSignals` (plus derived context card `distance-65`, separate from this count) |
+| **Score-wiring gates** | — | **v1.0c** (CFTC), **v1.1f** (levered ETF), **v1.2f** (retirement), **v1.4f** (options) — product-approved only; discouraged by default |
 
 ---
 
@@ -72,14 +74,17 @@ Ten sub-inputs feed the research composite (50% Passive Pressure + 50% Structura
 | `systematic-flow` | CFTC leveraged-funds positioning proxy | [`systematicFlowProxy.v1.json`](../data/ghostflow/artifacts/systematicFlowProxy.v1.json) | **No** — MOCK **62** still drives composite |
 | `levered-etf-rebalance` | Levered ETF Rebalance Pressure Proxy | [`leveredEtfRebalancePressure.v1.json`](../data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.json) | **No** — MOCK **55** still drives composite |
 | `retirement-asset-growth` | Retirement Asset Growth Proxy | [`retirementFlowPressureProxy.v1.json`](../data/ghostflow/artifacts/retirementFlowPressureProxy.v1.json) | **No** — MOCK **58** still drives composite |
+| `options-activity-proxy` | Index Options Intensity Proxy | [`optionsActivityProxy.v1.json`](../data/ghostflow/artifacts/optionsActivityProxy.v1.json) | **No** — VIX `optionsVolatilityAmplifier` still drives composite options/vol slot |
 
-### PLACEHOLDER signal cards (not in composite)
+### Retired placeholder (`odte-options`)
 
-| Signal id | UI label | Mock snapshot name | In score |
-|---------|----------|-------------------|----------|
-| `odte-options` | 0DTE / Options Pressure | High gamma sensitivity (numeric **70**) | No |
+`odte-options` remains in [`mockGhostflowSnapshot.ts`](../data/ghostflow/mockGhostflowSnapshot.ts) as a **fallback only** when [`optionsActivityProxy.v1.json`](../data/ghostflow/artifacts/optionsActivityProxy.v1.json) is missing or invalid. When the production options artifact validates (v1.4d+), the UI **suppresses** `odte-options` and shows **`options-activity-proxy`** instead — **0** active placeholder cards.
 
-Do not confuse **display-only** public cards (`systematic-flow`, `levered-etf-rebalance`, `retirement-asset-growth`) with **MOCK** composite sub-inputs **62** / **55** / **58** (`systematicStrategyPressure`, `leveredEtfRebalancePressure`, `retirementFlowPressureProxy`). Display cards may show 0–100 context readings that are **not** Research Composite inputs.
+**Do not confuse:**
+
+- **Display-only** public cards are **not** Research Composite inputs. They may show 0–100 context readings that do not affect the composite.
+- **CFTC / levered / retirement** display cards (`systematic-flow`, `levered-etf-rebalance`, `retirement-asset-growth`) are **separate** from MOCK score sub-inputs **62** / **55** / **58** (`systematicStrategyPressure`, `leveredEtfRebalancePressure`, `retirementFlowPressureProxy`).
+- **Options activity** (`options-activity-proxy`, OCC Index/Others cleared volume) is **display-only** and **not** 0DTE/GEX. The **score-fed** options/vol input is **`optionsVolatilityAmplifier`** via CBOE **VIX** only — do not confuse OCC activity with VIX implied volatility.
 
 ---
 
@@ -111,7 +116,7 @@ Shipped: `buildSnapshot.ts` merge, DERIVED classification, coverage **6 public /
 
 **Outcome:** **YELLOW** — no retirement-labeled weekly **flow** series suitable for score without overlapping existing ICI artifacts. Best path: **quarterly ICI Retirement Market asset growth** (optional Z.1 cross-check) as a **structural** proxy — **display-only preferred** if developed; keep `retirementFlowPressureProxy` **MOCK 58** for now. **v1.2f** score-wiring gate only if product-approved after v1.2b–e.
 
-### E) 0DTE / options — PLACEHOLDER; OCC aggregate path locked (v1.4a + v1.4b COMPLETE)
+### E) 0DTE / options — display proxy shipped (v1.4d–e); true 0DTE/GEX gated
 
 **Feasibility memo:** [ODTE_OPTIONS_FEASIBILITY.md](./ODTE_OPTIONS_FEASIBILITY.md) · **Spike:** `npm run ghostflow:options-data-spike`
 
@@ -139,7 +144,7 @@ Shipped: `buildSnapshot.ts` merge, DERIVED classification, coverage **6 public /
 | **SSGA SPY monthly fact sheet (existing)** | `indexConcentration` | Top-10 **index** weights, not fund weights |
 | **CFTC COT / TFF (production candidate)** | `systematicStrategyPressure` (future) | v0.9e — [`systematicFlowProxy.v1.json`](../data/ghostflow/artifacts/systematicFlowProxy.v1.json) validated via `ghostflow:validate-artifacts`; **not merged into score yet** |
 | **Issuer fund pages + index proxies (v1.1c production candidate)** | `leveredEtfRebalancePressure` (future) | [`leveredEtfRebalancePressure.v1.json`](../data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.json) validated via `ghostflow:validate-artifacts`; **not merged into score yet** — see [LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md](./LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md) |
-| **OCC daily volume (v1.4b locked)** | `options-activity-proxy` display card (future) | `indexOptionsContracts` — [ODTE_OPTIONS_FEASIBILITY.md](./ODTE_OPTIONS_FEASIBILITY.md) §v1.4b; operator Volume Download |
+| **OCC daily volume (production)** | `options-activity-proxy` display card | [`optionsActivityProxy.v1.json`](../data/ghostflow/artifacts/optionsActivityProxy.v1.json) — display-only; `indexOptionsContracts` (Index/Others); [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) daily OCC row; not scored ([v1.4e mapping](./OPTIONS_ACTIVITY_MAPPING_DECISION.md)) |
 | **Cboe monthly XLSX (supplementary)** | Optional SPX ADV context | SPX options ADV row; **no** 0DTE columns in Apr/May 2026 XLSX |
 | **Paid vendor (0DTE / GEX)** | True 0DTE or gamma only with license | Outside public repo artifacts |
 | **ICI Retirement Market (v1.2b+ candidate)** | `retirementFlowPressureProxy` (display-first) | Quarterly assets — see [RETIREMENT_FLOW_FEASIBILITY.md](./RETIREMENT_FLOW_FEASIBILITY.md); do not double-count ICI equity flows |
@@ -194,6 +199,7 @@ GhostFlow input promotion rules (all phases):
 | **v1.4e** | Options mapping decision | **Done** — [OPTIONS_ACTIVITY_MAPPING_DECISION.md](./OPTIONS_ACTIVITY_MAPPING_DECISION.md); display-only; no mapper; `mappingStatus` **not_final** |
 | **v1.4e-calibration** | Options OCC history study (optional, research only) | **Future** — Index/Others percentiles for display context; not required for v1.4e; excluded from `ghostflow:check` |
 | **v1.4f** | Options score-wiring gate (if product-approved) | **Gated / discouraged** — VIX overlap; explicit product approval required |
+| **v1.5a** | Current-state audit / release checkpoint | **Done** — docs alignment with live dashboard; scores **62 / 58 / 66** unchanged; canonical state at top of this roadmap |
 
 ---
 
@@ -228,6 +234,6 @@ GhostFlow input promotion rules (all phases):
 - [ACTIVE_INDEX_ARTIFACT_RUNBOOK.md](./ACTIVE_INDEX_ARTIFACT_RUNBOOK.md) — Active vs index flows
 - [PASSIVE_SHARE_PROXY_ARTIFACT_RUNBOOK.md](./PASSIVE_SHARE_PROXY_ARTIFACT_RUNBOOK.md) — ICI index share + distance-to-65
 - [INDEX_CONCENTRATION_ARTIFACT_RUNBOOK.md](./INDEX_CONCENTRATION_ARTIFACT_RUNBOOK.md) — SSGA SPY concentration
-- [ODTE_OPTIONS_FEASIBILITY.md](./ODTE_OPTIONS_FEASIBILITY.md) — v1.4a 0DTE/options data-path feasibility (YELLOW leaning RED; placeholder unchanged)
+- [ODTE_OPTIONS_FEASIBILITY.md](./ODTE_OPTIONS_FEASIBILITY.md) — v1.4a 0DTE/options data-path feasibility (YELLOW leaning RED; display proxy shipped v1.4d–e)
 - [OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md](./OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md) — v1.4c/d OCC index options intensity proxy (production JSON + display card v1.4d)
 - [OPTIONS_ACTIVITY_MAPPING_DECISION.md](./OPTIONS_ACTIVITY_MAPPING_DECISION.md) — v1.4e display-only mapping decision; v1.4f gated

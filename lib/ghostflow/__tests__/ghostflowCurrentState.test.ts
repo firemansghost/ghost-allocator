@@ -1,5 +1,5 @@
 /**
- * GhostFlow v1.3a — consolidated dashboard state / trust audit (no score wiring).
+ * GhostFlow v1.5a — consolidated dashboard state / trust audit (no score wiring).
  */
 
 import assert from 'assert';

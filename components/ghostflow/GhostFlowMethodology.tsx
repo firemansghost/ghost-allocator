@@ -62,7 +62,7 @@ export function GhostFlowMethodology({
         Methodology &amp; model zones
       </h2>
       <p className="text-xs text-zinc-500">
-        Trust &amp; clarity pass v1.3a — scoring weights unchanged; display-only artifact cards documented separately
+        Trust &amp; clarity pass v1.5a — scoring weights unchanged; display-only artifact cards documented separately
         from composite inputs.
       </p>
 
