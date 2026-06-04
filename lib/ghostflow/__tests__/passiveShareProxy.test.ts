@@ -172,13 +172,14 @@ assert.strictEqual(passiveSignal!.name, 'ICI Index Share Proxy');
 assert.strictEqual(passiveSignal!.dataStatus, 'public_proxy');
 assert.strictEqual(passiveSignal!.freshnessStatus, 'fresh');
 assert.ok(passiveSignal!.value.includes('ICI fund/ETF index share: 63.2%'));
-assert.ok(passiveSignal!.cardCaveat?.includes('published passive-flow model input'));
+assert.ok(passiveSignal!.cardCaveat?.includes('public proxy'));
+assert.ok(passiveSignal!.cardCaveat?.includes('price-discovery capital'));
 
 const distanceSignal = passiveOnly.raw.signals.find((s) => s.id === 'distance-65');
 assert.ok(distanceSignal);
 assert.strictEqual(distanceSignal!.dataStatus, 'public_proxy');
 assert.strictEqual(distanceSignal!.value, '1.8 pp');
-assert.strictEqual(distanceSignal!.name, 'Distance to 65% Model Zone (Proxy Context)');
+assert.strictEqual(distanceSignal!.name, 'Distance to Model-Stress Zone');
 assert.ok(distanceSignal!.sourceNote?.includes('Derived'));
 
 const passiveScored = scoreGhostFlowSnapshot(passiveOnly.raw);

@@ -79,7 +79,15 @@ Edit [`data/ghostflow/artifacts/passiveShareProxy.v1.json`](../data/ghostflow/ar
 - Sets `raw.passiveSharePercent` and `structuralFragility.passiveShareProxy` (30% of Structural Fragility)
 - Structural sub-input = `round(indexAssetSharePercent)` clamped 0–100 (identity mapping in v0.6)
 - Derives `distance-65` signal card from the same artifact (not a separate manual artifact)
-- Does **not** wire `modelZoneProximity` (stays mock)
+- **`modelZoneProximity` (v0.9b):** DERIVED from the same ICI index-share artifact via `mapDistanceToZoneNumericValue` — wired into Structural Fragility at 15%; not mock
+
+## Language (v1.6a)
+
+See [PASSIVE_STRESS_ZONE_LANGUAGE.md](./PASSIVE_STRESS_ZONE_LANGUAGE.md).
+
+- ICI index-share is a **public proxy**, not a perfect measure of true passive control of market pricing or **active price-discovery capital**.
+- GhostFlow treats the **60–65%** area as a **model-stress zone**, not a precise tripwire or crash countdown.
+- **Operator warning:** refreshing this artifact updates structural context only — do **not** interpret a move toward ~65% as a crash trigger or forecast event.
 
 ## Validate
 

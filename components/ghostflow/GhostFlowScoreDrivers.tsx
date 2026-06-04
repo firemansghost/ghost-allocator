@@ -33,7 +33,7 @@ export function GhostFlowScoreDrivers() {
               Derived score input
             </p>
             <ul className="space-y-1 text-zinc-300 text-xs list-disc list-inside">
-              <li>ICI index-share moving closer to the 65% model zone → higher model-zone proximity</li>
+              <li>ICI index-share moving toward the model-stress-zone reference (60–65% framing) → higher model-zone proximity</li>
             </ul>
             <p className="mt-3 text-[10px] font-semibold uppercase tracking-wide text-zinc-500 mb-2">
               Static mock assumptions in the composite today
@@ -64,7 +64,7 @@ export function GhostFlowScoreDrivers() {
               Derived score input
             </p>
             <ul className="space-y-1 text-zinc-300 text-xs list-disc list-inside">
-              <li>ICI index-share moving farther below the 65% model zone → lower model-zone proximity</li>
+              <li>ICI index-share farther below the model-stress-zone reference → lower model-zone proximity</li>
             </ul>
             <p className="mt-3 text-[10px] font-semibold uppercase tracking-wide text-zinc-500 mb-2">
               Static mock assumptions in the composite today

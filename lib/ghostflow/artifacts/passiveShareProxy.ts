@@ -80,10 +80,10 @@ export function buildPassiveShareProxyExplanation(indexAssetSharePercent: number
 }
 
 export const PASSIVE_SHARE_PROXY_CARD_CAVEAT =
-  'Not a market-wide passive-share estimate or published passive-flow model input.';
+  'ICI index-share data is a public proxy, not a perfect measure of true passive control of market pricing or active price-discovery capital. Not a market-wide passive-share estimate.';
 
 export const DISTANCE_TO_65_CARD_CAVEAT =
-  'Derived from the ICI Index Share Proxy, not a market-wide passive-share estimate. 65% is an assumption-sensitive model stress zone, not a crash line.';
+  'ICI index-share data is a public proxy, not a perfect measure of true passive control of market pricing. GhostFlow treats the 60–65% area as a model-stress zone, not a precise tripwire or crash countdown. Derived from the ICI Index Share Proxy only.';
 
 export function buildPassiveShareDenominatorWarning(indexAssetSharePercent: number): string {
   const pct = formatIndexSharePercentDisplay(indexAssetSharePercent);
@@ -95,17 +95,18 @@ export function buildPassiveShareDenominatorWarning(indexAssetSharePercent: numb
 export function buildDistanceTo65Explanation(distancePp: number): string {
   if (distancePp <= 0) {
     return (
-      `ICI Index Share Proxy is at or above the ${MODEL_STRESS_ZONE_THRESHOLD}% assumption-sensitive model stress zone ` +
-      `in published passive-flow research framing. Proxy context only, not a market-wide passive-share estimate or crash countdown.`
+      `ICI Index Share Proxy is at or above the ~${MODEL_STRESS_ZONE_THRESHOLD}% model-stress-zone reference in published passive-flow framing ` +
+      `(broader 60–65% zone depending on definition). Proxy context only — pressure gauge, not a crash countdown or forecast.`
     );
   }
   return (
-    `${formatDistanceToModelZoneDisplay(distancePp)} below the ${MODEL_STRESS_ZONE_THRESHOLD}% assumption-sensitive ` +
-    `model stress zone, derived from the ICI Index Share Proxy (narrow fund/ETF denominator). Context only, not a market-wide passive-share estimate or calibrated forecast.`
+    `${formatDistanceToModelZoneDisplay(distancePp)} below the ~${MODEL_STRESS_ZONE_THRESHOLD}% model-stress-zone reference ` +
+    `(60–65% framing in published research), from the ICI Index Share Proxy (narrow fund/ETF denominator). ` +
+    `Context only — possible pathways, not predictions; not market-wide passive share.`
   );
 }
 
-export const DISTANCE_TO_65_SIGNAL_NAME = 'Distance to 65% Model Zone (Proxy Context)';
+export const DISTANCE_TO_65_SIGNAL_NAME = 'Distance to Model-Stress Zone';
 
 export function validatePassiveShareProxyArtifact(
   raw: unknown,

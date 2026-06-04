@@ -5,7 +5,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = buildMetadata({
   title: 'GhostFlow: Passive Pressure Gauge - Ghost Allocator',
   description:
-    'GhostFlow research composite preview: six manual public artifacts (VIX, breadth, ETF issuance, active/index flows, concentration, ICI index share) plus four static mock score inputs. Two PLACEHOLDER signal cards are not in the score. Not a market-wide passive-share estimate. Research only, not financial advice, not a crash predictor.',
+    'GhostFlow research composite preview: six score-fed public artifacts, one derived structural input, three mock score inputs, and four display-only public cards (10 public signals when artifacts validate; zero placeholder cards). ICI index share is a public proxy, not market-wide passive control — model-stress zones are not tripwires. Research and education only; not financial advice or a crash predictor.',
   path: '/ghostflow',
 });
 
