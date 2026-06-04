@@ -4,6 +4,7 @@
 
 import assert from 'node:assert/strict';
 import exampleJson from '@/data/ghostflow/artifacts/treasuryFuturesPositioningProxy.v1.example.json';
+import productionJson from '@/data/ghostflow/artifacts/treasuryFuturesPositioningProxy.v1.json';
 import {
   classifyDirection,
   computeBasketGrossPctOi,
@@ -11,6 +12,7 @@ import {
   computeGross,
   computeNet,
   computePctOfOpenInterest,
+  loadTreasuryFuturesPositioningProxyArtifact,
   validateTreasuryFuturesPositioningProxyArtifact,
 } from '@/lib/ghostflow/artifacts/treasuryFuturesPositioningProxy';
 import type { TreasuryFuturesContractRowV1 } from '@/lib/ghostflow/artifacts/types';
@@ -18,6 +20,18 @@ import type { TreasuryFuturesContractRowV1 } from '@/lib/ghostflow/artifacts/typ
 function cloneExample(): Record<string, unknown> {
   return JSON.parse(JSON.stringify(exampleJson)) as Record<string, unknown>;
 }
+
+// --- production artifact validates ---
+const productionOk = validateTreasuryFuturesPositioningProxyArtifact(productionJson, {
+  mode: 'production',
+});
+assert.ok(productionOk.ok, productionOk.ok ? '' : productionOk.errors.join('; '));
+
+const loaderOk = loadTreasuryFuturesPositioningProxyArtifact();
+assert.ok(loaderOk.ok);
+
+assert.equal((productionJson as { designOnly?: boolean }).designOnly, undefined);
+assert.equal(productionOk.artifact.observations.mappingStatus, 'not_final');
 
 // --- example validates ---
 const exampleOk = validateTreasuryFuturesPositioningProxyArtifact(exampleJson, { mode: 'example' });
@@ -138,7 +152,22 @@ fundAgg.contracts = [
 const fundAggResult = validateTreasuryFuturesPositioningProxyArtifact(fundAgg, { mode: 'example' });
 assert.ok(!fundAggResult.ok);
 
-// --- forbidden scores ---
+// --- forbidden scores (production) ---
+const mappedProd = JSON.parse(JSON.stringify(productionJson)) as Record<string, unknown>;
+mappedProd.mappedPressureScore = 50;
+const mappedProdResult = validateTreasuryFuturesPositioningProxyArtifact(mappedProd, {
+  mode: 'production',
+});
+assert.ok(!mappedProdResult.ok);
+
+const basisProd = JSON.parse(JSON.stringify(productionJson)) as Record<string, unknown>;
+(basisProd.observations as Record<string, unknown>).basisTradeMeasured = true;
+const basisProdResult = validateTreasuryFuturesPositioningProxyArtifact(basisProd, {
+  mode: 'production',
+});
+assert.ok(!basisProdResult.ok);
+
+// --- forbidden scores (example) ---
 const mapped = cloneExample();
 mapped.mappedPressureScore = 50;
 const mappedResult = validateTreasuryFuturesPositioningProxyArtifact(mapped, { mode: 'example' });

@@ -15,6 +15,7 @@ import { validateSystematicFlowProxyArtifact } from '../../lib/ghostflow/artifac
 import { validateLeveredEtfRebalancePressureArtifact } from '../../lib/ghostflow/artifacts/leveredEtfRebalancePressure';
 import { validateRetirementFlowPressureProxyArtifact } from '../../lib/ghostflow/artifacts/retirementFlowPressureProxy';
 import { validateOptionsActivityProxyArtifact } from '../../lib/ghostflow/artifacts/optionsActivityProxy';
+import { validateTreasuryFuturesPositioningProxyArtifact } from '../../lib/ghostflow/artifacts/treasuryFuturesPositioningProxy';
 import { GHOSTFLOW_REFERENCE_AS_OF } from '../../lib/ghostflow/reference';
 
 const root = process.cwd();
@@ -212,6 +213,25 @@ function main(): void {
       o.putCallRatio != null ? `, PCR ${o.putCallRatio.toFixed(2)}` : '';
     console.log(
       `GhostFlow rules: options-activity-proxy OK (index ${indexM}M contracts, ${o.indexShareOfTotalPct}% of total${pcr}, mappingStatus ${o.mappingStatus}, asOf ${optionsRules.artifact.asOf}, published ${optionsRules.artifact.publishedAt})`
+    );
+  }
+
+  const treasuryFuturesPath = join(
+    root,
+    'data/ghostflow/artifacts/treasuryFuturesPositioningProxy.v1.json'
+  );
+  const treasuryFuturesRules = validateTreasuryFuturesPositioningProxyArtifact(
+    loadJson(treasuryFuturesPath),
+    { mode: 'production' }
+  );
+  if (!treasuryFuturesRules.ok) {
+    failed = true;
+    console.error('GhostFlow rules failed for treasury-futures-positioning-proxy:');
+    for (const err of treasuryFuturesRules.errors) console.error(`  - ${err}`);
+  } else {
+    const o = treasuryFuturesRules.artifact.observations;
+    console.log(
+      `GhostFlow rules: treasury-futures-positioning-proxy OK (${o.basketDirection}, basket lev net ${o.basketLevMoneyNetPctOi}% OI, ${o.basketContractCount} core contracts, mappingStatus ${o.mappingStatus}, asOf ${treasuryFuturesRules.artifact.asOf})`
     );
   }
 

@@ -1,8 +1,10 @@
 /**
- * GhostFlow v1.7b — Treasury futures positioning proxy artifact (design only).
- * Pure validation and compute helpers. No production load, buildSnapshot, or score wiring.
+ * GhostFlow v1.7b/d — Treasury futures positioning proxy artifact.
+ * Pure validation and compute helpers; production loader for v1.7d candidate JSON.
+ * No buildSnapshot merge or score wiring.
  */
 
+import treasuryFuturesPositioningProxyArtifactJson from '@/data/ghostflow/artifacts/treasuryFuturesPositioningProxy.v1.json';
 import type {
   TreasuryFuturesContractRole,
   TreasuryFuturesContractRowV1,
@@ -14,6 +16,9 @@ import type {
 
 export const TREASURY_FUTURES_POSITIONING_EXAMPLE_ARTIFACT_PATH =
   'data/ghostflow/artifacts/treasuryFuturesPositioningProxy.v1.example.json';
+
+export const TREASURY_FUTURES_POSITIONING_PRODUCTION_ARTIFACT_PATH =
+  'data/ghostflow/artifacts/treasuryFuturesPositioningProxy.v1.json';
 
 export const TREASURY_FUTURES_POSITIONING_PROXY_SIGNAL_ID =
   'treasury-futures-positioning-proxy' as const;
@@ -529,4 +534,11 @@ export function validateTreasuryFuturesPositioningProxyArtifact(
     ok: true,
     artifact: raw as unknown as TreasuryFuturesPositioningArtifactV1,
   };
+}
+
+export function loadTreasuryFuturesPositioningProxyArtifact(): TreasuryFuturesPositioningValidation {
+  return validateTreasuryFuturesPositioningProxyArtifact(
+    treasuryFuturesPositioningProxyArtifactJson,
+    { mode: 'production' }
+  );
 }

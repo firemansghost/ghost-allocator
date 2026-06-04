@@ -6,7 +6,7 @@ Operator runbook for manually refreshing GhostFlow public-data artifacts. **No l
 
 **Dashboard coverage (v1.5a):** **6** score-fed public artifacts · **4** display-only public artifact cards (CFTC `systematic-flow`, levered `levered-etf-rebalance`, retirement `retirement-asset-growth`, OCC `options-activity-proxy`) · **`publicSignalCount` 10** when all validate · **0** placeholder cards when artifacts validate. Display-only cards (including options activity) do **not** refresh or change the Research Composite — MOCK **62** / **55** / **58** and VIX still drive scored sub-inputs. Quarterly retirement freshness **caution** (46–90 days after release) reflects normal ICI quarterly cadence — not a failed feed or score problem.
 
-**Treasury Plumbing:** No operator refresh yet; v1.7b–c example artifacts only ([TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md](./TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md), [BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md](./BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md)); daily FRED yield extract for `treasury-long-end-income-lens` is **v1.7d+** only; production refresh table deferred to v1.7d+.
+**Treasury Plumbing:** Production candidate **Treasury Futures Positioning** only (v1.7d) — weekly CFTC TFF `gpe5-46if` via `npm run ghostflow:treasury-cftc-pre-spike`, then update [`treasuryFuturesPositioningProxy.v1.json`](../data/ghostflow/artifacts/treasuryFuturesPositioningProxy.v1.json); **not scored**, not in `publicSignalCount`. Long-End Income Lens production refresh **deferred v1.7d.1** until FRED series field lock ([BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md](./BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md)).
 
 Per-artifact deep dives: see linked runbooks at the bottom of this page.
 
@@ -19,7 +19,8 @@ Per-artifact deep dives: see linked runbooks at the bottom of this page.
 | **Daily** | After US market close (~6:00 PM ET) | Volatility Regime (VIX) + Market Breadth Participation | Update [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) **after** both daily artifacts align to the same last trading day |
 | **Daily** | After OCC session volume is published | Index Options Intensity Proxy (`options-activity-proxy`) | Display-only — updates [`optionsActivityProxy.v1.json`](../data/ghostflow/artifacts/optionsActivityProxy.v1.json) only; **not** scored; not 0DTE/GEX ([OPTIONS_ACTIVITY_MAPPING_DECISION.md](./OPTIONS_ACTIVITY_MAPPING_DECISION.md)) |
 | **Weekly** | After ICI ETF estimated net issuance release | ETF Net Issuance Pressure | Optional reference bump if you also run the daily pass |
-| **Weekly** | After CFTC TFF Friday release | CFTC TFF Positioning Proxy | Production candidate validated; **not merged into GhostFlow score yet** (v0.9f / v1.0) |
+| **Weekly** | After CFTC TFF Friday release | CFTC TFF Positioning Proxy (equity `systematic-flow`) | Production candidate validated; **not merged into GhostFlow score yet** (v0.9f / v1.0) |
+| **Weekly** | After CFTC TFF Friday release | Treasury Futures Positioning Proxy (`treasury-futures-positioning-proxy`) | Update [`treasuryFuturesPositioningProxy.v1.json`](../data/ghostflow/artifacts/treasuryFuturesPositioningProxy.v1.json) — spike + hand map; **Treasury lane only**; **not scored**; not in `publicSignalCount` |
 | **Monthly** | After ICI combined active/index monthly release | Active vs Index Flow + ICI Index Share Proxy | Use ICI `publishedAt`; **flows table vs assets table** |
 | **Monthly** | After new SSGA SPY US monthly fact sheet PDF | Index Concentration | PDF month-end `asOf`; PDF control date `publishedAt` |
 | **Quarterly** | After ICI Quarterly Retirement Market Data release | Retirement Asset Growth Proxy | Display-only card `retirement-asset-growth`; **not scored** (MOCK **58**); `mappingStatus` **not_final** |

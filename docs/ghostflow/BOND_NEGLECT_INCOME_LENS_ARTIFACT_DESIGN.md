@@ -1,6 +1,6 @@
 # Bond Neglect / Long-End Income Lens Artifact Design (GhostFlow v1.7c)
 
-**Status:** v1.7c artifact design only — example JSON + pure validator/tests. **Not** production data, display card, score wiring, or `validate-artifacts` registration.
+**Status:** v1.7c artifact design only — example JSON + pure validator/tests. **v1.7d:** production JSON **deferred to v1.7d.1** (FRED verification blocked in implementation environment — timeouts on public CSV). **Not** display card, score wiring, or `validate-artifacts` registration yet.
 
 **Prior work:** [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md) (v1.7a) · v1.7b [Treasury Futures Positioning Proxy](./TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md)
 
@@ -193,7 +193,8 @@ Tests: [`lib/ghostflow/__tests__/treasuryLongEndIncomeLens.test.ts`](../lib/ghos
 
 | Phase | Scope |
 |-------|--------|
-| **v1.7d** | Production artifact candidate JSON + operator FRED field lock + `validate-artifacts` registration |
+| **v1.7d** | Production JSON — **deferred v1.7d.1** (FRED field lock pending clean operator extract) |
+| **v1.7d.1** | Production artifact candidate JSON + `validate-artifacts` registration |
 | **v1.7e** | Display-only Treasury Plumbing section — **Long-End Income Lens** subcard |
 | **v1.7f** | Calibration / historical percentiles (`nominalYieldPercentile`, `realYieldPercentile`) |
 | **v1.7g** | Separate Treasury Plumbing score gate — **discouraged**; product-approved only |
