@@ -204,6 +204,7 @@ GhostFlow input promotion rules (all phases):
 | **v1.6b** | Passive Endgame Scenario explainer | **Done** — [PASSIVE_ENDGAME_SCENARIOS.md](./PASSIVE_ENDGAME_SCENARIOS.md); educational UI + doc; not scored; no new artifacts |
 | **v1.7a** | Treasury Plumbing feasibility | **Done** — [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md); docs-only; separate future lane; no cards/artifacts/score wiring |
 | **v1.7a.1** | Treasury CFTC PRE contract-discovery spike | **Done** — `ghostflow:treasury-cftc-pre-spike`; TFF `gpe5-46if` UST codes verified; **GREEN**; not in `ghostflow:check`; no artifact |
+| **v1.7b** | Treasury Futures Positioning artifact design | **Done** — [TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md](./TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md); example JSON + validator/tests; no production/display/score |
 
 **Treasury Plumbing (future lane):** Not part of the equity Research Composite, `publicSignalCount`, or Passive Pressure. Basis-trade stress and long-end income lens are display-only candidates for a separate dashboard section (v1.7e+). See [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md).
 
@@ -216,7 +217,7 @@ GhostFlow input promotion rules (all phases):
 3. ~~**Levered ETF scope:**~~ **Resolved (v1.1a–b):** Tier-1 six-ticker universe; single-session `underlyingReturnPct`; formula in [LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md](./LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md). ~~**Levered ETF mapping (v1.1e):**~~ **Resolved:** [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md) — display-only; MOCK **55**. ~~**Levered ETF calibration (v1.1e-calibration):**~~ **Resolved:** [LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md](./LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md) — full fixed-current-AUM return-sensitivity run complete; **v1.1f** score wiring gated on product approval only.
 4. **0DTE data path:** **Display proxy shipped (v1.4d–e):** OCC Index/Others via `options-activity-proxy` — [mapping decision](./OPTIONS_ACTIVITY_MAPPING_DECISION.md) locks display-only; true 0DTE/GEX → paid/vendor; **v1.4f** score gate discouraged (VIX overlap).
 5. ~~**Retirement flows:**~~ **Resolved (v1.2a–b):** [RETIREMENT_FLOW_FEASIBILITY.md](./RETIREMENT_FLOW_FEASIBILITY.md) + [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md) — **YELLOW**; ICI Retirement Market primary; exact ICI table/rows → **v1.2c** operator extract; composite membership → **v1.2d** decision.
-6. **Treasury Plumbing (v1.7a–a.1):** [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md) — **GREEN** CFTC basis-trade proxy path (TFF `gpe5-46if`; Tier-1 codes `042601`, `044601`, `043602`, `020601`; Ultra `043607`/`020604` optional one-per-tenor); **YELLOW–GREEN** bond-neglect display (FRED yields/curve). **Resolved (v1.7a.1):** Treasury CFTC PRE contract discovery via `ghostflow:treasury-cftc-pre-spike`. Open: **Bond Neglect primary source lock** (FRED core vs ETF flows); **v1.7b** artifact design proceeds if product approves. Treasury lane **separate from equity composite** — no merge into `buildSnapshot` or `publicSignalCount` by default.
+6. **Treasury Plumbing (v1.7a–b):** [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md) · [TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md](./TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md) — CFTC **GREEN** path; artifact **design complete** (`treasury-futures-positioning-proxy` example + validator). **YELLOW–GREEN** bond-neglect (v1.7c). Open: **Bond Neglect source lock**; **v1.7d** production JSON. Treasury lane **separate from equity composite**.
 
 ---
 
@@ -247,3 +248,4 @@ GhostFlow input promotion rules (all phases):
 - [PASSIVE_STRESS_ZONE_LANGUAGE.md](./PASSIVE_STRESS_ZONE_LANGUAGE.md) — v1.6a passive-share / model-stress-zone phrasebook
 - [PASSIVE_ENDGAME_SCENARIOS.md](./PASSIVE_ENDGAME_SCENARIOS.md) — v1.6b educational passive-endgame scenario explainer (not scored)
 - [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md) — v1.7a Treasury Plumbing feasibility (separate lane; docs-only; no score/artifact/UI)
+- [TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md](./TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md) — v1.7b Treasury futures positioning artifact design (example JSON + validator; no production/UI/score)

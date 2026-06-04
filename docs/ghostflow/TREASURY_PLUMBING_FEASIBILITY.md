@@ -125,7 +125,7 @@
 
 **GREEN** — ≥3 Tier-1 UST contracts with full leveraged-funds fields and report within 21 days of run.
 
-**v1.7b gate:** Proceed to Treasury Basis Trade **artifact design** (memo + example JSON only) using `gpe5-46if` and the Tier-1 codes above. Maintain approved proxy copy; do not merge into equity composite or `systematic-flow`.
+**v1.7b gate:** ~~Proceed to artifact design~~ **Done** — [TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md](./TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md) + example JSON + validator/tests. Production artifact → **v1.7d**; UI lane → **v1.7e**.
 
 ---
 
@@ -185,7 +185,7 @@
 |-------|--------|------------|
 | **v1.7a** | Treasury Plumbing Feasibility — **this memo; docs-only** | None |
 | **v1.7a.1** | Treasury CFTC PRE spike — `ghostflow:treasury-cftc-pre-spike`; contract discovery **GREEN** | None |
-| **v1.7b** | Treasury Basis Trade artifact design — memo + example JSON only | None |
+| **v1.7b** | Treasury Futures Positioning artifact design — [TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md](./TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md) + example JSON + validator/tests | None |
 | **v1.7c** | Bond Neglect / Long-End Income artifact design — memo + example JSON only | None |
 | **v1.7d** | Production artifact candidates — JSON + validators | Display path only |
 | **v1.7e** | Display-only Treasury Plumbing section — separate UI lane | Cards only; not scored |
