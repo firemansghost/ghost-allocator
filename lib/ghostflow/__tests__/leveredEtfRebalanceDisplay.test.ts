@@ -60,7 +60,7 @@ assert.strictEqual(
 assert.strictEqual(raw.passivePressure.leveredEtfRebalancePressure, 55);
 assert.ok(!meta.publicPassiveInputKeys?.includes('leveredEtfRebalancePressure'));
 assert.strictEqual(meta.publicStructuralInputKeys?.length, 4);
-assert.strictEqual(meta.publicSignalCount, 9);
+assert.strictEqual(meta.publicSignalCount, 10);
 assert.ok(meta.publicSignals.some((s) => s.signalId === 'levered-etf-rebalance'));
 
 assert.strictEqual(scored.score.score, 62);
@@ -70,10 +70,7 @@ assert.strictEqual(ghostFlowBandLabel(scored.score.band), 'Crowded / Reflexive')
 
 const grouped = groupSignalsByPresentation(scored.signals);
 assert.ok(grouped.publicArtifacts.some((s) => s.id === 'levered-etf-rebalance'));
-assert.deepStrictEqual(
-  grouped.mockProxies.map((s) => s.id),
-  ['odte-options']
-);
+assert.deepStrictEqual(grouped.mockProxies.map((s) => s.id), []);
 
 const invalidMerge = mergeLeveredEtfRebalanceDisplayIfValid(
   {

@@ -17,6 +17,7 @@ export const PUBLIC_ARTIFACT_SIGNAL_IDS = [
   'systematic-flow',
   'levered-etf-rebalance',
   'retirement-asset-growth',
+  'options-activity-proxy',
 ] as const;
 
 export const DERIVED_SIGNAL_IDS = ['distance-65'] as const;
@@ -40,9 +41,10 @@ export function groupSignalsByPresentation(signals: ScoredGhostFlowSignal[]): Gr
     (s): s is ScoredGhostFlowSignal => s != null
   );
 
-  const mockFromIds = MOCK_SIGNAL_IDS.map((id) => byId.get(id)).filter(
-    (s): s is ScoredGhostFlowSignal => s != null
-  );
+  const hasOptionsActivityCard = publicArtifacts.some((s) => s.id === 'options-activity-proxy');
+  const mockFromIds = MOCK_SIGNAL_IDS.map((id) => byId.get(id))
+    .filter((s): s is ScoredGhostFlowSignal => s != null)
+    .filter((s) => !(hasOptionsActivityCard && s.id === 'odte-options'));
   const systematicFallback = byId.get('systematic-flow');
   const mockProxies = [
     ...mockFromIds,
@@ -104,7 +106,8 @@ export function signalCardBadgeLabelForSignal(
   if (
     (sig.id === 'systematic-flow' ||
       sig.id === 'levered-etf-rebalance' ||
-      sig.id === 'retirement-asset-growth') &&
+      sig.id === 'retirement-asset-growth' ||
+      sig.id === 'options-activity-proxy') &&
     sig.dataStatus === 'public_proxy'
   ) {
     return 'DISPLAY ONLY';

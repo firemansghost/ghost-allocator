@@ -1,14 +1,14 @@
 # Index Options Intensity Proxy — Artifact Design (GhostFlow v1.4c)
 
-**Status:** **v1.4c design only** — example JSON, validator, types, and tests. **Not** production, **not** scored, **not** in `buildSnapshot` or dashboard.
+**Status:** **v1.4d complete** — production JSON, `validate-artifacts`, display-only dashboard card. **Not** scored. Official OCC preflight required (see §9).
 
 **Prior research:** [ODTE_OPTIONS_FEASIBILITY.md](./ODTE_OPTIONS_FEASIBILITY.md) (v1.4a) · v1.4b column-lock spike (`npm run ghostflow:options-data-spike`)
 
 **Example file:** [`data/ghostflow/artifacts/optionsActivityProxy.v1.example.json`](../data/ghostflow/artifacts/optionsActivityProxy.v1.example.json) (`designOnly: true`, `dataQuality: manual_unverified`)
 
-**Production file (v1.4d only):** `data/ghostflow/artifacts/optionsActivityProxy.v1.json` — **must not exist in v1.4c**
+**Production file:** [`data/ghostflow/artifacts/optionsActivityProxy.v1.json`](../data/ghostflow/artifacts/optionsActivityProxy.v1.json) (`dataQuality: manual_unverified`; omit `designOnly`)
 
-**Library:** [`lib/ghostflow/artifacts/optionsActivityProxy.ts`](../lib/ghostflow/artifacts/optionsActivityProxy.ts) — `validateOptionsActivityProxyArtifact`, compute/display helpers; **no** `load*` production import
+**Library:** [`lib/ghostflow/artifacts/optionsActivityProxy.ts`](../lib/ghostflow/artifacts/optionsActivityProxy.ts) — `validateOptionsActivityProxyArtifact`, `loadOptionsActivityProxyArtifact`, display merge via `buildSnapshot`
 
 ---
 
@@ -162,15 +162,13 @@ Do **not** claim or store:
 
 ---
 
-## 9. Promotion checklist — v1.4d
+## 9. v1.4d promotion checklist (complete)
 
-- [ ] Operator extracts from **official** OCC Volume Download for target `asOf`
-- [ ] Field labels re-verified with `ghostflow:options-data-spike` against Record Layout PDF
-- [ ] Create `optionsActivityProxy.v1.json` (`designOnly` omitted, `dataQuality: verified_manual`)
-- [ ] Register in `validate-artifacts.ts` and `ghostflow:check`
-- [ ] `buildSnapshot` display-only merge + `signalPresentation` entry
-- [ ] UI card: `options-activity-proxy` / **Index Options Intensity Proxy**; retire `odte-options` placeholder label
-- [ ] `publicSignalCount` may increment; **no** `publicPassiveInputKey`
+- [x] Official OCC Daily Volume Statistics CSV downloaded (`marketdata.theocc.com/daily-volume-statistics?reportDate=YYYYMMDD&format=csv`)
+- [x] Preflight: `npm run ghostflow:options-data-spike -- --occ-daily tmp/options-spike/occ-volume-download-2026-05-22.csv --occ-daily tmp/options-spike/occ-volume-download-2026-05-21.csv`
+- [x] Production `optionsActivityProxy.v1.json` — `indexOptionsContracts` = OCC **Index/Others** column (not illustrative v1.4b fixture)
+- [x] `validate-artifacts` + `buildSnapshot` display merge; `odte-options` suppressed when card valid
+- [x] `publicSignalCount` **10**; **no** `publicPassiveInputKey`
 
 ---
 

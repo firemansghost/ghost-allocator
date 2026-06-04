@@ -75,10 +75,11 @@ export function GhostFlowMethodology({
             score-fed public artifacts</strong> (ETF issuance, VIX, ICI index share, active/index flows, SPY concentration,
             breadth), <strong className="text-zinc-300">one derived structural input</strong> (model-zone proximity from ICI
             index share), and <strong className="text-zinc-300">three static MOCK passive inputs</strong> (systematic **62**,
-            retirement-flow **58**, levered ETF **55**). Three additional <strong className="text-zinc-300">display-only public
-            artifact cards</strong> (CFTC TFF positioning, levered ETF rebalance estimate, retirement asset growth) show
-            measured context but do <strong className="text-zinc-300">not</strong> feed the composite. One{' '}
-            <strong className="text-zinc-300">placeholder</strong> card (0DTE) is illustrative only. The ICI index share score
+            retirement-flow **58**, levered ETF **55**). Four <strong className="text-zinc-300">display-only public artifact
+            cards</strong> (CFTC TFF positioning, levered ETF rebalance estimate, retirement asset growth, OCC index options
+            intensity from Daily Volume Statistics) show measured context but do <strong className="text-zinc-300">not</strong>{' '}
+            feed the composite. The scored options/vol input remains CBOE VIX — not the OCC activity card (not 0DTE/GEX). The ICI
+            index share score
             input is not a market-wide passive-share estimate.
           </p>
           <div className="grid gap-4 sm:grid-cols-2 text-xs">
@@ -594,12 +595,13 @@ export function GhostFlowMethodology({
           <li>Does not provide buy/sell recommendations.</li>
           <li>Does not treat model thresholds as guaranteed outcomes.</li>
           <li>
-            Does not use live feeds. Six score-fed manual public artifacts plus three display-only public cards and static
-            MOCK composite inputs elsewhere.
+            Does not use live feeds. Six score-fed manual public artifacts plus four display-only public cards and static MOCK
+            composite inputs elsewhere.
           </li>
           <li>
-            Does not treat display-only CFTC, levered ETF rebalance, or retirement asset-growth cards as Research Composite
-            inputs — MOCK **62**, **55**, and **58** still drive those passive sub-inputs.
+            Does not treat display-only CFTC, levered ETF rebalance, retirement asset-growth, or OCC index options intensity
+            cards as Research Composite inputs — MOCK **62**, **55**, and **58** still drive those passive sub-inputs; VIX still
+            drives options/vol.
           </li>
           <li>
             Does not treat ETF net issuance, active/index flow differential, ICI Index Share Proxy, index

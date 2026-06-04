@@ -1,7 +1,7 @@
 import { GlassCard } from '@/components/GlassCard';
 
 const WATCH_TARGETS = [
-  '0DTE / options volume',
+  'OCC index options intensity — display-only; Index/Others column; mapping not final (v1.4e)',
   'CTA / vol-control proxy',
   'Levered ETF rebalance pressure — display-only artifact; mapping not final (v1.1e)',
   'Retirement asset growth — display-only ICI quarterly artifact; mapping not final (v1.2e)',
@@ -18,9 +18,10 @@ export function GhostFlowWatchlist() {
       <GlassCard className="p-4 sm:p-6">
         <p className="text-sm text-zinc-400 leading-relaxed mb-4">
           GhostFlow uses six public score artifacts, one derived score input (model-zone proximity from ICI index
-          share), three display-only public artifacts (CFTC TFF positioning, levered ETF rebalance pressure, retirement
-          asset growth), and three static mock score inputs in the research composite, plus one PLACEHOLDER signal card
-          (0DTE) not yet in the score. Retirement-flow pressure stays MOCK 58 (v1.2e display-only); levered mapping
+          share), four display-only public artifacts (CFTC TFF, levered ETF rebalance, retirement asset growth, OCC index
+          options intensity), and three static mock score inputs in the research composite. Options activity is not 0DTE/GEX
+          and not score-fed — VIX remains the scored options/vol input. Retirement-flow pressure stays MOCK 58 (v1.2e
+          display-only); levered mapping
           (v1.1e) and score wiring (v1.1f / v1.2f) remain product-gated; CFTC score wiring is separately gated.
         </p>
         <ul className="grid gap-2 sm:grid-cols-2 text-sm text-zinc-300">

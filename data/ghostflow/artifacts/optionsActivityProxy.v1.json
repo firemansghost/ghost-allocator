@@ -1,0 +1,31 @@
+{
+  "artifactVersion": "1",
+  "signalId": "options-activity-proxy",
+  "asOf": "2026-05-22",
+  "publishedAt": "2026-05-22",
+  "source": {
+    "name": "OCC Daily Volume Statistics — marketdata.theocc.com",
+    "url": "https://marketdata.theocc.com/daily-volume-statistics?reportDate=20260522&format=csv",
+    "note": "Operator-downloaded OCC Daily Volume Statistics CSV (reportDate=20260522). indexOptionsContracts maps to OCC Index/Others column. Prior session from reportDate=20260521. Verified with npm run ghostflow:options-data-spike. ETF split and put/call ratio not in this OCC table."
+  },
+  "observationType": "occ_daily_volume_snapshot",
+  "seriesDefinition": "occ_daily_options_volume_v1",
+  "updateFrequency": "daily",
+  "dataQuality": "manual_unverified",
+  "caveats": [
+    "OCC Daily Volume Statistics — Index/Others column, not a dedicated index-only options line",
+    "Aggregate cleared OCC contract volume — not 0DTE, same-day expiry, or dealer gamma/GEX",
+    "Not included in the Research Composite; mappingStatus not_final",
+    "Distinct from CBOE VIX-based optionsVolatilityAmplifier (vol level, not contract activity)",
+    "Put/call ratio and ETF split not present in official daily-volume-statistics CSV"
+  ],
+  "observations": {
+    "totalOptionsContracts": 76337620,
+    "indexOptionsContracts": 5741700,
+    "equityOptionsContracts": 70421595,
+    "indexShareOfTotalPct": 7.52,
+    "priorSessionIndexOptionsContracts": 6047810,
+    "indexOptionsDailyChangePct": -5.06,
+    "mappingStatus": "not_final"
+  }
+}

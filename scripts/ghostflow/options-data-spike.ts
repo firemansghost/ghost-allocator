@@ -332,6 +332,101 @@ function extractNumberAfterLabel(line: string): number | null {
   return null;
 }
 
+function parseCsvRow(line: string): string[] {
+  const cols: string[] = [];
+  let cur = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i]!;
+    if (ch === '"') {
+      inQuotes = !inQuotes;
+      continue;
+    }
+    if (ch === ',' && !inQuotes) {
+      cols.push(cur.trim());
+      cur = '';
+      continue;
+    }
+    cur += ch;
+  }
+  cols.push(cur.trim());
+  return cols;
+}
+
+/** OCC marketdata.theocc.com daily-volume-statistics CSV (Daily OCC Contract Volume table). */
+function parseOccDailyVolumeStatisticsCsv(
+  path: string,
+  raw: string
+): { tradeDate: string; fields: OccFieldHit[]; layoutNotes: string[] } | null {
+  if (!/Daily OCC Contract Volume/i.test(raw)) return null;
+
+  const fileDate = basename(path).match(/(\d{4})-(\d{2})-(\d{2})/);
+  if (!fileDate) return null;
+  const [, y, mo, d] = fileDate;
+  const rowDateSlash = `${mo}/${d}/${y}`;
+  const tradeDate = `${y}-${mo}-${d}`;
+
+  const lines = raw.split(/\r?\n/);
+  let headerIdx = -1;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]!.trim();
+    if (/^Date,\s*Equity,\s*Index\/Others/i.test(line)) {
+      headerIdx = i;
+      break;
+    }
+  }
+  if (headerIdx < 0) return null;
+
+  let dataLine: string | null = null;
+  for (let i = headerIdx + 1; i < lines.length; i++) {
+    const line = lines[i]!.trim();
+    if (!line || /^May Total/i.test(line) || /^YTD/i.test(line)) break;
+    if (line.startsWith(`${rowDateSlash},`) || line.startsWith(`${mo}/${d}/${y},`)) {
+      dataLine = line;
+      break;
+    }
+  }
+  if (!dataLine) return null;
+
+  const cols = parseCsvRow(dataLine);
+  if (cols.length < 6) return null;
+
+  const equity = parseNumberToken(cols[1] ?? '');
+  const indexOthers = parseNumberToken(cols[2] ?? '');
+  const occTotal = parseNumberToken(cols[5] ?? '');
+  if (equity == null || indexOthers == null || occTotal == null) return null;
+
+  const fields: OccFieldHit[] = [
+    {
+      lockKey: 'equityOptionsContracts',
+      label: `Equity (OCC Daily Volume Statistics ${rowDateSlash})`,
+      value: equity,
+      line: headerIdx + 2,
+    },
+    {
+      lockKey: 'indexOptionsContracts',
+      label: `Index/Others (OCC Daily Volume Statistics ${rowDateSlash})`,
+      value: indexOthers,
+      line: headerIdx + 2,
+    },
+    {
+      lockKey: 'totalOptionsContracts',
+      label: `OCC Total (OCC Daily Volume Statistics ${rowDateSlash})`,
+      value: occTotal,
+      line: headerIdx + 2,
+    },
+  ];
+
+  return {
+    tradeDate,
+    fields,
+    layoutNotes: [
+      'Parsed official OCC Daily Volume Statistics CSV (marketdata.theocc.com); indexOptionsContracts maps to Index/Others column.',
+      'ETF split and put/call ratio not present in this OCC table.',
+    ],
+  };
+}
+
 function scanOccDaily(path: string): OccDailyScan {
   const fileType = 'text/plain (OCC volume download — operator provided)';
   if (!existsSync(path)) {
@@ -347,6 +442,28 @@ function scanOccDaily(path: string): OccDailyScan {
 
   try {
     const raw = readFileSync(path, 'utf8');
+    if (/Illustrative layout for spike parser validation/i.test(raw)) {
+      return {
+        path,
+        fileType,
+        tradeDate: null,
+        fields: [],
+        layoutNotes: ['Rejected illustrative spike fixture — use official OCC Volume Download.'],
+        error: 'File contains illustrative fixture disclaimer.',
+      };
+    }
+
+    const csvParsed = parseOccDailyVolumeStatisticsCsv(path, raw);
+    if (csvParsed) {
+      return {
+        path,
+        fileType: 'text/csv (OCC daily-volume-statistics — official download)',
+        tradeDate: csvParsed.tradeDate,
+        fields: csvParsed.fields,
+        layoutNotes: csvParsed.layoutNotes,
+      };
+    }
+
     const lines = raw.split(/\r?\n/);
     const fields: OccFieldHit[] = [];
     const layoutNotes: string[] = [];

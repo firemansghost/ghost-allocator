@@ -42,7 +42,7 @@ assert.ok(
 
 assert.strictEqual(raw.passivePressure.systematicStrategyPressure, 62);
 assert.ok(!meta.publicPassiveInputKeys.includes('systematicStrategyPressure'));
-assert.strictEqual(meta.publicSignalCount, 9);
+assert.strictEqual(meta.publicSignalCount, 10);
 assert.ok(meta.publicSignals.some((s) => s.signalId === 'systematic-flow'));
 
 assert.strictEqual(scored.score.score, 62);
@@ -52,10 +52,7 @@ assert.strictEqual(ghostFlowBandLabel(scored.score.band), 'Crowded / Reflexive')
 
 const grouped = groupSignalsByPresentation(scored.signals);
 assert.ok(grouped.publicArtifacts.some((s) => s.id === 'systematic-flow'));
-assert.deepStrictEqual(
-  grouped.mockProxies.map((s) => s.id),
-  ['odte-options']
-);
+assert.deepStrictEqual(grouped.mockProxies.map((s) => s.id), []);
 
 const publicSystematic = grouped.publicArtifacts.find((s) => s.id === 'systematic-flow')!;
 const scoredSystematic = scored.signals.find((s) => s.id === 'systematic-flow')!;

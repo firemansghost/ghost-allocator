@@ -1,8 +1,9 @@
 /**
- * GhostFlow v1.4c — Index options activity proxy artifact (design only).
- * Pure validation, compute helpers, and display formatters. No production loader or buildSnapshot merge.
+ * GhostFlow v1.4c/d — Index options activity proxy artifact.
+ * Pure validation, display helpers, production loader, and buildSnapshot display merge (no score wiring).
  */
 
+import optionsActivityProxyArtifactJson from '@/data/ghostflow/artifacts/optionsActivityProxy.v1.json';
 import { evaluateDailyArtifactFreshness } from '@/lib/ghostflow/artifactFreshness';
 import { GHOSTFLOW_REFERENCE_AS_OF } from '@/lib/ghostflow/reference';
 import type {
@@ -30,8 +31,10 @@ export const OPTIONS_ACTIVITY_DISPLAY_SIGNAL_NAME =
 export const OPTIONS_ACTIVITY_DISPLAY_SIGNAL_ALT_NAME =
   'Options Activity Pressure Proxy' as const;
 
+export const OPTIONS_ACTIVITY_DISPLAY_SIGNAL_ID = OPTIONS_ACTIVITY_PROXY_SIGNAL_ID;
+
 export const OPTIONS_ACTIVITY_DISPLAY_CARD_CAVEAT =
-  'Display-only OCC cleared index-options intensity proxy — not 0DTE, not dealer gamma/GEX, and not included in the Research Composite.';
+  'Display-only OCC index-options activity proxy; not 0DTE, not gamma/GEX, and not included in the Research Composite.';
 
 /** Relative tolerance for % reconciliation (percentage points). */
 export const PCT_RECONCILIATION_TOLERANCE = 0.05;
@@ -187,20 +190,53 @@ function validateOptionalPositiveNumber(name: string, v: unknown, errors: string
   return true;
 }
 
-export function formatOptionsActivityDisplayValue(
+/** Compact dashboard card value (Index/Others intensity). */
+export function formatOptionsActivityCardValue(
   observations: OptionsActivityProxyObservationsV1
 ): string {
   const indexM = observations.indexOptionsContracts / 1_000_000;
   const share = observations.indexShareOfTotalPct;
   const pcr =
     observations.putCallRatio !== undefined
-      ? ` · P/C ${observations.putCallRatio.toFixed(2)}`
+      ? ` · PCR ${observations.putCallRatio.toFixed(2)}`
       : '';
+  return `Index ${indexM.toFixed(1)}M contracts · ${share.toFixed(1)}% of total${pcr}`;
+}
+
+export function formatOptionsActivityDisplayValue(
+  observations: OptionsActivityProxyObservationsV1
+): string {
+  const card = formatOptionsActivityCardValue(observations);
   const daily =
     observations.indexOptionsDailyChangePct !== undefined
-      ? ` · ${observations.indexOptionsDailyChangePct >= 0 ? '+' : ''}${observations.indexOptionsDailyChangePct.toFixed(1)}% vs prior session`
+      ? ` · ${observations.indexOptionsDailyChangePct >= 0 ? '+' : ''}${observations.indexOptionsDailyChangePct.toFixed(1)}% vs prior session (Index/Others)`
       : '';
-  return `${indexM.toFixed(1)}M index contracts (${share.toFixed(1)}% of total)${pcr}${daily}`;
+  return `${card}${daily}`;
+}
+
+export function buildOptionsActivityDisplayExplanation(
+  artifact: OptionsActivityProxyArtifactV1
+): string {
+  const { observations: o } = artifact;
+  const indexM = (o.indexOptionsContracts / 1_000_000).toFixed(1);
+  const totalM = (o.totalOptionsContracts / 1_000_000).toFixed(1);
+  const pcr =
+    o.putCallRatio !== undefined ? ` Put/call ratio ${o.putCallRatio.toFixed(2)}.` : '';
+  const daily =
+    o.indexOptionsDailyChangePct !== undefined
+      ? ` Session change in Index/Others volume: ${o.indexOptionsDailyChangePct >= 0 ? '+' : ''}${o.indexOptionsDailyChangePct.toFixed(1)}%.`
+      : '';
+  return (
+    `OCC Daily Volume Statistics: ${indexM}M Index/Others contracts of ${totalM}M OCC total cleared options (${o.indexShareOfTotalPct.toFixed(1)}% share).${pcr}${daily} ` +
+    `Not 0DTE, not dealer gamma/GEX, not intraday hedging pressure. mappingStatus: ${o.mappingStatus}; not included in the Research Composite.`
+  );
+}
+
+export function loadOptionsActivityProxyArtifact(): OptionsActivityProxyValidation {
+  return validateOptionsActivityProxyArtifact(optionsActivityProxyArtifactJson, {
+    mode: 'production',
+    referenceAsOf: GHOSTFLOW_REFERENCE_AS_OF,
+  });
 }
 
 export function optionsActivityFreshnessAnchor(artifact: OptionsActivityProxyArtifactV1): string {

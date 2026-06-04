@@ -14,6 +14,7 @@ import { validateMarketBreadthArtifact } from '../../lib/ghostflow/artifacts/mar
 import { validateSystematicFlowProxyArtifact } from '../../lib/ghostflow/artifacts/systematicFlowProxy';
 import { validateLeveredEtfRebalancePressureArtifact } from '../../lib/ghostflow/artifacts/leveredEtfRebalancePressure';
 import { validateRetirementFlowPressureProxyArtifact } from '../../lib/ghostflow/artifacts/retirementFlowPressureProxy';
+import { validateOptionsActivityProxyArtifact } from '../../lib/ghostflow/artifacts/optionsActivityProxy';
 import { GHOSTFLOW_REFERENCE_AS_OF } from '../../lib/ghostflow/reference';
 
 const root = process.cwd();
@@ -192,6 +193,25 @@ function main(): void {
         : '';
     console.log(
       `GhostFlow rules: retirement-flow-pressure-proxy OK ($${o.totalRetirementMarketAssetsTrillionsUsd}T total${qoq}, mappingStatus ${o.mappingStatus}, asOf ${retirementRules.artifact.asOf}, published ${retirementRules.artifact.publishedAt})`
+    );
+  }
+
+  const optionsPath = join(root, 'data/ghostflow/artifacts/optionsActivityProxy.v1.json');
+  const optionsRules = validateOptionsActivityProxyArtifact(loadJson(optionsPath), {
+    mode: 'production',
+    referenceAsOf: GHOSTFLOW_REFERENCE_AS_OF,
+  });
+  if (!optionsRules.ok) {
+    failed = true;
+    console.error('GhostFlow rules failed for options-activity-proxy:');
+    for (const err of optionsRules.errors) console.error(`  - ${err}`);
+  } else {
+    const o = optionsRules.artifact.observations;
+    const indexM = (o.indexOptionsContracts / 1_000_000).toFixed(1);
+    const pcr =
+      o.putCallRatio != null ? `, PCR ${o.putCallRatio.toFixed(2)}` : '';
+    console.log(
+      `GhostFlow rules: options-activity-proxy OK (index ${indexM}M contracts, ${o.indexShareOfTotalPct}% of total${pcr}, mappingStatus ${o.mappingStatus}, asOf ${optionsRules.artifact.asOf}, published ${optionsRules.artifact.publishedAt})`
     );
   }
 
