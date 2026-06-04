@@ -5,7 +5,7 @@ const WATCH_TARGETS = [
   'CTA / vol-control proxy',
   'Levered ETF rebalance pressure — display-only artifact; mapping not final (v1.1e)',
   'Retirement asset growth — display-only ICI quarterly artifact; mapping not final (v1.2e)',
-  'Bond neglect / income replacement lens',
+  'Treasury Plumbing feasibility — basis-trade proxy + long-end income lens (future; not live; display-only candidate; not scored)',
   'HHI or effective-number concentration metric',
 ];
 

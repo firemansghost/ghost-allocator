@@ -91,12 +91,16 @@ Full copy: [PASSIVE_ENDGAME_SCENARIOS.md](./PASSIVE_ENDGAME_SCENARIOS.md).
 
 - [PASSIVE_ENDGAME_SCENARIOS.md](./PASSIVE_ENDGAME_SCENARIOS.md) — six-scenario educational ladder (UI + doc); not scored
 
+## Delivered in v1.7a
+
+- [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md) — Treasury Plumbing feasibility complete (docs-only); separate future lane; not on live dashboard; not scored
+
 ## Out of scope (ongoing)
 
 | Item | Deferred phase |
 |------|----------------|
-| Treasury Plumbing section | v1.7a feasibility |
-| Treasury basis trade / bond neglect data | v1.7b+ |
+| Treasury Plumbing dashboard section | v1.7e+ (after artifact design v1.7b–d) |
+| Treasury basis trade / bond neglect artifacts & cards | v1.7b+ |
 | Scoring weight or mapper changes | Not approved |
 | New artifacts or data sources | Not approved |
 | Live fetching / runtime feeds | Not approved |

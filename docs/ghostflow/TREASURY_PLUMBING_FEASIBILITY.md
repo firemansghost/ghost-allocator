@@ -1,0 +1,175 @@
+# Treasury Plumbing Feasibility Memo (GhostFlow v1.7a)
+
+## Status
+
+- **v1.7a feasibility only** — docs-only pass; no production wiring.
+- **No scoring** — Research Composite, Passive Pressure, and Structural Fragility unchanged.
+- **No artifacts** — no example JSON, no production JSON, no validators in this phase.
+- **No UI cards** — no dashboard section, no placeholder cards, no Treasury Plumbing lane on the live grid.
+- **No data pipeline** — no spike scripts, no runtime/live fetching, no operator refresh table for Treasury yet.
+- **Treasury Plumbing remains a separate future lane** — not merged into the equity GhostFlow Research Composite, `publicSignalCount`, or Passive Pressure.
+
+---
+
+## Executive recommendation
+
+1. **Treasury Plumbing is worth pursuing as a separate lane** — Treasury futures positioning stress and long-end income neglect are distinct from equity passive-pressure mechanics and deserve their own display-only research section when product approves later phases.
+2. **v1.7a should not ship cards or artifacts** — feasibility and architecture only; defer artifact design to v1.7b–c and UI to v1.7e.
+3. **Treasury Basis Trade Stress** is feasible only as a **public proxy**, not full basis-trade measurement — CFTC Treasury futures positioning plus funding/vol/OI context can signal crowded relative-value positioning, not cash-futures basis or repo specialness directly.
+4. **Bond Neglect / Long-End Income Lens** is **more source-feasible** (FRED yields, curve, breakevens) but carries **higher interpretation and advice risk** — must stay display-only with explicit “not a recommendation to buy bonds” copy.
+5. **Both subcards should remain display-only by default** in future phases — labels: Public proxy, Manual, Display-only, Not scored.
+6. **Do not merge Treasury Plumbing into the equity GhostFlow Research Composite** — no `publicPassiveInputKey`, no blend into Passive Pressure or Structural Fragility, no `buildSnapshot` merge.
+
+---
+
+## Current GhostFlow overlap audit
+
+| Existing GhostFlow item | What it covers | Overlap with Treasury Plumbing | Boundary |
+|-------------------------|----------------|--------------------------------|----------|
+| **CFTC TFF equity-index positioning** | ES / NQ / RTY / VIX leveraged-funds proxy via PRE `gpe5-46if`; production artifact `systematicFlowProxy.v1.json`; weekly manual cadence | **Pattern reuse only** — same PRE API and manual-artifact discipline; **different contract universe** (UST 2Y/5Y/10Y/30Y, etc.) | Treasury CFTC requires **dedicated contract discovery** (v1.7a.1 / v1.7b); **do not relabel or extend** the equity `systematic-flow` card |
+| **`systematic-flow` display-only card** | “CFTC leveraged-funds positioning proxy” for **equity index** futures | Narrative overlap (“crowded positioning”) but **wrong instrument** for Treasury basis stress | Keep equity card; future Treasury card is a **new signal id** in a **separate UI section** |
+| **VIX / `optionsVolatilityAmplifier`** | CBOE VIX → scored options/vol slot (20% Passive Pressure) | Vol stress is **correlated** with risk-off and funding episodes but **not Treasury-specific** | Do not substitute VIX for Treasury basis or long-end income lenses |
+| **`options-activity-proxy`** | OCC Index/Others display-only; not 0DTE/GEX | None for Treasury plumbing | Unrelated lane |
+| **Passive Endgame Scenarios** | Educational six-scenario ladder; scenario 5 mentions policy/Treasury narrative | **Conceptual** link to “policy intervention / market repair” — not a data feed | Point readers to this memo; Treasury Plumbing **not live** on dashboard (v1.6b) |
+| **GhostFlow Watchlist** | Forward-looking research targets | May list Treasury Plumbing as **future / not live / not scored** candidate | v1.7a optional one-liner only |
+| **GhostRegime TLT / IEF references** (if present in product) | Regime tooling outside GhostFlow composite | **Out of GhostFlow scope** for v1.7a | Do not wire GhostRegime series into GhostFlow score or artifacts in this lane |
+
+**Clear statements:**
+
+- Existing **CFTC PRE infrastructure** (`cftc-tff-spike.ts`, TFF feasibility memos, manual artifact pattern) provides a **reusable research pattern** for weekly public extracts.
+- **Treasury futures contract discovery is not yet done** — equity spike codes (e.g. `13874A`) do not transfer; v1.7a.1 is an optional research-only Treasury PRE spike, separately approved.
+- **Treasury CFTC must not relabel or extend** the existing **`systematic-flow`** equity card — that card stays equity-index-only per [CFTC_TFF_MAPPING_DECISION.md](./CFTC_TFF_MAPPING_DECISION.md).
+
+---
+
+## Treasury Basis Trade Stress feasibility
+
+**Purpose (future):** Public proxy for leveraged Treasury **futures** positioning and financing-dependent relative-value stress — **not** measurement of the full cash-futures basis trade.
+
+**Approved user-facing copy (future display):**
+
+> Tracks public proxies for leveraged Treasury futures positioning. This does not measure the full basis trade, but it helps show when Treasury relative-value positioning may be crowded and dependent on cheap financing.
+
+### Source table
+
+| Source | Availability | Cadence | Expected fields | Basis-trade support | Manual artifact feasibility | Display suitability | Scoring suitability |
+|--------|--------------|---------|-----------------|---------------------|----------------------------|---------------------|---------------------|
+| **CFTC TFF / PRE — Treasury futures** | Live public (PRE API) | Weekly (Tue close → Fri release) | Contract name/code, OI, Leveraged Funds / Asset Manager positions & changes, % OI | **Proxy** — futures positioning only; not cash-futures basis | **Feasible after contract discovery** | **High** — citable, weekly | **Discouraged** — overlaps equity systematic narrative; display-only default |
+| **CFTC legacy COT — Treasury futures** | Public manual / API | Weekly | Commercial / non-commercial style buckets (legacy layout) | **Proxy** — coarser categories than TFF | Feasible; prefer TFF for consistency | Medium — category confusion risk | Discouraged |
+| **OFR Hedge Fund Monitor** | Public manual (reports) | Quarterly / episodic | HF gross leverage, Treasury exposure aggregates (where published) | **Proxy** — fund-level, lagged | Low–medium — PDF/table extract | Medium — narrative context | Not suitable for weekly score |
+| **SOFR / repo / funding stress proxies** | Live public (FRED, NY Fed) | Daily–weekly | SOFR, EFFR spread, GC repo indicators, FRA-OIS where available | **Proxy** — financing conditions, not position-level basis | Feasible as secondary context fields | **High** for “cheap financing” narrative | **Poor** — macro overlap with vol/risk-off |
+| **Treasury volatility / MOVE** | Mixed — index levels may be **paid/proprietary** (ICE BofA MOVE); some vol via futures/options | Daily | Index level, changes | **Proxy** — stress amplifier | Manual snapshot if licensed; else avoid | Medium — licensing risk | Discouraged |
+| **Treasury futures open interest** | Live public (CFTC PRE, exchange stats) | Weekly / daily | OI by contract, changes | **Proxy** — positioning depth | Feasible alongside TFF extract | High as supporting field | Discouraged alone |
+| **Primary dealer / financing data** | Public manual (Fed H.4.1, dealer surveys); some series delayed | Weekly / monthly | Dealer positioning, repo volumes (where published) | **Proxy** — indirect | Medium — operator burden | Medium — expert audience | Not suitable |
+| **FRED stress proxies** (e.g. yield curve, credit spreads, financial conditions) | Live public | Daily–monthly | Yields, spreads, NFCI | **Proxy** — macro context only | Feasible | Medium — support lens only | Poor — duplicates other pillars |
+
+**Conclusion — Treasury Basis Trade Stress:** **YELLOW** — feasible as a **public proxy** after **dedicated Treasury CFTC contract discovery** (v1.7a.1 / v1.7b), combined with funding/vol/OI context fields. **Not feasible** as full basis-trade measurement or as an extension of the equity `systematic-flow` card.
+
+---
+
+## Bond Neglect / Long-End Income Lens feasibility
+
+**Purpose (future):** Display-only check on whether long-duration Treasury **income** is being ignored despite meaningful nominal or real yields — **not** allocation advice.
+
+**Approved user-facing copy (future display):**
+
+> Tracks whether long-duration Treasury income is being ignored despite historically meaningful nominal or real yields. This is not a recommendation to buy bonds. It is a plumbing check on whether narrative fear may be overpowering income math.
+
+### Source table
+
+| Source | Availability | Cadence | Public / manual feasibility | Display-card suitability | Interpretation risk | Caveats |
+|--------|--------------|---------|----------------------------|--------------------------|---------------------|---------|
+| **30-year Treasury yield** | Live public (FRED `DGS30`) | Daily | **High** — trivial manual snapshot | **High** | Medium — “high yield” is regime-relative | Nominal only; not real return |
+| **30-year TIPS real yield** | Live public (FRED `DFII30`) | Daily | **High** | **High** | Medium | Liquidity/premium noise |
+| **2s30s / 5s30s curve** | Live public (FRED spreads) | Daily | **High** | **High** | Medium — steepener/flattener narratives | Not neglect alone |
+| **Treasury term premium** (e.g. NY Fed ACM) | Public manual / model | Monthly | Medium — model revision risk | Medium | **High** — model dependence | Not real-time |
+| **Inflation breakevens** (5Y5Y, 10Y) | Live public (FRED) | Daily | **High** | Medium | Medium — inflation vs income confusion | Separate from neglect |
+| **TLT / long-duration Treasury ETF flows** | Mixed — flows often **paid/proprietary**; AUM public on fund sites | Daily / monthly | Low–medium without vendor | Medium | **High** — sounds like “buy TLT” | ETF ≠ cash Treasury |
+| **Long-duration Treasury ETF AUM** | Public manual (issuer factsheets) | Monthly | Medium | Medium | High | Single-fund bias |
+| **ICI bond fund flows** | Public manual (ICI tables) | Weekly / monthly | Medium — table extract like equity flows | Medium | **High** — flows ≠ neglect | Different product mix than Treasuries |
+
+**Conclusion — Bond Neglect / Long-End Income Lens:** **YELLOW–GREEN** for **display-only** feasibility using FRED yields, curve, and breakevens as primary public fields. Must be **heavily caveated** to avoid sounding like investment advice or a bond-buy signal. ETF flow/AUM series are secondary and higher risk.
+
+---
+
+## Proposed Treasury Plumbing architecture (future)
+
+**Future dashboard section (not in v1.7a):** `Treasury Plumbing` — separate lane below or beside equity GhostFlow Research Composite, not inside Passive Pressure.
+
+**Future subcards:**
+
+| Subcard | Role | Default labels |
+|---------|------|----------------|
+| **Treasury Basis Trade Stress** | Leveraged UST futures positioning + financing/vol context | Public proxy · Manual · Display-only · Not scored |
+| **Bond Neglect / Long-End Income Lens** | Long-end nominal/real yield vs narrative fear | Public proxy · Manual · Display-only · Not scored |
+
+**Future status labels (display):** Quiet · Watch · Elevated · Stress
+
+**Hard boundaries (all future phases unless explicitly product-gated):**
+
+| Exclusion | Reason |
+|-----------|--------|
+| Not in `publicSignalCount` | Treasury lane is separate from the 10 equity research sub-inputs |
+| Not in `PUBLIC_ARTIFACT_SIGNAL_IDS` for composite merge | No `buildSnapshot` wiring by default |
+| Not in Passive Pressure or Structural Fragility | Different macro plumbing narrative |
+| Not merged into `buildSnapshot` | No score sub-input keys for Treasury in v1.7a–e default |
+| No composite score impact | Research Composite remains equity-framed |
+
+---
+
+## Phase ladder
+
+| Phase | Scope | Score / UI |
+|-------|--------|------------|
+| **v1.7a** | Treasury Plumbing Feasibility — **this memo; docs-only** | None |
+| **v1.7a.1** | Optional Treasury CFTC PRE spike — research-only script; **separately approved** | None |
+| **v1.7b** | Treasury Basis Trade artifact design — memo + example JSON only | None |
+| **v1.7c** | Bond Neglect / Long-End Income artifact design — memo + example JSON only | None |
+| **v1.7d** | Production artifact candidates — JSON + validators | Display path only |
+| **v1.7e** | Display-only Treasury Plumbing section — separate UI lane | Cards only; not scored |
+| **v1.7f** | Calibration / mapping decision | Display thresholds; score gate still off |
+| **v1.7g** | Separate Treasury Plumbing score gate | **Product-approved only; discouraged by default** |
+
+---
+
+## Risks and caveats
+
+| Risk | Mitigation |
+|------|------------|
+| **Semantic overreach — “basis trade”** | Approved copy states proxy only; never claim full basis measurement |
+| **Bond neglect sounds like allocation advice** | Mandatory “not a recommendation to buy bonds” in UI and docs |
+| **CFTC category confusion** | Do not reuse equity Leveraged Funds copy for UST; separate card and artifact ids |
+| **MOVE / data licensing** | Treat MOVE as paid/proprietary unless license confirmed; prefer public CFTC + FRED |
+| **Funding / repo proxy limitations** | Label as macro financing context, not trade-level repo specialness |
+| **Operator burden** | Weekly CFTC + daily FRED multi-series refresh is non-trivial; defer refresh table until v1.7d+ |
+| **Scope creep into equity composite** | Hard boundary in roadmap and architecture; no `publicPassiveInputKey` |
+
+---
+
+## No-score-change confirmation (v1.7a)
+
+After v1.7a implementation:
+
+| Item | Value / state |
+|------|----------------|
+| **Research Composite** | **62** (unchanged) |
+| **Passive Pressure** | **58** (unchanged) |
+| **Structural Fragility** | **66** (unchanged) |
+| **`publicSignalCount`** | **10** (unchanged) |
+| **`publicPassiveInputKey`** | **Not added** |
+| **Treasury signal cards** | **None** |
+| **Treasury artifacts** | **None** |
+| **Score wiring** | **None** |
+| **Runtime fetching** | **None** |
+
+**Files intentionally untouched in v1.7a:** `lib/ghostflow/scoring.ts`, `lib/ghostflow/buildSnapshot.ts`, `data/ghostflow/artifacts/*.json`, `data/ghostflow/mockGhostflowSnapshot.ts`, `scripts/ghostflow/validate-artifacts.ts`, `package.json`, GhostRegime, GhostYield, Models, builder.
+
+---
+
+## Related documents
+
+- [DATA_ROADMAP.md](./DATA_ROADMAP.md) — phase row v1.7a; Treasury future lane note
+- [PASSIVE_STRESS_ZONE_LANGUAGE.md](./PASSIVE_STRESS_ZONE_LANGUAGE.md) — v1.7a feasibility complete; Treasury separate from equity stress-zone phrasebook
+- [PASSIVE_ENDGAME_SCENARIOS.md](./PASSIVE_ENDGAME_SCENARIOS.md) — scenario 5 policy/Treasury narrative link
+- [CFTC_TFF_FEASIBILITY.md](./CFTC_TFF_FEASIBILITY.md) — equity PRE pattern (not Treasury contracts)
+- [CFTC_TFF_MAPPING_DECISION.md](./CFTC_TFF_MAPPING_DECISION.md) — equity `systematic-flow` display-only boundary
