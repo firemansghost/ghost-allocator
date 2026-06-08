@@ -148,7 +148,7 @@ function buildIncomeExplanation(artifact: TreasuryLongEndIncomeLensArtifactV1): 
     `30Y TIPS real ${formatYieldPct(o.thirtyYearTipsRealYieldPct)}, ` +
     `10Y breakeven ${formatOptionalYield(o.tenYearBreakevenInflationPct)}. ` +
     `Curve spreads 2s30s ${formatCurveSpreadPp(o.curve2s30sPct)}, 5s30s ${formatCurveSpreadPp(o.curve5s30sPct)}, ` +
-    `10s30s ${formatCurveSpreadPp(o.curve10s30sPct)}. mappingStatus: ${o.mappingStatus}; not scored.`
+    `10s30s ${formatCurveSpreadPp(o.curve10s30sPct)}. Display-only context; not scored.`
   );
 }
 

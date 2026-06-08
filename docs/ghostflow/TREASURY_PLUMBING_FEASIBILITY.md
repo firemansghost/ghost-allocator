@@ -190,7 +190,8 @@
 | **v1.7d** | Production artifact candidates — Treasury Futures Positioning JSON + loader + `validate-artifacts` (**done**) | Display path only; no UI/score |
 | **v1.7d.1** | Long-End Income Lens production JSON + `validate-artifacts` + FRED spike (**done**) | Display path only; no UI/score |
 | **v1.7e** | Display-only Treasury Plumbing section — separate UI lane (**done**) | Cards only; not scored; not in `publicSignalCount` |
-| **v1.7f** | Calibration / mapping decision | Display thresholds; score gate still off |
+| **v1.7f** | Mapping / product decision — [TREASURY_PLUMBING_MAPPING_DECISION.md](./TREASURY_PLUMBING_MAPPING_DECISION.md) (**done**) | Decision-only; display-only default; no thresholds shipped |
+| **v1.7f-calibration** | Optional CFTC + FRED history studies | Research-only; future display context |
 | **v1.7g** | Separate Treasury Plumbing score gate | **Product-approved only; discouraged by default** |
 
 ---
