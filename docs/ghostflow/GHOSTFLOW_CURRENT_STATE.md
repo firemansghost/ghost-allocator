@@ -2,7 +2,7 @@
 
 Canonical inventory after the **v1.7** release checkpoint. Theme for v1.8: **GhostFlow Data Quality & Mock Score Discipline**.
 
-**Related:** [DATA_ROADMAP.md](./DATA_ROADMAP.md) (living phase ladder) · [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) (operator refresh)
+**Related:** [DATA_ROADMAP.md](./DATA_ROADMAP.md) (living phase ladder) · [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) (operator refresh) · [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) (v1.8c freshness & `dataQuality` policy)
 
 ---
 
@@ -12,6 +12,7 @@ Canonical inventory after the **v1.7** release checkpoint. Theme for v1.8: **Gho
 - **Document type:** Documentation inventory only — no score, artifact, UI, runtime, or data changes in v1.8a.
 - **Baseline reference:** [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) = `2026-05-22` (production composite snapshot).
 - **GhostRegime boundary:** GhostRegime (including BTC provider work) is a separate product lane — not in GhostFlow v1.8 scope.
+- **Freshness & dataQuality policy:** [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) — canonical cadence thresholds, label definitions, and 12-artifact inventory (v1.8c docs-only).
 
 ---
 
@@ -131,7 +132,7 @@ Separate dashboard lane — **not** in equity composite or `publicSignalCount`.
 3. **0DTE / true GEX path** — OCC Index/Others proxy shipped display-only; true 0DTE/GEX still YELLOW/RED per [ODTE_OPTIONS_FEASIBILITY.md](./ODTE_OPTIONS_FEASIBILITY.md).
 4. **Passive-flow next source** — Any new public proxy must avoid double-counting ICI index share / active-index-flow already in composite.
 5. **Doc sprawl** — 35+ memos under `docs/ghostflow/`; v1.8e consolidation planned.
-6. **Artifact freshness / dataQuality consistency** — `manual_unverified` on breadth, levered ETF, options, Treasury futures; v1.8c pass planned.
+6. ~~**Artifact freshness / dataQuality consistency**~~ **Resolved (v1.8c):** [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) — policy documented; labels unchanged; v1.8c.1 metadata cleanup deferred.
 
 ---
 
@@ -145,8 +146,8 @@ Discipline-first roadmap after v1.7 feature completion — inventory and operato
 |-------|-------------|--------|
 | **v1.8a** | Current State / Data Quality Inventory — **this doc** | **Done** (docs-only) |
 | **v1.8b** | Mock Score Retirement Decision — [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) | **Done** (docs-only) |
-| **v1.8c** | Artifact Freshness & `dataQuality` Consistency Pass | **Next** |
-| **v1.8d** | Operator Refresh Discipline | Planned |
+| **v1.8c** | Artifact Freshness & `dataQuality` Consistency Pass — [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) | **Done** (docs-only) |
+| **v1.8d** | Operator Refresh Discipline | **Next** |
 | **v1.8e** | Documentation Consolidation | Planned |
 | **v1.8f** | UI Clarity / Methodology Polish | Optional |
 | **v1.8g** | Treasury Calibration Research-Only | Optional |

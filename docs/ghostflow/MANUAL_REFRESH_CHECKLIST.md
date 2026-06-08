@@ -2,7 +2,7 @@
 
 Operator runbook for manually refreshing GhostFlow public-data artifacts. **No live fetches, no scraping, no cron, no API routes** — values are hand-edited into static JSON files committed to the repo.
 
-**Related:** [DATA_ROADMAP.md](./DATA_ROADMAP.md) — score-input sourcing and canonical dashboard state · [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) — v1.8b keep-MOCK policy (display refresh does not change scored MOCK **62** / **55** / **58**).
+**Related:** [DATA_ROADMAP.md](./DATA_ROADMAP.md) — score-input sourcing · [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) — v1.8b keep-MOCK policy · [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) — v1.8c freshness & `dataQuality` policy (canonical thresholds below).
 
 **Equity dashboard coverage (v1.7):** **6** score-fed public artifacts · **4** display-only public artifact cards (CFTC `systematic-flow`, levered `levered-etf-rebalance`, retirement `retirement-asset-growth`, OCC `options-activity-proxy`) · **`publicSignalCount` 10** when all validate · **0** placeholder cards when artifacts validate. Display-only equity cards do **not** refresh or change the Research Composite — Composite **62** / Passive **58** / Structural **66** and MOCK **62** / **55** / **58** and VIX still drive scored sub-inputs. Quarterly retirement freshness **caution** (46–90 days after release) reflects normal ICI quarterly cadence — not a failed feed or score problem.
 
@@ -28,13 +28,29 @@ Per-artifact deep dives: see linked runbooks at the bottom of this page.
 
 **Daily group:** VIX + Market Breadth + OCC Index Options Intensity (display-only) + `GHOSTFLOW_REFERENCE_AS_OF` (when running the full daily pass)
 
-**Weekly group:** ETF Net Issuance + CFTC TFF Positioning Proxy (production candidate; not scored yet)
+**Weekly group:** ETF Net Issuance + CFTC TFF Positioning Proxy (display-only; MOCK **62** score input unchanged; **v1.0c** not approved)
 
 **Monthly group (ICI):** Active/Index Flow + ICI Index Share Proxy (same release, different tables)
 
 **Monthly group (SSGA):** Index Concentration (separate SSGA fact sheet cadence)
 
 **Quarterly group (ICI Retirement Market):** Retirement Asset Growth Proxy — display-only card; Table 1 extract; MOCK **58** in composite unchanged ([v1.2e](./RETIREMENT_FLOW_MAPPING_DECISION.md) display-only default)
+
+## Freshness thresholds (equity reference)
+
+Against [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts). Per-card status on signal cards; summary rollup covers subset only — see [audit memo](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md).
+
+| Cadence | Anchor | Fresh | Caution | Stale |
+|---------|--------|-------|---------|-------|
+| Daily (VIX, breadth) | `asOf` | ≤2 trading days | 3–5 trading | >5 trading |
+| Daily (options) | `publishedAt ?? asOf` | ≤2 trading days | 3–5 trading | >5 trading |
+| Weekly (ETF, CFTC) | `publishedAt ?? asOf` | ≤7–10 calendar days | 8–14 / 11–17 | >14 / >17 |
+| Monthly (ICI, SSGA) | `publishedAt ?? asOf` | ≤35 calendar days | 36–55 | >55 |
+| Quarterly (retirement) | `publishedAt ?? asOf` | ≤45 calendar days | 46–90 (normal cadence) | >90 |
+
+Treasury lane: no structured freshness bands today — dates on cards only. Larger operator legend → **v1.8d**.
+
+---
 
 **Options activity (v1.4d — display-only):** Download OCC Daily Volume Statistics CSV per session, e.g. `https://marketdata.theocc.com/daily-volume-statistics?reportDate=YYYYMMDD&format=csv` → save under `tmp/options-spike/occ-volume-download-YYYY-MM-DD.csv` → `npm run ghostflow:options-data-spike -- --occ-daily <file>` → update [`optionsActivityProxy.v1.json`](../data/ghostflow/artifacts/optionsActivityProxy.v1.json). Maps **Index/Others** to `indexOptionsContracts`. Refresh updates the **display-only** artifact and card only — **not** the Research Composite ([OPTIONS_ACTIVITY_MAPPING_DECISION.md](./OPTIONS_ACTIVITY_MAPPING_DECISION.md)). Not 0DTE/GEX; not scored.
 
