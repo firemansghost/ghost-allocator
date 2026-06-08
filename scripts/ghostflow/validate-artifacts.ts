@@ -16,6 +16,7 @@ import { validateLeveredEtfRebalancePressureArtifact } from '../../lib/ghostflow
 import { validateRetirementFlowPressureProxyArtifact } from '../../lib/ghostflow/artifacts/retirementFlowPressureProxy';
 import { validateOptionsActivityProxyArtifact } from '../../lib/ghostflow/artifacts/optionsActivityProxy';
 import { validateTreasuryFuturesPositioningProxyArtifact } from '../../lib/ghostflow/artifacts/treasuryFuturesPositioningProxy';
+import { validateTreasuryLongEndIncomeLensArtifact } from '../../lib/ghostflow/artifacts/treasuryLongEndIncomeLens';
 import { GHOSTFLOW_REFERENCE_AS_OF } from '../../lib/ghostflow/reference';
 
 const root = process.cwd();
@@ -232,6 +233,25 @@ function main(): void {
     const o = treasuryFuturesRules.artifact.observations;
     console.log(
       `GhostFlow rules: treasury-futures-positioning-proxy OK (${o.basketDirection}, basket lev net ${o.basketLevMoneyNetPctOi}% OI, ${o.basketContractCount} core contracts, mappingStatus ${o.mappingStatus}, asOf ${treasuryFuturesRules.artifact.asOf})`
+    );
+  }
+
+  const treasuryIncomePath = join(
+    root,
+    'data/ghostflow/artifacts/treasuryLongEndIncomeLens.v1.json'
+  );
+  const treasuryIncomeRules = validateTreasuryLongEndIncomeLensArtifact(
+    loadJson(treasuryIncomePath),
+    { mode: 'production' }
+  );
+  if (!treasuryIncomeRules.ok) {
+    failed = true;
+    console.error('GhostFlow rules failed for treasury-long-end-income-lens:');
+    for (const err of treasuryIncomeRules.errors) console.error(`  - ${err}`);
+  } else {
+    const o = treasuryIncomeRules.artifact.observations;
+    console.log(
+      `GhostFlow rules: treasury-long-end-income-lens OK (30Y nom ${o.thirtyYearNominalYieldPct}%, 30Y real ${o.thirtyYearTipsRealYieldPct}%, 10s30s ${o.curve10s30sPct} pp, mappingStatus ${o.mappingStatus}, asOf ${treasuryIncomeRules.artifact.asOf})`
     );
   }
 

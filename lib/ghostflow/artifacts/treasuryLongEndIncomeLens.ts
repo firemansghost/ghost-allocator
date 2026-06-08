@@ -1,8 +1,10 @@
 /**
- * GhostFlow v1.7c — Treasury long-end income lens artifact (design only).
- * Pure validation and compute helpers. No production load, buildSnapshot, or score wiring.
+ * GhostFlow v1.7c/d.1 — Treasury long-end income lens artifact.
+ * Pure validation and compute helpers; production loader for v1.7d.1 candidate JSON.
+ * No buildSnapshot merge or score wiring.
  */
 
+import treasuryLongEndIncomeLensArtifactJson from '@/data/ghostflow/artifacts/treasuryLongEndIncomeLens.v1.json';
 import type {
   TreasuryLongEndIncomeLensArtifactV1,
   TreasuryLongEndIncomeLensValidation,
@@ -10,6 +12,9 @@ import type {
 
 export const TREASURY_LONG_END_EXAMPLE_ARTIFACT_PATH =
   'data/ghostflow/artifacts/treasuryLongEndIncomeLens.v1.example.json';
+
+export const TREASURY_LONG_END_PRODUCTION_ARTIFACT_PATH =
+  'data/ghostflow/artifacts/treasuryLongEndIncomeLens.v1.json';
 
 export const TREASURY_LONG_END_INCOME_LENS_SIGNAL_ID =
   'treasury-long-end-income-lens' as const;
@@ -364,4 +369,10 @@ export function validateTreasuryLongEndIncomeLensArtifact(
     ok: true,
     artifact: raw as unknown as TreasuryLongEndIncomeLensArtifactV1,
   };
+}
+
+export function loadTreasuryLongEndIncomeLensArtifact(): TreasuryLongEndIncomeLensValidation {
+  return validateTreasuryLongEndIncomeLensArtifact(treasuryLongEndIncomeLensArtifactJson, {
+    mode: 'production',
+  });
 }

@@ -41,6 +41,7 @@
     "ghostflow:validate-artifacts": "tsx scripts/ghostflow/validate-artifacts.ts",
     "ghostflow:cftc-tff-spike": "tsx scripts/ghostflow/cftc-tff-spike.ts",
     "ghostflow:treasury-cftc-pre-spike": "tsx scripts/ghostflow/treasury-cftc-pre-spike.ts",
+    "ghostflow:fred-treasury-yields-spike": "tsx scripts/ghostflow/fred-treasury-yields-spike.ts",
     "ghostflow:cftc-tff-history-study": "tsx scripts/ghostflow/cftc-tff-history-study.ts",
     "ghostflow:levered-etf-rebalance-history-study": "tsx scripts/ghostflow/levered-etf-rebalance-history-study.ts",
     "ghostflow:retirement-flow-history-study": "tsx scripts/ghostflow/retirement-flow-history-study.ts",

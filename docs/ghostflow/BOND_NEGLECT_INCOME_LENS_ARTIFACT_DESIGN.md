@@ -1,24 +1,41 @@
 # Bond Neglect / Long-End Income Lens Artifact Design (GhostFlow v1.7c)
 
-**Status:** v1.7c artifact design only — example JSON + pure validator/tests. **v1.7d:** production JSON **deferred to v1.7d.1** (FRED verification blocked in implementation environment — timeouts on public CSV). **Not** display card, score wiring, or `validate-artifacts` registration yet.
+**Status:** v1.7d.1 production artifact candidate — [`treasuryLongEndIncomeLens.v1.json`](../data/ghostflow/artifacts/treasuryLongEndIncomeLens.v1.json) + loader + `validate-artifacts`. **Not** display card, score wiring, or `buildSnapshot` merge.
 
 **Prior work:** [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md) (v1.7a) · v1.7b [Treasury Futures Positioning Proxy](./TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md)
 
 **Example file:** [`data/ghostflow/artifacts/treasuryLongEndIncomeLens.v1.example.json`](../data/ghostflow/artifacts/treasuryLongEndIncomeLens.v1.example.json) (`designOnly: true`)
 
+**Production file:** [`data/ghostflow/artifacts/treasuryLongEndIncomeLens.v1.json`](../data/ghostflow/artifacts/treasuryLongEndIncomeLens.v1.json) (`dataQuality: verified_manual`; FRED API extract asOf **2026-06-02**)
+
 **Library:** [`lib/ghostflow/artifacts/treasuryLongEndIncomeLens.ts`](../lib/ghostflow/artifacts/treasuryLongEndIncomeLens.ts)
 
 ---
 
-## 1. Not implemented (v1.7c)
+## 1. FRED verification (v1.7d.1)
+
+Research spike: `npm run ghostflow:fred-treasury-yields-spike` (not in `ghostflow:check`).
+
+| Method | When |
+|--------|------|
+| Live CSV | `fred.stlouisfed.org/graph/fredgraph.csv?id=<ID>` (preferred; may timeout in some environments) |
+| Local CSV | `npm run ghostflow:fred-treasury-yields-spike -- --local-dir tmp/fred` after operator download |
+| FRED API | `FRED_API_KEY` env + `--fred-api` flag (official api.stlouisfed.org; fallback when CSV blocked) |
+
+Production extract (v1.7d.1): **fred_api**, common **asOf 2026-06-02**, `publishedAt` **2026-06-04**. No forward-fill.
+
+## 1a. Not implemented (v1.7d.1)
+
+- `buildSnapshot` / `publicSignalCount` / score sub-input
+- Display card / Treasury Plumbing UI lane (v1.7e)
+- Runtime dashboard fetching
+
+## 1b. Implemented (v1.7d.1)
 
 - Production `treasuryLongEndIncomeLens.v1.json`
 - `loadTreasuryLongEndIncomeLensArtifact()`
-- `buildSnapshot` / `publicSignalCount` / `publicPassiveInputKey` / score sub-input
-- Display card / Treasury Plumbing UI lane
 - `scripts/ghostflow/validate-artifacts.ts` entry
-- Runtime / live dashboard fetching
-- FRED fetch or spike script (`ghostflow:fred-treasury-yields-spike` deferred)
+- `scripts/ghostflow/fred-treasury-yields-spike.ts` (research only)
 
 ---
 
@@ -193,8 +210,7 @@ Tests: [`lib/ghostflow/__tests__/treasuryLongEndIncomeLens.test.ts`](../lib/ghos
 
 | Phase | Scope |
 |-------|--------|
-| **v1.7d** | Production JSON — **deferred v1.7d.1** (FRED field lock pending clean operator extract) |
-| **v1.7d.1** | Production artifact candidate JSON + `validate-artifacts` registration |
+| **v1.7d.1** | Production artifact candidate JSON + `validate-artifacts` registration — **done** |
 | **v1.7e** | Display-only Treasury Plumbing section — **Long-End Income Lens** subcard |
 | **v1.7f** | Calibration / historical percentiles (`nominalYieldPercentile`, `realYieldPercentile`) |
 | **v1.7g** | Separate Treasury Plumbing score gate — **discouraged**; product-approved only |

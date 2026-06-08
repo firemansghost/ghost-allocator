@@ -4,9 +4,11 @@
 
 import assert from 'node:assert/strict';
 import exampleJson from '@/data/ghostflow/artifacts/treasuryLongEndIncomeLens.v1.example.json';
+import productionJson from '@/data/ghostflow/artifacts/treasuryLongEndIncomeLens.v1.json';
 import {
   computeCurveSpread,
   formatYieldPct,
+  loadTreasuryLongEndIncomeLensArtifact,
   reconcileCurveSpread,
   validatePercentRate,
   validateTreasuryLongEndIncomeLensArtifact,
@@ -15,6 +17,23 @@ import {
 function cloneExample(): Record<string, unknown> {
   return JSON.parse(JSON.stringify(exampleJson)) as Record<string, unknown>;
 }
+
+// --- production artifact validates ---
+const productionOk = validateTreasuryLongEndIncomeLensArtifact(productionJson, { mode: 'production' });
+assert.ok(productionOk.ok, productionOk.ok ? '' : productionOk.errors.join('; '));
+
+const loaderOk = loadTreasuryLongEndIncomeLensArtifact();
+assert.ok(loaderOk.ok);
+
+assert.equal((productionJson as { designOnly?: boolean }).designOnly, undefined);
+assert.equal(productionOk.artifact.observations.mappingStatus, 'not_final');
+assert.ok(productionOk.artifact.source.series.length >= 6);
+const prodIds = productionOk.artifact.source.series.map((s) => s.id);
+for (const id of ['DGS30', 'DFII30', 'DGS2', 'DGS5', 'DGS10', 'T10YIE']) {
+  assert.ok(prodIds.includes(id), `missing series ${id}`);
+}
+assert.equal(productionOk.artifact.observations.nominalYieldPercentile, null);
+assert.equal(productionOk.artifact.observations.realYieldPercentile, null);
 
 // --- example validates ---
 const exampleOk = validateTreasuryLongEndIncomeLensArtifact(exampleJson, { mode: 'example' });
@@ -115,7 +134,13 @@ const pctNull = cloneExample();
 const pctNullResult = validateTreasuryLongEndIncomeLensArtifact(pctNull, { mode: 'example' });
 assert.ok(pctNullResult.ok);
 
-// --- forbidden score fields ---
+// --- forbidden score fields (production) ---
+const mappedProd = JSON.parse(JSON.stringify(productionJson)) as Record<string, unknown>;
+mappedProd.mappedPressureScore = 50;
+const mappedProdResult = validateTreasuryLongEndIncomeLensArtifact(mappedProd, { mode: 'production' });
+assert.ok(!mappedProdResult.ok);
+
+// --- forbidden score fields (example) ---
 const mapped = cloneExample();
 mapped.mappedPressureScore = 50;
 const mappedResult = validateTreasuryLongEndIncomeLensArtifact(mapped, { mode: 'example' });
@@ -126,6 +151,12 @@ const neglect = cloneExample();
 (neglect.observations as Record<string, unknown>).neglectScore = 80;
 const neglectResult = validateTreasuryLongEndIncomeLensArtifact(neglect, { mode: 'example' });
 assert.ok(!neglectResult.ok);
+
+// --- forbidden advice/allocation fields (production) ---
+const buyProd = JSON.parse(JSON.stringify(productionJson)) as Record<string, unknown>;
+buyProd.buySignal = true;
+const buyProdResult = validateTreasuryLongEndIncomeLensArtifact(buyProd, { mode: 'production' });
+assert.ok(!buyProdResult.ok);
 
 // --- forbidden advice/allocation fields ---
 const buy = cloneExample();
