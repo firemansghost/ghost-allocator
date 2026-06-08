@@ -10,7 +10,7 @@ Living roadmap for GhostFlow score-input sourcing, phase history, and open quest
 
 **Current research composite (production snapshot, reference 2026-05-22):** Composite **62** · Passive Pressure **58** · Structural Fragility **66** · band *Crowded / Reflexive*.
 
-**v1.8 theme:** GhostFlow **Data Quality & Mock Score Discipline** — see [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) § v1.8 recommendation.
+**v1.8 theme:** GhostFlow **Data Quality & Mock Score Discipline** — see [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) § v1.8 recommendation. **v1.8b** formalized keep-MOCK decisions for `systematicStrategyPressure` **62**, `retirementFlowPressureProxy` **58**, and `leveredEtfRebalancePressure` **55** — [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md); no score wiring, replacements, or retirements approved; gates **v1.0c / v1.1f / v1.2f / v1.4f / v1.7g / v1.8i** remain discouraged.
 
 ### Current dashboard state (v1.7 — after v1.7f)
 
@@ -233,8 +233,8 @@ GhostFlow input promotion rules (all phases):
 | **v1.7g** | Treasury Plumbing score gate | **Not approved** — discouraged by default |
 | **v1.7** | Treasury Plumbing release checkpoint / consistency audit | **Done** — docs alignment; equity state unchanged; Treasury lane documented as separate |
 | **v1.8a** | Current State / Data Quality Inventory | **Done** — [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md); docs-only; no score/artifact/UI change |
-| **v1.8b** | Mock Score Retirement Decision | **Next** — `MOCK_SCORE_RETIREMENT_PLAN.md`; per-mock keep/replace/label/gate; no score wiring unless product-approved |
-| **v1.8c** | Artifact Freshness & `dataQuality` Consistency Pass | **Planned** — prod JSON vs runbooks; label alignment |
+| **v1.8b** | Mock Score Retirement Decision | **Done** — [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md); keep-MOCK decisions for three passive inputs; no wiring/replacements/retirements approved |
+| **v1.8c** | Artifact Freshness & `dataQuality` Consistency Pass | **Next** — prod JSON vs runbooks; label alignment |
 | **v1.8d** | Operator Refresh Discipline | **Planned** — scored vs display vs Treasury legend in refresh checklist |
 | **v1.8e** | Documentation Consolidation | **Planned** — onboarding path; stale line fixes |
 | **v1.8f** | UI Clarity / Methodology Polish | **Optional** — equity vs Treasury separation copy |
@@ -260,6 +260,7 @@ GhostFlow input promotion rules (all phases):
 ## Related documents
 
 - [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) — **v1.8a canonical inventory** (score-fed, display-only, MOCK, derived, Treasury)
+- [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) — **v1.8b mock retirement decision** (keep-MOCK ×3; no wiring approved)
 - [CFTC_TFF_FEASIBILITY.md](./CFTC_TFF_FEASIBILITY.md) — v0.9c TFF/COT feasibility (YELLOW)
 - [CFTC_TFF_CALIBRATION_STUDY.md](./CFTC_TFF_CALIBRATION_STUDY.md) — v1.0a historical calibration (research)
 - [CFTC_TFF_MAPPING_DECISION.md](./CFTC_TFF_MAPPING_DECISION.md) — v1.0b mapping/product decision (display-only; v1.0c score gate)
