@@ -189,7 +189,7 @@
 | **v1.7c** | Bond Neglect / Long-End Income artifact design — [BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md](./BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md) + example JSON + validator/tests; FRED IDs **candidate** until v1.7d operator lock | None |
 | **v1.7d** | Production artifact candidates — Treasury Futures Positioning JSON + loader + `validate-artifacts` (**done**) | Display path only; no UI/score |
 | **v1.7d.1** | Long-End Income Lens production JSON + `validate-artifacts` + FRED spike (**done**) | Display path only; no UI/score |
-| **v1.7e** | Display-only Treasury Plumbing section — separate UI lane | Cards only; not scored |
+| **v1.7e** | Display-only Treasury Plumbing section — separate UI lane (**done**) | Cards only; not scored; not in `publicSignalCount` |
 | **v1.7f** | Calibration / mapping decision | Display thresholds; score gate still off |
 | **v1.7g** | Separate Treasury Plumbing score gate | **Product-approved only; discouraged by default** |
 
