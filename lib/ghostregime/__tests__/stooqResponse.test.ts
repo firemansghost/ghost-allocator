@@ -4,7 +4,12 @@
 
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import { isStooqApiKeyGateBody, isStooqDailyCsvHeader } from '../marketData';
+import {
+  isStooqApiKeyGateBody,
+  isStooqBrowserChallengeBody,
+  isStooqDailyCsvHeader,
+  formatStooqFailureHint,
+} from '../marketData';
 
 describe('isStooqApiKeyGateBody', () => {
   it('detects Stooq plaintext apikey instructions (live failure mode)', () => {
@@ -38,5 +43,26 @@ describe('isStooqDailyCsvHeader', () => {
 
   it('rejects unrelated first line', () => {
     assert.strictEqual(isStooqDailyCsvHeader('Not,a,csv'), false);
+  });
+});
+
+describe('isStooqBrowserChallengeBody', () => {
+  it('detects JS verification page', () => {
+    const html = `<!DOCTYPE html><html><head></head><body>This page requires JavaScript</body></html>`;
+    assert.strictEqual(isStooqBrowserChallengeBody(html), true);
+  });
+});
+
+describe('formatStooqFailureHint', () => {
+  it('mentions Yahoo for stooq_browser_challenge', () => {
+    const hint = formatStooqFailureHint({
+      request_url_display: 'x',
+      http_status: 200,
+      content_type: 'text/html',
+      body_preview: 'verify your browser',
+      outcome: 'stooq_browser_challenge',
+    });
+    assert.match(hint, /browser\/JS verification/i);
+    assert.match(hint, /Yahoo/i);
   });
 });

@@ -1,7 +1,7 @@
 /**
  * GhostRegime Market Data Provider
- * Stooq CSV for US ETFs (+ optional STOOQ_API_KEY when Stooq serves apikey/captcha gate),
- * CoinGecko fallback for BTC-USD if Stooq fails, CBOE (VIX), AlphaVantage (PDBC with DBC/Stooq fallback)
+ * Yahoo chart (BTC-USD bootstrap), Stooq CSV for US ETFs (+ optional STOOQ_API_KEY),
+ * CoinGecko recent-only BTC gap-fill, CBOE (VIX), AlphaVantage (PDBC with DBC/Stooq fallback)
  */
 
 import type { MarketDataPoint } from './types';
@@ -11,6 +11,16 @@ import {
   formatMarketstackFailureHint,
   isMarketstackEtfFallbackSymbol,
 } from './marketstackEod';
+import {
+  BTC_BOOTSTRAP_MIN_ROWS,
+  clampCoinGeckoPublicStart,
+  isCoinGeckoPublicLookbackExceeded,
+} from './providerCapabilities';
+import {
+  fetchYahooBtcChart,
+  formatYahooFailureHint,
+  type YahooChartDebug,
+} from './yahooChart';
 
 /**
  * Stooq symbol mapping (ticker -> Stooq ID)
@@ -74,6 +84,19 @@ export function isStooqApiKeyGateBody(text: string): boolean {
   );
 }
 
+/** Stooq may return browser/JS verification HTML instead of CSV (common from serverless IPs). */
+export function isStooqBrowserChallengeBody(text: string): boolean {
+  const head = text.slice(0, 4000).toLowerCase();
+  return (
+    head.includes('requires javascript') ||
+    head.includes('please enable javascript') ||
+    head.includes('verify your browser') ||
+    head.includes('browser verification') ||
+    head.includes('checking your browser') ||
+    (head.includes('<!doctype') && head.includes('javascript'))
+  );
+}
+
 function buildStooqCsvUrl(
   stooqId: string,
   startStr: string,
@@ -91,6 +114,7 @@ function buildStooqCsvUrl(
 export type StooqFetchOutcome =
   | 'csv_ok'
   | 'stooq_apikey_gate'
+  | 'stooq_browser_challenge'
   | 'non_csv_unexpected'
   | 'http_not_ok'
   | 'empty_body'
@@ -128,6 +152,8 @@ export function formatStooqFailureHint(debug: StooqFetchDebug): string {
   switch (debug.outcome) {
     case 'stooq_apikey_gate':
       return `Stooq returned API-key/captcha instructions instead of CSV. Set env STOOQ_API_KEY (see https://stooq.com/q/d/?s=spy.us&get_apikey). Preview: ${p}`;
+    case 'stooq_browser_challenge':
+      return `Stooq returned browser/JS verification instead of CSV (use Yahoo BTC bootstrap). Preview: ${p}`;
     case 'non_csv_unexpected':
       return `Stooq response was not recognized as daily CSV (expected header Date,Open,High,Low,Close with optional Volume, or HTML/error body). Preview: ${p}`;
     case 'http_not_ok':
@@ -189,6 +215,14 @@ async function fetchStooqData(
         data: [],
         resolvedId: stooqId,
         debug: emptyStooqDebug(displayUrl, response.status, contentType, preview, 'stooq_apikey_gate'),
+      };
+    }
+
+    if (isStooqBrowserChallengeBody(text)) {
+      return {
+        data: [],
+        resolvedId: stooqId,
+        debug: emptyStooqDebug(displayUrl, response.status, contentType, preview, 'stooq_browser_challenge'),
       };
     }
 
@@ -457,18 +491,29 @@ async function fetchAlphaVantagePdbc(
   }
 }
 
-/** Public CoinGecko `/market_chart/range` rejects very long windows (401 / rate limits). Chunk sub-ranges. */
-const COINGECKO_RANGE_CHUNK_SECONDS = 80 * 24 * 60 * 60; // 80 days — stays under typical free-tier caps
+/** Public CoinGecko chunk size within the 360-day public cap. */
+const COINGECKO_RANGE_CHUNK_SECONDS = 80 * 24 * 60 * 60;
+
+export interface CoinGeckoBtcFetchMeta {
+  lookbackLimited?: boolean;
+  lookbackExceeded?: boolean;
+}
 
 /**
- * Fetch BTC price from CoinGecko (used when Stooq BTC CSV is unavailable)
+ * CoinGecko public BTC — recent-only gap-fill; not bootstrap-capable (max ~360 calendar days).
  */
-async function fetchCoinGeckoBtc(
+export async function fetchCoinGeckoBtcPublic(
   startDate: Date,
   endDate: Date
-): Promise<{ data: MarketDataPoint[]; error?: string }> {
+): Promise<{ data: MarketDataPoint[]; error?: string; meta: CoinGeckoBtcFetchMeta }> {
+  const meta: CoinGeckoBtcFetchMeta = {};
   try {
-    const startTimestamp = Math.floor(startDate.getTime() / 1000);
+    const { effectiveStart, lookbackLimited } = clampCoinGeckoPublicStart(startDate, endDate);
+    if (lookbackLimited) {
+      meta.lookbackLimited = true;
+    }
+
+    const startTimestamp = Math.floor(effectiveStart.getTime() / 1000);
     const endTimestamp = Math.floor(endDate.getTime() / 1000);
 
     const pricePoints: [number, number][] = [];
@@ -488,15 +533,24 @@ async function fetchCoinGeckoBtc(
       const bodyText = await response.text().catch(() => '');
 
       if (!response.ok) {
-        lastError = `CoinGecko HTTP ${response.status} (chunk ${cursor}-${chunkEnd}): ${bodyText.slice(0, 240)}`;
-        return { data: [], error: lastError };
+        if (isCoinGeckoPublicLookbackExceeded(bodyText)) {
+          meta.lookbackExceeded = true;
+          lastError = `coingecko_public_lookback_exceeded: HTTP ${response.status}: ${bodyText.slice(0, 240)}`;
+        } else {
+          lastError = `CoinGecko HTTP ${response.status} (chunk ${cursor}-${chunkEnd}): ${bodyText.slice(0, 240)}`;
+        }
+        return { data: [], error: lastError, meta };
       }
 
       let json: { prices?: [number, number][] };
       try {
         json = JSON.parse(bodyText) as { prices?: [number, number][] };
       } catch {
-        return { data: [], error: `CoinGecko invalid JSON (chunk ${cursor}-${chunkEnd})` };
+        return {
+          data: [],
+          error: `CoinGecko invalid JSON (chunk ${cursor}-${chunkEnd})`,
+          meta,
+        };
       }
 
       for (const pair of json.prices || []) {
@@ -525,6 +579,7 @@ async function fetchCoinGeckoBtc(
     for (const dateKey of sortedDates) {
       const close = dailyCloses.get(dateKey)!;
       const date = new Date(dateKey + 'T00:00:00Z');
+      if (date < effectiveStart || date > endDate) continue;
       const returns = prevClose !== null ? calculateReturn(prevClose, close) : 0;
 
       data.push({
@@ -538,14 +593,154 @@ async function fetchCoinGeckoBtc(
     }
 
     if (data.length === 0) {
-      return { data: [], error: lastError || 'CoinGecko returned no prices in range' };
+      return {
+        data: [],
+        error: lastError || 'CoinGecko returned no prices in range',
+        meta,
+      };
     }
 
-    return { data };
+    return { data, meta };
   } catch (error) {
     console.error('Error fetching CoinGecko BTC data:', error);
-    return { data: [], error: (error as Error).message };
+    return { data: [], error: (error as Error).message, meta };
   }
+}
+
+export interface BtcProviderAttempt {
+  provider: 'yahoo' | 'stooq' | 'coingecko_public';
+  outcome: string;
+  rows: number;
+  note?: string;
+}
+
+export interface BtcMarketProbe {
+  provider_attempts: BtcProviderAttempt[];
+  oldest_date: string | null;
+  newest_date: string | null;
+  obs_in_fetch: number;
+  coingecko_public_lookback_limited?: boolean;
+  coingecko_public_lookback_exceeded?: boolean;
+  bootstrap_capable_succeeded: boolean;
+}
+
+function btcDateRange(data: MarketDataPoint[]): { oldest: string | null; newest: string | null } {
+  if (data.length === 0) return { oldest: null, newest: null };
+  const sorted = [...data].sort((a, b) => a.date.getTime() - b.date.getTime());
+  return {
+    oldest: sorted[0].date.toISOString().split('T')[0],
+    newest: sorted[sorted.length - 1].date.toISOString().split('T')[0],
+  };
+}
+
+function finalizeBtcProbe(
+  attempts: BtcProviderAttempt[],
+  data: MarketDataPoint[],
+  extra?: Pick<BtcMarketProbe, 'coingecko_public_lookback_limited' | 'coingecko_public_lookback_exceeded'>
+): BtcMarketProbe {
+  const range = btcDateRange(data);
+  const bootstrapOk = data.length >= BTC_BOOTSTRAP_MIN_ROWS;
+  return {
+    provider_attempts: attempts,
+    oldest_date: range.oldest,
+    newest_date: range.newest,
+    obs_in_fetch: data.length,
+    bootstrap_capable_succeeded: bootstrapOk,
+    ...extra,
+  };
+}
+
+/**
+ * BTC-USD provider chain: Yahoo (bootstrap) → Stooq (optional) → CoinGecko public (recent-only).
+ */
+export async function fetchBtcUsdFromProviders(
+  startDate: Date,
+  endDate: Date
+): Promise<{
+  data: MarketDataPoint[];
+  resolvedId: string;
+  error?: string;
+  probe: BtcMarketProbe;
+  stooqDebug?: StooqFetchDebug;
+  yahooDebug?: YahooChartDebug;
+}> {
+  const attempts: BtcProviderAttempt[] = [];
+
+  const yahoo = await fetchYahooBtcChart(startDate, endDate);
+  attempts.push({
+    provider: 'yahoo',
+    outcome: yahoo.debug.outcome,
+    rows: yahoo.data.length,
+    note: yahoo.error,
+  });
+
+  if (yahoo.data.length >= BTC_BOOTSTRAP_MIN_ROWS) {
+    return {
+      data: yahoo.data,
+      resolvedId: 'yahoo:BTC-USD',
+      probe: finalizeBtcProbe(attempts, yahoo.data),
+      yahooDebug: yahoo.debug,
+    };
+  }
+
+  const stooqId = STOOQ_SYMBOL_MAP[MARKET_SYMBOLS.BTC_USD];
+  const stooq = await fetchStooqData(MARKET_SYMBOLS.BTC_USD, stooqId, startDate, endDate);
+  attempts.push({
+    provider: 'stooq',
+    outcome: stooq.debug.outcome,
+    rows: stooq.data.length,
+    note:
+      stooq.data.length === 0
+        ? formatStooqFailureHint(stooq.debug)
+        : undefined,
+  });
+
+  if (stooq.data.length >= BTC_BOOTSTRAP_MIN_ROWS) {
+    return {
+      data: stooq.data,
+      resolvedId: stooq.resolvedId,
+      probe: finalizeBtcProbe(attempts, stooq.data),
+      stooqDebug: stooq.debug,
+      yahooDebug: yahoo.debug,
+    };
+  }
+
+  const cg = await fetchCoinGeckoBtcPublic(startDate, endDate);
+  attempts.push({
+    provider: 'coingecko_public',
+    outcome: cg.data.length > 0 ? 'prices_ok' : 'no_data',
+    rows: cg.data.length,
+    note: cg.error,
+  });
+
+  const best =
+    yahoo.data.length >= stooq.data.length && yahoo.data.length >= cg.data.length
+      ? { data: yahoo.data, resolvedId: 'yahoo:BTC-USD' }
+      : stooq.data.length >= cg.data.length
+        ? { data: stooq.data, resolvedId: stooq.resolvedId }
+        : { data: cg.data, resolvedId: 'coingecko:bitcoin' };
+
+  const errors: string[] = [];
+  if (yahoo.error && yahoo.data.length === 0) errors.push(`Yahoo: ${yahoo.error}`);
+  if (stooq.data.length === 0) errors.push(formatStooqFailureHint(stooq.debug));
+  if (cg.error) errors.push(cg.error);
+  if (best.data.length < BTC_BOOTSTRAP_MIN_ROWS) {
+    errors.push(
+      `No bootstrap-capable BTC provider reached ${BTC_BOOTSTRAP_MIN_ROWS} observations (CoinGecko public is recent-only, max ~360d)`
+    );
+  }
+
+  return {
+    data: best.data,
+    resolvedId: best.resolvedId,
+    error: errors.filter(Boolean).join(' | '),
+    probe: finalizeBtcProbe(attempts, best.data, {
+      coingecko_public_lookback_limited: cg.meta.lookbackLimited,
+      coingecko_public_lookback_exceeded: cg.meta.lookbackExceeded,
+    }),
+    stooqDebug: stooq.debug,
+    yahooDebug: yahoo.debug,
+  };
 }
 
 /**
@@ -557,6 +752,8 @@ export interface ProviderDiagnostics {
   proxies: Record<string, string>; // original symbol -> proxy symbol (e.g., "PDBC" -> "DBC")
   /** Per fetch-key Stooq probe (symbol passed to fetch, e.g. SPY, DBC); body_preview shows why CSV failed */
   stooq_probe?: Record<string, StooqFetchDebug>;
+  /** BTC-USD multi-provider chain probe */
+  btc_probe?: BtcMarketProbe;
   /** One line per symbol: primary Stooq outcome, optional Marketstack fallback result */
   feed_routing?: Record<string, string>;
   /** Marketstack EOD probe when fallback ran (or failed) */
@@ -657,22 +854,23 @@ export class DefaultMarketDataProvider implements MarketDataProvider {
         if (!stooqId) {
           this.diagnostics.errors[symbol] = `No Stooq mapping for ${symbol}`;
         } else if (symbol === MARKET_SYMBOLS.BTC_USD) {
-          const result = await fetchStooqData(symbol, stooqId, startDate, endDate);
-          if (result.debug.outcome !== 'csv_ok') {
+          const btc = await fetchBtcUsdFromProviders(startDate, endDate);
+          symbolData = btc.data;
+          this.diagnostics.resolvedIds[symbol] = btc.resolvedId;
+          this.diagnostics.btc_probe = btc.probe;
+          this.diagnostics.feed_routing ??= {};
+          const winner = btc.probe.provider_attempts.find(
+            (a) => a.rows >= BTC_BOOTSTRAP_MIN_ROWS
+          );
+          this.diagnostics.feed_routing[symbol] = winner
+            ? `${winner.provider} (bootstrap ok, rows=${winner.rows})`
+            : `BTC chain: ${btc.probe.provider_attempts.map((a) => `${a.provider}:${a.outcome}/${a.rows}`).join(' → ')}`;
+          if (btc.stooqDebug && btc.stooqDebug.outcome !== 'csv_ok') {
             if (!this.diagnostics.stooq_probe) this.diagnostics.stooq_probe = {};
-            this.diagnostics.stooq_probe[symbol] = result.debug;
+            this.diagnostics.stooq_probe[symbol] = btc.stooqDebug;
           }
-          symbolData = result.data;
-          this.diagnostics.resolvedIds[symbol] = result.resolvedId;
-          if (symbolData.length === 0) {
-            const cg = await fetchCoinGeckoBtc(startDate, endDate);
-            if (cg.data.length > 0) {
-              symbolData = cg.data;
-              this.diagnostics.resolvedIds[symbol] = 'coingecko:bitcoin';
-            } else {
-              this.diagnostics.errors[symbol] =
-                formatStooqFailureHint(result.debug) + (cg.error ? ` ${cg.error}` : '');
-            }
+          if (btc.error && btc.data.length < BTC_BOOTSTRAP_MIN_ROWS) {
+            this.diagnostics.errors[symbol] = btc.error;
           }
         } else {
           const result = await fetchStooqData(symbol, stooqId, startDate, endDate);

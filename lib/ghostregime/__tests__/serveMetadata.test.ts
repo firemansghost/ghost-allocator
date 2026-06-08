@@ -20,7 +20,29 @@ describe('computeMarketSnapshotLagDays', () => {
 });
 
 describe('extractRefreshErrorSummary', () => {
-  it('prefers first provider errors string', () => {
+  it('prefers BTC probe summary when bootstrap failed', () => {
+    const pd: ProviderDiagnostics = {
+      resolvedIds: {},
+      errors: { 'BTC-USD': 'chain failed' },
+      proxies: {},
+      btc_probe: {
+        provider_attempts: [
+          { provider: 'yahoo', outcome: 'zero_valid_rows', rows: 0 },
+          { provider: 'stooq', outcome: 'stooq_browser_challenge', rows: 0 },
+        ],
+        oldest_date: null,
+        newest_date: null,
+        obs_in_fetch: 0,
+        coingecko_public_lookback_exceeded: true,
+        bootstrap_capable_succeeded: false,
+      },
+    };
+    const s = extractRefreshErrorSummary(pd);
+    assert.ok(s?.includes('BTC fetch failed'));
+    assert.ok(s?.includes('coingecko_public_lookback_exceeded'));
+  });
+
+  it('falls back to first provider errors string when BTC ok', () => {
     const pd: ProviderDiagnostics = {
       resolvedIds: {},
       errors: { SPY: 'Stooq gate' },

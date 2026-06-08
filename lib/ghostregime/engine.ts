@@ -71,7 +71,11 @@ function buildStaleObservationPayload(
     },
   };
   if (staleReason === 'INSUFFICIENT_HISTORY' || staleReason === 'MISSING_CORE_SERIES') {
-    base.stale_detail = formatStaleHistoryHumanSummary(staleReason, diagnostics);
+    base.stale_detail = formatStaleHistoryHumanSummary(
+      staleReason,
+      diagnostics,
+      providerDiagnostics
+    );
   } else if (staleReason === 'MARKET_DATA_UNAVAILABLE') {
     base.stale_detail =
       'No market rows returned for the configured fetch window (see core_symbol_status and provider_diagnostics).';
