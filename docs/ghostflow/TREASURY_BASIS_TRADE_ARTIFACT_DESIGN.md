@@ -1,6 +1,6 @@
 # Treasury Basis Trade / Futures Positioning Artifact Design (GhostFlow v1.7b)
 
-**Status:** v1.7d production artifact + **v1.7e display card** in Treasury Plumbing lane — [`treasuryFuturesPositioningProxy.v1.json`](../data/ghostflow/artifacts/treasuryFuturesPositioningProxy.v1.json) via [`treasuryPlumbingDisplay.ts`](../lib/ghostflow/treasuryPlumbingDisplay.ts). **Not** score wiring or `buildSnapshot` merge.
+**Status:** v1.7d production artifact + **v1.7e display card** + **v1.7f display-only mapping decision** — [`treasuryFuturesPositioningProxy.v1.json`](../data/ghostflow/artifacts/treasuryFuturesPositioningProxy.v1.json) via [`treasuryPlumbingDisplay.ts`](../lib/ghostflow/treasuryPlumbingDisplay.ts); [`mapping decision`](./TREASURY_PLUMBING_MAPPING_DECISION.md). **Not** score wiring or `buildSnapshot` merge; `mappingStatus` **not_final**.
 
 **Prior work:** [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md) (v1.7a) · v1.7a.1 CFTC PRE spike (`npm run ghostflow:treasury-cftc-pre-spike`)
 
@@ -170,16 +170,17 @@ Tests: [`lib/ghostflow/__tests__/treasuryFuturesPositioningProxy.test.ts`](../li
 |-------|--------|
 | **v1.7d** | Production artifact candidate JSON + `validate-artifacts` registration — **done** (positioning proxy) |
 | **v1.7e** | Display-only Treasury Plumbing dashboard section — **done** |
-| **v1.7f** | Calibration / mapping decision |
+| **v1.7f** | Mapping decision — display-only; `mappingStatus` **not_final** — **done** ([memo](./TREASURY_PLUMBING_MAPPING_DECISION.md)) |
 | **v1.7g** | Separate Treasury score gate — discouraged; product-approved only |
 
 ---
 
-## 9. Not implemented (v1.7e+)
+## 9. Not implemented (v1.7f+)
 
 - `buildSnapshot` / `publicSignalCount` / score sub-input
 - Runtime dashboard fetching
-- Treasury status score (v1.7g discouraged)
+- Status bands / final mapper (v1.7f decision: **none selected**)
+- Treasury status score (v1.7g discouraged; not approved)
 
 ## 9a. Implemented (v1.7d–e)
 

@@ -1,6 +1,6 @@
 # Bond Neglect / Long-End Income Lens Artifact Design (GhostFlow v1.7c)
 
-**Status:** v1.7d.1 production artifact + **v1.7e display card** in Treasury Plumbing lane — [`treasuryLongEndIncomeLens.v1.json`](../data/ghostflow/artifacts/treasuryLongEndIncomeLens.v1.json) via [`treasuryPlumbingDisplay.ts`](../lib/ghostflow/treasuryPlumbingDisplay.ts). **Not** score wiring or `buildSnapshot` merge.
+**Status:** v1.7d.1 production artifact + **v1.7e display card** + **v1.7f display-only mapping decision** — [`treasuryLongEndIncomeLens.v1.json`](../data/ghostflow/artifacts/treasuryLongEndIncomeLens.v1.json) via [`treasuryPlumbingDisplay.ts`](../lib/ghostflow/treasuryPlumbingDisplay.ts); [`mapping decision`](./TREASURY_PLUMBING_MAPPING_DECISION.md). **Not** score wiring or `buildSnapshot` merge; `mappingStatus` **not_final**.
 
 **Prior work:** [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md) (v1.7a) · v1.7b [Treasury Futures Positioning Proxy](./TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md)
 
@@ -193,7 +193,7 @@ Tests: [`lib/ghostflow/__tests__/treasuryLongEndIncomeLens.test.ts`](../lib/ghos
 - Nominal and real yields can diverge for different macro reasons; breakevens are context, not neglect proof.
 - Duration risk remains even when yields appear “high” vs recent history.
 - Public/manual data only; display-only by default; not scored.
-- Future percentiles (v1.7f) do not imply buy/sell bands without separate product approval.
+- Future percentiles (v1.7f-calibration / v1.7f.1) do not imply buy/sell bands without separate product approval; v1.7f mapping decision keeps display-only ([memo](./TREASURY_PLUMBING_MAPPING_DECISION.md)).
 
 ---
 
@@ -213,7 +213,8 @@ Tests: [`lib/ghostflow/__tests__/treasuryLongEndIncomeLens.test.ts`](../lib/ghos
 |-------|--------|
 | **v1.7d.1** | Production artifact candidate JSON + `validate-artifacts` registration — **done** |
 | **v1.7e** | Display-only Treasury Plumbing section — **Long-End Income Lens** subcard — **done** |
-| **v1.7f** | Calibration / historical percentiles (`nominalYieldPercentile`, `realYieldPercentile`) |
+| **v1.7f** | Mapping decision — display-only; no neglect bands — **done** ([memo](./TREASURY_PLUMBING_MAPPING_DECISION.md)) |
+| **v1.7f-calibration** | Optional FRED yield history + display percentiles (`nominalYieldPercentile`, `realYieldPercentile`) |
 | **v1.7g** | Separate Treasury Plumbing score gate — **discouraged**; product-approved only |
 
 ---
