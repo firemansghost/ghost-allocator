@@ -10,6 +10,8 @@ import { GhostFlowSignalGrid } from './GhostFlowSignalGrid';
 import { GhostFlowMethodology } from './GhostFlowMethodology';
 import { GhostFlowPassiveEndgameScenarios } from './GhostFlowPassiveEndgameScenarios';
 import { GhostFlowWatchlist } from './GhostFlowWatchlist';
+import { buildTreasuryPlumbingDisplay } from '@/lib/ghostflow/treasuryPlumbingDisplay';
+import { GhostFlowTreasuryPlumbing } from './GhostFlowTreasuryPlumbing';
 
 const HEADER_BADGES = ['Static preview', 'Research only', 'Not a forecast', 'Not financial advice'] as const;
 
@@ -31,6 +33,8 @@ export function GhostFlowDashboard() {
   const indexConcentrationAsOf = meta.indexConcentrationAsOf;
   const passiveShareAsOf = meta.passiveShareProxyAsOf;
   const breadthAsOf = meta.breadthAsOf;
+
+  const treasuryPlumbing = buildTreasuryPlumbingDisplay();
 
   const dateParts: string[] = [];
   if (volAsOf) dateParts.push(`VIX as of ${volAsOf}`);
@@ -106,6 +110,7 @@ export function GhostFlowDashboard() {
 
       <GhostFlowSignalGrid signals={data.signals} dataMix={data.dataMix} publicSignalCount={data.publicSignalCount} />
       <GhostFlowScoreDrivers />
+      <GhostFlowTreasuryPlumbing data={treasuryPlumbing} />
       <GhostFlowMethodology
         data={data}
         volRegimeAsOf={meta.volRegimeAsOf}

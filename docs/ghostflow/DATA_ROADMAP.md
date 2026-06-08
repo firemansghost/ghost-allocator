@@ -207,9 +207,10 @@ GhostFlow input promotion rules (all phases):
 | **v1.7b** | Treasury Futures Positioning artifact design | **Done** — [TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md](./TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md); example JSON + validator/tests; no production/display/score |
 | **v1.7c** | Bond Neglect / Long-End Income Lens artifact design | **Done** — [BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md](./BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md); `treasury-long-end-income-lens` example + validator/tests; FRED IDs candidate until v1.7d.1 production |
 | **v1.7d** | Treasury Plumbing production — futures positioning | **Done** — `treasury-futures-positioning-proxy` production JSON + loader + `ghostflow:check` |
-| **v1.7d.1** | Treasury Plumbing production — long-end income lens | **Done** — [BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md](./BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md); FRED-verified production JSON (asOf 2026-06-02); no UI/score/`publicSignalCount` change |
+| **v1.7d.1** | Treasury Plumbing production — long-end income lens | **Done** — [BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md](./BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md); FRED-verified production JSON (asOf 2026-06-02); no score/`publicSignalCount` change |
+| **v1.7e** | Treasury Plumbing display-only UI section | **Done** — separate dashboard lane (`GhostFlowTreasuryPlumbing`); both production artifacts visible; no `buildSnapshot` merge; `publicSignalCount` **10** unchanged |
 
-**Treasury Plumbing (future lane):** Not part of the equity Research Composite, `publicSignalCount`, or Passive Pressure. Basis-trade stress and long-end income lens are display-only candidates for a separate dashboard section (v1.7e+). See [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md).
+**Treasury Plumbing:** Separate from the equity Research Composite, `publicSignalCount`, and Passive Pressure. Display-only context cards — not investment advice; no Treasury status score. See [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md).
 
 ---
 
@@ -220,7 +221,7 @@ GhostFlow input promotion rules (all phases):
 3. ~~**Levered ETF scope:**~~ **Resolved (v1.1a–b):** Tier-1 six-ticker universe; single-session `underlyingReturnPct`; formula in [LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md](./LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md). ~~**Levered ETF mapping (v1.1e):**~~ **Resolved:** [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md) — display-only; MOCK **55**. ~~**Levered ETF calibration (v1.1e-calibration):**~~ **Resolved:** [LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md](./LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md) — full fixed-current-AUM return-sensitivity run complete; **v1.1f** score wiring gated on product approval only.
 4. **0DTE data path:** **Display proxy shipped (v1.4d–e):** OCC Index/Others via `options-activity-proxy` — [mapping decision](./OPTIONS_ACTIVITY_MAPPING_DECISION.md) locks display-only; true 0DTE/GEX → paid/vendor; **v1.4f** score gate discouraged (VIX overlap).
 5. ~~**Retirement flows:**~~ **Resolved (v1.2a–b):** [RETIREMENT_FLOW_FEASIBILITY.md](./RETIREMENT_FLOW_FEASIBILITY.md) + [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md) — **YELLOW**; ICI Retirement Market primary; exact ICI table/rows → **v1.2c** operator extract; composite membership → **v1.2d** decision.
-6. **Treasury Plumbing (v1.7a–d.1):** [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md) · both Treasury **production candidates** complete (positioning + income lens). Open: **v1.7e** display section only. Treasury lane **separate from equity composite**; `publicSignalCount` **10** unchanged.
+6. **Treasury Plumbing (v1.7a–e):** [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md) · production artifacts + **display-only UI lane** complete. Open: **v1.7f** calibration/mapping; **v1.7g** Treasury score gate discouraged. Treasury lane **separate from equity composite**; `publicSignalCount` **10** unchanged.
 
 ---
 
