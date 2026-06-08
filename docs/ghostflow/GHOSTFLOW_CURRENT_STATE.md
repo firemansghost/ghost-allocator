@@ -1,0 +1,178 @@
+# GhostFlow Current State (v1.8a)
+
+Canonical inventory after the **v1.7** release checkpoint. Theme for v1.8: **GhostFlow Data Quality & Mock Score Discipline**.
+
+**Related:** [DATA_ROADMAP.md](./DATA_ROADMAP.md) (living phase ladder) · [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) (operator refresh)
+
+---
+
+## Status
+
+- **Current as of:** v1.8a — after v1.7 checkpoint (Treasury Plumbing display-only mapping complete).
+- **Document type:** Documentation inventory only — no score, artifact, UI, runtime, or data changes in v1.8a.
+- **Baseline reference:** [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) = `2026-05-22` (production composite snapshot).
+- **GhostRegime boundary:** GhostRegime (including BTC provider work) is a separate product lane — not in GhostFlow v1.8 scope.
+
+---
+
+## Architecture summary
+
+### Equity Research Composite lane
+
+| Piece | Role |
+|-------|------|
+| [`buildSnapshot.ts`](../../lib/ghostflow/buildSnapshot.ts) | Merges mock snapshot + validated public artifacts before scoring |
+| [`scoring.ts`](../../lib/ghostflow/scoring.ts) | Composite / Passive / Structural sub-scores and band |
+| [`GhostFlowSignalGrid`](../../components/ghostflow/GhostFlowSignalGrid.tsx) | Equity/public signal cards (score-fed + display-only + derived context) |
+| **`publicSignalCount`** | **10** — six score-fed public cards + four display-only public signals in `meta.publicSignals` |
+
+Derived context card `distance-65` appears in the grid but is **not** counted in `publicSignalCount`.
+
+### Treasury Plumbing lane (separate)
+
+| Piece | Role |
+|-------|------|
+| [`treasuryPlumbingDisplay.ts`](../../lib/ghostflow/treasuryPlumbingDisplay.ts) | Loads Treasury production JSON; formats display cards — **not** `buildSnapshot` |
+| [`GhostFlowTreasuryPlumbing`](../../components/ghostflow/GhostFlowTreasuryPlumbing.tsx) | Two-card display-only section on dashboard |
+| **Card count** | **2** production-backed display-only cards |
+
+**Counting rule:** Equity `publicSignalCount` = **10**. Treasury display lane = **2** cards. **Do not** combine into 12. Treasury is outside `raw.signals`, `meta.publicSignals`, and [`PUBLIC_ARTIFACT_SIGNAL_IDS`](../../lib/ghostflow/signalPresentation.ts).
+
+---
+
+## Current headline state
+
+| Item | Value |
+|------|--------|
+| **Composite** | **62** |
+| **Passive Pressure** | **58** |
+| **Structural Fragility** | **66** |
+| **Band** | *Crowded / Reflexive* |
+| **`publicSignalCount`** | **10** (equity only) |
+| **Treasury cards** | **2** separate display-only cards |
+| **Treasury scored** | **No** — does not affect Composite / Passive / Structural |
+
+---
+
+## Score-fed public artifacts
+
+Six artifacts merge into the Research Composite via `buildSnapshot`. All in `ghostflow:check`.
+
+| Signal id | Source | dataQuality | Scored role | Cadence | Status | Open issue |
+|-----------|--------|-------------|-------------|---------|--------|------------|
+| `vol-regime` | CBOE VIX History CSV | `verified_manual` | Passive 20% — `optionsVolatilityAmplifier` | Daily | Production | Align `GHOSTFLOW_REFERENCE_AS_OF` with daily breadth pass |
+| `etf-flow` | ICI domestic equity ETF estimated net issuance | `verified_manual` | Passive 25% — `etfFundFlowImpulse` | Weekly | Production | Weekly freshness caution bands (7–14 days) |
+| `passive-share` | ICI fund/ETF domestic equity **index asset share** | `verified_manual` | Structural 30% — `passiveShareProxy` | Monthly | Production | Public **proxy** — not market-wide passive share |
+| `active-index-flow` | ICI active vs index **monthly net flows** | `verified_manual` | Structural 20% — `activeShareOffsetProxy` | Monthly | Production | Same ICI release; flows vs assets table discipline |
+| `concentration` | SSGA SPY monthly fact sheet top-10 weight | `verified_manual` | Structural 20% — `indexConcentration` | Monthly | Production | PDF month-end `asOf` vs control `publishedAt` |
+| `breadth` | StockCharts `$SPXA50R` (% above 50-day MA) | `manual_unverified` | Structural 15% — `breadthWeakness` | Daily | Production | Barchart `$S5FI` cross-check gap ~1.2 pp |
+
+---
+
+## Display-only equity/public cards
+
+Four artifacts produce signal cards in the equity/public grid. **Not** merged into composite scores. Related passive score slots remain **MOCK** (see below).
+
+| Signal id | Source | dataQuality | Why display-only | Status | Open issue |
+|-----------|--------|-------------|------------------|--------|------------|
+| `systematic-flow` | CFTC TFF equity-index basket (ES/NQ/RTY/VIX) | `verified_manual` | [v1.0b mapping](./CFTC_TFF_MAPPING_DECISION.md) — display Mapping A; MOCK **62** still scores `systematicStrategyPressure` | Production card | `mappingStatus` **not_final**; **v1.0c** score gate discouraged |
+| `levered-etf-rebalance` | Tier-1 levered ETF rebalance pressure estimate | `manual_unverified` | [v1.1e mapping](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md); MOCK **55** still scores | Production card | `mappingStatus` **not_final**; **v1.1f** gate discouraged |
+| `retirement-asset-growth` | ICI Retirement Market Table 1 structural assets | `verified_manual` | [v1.2e mapping](./RETIREMENT_FLOW_MAPPING_DECISION.md); quarterly assets ≠ flow pressure; MOCK **58** still scores | Production card | `mappingStatus` **not_final**; quarterly freshness caution normal; **v1.2f** gate discouraged |
+| `options-activity-proxy` | OCC Daily Volume — Index/Others contracts | `manual_unverified` | [v1.4e mapping](./OPTIONS_ACTIVITY_MAPPING_DECISION.md); not 0DTE/GEX; VIX remains scored vol input | Production card | `mappingStatus` **not_final**; **v1.4f** gate discouraged (VIX overlap) |
+
+These cards may appear in the equity signal grid with **DISPLAY ONLY** badges. Their production artifacts refresh display values only — they do **not** replace MOCK composite inputs unless a future product-approved score gate is opened.
+
+---
+
+## MOCK score inputs
+
+Three static values from [`mockGhostflowSnapshot.ts`](../../data/ghostflow/mockGhostflowSnapshot.ts) feed the Research Composite. **No retirement decisions in v1.8a** — deferred to **v1.8b**.
+
+| Input | Mock value | Why still mock | Replacement candidate | Risk if left mock | Recommended next step (v1.8b) |
+|-------|------------|----------------|----------------------|-------------------|-------------------------------|
+| `systematicStrategyPressure` | **62** | v1.0b locked CFTC display-only; score gate not approved | CFTC Mapping C (`min(80, basketScore)`) after rename — [v1.0b](./CFTC_TFF_MAPPING_DECISION.md) | Passive pillar partly static; narrative mismatch vs live CFTC card | **v1.8b:** keep mock / permanent label / gated **v1.0c** |
+| `retirementFlowPressureProxy` | **58** | v1.2e display-only; quarterly structural assets ≠ flow-pressure telemetry | ICI-derived flow mapper (unapproved) | Passive pillar partly static | **v1.8b:** keep mock / permanent label / gated **v1.2f** |
+| `leveredEtfRebalancePressure` | **55** | v1.1e display-only; calibration is return-sensitivity not true AUM history | Production artifact pressure → score merge — **v1.1f** | Rebalance signal may diverge from display card | **v1.8b:** compare artifact vs mock **55**; gate **v1.1f** only if product-approved |
+
+**v1.8a posture:** No score wiring approved. Expected v1.8b deliverable: `MOCK_SCORE_RETIREMENT_PLAN.md` (not created in v1.8a).
+
+---
+
+## DERIVED inputs
+
+| Name | Source | Method | Status | Open issue |
+|------|--------|--------|--------|------------|
+| `modelZoneProximity` (score sub-input) | ICI `passive-share` artifact | `mapDistanceToZoneNumericValue` from index share vs 65% reference zone (v0.9b) | Wired in `buildSnapshot` — Structural 15% | Same ICI denominator caveats as `passive-share`; [stress-zone phrasebook](./PASSIVE_STRESS_ZONE_LANGUAGE.md) |
+| `distance-65` (signal card only) | Same ICI index share | Context card — distance to model-stress **reference zone** | Live when passive-share validates; **not** in `publicSignalCount` | **Not a tripwire** — assumption-sensitive framing per v1.6a; public proxy only |
+
+---
+
+## Treasury Plumbing cards
+
+Separate dashboard lane — **not** in equity composite or `publicSignalCount`.
+
+| Signal id | Source | Production | Display-only rationale | mappingStatus | Future calibration | Caveat |
+|-----------|--------|------------|------------------------|---------------|-------------------|--------|
+| `treasury-futures-positioning-proxy` | CFTC TFF UST futures basket (2Y/5Y/10Y/30Y) | Yes — `ghostflow:check` | [v1.7f Option A](./TREASURY_PLUMBING_MAPPING_DECISION.md) display-only | `not_final` | v1.7f-calibration optional (research) | **Public CFTC positioning proxy only** — not full basis-trade measurement |
+| `treasury-long-end-income-lens` | FRED six-series common-date yields/breakevens | Yes — `ghostflow:check` | v1.7f display-only; no mapper / no score | `not_final` | FRED history percentiles optional (v1.7f.1 not approved) | **Not investment advice** — not bond-buying or duration-allocation advice |
+
+- **v1.7f** selected display-only for both artifacts.
+- **v1.7g** Treasury score gate — **not approved**, discouraged.
+- Treasury refresh updates display lane only — no Composite / Passive / Structural impact.
+
+---
+
+## Open roadmap questions
+
+1. **Mock retirement** — Which MOCK inputs (if any) should graduate to PUBLIC score slots? All four equity score gates (**v1.0c**, **v1.1f**, **v1.2f**, **v1.4f**) remain discouraged.
+2. **Calibration backlog** — v1.4e-calibration (options), v1.7f-calibration (Treasury), plus existing CFTC/levered/retirement studies — research-only vs display percentiles (not approved for UI).
+3. **0DTE / true GEX path** — OCC Index/Others proxy shipped display-only; true 0DTE/GEX still YELLOW/RED per [ODTE_OPTIONS_FEASIBILITY.md](./ODTE_OPTIONS_FEASIBILITY.md).
+4. **Passive-flow next source** — Any new public proxy must avoid double-counting ICI index share / active-index-flow already in composite.
+5. **Doc sprawl** — 35+ memos under `docs/ghostflow/`; v1.8e consolidation planned.
+6. **Artifact freshness / dataQuality consistency** — `manual_unverified` on breadth, levered ETF, options, Treasury futures; v1.8c pass planned.
+
+---
+
+## v1.8 recommendation
+
+**Primary v1.8 theme:** GhostFlow **Data Quality & Mock Score Discipline**
+
+Discipline-first roadmap after v1.7 feature completion — inventory and operator honesty before new sources or score expansion.
+
+| Phase | Deliverable | Status |
+|-------|-------------|--------|
+| **v1.8a** | Current State / Data Quality Inventory — **this doc** | **Done** (docs-only) |
+| **v1.8b** | Mock Score Retirement Decision — `MOCK_SCORE_RETIREMENT_PLAN.md` | **Next** |
+| **v1.8c** | Artifact Freshness & `dataQuality` Consistency Pass | Planned |
+| **v1.8d** | Operator Refresh Discipline | Planned |
+| **v1.8e** | Documentation Consolidation | Planned |
+| **v1.8f** | UI Clarity / Methodology Polish | Optional |
+| **v1.8g** | Treasury Calibration Research-Only | Optional |
+| **v1.8h** | Passive-Flow Next-Source Feasibility | Optional |
+| **v1.8i** | Score Wiring Gate | **Not approved / discouraged** |
+
+---
+
+## Avoid for now
+
+- Score wiring (v1.0c, v1.1f, v1.2f, v1.4f, v1.7g)
+- Treasury score, percentiles, or status bands (v1.7f.1)
+- `publicSignalCount` change (do not combine equity 10 + Treasury 2)
+- Runtime / live dashboard fetching
+- New data sources without feasibility memo
+- Replacing MOCK inputs without source verification and product gate
+- GhostRegime work inside GhostFlow v1.8
+
+---
+
+## Validation / guardrails (v1.8a)
+
+| Guardrail | v1.8a posture |
+|-----------|---------------|
+| Docs-only | Yes — this file + `DATA_ROADMAP.md` updates only |
+| Score change | **No** — Composite **62 / 58 / 66** unchanged |
+| Artifact JSON change | **No** |
+| UI / code change | **No** |
+| `publicSignalCount` | **10** (equity) — unchanged |
+| Treasury lane | **2** separate display-only cards — unchanged |
+| Trust tests | [`ghostflowCurrentState.test.ts`](../../lib/ghostflow/__tests__/ghostflowCurrentState.test.ts) · [`treasuryPlumbingDisplay.test.ts`](../../lib/ghostflow/__tests__/treasuryPlumbingDisplay.test.ts) |
