@@ -86,15 +86,17 @@ These cards may appear in the equity signal grid with **DISPLAY ONLY** badges. T
 
 ## MOCK score inputs
 
-Three static values from [`mockGhostflowSnapshot.ts`](../../data/ghostflow/mockGhostflowSnapshot.ts) feed the Research Composite. **No retirement decisions in v1.8a** — deferred to **v1.8b**.
+Three static values from [`mockGhostflowSnapshot.ts`](../../data/ghostflow/mockGhostflowSnapshot.ts) feed the Research Composite. **v1.8b decision memo:** [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) — docs-only; mock values unchanged; no score wiring approved.
 
-| Input | Mock value | Why still mock | Replacement candidate | Risk if left mock | Recommended next step (v1.8b) |
-|-------|------------|----------------|----------------------|-------------------|-------------------------------|
-| `systematicStrategyPressure` | **62** | v1.0b locked CFTC display-only; score gate not approved | CFTC Mapping C (`min(80, basketScore)`) after rename — [v1.0b](./CFTC_TFF_MAPPING_DECISION.md) | Passive pillar partly static; narrative mismatch vs live CFTC card | **v1.8b:** keep mock / permanent label / gated **v1.0c** |
-| `retirementFlowPressureProxy` | **58** | v1.2e display-only; quarterly structural assets ≠ flow-pressure telemetry | ICI-derived flow mapper (unapproved) | Passive pillar partly static | **v1.8b:** keep mock / permanent label / gated **v1.2f** |
-| `leveredEtfRebalancePressure` | **55** | v1.1e display-only; calibration is return-sensitivity not true AUM history | Production artifact pressure → score merge — **v1.1f** | Rebalance signal may diverge from display card | **v1.8b:** compare artifact vs mock **55**; gate **v1.1f** only if product-approved |
+Together these inputs are **55% of Passive Pressure** and **27.5% of Composite** — a trust/disclosure issue documented in v1.8b, not authorization to change scores.
 
-**v1.8a posture:** No score wiring approved. Expected v1.8b deliverable: `MOCK_SCORE_RETIREMENT_PLAN.md` (not created in v1.8a).
+| Input | Mock value | Related display card | v1.8b decision |
+|-------|------------|----------------------|----------------|
+| `systematicStrategyPressure` | **62** | `systematic-flow` (CFTC TFF) | **Keep MOCK**; disclose; defer replacement to **v1.0c** product gate only; reject Mapping A score wiring |
+| `retirementFlowPressureProxy` | **58** | `retirement-asset-growth` (ICI Table 1) | **Keep MOCK**; reject current artifact as replacement; possible retire/remove in broader scoring rewrite only |
+| `leveredEtfRebalancePressure` | **55** | `levered-etf-rebalance` | **Keep MOCK**; disclose; defer replacement to **v1.1f** product gate only; reject wiring without true AUM history |
+
+Display artifacts refresh cards only — they do **not** replace these score inputs. Gates **v1.0c / v1.1f / v1.2f** remain **not approved / discouraged**.
 
 ---
 
@@ -124,7 +126,7 @@ Separate dashboard lane — **not** in equity composite or `publicSignalCount`.
 
 ## Open roadmap questions
 
-1. **Mock retirement** — Which MOCK inputs (if any) should graduate to PUBLIC score slots? All four equity score gates (**v1.0c**, **v1.1f**, **v1.2f**, **v1.4f**) remain discouraged.
+1. ~~**Mock retirement**~~ **Resolved (v1.8b):** [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) — all three passive MOCK inputs **kept**; no replacements or retirements executed; gates **v1.0c / v1.1f / v1.2f / v1.4f** remain discouraged.
 2. **Calibration backlog** — v1.4e-calibration (options), v1.7f-calibration (Treasury), plus existing CFTC/levered/retirement studies — research-only vs display percentiles (not approved for UI).
 3. **0DTE / true GEX path** — OCC Index/Others proxy shipped display-only; true 0DTE/GEX still YELLOW/RED per [ODTE_OPTIONS_FEASIBILITY.md](./ODTE_OPTIONS_FEASIBILITY.md).
 4. **Passive-flow next source** — Any new public proxy must avoid double-counting ICI index share / active-index-flow already in composite.
@@ -142,8 +144,8 @@ Discipline-first roadmap after v1.7 feature completion — inventory and operato
 | Phase | Deliverable | Status |
 |-------|-------------|--------|
 | **v1.8a** | Current State / Data Quality Inventory — **this doc** | **Done** (docs-only) |
-| **v1.8b** | Mock Score Retirement Decision — `MOCK_SCORE_RETIREMENT_PLAN.md` | **Next** |
-| **v1.8c** | Artifact Freshness & `dataQuality` Consistency Pass | Planned |
+| **v1.8b** | Mock Score Retirement Decision — [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) | **Done** (docs-only) |
+| **v1.8c** | Artifact Freshness & `dataQuality` Consistency Pass | **Next** |
 | **v1.8d** | Operator Refresh Discipline | Planned |
 | **v1.8e** | Documentation Consolidation | Planned |
 | **v1.8f** | UI Clarity / Methodology Polish | Optional |
