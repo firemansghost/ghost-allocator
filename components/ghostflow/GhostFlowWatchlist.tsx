@@ -5,7 +5,7 @@ const WATCH_TARGETS = [
   'CTA / vol-control proxy',
   'Levered ETF rebalance pressure — display-only artifact; mapping not final (v1.1e)',
   'Retirement asset growth — display-only ICI quarterly artifact; mapping not final (v1.2e)',
-  'Treasury Plumbing feasibility — basis-trade proxy + long-end income lens (future; not live; display-only candidate; not scored)',
+  'Treasury Plumbing — shipped v1.7e as separate display-only lane (2 production cards); v1.7f kept unscored (no mapper/status bands); future: optional v1.7f-calibration / v1.7f.1 percentiles; v1.7g score gate not approved',
   'HHI or effective-number concentration metric',
 ];
 
@@ -19,10 +19,11 @@ export function GhostFlowWatchlist() {
         <p className="text-sm text-zinc-400 leading-relaxed mb-4">
           GhostFlow uses six public score artifacts, one derived score input (model-zone proximity from ICI index
           share), four display-only public artifacts (CFTC TFF, levered ETF rebalance, retirement asset growth, OCC index
-          options intensity), and three static mock score inputs in the research composite. Options activity is not 0DTE/GEX
-          and not score-fed — VIX remains the scored options/vol input. Retirement-flow pressure stays MOCK 58 (v1.2e
-          display-only); levered mapping
-          (v1.1e) and score wiring (v1.1f / v1.2f) remain product-gated; CFTC score wiring is separately gated.
+          options intensity), and three static mock score inputs in the equity research composite ({`publicSignalCount`}{' '}
+          10). Treasury Plumbing is a separate display-only lane — not in the equity signal grid or{' '}
+          {`publicSignalCount`}. Options activity is not 0DTE/GEX and not score-fed — VIX remains the scored options/vol
+          input. Retirement-flow pressure stays MOCK 58 (v1.2e display-only); levered mapping (v1.1e) and score wiring
+          (v1.1f / v1.2f) remain product-gated; CFTC score wiring is separately gated.
         </p>
         <ul className="grid gap-2 sm:grid-cols-2 text-sm text-zinc-300">
           {WATCH_TARGETS.map((item) => (

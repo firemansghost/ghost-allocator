@@ -1,5 +1,5 @@
 /**
- * GhostFlow v1.5a — consolidated dashboard state / trust audit (no score wiring).
+ * GhostFlow v1.7 — consolidated dashboard state / trust audit (no score wiring).
  */
 
 import assert from 'assert';
@@ -75,5 +75,21 @@ assert.strictEqual(PUBLIC_ARTIFACT_SIGNAL_IDS.length, 10);
 assert.ok(PUBLIC_ARTIFACT_SIGNAL_IDS.includes('retirement-asset-growth'));
 assert.ok(PUBLIC_ARTIFACT_SIGNAL_IDS.includes('options-activity-proxy'));
 assert.ok(!raw.signals.some((s) => s.id === 'odte-options'));
+
+const TREASURY_DISPLAY_IDS = [
+  'treasury-futures-positioning-proxy',
+  'treasury-long-end-income-lens',
+] as const;
+
+for (const id of TREASURY_DISPLAY_IDS) {
+  assert.ok(
+    !PUBLIC_ARTIFACT_SIGNAL_IDS.includes(id),
+    `Treasury id ${id} must not be in PUBLIC_ARTIFACT_SIGNAL_IDS`
+  );
+  assert.ok(
+    !raw.signals.some((s) => s.id === id),
+    `Treasury id ${id} must not be in buildSnapshot raw.signals`
+  );
+}
 
 console.log('ghostflow/ghostflowCurrentState.test.ts: ok');

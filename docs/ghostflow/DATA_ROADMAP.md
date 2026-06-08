@@ -8,19 +8,34 @@ Planning document for GhostFlow score-input sourcing. Builds on **v0.8** (resear
 
 **Current research composite (production snapshot, reference 2026-05-22):** Composite **62** · Passive Pressure **58** · Structural Fragility **66** · band *Crowded / Reflexive*.
 
-### Current dashboard state (v1.5a — after v1.4e)
+### Current dashboard state (v1.7 — after v1.7f)
 
-Canonical release checkpoint. Scores unchanged from v1.4d reference snapshot.
+Canonical release checkpoint. Equity Research Composite scores unchanged from v1.4d reference snapshot. Treasury Plumbing is a **separate** display-only lane — **not** included in `publicSignalCount` (do **not** combine equity **10** + Treasury **2** into 12).
+
+#### Equity Research Composite (`buildSnapshot` lane)
 
 | Layer | Count | Notes |
 |-------|-------|--------|
+| **Composite / Passive / Structural** | **62 / 58 / 66** | Band *Crowded / Reflexive* |
 | **PUBLIC score artifacts** | **6** | vol-regime, etf-flow, passive-share, active-index-flow, concentration, breadth — merged into composite |
 | **DERIVED score input** | **1** | `modelZoneProximity` (from ICI index share) |
 | **MOCK score inputs** | **3** | `systematicStrategyPressure` **62**, `retirementFlowPressureProxy` **58**, `leveredEtfRebalancePressure` **55** |
-| **DISPLAY-ONLY public artifacts** | **4** | [`systematic-flow`](./CFTC_TFF_MAPPING_DECISION.md), [`levered-etf-rebalance`](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md), [`retirement-asset-growth`](./RETIREMENT_FLOW_MAPPING_DECISION.md), [`options-activity-proxy`](./OPTIONS_ACTIVITY_MAPPING_DECISION.md) — cards only; not in composite |
-| **PLACEHOLDER cards** | **0** | When production artifacts validate; see retired `odte-options` note below |
+| **DISPLAY-ONLY public artifacts** | **4** | [`systematic-flow`](./CFTC_TFF_MAPPING_DECISION.md), [`levered-etf-rebalance`](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md), [`retirement-asset-growth`](./RETIREMENT_FLOW_MAPPING_DECISION.md), [`options-activity-proxy`](./OPTIONS_ACTIVITY_MAPPING_DECISION.md) — equity signal grid only; not in composite |
+| **PLACEHOLDER cards** | **0** | When options activity artifact validates; see retired `odte-options` note below |
 | **`publicSignalCount`** | **10** | Six score-fed public cards + four display-only public signals in `meta.publicSignals` (plus derived context card `distance-65`, separate from this count) |
 | **Score-wiring gates** | — | **v1.0c** (CFTC), **v1.1f** (levered ETF), **v1.2f** (retirement), **v1.4f** (options) — product-approved only; discouraged by default |
+
+#### Treasury Plumbing (separate lane — outside composite)
+
+| Item | Value |
+|------|--------|
+| **Display-only cards** | **2** — `treasury-futures-positioning-proxy`, `treasury-long-end-income-lens` |
+| **Wiring** | [`treasuryPlumbingDisplay.ts`](../lib/ghostflow/treasuryPlumbingDisplay.ts) — **not** `buildSnapshot` |
+| **Outside** | `raw.signals`, `meta.publicSignals`, `PUBLIC_ARTIFACT_SIGNAL_IDS`, **`publicSignalCount`** |
+| **Scored** | **No** — does not affect Composite / Passive / Structural |
+| **`mappingStatus`** | **`not_final`** on both production artifacts — [mapping decision](./TREASURY_PLUMBING_MAPPING_DECISION.md) |
+| **Caveats** | Futures: public CFTC positioning proxy only — **not** full basis-trade measurement. Income lens: **not** investment advice; **not** bond-buying or duration-allocation advice |
+| **Future (not approved)** | **v1.7f-calibration** (research-only); **v1.7f.1** display percentiles; **v1.7g** score gate (**discouraged**) |
 
 ---
 
@@ -202,9 +217,9 @@ GhostFlow input promotion rules (all phases):
 | **v1.5a** | Current-state audit / release checkpoint | **Done** — docs alignment with live dashboard; scores **62 / 58 / 66** unchanged; canonical state at top of this roadmap |
 | **v1.6a** | Passive stress-zone language audit | **Done** — [PASSIVE_STRESS_ZONE_LANGUAGE.md](./PASSIVE_STRESS_ZONE_LANGUAGE.md); model-stress zone not tripwire; copy only |
 | **v1.6b** | Passive Endgame Scenario explainer | **Done** — [PASSIVE_ENDGAME_SCENARIOS.md](./PASSIVE_ENDGAME_SCENARIOS.md); educational UI + doc; not scored; no new artifacts |
-| **v1.7a** | Treasury Plumbing feasibility | **Done** — [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md); docs-only; separate future lane; no cards/artifacts/score wiring |
+| **v1.7a** | Treasury Plumbing feasibility | **Done** — [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md); feasibility memo; lane shipped v1.7e |
 | **v1.7a.1** | Treasury CFTC PRE contract-discovery spike | **Done** — `ghostflow:treasury-cftc-pre-spike`; TFF `gpe5-46if` UST codes verified; **GREEN**; not in `ghostflow:check`; no artifact |
-| **v1.7b** | Treasury Futures Positioning artifact design | **Done** — [TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md](./TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md); example JSON + validator/tests; no production/display/score |
+| **v1.7b** | Treasury Futures Positioning artifact design | **Done** — [TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md](./TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md); example JSON + validator/tests |
 | **v1.7c** | Bond Neglect / Long-End Income Lens artifact design | **Done** — [BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md](./BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md); `treasury-long-end-income-lens` example + validator/tests; FRED IDs candidate until v1.7d.1 production |
 | **v1.7d** | Treasury Plumbing production — futures positioning | **Done** — `treasury-futures-positioning-proxy` production JSON + loader + `ghostflow:check` |
 | **v1.7d.1** | Treasury Plumbing production — long-end income lens | **Done** — [BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md](./BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md); FRED-verified production JSON (asOf 2026-06-02); no score/`publicSignalCount` change |
@@ -212,6 +227,7 @@ GhostFlow input promotion rules (all phases):
 | **v1.7f** | Treasury Plumbing mapping decision | **Done** — [TREASURY_PLUMBING_MAPPING_DECISION.md](./TREASURY_PLUMBING_MAPPING_DECISION.md); display-only for both artifacts; no mapper / no score / `mappingStatus` **not_final** |
 | **v1.7f-calibration** | Treasury CFTC + FRED history studies (optional) | **Future** — research-only; may inform display percentiles only |
 | **v1.7g** | Treasury Plumbing score gate | **Not approved** — discouraged by default |
+| **v1.7** | Treasury Plumbing release checkpoint / consistency audit | **Done** — docs alignment; equity state unchanged; Treasury lane documented as separate |
 
 **Treasury Plumbing:** Separate from the equity Research Composite, `publicSignalCount`, and Passive Pressure. Display-only context cards — not investment advice; no Treasury status score. See [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md) · [TREASURY_PLUMBING_MAPPING_DECISION.md](./TREASURY_PLUMBING_MAPPING_DECISION.md).
 
@@ -254,6 +270,6 @@ GhostFlow input promotion rules (all phases):
 - [OPTIONS_ACTIVITY_MAPPING_DECISION.md](./OPTIONS_ACTIVITY_MAPPING_DECISION.md) — v1.4e display-only mapping decision; v1.4f gated
 - [PASSIVE_STRESS_ZONE_LANGUAGE.md](./PASSIVE_STRESS_ZONE_LANGUAGE.md) — v1.6a passive-share / model-stress-zone phrasebook
 - [PASSIVE_ENDGAME_SCENARIOS.md](./PASSIVE_ENDGAME_SCENARIOS.md) — v1.6b educational passive-endgame scenario explainer (not scored)
-- [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md) — v1.7a Treasury Plumbing feasibility (separate lane; docs-only; no score/artifact/UI)
-- [TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md](./TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md) — v1.7b Treasury futures positioning artifact design (example JSON + validator; no production/UI/score)
+- [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md) — v1.7a Treasury Plumbing feasibility + v1.7 release checkpoint (separate display-only lane; live v1.7e)
+- [TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md](./TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md) — v1.7b/d Treasury futures positioning (production + display card v1.7e)
 - [TREASURY_PLUMBING_MAPPING_DECISION.md](./TREASURY_PLUMBING_MAPPING_DECISION.md) — v1.7f Treasury Plumbing mapping decision (display-only; no score)

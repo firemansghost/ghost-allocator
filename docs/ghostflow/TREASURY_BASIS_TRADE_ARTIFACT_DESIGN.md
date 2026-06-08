@@ -182,12 +182,13 @@ Tests: [`lib/ghostflow/__tests__/treasuryFuturesPositioningProxy.test.ts`](../li
 - Status bands / final mapper (v1.7f decision: **none selected**)
 - Treasury status score (v1.7g discouraged; not approved)
 
-## 9a. Implemented (v1.7d–e)
+## 9a. Implemented (v1.7d–f)
 
 - Production `treasuryFuturesPositioningProxy.v1.json` — CFTC extract asOf **2026-05-26** via `ghostflow:treasury-cftc-pre-spike` (2026-06-04)
 - `loadTreasuryFuturesPositioningProxyArtifact()`
 - `scripts/ghostflow/validate-artifacts.ts` entry
-- Display card in Treasury Plumbing UI lane (v1.7e; public CFTC proxy only — not full basis-trade measurement)
+- Display card in Treasury Plumbing UI lane (v1.7e; public CFTC proxy only — **not** full basis-trade measurement)
+- v1.7f mapping decision — [TREASURY_PLUMBING_MAPPING_DECISION.md](./TREASURY_PLUMBING_MAPPING_DECISION.md): display-only; `mappingStatus` **not_final**; no mapper / no score; v1.7g discouraged
 
 ---
 

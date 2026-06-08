@@ -1,14 +1,23 @@
 # Treasury Plumbing Feasibility Memo (GhostFlow v1.7a)
 
-## Status
+## v1.7 release checkpoint
 
-- **v1.7a feasibility only** — docs-only pass; no production wiring.
-- **No scoring** — Research Composite, Passive Pressure, and Structural Fragility unchanged.
-- **No artifacts** — no example JSON, no production JSON, no validators in this phase.
-- **No UI cards** — no dashboard section, no placeholder cards, no Treasury Plumbing lane on the live grid.
-- **v1.7a.1 research spike** — `npm run ghostflow:treasury-cftc-pre-spike` (contract discovery only; not in `ghostflow:check`).
-- **No production data pipeline** — no artifacts, no dashboard runtime fetching, no operator refresh table for Treasury yet.
-- **Treasury Plumbing remains a separate future lane** — not merged into the equity GhostFlow Research Composite, `publicSignalCount`, or Passive Pressure.
+- **Treasury Plumbing is live** as a **separate display-only dashboard lane** (v1.7e) with **two production-backed cards**: `treasury-futures-positioning-proxy` and `treasury-long-end-income-lens`.
+- **Outside the equity Research Composite** — not in `buildSnapshot`, `raw.signals`, `meta.publicSignals`, or `PUBLIC_ARTIFACT_SIGNAL_IDS`.
+- **No score impact** — Composite / Passive / Structural unchanged; Treasury does **not** affect `publicSignalCount` (**10** equity only; do **not** combine with Treasury **2**).
+- **v1.7f mapping decision** — [TREASURY_PLUMBING_MAPPING_DECISION.md](./TREASURY_PLUMBING_MAPPING_DECISION.md) selected **display-only** for both artifacts; `mappingStatus` **not_final**; no mapper / no status bands.
+- **v1.7g score gate** — **not approved**; remains discouraged.
+- **Optional future only** — v1.7f-calibration (research); v1.7f.1 display percentiles.
+
+## Status (v1.7a — historical feasibility baseline)
+
+*The bullets below describe the **v1.7a starting posture** before production, UI, and mapping phases. They are preserved for feasibility context.*
+
+- **v1.7a feasibility only** — initial docs-only pass; no production wiring at that time.
+- **No scoring** — Research Composite, Passive Pressure, and Structural Fragility unchanged (still true in v1.7).
+- **Artifacts / UI** — deferred in v1.7a; **shipped** in v1.7b–e (design → production → display lane).
+- **v1.7a.1 research spike** — `npm run ghostflow:treasury-cftc-pre-spike` (contract discovery; not in `ghostflow:check`).
+- **Treasury Plumbing is a separate lane** — never merged into equity `publicSignalCount` or Passive Pressure.
 
 ---
 
@@ -31,8 +40,8 @@
 | **`systematic-flow` display-only card** | “CFTC leveraged-funds positioning proxy” for **equity index** futures | Narrative overlap (“crowded positioning”) but **wrong instrument** for Treasury basis stress | Keep equity card; future Treasury card is a **new signal id** in a **separate UI section** |
 | **VIX / `optionsVolatilityAmplifier`** | CBOE VIX → scored options/vol slot (20% Passive Pressure) | Vol stress is **correlated** with risk-off and funding episodes but **not Treasury-specific** | Do not substitute VIX for Treasury basis or long-end income lenses |
 | **`options-activity-proxy`** | OCC Index/Others display-only; not 0DTE/GEX | None for Treasury plumbing | Unrelated lane |
-| **Passive Endgame Scenarios** | Educational six-scenario ladder; scenario 5 mentions policy/Treasury narrative | **Conceptual** link to “policy intervention / market repair” — not a data feed | Point readers to this memo; Treasury Plumbing **not live** on dashboard (v1.6b) |
-| **GhostFlow Watchlist** | Forward-looking research targets | May list Treasury Plumbing as **future / not live / not scored** candidate | v1.7a optional one-liner only |
+| **Passive Endgame Scenarios** | Educational six-scenario ladder; scenario 5 mentions policy/Treasury narrative | **Conceptual** link to “policy intervention / market repair” — not a data feed | Treasury Plumbing **live** as separate display-only lane (v1.7e); see [mapping decision](./TREASURY_PLUMBING_MAPPING_DECISION.md) |
+| **GhostFlow Watchlist** | Forward-looking research targets | Treasury shipped v1.7e; optional calibration / v1.7g gated | Display-only; not in `publicSignalCount` |
 | **GhostRegime TLT / IEF references** (if present in product) | Regime tooling outside GhostFlow composite | **Out of GhostFlow scope** for v1.7a | Do not wire GhostRegime series into GhostFlow score or artifacts in this lane |
 
 **Clear statements:**
@@ -187,10 +196,10 @@
 | **v1.7a.1** | Treasury CFTC PRE spike — `ghostflow:treasury-cftc-pre-spike`; contract discovery **GREEN** | None |
 | **v1.7b** | Treasury Futures Positioning artifact design — [TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md](./TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md) + example JSON + validator/tests | None |
 | **v1.7c** | Bond Neglect / Long-End Income artifact design — [BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md](./BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md) + example JSON + validator/tests; FRED IDs **candidate** until v1.7d operator lock | None |
-| **v1.7d** | Production artifact candidates — Treasury Futures Positioning JSON + loader + `validate-artifacts` (**done**) | Display path only; no UI/score |
-| **v1.7d.1** | Long-End Income Lens production JSON + `validate-artifacts` + FRED spike (**done**) | Display path only; no UI/score |
+| **v1.7d** | Production artifact — Treasury Futures Positioning JSON + loader + `validate-artifacts` (**done**) | Production only at v1.7d; display lane v1.7e |
+| **v1.7d.1** | Long-End Income Lens production JSON + `validate-artifacts` + FRED spike (**done**) | Production only at v1.7d.1; display lane v1.7e |
 | **v1.7e** | Display-only Treasury Plumbing section — separate UI lane (**done**) | Cards only; not scored; not in `publicSignalCount` |
-| **v1.7f** | Mapping / product decision — [TREASURY_PLUMBING_MAPPING_DECISION.md](./TREASURY_PLUMBING_MAPPING_DECISION.md) (**done**) | Decision-only; display-only default; no thresholds shipped |
+| **v1.7f** | Mapping / product decision — [TREASURY_PLUMBING_MAPPING_DECISION.md](./TREASURY_PLUMBING_MAPPING_DECISION.md) (**done**) | Display-only default; no mapper / no score; `mappingStatus` **not_final** |
 | **v1.7f-calibration** | Optional CFTC + FRED history studies | Research-only; future display context |
 | **v1.7g** | Separate Treasury Plumbing score gate | **Product-approved only; discouraged by default** |
 
@@ -205,7 +214,7 @@
 | **CFTC category confusion** | Do not reuse equity Leveraged Funds copy for UST; separate card and artifact ids |
 | **MOVE / data licensing** | Treat MOVE as paid/proprietary unless license confirmed; prefer public CFTC + FRED |
 | **Funding / repo proxy limitations** | Label as macro financing context, not trade-level repo specialness |
-| **Operator burden** | Weekly CFTC + daily FRED multi-series refresh is non-trivial; defer refresh table until v1.7d+ |
+| **Operator burden** | Weekly CFTC + daily FRED multi-series refresh is non-trivial; see [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) Treasury section (v1.7d+) |
 | **Scope creep into equity composite** | Hard boundary in roadmap and architecture; no `publicPassiveInputKey` |
 
 ---
@@ -232,7 +241,7 @@ After v1.7a implementation:
 
 ## Related documents
 
-- [DATA_ROADMAP.md](./DATA_ROADMAP.md) — phase row v1.7a; Treasury future lane note
+- [DATA_ROADMAP.md](./DATA_ROADMAP.md) — v1.7 checkpoint; Treasury separate display-only lane
 - [PASSIVE_STRESS_ZONE_LANGUAGE.md](./PASSIVE_STRESS_ZONE_LANGUAGE.md) — v1.7a feasibility complete; Treasury separate from equity stress-zone phrasebook
 - [PASSIVE_ENDGAME_SCENARIOS.md](./PASSIVE_ENDGAME_SCENARIOS.md) — scenario 5 policy/Treasury narrative link
 - [CFTC_TFF_FEASIBILITY.md](./CFTC_TFF_FEASIBILITY.md) — equity PRE pattern (not Treasury contracts)
