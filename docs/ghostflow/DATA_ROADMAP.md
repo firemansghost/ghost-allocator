@@ -1,6 +1,8 @@
-# GhostFlow Data Roadmap (v0.9 planning)
+# GhostFlow Data Roadmap (living roadmap)
 
-Planning document for GhostFlow score-input sourcing. Builds on **v0.8** (research composite framing: six PUBLIC score sub-inputs, three MOCK passive score sub-inputs, one DERIVED structural sub-input, display-only public artifact cards for CFTC TFF, levered ETF rebalance, retirement asset growth, and OCC index options intensity).
+Living roadmap for GhostFlow score-input sourcing, phase history, and open questions. Builds on **v0.8** (research composite framing: six PUBLIC score sub-inputs, three MOCK passive score sub-inputs, one DERIVED structural sub-input, display-only public artifact cards for CFTC TFF, levered ETF rebalance, retirement asset growth, and OCC index options intensity).
+
+**Canonical inventory (detailed tables):** [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) — score-fed, display-only, MOCK, derived, and Treasury lanes after v1.7.
 
 **Baseline reference date:** [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) = `2026-05-22`.
 
@@ -8,9 +10,11 @@ Planning document for GhostFlow score-input sourcing. Builds on **v0.8** (resear
 
 **Current research composite (production snapshot, reference 2026-05-22):** Composite **62** · Passive Pressure **58** · Structural Fragility **66** · band *Crowded / Reflexive*.
 
+**v1.8 theme:** GhostFlow **Data Quality & Mock Score Discipline** — see [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) § v1.8 recommendation.
+
 ### Current dashboard state (v1.7 — after v1.7f)
 
-Canonical release checkpoint. Equity Research Composite scores unchanged from v1.4d reference snapshot. Treasury Plumbing is a **separate** display-only lane — **not** included in `publicSignalCount` (do **not** combine equity **10** + Treasury **2** into 12).
+Release checkpoint summary (detail in [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md)). Equity Research Composite scores unchanged from v1.4d reference snapshot. Treasury Plumbing is a **separate** display-only lane — **not** included in `publicSignalCount` (do **not** combine equity **10** + Treasury **2** into 12).
 
 #### Equity Research Composite (`buildSnapshot` lane)
 
@@ -228,6 +232,15 @@ GhostFlow input promotion rules (all phases):
 | **v1.7f-calibration** | Treasury CFTC + FRED history studies (optional) | **Future** — research-only; may inform display percentiles only |
 | **v1.7g** | Treasury Plumbing score gate | **Not approved** — discouraged by default |
 | **v1.7** | Treasury Plumbing release checkpoint / consistency audit | **Done** — docs alignment; equity state unchanged; Treasury lane documented as separate |
+| **v1.8a** | Current State / Data Quality Inventory | **Done** — [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md); docs-only; no score/artifact/UI change |
+| **v1.8b** | Mock Score Retirement Decision | **Next** — `MOCK_SCORE_RETIREMENT_PLAN.md`; per-mock keep/replace/label/gate; no score wiring unless product-approved |
+| **v1.8c** | Artifact Freshness & `dataQuality` Consistency Pass | **Planned** — prod JSON vs runbooks; label alignment |
+| **v1.8d** | Operator Refresh Discipline | **Planned** — scored vs display vs Treasury legend in refresh checklist |
+| **v1.8e** | Documentation Consolidation | **Planned** — onboarding path; stale line fixes |
+| **v1.8f** | UI Clarity / Methodology Polish | **Optional** — equity vs Treasury separation copy |
+| **v1.8g** | Treasury Calibration Research-Only | **Optional** — no percentiles/bands/score in UI |
+| **v1.8h** | Passive-Flow Next-Source Feasibility | **Optional** — ICI non-overlap review |
+| **v1.8i** | Score Wiring Gate | **Not approved** — discouraged (v1.0c / v1.1f / v1.2f / v1.4f / v1.7g) |
 
 **Treasury Plumbing:** Separate from the equity Research Composite, `publicSignalCount`, and Passive Pressure. Display-only context cards — not investment advice; no Treasury status score. See [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md) · [TREASURY_PLUMBING_MAPPING_DECISION.md](./TREASURY_PLUMBING_MAPPING_DECISION.md).
 
@@ -246,6 +259,7 @@ GhostFlow input promotion rules (all phases):
 
 ## Related documents
 
+- [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) — **v1.8a canonical inventory** (score-fed, display-only, MOCK, derived, Treasury)
 - [CFTC_TFF_FEASIBILITY.md](./CFTC_TFF_FEASIBILITY.md) — v0.9c TFF/COT feasibility (YELLOW)
 - [CFTC_TFF_CALIBRATION_STUDY.md](./CFTC_TFF_CALIBRATION_STUDY.md) — v1.0a historical calibration (research)
 - [CFTC_TFF_MAPPING_DECISION.md](./CFTC_TFF_MAPPING_DECISION.md) — v1.0b mapping/product decision (display-only; v1.0c score gate)
