@@ -24,19 +24,20 @@ Research spike: `npm run ghostflow:fred-treasury-yields-spike` (not in `ghostflo
 
 Production extract (v1.7d.1): **fred_api**, common **asOf 2026-06-02**, `publishedAt` **2026-06-04**. No forward-fill.
 
-## 1a. Not implemented (v1.7e+)
+## 1a. Not implemented (score / composite)
 
 - `buildSnapshot` / `publicSignalCount` / score sub-input
 - Runtime dashboard fetching
-- Treasury status score (v1.7g discouraged)
+- Treasury status score (v1.7g discouraged; not approved)
 
-## 1b. Implemented (v1.7d.1–e)
+## 1b. Implemented (v1.7d.1–f)
 
 - Production `treasuryLongEndIncomeLens.v1.json`
 - `loadTreasuryLongEndIncomeLensArtifact()`
 - `scripts/ghostflow/validate-artifacts.ts` entry
 - `scripts/ghostflow/fred-treasury-yields-spike.ts` (research only)
 - Display card in Treasury Plumbing UI lane (v1.7e; not investment advice; not bond-buy/duration signal)
+- v1.7f mapping decision — display-only; `mappingStatus` **not_final** — [TREASURY_PLUMBING_MAPPING_DECISION.md](./TREASURY_PLUMBING_MAPPING_DECISION.md)
 
 ---
 
@@ -54,13 +55,13 @@ Production extract (v1.7d.1): **fred_api**, common **asOf 2026-06-02**, `publish
 
 **Rejected:** `bondNeglect*` / `longEndIncomeLens` without `treasury` prefix — too easy to read as a trade or allocation signal outside the Treasury lane.
 
-**Equity boundary:** Research Composite, `publicSignalCount` (10), VIX `optionsVolatilityAmplifier`, and equity CFTC `systematic-flow` are unchanged. Treasury Plumbing remains a **separate future lane**.
+**Equity boundary:** Research Composite, `publicSignalCount` (10), VIX `optionsVolatilityAmplifier`, and equity CFTC `systematic-flow` are unchanged. Treasury Plumbing is a **separate display-only lane**, live as of v1.7e — outside `buildSnapshot` and `publicSignalCount`.
 
 ---
 
 ## 3. Source candidates and v1.7d field-lock checklist
 
-**v1.7c posture:** Candidate FRED series IDs only. Example values are **illustrative** (`manual_unverified`, `designOnly: true`). Operator must verify each series before v1.7d production.
+**v1.7c posture (historical):** Candidate FRED series IDs only. Example values were **illustrative** (`manual_unverified`, `designOnly: true`). **v1.7d.1 production** — FRED-verified production JSON; operator refresh per [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md).
 
 ### Candidate FRED stack
 

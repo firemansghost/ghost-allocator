@@ -83,7 +83,7 @@ Full copy: [PASSIVE_ENDGAME_SCENARIOS.md](./PASSIVE_ENDGAME_SCENARIOS.md).
 
 - Composite and sub-scores are **context gauges** for research preview.  
 - No crash-date prediction; no allocation recommendation.  
-- Display-only artifact cards and MOCK score inputs remain separate from measured public proxies (see v1.5a roadmap checkpoint).
+- Display-only artifact cards and MOCK score inputs remain separate from measured public proxies (see v1.7 roadmap checkpoint).
 
 ---
 
@@ -93,14 +93,19 @@ Full copy: [PASSIVE_ENDGAME_SCENARIOS.md](./PASSIVE_ENDGAME_SCENARIOS.md).
 
 ## Delivered in v1.7a
 
-- [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md) — Treasury Plumbing feasibility complete (docs-only); separate future lane; not on live dashboard; not scored
+- [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md) — Treasury Plumbing feasibility memo (historical v1.7a baseline)
+
+## Delivered in v1.7e
+
+- Treasury Plumbing **display-only dashboard lane** — two production-backed cards (`treasury-futures-positioning-proxy`, `treasury-long-end-income-lens`); separate from Research Composite; not scored; not in `publicSignalCount` — [mapping decision](./TREASURY_PLUMBING_MAPPING_DECISION.md)
 
 ## Out of scope (ongoing)
 
 | Item | Deferred phase |
 |------|----------------|
-| Treasury Plumbing dashboard section | v1.7e+ (after artifact design v1.7b–d) |
-| Treasury basis trade / bond neglect artifacts & cards | v1.7b+ |
+| Treasury CFTC / FRED history calibration | v1.7f-calibration (optional research only) |
+| Treasury display percentile context | v1.7f.1 (display-only; not approved) |
+| Treasury Plumbing score gate | v1.7g — **not approved** / discouraged |
 | Scoring weight or mapper changes | Not approved |
 | New artifacts or data sources | Not approved |
 | Live fetching / runtime feeds | Not approved |

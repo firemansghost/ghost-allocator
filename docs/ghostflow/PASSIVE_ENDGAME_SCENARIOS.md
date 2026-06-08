@@ -108,9 +108,9 @@ Global caveat (each scenario): *Illustrative pathway from passive-flow research 
 - Narrative band; not a GhostFlow score.
 - May align with extreme vol/breadth on dashboard.
 - Outcome uncertain.
-- **Treasury Plumbing:** feasibility complete in v1.7a ([TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md)) — **future lane only**; not a live dashboard section; basis-trade proxy + long-end income lens are display-only candidates when shipped (v1.7e+).
+- **Treasury Plumbing:** **live** as a separate display-only dashboard lane as of v1.7e ([TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md) · [mapping decision](./TREASURY_PLUMBING_MAPPING_DECISION.md)) — two production-backed cards; **not scored**; **not** in equity `publicSignalCount`; does not affect Composite / Passive / Structural.
 
-**Indicators:** `vol-regime`, `breadth` (when stress visible); Treasury Plumbing — future (see feasibility memo)
+**Indicators:** `vol-regime`, `breadth` (when stress visible); Treasury Plumbing — `treasury-futures-positioning-proxy`, `treasury-long-end-income-lens` (display-only; separate lane)
 
 ### 6. Structural Reform
 
@@ -141,11 +141,12 @@ Global caveat (each scenario): *Illustrative pathway from passive-flow research 
 | OCC Options Intensity | `options-activity-proxy` | Display only |
 | Retirement Asset Growth | `retirement-asset-growth` | Display only |
 
-**Unavailable on dashboard (v1.6b):**
+**Unavailable on dashboard (v1.6b / v1.7 checkpoint):**
 
 - Cap-weight vs equal-weight spread
 - Dedicated correlation / liquidity index
-- Treasury Plumbing (v1.7a feasibility done — UI lane v1.7e+; [memo](./TREASURY_PLUMBING_FEASIBILITY.md))
+
+**Treasury Plumbing (v1.7e+):** separate display-only lane — not in equity indicator mapping / `publicSignalCount`; see [memo](./TREASURY_PLUMBING_FEASIBILITY.md)
 
 ---
 
@@ -153,7 +154,7 @@ Global caveat (each scenario): *Illustrative pathway from passive-flow research 
 
 | Item | Notes |
 |------|--------|
-| Treasury Plumbing | v1.7a feasibility done; cards v1.7e+ — [memo](./TREASURY_PLUMBING_FEASIBILITY.md) |
+| Treasury score wiring / percentiles / status bands | v1.7f-calibration (optional research); v1.7f.1 display percentiles; v1.7g score gate **not approved** — [mapping decision](./TREASURY_PLUMBING_MAPPING_DECISION.md) |
 | New data sources / artifacts | Not approved |
 | Scoring / `publicSignals` / new `signalId` | Not approved |
 | Scenario prediction engine | Not approved |
