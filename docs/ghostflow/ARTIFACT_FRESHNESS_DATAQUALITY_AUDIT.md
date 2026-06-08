@@ -154,7 +154,7 @@ Evaluated against reference **`2026-05-22`**. All 12 files validated by `npm run
 
 | Phase | Scope |
 |-------|--------|
-| **v1.8d** | Operator Refresh Discipline — expand checklist legend; scored vs display-only vs Treasury vs MOCK vs derived |
+| ~~**v1.8d**~~ | ~~Operator Refresh Discipline~~ — **Done** — [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md); taxonomy, cadence map, validation matrix; checklist tightened; docs-only |
 | **v1.8c.1** | Optional metadata-only cleanup — retirement stale “not yet displayed” note/caveats; possible options `dataQuality` promotion **only** if operator verification policy satisfied; requires `ghostflow:check` + tests if JSON changes **approved separately** |
 | **v1.8f** | UI / freshness summary clarity — whether to include options/CFTC/levered/retirement in rollup; whether Treasury needs bands |
 

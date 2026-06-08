@@ -1,8 +1,18 @@
-# GhostFlow Manual Refresh Checklist (v1.7 — after v1.7f)
+# GhostFlow Manual Refresh Checklist (v1.8d — operator quick checklist)
 
-Operator runbook for manually refreshing GhostFlow public-data artifacts. **No live fetches, no scraping, no cron, no API routes** — values are hand-edited into static JSON files committed to the repo.
+Field-level quick reference for manually refreshing GhostFlow public-data artifacts. **Canonical workflow:** [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md). **No live fetches, no scraping, no cron, no API routes** — values are hand-edited into static JSON files committed to the repo.
 
-**Related:** [DATA_ROADMAP.md](./DATA_ROADMAP.md) — score-input sourcing · [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) — v1.8b keep-MOCK policy · [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) — v1.8c freshness & `dataQuality` policy (canonical thresholds below).
+**Related:** [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md) — taxonomy, cadence map, validation matrix, guardrails · [DATA_ROADMAP.md](./DATA_ROADMAP.md) · [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) · [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md)
+
+## Taxonomy legend
+
+| Class | Items | Affects score? | Operator note |
+|-------|-------|----------------|---------------|
+| **A — Score-fed equity** | vol-regime, etf-flow, passive-share, active-index-flow, concentration, breadth | **Yes** | Can change Composite / Passive / Structural |
+| **B — Display-only equity** | systematic-flow, levered-etf-rebalance, retirement-asset-growth, options-activity-proxy | **No** | MOCK **62 / 55 / 58** unchanged |
+| **C — Treasury lane** | treasury-futures-positioning-proxy, treasury-long-end-income-lens | **No** | Separate lane; not in `publicSignalCount` |
+| **D — Derived/context** | modelZoneProximity, distance-65 | Partial | Refresh **passive-share** only — do not edit separately |
+| **E — MOCK score inputs** | systematic **62**, retirement **58**, levered **55** | Static | **Do not edit** `mockGhostflowSnapshot.ts` |
 
 **Equity dashboard coverage (v1.7):** **6** score-fed public artifacts · **4** display-only public artifact cards (CFTC `systematic-flow`, levered `levered-etf-rebalance`, retirement `retirement-asset-growth`, OCC `options-activity-proxy`) · **`publicSignalCount` 10** when all validate · **0** placeholder cards when artifacts validate. Display-only equity cards do **not** refresh or change the Research Composite — Composite **62** / Passive **58** / Structural **66** and MOCK **62** / **55** / **58** and VIX still drive scored sub-inputs. Quarterly retirement freshness **caution** (46–90 days after release) reflects normal ICI quarterly cadence — not a failed feed or score problem.
 
@@ -48,11 +58,7 @@ Against [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts). Per-car
 | Monthly (ICI, SSGA) | `publishedAt ?? asOf` | ≤35 calendar days | 36–55 | >55 |
 | Quarterly (retirement) | `publishedAt ?? asOf` | ≤45 calendar days | 46–90 (normal cadence) | >90 |
 
-Treasury lane: no structured freshness bands today — dates on cards only. Larger operator legend → **v1.8d**.
-
----
-
-**Options activity (v1.4d — display-only):** Download OCC Daily Volume Statistics CSV per session, e.g. `https://marketdata.theocc.com/daily-volume-statistics?reportDate=YYYYMMDD&format=csv` → save under `tmp/options-spike/occ-volume-download-YYYY-MM-DD.csv` → `npm run ghostflow:options-data-spike -- --occ-daily <file>` → update [`optionsActivityProxy.v1.json`](../data/ghostflow/artifacts/optionsActivityProxy.v1.json). Maps **Index/Others** to `indexOptionsContracts`. Refresh updates the **display-only** artifact and card only — **not** the Research Composite ([OPTIONS_ACTIVITY_MAPPING_DECISION.md](./OPTIONS_ACTIVITY_MAPPING_DECISION.md)). Not 0DTE/GEX; not scored.
+Treasury lane: no structured freshness bands today — dates on cards only. See [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md).
 
 ---
 
@@ -222,21 +228,73 @@ Treasury lane: no structured freshness bands today — dates on cards only. Larg
 
 ---
 
+### 8. Index Options Intensity Proxy (daily — display-only, not scored)
+
+| Item | Detail |
+|------|--------|
+| **Production file** | [`data/ghostflow/artifacts/optionsActivityProxy.v1.json`](../../data/ghostflow/artifacts/optionsActivityProxy.v1.json) |
+| **Spike helper** | `npm run ghostflow:options-data-spike -- --occ-daily <file>` |
+| **Source** | [OCC Daily Volume Statistics](https://marketdata.theocc.com/daily-volume-statistics?reportDate=YYYYMMDD&format=csv) — save CSV under `tmp/options-spike/` |
+| **Fields to update** | `asOf`, `publishedAt`, `observations.indexOptionsContracts`, `dataQuality`, `source.note` |
+| **Mapping** | **Index/Others** column → `indexOptionsContracts` — not 0DTE/GEX |
+| **`asOf` / `publishedAt`** | OCC session `reportDate` (usually same day) |
+| **`dataQuality` rule** | `verified_manual` only after spike + hand verification per [audit policy](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md); default production may stay `manual_unverified` |
+| **Status** | Display-only; **not** in Research Composite; MOCK vol slot unchanged (VIX still scores vol) |
+| **Deep dive** | [OPTIONS_ACTIVITY_MAPPING_DECISION.md](./OPTIONS_ACTIVITY_MAPPING_DECISION.md) · [OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md](./OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md) |
+
+---
+
+### 9. Treasury Futures Positioning Proxy (weekly — Treasury lane only)
+
+| Item | Detail |
+|------|--------|
+| **Production file** | [`data/ghostflow/artifacts/treasuryFuturesPositioningProxy.v1.json`](../../data/ghostflow/artifacts/treasuryFuturesPositioningProxy.v1.json) |
+| **Spike helper** | `npm run ghostflow:treasury-cftc-pre-spike` (contract discovery + PRE extract aid) |
+| **Source** | CFTC PRE TFF — UST futures basket (2Y/5Y/10Y/30Y); see [TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md](./TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md) |
+| **Fields to update** | `asOf`, `publishedAt`, contract rows, basket metrics — recompute; `dataQuality`, `mappingStatus` stays **not_final** |
+| **`asOf` rule** | CFTC Tuesday report date; aligned across contracts |
+| **`publishedAt` rule** | Friday CFTC release date for that report |
+| **Lane** | **Treasury Plumbing only** — not scored; not in `publicSignalCount`; not equity grid |
+| **Caveat** | Public CFTC positioning proxy — **not** full basis-trade measurement |
+| **Deep dive** | [TREASURY_PLUMBING_MAPPING_DECISION.md](./TREASURY_PLUMBING_MAPPING_DECISION.md) |
+
+---
+
+### 10. Treasury Long-End Income Lens (daily-ish — Treasury lane only)
+
+| Item | Detail |
+|------|--------|
+| **Production file** | [`data/ghostflow/artifacts/treasuryLongEndIncomeLens.v1.json`](../../data/ghostflow/artifacts/treasuryLongEndIncomeLens.v1.json) |
+| **Spike helper** | `npm run ghostflow:fred-treasury-yields-spike` (or `--local-dir tmp/fred` / `--fred-api` if CSV blocked) |
+| **Source** | FRED: DGS30, DFII30, DGS2, DGS5, DGS10, T10YIE — **common asOf** across all six |
+| **Fields to update** | `asOf`, `publishedAt`, yield/breakeven observations; `dataQuality`; **no forward-fill** |
+| **`asOf` rule** | Latest **common** FRED business date across all six series |
+| **Lane** | **Treasury Plumbing only** — not scored; not investment advice |
+| **Caveat** | Not bond-buying or duration-allocation advice |
+| **Deep dive** | [BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md](./BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md) |
+
+---
+
 ## Daily refresh mini-checklist
 
-- [ ] Update CBOE VIX close in `volatilityRegime.v1.json`
-- [ ] Update StockCharts `$SPXA50R` in `marketBreadth.v1.json`
+- [ ] Update CBOE VIX close in `volatilityRegime.v1.json` **(A — score-fed)**
+- [ ] Update StockCharts `$SPXA50R` in `marketBreadth.v1.json` **(A)**
 - [ ] Cross-check breadth against Barchart `$S5FI`; set `dataQuality` and document in `source.note`
-- [ ] Update `GHOSTFLOW_REFERENCE_AS_OF` in [`lib/ghostflow/reference.ts`](../../lib/ghostflow/reference.ts) **only after** daily artifacts share the same last trading day
-- [ ] Run `npm run ghostflow:check` (quick sanity check)
+- [ ] Update OCC Index/Others in `optionsActivityProxy.v1.json` **(B — display-only)**
+- [ ] Optional: update Treasury FRED income lens `treasuryLongEndIncomeLens.v1.json` **(C — Treasury lane)**
+- [ ] Update `GHOSTFLOW_REFERENCE_AS_OF` in [`lib/ghostflow/reference.ts`](../../lib/ghostflow/reference.ts) **only after** daily score-fed artifacts share the same last trading day
+- [ ] Run `npm run ghostflow:check`
 - [ ] Run full validation suite before commit/PR (see below)
 
 ---
 
 ## Weekly refresh mini-checklist
 
-- [ ] Update ICI domestic equity ETF net issuance in `etfNetIssuance.v1.json`
-- [ ] Confirm you are **not** updating monthly active/index flows or passive-share assets
+- [ ] Update ICI domestic equity ETF net issuance in `etfNetIssuance.v1.json` **(A)**
+- [ ] Update CFTC equity `systematicFlowProxy.v1.json` **(B — display-only; MOCK 62 unchanged)**
+- [ ] Update Treasury CFTC `treasuryFuturesPositioningProxy.v1.json` **(C)**
+- [ ] Update levered ETF `leveredEtfRebalancePressure.v1.json` when session/AUM window warrants **(B)**
+- [ ] Confirm you are **not** updating monthly active/index flows or passive-share assets in the same pass unless intended
 - [ ] Run `npm run ghostflow:check`
 - [ ] Run full validation suite before commit/PR
 
@@ -244,12 +302,32 @@ Treasury lane: no structured freshness bands today — dates on cards only. Larg
 
 ## Monthly refresh mini-checklist
 
-- [ ] Update `activeIndexFlow.v1.json` from ICI **flows** table (domestic equity active + index)
-- [ ] Update `passiveShareProxy.v1.json` from ICI **total net assets** table (not flows)
-- [ ] Update `indexConcentration.v1.json` from SSGA SPY **monthly fact sheet PDF**
+- [ ] Update `activeIndexFlow.v1.json` from ICI **flows** table **(A)**
+- [ ] Update `passiveShareProxy.v1.json` from ICI **total net assets** table **(A — also drives derived distance-65)**
+- [ ] Update `indexConcentration.v1.json` from SSGA SPY **monthly fact sheet PDF** **(A)**
 - [ ] Do **not** use live SSGA product page as primary source unless methodology is explicitly changed
 - [ ] Run `npm run ghostflow:check`
 - [ ] Run full validation suite before commit/PR
+
+---
+
+## Quarterly refresh mini-checklist
+
+- [ ] Update `retirementFlowPressureProxy.v1.json` from ICI Retirement Market Table 1 **(B — display-only; MOCK 58 unchanged)**
+- [ ] Set `asOf` to quarter-end; `publishedAt` to ICI release date
+- [ ] Caution 46–90 days after release is **normal** quarterly cadence — not a failed feed
+- [ ] Run `npm run ghostflow:check`
+- [ ] Run full validation suite before commit/PR
+
+---
+
+## Treasury-only refresh mini-checklist
+
+- [ ] Update **one or both** Treasury production JSON files only
+- [ ] Confirm **no** equity score-fed or display-only files changed unless intentional
+- [ ] Confirm Composite / Passive / Structural **unchanged** (Treasury lane only)
+- [ ] Confirm `publicSignalCount` **10** unchanged
+- [ ] Run `npm run ghostflow:check`
 
 ---
 
@@ -257,10 +335,17 @@ Treasury lane: no structured freshness bands today — dates on cards only. Larg
 
 - Scoring formulas and pillar weights (`lib/ghostflow/scoring.ts`)
 - Merge behavior (`lib/ghostflow/buildSnapshot.ts`) unless adding a new artifact (not part of routine refresh)
-- Freshness thresholds (`lib/ghostflow/artifactFreshness.ts`)
+- Signal presentation (`lib/ghostflow/signalPresentation.ts`)
+- Freshness thresholds (`lib/ghostflow/artifactFreshness.ts`, `lib/ghostflow/freshnessSummary.ts`)
+- [`mockGhostflowSnapshot.ts`](../../data/ghostflow/mockGhostflowSnapshot.ts) — MOCK **62 / 58 / 55** inputs
+- `publicSignalCount` — equity grid stays **10**; do not promote display-only or Treasury artifacts
+- Display-only promotion — never wire systematic / levered / retirement / options into score or `raw.signals`
+- Treasury score/grid promotion — Treasury lane stays separate 2-card display-only
+- `mappingStatus: final` — requires separate decision memo; routine refresh keeps **not_final** where applicable
+- Cosmetic `dataQuality` changes — do not bump labels just to make cards look better
 - JSON schema files unless the source structure actually changed
 - Unit tests and fixtures — **routine refreshes do not require editing test files** unless mapper, schema, or freshness/merge behavior changed
-- GhostYield, GhostRegime, allocator logic, APIs, cron jobs
+- GhostYield, GhostRegime, Models, builder, allocator logic, APIs, cron jobs
 - Public artifact `source.name` labels unless the underlying source changed
 - `mock_fallback` in artifact JSON (runtime-only fallback label)
 
@@ -309,3 +394,6 @@ Include the relevant `asOf` / week ended / month ended dates in the commit body 
 - [PASSIVE_STRESS_ZONE_LANGUAGE.md](./PASSIVE_STRESS_ZONE_LANGUAGE.md) — v1.6a model-stress-zone phrasebook
 - [PASSIVE_ENDGAME_SCENARIOS.md](./PASSIVE_ENDGAME_SCENARIOS.md) — v1.6b educational scenarios (no refresh cadence; not scored)
 - [INDEX_CONCENTRATION_ARTIFACT_RUNBOOK.md](./INDEX_CONCENTRATION_ARTIFACT_RUNBOOK.md) — Index Concentration
+- [OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md](./OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md) — Options Activity Proxy (display-only)
+- [TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md](./TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md) — Treasury Futures Positioning
+- [BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md](./BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md) — Treasury Long-End Income Lens
