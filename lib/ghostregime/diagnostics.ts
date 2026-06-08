@@ -43,23 +43,39 @@ export const GHOSTREGIME_HISTORY_REQUIREMENTS = {
 } as const;
 
 /**
- * Get provider name for a symbol (uses resolvedIds when BTC is served from CoinGecko fallback)
+ * Get provider name for a symbol (uses resolvedIds for BTC Yahoo / CoinGecko / Stooq routing)
  */
 function getProviderName(symbol: string, providerDiagnostics?: ProviderDiagnostics): string {
   if (symbol === MARKET_SYMBOLS.VIX) {
     return 'CBOE';
   } else if (symbol === MARKET_SYMBOLS.PDBC) {
     return 'AlphaVantage'; // May use DBC proxy from Stooq
-  } else if (
-    symbol === MARKET_SYMBOLS.BTC_USD &&
-    providerDiagnostics?.resolvedIds?.[symbol]?.startsWith('coingecko')
-  ) {
-    return 'CoinGecko';
+  } else if (symbol === MARKET_SYMBOLS.BTC_USD) {
+    const rid = providerDiagnostics?.resolvedIds?.[symbol] ?? '';
+    if (rid.startsWith('yahoo:')) return 'Yahoo';
+    if (rid.startsWith('coingecko')) return 'CoinGecko';
+    return 'Stooq';
   } else if (providerDiagnostics?.resolvedIds?.[symbol]?.startsWith('marketstack:')) {
     return 'Marketstack';
   } else {
     return 'Stooq';
   }
+}
+
+function formatBtcProbeSummary(providerDiagnostics?: ProviderDiagnostics): string {
+  const probe = providerDiagnostics?.btc_probe;
+  if (!probe) return '';
+  const bits: string[] = [];
+  bits.push(
+    `attempts=${probe.provider_attempts.map((a) => `${a.provider}:${a.outcome}/${a.rows}`).join('>')}`
+  );
+  if (probe.oldest_date) bits.push(`oldest=${probe.oldest_date}`);
+  if (probe.newest_date) bits.push(`newest=${probe.newest_date}`);
+  bits.push(`obs_in_fetch=${probe.obs_in_fetch}`);
+  if (probe.coingecko_public_lookback_limited) bits.push('coingecko_public_lookback_limited');
+  if (probe.coingecko_public_lookback_exceeded) bits.push('coingecko_public_lookback_exceeded');
+  if (!probe.bootstrap_capable_succeeded) bits.push('no_bootstrap_provider_succeeded');
+  return bits.join('; ');
 }
 
 function obsAtOrBefore(marketData: MarketDataPoint[], symbol: string, asofDate: Date): number {
@@ -72,7 +88,8 @@ function obsAtOrBefore(marketData: MarketDataPoint[], symbol: string, asofDate: 
  */
 export function formatStaleHistoryHumanSummary(
   staleReason: string,
-  diagnostics: { missingSymbols: string[]; status: Record<string, CoreSymbolStatus> }
+  diagnostics: { missingSymbols: string[]; status: Record<string, CoreSymbolStatus> },
+  providerDiagnostics?: ProviderDiagnostics
 ): string {
   if (staleReason === 'MISSING_CORE_SERIES') {
     const miss = diagnostics.missingSymbols.length
@@ -100,6 +117,10 @@ export function formatStaleHistoryHumanSummary(
       bits.push(`TR_21 need ${s.checks.tr_21.required} have ${s.checks.tr_21.have_at_asof}`);
     }
     if (s.note) bits.push(`note=${s.note}`);
+    if (sym === MARKET_SYMBOLS.BTC_USD) {
+      const btcExtra = formatBtcProbeSummary(providerDiagnostics);
+      if (btcExtra) bits.push(btcExtra);
+    }
     return `${sym}: ${bits.join('; ')}`;
   });
   return parts.join(' || ');

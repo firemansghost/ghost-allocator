@@ -186,7 +186,7 @@ curl https://ghost-allocator.vercel.app/api/ghostregime/health
 - **AlphaVantage**: Verify `ALPHAVANTAGE_API_KEY` in Vercel env vars
 - **CBOE VIX**: Usually reliable, check if CSV format changed
 - **Stooq**: Stooq may return **API-key / captcha instructions** (plaintext) instead of CSV when `STOOQ_API_KEY` is not set. Obtain a key via [Stooq get_apikey](https://stooq.com/q/d/?s=spy.us&get_apikey), then set `STOOQ_API_KEY` in Vercel. Responses are classified as `stooq_apikey_gate` in `stooq_probe`, not as “empty history” without explanation.
-- **BTC-USD**: If Stooq CSV fails, the provider tries **CoinGecko** for BTC only; ETFs still require Stooq (or another future source).
+- **BTC-USD**: **Yahoo Finance chart** is the primary bootstrap provider (600+ calendar days). Fallback order: **Yahoo → Stooq `btcusd` → CoinGecko public (recent-only)**. ETFs still use Stooq first (optional Marketstack fallback).
 
 ### Typical Provider Issues
 
@@ -201,8 +201,17 @@ curl https://ghost-allocator.vercel.app/api/ghostregime/health
 
 **Stooq**:
 - **API key required**: Plaintext body starting with “Get your apikey” means CSV was not returned — configure `STOOQ_API_KEY`.
+- **Browser / JS challenge**: HTML bodies mentioning JavaScript or browser verification are classified as `stooq_browser_challenge`. **Do not rely on Stooq for BTC bootstrap** — Yahoo is primary for `BTC-USD`.
 - **Symbol mapping**: Verify `STOOQ_SYMBOL_MAP` in `lib/ghostregime/marketData.ts`
-- **Diagnostics**: `provider_diagnostics.stooq_probe[symbol].body_preview` shows the first ~500 chars of the response; `outcome` distinguishes `stooq_apikey_gate`, `non_csv_unexpected`, `csv_ok`, etc.
+- **Diagnostics**: `provider_diagnostics.stooq_probe[symbol].body_preview` shows the first ~500 chars of the response; `outcome` distinguishes `stooq_apikey_gate`, `stooq_browser_challenge`, `non_csv_unexpected`, `csv_ok`, etc.
+
+**BTC-USD refresh (VAMS bootstrap)**:
+- **Provider order**: Yahoo Finance chart → Stooq `btcusd` (optional) → CoinGecko public (recent-only gap-fill).
+- **VAMS requirement unchanged**: `vams_min_observations_at_asof` = **400** at market as-of. Do not lower this gate.
+- **CoinGecko public**: Cannot bootstrap 400+ observations — public tier is capped to ~**360 calendar days** (`coingecko_public_lookback_limited` / `coingecko_public_lookback_exceeded` in `provider_diagnostics.btc_probe`). Not bootstrap-capable.
+- **Failed refresh**: Blob **latest is preserved** when `stale=true` or history is insufficient (`serve_metadata.persisted_snapshot_preserved: true`). This is intentional.
+- **Deploy before CI passes**: The daily GitHub workflow calls **Vercel Production** (`?force=1`). Code and env changes must be **deployed to Vercel Production** before the workflow will see the fix.
+- **Slack**: `SLACK_WEBHOOK_URL` is optional; missing webhook does **not** cause refresh failure.
 
 ## Environment Variables
 

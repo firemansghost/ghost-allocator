@@ -81,4 +81,46 @@ describe('formatStaleHistoryHumanSummary', () => {
     assert.match(summary, /SPY/);
     assert.match(summary, /VAMS need 400 have 330/);
   });
+
+  it('includes BTC provider probe detail when BTC fails VAMS', () => {
+    const summary = formatStaleHistoryHumanSummary(
+      'INSUFFICIENT_HISTORY',
+      {
+        missingSymbols: [MARKET_SYMBOLS.BTC_USD],
+        status: {
+          [MARKET_SYMBOLS.BTC_USD]: {
+            provider: 'Yahoo',
+            last_date: null,
+            obs: 0,
+            obs_at_asof: 0,
+            ok: false,
+            checks: {
+              vams: { required: 400, met: false, have_at_asof: 0 },
+            },
+          },
+        },
+      },
+      {
+        resolvedIds: {},
+        errors: { 'BTC-USD': 'No bootstrap provider' },
+        proxies: {},
+        btc_probe: {
+          provider_attempts: [
+            { provider: 'yahoo', outcome: 'http_not_ok', rows: 0 },
+            { provider: 'stooq', outcome: 'stooq_browser_challenge', rows: 0 },
+            { provider: 'coingecko_public', outcome: 'no_data', rows: 0 },
+          ],
+          oldest_date: null,
+          newest_date: null,
+          obs_in_fetch: 0,
+          coingecko_public_lookback_limited: true,
+          bootstrap_capable_succeeded: false,
+        },
+      }
+    );
+    assert.match(summary, /BTC-USD/);
+    assert.match(summary, /yahoo:http_not_ok/);
+    assert.match(summary, /coingecko_public_lookback_limited/);
+    assert.match(summary, /no_bootstrap_provider_succeeded/);
+  });
 });

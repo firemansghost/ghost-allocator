@@ -15,6 +15,21 @@ export function computeMarketSnapshotLagDays(runDateUtc: Date, snapshotDateStr: 
 
 export function extractRefreshErrorSummary(pd?: ProviderDiagnostics): string | undefined {
   if (!pd) return undefined;
+  const btc = pd.btc_probe;
+  if (btc && !btc.bootstrap_capable_succeeded) {
+    const attemptLine = btc.provider_attempts
+      .map((a) => `${a.provider}:${a.outcome}/${a.rows}`)
+      .join(' → ');
+    const flags: string[] = [];
+    if (btc.coingecko_public_lookback_limited) flags.push('coingecko_public_lookback_limited');
+    if (btc.coingecko_public_lookback_exceeded) flags.push('coingecko_public_lookback_exceeded');
+    const range =
+      btc.oldest_date && btc.newest_date ? ` ${btc.oldest_date}..${btc.newest_date}` : '';
+    return `BTC fetch failed (${attemptLine}; obs=${btc.obs_in_fetch}${range}${flags.length ? `; ${flags.join(',')}` : ''})`.slice(
+      0,
+      400
+    );
+  }
   const errVals = Object.values(pd.errors).filter((e): e is string => Boolean(e && String(e).trim()));
   if (errVals.length > 0) {
     return errVals[0].slice(0, 400);
