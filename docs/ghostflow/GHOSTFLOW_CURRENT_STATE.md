@@ -2,7 +2,7 @@
 
 Canonical inventory after the **v1.7** release checkpoint. Theme for v1.8: **GhostFlow Data Quality & Mock Score Discipline**.
 
-**Related:** [DATA_ROADMAP.md](./DATA_ROADMAP.md) (living phase ladder) · [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) (operator refresh) · [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) (v1.8c freshness & `dataQuality` policy)
+**Related:** [DATA_ROADMAP.md](./DATA_ROADMAP.md) (living phase ladder) · [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md) (canonical operator workflow) · [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) (field quick reference) · [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) (v1.8c freshness & `dataQuality` policy)
 
 ---
 
@@ -147,8 +147,8 @@ Discipline-first roadmap after v1.7 feature completion — inventory and operato
 | **v1.8a** | Current State / Data Quality Inventory — **this doc** | **Done** (docs-only) |
 | **v1.8b** | Mock Score Retirement Decision — [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) | **Done** (docs-only) |
 | **v1.8c** | Artifact Freshness & `dataQuality` Consistency Pass — [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) | **Done** (docs-only) |
-| **v1.8d** | Operator Refresh Discipline | **Next** |
-| **v1.8e** | Documentation Consolidation | Planned |
+| **v1.8d** | Operator Refresh Discipline — [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md) | **Done** (docs-only) |
+| **v1.8e** | Documentation Consolidation | **Next** |
 | **v1.8f** | UI Clarity / Methodology Polish | Optional |
 | **v1.8g** | Treasury Calibration Research-Only | Optional |
 | **v1.8h** | Passive-Flow Next-Source Feasibility | Optional |

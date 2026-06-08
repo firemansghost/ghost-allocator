@@ -6,7 +6,7 @@ Living roadmap for GhostFlow score-input sourcing, phase history, and open quest
 
 **Baseline reference date:** [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) = `2026-05-22`.
 
-**Operator refresh:** [`MANUAL_REFRESH_CHECKLIST.md`](./MANUAL_REFRESH_CHECKLIST.md) · per-artifact runbooks at the bottom of that page.
+**Operator refresh:** [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md) (canonical workflow) · [`MANUAL_REFRESH_CHECKLIST.md`](./MANUAL_REFRESH_CHECKLIST.md) (field quick reference) · per-artifact runbooks at the bottom of the checklist.
 
 **Current research composite (production snapshot, reference 2026-05-22):** Composite **62** · Passive Pressure **58** · Structural Fragility **66** · band *Crowded / Reflexive*.
 
@@ -235,8 +235,8 @@ GhostFlow input promotion rules (all phases):
 | **v1.8a** | Current State / Data Quality Inventory | **Done** — [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md); docs-only; no score/artifact/UI change |
 | **v1.8b** | Mock Score Retirement Decision | **Done** — [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md); keep-MOCK decisions for three passive inputs; no wiring/replacements/retirements approved |
 | **v1.8c** | Artifact Freshness & `dataQuality` Consistency Pass | **Done** — [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md); policy documented; no JSON/score/UI changes |
-| **v1.8d** | Operator Refresh Discipline | **Next** — scored vs display vs Treasury legend in refresh checklist |
-| **v1.8e** | Documentation Consolidation | **Planned** — onboarding path; stale line fixes |
+| **v1.8d** | Operator Refresh Discipline | **Done** — [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md); docs-only operator workflow; taxonomy, cadence map, validation matrix; checklist tightened; no JSON/score/UI changes; v1.8c.1 / v1.8f / score wiring **not** approved |
+| **v1.8e** | Documentation Consolidation | **Next** — onboarding path; stale line fixes |
 | **v1.8f** | UI Clarity / Methodology Polish | **Optional** — equity vs Treasury separation copy |
 | **v1.8g** | Treasury Calibration Research-Only | **Optional** — no percentiles/bands/score in UI |
 | **v1.8h** | Passive-Flow Next-Source Feasibility | **Optional** — ICI non-overlap review |
