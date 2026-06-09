@@ -1,5 +1,7 @@
 # Treasury Basis Trade / Futures Positioning Artifact Design (GhostFlow v1.7b)
 
+> **Current status:** Treasury Futures Positioning **production artifact shipped** (v1.7d). UI shipped as part of **Treasury Plumbing** separate display-only lane (v1.7e). **v1.7f** kept it display-only; **v1.7g** score gate **not approved / discouraged**. Public CFTC positioning proxy only — **not** full basis-trade measurement. See [TREASURY_PLUMBING_MAPPING_DECISION.md](./TREASURY_PLUMBING_MAPPING_DECISION.md) and [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md).
+
 **Status:** v1.7d production artifact + **v1.7e display card** + **v1.7f display-only mapping decision** — [`treasuryFuturesPositioningProxy.v1.json`](../data/ghostflow/artifacts/treasuryFuturesPositioningProxy.v1.json) via [`treasuryPlumbingDisplay.ts`](../lib/ghostflow/treasuryPlumbingDisplay.ts); [`mapping decision`](./TREASURY_PLUMBING_MAPPING_DECISION.md). **Not** score wiring or `buildSnapshot` merge; `mappingStatus` **not_final**.
 
 **Prior work:** [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md) (v1.7a) · v1.7a.1 CFTC PRE spike (`npm run ghostflow:treasury-cftc-pre-spike`)
@@ -18,8 +20,8 @@
 |------|--------|
 | `signalId` | `treasury-futures-positioning-proxy` |
 | Artifact file (example) | `treasuryFuturesPositioningProxy.v1.example.json` |
-| Future UI title | **Treasury Futures Positioning Proxy** |
-| Future section | **Treasury Plumbing** |
+| UI title (shipped v1.7e) | **Treasury Futures Positioning Proxy** |
+| Dashboard section (shipped v1.7e) | **Treasury Plumbing** |
 | Narrative (caveats only) | “Basis-trade stress proxy” — not in `signalId` |
 
 **Rejected:** `treasury-basis-trade-stress-proxy` — overstates measurement.

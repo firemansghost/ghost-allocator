@@ -1,5 +1,7 @@
 # Operator Refresh Discipline (GhostFlow v1.8d)
 
+**Operator path:** [README](./README.md) · [Discipline](./OPERATOR_REFRESH_DISCIPLINE.md) · [Checklist](./MANUAL_REFRESH_CHECKLIST.md)
+
 **Status:** Canonical operator workflow — **docs-only**; no artifact JSON, score, UI, runtime, or schema changes in v1.8d.  
 **Related:** [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) (field reference) · [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) (freshness & `dataQuality` policy) · [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) · [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md)
 
@@ -186,6 +188,7 @@ Suggested messages: see [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST
 
 | Doc | Role |
 |-----|------|
+| [README.md](./README.md) | GhostFlow doc index and onboarding path |
 | [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) | Field-level quick checklist + per-artifact tables |
 | [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) | Freshness thresholds & `dataQuality` policy |
 | [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) | Canonical dashboard inventory |

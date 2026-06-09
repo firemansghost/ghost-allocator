@@ -1,5 +1,7 @@
 # 0DTE / Options Data-Path — Feasibility Memo (GhostFlow v1.4a)
 
+> **Current status (post-v1.4d):** This is a **v1.4a historical feasibility memo**. The `odte-options` **PLACEHOLDER** was retired. **`options-activity-proxy`** shipped as **display-only** in v1.4d; v1.4e kept it display-only. Equity **`publicSignalCount` is 10**; **placeholder cards are 0**. True 0DTE/GEX remains unimplemented / not approved. See [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) and [OPTIONS_ACTIVITY_MAPPING_DECISION.md](./OPTIONS_ACTIVITY_MAPPING_DECISION.md). Sections below preserve v1.4a research context.
+
 **Status:** Research / feasibility + **v1.4b column-lock spike** — no scoring, merge, production artifact JSON, or UI changes.  
 **Spike:** `npm run ghostflow:options-data-spike` → [`scripts/ghostflow/options-data-spike.ts`](../scripts/ghostflow/options-data-spike.ts) (not in `ghostflow:check`).  
 **Target (future):** A defensible proxy for **options-market structure pressure** (short-dated positioning, dealer hedging feedback) — likely **display-only** if built from public aggregates; true **0DTE share** or **gamma/GEX** may require paid/vendor data.  

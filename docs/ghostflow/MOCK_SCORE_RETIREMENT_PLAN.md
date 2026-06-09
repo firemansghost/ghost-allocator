@@ -1,5 +1,7 @@
 # Mock Score Retirement Plan (GhostFlow v1.8b)
 
+**GhostFlow docs:** [README](./README.md) · [Current state](./GHOSTFLOW_CURRENT_STATE.md) · [Roadmap](./DATA_ROADMAP.md)
+
 **Status:** Decision record only — **docs-only**; no score, artifact, UI, or runtime changes.  
 **Effective:** v1.8b (after v1.8a inventory)  
 **Related:** [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) · [DATA_ROADMAP.md](./DATA_ROADMAP.md) · [CFTC_TFF_MAPPING_DECISION.md](./CFTC_TFF_MAPPING_DECISION.md) · [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md) · [RETIREMENT_FLOW_MAPPING_DECISION.md](./RETIREMENT_FLOW_MAPPING_DECISION.md)

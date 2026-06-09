@@ -1,0 +1,147 @@
+# GhostFlow Documentation
+
+Entrypoint for GhostFlow docs under `docs/ghostflow/`. For live dashboard inventory and scores, see [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md).
+
+---
+
+## Current canonical snapshot
+
+| Item | Value |
+|------|--------|
+| **Composite** | **62** |
+| **Passive Pressure** | **58** |
+| **Structural Fragility** | **66** |
+| **Band** | *Crowded / Reflexive* |
+| **Equity `publicSignalCount`** | **10** |
+| **Treasury Plumbing** | **2** separate display-only cards |
+
+Treasury is **outside** the equity Research Composite, `buildSnapshot`, `raw.signals`, `meta.publicSignals`, [`PUBLIC_ARTIFACT_SIGNAL_IDS`](../../lib/ghostflow/signalPresentation.ts), and `publicSignalCount`. Do **not** combine equity **10** + Treasury **2** into 12.
+
+Three **MOCK** passive score inputs (`systematicStrategyPressure` **62**, `retirementFlowPressureProxy` **58**, `leveredEtfRebalancePressure` **55**) remain unchanged unless a separate product-approved score gate opens.
+
+---
+
+## Start here
+
+Read in this order for onboarding:
+
+1. **[DATA_ROADMAP.md](./DATA_ROADMAP.md)** — Living phase ladder, promotion taxonomy, and open questions. Use for *why* a phase shipped and what gates remain closed.
+2. **[GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md)** — Canonical inventory: score-fed vs display-only vs MOCK vs derived vs Treasury lanes, counts, and guardrails.
+3. **[OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md)** — Canonical operator workflow: taxonomy, cadence map, validation matrix, and refresh guardrails.
+4. **[MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md)** — Field-level quick reference: per-artifact tables, cadence mini-checklists, and validation commands.
+
+---
+
+## Trust and data quality
+
+| Doc | Purpose |
+|-----|---------|
+| [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) | Freshness thresholds, `dataQuality` label policy, and 12-artifact inventory |
+| [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) | Keep-MOCK decisions for three passive score inputs; no replacements or score wiring approved |
+
+No score wiring without an explicit product gate (**v1.0c**, **v1.1f**, **v1.2f**, **v1.4f**, **v1.7g**, **v1.8i** — all discouraged / not approved).
+
+---
+
+## Score-fed artifacts
+
+These **six** equity/public artifacts merge into the Research Composite via `buildSnapshot` and **can affect** Composite / Passive / Structural when refreshed.
+
+| `signalId` | Runbook |
+|------------|---------|
+| `vol-regime` | [ARTIFACT_RUNBOOK.md](./ARTIFACT_RUNBOOK.md) (CBOE VIX) |
+| `breadth` | [BREADTH_ARTIFACT_RUNBOOK.md](./BREADTH_ARTIFACT_RUNBOOK.md) |
+| `etf-flow` | [ETF_ARTIFACT_RUNBOOK.md](./ETF_ARTIFACT_RUNBOOK.md) |
+| `active-index-flow` | [ACTIVE_INDEX_ARTIFACT_RUNBOOK.md](./ACTIVE_INDEX_ARTIFACT_RUNBOOK.md) |
+| `passive-share` | [PASSIVE_SHARE_PROXY_ARTIFACT_RUNBOOK.md](./PASSIVE_SHARE_PROXY_ARTIFACT_RUNBOOK.md) |
+| `concentration` | [INDEX_CONCENTRATION_ARTIFACT_RUNBOOK.md](./INDEX_CONCENTRATION_ARTIFACT_RUNBOOK.md) |
+
+**Derived context:** `modelZoneProximity` (score) and `distance-65` (card) follow `passive-share` — do not refresh separately.
+
+---
+
+## Display-only equity artifacts
+
+These **four** production artifacts refresh **display cards only**. They do **not** replace MOCK score inputs. `mappingStatus` remains **`not_final`** unless separately approved. Display-only does **not** mean low quality.
+
+| Card `signalId` | Design | Mapping decision |
+|-----------------|--------|------------------|
+| `systematic-flow` | [CFTC_TFF_ARTIFACT_DESIGN.md](./CFTC_TFF_ARTIFACT_DESIGN.md) | [CFTC_TFF_MAPPING_DECISION.md](./CFTC_TFF_MAPPING_DECISION.md) |
+| `levered-etf-rebalance` | [LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md](./LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md) | [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md) |
+| `retirement-asset-growth` | [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md) | [RETIREMENT_FLOW_MAPPING_DECISION.md](./RETIREMENT_FLOW_MAPPING_DECISION.md) |
+| `options-activity-proxy` | [OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md](./OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md) | [OPTIONS_ACTIVITY_MAPPING_DECISION.md](./OPTIONS_ACTIVITY_MAPPING_DECISION.md) |
+
+---
+
+## Treasury Plumbing
+
+Separate **display-only** dashboard lane — **not** in equity `publicSignalCount` or Research Composite.
+
+| Doc | Role |
+|-----|------|
+| [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md) | Feasibility + v1.7 release checkpoint |
+| [TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md](./TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md) | `treasury-futures-positioning-proxy` — public CFTC proxy only; **not** full basis-trade measurement |
+| [BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md](./BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md) | `treasury-long-end-income-lens` — **not** investment advice, bond-buying, or duration-allocation advice |
+| [TREASURY_PLUMBING_MAPPING_DECISION.md](./TREASURY_PLUMBING_MAPPING_DECISION.md) | v1.7f display-only mapping lock |
+
+Operator refresh: [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) §9–10 · [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md) class C.
+
+**v1.7g** Treasury score gate — **not approved**, discouraged.
+
+---
+
+## Historical research / decision records
+
+These memos preserve feasibility, calibration, and mapping history. They may contain phase-specific language from when features were planned or in flight.
+
+**Current state is governed by** [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md). **Do not** treat historical feasibility or design docs as score-wiring approval.
+
+### Feasibility memos
+
+- [CFTC_TFF_FEASIBILITY.md](./CFTC_TFF_FEASIBILITY.md) (v0.9c)
+- [LEVERED_ETF_REBALANCE_FEASIBILITY.md](./LEVERED_ETF_REBALANCE_FEASIBILITY.md) (v1.1a)
+- [RETIREMENT_FLOW_FEASIBILITY.md](./RETIREMENT_FLOW_FEASIBILITY.md) (v1.2a)
+- [ODTE_OPTIONS_FEASIBILITY.md](./ODTE_OPTIONS_FEASIBILITY.md) (v1.4a — superseded placeholder path; see banner)
+- [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md) (v1.7a)
+
+### Calibration studies (research-only)
+
+- [CFTC_TFF_CALIBRATION_STUDY.md](./CFTC_TFF_CALIBRATION_STUDY.md)
+- [LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md](./LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md)
+- [RETIREMENT_FLOW_CALIBRATION_STUDY.md](./RETIREMENT_FLOW_CALIBRATION_STUDY.md)
+
+### Mapping decisions
+
+- [CFTC_TFF_MAPPING_DECISION.md](./CFTC_TFF_MAPPING_DECISION.md)
+- [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md)
+- [RETIREMENT_FLOW_MAPPING_DECISION.md](./RETIREMENT_FLOW_MAPPING_DECISION.md)
+- [OPTIONS_ACTIVITY_MAPPING_DECISION.md](./OPTIONS_ACTIVITY_MAPPING_DECISION.md)
+- [TREASURY_PLUMBING_MAPPING_DECISION.md](./TREASURY_PLUMBING_MAPPING_DECISION.md)
+
+### Education / copy
+
+- [PASSIVE_STRESS_ZONE_LANGUAGE.md](./PASSIVE_STRESS_ZONE_LANGUAGE.md) (v1.6a)
+- [PASSIVE_ENDGAME_SCENARIOS.md](./PASSIVE_ENDGAME_SCENARIOS.md) (v1.6b)
+
+---
+
+## Guardrails
+
+- **`publicSignalCount` remains 10** (equity only) — do not promote display-only or Treasury artifacts into score or `meta.publicSignals`.
+- **Treasury remains separate** — 2-card display-only lane outside composite.
+- **Score gates not approved:** v1.0c (CFTC), v1.1f (levered ETF), v1.2f (retirement), v1.4f (options), v1.7g (Treasury), v1.8i (general).
+- **MOCK 62 / 58 / 55** unchanged per [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md).
+- **Routine refresh** must not touch `scoring.ts`, `buildSnapshot.ts`, `mockGhostflowSnapshot.ts`, or open score gates — see [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md).
+- **GhostRegime** is a separate product lane — out of GhostFlow scope.
+
+---
+
+## Production artifacts (12)
+
+All validated by `npm run ghostflow:check`:
+
+- **6** score-fed equity JSON files
+- **4** display-only equity JSON files
+- **2** Treasury lane JSON files
+
+See [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) for file paths and lane tables.
