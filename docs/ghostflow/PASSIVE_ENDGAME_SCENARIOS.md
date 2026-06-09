@@ -146,7 +146,7 @@ Global caveat (each scenario): *Illustrative pathway from passive-flow research 
 - Cap-weight vs equal-weight spread
 - Dedicated correlation / liquidity index
 
-**Treasury Plumbing (v1.7e+):** separate display-only lane — not in equity indicator mapping / `publicSignalCount`; see [memo](./TREASURY_PLUMBING_FEASIBILITY.md)
+**Treasury Plumbing (shipped v1.7e):** separate **2-card** display-only lane — not in equity indicator mapping / `publicSignalCount`; **v1.7g** score gate not approved; see [feasibility memo](./TREASURY_PLUMBING_FEASIBILITY.md) · [mapping decision](./TREASURY_PLUMBING_MAPPING_DECISION.md)
 
 ---
 

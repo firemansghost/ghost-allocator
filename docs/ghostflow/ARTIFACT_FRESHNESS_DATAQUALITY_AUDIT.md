@@ -1,5 +1,7 @@
 # Artifact Freshness & dataQuality Audit (GhostFlow v1.8c)
 
+**GhostFlow docs:** [README](./README.md) · [Current state](./GHOSTFLOW_CURRENT_STATE.md) · [Roadmap](./DATA_ROADMAP.md)
+
 **Status:** Audit / policy memo only — **docs-only**; no score, artifact value, production JSON, UI, runtime, or validation-script changes.  
 **Effective:** v1.8c (after v1.8a inventory and v1.8b mock retirement decision)  
 **Reference date:** [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) = `2026-05-22` (equity freshness narrative)  
@@ -155,6 +157,7 @@ Evaluated against reference **`2026-05-22`**. All 12 files validated by `npm run
 | Phase | Scope |
 |-------|--------|
 | ~~**v1.8d**~~ | ~~Operator Refresh Discipline~~ — **Done** — [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md); taxonomy, cadence map, validation matrix; checklist tightened; docs-only |
+| ~~**v1.8e**~~ | ~~Documentation Consolidation~~ — **Done** — [README.md](./README.md); doc index + targeted stale-line banners; no file moves/archives |
 | **v1.8c.1** | Optional metadata-only cleanup — retirement stale “not yet displayed” note/caveats; possible options `dataQuality` promotion **only** if operator verification policy satisfied; requires `ghostflow:check` + tests if JSON changes **approved separately** |
 | **v1.8f** | UI / freshness summary clarity — whether to include options/CFTC/levered/retirement in rollup; whether Treasury needs bands |
 

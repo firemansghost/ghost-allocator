@@ -1,8 +1,10 @@
 # GhostFlow Current State (v1.8a)
 
+**GhostFlow docs:** [README](./README.md) · [Current state](./GHOSTFLOW_CURRENT_STATE.md) · [Roadmap](./DATA_ROADMAP.md)
+
 Canonical inventory after the **v1.7** release checkpoint. Theme for v1.8: **GhostFlow Data Quality & Mock Score Discipline**.
 
-**Related:** [DATA_ROADMAP.md](./DATA_ROADMAP.md) (living phase ladder) · [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md) (canonical operator workflow) · [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) (field quick reference) · [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) (v1.8c freshness & `dataQuality` policy)
+**Related:** [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md) (canonical operator workflow) · [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) (field quick reference) · [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) (v1.8c freshness & `dataQuality` policy)
 
 ---
 
@@ -131,7 +133,7 @@ Separate dashboard lane — **not** in equity composite or `publicSignalCount`.
 2. **Calibration backlog** — v1.4e-calibration (options), v1.7f-calibration (Treasury), plus existing CFTC/levered/retirement studies — research-only vs display percentiles (not approved for UI).
 3. **0DTE / true GEX path** — OCC Index/Others proxy shipped display-only; true 0DTE/GEX still YELLOW/RED per [ODTE_OPTIONS_FEASIBILITY.md](./ODTE_OPTIONS_FEASIBILITY.md).
 4. **Passive-flow next source** — Any new public proxy must avoid double-counting ICI index share / active-index-flow already in composite.
-5. **Doc sprawl** — 35+ memos under `docs/ghostflow/`; v1.8e consolidation planned.
+5. ~~**Doc sprawl**~~ **Resolved (v1.8e):** [README.md](./README.md) — doc index and onboarding path; targeted stale-line banners on historical memos; no file moves/archives.
 6. ~~**Artifact freshness / dataQuality consistency**~~ **Resolved (v1.8c):** [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) — policy documented; labels unchanged; v1.8c.1 metadata cleanup deferred.
 
 ---
@@ -148,8 +150,8 @@ Discipline-first roadmap after v1.7 feature completion — inventory and operato
 | **v1.8b** | Mock Score Retirement Decision — [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) | **Done** (docs-only) |
 | **v1.8c** | Artifact Freshness & `dataQuality` Consistency Pass — [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) | **Done** (docs-only) |
 | **v1.8d** | Operator Refresh Discipline — [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md) | **Done** (docs-only) |
-| **v1.8e** | Documentation Consolidation | **Next** |
-| **v1.8f** | UI Clarity / Methodology Polish | Optional |
+| **v1.8e** | Documentation Consolidation — [README.md](./README.md) | **Done** (docs-only) |
+| **v1.8f** | UI Clarity / Methodology Polish | **Next** (optional) |
 | **v1.8g** | Treasury Calibration Research-Only | Optional |
 | **v1.8h** | Passive-Flow Next-Source Feasibility | Optional |
 | **v1.8i** | Score Wiring Gate | **Not approved / discouraged** |

@@ -1,6 +1,8 @@
 # CFTC TFF Artifact Design (GhostFlow v0.9d)
 
-**Status:** v0.9e production artifact validated; v0.9f **display-only** public dashboard card (`systematic-flow`). **Not wired** into GhostFlow scoring (`systematicStrategyPressure` remains MOCK until v0.9g / v1.0).  
+> **Current status:** CFTC systematic artifact is **production display-only** (`systematic-flow` card). Related score input remains **MOCK 62** per [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md). **v1.0c** score gate is **not approved / discouraged**. Do **not** treat this design doc as score-wiring approval. See [CFTC_TFF_MAPPING_DECISION.md](./CFTC_TFF_MAPPING_DECISION.md) and [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md).
+
+**Status:** v0.9e production artifact validated; v0.9f **display-only** public dashboard card (`systematic-flow`). **Not wired** into GhostFlow scoring (`systematicStrategyPressure` remains MOCK **62**).  
 **Prior work:** [CFTC_TFF_FEASIBILITY.md](./CFTC_TFF_FEASIBILITY.md) (v0.9c, **YELLOW**).  
 **Production file:** [`data/ghostflow/artifacts/systematicFlowProxy.v1.json`](../data/ghostflow/artifacts/systematicFlowProxy.v1.json)  
 **Example file:** [`data/ghostflow/artifacts/systematicFlowProxy.v1.example.json`](../data/ghostflow/artifacts/systematicFlowProxy.v1.example.json)  

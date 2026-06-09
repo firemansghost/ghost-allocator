@@ -1,8 +1,10 @@
 # GhostFlow Data Roadmap (living roadmap)
 
+**GhostFlow docs:** [README](./README.md) · [Current state](./GHOSTFLOW_CURRENT_STATE.md) · [Roadmap](./DATA_ROADMAP.md)
+
 Living roadmap for GhostFlow score-input sourcing, phase history, and open questions. Builds on **v0.8** (research composite framing: six PUBLIC score sub-inputs, three MOCK passive score sub-inputs, one DERIVED structural sub-input, display-only public artifact cards for CFTC TFF, levered ETF rebalance, retirement asset growth, and OCC index options intensity).
 
-**Canonical inventory (detailed tables):** [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) — score-fed, display-only, MOCK, derived, and Treasury lanes after v1.7.
+**Canonical inventory (detailed tables):** [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) — score-fed, display-only, MOCK, derived, and Treasury lanes after v1.7. **Doc index:** [README.md](./README.md).
 
 **Baseline reference date:** [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) = `2026-05-22`.
 
@@ -187,6 +189,8 @@ GhostFlow input promotion rules (all phases):
 
 ## 5. Proposed implementation phases
 
+*Historical rows below show incremental milestones (e.g. `publicSignals` +7, `publicSignalCount` +8, count **9** at v1.2d). **Current equity `publicSignalCount` is **10** (v1.4d+).*
+
 | Phase | Deliverable | Code / data changes |
 |-------|-------------|---------------------|
 | **v0.9a** | This roadmap + optional checklist link | **Docs only** |
@@ -236,8 +240,8 @@ GhostFlow input promotion rules (all phases):
 | **v1.8b** | Mock Score Retirement Decision | **Done** — [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md); keep-MOCK decisions for three passive inputs; no wiring/replacements/retirements approved |
 | **v1.8c** | Artifact Freshness & `dataQuality` Consistency Pass | **Done** — [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md); policy documented; no JSON/score/UI changes |
 | **v1.8d** | Operator Refresh Discipline | **Done** — [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md); docs-only operator workflow; taxonomy, cadence map, validation matrix; checklist tightened; no JSON/score/UI changes; v1.8c.1 / v1.8f / score wiring **not** approved |
-| **v1.8e** | Documentation Consolidation | **Next** — onboarding path; stale line fixes |
-| **v1.8f** | UI Clarity / Methodology Polish | **Optional** — equity vs Treasury separation copy |
+| **v1.8e** | Documentation Consolidation | **Done** — [README.md](./README.md); docs-only index + targeted stale-line fixes; no file moves/archives |
+| **v1.8f** | UI Clarity / Methodology Polish | **Next** (optional) — equity vs Treasury separation copy |
 | **v1.8g** | Treasury Calibration Research-Only | **Optional** — no percentiles/bands/score in UI |
 | **v1.8h** | Passive-Flow Next-Source Feasibility | **Optional** — ICI non-overlap review |
 | **v1.8i** | Score Wiring Gate | **Not approved** — discouraged (v1.0c / v1.1f / v1.2f / v1.4f / v1.7g) |
@@ -258,6 +262,8 @@ GhostFlow input promotion rules (all phases):
 ---
 
 ## Related documents
+
+Full categorized index: [README.md](./README.md). Key canonical docs:
 
 - [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) — **v1.8a canonical inventory** (score-fed, display-only, MOCK, derived, Treasury)
 - [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) — **v1.8b mock retirement decision** (keep-MOCK ×3; no wiring approved)

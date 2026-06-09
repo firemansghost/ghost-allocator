@@ -1,5 +1,7 @@
 # CFTC TFF / COT Feasibility Memo (GhostFlow v0.9c)
 
+> **Current status:** Feasibility led to a **production display-only** CFTC artifact (`systematic-flow` card). Score input remains **MOCK 62**; **v1.0c** not approved. Body below is **historical** v0.9c research. See [CFTC_TFF_MAPPING_DECISION.md](./CFTC_TFF_MAPPING_DECISION.md) and [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md).
+
 **Status:** Research spike only — no scoring, merge, artifact JSON, or UI changes.  
 **Target (future):** Replace static MOCK `systematicStrategyPressure` (currently **62** in `mockGhostflowSnapshot.ts`) with a **public weekly futures-positioning proxy**, not a CTA / vol-control / systematic-flow estimate.  
 **Spike script:** `npm run ghostflow:cftc-tff-spike` → `scripts/ghostflow/cftc-tff-spike.ts`  

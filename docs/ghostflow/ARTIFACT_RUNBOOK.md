@@ -1,8 +1,12 @@
 # GhostFlow Artifact Runbook (v0.2+)
 
-**Start here for scheduled refreshes:** [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) — daily, weekly, and monthly operator checklists for all six v0.7 public artifacts.
+**Operator path:** [README](./README.md) · [Discipline](./OPERATOR_REFRESH_DISCIPLINE.md) · [Checklist](./MANUAL_REFRESH_CHECKLIST.md)
+
+**VIX (vol-regime) runbook** — one of six score-fed equity artifacts. GhostFlow has **12** production JSON artifacts validated by `npm run ghostflow:check`: **6** score-fed equity, **4** display-only equity, **2** Treasury separate-lane display-only. Derived/context (`modelZoneProximity`, `distance-65`) and MOCK score inputs are documented in [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) and [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md).
 
 Manual refresh workflow for GhostFlow public-data artifacts. **No live fetches** — all values are hand-edited into static JSON files committed to the repo.
+
+**Related:** [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) (freshness & `dataQuality` policy) · [DATA_ROADMAP.md](./DATA_ROADMAP.md)
 
 **ETF Net Issuance (v0.3):** see [ETF_ARTIFACT_RUNBOOK.md](./ETF_ARTIFACT_RUNBOOK.md).
 
