@@ -69,9 +69,8 @@ const SECTION_INTRO =
 
 const MICRO_CAVEATS = [
   'Separate from Research Composite',
-  'Display-only',
-  'No score impact',
-  'No investment advice',
+  'Display-only · not scored',
+  'Not investment advice',
 ] as const;
 
 const FUTURES_CAVEAT =
@@ -130,14 +129,25 @@ function formatOptionalYield(value: number | undefined): string {
   return value === undefined ? '—' : formatYieldPct(value);
 }
 
+function formatTreasuryBasketDirectionPhrase(direction: TreasuryFuturesDirection): string {
+  switch (direction) {
+    case 'net_short':
+      return 'net short';
+    case 'net_long':
+      return 'net long';
+    case 'flat':
+      return 'flat';
+  }
+}
+
 function buildFuturesExplanation(artifact: TreasuryFuturesPositioningArtifactV1): string {
   const o = artifact.observations;
-  const direction = formatTreasuryBasketDirectionLabel(o.basketDirection).toLowerCase();
+  const direction = formatTreasuryBasketDirectionPhrase(o.basketDirection);
   const pct = Math.abs(o.basketLevMoneyNetPctOi).toFixed(1);
   return (
-    `CFTC TFF Futures Only Treasury basket (${o.basketContractCount} core contracts): leveraged funds ${direction} ` +
-    `(${pct}% of combined open interest, gross ${o.basketLevMoneyGrossPctOi.toFixed(1)}% OI). ` +
-    `Public positioning proxy only — not cash-futures basis, repo, or CTD. Display-only; not in the Research Composite.`
+    `CFTC TFF Futures Only Treasury basket (${o.basketContractCount} core contracts): leveraged funds are ${direction} ` +
+    `${pct}% of combined open interest (gross ${o.basketLevMoneyGrossPctOi.toFixed(1)}% OI). ` +
+    `Public positioning proxy only — not cash-futures basis, repo, or CTD.`
   );
 }
 
