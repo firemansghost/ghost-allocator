@@ -100,8 +100,9 @@ export function GhostFlowMethodology({
             Fragility Score. Weights are fixed and documented below. The composite uses <strong className="text-zinc-300">six
             score-fed public artifacts</strong> (ETF issuance, VIX, ICI index share, active/index flows, SPY concentration,
             breadth), <strong className="text-zinc-300">one derived structural input</strong> (model-zone proximity from ICI
-            index share), and <strong className="text-zinc-300">three static MOCK passive inputs</strong> (systematic **62**,
-            retirement-flow **58**, levered ETF **55**). Four <strong className="text-zinc-300">display-only public artifact
+            index share), and <strong className="text-zinc-300">three static MOCK passive inputs</strong> (systematic{' '}
+            <strong className="text-zinc-300">62</strong>, retirement-flow <strong className="text-zinc-300">58</strong>,
+            levered ETF <strong className="text-zinc-300">55</strong>). Four <strong className="text-zinc-300">display-only public artifact
             cards</strong> (CFTC TFF positioning, levered ETF rebalance estimate, retirement asset growth, OCC index options
             intensity from Daily Volume Statistics) show measured context but do <strong className="text-zinc-300">not</strong>{' '}
             feed the composite. The scored options/vol input remains CBOE VIX — not the OCC activity card (not 0DTE/GEX). The ICI
@@ -635,8 +636,9 @@ export function GhostFlowMethodology({
           </li>
           <li>
             Does not treat display-only CFTC, levered ETF rebalance, retirement asset-growth, or OCC index options intensity
-            cards as Research Composite inputs — MOCK **62**, **55**, and **58** still drive those passive sub-inputs; VIX still
-            drives options/vol.
+            cards as Research Composite inputs — MOCK <strong className="text-zinc-300">62</strong>,{' '}
+            <strong className="text-zinc-300">55</strong>, and <strong className="text-zinc-300">58</strong> still drive
+            those passive sub-inputs; VIX still drives options/vol.
           </li>
           <li>
             Does not treat ETF net issuance, active/index flow differential, ICI Index Share Proxy, index

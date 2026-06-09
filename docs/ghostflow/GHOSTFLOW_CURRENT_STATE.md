@@ -151,8 +151,8 @@ Discipline-first roadmap after v1.7 feature completion — inventory and operato
 | **v1.8c** | Artifact Freshness & `dataQuality` Consistency Pass — [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) | **Done** (docs-only) |
 | **v1.8d** | Operator Refresh Discipline — [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md) | **Done** (docs-only) |
 | **v1.8e** | Documentation Consolidation — [README.md](./README.md) | **Done** (docs-only) |
-| **v1.8f** | UI Clarity / Methodology Polish | **Next** (optional) |
-| **v1.8g** | Treasury Calibration Research-Only | Optional |
+| **v1.8f** | UI Clarity / Methodology Polish | **Done** (UI/copy only; no score/artifact changes) |
+| **v1.8g** | Treasury Calibration Research-Only | **Optional / pause** — v1.8 theme complete; decide next |
 | **v1.8h** | Passive-Flow Next-Source Feasibility | Optional |
 | **v1.8i** | Score Wiring Gate | **Not approved / discouraged** |
 

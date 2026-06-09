@@ -44,8 +44,7 @@ export function GhostFlowScoreCard({
     publicStructuralInputKeys,
   } = data;
   const isMixed = data.dataMix === 'mixed';
-  const { derivedScoreInputCount, mockScoreInputCount } =
-    countScoreInputMixDetailed(passiveShareProxySource);
+  const { mockScoreInputCount } = countScoreInputMixDetailed(passiveShareProxySource);
   const publicPassiveCount = publicPassiveInputKeys?.length ?? 0;
   const publicStructuralCount = publicStructuralInputKeys?.length ?? 0;
   const hasDerivedModelZone = passiveShareProxySource === 'public';
@@ -79,16 +78,22 @@ export function GhostFlowScoreCard({
           {score.subScores.structuralFragility}). Not a forecast. Not financial advice.
         </p>
         {isMixed && hasDerivedModelZone && (
-          <p className="mt-2 text-xs text-amber-300/85">
-            {publicPassiveCount} public Passive Pressure sub-input{publicPassiveCount === 1 ? '' : 's'},{' '}
-            {publicStructuralCount} public Structural Fragility sub-input{publicStructuralCount === 1 ? '' : 's'},
-            and {derivedScoreInputCount} derived Structural sub-input (model-zone proximity from ICI index share)
-            feed this composite; {mockScoreInputCount} static mock input
-            {mockScoreInputCount === 1 ? '' : 's'} remain illustrative placeholders. Public display-only cards for CFTC
-            TFF positioning, levered ETF rebalance, retirement asset growth, and OCC index options intensity are not score
-            inputs — MOCK **62**, **55**, and **58** still drive those composite sub-inputs; VIX still feeds options/vol at
-            20% (no score change from display cards).
-          </p>
+          <ul className="mt-3 space-y-1 text-xs text-amber-300/85 list-disc list-inside max-w-3xl">
+            <li>
+              <span className="text-amber-200/90">Feeds the score:</span> 6 public score artifacts + 1 derived input
+              (model-zone proximity from ICI index share).
+            </li>
+            <li>
+              <span className="text-amber-200/90">Static placeholders:</span> systematic{' '}
+              <strong className="font-semibold text-amber-100/95">62</strong>, retirement{' '}
+              <strong className="font-semibold text-amber-100/95">58</strong>, levered ETF{' '}
+              <strong className="font-semibold text-amber-100/95">55</strong> (VIX still scores options/vol at 20%).
+            </li>
+            <li>
+              <span className="text-amber-200/90">Displayed only:</span> CFTC positioning, levered ETF rebalance,
+              retirement asset growth, and OCC options activity — visible context, not composite inputs.
+            </li>
+          </ul>
         )}
         {isMixed && !hasDerivedModelZone && (
           <p className="mt-2 text-xs text-amber-300/85">

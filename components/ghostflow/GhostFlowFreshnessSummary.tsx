@@ -83,8 +83,8 @@ export function GhostFlowFreshnessSummary({
         )}
       </dl>
       <p className="mt-3 text-[10px] text-zinc-600 leading-relaxed">
-        Status comes from structured artifact freshness on each public signal card. See individual cards for full
-        detail.
+        Summary covers equity Research Composite artifact groups (daily, weekly, monthly score-fed inputs). Display-only
+        and Treasury cards show their own dates and quality labels on each card.
       </p>
     </GlassCard>
   );

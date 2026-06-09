@@ -207,6 +207,30 @@ function SignalCard({
   );
 }
 
+const SCORE_FED_SIGNAL_ORDER = [
+  'vol-regime',
+  'breadth',
+  'etf-flow',
+  'active-index-flow',
+  'passive-share',
+  'concentration',
+] as const;
+
+const DISPLAY_ONLY_SIGNAL_ORDER = [
+  'systematic-flow',
+  'levered-etf-rebalance',
+  'retirement-asset-growth',
+  'options-activity-proxy',
+] as const;
+
+function orderSignals(
+  signals: ScoredGhostFlowSignal[],
+  order: readonly string[]
+): ScoredGhostFlowSignal[] {
+  const byId = new Map(signals.map((s) => [s.id, s]));
+  return order.map((id) => byId.get(id)).filter((s): s is ScoredGhostFlowSignal => s != null);
+}
+
 function SignalSection({
   title,
   intro,
@@ -244,6 +268,8 @@ export function GhostFlowSignalGrid({
   publicSignalCount?: number;
 }) {
   const grouped = groupSignalsByPresentation(signals);
+  const scoreFedSignals = orderSignals(grouped.publicArtifacts, SCORE_FED_SIGNAL_ORDER);
+  const displayOnlySignals = orderSignals(grouped.publicArtifacts, DISPLAY_ONLY_SIGNAL_ORDER);
 
   return (
     <section className="space-y-6" aria-labelledby="ghostflow-signals-heading">
@@ -252,23 +278,30 @@ export function GhostFlowSignalGrid({
           Market-structure signals
         </h2>
         <p className="mt-2 text-xs text-zinc-500 leading-relaxed max-w-3xl">
-          Six public score artifacts and one derived score input feed the research composite. Four additional public
-          artifacts are display-only (CFTC TFF positioning, levered ETF rebalance pressure, retirement asset growth,
-          OCC index options intensity). No placeholder signal cards when the options activity artifact is valid.
+          Six public score artifacts and one derived input feed the Research Composite. Four additional public artifacts
+          are display-only context cards — visible on the dashboard, but not score inputs.
         </p>
       </div>
 
       <SignalSection
-        title="Public manual artifacts"
-        intro="Hand-updated from public sources. Score-fed cards show mapped 0–100 proxy level where mapping is final. Display-only cards (CFTC TFF, levered ETF rebalance, retirement asset growth, index options intensity) may show context metrics on the card but do not feed the Research Composite."
-        signals={grouped.publicArtifacts}
+        title="Score-fed public artifacts"
+        intro="Hand-updated from public sources. Mapped 0–100 proxy levels feed Passive Pressure or Structural Fragility sub-scores."
+        signals={scoreFedSignals}
+        variant="public"
+        dataMix={dataMix}
+      />
+
+      <SignalSection
+        title="Display-only public artifacts"
+        intro="Hand-updated context cards. Metrics may appear on the card but do not replace static MOCK score inputs or change the Research Composite."
+        signals={displayOnlySignals}
         variant="public"
         dataMix={dataMix}
       />
 
       <SignalSection
         title="Derived context"
-        intro="Derived from the ICI Index Share Proxy. Shows gap to a model-stress-zone reference (~65% in published framing; broader 60–65% zone depending on definition). Public proxy only — not a tripwire, crash countdown, or forecast."
+        intro="Derived from the ICI Index Share Proxy — gap to a model-stress-zone reference (~65% in published framing; 60–65% zone depending on definition). Context only, not an additional score sub-input."
         signals={grouped.derivedContext}
         variant="derived"
         dataMix={dataMix}

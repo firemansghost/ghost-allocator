@@ -171,10 +171,7 @@ export function GhostFlowPassiveEndgameScenarios({
             definition). They are <strong className="text-zinc-300">not sequential</strong>, not scored,
             and not a forecast engine.
           </p>
-          <p>
-            GhostFlow is a <strong className="text-zinc-300">pressure gauge</strong>, not a countdown
-            clock. No investment advice. {SCENARIO_GLOBAL_CAVEAT}
-          </p>
+          <p>{SCENARIO_GLOBAL_CAVEAT}</p>
         </div>
       </GlassCard>
 

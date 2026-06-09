@@ -37,9 +37,8 @@ export function GhostFlowCurrentRead({
         )}
         <p className="text-zinc-400">{iciLine}</p>
         <p className="text-zinc-400">
-          Current read:{' '}
-          {score.bandLabel.toLowerCase().replace(/\s*\/\s*/g, '/')} mechanical and structural pressure in the research
-          preview, not a crash forecast.
+          Band label reflects mechanical and structural pressure in the preview model — sensitivity context, not a timed
+          forecast.
         </p>
       </div>
     </GlassCard>
