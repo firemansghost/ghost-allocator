@@ -22,7 +22,8 @@ GhostRegime, GhostYield, Models, and builder are out of scope. This study does *
 | CSV / JSON committed | **None** — local temp files only (`tmp/ghostflow/cap-weight-premium/`) |
 | `publicSignalCount` | **10** (equity) — unchanged |
 | Treasury lane | **2** separate display-only cards — unchanged |
-| **v1.9b.2** artifact design | **Future** — product-gated; display-only default |
+| **v1.9b.2** artifact design | **Done** — [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md); display-only default; docs-only |
+| **v1.9b.3** example JSON + validator | **Future** — separately approved |
 
 ---
 
@@ -142,18 +143,21 @@ The lens is **regime-dependent**. It is not a one-way “cap-weight always wins�
 |----------|--------|
 | Is real output usable? | **Yes** — exit **0**, adjusted close, ~5,818 aligned days |
 | Does SPY/RSP path remain viable? | **Yes** — with operator-CSV discipline and source caveats |
-| Worth planning v1.9b.2? | **Conditionally yes** — if product approves **display-only** artifact-design exploration |
+| Worth planning v1.9b.2? | **Done** — [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) |
 | Score mapper selected? | **No** — no 0–100 mapping approved |
 | Display-only default? | **Yes** |
 
-**Possible future display-only card fields** (v1.9b.2 design only — not approved):
+**Possible future display-only card fields** — specified in [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) (**Done, v1.9b.2**):
 
-- SPY/RSP ratio and ratio percentile
-- 1Y / 3Y / 5Y rolling spread and percentiles
-- Caveat copy on short-horizon reversals (1M/6M mixed)
-- Explicit “proxy / not causal” framing
+- Headline: 5Y spread percentile (**99.6**) — labeled **5Y premium percentile**, not a score
+- SPY/RSP ratio (**3.5458**) and ratio percentile (**98.8**)
+- 1M spread (**-3.64%**, 1.9th percentile) for short-horizon reversal context
+- 1Y / 3Y / 5Y rolling spreads and percentiles
+- Required copy: *Long-horizon cap-weight premium elevated; short horizons regime-dependent.*
+- Caveat: *SPY/RSP proxy; measures weighting-rule return effect, not passive-flow causality; not a trading signal.*
+- Badge: **DISPLAY ONLY**
 
-**v1.9b.2 remains product-gated.** No production artifact JSON, example JSON, UI card, or `publicSignalCount` change in v1.9b.1a.
+**v1.9b.3+ remains separately approved.** No production artifact JSON, example JSON, UI card, or `publicSignalCount` change in v1.9b.2.
 
 ---
 
@@ -163,7 +167,7 @@ The lens is **regime-dependent**. It is not a one-way “cap-weight always wins�
 2. **ETF structure** — RSP quarterly equal-weight rebalance, expense ratio, tracking drift vs S&P 500 Equal Weight Index.
 3. **Adjusted close** — better than raw close, but not identical to official index total-return series comparison.
 4. **Yahoo operator data** — acceptable for this calibration run; **not** approved as dashboard runtime feed.
-5. **Stooq** — direct automated CSV blocked by verification gate; manual Stooq download remains optional cross-check before v1.9b.2.
+5. **Stooq** — direct automated CSV blocked by verification gate; manual Stooq download remains optional cross-check before v1.9b.4 production artifact.
 6. **Not investment advice** — research and education only.
 
 Script caveats echoed: proxy not causal proof; adj-close discipline matters; RSP rebalance/fees add noise; companion to `concentration`; display-only by default.
@@ -173,9 +177,10 @@ Script caveats echoed: proxy not causal proof; adj-close discipline matters; RSP
 ## Recommendation
 
 1. **v1.9b.1a complete** — real operator run documented; path validated for research.
-2. **Proceed to v1.9b.2 only if product approves** artifact-design exploration — **display-only** design memo, not production artifact or score wiring.
+2. **v1.9b.2 complete** — [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md); display-only artifact design memo; no JSON/UI/score.
 3. **Do not score** this lens; do not wire into `buildSnapshot`; do not alter `publicSignalCount` without separate product approval.
-4. **Optional:** second-source cross-check (manually downloaded Stooq or fund-provider adjusted series) before v1.9b.2 if product wants higher confidence.
-5. **v1.9c** (passive supply / float absorption) remains on the roadmap in parallel if product prioritizes supply-side research.
+4. **v1.9b.3** example JSON + validator — **future and separately approved**.
+5. **Optional:** second-source cross-check (manually downloaded Stooq or fund-provider adjusted series) before v1.9b.4 production artifact.
+6. **v1.9c** (passive supply / float absorption) remains on the roadmap in parallel if product prioritizes supply-side research.
 
 **Headline scores unchanged:** Composite **62** · Passive **58** · Structural **66** · band *Crowded / Reflexive* · equity `publicSignalCount` **10** · Treasury **2** display-only cards · MOCK **62 / 58 / 55**.

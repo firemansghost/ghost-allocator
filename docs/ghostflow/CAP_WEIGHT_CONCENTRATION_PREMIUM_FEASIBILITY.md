@@ -147,7 +147,8 @@ Metrics below are for **future v1.9b.1 study** and optional display context — 
 
 | Property | Planned posture |
 |----------|-----------------|
-| Signal id | TBD (e.g. `cap-weight-premium`) — **never** `concentration` |
+| Signal id | `cap-weight-premium-proxy` (artifact) · `cap-weight-premium` (dashboard card) — **never** `concentration` |
+| Design memo | [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) — **Done (v1.9b.2)** |
 | Score role | **Display-only by default** |
 | Data | SPY vs RSP spread / ratio from operator CSV |
 | Question | “Is cap-weighted exposure outperforming equal-weighted exposure?” |
@@ -194,8 +195,10 @@ Metrics below are for **future v1.9b.1 study** and optional display context — 
 | **v1.9b** | Cap-Weight Concentration Premium Feasibility — **this memo** | **Done** (docs-only) |
 | **v1.9b.1** | Cap-Weight Premium CSV Study | **Done** — operator-CSV study script; not in `ghostflow:check` |
 | **v1.9b.1a** | Cap-Weight Premium Calibration Study | **Done** — [CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md); real SPY/RSP run; docs-only |
-| **v1.9b.2** | Artifact design (if study useful) | **Future** — product-gated; display-only default |
-| **v1.9c** | Passive Supply / Float Absorption Feasibility | **Future** — parallel or after v1.9b.1 per product decision |
+| **v1.9b.2** | Artifact design | **Done** — [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md); display-only default; docs-only |
+| **v1.9b.3** | Example JSON + validator/types + tests | **Future** — separately approved |
+| **v1.9b.4** | Production artifact + display-only card | **Future** — product-gated |
+| **v1.9c** | Passive Supply / Float Absorption Feasibility | **Future** — parallel or after v1.9b.3 per product decision |
 
 ### v1.9b.1 — Cap-Weight Premium CSV Study
 
@@ -224,7 +227,9 @@ npm run ghostflow:cap-weight-premium-study -- --spy-csv ... --rsp-csv ... --out 
 
 **Not approved by v1.9b.1:** display card, production artifact, example JSON, score mapper, `publicSignalCount` change.
 
-**Results memo:** [CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) — **Done (v1.9b.1a)** — real operator run 2026-06-15; exit **0**; adj-close SPY/RSP; 5Y spread +39.51% (99.6th pctile); short horizons mixed; v1.9b.2 remains product-gated.
+**Results memo:** [CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) — **Done (v1.9b.1a)** — real operator run 2026-06-15; exit **0**; adj-close SPY/RSP; 5Y spread +39.51% (99.6th pctile); short horizons mixed.
+
+**Design memo:** [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) — **Done (v1.9b.2)** — display-only artifact design; v1.9b.3+ separately approved.
 
 **v1.9b.1 guardrails:**
 
@@ -237,7 +242,7 @@ npm run ghostflow:cap-weight-premium-study -- --spy-csv ... --rsp-csv ... --out 
 
 ### v1.9b.2 and beyond
 
-If v1.9b.1 percentiles and spreads are stable and interpretable → optional artifact design memo (display-only default). If messy → pause rather than forcing a new card. **v1.9c** (passive supply / float absorption) remains on the roadmap regardless.
+Artifact design memo complete — [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md). v1.9b.3 example JSON + validator is **future and separately approved**. **v1.9c** (passive supply / float absorption) remains on the roadmap regardless.
 
 ---
 

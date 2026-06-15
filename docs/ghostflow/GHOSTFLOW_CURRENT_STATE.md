@@ -135,7 +135,7 @@ Separate dashboard lane — **not** in equity composite or `publicSignalCount`.
 4. **Passive-flow next source** — Any new public proxy must avoid double-counting ICI index share / active-index-flow already in composite.
 5. ~~**Doc sprawl**~~ **Resolved (v1.8e):** [README.md](./README.md) — doc index and onboarding path; targeted stale-line banners on historical memos; no file moves/archives.
 6. ~~**Artifact freshness / dataQuality consistency**~~ **Resolved (v1.8c):** [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) — policy documented; labels unchanged; ~~v1.8c.1 metadata cleanup~~ **Done (v1.8c.1)** — display-only/Treasury stale metadata text only.
-7. ~~**v1.9 passive supply & concentration research**~~ **Partially resolved (v1.9a–b.1a):** [PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md](./PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md) · [CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) — v1.9b.1a calibration **Done**; **v1.9b.2** artifact design product-gated; scores/counts unchanged.
+7. ~~**v1.9 passive supply & concentration research**~~ **Partially resolved (v1.9a–b.2):** [PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md](./PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md) · [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) — v1.9b.2 artifact design **Done**; v1.9b.3+ separately approved; scores/counts unchanged.
 
 ---
 
@@ -162,7 +162,7 @@ Discipline-first roadmap after v1.7 feature completion — inventory and operato
 
 ## v1.9 recommendation
 
-**Primary v1.9 theme:** GhostFlow **Passive Supply & Concentration Research** — v1.9b.1a calibration complete; v1.9b.2 product-gated.
+**Primary v1.9 theme:** GhostFlow **Passive Supply & Concentration Research** — v1.9b.2 artifact design complete; v1.9b.3+ separately approved.
 
 | Phase | Deliverable | Status |
 |-------|-------------|--------|
@@ -170,7 +170,8 @@ Discipline-first roadmap after v1.7 feature completion — inventory and operato
 | **v1.9b** | Cap-Weight Concentration Premium Feasibility — [CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) | **Done** (docs-only) |
 | **v1.9b.1** | Cap-Weight Premium CSV Study — `ghostflow:cap-weight-premium-study` | **Done** (research script) |
 | **v1.9b.1a** | Cap-Weight Premium Calibration Study — [CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) | **Done** (docs-only) |
-| **v1.9b.2** | Cap-Weight Premium Artifact Design | **Future** — product-gated |
+| **v1.9b.2** | Cap-Weight Premium Artifact Design — [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) | **Done** (docs-only) |
+| **v1.9b.3** | Example JSON + validator | **Future** — separately approved |
 
 Composite **62 / 58 / 66**, `publicSignalCount` **10**, and Treasury **2**-card lane unchanged.
 
