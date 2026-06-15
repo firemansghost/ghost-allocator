@@ -6,7 +6,7 @@
   "source": {
     "name": "CFTC Public Reporting Environment — TFF Futures Only",
     "url": "https://publicreporting.cftc.gov/Commitments-of-Traders/TFF-Futures-Only/gpe5-46if/about_data",
-    "note": "Production artifact candidate; validated but not yet wired into GhostFlow score."
+    "note": "Production display-only artifact (equity card systematic-flow); not wired into GhostFlow Research Composite score (systematicStrategyPressure remains MOCK 62)."
   },
   "seriesDefinition": "cftc_tff_futures_only_leveraged_funds_equity_basket",
   "updateFrequency": "weekly",

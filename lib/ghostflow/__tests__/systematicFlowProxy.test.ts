@@ -124,8 +124,9 @@ const prodValid = validateSystematicFlowProxyArtifact(production, GHOSTFLOW_REFE
 assert.ok(prodValid.ok, prodValid.ok ? '' : prodValid.errors.join('; '));
 assert.strictEqual(production.designOnly, undefined);
 assert.ok(
-  production.source.note?.includes('Production artifact candidate') &&
-    production.source.note?.includes('not yet wired')
+  production.source.note?.includes('display-only') &&
+    production.source.note?.includes('systematic-flow') &&
+    production.source.note?.includes('MOCK 62')
 );
 assert.strictEqual(production.publishedAt, '2026-05-22');
 assert.strictEqual(production.basket.basketNetPctOi, -18.5);

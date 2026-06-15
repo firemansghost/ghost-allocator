@@ -242,6 +242,7 @@ GhostFlow input promotion rules (all phases):
 | **v1.8d** | Operator Refresh Discipline | **Done** — [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md); docs-only operator workflow; taxonomy, cadence map, validation matrix; checklist tightened; no JSON/score/UI changes; v1.8c.1 / v1.8f / score wiring **not** approved |
 | **v1.8e** | Documentation Consolidation | **Done** — [README.md](./README.md); docs-only index + targeted stale-line fixes; no file moves/archives |
 | **v1.8f** | UI Clarity / Methodology Polish | **Done** — UI/copy hierarchy polish; no score/artifact/data changes; v1.8 theme complete |
+| **v1.8c.1** | Metadata-Only Cleanup | **Done** — stale display-only/Treasury `source.note` and `caveats` text only; no values, `dataQuality`, `mappingStatus`, score, UI, or runtime changes |
 | **v1.8g** | Treasury Calibration Research-Only | **Optional / pause** — no percentiles/bands/score in UI; decide next theme after v1.8 |
 | **v1.8h** | Passive-Flow Next-Source Feasibility | **Optional** — ICI non-overlap review |
 | **v1.8i** | Score Wiring Gate | **Not approved** — discouraged (v1.0c / v1.1f / v1.2f / v1.4f / v1.7g) |
