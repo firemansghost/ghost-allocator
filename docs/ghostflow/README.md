@@ -125,6 +125,24 @@ These memos preserve feasibility, calibration, and mapping history. They may con
 
 ---
 
+## Future research backlog
+
+| Doc | Purpose |
+|-----|---------|
+| [PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md](./PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md) | **v1.9a** Mike Green–inspired research queue — backlog capture only; **v1.9b** feasibility is candidate next |
+
+Topics parked for later evaluation (no score wiring, artifacts, UI cards, or `publicSignalCount` changes approved):
+
+- **Cap-weight concentration premium** — SPY vs RSP / cap-weight vs equal-weight return spread
+- **Passive supply / float absorption** — IPOs, secondaries, lockups, index inclusion vs float
+- **Systematic re-risking** — long-term path beyond MOCK **62** and CFTC display proxy
+- **Protection bid / correlation dispersion** — skew, implied correlation, single-stock vs index vol
+- **Mega-cap autocorrelation / flow momentum** — own-price continuation in flow-fed names
+- **Valuation stress context** — individual-security CAPE-style work; likely outside composite
+- **Credit catalyst / AI financing stress** — outside GhostFlow; possible GhostRegime / GhostYield / separate lane
+
+---
+
 ## Guardrails
 
 - **`publicSignalCount` remains 10** (equity only) — do not promote display-only or Treasury artifacts into score or `meta.publicSignals`.
