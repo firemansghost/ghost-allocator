@@ -74,7 +74,7 @@ Any future candidate in this backlog starts **display-only / feasibility-only** 
 
 | # | Candidate | Research value | GhostFlow semantic fit | Likely data availability | Double-count risk | Score-creep risk | Recommended next action | Suggested future phase |
 |---|-----------|------------------|------------------------|--------------------------|-------------------|------------------|-------------------------|------------------------|
-| 1 | **Cap-Weight Concentration Premium Lens** | High — tests whether weighting mechanism itself produces excess return | **High** — natural companion to existing `concentration` card | **High** — SPY/RSP and index price series are public | Low–medium vs `concentration`, `passive-share` | Medium if wired without gate | **v1.9b Done** — [feasibility memo](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md); next: **v1.9b.1** CSV study or **v1.9c** | **v1.9b Done** · **v1.9b.1 next** |
+| 1 | **Cap-Weight Concentration Premium Lens** | High — tests whether weighting mechanism itself produces excess return | **High** — natural companion to existing `concentration` card | **High** — SPY/RSP and index price series are public | Low–medium vs `concentration`, `passive-share` | Medium if wired without gate | **v1.9b.1a Done** — [calibration study](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md); real run usable; **v1.9b.2** product-gated | **v1.9b.1a Done** · **v1.9b.2 next** |
 | 2 | **Passive Supply / Float Absorption Lens** | High — supply-side complement to demand/flow proxies | **High** — passive market-structure native | Medium — event data fragmented; aggregates harder | Medium vs `etf-flow`, buyback narrative | High if scored naively | Future feasibility memo; display-only default | **v1.9c** |
 | 3 | **Systematic Re-Risking / De-Risking Lens** | High — addresses MOCK trust gap on `systematicStrategyPressure` | **Medium–high** — passive flow theme; semantic rename required | Medium — vol/trend public; true CTA exposure harder | Medium vs VIX, CFTC display card | **High** — direct MOCK replacement temptation | Future feasibility; long-term MOCK retirement path only | **v1.9d** |
 | 4 | **Protection Bid / Correlation Dispersion Lens** | Medium–high — options-market uncertainty framing | **Medium** — vol/options adjacent; distinct from VIX amplifier | Medium — VIX/SKEW public; implied correlation harder | **High** vs score-fed VIX and OCC display proxy | High without reweight decision | Future feasibility; display-only default; avoid VIX double-count | **v1.9e** |
@@ -118,13 +118,15 @@ Any future candidate in this backlog starts **display-only / feasibility-only** 
 **Default recommendation:**
 
 - **v1.9b feasibility complete** — [CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) rates SPY/RSP **YELLOW leaning GREEN**
+- **v1.9b.1 CSV study shipped** — `ghostflow:cap-weight-premium-study`
+- **v1.9b.1a calibration complete** — [CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md); real operator run exit **0**; longer horizons show strong cap-weight premium; short horizons mixed
 - Display-only by default if later implemented
 - No score wiring without later product gate
-- **Next:** **v1.9b.1** operator-CSV study (candidate) or **v1.9c** passive supply feasibility per product decision
+- **Next:** **v1.9b.2** display-only artifact design (product-gated) or **v1.9c** passive supply feasibility per product decision
 
-**Completed phase:** **v1.9b — Cap-Weight Concentration Premium Feasibility** (docs-only)
+**Completed phases:** **v1.9b** feasibility · **v1.9b.1** CSV study · **v1.9b.1a** calibration
 
-**Suggested future phases:** **v1.9b.1** CSV study · **v1.9b.2** artifact design (if study useful)
+**Suggested future phase:** **v1.9b.2** artifact design (display-only; product-gated)
 
 ---
 
@@ -364,8 +366,9 @@ Any future candidate in this backlog starts **display-only / feasibility-only** 
 |-------|-------------|--------|
 | **v1.9a** | Passive Supply & Concentration Research Backlog — **this memo** | **Done** (docs-only) |
 | **v1.9b** | Cap-Weight Concentration Premium Feasibility | **Done** — [CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) |
-| **v1.9b.1** | Cap-Weight Premium CSV Study | **Future** — **candidate next** |
-| **v1.9b.2** | Cap-Weight Premium Artifact Design | **Future** — if v1.9b.1 useful |
+| **v1.9b.1** | Cap-Weight Premium CSV Study | **Done** — `ghostflow:cap-weight-premium-study` |
+| **v1.9b.1a** | Cap-Weight Premium Calibration Study | **Done** — [CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) |
+| **v1.9b.2** | Cap-Weight Premium Artifact Design | **Future** — product-gated; display-only default |
 | **v1.9c** | Passive Supply / Float Absorption Feasibility | **Future** — research-only |
 | **v1.9d** | Systematic Re-Risking Proxy Feasibility | **Future** — research-only |
 | **v1.9e** | Protection Bid / Correlation Dispersion Feasibility | **Future** — research-only |
@@ -395,12 +398,8 @@ None of the future phases above are approved for implementation, scoring, artifa
 
 ## Recommended next step
 
-**v1.9b** — Cap-Weight Concentration Premium Feasibility — **Done** ([memo](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md)).
+**v1.9b.1a** — Cap-Weight Premium Calibration Study — **Done** ([memo](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md)).
 
-**Candidate next:** **v1.9b.1** operator-CSV study or **v1.9c** passive supply feasibility per product decision.
+**Candidate next:** **v1.9b.2** display-only artifact design (product-gated) or **v1.9c** passive supply feasibility per product decision.
 
-The first empirical question for v1.9b.1:
-
-> Can we compute rolling SPY vs RSP return spreads and ratio percentiles from operator-provided adjusted-close CSVs without live fetching?
-
-If v1.9b.1 looks messy — data gaps, unclear semantics, or high double-count risk with existing `concentration` — **pause** rather than forcing a new artifact.
+Real operator run validated SPY/RSP path (exit **0**, adj-close, 5,818 aligned days). Longer-horizon cap-weight premium is elevated; short horizons are mixed — design any future display card with regime caveats.
