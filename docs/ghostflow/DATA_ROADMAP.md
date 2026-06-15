@@ -12,7 +12,9 @@ Living roadmap for GhostFlow score-input sourcing, phase history, and open quest
 
 **Current research composite (production snapshot, reference 2026-05-22):** Composite **62** · Passive Pressure **58** · Structural Fragility **66** · band *Crowded / Reflexive*.
 
-**v1.8 theme:** GhostFlow **Data Quality & Mock Score Discipline** — see [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) § v1.8 recommendation. **v1.8b** formalized keep-MOCK decisions — [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md). **v1.8c** standardized freshness and `dataQuality` policy — [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md); no artifact JSON, score, UI, runtime, or count changes; **v1.8c.1** metadata cleanup **not** approved in v1.8c.
+**v1.8 theme:** GhostFlow **Data Quality & Mock Score Discipline** — see [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) § v1.8 recommendation. **v1.8b** formalized keep-MOCK decisions — [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md). **v1.8c** standardized freshness and `dataQuality` policy — [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md); no artifact JSON, score, UI, runtime, or count changes; **v1.8c.1** metadata cleanup **Done**.
+
+**v1.9 theme:** GhostFlow **Passive Supply & Concentration Research** — [PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md](./PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md). Future feasibility candidates only; no implementation, scores, artifacts, UI cards, or `publicSignalCount` changes approved.
 
 ### Current dashboard state (v1.7 — after v1.7f)
 
@@ -246,8 +248,36 @@ GhostFlow input promotion rules (all phases):
 | **v1.8g** | Treasury Calibration Research-Only | **Optional / pause** — no percentiles/bands/score in UI; decide next theme after v1.8 |
 | **v1.8h** | Passive-Flow Next-Source Feasibility | **Optional** — ICI non-overlap review |
 | **v1.8i** | Score Wiring Gate | **Not approved** — discouraged (v1.0c / v1.1f / v1.2f / v1.4f / v1.7g) |
+| **v1.9a** | Passive Supply & Concentration Research Backlog | **Done** — [PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md](./PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md); docs-only; no score/artifact/UI changes |
+| **v1.9b** | Cap-Weight Concentration Premium Feasibility | **Future** — **candidate next** (Plan Mode first) |
+| **v1.9c** | Passive Supply / Float Absorption Feasibility | **Future** — research-only |
+| **v1.9d** | Systematic Re-Risking Proxy Feasibility | **Future** — research-only |
+| **v1.9e** | Protection Bid / Correlation Dispersion Feasibility | **Future** — research-only |
+| **v1.9f** | Mega-Cap Autocorrelation / Flow Momentum Feasibility | **Future** — optional or folded into v1.9b |
+| **v1.9g** | Valuation Stress Context Feasibility | **Future** — likely outside GhostFlow core |
+| **Credit Catalyst / AI Financing Stress** | Outside GhostFlow | **Future** — possible separate lane (GhostRegime / GhostYield / Credit Plumbing) |
 
 **Treasury Plumbing:** Separate from the equity Research Composite, `publicSignalCount`, and Passive Pressure. Display-only context cards — not investment advice; no Treasury status score. See [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md) · [TREASURY_PLUMBING_MAPPING_DECISION.md](./TREASURY_PLUMBING_MAPPING_DECISION.md).
+
+---
+
+## 6. Future research backlog (v1.9+)
+
+Canonical backlog: [PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md](./PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md) (v1.9a).
+
+Future research candidates inspired by passive market-structure / Mike Green review — **not** approved for implementation:
+
+| Candidate | Suggested phase | GhostFlow fit |
+|-----------|-----------------|---------------|
+| Cap-Weight Concentration Premium Lens | **v1.9b** (next) | Core — companion to `concentration` |
+| Passive Supply / Float Absorption Lens | v1.9c | Core — supply-side complement |
+| Systematic Re-Risking / De-Risking Lens | v1.9d | Core — long-term MOCK retirement path |
+| Protection Bid / Correlation Dispersion Lens | v1.9e | Adjacent — avoid VIX double-count |
+| Mega-Cap Autocorrelation / Flow Momentum Lens | v1.9f or v1.9b appendix | Related to cap-weight premium |
+| Valuation Stress / Individual-Security CAPE Lens | v1.9g or outside GhostFlow | Outside composite |
+| Credit Catalyst / AI Financing Stress | Outside GhostFlow | Separate product lane |
+
+**Not approved:** scores, artifacts, example JSON, UI cards, runtime feeds, `publicSignalCount` changes, or score gates. All candidates start feasibility/display-only unless separately product-gated.
 
 ---
 
@@ -267,6 +297,7 @@ GhostFlow input promotion rules (all phases):
 Full categorized index: [README.md](./README.md). Key canonical docs:
 
 - [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) — **v1.8a canonical inventory** (score-fed, display-only, MOCK, derived, Treasury)
+- [PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md](./PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md) — **v1.9a future research backlog** (passive supply & concentration; no implementation approved)
 - [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) — **v1.8b mock retirement decision** (keep-MOCK ×3; no wiring approved)
 - [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) — **v1.8c freshness & dataQuality audit** (policy memo; no JSON changes)
 - [CFTC_TFF_FEASIBILITY.md](./CFTC_TFF_FEASIBILITY.md) — v0.9c TFF/COT feasibility (YELLOW)
