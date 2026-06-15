@@ -132,11 +132,12 @@ These memos preserve feasibility, calibration, and mapping history. They may con
 |-----|---------|
 | [PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md](./PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md) | **v1.9a** Mike Green–inspired research queue |
 | [CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) | **v1.9b** SPY vs RSP feasibility — YELLOW leaning GREEN |
-| [CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) | **v1.9b.1a** real operator calibration — ratio 98.8th pctile; 5Y spread +39.51%; v1.9b.2 product-gated |
+| [CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) | **v1.9b.1a** real operator calibration — ratio 98.8th pctile; 5Y spread +39.51% |
+| [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) | **v1.9b.2** display-only artifact design — naming, schema, card display; v1.9b.3+ separately approved |
 
 Topics parked for later evaluation (no score wiring, artifacts, UI cards, or `publicSignalCount` changes approved):
 
-- **Cap-weight concentration premium** — [v1.9b feasibility](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) + [v1.9b.1a calibration](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md); operator CSV study (`npm run ghostflow:cap-weight-premium-study`)
+- **Cap-weight concentration premium** — [v1.9b feasibility](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) + [v1.9b.1a calibration](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) + [v1.9b.2 artifact design](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md); operator CSV study (`npm run ghostflow:cap-weight-premium-study`)
 - **Passive supply / float absorption** — IPOs, secondaries, lockups, index inclusion vs float
 - **Systematic re-risking** — long-term path beyond MOCK **62** and CFTC display proxy
 - **Protection bid / correlation dispersion** — skew, implied correlation, single-stock vs index vol
