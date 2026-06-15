@@ -192,21 +192,38 @@ Metrics below are for **future v1.9b.1 study** and optional display context — 
 | Phase | Deliverable | Status |
 |-------|-------------|--------|
 | **v1.9b** | Cap-Weight Concentration Premium Feasibility — **this memo** | **Done** (docs-only) |
-| **v1.9b.1** | Cap-Weight Premium CSV Study | **Future** — **candidate next** |
-| **v1.9b.2** | Artifact design (if study useful) | **Future** — gated on v1.9b.1 output |
+| **v1.9b.1** | Cap-Weight Premium CSV Study | **Done** — operator-CSV study script; not in `ghostflow:check` |
+| **v1.9b.2** | Artifact design (if study useful) | **Future** — gated on real operator study output |
 | **v1.9c** | Passive Supply / Float Absorption Feasibility | **Future** — parallel or after v1.9b.1 per product decision |
 
-### v1.9b.1 — Cap-Weight Premium CSV Study (not implemented in v1.9b)
+### v1.9b.1 — Cap-Weight Premium CSV Study
+
+**Status:** **Done** — research-only operator-CSV study. No downloaded SPY/RSP CSVs or generated JSON committed unless separately approved.
 
 Follow [retirement-flow-history-study.ts](../scripts/ghostflow/retirement-flow-history-study.ts) pattern: **operator-provided CSVs only, no network fetching**.
 
-**Possible future files (separate approval):**
+**Shipped files:**
 
-- `lib/ghostflow/research/capWeightPremiumHistory.ts` — pure functions: align dates, rolling spreads, ratio, percentiles
-- `scripts/ghostflow/cap-weight-premium-study.ts` — CLI: `--spy-csv`, `--rsp-csv`, optional `--out`
-- `lib/ghostflow/__tests__/capWeightPremiumHistory.test.ts` — fixture CSVs, no network
-- `docs/ghostflow/CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md` — optional results memo after first run
-- `package.json` script — `ghostflow:cap-weight-premium-study` — **only if v1.9b.1 approved**
+- [`lib/ghostflow/research/capWeightPremiumHistory.ts`](../lib/ghostflow/research/capWeightPremiumHistory.ts) — parse, align, rolling spreads, ratio, drawdown, percentiles
+- [`scripts/ghostflow/cap-weight-premium-study.ts`](../scripts/ghostflow/cap-weight-premium-study.ts) — CLI
+- [`lib/ghostflow/__tests__/capWeightPremiumHistory.test.ts`](../lib/ghostflow/__tests__/capWeightPremiumHistory.test.ts) — fixture tests, no network
+- `npm run ghostflow:cap-weight-premium-study` — **not** in `ghostflow:check`
+
+**Usage:**
+
+```bash
+npm run ghostflow:cap-weight-premium-study -- --spy-csv path/to/spy.csv --rsp-csv path/to/rsp.csv
+npm run ghostflow:cap-weight-premium-study -- --spy-csv ... --rsp-csv ... --since 2010-01-01 --windows 21,63,252
+npm run ghostflow:cap-weight-premium-study -- --spy-csv ... --rsp-csv ... --out ./capWeightPremiumStudy.v1.json
+```
+
+**CSV contract:** `Date` + `Adj Close` preferred; `Close` fallback (exit code **2** with warning). Inner-join on common dates only.
+
+**Exit codes:** `0` adjusted-close + sufficient overlap; `1` parse/arg/overlap failure; `2` close-only or partial window quality.
+
+**Not approved by v1.9b.1:** display card, production artifact, example JSON, score mapper, `publicSignalCount` change.
+
+**Results memo:** [`CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md`](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) — create only after a **real** operator run on live SPY/RSP CSVs; do not populate from fixtures.
 
 **v1.9b.1 guardrails:**
 
