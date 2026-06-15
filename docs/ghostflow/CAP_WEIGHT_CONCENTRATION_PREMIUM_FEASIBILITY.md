@@ -193,7 +193,8 @@ Metrics below are for **future v1.9b.1 study** and optional display context — 
 |-------|-------------|--------|
 | **v1.9b** | Cap-Weight Concentration Premium Feasibility — **this memo** | **Done** (docs-only) |
 | **v1.9b.1** | Cap-Weight Premium CSV Study | **Done** — operator-CSV study script; not in `ghostflow:check` |
-| **v1.9b.2** | Artifact design (if study useful) | **Future** — gated on real operator study output |
+| **v1.9b.1a** | Cap-Weight Premium Calibration Study | **Done** — [CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md); real SPY/RSP run; docs-only |
+| **v1.9b.2** | Artifact design (if study useful) | **Future** — product-gated; display-only default |
 | **v1.9c** | Passive Supply / Float Absorption Feasibility | **Future** — parallel or after v1.9b.1 per product decision |
 
 ### v1.9b.1 — Cap-Weight Premium CSV Study
@@ -223,7 +224,7 @@ npm run ghostflow:cap-weight-premium-study -- --spy-csv ... --rsp-csv ... --out 
 
 **Not approved by v1.9b.1:** display card, production artifact, example JSON, score mapper, `publicSignalCount` change.
 
-**Results memo:** [`CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md`](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) — create only after a **real** operator run on live SPY/RSP CSVs; do not populate from fixtures.
+**Results memo:** [CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) — **Done (v1.9b.1a)** — real operator run 2026-06-15; exit **0**; adj-close SPY/RSP; 5Y spread +39.51% (99.6th pctile); short horizons mixed; v1.9b.2 remains product-gated.
 
 **v1.9b.1 guardrails:**
 
