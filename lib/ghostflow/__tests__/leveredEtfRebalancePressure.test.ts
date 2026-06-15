@@ -67,8 +67,9 @@ const prodValid = validateLeveredEtfRebalancePressureArtifact(production, {
 assert.ok(prodValid.ok, prodValid.ok ? '' : prodValid.errors.join('; '));
 assert.strictEqual(production.designOnly, undefined);
 assert.ok(
-  production.source.note?.includes('Production artifact candidate') &&
-    production.source.note?.includes('not yet wired')
+  production.source.note?.includes('display-only') &&
+    production.source.note?.includes('levered-etf-rebalance') &&
+    production.source.note?.includes('MOCK 55')
 );
 assert.strictEqual(production.asOf, '2026-05-22');
 assert.strictEqual(production.publishedAt, '2026-05-28');

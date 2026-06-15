@@ -6,7 +6,7 @@
   "source": {
     "name": "CFTC Public Reporting Environment — TFF Futures Only (Treasury)",
     "url": "https://publicreporting.cftc.gov/Commitments-of-Traders/TFF-Futures-Only/gpe5-46if/about_data",
-    "note": "Production artifact candidate (v1.7d). Values extracted via npm run ghostflow:treasury-cftc-pre-spike on 2026-06-04 from dataset gpe5-46if (TFF Futures Only). Report asOf 2026-05-26 = Tuesday positions (2026 Report Week 21). publishedAt 2026-06-04 = operator extract date. Public leveraged-funds Treasury futures positioning proxy only — not the full cash-futures basis trade, repo specialness, CTD behavior, or financing terms. Not scored; mappingStatus not_final."
+    "note": "Production artifact (v1.7d). Values extracted via npm run ghostflow:treasury-cftc-pre-spike on 2026-06-04 from dataset gpe5-46if (TFF Futures Only). Report asOf 2026-05-26 = Tuesday positions (2026 Report Week 21). publishedAt 2026-06-04 = operator extract date. Public leveraged-funds Treasury futures positioning proxy only — not the full cash-futures basis trade, repo specialness, CTD behavior, or financing terms. Not scored; mappingStatus not_final."
   },
   "observationType": "cftc_tff_treasury_futures_positioning_snapshot",
   "seriesDefinition": "cftc_tff_futures_only_treasury_leveraged_funds_basket_v1",
@@ -18,7 +18,7 @@
     "Public CFTC leveraged-funds Treasury futures positioning proxy only.",
     "Does not measure the full Treasury basis trade, cash-futures basis, repo specialness, CTD behavior, or financing terms.",
     "Leveraged Funds are a regulatory bucket, not a basis-trade desk label.",
-    "Validated production candidate only — not displayed and not wired into buildSnapshot or the Research Composite.",
+    "Display-only Treasury Plumbing card (separate lane, v1.7e); outside equity publicSignalCount; not merged into buildSnapshot or Research Composite.",
     "Basis-trade stress framing is narrative context only — not measured directly."
   ],
   "contracts": [

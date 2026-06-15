@@ -42,9 +42,9 @@ assert.ok(prodValid.ok, prodValid.ok ? '' : prodValid.errors.join('; '));
 assert.strictEqual(production.designOnly, undefined);
 assert.strictEqual(production.dataQuality, 'verified_manual');
 assert.ok(
-  production.source.note?.includes(
-    'Production artifact candidate; validated but not yet displayed or wired into GhostFlow score'
-  )
+  production.source.note?.includes('display-only') &&
+    production.source.note?.includes('retirement-asset-growth') &&
+    production.source.note?.includes('MOCK 58')
 );
 assert.strictEqual(production.asOf, '2025-12-31');
 assert.strictEqual(production.publishedAt, '2026-03-26');

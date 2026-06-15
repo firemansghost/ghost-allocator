@@ -99,7 +99,7 @@ Evaluated against reference **`2026-05-22`**. All 12 files validated by `npm run
 | `indexConcentration.v1.json` | `concentration` | Score-fed | `verified_manual` | — | 2026-03-31 | 2026-04-09 | Monthly | **caution** (43d) | Yes | Normal between SSGA releases |
 | `systematicFlowProxy.v1.json` | `systematic-flow` | Display-only | `verified_manual` | — | 2026-05-19 | 2026-05-22 | Weekly (CFTC) | **fresh** (0d) | Yes | JSON `signalId`: `systematic-flow-proxy` |
 | `leveredEtfRebalancePressure.v1.json` | `levered-etf-rebalance` | Display-only | `manual_unverified` | `not_final` | 2026-05-22 | 2026-05-28 | Event/manual | **fresh** (anchor after ref → 0d) | Yes | AUM/return date skew; label appropriate |
-| `retirementFlowPressureProxy.v1.json` | `retirement-asset-growth` | Display-only | `verified_manual` | `not_final` | 2025-12-31 | 2026-03-26 | Quarterly | **caution** (57d; normal cadence) | Yes | Stale note “not yet displayed” — v1.8c.1 candidate; JSON `signalId` ≠ card id |
+| `retirementFlowPressureProxy.v1.json` | `retirement-asset-growth` | Display-only | `verified_manual` | `not_final` | 2025-12-31 | 2026-03-26 | Quarterly | **caution** (57d; normal cadence) | Yes | Metadata updated v1.8c.1 — display-only card live; JSON `signalId` ≠ card id |
 | `optionsActivityProxy.v1.json` | `options-activity-proxy` | Display-only | `manual_unverified` | `not_final` | 2026-05-22 | 2026-05-22 | Daily | **fresh** | Yes | OCC spike in `source.note`; label defensible per policy |
 | `treasuryFuturesPositioningProxy.v1.json` | `treasury-futures-positioning-proxy` | Treasury | `manual_unverified` | `not_final` | 2026-05-26 | 2026-06-04 | Weekly CFTC | **No equity band** | Yes | Separate lane; `asOf` can exceed equity ref |
 | `treasuryLongEndIncomeLens.v1.json` | `treasury-long-end-income-lens` | Treasury | `verified_manual` | `not_final` | 2026-06-02 | 2026-06-04 | Daily FRED | **No equity band** | Yes | FRED common-date design; not investment advice |
@@ -158,7 +158,7 @@ Evaluated against reference **`2026-05-22`**. All 12 files validated by `npm run
 |-------|--------|
 | ~~**v1.8d**~~ | ~~Operator Refresh Discipline~~ — **Done** — [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md); taxonomy, cadence map, validation matrix; checklist tightened; docs-only |
 | ~~**v1.8e**~~ | ~~Documentation Consolidation~~ — **Done** — [README.md](./README.md); doc index + targeted stale-line banners; no file moves/archives |
-| **v1.8c.1** | Optional metadata-only cleanup — retirement stale “not yet displayed” note/caveats; possible options `dataQuality` promotion **only** if operator verification policy satisfied; requires `ghostflow:check` + tests if JSON changes **approved separately** |
+| ~~**v1.8c.1**~~ | ~~Metadata-only cleanup~~ — **Done** — retirement, CFTC, levered ETF `source.note`; Treasury + retirement `caveats`; text only; no values, `dataQuality`, `mappingStatus`, score, or UI changes |
 | **v1.8f** | UI / freshness summary clarity — whether to include options/CFTC/levered/retirement in rollup; whether Treasury needs bands |
 
 ---

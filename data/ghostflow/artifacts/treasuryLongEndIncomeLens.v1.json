@@ -6,7 +6,7 @@
   "source": {
     "name": "FRED — U.S. Treasury constant maturity, TIPS, and breakeven inflation (verified extract)",
     "url": "https://fred.stlouisfed.org/",
-    "note": "Production artifact candidate (v1.7d.1). Values from official FRED API (api.stlouisfed.org) via ghostflow:fred-treasury-yields-spike on 2026-06-04; observation_start 2020-01-01; common asOf 2026-06-02 where all six series have numeric observations. No forward-fill. Series: DGS30, DFII30, DGS2, DGS5, DGS10, T10YIE. Not investment advice; not scored; mappingStatus not_final.",
+    "note": "Production artifact (v1.7d.1). Values from official FRED API (api.stlouisfed.org) via ghostflow:fred-treasury-yields-spike on 2026-06-04; observation_start 2020-01-01; common asOf 2026-06-02 where all six series have numeric observations. No forward-fill. Series: DGS30, DFII30, DGS2, DGS5, DGS10, T10YIE. Not investment advice; not scored; mappingStatus not_final.",
     "series": [
       {
         "id": "DGS30",
@@ -55,7 +55,7 @@
     "Not investment advice and not a recommendation to buy or sell Treasury securities or bond funds.",
     "Not a duration allocation signal — yield levels alone do not prove income neglect or investor behavior.",
     "Nominal and real yields can move for different macro reasons; duration risk remains.",
-    "Validated production candidate only — not displayed and not wired into buildSnapshot or the Research Composite.",
+    "Display-only Treasury Plumbing card (separate lane, v1.7e); outside equity publicSignalCount; not merged into buildSnapshot or Research Composite.",
     "Public/manual FRED snapshot; mappingStatus not_final; no scored pressure mapping."
   ],
   "observations": {

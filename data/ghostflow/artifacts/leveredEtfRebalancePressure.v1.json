@@ -6,7 +6,7 @@
   "source": {
     "name": "ProShares + Direxion fund pages; StockAnalysis index proxy daily returns",
     "url": "https://www.proshares.com/our-etfs/leveraged-and-inverse/tqqq",
-    "note": "Production artifact candidate; validated but not yet wired into GhostFlow score. Single-session underlyingReturnPct per index proxy (QQQ, SPY, IWM) for session ending 2026-05-22. AUM from issuer pages as of 2026-05-27 (ProShares) or 2026-05-28 (Direxion via StockAnalysis). Not issuer-reported rebalance flow."
+    "note": "Production display-only artifact (equity card levered-etf-rebalance); not wired into GhostFlow Research Composite score (leveredEtfRebalancePressure remains MOCK 55). Single-session underlyingReturnPct per index proxy (QQQ, SPY, IWM) for session ending 2026-05-22. AUM from issuer pages as of 2026-05-27 (ProShares) or 2026-05-28 (Direxion via StockAnalysis). Not issuer-reported rebalance flow."
   },
   "observationType": "latest_session_snapshot_refreshed_manually",
   "universeDefinition": "tier1_six_ticker_3x_index_etf_v1",
