@@ -135,7 +135,7 @@ Separate dashboard lane — **not** in equity composite or `publicSignalCount`.
 4. **Passive-flow next source** — Any new public proxy must avoid double-counting ICI index share / active-index-flow already in composite.
 5. ~~**Doc sprawl**~~ **Resolved (v1.8e):** [README.md](./README.md) — doc index and onboarding path; targeted stale-line banners on historical memos; no file moves/archives.
 6. ~~**Artifact freshness / dataQuality consistency**~~ **Resolved (v1.8c):** [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) — policy documented; labels unchanged; ~~v1.8c.1 metadata cleanup~~ **Done (v1.8c.1)** — display-only/Treasury stale metadata text only.
-7. ~~**v1.9 passive supply & concentration research**~~ **Partially resolved (v1.9a–b):** [PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md](./PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md) · [CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) — v1.9b SPY/RSP feasibility **Done** (YELLOW leaning GREEN); **v1.9b.1** CSV study candidate next; scores/counts unchanged.
+7. ~~**v1.9 passive supply & concentration research**~~ **Partially resolved (v1.9a–b.1):** [PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md](./PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md) · [CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) · `ghostflow:cap-weight-premium-study` — v1.9b.1 CSV study **Done**; **v1.9b.2** artifact design after real operator run; scores/counts unchanged.
 
 ---
 
@@ -162,13 +162,14 @@ Discipline-first roadmap after v1.7 feature completion — inventory and operato
 
 ## v1.9 recommendation
 
-**Primary v1.9 theme:** GhostFlow **Passive Supply & Concentration Research** — backlog capture only; no implementation approved.
+**Primary v1.9 theme:** GhostFlow **Passive Supply & Concentration Research** — v1.9b.1 CSV study shipped; no artifact/UI/scoring approved.
 
 | Phase | Deliverable | Status |
 |-------|-------------|--------|
 | **v1.9a** | Passive Supply & Concentration Research Backlog — [PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md](./PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md) | **Done** (docs-only) |
 | **v1.9b** | Cap-Weight Concentration Premium Feasibility — [CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) | **Done** (docs-only) |
-| **v1.9b.1** | Cap-Weight Premium CSV Study | **Future** — candidate next |
+| **v1.9b.1** | Cap-Weight Premium CSV Study — `ghostflow:cap-weight-premium-study` | **Done** (research script; not in `ghostflow:check`) |
+| **v1.9b.2** | Cap-Weight Premium Artifact Design | **Future** — after real operator study output |
 
 Composite **62 / 58 / 66**, `publicSignalCount` **10**, and Treasury **2**-card lane unchanged.
 
