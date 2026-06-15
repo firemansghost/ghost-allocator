@@ -129,11 +129,12 @@ These memos preserve feasibility, calibration, and mapping history. They may con
 
 | Doc | Purpose |
 |-----|---------|
-| [PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md](./PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md) | **v1.9a** Mike Green–inspired research queue — backlog capture only; **v1.9b** feasibility is candidate next |
+| [PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md](./PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md) | **v1.9a** Mike Green–inspired research queue |
+| [CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) | **v1.9b** SPY vs RSP feasibility — YELLOW leaning GREEN; companion to `concentration`; **v1.9b.1** CSV study candidate next |
 
 Topics parked for later evaluation (no score wiring, artifacts, UI cards, or `publicSignalCount` changes approved):
 
-- **Cap-weight concentration premium** — SPY vs RSP / cap-weight vs equal-weight return spread
+- **Cap-weight concentration premium** — SPY vs RSP return spread; [v1.9b feasibility](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) complete
 - **Passive supply / float absorption** — IPOs, secondaries, lockups, index inclusion vs float
 - **Systematic re-risking** — long-term path beyond MOCK **62** and CFTC display proxy
 - **Protection bid / correlation dispersion** — skew, implied correlation, single-stock vs index vol

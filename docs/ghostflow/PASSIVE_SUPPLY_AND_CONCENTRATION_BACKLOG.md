@@ -74,7 +74,7 @@ Any future candidate in this backlog starts **display-only / feasibility-only** 
 
 | # | Candidate | Research value | GhostFlow semantic fit | Likely data availability | Double-count risk | Score-creep risk | Recommended next action | Suggested future phase |
 |---|-----------|------------------|------------------------|--------------------------|-------------------|------------------|-------------------------|------------------------|
-| 1 | **Cap-Weight Concentration Premium Lens** | High — tests whether weighting mechanism itself produces excess return | **High** — natural companion to existing `concentration` card | **High** — SPY/RSP and index price series are public | Low–medium vs `concentration`, `passive-share` | Medium if wired without gate | **First true v1.9 feasibility target** | **v1.9b** |
+| 1 | **Cap-Weight Concentration Premium Lens** | High — tests whether weighting mechanism itself produces excess return | **High** — natural companion to existing `concentration` card | **High** — SPY/RSP and index price series are public | Low–medium vs `concentration`, `passive-share` | Medium if wired without gate | **v1.9b Done** — [feasibility memo](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md); next: **v1.9b.1** CSV study or **v1.9c** | **v1.9b Done** · **v1.9b.1 next** |
 | 2 | **Passive Supply / Float Absorption Lens** | High — supply-side complement to demand/flow proxies | **High** — passive market-structure native | Medium — event data fragmented; aggregates harder | Medium vs `etf-flow`, buyback narrative | High if scored naively | Future feasibility memo; display-only default | **v1.9c** |
 | 3 | **Systematic Re-Risking / De-Risking Lens** | High — addresses MOCK trust gap on `systematicStrategyPressure` | **Medium–high** — passive flow theme; semantic rename required | Medium — vol/trend public; true CTA exposure harder | Medium vs VIX, CFTC display card | **High** — direct MOCK replacement temptation | Future feasibility; long-term MOCK retirement path only | **v1.9d** |
 | 4 | **Protection Bid / Correlation Dispersion Lens** | Medium–high — options-market uncertainty framing | **Medium** — vol/options adjacent; distinct from VIX amplifier | Medium — VIX/SKEW public; implied correlation harder | **High** vs score-fed VIX and OCC display proxy | High without reweight decision | Future feasibility; display-only default; avoid VIX double-count | **v1.9e** |
@@ -117,12 +117,14 @@ Any future candidate in this backlog starts **display-only / feasibility-only** 
 
 **Default recommendation:**
 
-- **First true v1.9 feasibility target**
-- Research-only first
+- **v1.9b feasibility complete** — [CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) rates SPY/RSP **YELLOW leaning GREEN**
 - Display-only by default if later implemented
 - No score wiring without later product gate
+- **Next:** **v1.9b.1** operator-CSV study (candidate) or **v1.9c** passive supply feasibility per product decision
 
-**Suggested future phase:** **v1.9b — Cap-Weight Concentration Premium Feasibility**
+**Completed phase:** **v1.9b — Cap-Weight Concentration Premium Feasibility** (docs-only)
+
+**Suggested future phases:** **v1.9b.1** CSV study · **v1.9b.2** artifact design (if study useful)
 
 ---
 
@@ -361,7 +363,9 @@ Any future candidate in this backlog starts **display-only / feasibility-only** 
 | Phase | Deliverable | Status |
 |-------|-------------|--------|
 | **v1.9a** | Passive Supply & Concentration Research Backlog — **this memo** | **Done** (docs-only) |
-| **v1.9b** | Cap-Weight Concentration Premium Feasibility | **Future** — **candidate next** |
+| **v1.9b** | Cap-Weight Concentration Premium Feasibility | **Done** — [CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) |
+| **v1.9b.1** | Cap-Weight Premium CSV Study | **Future** — **candidate next** |
+| **v1.9b.2** | Cap-Weight Premium Artifact Design | **Future** — if v1.9b.1 useful |
 | **v1.9c** | Passive Supply / Float Absorption Feasibility | **Future** — research-only |
 | **v1.9d** | Systematic Re-Risking Proxy Feasibility | **Future** — research-only |
 | **v1.9e** | Protection Bid / Correlation Dispersion Feasibility | **Future** — research-only |
@@ -391,10 +395,12 @@ None of the future phases above are approved for implementation, scoring, artifa
 
 ## Recommended next step
 
-**v1.9b** should be **Cap-Weight Concentration Premium Feasibility**, entered in **Plan Mode** first.
+**v1.9b** — Cap-Weight Concentration Premium Feasibility — **Done** ([memo](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md)).
 
-The first feasibility question:
+**Candidate next:** **v1.9b.1** operator-CSV study or **v1.9c** passive supply feasibility per product decision.
 
-> Can we measure whether cap-weighting itself is producing a persistent premium using clean public data such as SPY versus RSP?
+The first empirical question for v1.9b.1:
 
-If v1.9b looks messy — data gaps, unclear semantics, or high double-count risk with existing `concentration` — **pause** rather than forcing a new artifact.
+> Can we compute rolling SPY vs RSP return spreads and ratio percentiles from operator-provided adjusted-close CSVs without live fetching?
+
+If v1.9b.1 looks messy — data gaps, unclear semantics, or high double-count risk with existing `concentration` — **pause** rather than forcing a new artifact.
