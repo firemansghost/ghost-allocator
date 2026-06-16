@@ -3,10 +3,16 @@
  * Stooq remains primary; this module is only invoked from DefaultMarketDataProvider after a failed Stooq attempt.
  *
  * Env: MARKETSTACK_ACCESS_KEY (dashboard access key; do not commit).
+ * Env: ALLOW_MARKETSTACK_FALLBACK=true required to spend quota (see marketstackGuard.ts).
  * @see https://marketstack.com/documentation
  */
 
 import type { MarketDataPoint } from './types';
+import {
+  evaluateMarketstackFallbackAllowed,
+  formatMarketstackGuardSkipMessage,
+  type MarketstackGuardDenyReason,
+} from './marketstackGuard';
 
 /** ETF/core symbols that may use Marketstack after Stooq failure (not PDBC, not BTC-USD, not VIX). */
 export const MARKETSTACK_ETF_FALLBACK_SYMBOLS: ReadonlySet<string> = new Set([
@@ -38,6 +44,7 @@ function calculateReturn(prevClose: number, currentClose: number): number {
 export type MarketstackFetchOutcome =
   | 'ok'
   | 'missing_access_key'
+  | 'guard_blocked'
   | 'http_error'
   | 'api_error'
   | 'empty_data'
@@ -52,6 +59,7 @@ export interface MarketstackFetchDebug {
   body_preview?: string;
   pages_fetched?: number;
   api_message?: string;
+  guard_reason?: MarketstackGuardDenyReason;
 }
 
 function redactedUrl(params: URLSearchParams): string {
@@ -65,6 +73,10 @@ export function formatMarketstackFailureHint(debug: MarketstackFetchDebug): stri
   switch (debug.outcome) {
     case 'missing_access_key':
       return 'Marketstack skipped (MARKETSTACK_ACCESS_KEY unset)';
+    case 'guard_blocked':
+      return debug.guard_reason
+        ? formatMarketstackGuardSkipMessage(debug.guard_reason)
+        : 'Marketstack fallback blocked by guard';
     case 'http_error':
       return `Marketstack HTTP ${debug.http_status}. Preview: ${prev}`;
     case 'api_error':
@@ -153,6 +165,19 @@ export async function fetchMarketstackEod(
   endDate: Date,
   accessKey: string
 ): Promise<{ data: MarketDataPoint[]; debug: MarketstackFetchDebug }> {
+  const guard = evaluateMarketstackFallbackAllowed();
+  if (!guard.allowed) {
+    return {
+      data: [],
+      debug: {
+        request_display: '(guard blocked — no request sent)',
+        http_status: 0,
+        outcome: 'guard_blocked',
+        guard_reason: guard.denyReason,
+      },
+    };
+  }
+
   const dateFrom = startDate.toISOString().split('T')[0];
   const dateTo = endDate.toISOString().split('T')[0];
 

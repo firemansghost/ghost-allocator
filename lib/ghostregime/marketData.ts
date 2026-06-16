@@ -12,6 +12,11 @@ import {
   isMarketstackEtfFallbackSymbol,
 } from './marketstackEod';
 import {
+  evaluateMarketstackFallbackAllowed,
+  formatMarketstackGuardSkipMessage,
+  type MarketstackGuardDenyReason,
+} from './marketstackGuard';
+import {
   BTC_BOOTSTRAP_MIN_ROWS,
   clampCoinGeckoPublicStart,
   isCoinGeckoPublicLookbackExceeded,
@@ -766,6 +771,7 @@ export interface ProviderDiagnostics {
       body_preview?: string;
       pages_fetched?: number;
       api_message?: string;
+      guard_reason?: MarketstackGuardDenyReason;
     }
   >;
 }
@@ -886,38 +892,64 @@ export class DefaultMarketDataProvider implements MarketDataProvider {
             this.diagnostics.feed_routing ??= {};
             this.diagnostics.feed_routing[symbol] = 'Stooq (csv_ok)';
           } else if (isMarketstackEtfFallbackSymbol(symbol)) {
-            const msKey = process.env.MARKETSTACK_ACCESS_KEY?.trim();
-            if (msKey) {
-              const ms = await fetchMarketstackEod(symbol, startDate, endDate, msKey);
+            const guard = evaluateMarketstackFallbackAllowed();
+            if (!guard.allowed) {
+              this.diagnostics.resolvedIds[symbol] = result.resolvedId;
               this.diagnostics.marketstack_probe ??= {};
               this.diagnostics.marketstack_probe[symbol] = {
-                request_display: ms.debug.request_display,
-                http_status: ms.debug.http_status,
-                outcome: ms.debug.outcome,
-                body_preview: ms.debug.body_preview,
-                pages_fetched: ms.debug.pages_fetched,
-                api_message: ms.debug.api_message,
+                request_display: '(guard blocked — no request sent)',
+                http_status: 0,
+                outcome: 'guard_blocked',
+                guard_reason: guard.denyReason,
               };
-              if (ms.data.length > 0) {
-                symbolData = ms.data;
-                this.diagnostics.resolvedIds[symbol] = `marketstack:${symbol}`;
-                this.diagnostics.feed_routing ??= {};
-                this.diagnostics.feed_routing[symbol] =
-                  `Stooq (${result.debug.outcome}) → Marketstack (${ms.debug.outcome}, rows=${ms.data.length})`;
+              this.diagnostics.errors[symbol] =
+                `${formatStooqFailureHint(result.debug)} | ${formatMarketstackGuardSkipMessage(guard.denyReason!)}`;
+              this.diagnostics.feed_routing ??= {};
+              this.diagnostics.feed_routing[symbol] =
+                `Stooq (${result.debug.outcome}) → Marketstack skipped (${guard.denyReason})`;
+            } else {
+              const msKey = process.env.MARKETSTACK_ACCESS_KEY?.trim();
+              if (msKey) {
+                const ms = await fetchMarketstackEod(symbol, startDate, endDate, msKey);
+                this.diagnostics.marketstack_probe ??= {};
+                this.diagnostics.marketstack_probe[symbol] = {
+                  request_display: ms.debug.request_display,
+                  http_status: ms.debug.http_status,
+                  outcome: ms.debug.outcome,
+                  body_preview: ms.debug.body_preview,
+                  pages_fetched: ms.debug.pages_fetched,
+                  api_message: ms.debug.api_message,
+                  guard_reason: ms.debug.guard_reason,
+                };
+                if (ms.data.length > 0) {
+                  symbolData = ms.data;
+                  this.diagnostics.resolvedIds[symbol] = `marketstack:${symbol}`;
+                  this.diagnostics.feed_routing ??= {};
+                  this.diagnostics.feed_routing[symbol] =
+                    `Stooq (${result.debug.outcome}) → Marketstack (${ms.debug.outcome}, rows=${ms.data.length})`;
+                } else {
+                  this.diagnostics.resolvedIds[symbol] = result.resolvedId;
+                  this.diagnostics.errors[symbol] =
+                    `${formatStooqFailureHint(result.debug)} | Marketstack: ${formatMarketstackFailureHint(ms.debug)}`;
+                  this.diagnostics.feed_routing ??= {};
+                  this.diagnostics.feed_routing[symbol] =
+                    `Stooq (${result.debug.outcome}) → Marketstack failed (${ms.debug.outcome})`;
+                }
               } else {
                 this.diagnostics.resolvedIds[symbol] = result.resolvedId;
+                this.diagnostics.marketstack_probe ??= {};
+                this.diagnostics.marketstack_probe[symbol] = {
+                  request_display: '(no key — no request sent)',
+                  http_status: 0,
+                  outcome: 'guard_blocked',
+                  guard_reason: 'marketstack_key_missing',
+                };
                 this.diagnostics.errors[symbol] =
-                  `${formatStooqFailureHint(result.debug)} | Marketstack: ${formatMarketstackFailureHint(ms.debug)}`;
+                  `${formatStooqFailureHint(result.debug)} | ${formatMarketstackGuardSkipMessage('marketstack_key_missing')}`;
                 this.diagnostics.feed_routing ??= {};
                 this.diagnostics.feed_routing[symbol] =
-                  `Stooq (${result.debug.outcome}) → Marketstack failed (${ms.debug.outcome})`;
+                  `Stooq (${result.debug.outcome}); Marketstack not configured`;
               }
-            } else {
-              this.diagnostics.resolvedIds[symbol] = result.resolvedId;
-              this.diagnostics.errors[symbol] =
-                `${formatStooqFailureHint(result.debug)} (Marketstack fallback skipped: no MARKETSTACK_ACCESS_KEY)`;
-              this.diagnostics.feed_routing ??= {};
-              this.diagnostics.feed_routing[symbol] = `Stooq (${result.debug.outcome}); Marketstack not configured`;
             }
           } else {
             symbolData = result.data;

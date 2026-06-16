@@ -39,13 +39,31 @@ One command runs build, lint, and a focused set of GhostRegime unit tests (persi
 npm run verify:ghostregime
 ```
 
-### Marketstack fallback (optional)
+### Marketstack fallback (optional, opt-in)
 
-For **core US ETF symbols** (SPY, GLD, EEM, HYG, IEF, TIP, TLT, UUP), Stooq remains the **first** data source. If Stooq fails (gate, empty CSV, parse error, etc.), the engine may request **one** Marketstack EOD series per symbol **only for those tickers**, and only when `MARKETSTACK_ACCESS_KEY` is set in the deployment environment (`lib/ghostregime/marketstackEod.ts` reads this env var). **PDBC** and **BTC-USD** keep their existing AlphaVantage/DBC and Stooq→CoinGecko paths — they are not routed through Marketstack. The paid quota is limited; unused fallback does not consume Marketstack requests.
+For **core US ETF symbols** (SPY, GLD, EEM, HYG, IEF, TIP, TLT, UUP), Stooq remains the **first** data source. If Stooq fails (gate, empty CSV, parse error, etc.), the engine may request **one** Marketstack EOD series per symbol **only for those tickers**, and only when **both** of the following are set in the deployment environment:
 
-**Usage audit:** [MARKETSTACK_API_USAGE_AUDIT.md](./MARKETSTACK_API_USAGE_AUDIT.md) — call paths, trigger classification, and billing containment recommendations (docs-only).
+1. `MARKETSTACK_ACCESS_KEY` — Marketstack dashboard access key (do not commit)
+2. `ALLOW_MARKETSTACK_FALLBACK=true` — explicit opt-in to spend paid Marketstack quota
 
-**Where to configure Marketstack (scheduled refresh):** The GitHub Actions daily workflow only **calls the live Vercel API** (`?force=1`). Market data is fetched **inside that deployment**, so `MARKETSTACK_ACCESS_KEY` must be set in **Vercel Production** (and Preview if you test there) — putting the key only in GitHub Actions secrets does **not** unlock Marketstack for production refresh. After adding or changing the key in Vercel, **redeploy Production** so new builds/deployments receive the updated env (env changes apply to new deployments).
+**M2 guard (fail-closed):** The presence of `MARKETSTACK_ACCESS_KEY` alone is **not** enough to trigger Marketstack calls. Fallback is also blocked during tests (`NODE_ENV=test`), Vercel Preview (`VERCEL_ENV=preview`), and Next.js production builds (`NEXT_PHASE=phase-production-build`). Optional kill switch: `DISABLE_MARKETSTACK_FALLBACK=true`.
+
+**PDBC** and **BTC-USD** keep their existing AlphaVantage/DBC and Stooq→CoinGecko paths — they are not routed through Marketstack.
+
+**Usage audit:** [MARKETSTACK_API_USAGE_AUDIT.md](./MARKETSTACK_API_USAGE_AUDIT.md) — call paths, trigger classification, and billing containment (M2 guard implemented).
+
+#### Vercel environment guidance
+
+| Environment | `MARKETSTACK_ACCESS_KEY` | `ALLOW_MARKETSTACK_FALLBACK` |
+|-------------|--------------------------|------------------------------|
+| **Preview** | Do not set | Do not set |
+| **Development** (Vercel) | Do not set | Do not set |
+| **Production** | Set when fallback needed | Set `true` only when operator approves paid fallback |
+| **Local dev** | Optional for manual tests | Set `true` only with budget awareness |
+
+**After M2:** The weekday daily cron remains Stooq-only unless Vercel Production has **both** `MARKETSTACK_ACCESS_KEY` and `ALLOW_MARKETSTACK_FALLBACK=true`. Redeploy Production after changing env vars.
+
+**Where to configure Marketstack (scheduled refresh):** The GitHub Actions daily workflow only **calls the live Vercel API** (`?force=1`). Market data is fetched **inside that deployment**, so keys and flags must be set in **Vercel Production** — putting credentials only in GitHub Actions secrets does **not** unlock Marketstack for production refresh.
 
 ### Manual Execution
 

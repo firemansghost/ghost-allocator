@@ -164,6 +164,7 @@ export interface GhostRegimeRow {
         body_preview?: string;
         pages_fetched?: number;
         api_message?: string;
+        guard_reason?: string;
       }
     >;
   };
