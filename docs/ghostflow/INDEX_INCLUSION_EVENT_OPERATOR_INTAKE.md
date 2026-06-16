@@ -5,15 +5,15 @@
 | Item | Value |
 |------|-------|
 | **Phase** | v1.9c.4b |
-| **Status** | Docs-only operator collection pass — **In progress (4 candidate rows; operator review pending)** |
+| **Status** | Docs-only operator collection pass — **Done (4 rows operator-reviewed; production-eligible pending v1.9c.4 product approval)** |
 | **Production data** | **No** — memo rows are candidates only, not committed artifact JSON |
 | **Dashboard impact** | **None** — no card, no runtime feed |
 | **Production artifact** | **None** — [`indexInclusionEventProxy.v1.json`](../data/ghostflow/artifacts/indexInclusionEventProxy.v1.json) does not exist |
 | **UI card** | **None** |
 | **Scoring** | **None** — not a Research Composite input |
 | **`publicSignalCount`** | **10** — unchanged |
-| **v1.9c.4** | **Deferred** — blocked until production-eligible rows exist and product approval is explicit |
-| **Current recommendation** | **Collect more rows / operator review pending** |
+| **v1.9c.4** | **Product-gated** — 4 production-eligible rows exist; separate product approval required before production JSON or UI |
+| **Current recommendation** | **Eligible to request v1.9c.4 product approval** |
 
 **Related documents:**
 
@@ -54,12 +54,12 @@ Apply the full [v1.9c.4a provenance checklist](./PASSIVE_SUPPLY_EVENT_ARTIFACT_D
 
 | eventId | sourceName | sourceUrl | announcedDate | effectiveDate | sourceAccessedDate | indexFamily | indexName | ticker | companyName | action | eventType | sourceConfidence | notes | operatorVerified | productionEligible |
 |---------|------------|-----------|---------------|---------------|--------------------|-------------|-----------|--------|-------------|--------|-----------|------------------|-------|------------------|--------------------|
-| nasdaq100-2026-wmt-add | Nasdaq Investor Relations | https://ir.nasdaq.com/news-releases/news-release-details/walmart-inc-join-nasdaq-100-indexr-beginning-january-20th-2026 | 2026-01-09 | 2026-01-20 | 2026-06-16 | nasdaq | Nasdaq-100 Index | WMT | Walmart Inc. | add | component_replacement | high | Nasdaq announced Walmart Inc. would join the Nasdaq-100 Index prior to market open on 2026-01-20, replacing AstraZeneca PLC. Operator review still required before production eligibility. | pending | pending |
-| nasdaq100-2026-azn-delete | Nasdaq Investor Relations | https://ir.nasdaq.com/news-releases/news-release-details/walmart-inc-join-nasdaq-100-indexr-beginning-january-20th-2026 | 2026-01-09 | 2026-01-20 | 2026-06-16 | nasdaq | Nasdaq-100 Index | AZN | AstraZeneca PLC | delete | component_replacement | high | Nasdaq announced AstraZeneca PLC would be removed from the Nasdaq-100 Index prior to market open on 2026-01-20, replaced by Walmart Inc. Operator review still required before production eligibility. | pending | pending |
-| nasdaq100-2026-sndk-add | Nasdaq Investor Relations | https://ir.nasdaq.com/news-releases/news-release-details/sandisk-corporation-join-nasdaq-100-indexr-beginning-april-20 | 2026-04-10 | 2026-04-20 | 2026-06-16 | nasdaq | Nasdaq-100 Index | SNDK | Sandisk Corporation | add | component_replacement | high | Nasdaq announced Sandisk Corporation would join the Nasdaq-100 Index prior to market open on 2026-04-20, replacing Atlassian Corporation. Operator review still required before production eligibility. | pending | pending |
-| nasdaq100-2026-team-delete | Nasdaq Investor Relations | https://ir.nasdaq.com/news-releases/news-release-details/sandisk-corporation-join-nasdaq-100-indexr-beginning-april-20 | 2026-04-10 | 2026-04-20 | 2026-06-16 | nasdaq | Nasdaq-100 Index | TEAM | Atlassian Corporation | delete | component_replacement | high | Nasdaq announced Atlassian Corporation would be replaced in the Nasdaq-100 Index by Sandisk Corporation prior to market open on 2026-04-20. Operator review still required before production eligibility. | pending | pending |
+| nasdaq100-2026-wmt-add | Nasdaq Investor Relations | https://ir.nasdaq.com/news-releases/news-release-details/walmart-inc-join-nasdaq-100-indexr-beginning-january-20th-2026 | 2026-01-09 | 2026-01-20 | 2026-06-16 | nasdaq | Nasdaq-100 Index | WMT | Walmart Inc. | add | component_replacement | high | Nasdaq announced Walmart Inc. would join the Nasdaq-100 Index prior to market open on 2026-01-20, replacing AstraZeneca PLC. Operator review still required before production eligibility. | true | yes |
+| nasdaq100-2026-azn-delete | Nasdaq Investor Relations | https://ir.nasdaq.com/news-releases/news-release-details/walmart-inc-join-nasdaq-100-indexr-beginning-january-20th-2026 | 2026-01-09 | 2026-01-20 | 2026-06-16 | nasdaq | Nasdaq-100 Index | AZN | AstraZeneca PLC | delete | component_replacement | high | Nasdaq announced AstraZeneca PLC would be removed from the Nasdaq-100 Index prior to market open on 2026-01-20, replaced by Walmart Inc. Operator review still required before production eligibility. | true | yes |
+| nasdaq100-2026-sndk-add | Nasdaq Investor Relations | https://ir.nasdaq.com/news-releases/news-release-details/sandisk-corporation-join-nasdaq-100-indexr-beginning-april-20 | 2026-04-10 | 2026-04-20 | 2026-06-16 | nasdaq | Nasdaq-100 Index | SNDK | Sandisk Corporation | add | component_replacement | high | Nasdaq announced Sandisk Corporation would join the Nasdaq-100 Index prior to market open on 2026-04-20, replacing Atlassian Corporation. Operator review still required before production eligibility. | true | yes |
+| nasdaq100-2026-team-delete | Nasdaq Investor Relations | https://ir.nasdaq.com/news-releases/news-release-details/sandisk-corporation-join-nasdaq-100-indexr-beginning-april-20 | 2026-04-10 | 2026-04-20 | 2026-06-16 | nasdaq | Nasdaq-100 Index | TEAM | Atlassian Corporation | delete | component_replacement | high | Nasdaq announced Atlassian Corporation would be replaced in the Nasdaq-100 Index by Sandisk Corporation prior to market open on 2026-04-20. Operator review still required before production eligibility. | true | yes |
 
-These are official Nasdaq source-collected candidate rows. They remain **pending** until operator review confirms each row passes the [v1.9c.4a provenance checklist](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md#14-v1.9c4a-operator-provenance-checklist).
+Operator review completed for the four Nasdaq Investor Relations rows. Source URLs, announcement dates, effective dates, tickers, index names, and add/delete actions were reviewed against the v1.9c.4a checklist. These rows are eligible to be considered for future v1.9c.4 production JSON, pending separate product approval.
 
 **Row conventions:**
 
@@ -102,14 +102,14 @@ Reject a candidate row if any of the following apply:
 | Metric | Count |
 |--------|-------|
 | Candidate rows | 4 |
-| productionEligible: yes | 0 |
+| productionEligible: yes | 4 |
 | productionEligible: no | 0 |
-| productionEligible: pending | 4 |
-| operatorVerified: true | 0 |
+| productionEligible: pending | 0 |
+| operatorVerified: true | 4 |
 
-**Blockers:** No operator-verified production-eligible rows; all 4 candidates pending manual review; v1.9c.4 product approval not requested.
+**Blockers:** v1.9c.4 product approval not requested; production JSON and UI not approved.
 
-**Recommendation:** collect more rows / operator review pending.
+**Recommendation:** eligible to request v1.9c.4 product approval.
 
 **Recommendation logic:**
 
