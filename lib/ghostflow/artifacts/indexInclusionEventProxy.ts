@@ -412,24 +412,29 @@ export function validateIndexInclusionEventProxyArtifact(
       errors.push('observations.events must be an array.');
     }
 
+    const eventCountValue = observations.eventCount;
+    const upcomingEventCountValue = observations.upcomingEventCount;
+    const recentEventCountValue = observations.recentEventCount;
+    const sourceEventCountValue = observations.sourceEventCount;
+
     const eventCountOk = validateNonNegativeInteger(
       'observations.eventCount',
-      observations.eventCount,
+      eventCountValue,
       errors
     );
     const upcomingOk = validateNonNegativeInteger(
       'observations.upcomingEventCount',
-      observations.upcomingEventCount,
+      upcomingEventCountValue,
       errors
     );
     const recentOk = validateNonNegativeInteger(
       'observations.recentEventCount',
-      observations.recentEventCount,
+      recentEventCountValue,
       errors
     );
     const sourceCountOk = validateNonNegativeInteger(
       'observations.sourceEventCount',
-      observations.sourceEventCount,
+      sourceEventCountValue,
       errors
     );
     validateOptionalNonNegativeInteger(
@@ -445,14 +450,14 @@ export function validateIndexInclusionEventProxyArtifact(
         if (parsed) parsedEvents.push(parsed);
       }
 
-      if (eventCountOk && eventsRaw.length !== observations.eventCount) {
+      if (eventCountOk && eventsRaw.length !== eventCountValue) {
         errors.push(
-          `observations.eventCount (${observations.eventCount}) must equal events.length (${eventsRaw.length}).`
+          `observations.eventCount (${eventCountValue}) must equal events.length (${eventsRaw.length}).`
         );
       }
-      if (sourceCountOk && eventsRaw.length !== observations.sourceEventCount) {
+      if (sourceCountOk && eventsRaw.length !== sourceEventCountValue) {
         errors.push(
-          `observations.sourceEventCount (${observations.sourceEventCount}) must equal events.length (${eventsRaw.length}).`
+          `observations.sourceEventCount (${sourceEventCountValue}) must equal events.length (${eventsRaw.length}).`
         );
       }
 
@@ -472,17 +477,17 @@ export function validateIndexInclusionEventProxyArtifact(
             if (bucket === 'upcoming') upcoming++;
             else if (bucket === 'recent') recent++;
           }
-          if (upcoming !== observations.upcomingEventCount) {
+          if (upcoming !== upcomingEventCountValue) {
             errors.push(
-              `observations.upcomingEventCount (${observations.upcomingEventCount}) must equal dated upcoming events (${upcoming}).`
+              `observations.upcomingEventCount (${upcomingEventCountValue}) must equal dated upcoming events (${upcoming}).`
             );
           }
-          if (recent !== observations.recentEventCount) {
+          if (recent !== recentEventCountValue) {
             errors.push(
-              `observations.recentEventCount (${observations.recentEventCount}) must equal dated recent events (${recent}).`
+              `observations.recentEventCount (${recentEventCountValue}) must equal dated recent events (${recent}).`
             );
           }
-          if (observations.upcomingEventCount + observations.recentEventCount !== observations.eventCount) {
+          if (upcomingEventCountValue + recentEventCountValue !== eventCountValue) {
             errors.push(
               'observations.upcomingEventCount + recentEventCount must equal eventCount when all events are dated.'
             );
