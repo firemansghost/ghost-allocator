@@ -358,6 +358,6 @@ export function validateCapWeightPremiumProxyArtifact(
 
   return {
     ok: true,
-    artifact: raw as CapWeightPremiumProxyArtifactV1,
+    artifact: raw as unknown as CapWeightPremiumProxyArtifactV1,
   };
 }
