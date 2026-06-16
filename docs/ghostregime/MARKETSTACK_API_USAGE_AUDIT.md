@@ -286,10 +286,26 @@ Scripts calling `defaultMarketDataProvider.getHistoricalPrices` can trigger Mark
 |-------|-------------|------|--------|
 | **M1** | Marketstack API Usage Audit — this memo | Docs-only | **Done** |
 | **M2** | Build / Preview / Test guard — fail-closed `ALLOW_MARKETSTACK_FALLBACK` gate | Code + tests | **Done** |
-| **M3** | Operator refresh discipline — runbook commands | Code + docs | Future |
+| **M3** | Operator refresh discipline — when/how to enable fallback safely | Docs-only | **Done** |
 | **M4** | Scheduled job containment — safer daily `force=1` behavior | Workflow + API | Future |
 | **M5** | Cache / de-dupe — symbol + date window (+ as-of) | Code | Future |
 | **M6** | Optional monitoring — counters in logs/diagnostics | Code | Future |
+
+**M3 operator guide:** [MARKETSTACK_OPERATOR_REFRESH.md](./MARKETSTACK_OPERATOR_REFRESH.md) — environment policy, paid recovery checklist, verification, unsafe commands, rollback. No code or workflow changes in M3.
+
+### M4 problem statement (future)
+
+M4 should address scheduled-job containment without removing Marketstack as an operator tool:
+
+| Topic | Direction |
+|-------|-----------|
+| Blind weekday `force=1` | Short-circuit when persisted latest is fresh (as-of, schema, not stale) |
+| Repeated fallback storms | Do not recompute full ~600-day window when data unchanged |
+| Bounded refresh | Narrow fetch window for routine cron where safe |
+| Explicit fallback mode | Separate cron path or parameter for paid recovery vs normal refresh |
+| Cache / de-dupe (M5 overlap) | Avoid repeat Marketstack calls for same symbol + date window + as-of |
+
+Likely touch points: `.github/workflows/ghostregime-daily.yml`, `/api/ghostregime/today`, `lib/ghostregime/engine.ts`. **Not in M3 scope.**
 
 ### M2 guard spec (implemented)
 
@@ -303,7 +319,7 @@ Scripts calling `defaultMarketDataProvider.getHistoricalPrices` can trigger Mark
 | **Tests** | Mock/stub only — no live HTTP, no real API keys |
 | **Workflow** | No change in M2 — deferred to M4 |
 
-**Production rollout:** After M2 deploy, set `ALLOW_MARKETSTACK_FALLBACK=true` on Vercel Production only when paid fallback is intentionally desired (e.g. weekday cron when Stooq fails).
+**Production rollout:** Keep `ALLOW_MARKETSTACK_FALLBACK` **unset** on Production by default. Enable only during an approved paid fallback window per [MARKETSTACK_OPERATOR_REFRESH.md](./MARKETSTACK_OPERATOR_REFRESH.md); unset after controlled refresh.
 
 ---
 

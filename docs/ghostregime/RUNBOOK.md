@@ -41,12 +41,22 @@ npm run verify:ghostregime
 
 ### Marketstack fallback (optional, opt-in)
 
+**Operator discipline (M3):** [MARKETSTACK_OPERATOR_REFRESH.md](./MARKETSTACK_OPERATOR_REFRESH.md) — when to enable paid fallback, controlled refresh checklist, verification, and rollback.
+
 For **core US ETF symbols** (SPY, GLD, EEM, HYG, IEF, TIP, TLT, UUP), Stooq remains the **first** data source. If Stooq fails (gate, empty CSV, parse error, etc.), the engine may request **one** Marketstack EOD series per symbol **only for those tickers**, and only when **both** of the following are set in the deployment environment:
 
 1. `MARKETSTACK_ACCESS_KEY` — Marketstack dashboard access key (do not commit)
-2. `ALLOW_MARKETSTACK_FALLBACK=true` — explicit opt-in to spend paid Marketstack quota
+2. `ALLOW_MARKETSTACK_FALLBACK=true` — explicit opt-in to spend paid Marketstack quota (**temporary only** — unset after a controlled refresh)
 
 **M2 guard (fail-closed):** The presence of `MARKETSTACK_ACCESS_KEY` alone is **not** enough to trigger Marketstack calls. Fallback is also blocked during tests (`NODE_ENV=test`), Vercel Preview (`VERCEL_ENV=preview`), and Next.js production builds (`NEXT_PHASE=phase-production-build`). Optional kill switch: `DISABLE_MARKETSTACK_FALLBACK=true`.
+
+**ALLOW is not permanent.** Enable `ALLOW_MARKETSTACK_FALLBACK=true` only for an approved paid fallback window, run **one** controlled `force=1` refresh, verify diagnostics, then **unset ALLOW** and redeploy. Do not leave ALLOW enabled for the weekday cron (Stooq-only default until M4).
+
+**Preview:** Do not set `MARKETSTACK_ACCESS_KEY` or `ALLOW_MARKETSTACK_FALLBACK` on Preview deployments.
+
+**Unsafe without discipline:** repeated `force=1`, `debug=1` during ALLOW windows, smoke/research scripts with ALLOW enabled, leaving ALLOW on overnight. See the [operator refresh doc](./MARKETSTACK_OPERATOR_REFRESH.md#unsafe-commands--avoid).
+
+**Emergency rollback:** Unset `ALLOW_MARKETSTACK_FALLBACK`; optionally set `DISABLE_MARKETSTACK_FALLBACK=true`; redeploy Production. Details in [operator refresh — rollback](./MARKETSTACK_OPERATOR_REFRESH.md#emergency-rollback).
 
 **PDBC** and **BTC-USD** keep their existing AlphaVantage/DBC and Stooq→CoinGecko paths — they are not routed through Marketstack.
 
@@ -58,10 +68,10 @@ For **core US ETF symbols** (SPY, GLD, EEM, HYG, IEF, TIP, TLT, UUP), Stooq rema
 |-------------|--------------------------|------------------------------|
 | **Preview** | Do not set | Do not set |
 | **Development** (Vercel) | Do not set | Do not set |
-| **Production** | Set when fallback needed | Set `true` only when operator approves paid fallback |
-| **Local dev** | Optional for manual tests | Set `true` only with budget awareness |
+| **Production** | May remain set | **Unset by default**; `true` only during approved fallback window, then unset |
+| **Local dev** | Optional for manual tests | Unset by default; `true` only with budget awareness |
 
-**After M2:** The weekday daily cron remains Stooq-only unless Vercel Production has **both** `MARKETSTACK_ACCESS_KEY` and `ALLOW_MARKETSTACK_FALLBACK=true`. Redeploy Production after changing env vars.
+**After M2/M3:** The weekday daily cron remains **Stooq-only** while `ALLOW_MARKETSTACK_FALLBACK` is unset. Redeploy Production after any env change.
 
 **Where to configure Marketstack (scheduled refresh):** The GitHub Actions daily workflow only **calls the live Vercel API** (`?force=1`). Market data is fetched **inside that deployment**, so keys and flags must be set in **Vercel Production** — putting credentials only in GitHub Actions secrets does **not** unlock Marketstack for production refresh.
 
