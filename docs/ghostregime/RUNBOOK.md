@@ -43,6 +43,8 @@ npm run verify:ghostregime
 
 For **core US ETF symbols** (SPY, GLD, EEM, HYG, IEF, TIP, TLT, UUP), Stooq remains the **first** data source. If Stooq fails (gate, empty CSV, parse error, etc.), the engine may request **one** Marketstack EOD series per symbol **only for those tickers**, and only when `MARKETSTACK_ACCESS_KEY` is set in the deployment environment (`lib/ghostregime/marketstackEod.ts` reads this env var). **PDBC** and **BTC-USD** keep their existing AlphaVantage/DBC and Stooq→CoinGecko paths — they are not routed through Marketstack. The paid quota is limited; unused fallback does not consume Marketstack requests.
 
+**Usage audit:** [MARKETSTACK_API_USAGE_AUDIT.md](./MARKETSTACK_API_USAGE_AUDIT.md) — call paths, trigger classification, and billing containment recommendations (docs-only).
+
 **Where to configure Marketstack (scheduled refresh):** The GitHub Actions daily workflow only **calls the live Vercel API** (`?force=1`). Market data is fetched **inside that deployment**, so `MARKETSTACK_ACCESS_KEY` must be set in **Vercel Production** (and Preview if you test there) — putting the key only in GitHub Actions secrets does **not** unlock Marketstack for production refresh. After adding or changing the key in Vercel, **redeploy Production** so new builds/deployments receive the updated env (env changes apply to new deployments).
 
 ### Manual Execution
