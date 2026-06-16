@@ -138,16 +138,17 @@ For provider detail after a refresh attempt, use the controlled `force=1` respon
 
 ---
 
-## Cron posture until M4
+## Cron posture (M4)
 
 | Item | Current behavior |
 |------|------------------|
-| **Schedule** | Weekdays — `.github/workflows/ghostregime-daily.yml` calls Production `/api/ghostregime/today?force=1` |
-| **ALLOW unset (default)** | Cron is **Stooq-only**; Marketstack blocked with `marketstack_disabled_by_guard` if Stooq fails |
-| **ALLOW left on** | Cron can spend Marketstack on every weekday run when Stooq fails — **do not leave ALLOW enabled for cron** |
-| **M4 (future)** | Scheduled-job containment: freshness short-circuit, bounded windows, explicit fallback mode, less blind `force=1` |
+| **Schedule** | Weekdays — `.github/workflows/ghostregime-daily.yml` calls Production `/api/ghostregime/today?refresh=scheduled` |
+| **Fresh snapshot** | Preflight uses health-aligned freshness (`max_age_days = 4`) — Monday cron may serve Friday close without market fetch |
+| **ALLOW unset (default)** | Recompute path is Stooq-only; Marketstack blocked by M2 guard |
+| **Manual recovery** | Operators use `?force=1` with temporary ALLOW — not the weekday cron |
+| **M5 (future)** | Cache/de-dupe for repeated fetches when recompute is needed |
 
-See [API Usage Audit — M4 prep](./MARKETSTACK_API_USAGE_AUDIT.md#implementation-ladder).
+See [API Usage Audit — implementation ladder](./MARKETSTACK_API_USAGE_AUDIT.md#implementation-ladder).
 
 ---
 

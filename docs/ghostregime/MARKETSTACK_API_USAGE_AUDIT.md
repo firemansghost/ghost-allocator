@@ -287,25 +287,44 @@ Scripts calling `defaultMarketDataProvider.getHistoricalPrices` can trigger Mark
 | **M1** | Marketstack API Usage Audit — this memo | Docs-only | **Done** |
 | **M2** | Build / Preview / Test guard — fail-closed `ALLOW_MARKETSTACK_FALLBACK` gate | Code + tests | **Done** |
 | **M3** | Operator refresh discipline — when/how to enable fallback safely | Docs-only | **Done** |
-| **M4** | Scheduled job containment — safer daily `force=1` behavior | Workflow + API | Future |
+| **M4** | Scheduled job containment — `refresh=scheduled` cron, preflight skip | Workflow + API | **Done** |
 | **M5** | Cache / de-dupe — symbol + date window (+ as-of) | Code | Future |
 | **M6** | Optional monitoring — counters in logs/diagnostics | Code | Future |
 
-**M3 operator guide:** [MARKETSTACK_OPERATOR_REFRESH.md](./MARKETSTACK_OPERATOR_REFRESH.md) — environment policy, paid recovery checklist, verification, unsafe commands, rollback. No code or workflow changes in M3.
+**M3 operator guide:** [MARKETSTACK_OPERATOR_REFRESH.md](./MARKETSTACK_OPERATOR_REFRESH.md)
 
-### M4 problem statement (future)
+### M4 scheduled refresh spec (implemented)
+
+| Component | Behavior |
+|-----------|----------|
+| **Cron URL** | `?refresh=scheduled` (replaces blind `?force=1`) |
+| **Preflight** | [`scheduledRefresh.ts`](../../lib/ghostregime/scheduledRefresh.ts) — skip fetch when latest fresh per health standard (`max_age_days = 4`) |
+| **Manual force** | `?force=1` unchanged for operator recovery |
+| **Marketstack** | M2 guard unchanged — no query-param bypass |
+| **Outcomes** | `scheduled_served_persisted_no_fetch`, `scheduled_recomputed_and_persisted`, etc. |
+
+### M5 / M6 (future)
+
+| Phase | Scope |
+|-------|--------|
+| **M5** | Cache/de-dupe Marketstack/Stooq by symbol + date window; optional bounded fetch on recompute |
+| **M6** | Usage counters in diagnostics (no extra API calls) |
+
+**Parking lot (not M4):** GhostFlow **v1.9c.2** Event-Based Display Artifact Design remains product-gated pending after Marketstack containment work. Next branch may be M5 or v1.9c.2 depending on product priority.
+
+### M4 problem statement (implemented)
 
 M4 should address scheduled-job containment without removing Marketstack as an operator tool:
 
-| Topic | Direction |
-|-------|-----------|
-| Blind weekday `force=1` | Short-circuit when persisted latest is fresh (as-of, schema, not stale) |
-| Repeated fallback storms | Do not recompute full ~600-day window when data unchanged |
-| Bounded refresh | Narrow fetch window for routine cron where safe |
-| Explicit fallback mode | Separate cron path or parameter for paid recovery vs normal refresh |
-| Cache / de-dupe (M5 overlap) | Avoid repeat Marketstack calls for same symbol + date window + as-of |
+| Topic | M4 outcome |
+|-------|------------|
+| Blind weekday `force=1` | Replaced with `refresh=scheduled` |
+| Fresh persisted skip | Preflight before market fetch (health `max_age_days = 4`) |
+| Repeated fallback storms | No fetch on fresh days; M5 for cache on recompute |
+| Bounded refresh | Deferred to M5 |
+| Explicit fallback mode | Manual `force=1` + operator ALLOW unchanged |
 
-Likely touch points: `.github/workflows/ghostregime-daily.yml`, `/api/ghostregime/today`, `lib/ghostregime/engine.ts`. **Not in M3 scope.**
+Touch points: `.github/workflows/ghostregime-daily.yml`, `/api/ghostregime/today`, `lib/ghostregime/engine.ts`, `lib/ghostregime/scheduledRefresh.ts`.
 
 ### M2 guard spec (implemented)
 

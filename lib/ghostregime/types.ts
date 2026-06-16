@@ -58,11 +58,14 @@ export interface GhostRegimeServeMetadata {
   run_date_utc: string;
   latest_snapshot_date: string;
   market_snapshot_lag_days: number;
-  refresh_attempt: 'read' | 'force';
+  refresh_attempt: 'read' | 'force' | 'scheduled';
   refresh_outcome:
     | 'computed_and_persisted'
     | 'computed_not_persisted_debug'
     | 'served_persisted_snapshot'
+    | 'scheduled_served_persisted_no_fetch'
+    | 'scheduled_recomputed_and_persisted'
+    | 'scheduled_stale_carry_forward'
     | 'stale_carry_forward_blob_unchanged'
     | 'market_data_unavailable_carry_forward'
     | 'replay_cutover'

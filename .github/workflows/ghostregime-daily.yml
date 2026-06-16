@@ -47,11 +47,11 @@ jobs:
 
           echo "skip=$SKIP" >> "$GITHUB_OUTPUT"
 
-      - name: Force refresh GhostRegime (persist latest)
+      - name: Scheduled refresh GhostRegime (persist latest when needed)
         id: refresh
         if: steps.guard.outputs.skip != 'true'
         env:
-          URL: https://ghost-allocator.vercel.app/api/ghostregime/today?force=1
+          URL: https://ghost-allocator.vercel.app/api/ghostregime/today?refresh=scheduled
           CRON_SECRET: ${{ secrets.GHOSTREGIME_CRON_SECRET }}
         run: |
           set -euo pipefail
@@ -193,19 +193,36 @@ jobs:
                   f.write('\n'.join(summary_lines))
               sys.exit(1)
 
-          # force=1 must end with blob latest written — otherwise health/UI stay on old snapshot
+          # Manual force=1 must persist; scheduled recompute must persist when it ran a full compute
           sm_check = data.get("serve_metadata") or {}
-          if sm_check.get("refresh_attempt") == "force" and sm_check.get("refresh_outcome") != "computed_and_persisted":
-              err = f"::error::Force refresh did not persist blob latest (refresh_outcome={sm_check.get('refresh_outcome')})"
+          refresh_attempt = sm_check.get("refresh_attempt")
+          refresh_outcome = sm_check.get("refresh_outcome")
+          if refresh_attempt == "force" and refresh_outcome != "computed_and_persisted":
+              err = f"::error::Force refresh did not persist blob latest (refresh_outcome={refresh_outcome})"
               print(err)
               if sm_check.get("persist_rejected_reason"):
                   print(f"persist_rejected_reason: {sm_check.get('persist_rejected_reason')}")
               print(json.dumps(sm_check, indent=2, default=str))
               summary_lines.append("### ❌ Force refresh: compute ran but blob latest was NOT updated")
-              summary_lines.append(f"**refresh_outcome**: `{sm_check.get('refresh_outcome')}`")
+              summary_lines.append(f"**refresh_outcome**: `{refresh_outcome}`")
               if sm_check.get("persist_rejected_reason"):
                   summary_lines.append(f"**persist_rejected_reason**: `{sm_check.get('persist_rejected_reason')}`")
               summary_lines.append("**Hint**: See Vercel logs for `[GhostRegime] Persist skipped` — often persist gate or append/history failure.")
+              with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+                  f.write('\n'.join(summary_lines))
+              sys.exit(1)
+
+          scheduled_ok_outcomes = (
+              "scheduled_served_persisted_no_fetch",
+              "scheduled_recomputed_and_persisted",
+              "computed_and_persisted",
+          )
+          if refresh_attempt == "scheduled" and refresh_outcome not in scheduled_ok_outcomes:
+              err = f"::error::Scheduled refresh failed (refresh_outcome={refresh_outcome})"
+              print(err)
+              print(json.dumps(sm_check, indent=2, default=str))
+              summary_lines.append("### ❌ Scheduled refresh: unexpected outcome")
+              summary_lines.append(f"**refresh_outcome**: `{refresh_outcome}`")
               with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
                   f.write('\n'.join(summary_lines))
               sys.exit(1)
