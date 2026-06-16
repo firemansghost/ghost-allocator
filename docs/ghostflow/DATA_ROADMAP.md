@@ -262,7 +262,9 @@ GhostFlow input promotion rules (all phases):
 | **v1.9c.2** | Passive Supply Event Artifact Design | **Done** — [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md); Lane D event proxy; docs-only |
 | **v1.9c.2a** | Operator Event Intake Template | **Done** — appendix in [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) §14 |
 | **v1.9c.3** | Index Inclusion Event Example JSON + Validator | **Done** — [`indexInclusionEventProxy.v1.example.json`](../data/ghostflow/artifacts/indexInclusionEventProxy.v1.example.json); not in `validate-artifacts` |
-| **v1.9c.4** | Index Inclusion Event Production Artifact + Display Card | **Future** — product-gated; likely `publicSignalCount` 10 → 11 |
+| **v1.9c.4a** | Index Inclusion Event Operator Provenance Checklist | **Done** — [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) §14; docs-only intake discipline |
+| **v1.9c.4b** | Index Inclusion Event Operator Collection Pass | **Done (scaffold; operator-pending)** — [INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md](./INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md); no candidate rows yet |
+| **v1.9c.4** | Index Inclusion Event Production Artifact + Display Card | **Deferred** — product-gated; **blocker:** operator-verified production-eligible rows + explicit product approval; likely `publicSignalCount` 10 → 11 when approved |
 | **v1.9c.5** | Index Inclusion Event Mapping Decision | **Future** — likely display-only Option A |
 | **v1.9c.6** | Index Inclusion Event Score Gate | **Future** — discouraged; not approved by default |
 | **v1.9d** | Systematic Re-Risking Proxy Feasibility | **Future** — research-only |
@@ -284,14 +286,14 @@ Future research candidates inspired by passive market-structure / Mike Green rev
 | Candidate | Suggested phase | GhostFlow fit |
 |-----------|-----------------|---------------|
 | Cap-Weight Concentration Premium Lens | **v1.9b.3 Done** · **v1.9b.4 next** | Core — [feasibility](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) · [calibration](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) · [artifact design](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) |
-| Passive Supply / Float Absorption Lens | **v1.9c.3 Done** · **v1.9c.4 next** | Core — [feasibility](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) · [source spike](./PASSIVE_SUPPLY_SOURCE_SPIKE.md) · [artifact design](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) |
+| Passive Supply / Float Absorption Lens | **v1.9c.4b Done (scaffold)** · **v1.9c.4 deferred** | Core — [feasibility](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) · [source spike](./PASSIVE_SUPPLY_SOURCE_SPIKE.md) · [artifact design](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) · [operator intake](./INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md) |
 | Systematic Re-Risking / De-Risking Lens | v1.9d | Core — long-term MOCK retirement path |
 | Protection Bid / Correlation Dispersion Lens | v1.9e | Adjacent — avoid VIX double-count |
 | Mega-Cap Autocorrelation / Flow Momentum Lens | v1.9f or v1.9b appendix | Related to cap-weight premium |
 | Valuation Stress / Individual-Security CAPE Lens | v1.9g or outside GhostFlow | Outside composite |
 | Credit Catalyst / AI Financing Stress | Outside GhostFlow | Separate product lane |
 
-**Not approved:** production artifact JSON, UI cards, runtime feeds, `publicSignalCount` changes, or score gates. v1.9c.3 example/validator scaffolding complete; v1.9c.4 production/display remains product-gated.
+**Not approved:** production artifact JSON, UI cards, runtime feeds, `publicSignalCount` changes, or score gates. v1.9c.3 example/validator scaffolding complete; v1.9c.4a operator provenance checklist complete; v1.9c.4b operator intake memo complete (operator-pending rows); v1.9c.4 production/display **deferred** — blocked on production-eligible rows + explicit product approval.
 
 ---
 
