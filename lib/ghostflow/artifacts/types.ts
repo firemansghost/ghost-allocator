@@ -513,6 +513,97 @@ export type OptionsActivityProxyValidation =
   | OptionsActivityProxyValidationResult
   | OptionsActivityProxyValidationError;
 
+/** SPY vs RSP cap-weight premium proxy — v1.9b.3 design scaffolding only. */
+export type CapWeightPremiumPriceColumnUsed = 'adjusted' | 'close';
+
+export type CapWeightPremiumMappingStatus = 'not_final';
+
+export interface CapWeightPremiumPriceColumnUsedV1 {
+  spy: CapWeightPremiumPriceColumnUsed;
+  rsp: CapWeightPremiumPriceColumnUsed;
+}
+
+export interface CapWeightPremiumObservationsV1 {
+  latestDate: string;
+  spyAdjustedClose: number;
+  rspAdjustedClose: number;
+  spyRspRatio: number;
+  ratioPercentile: number;
+  spread1M: number;
+  spread1MPercentile: number;
+  spread3M: number;
+  spread3MPercentile: number;
+  spread6M: number;
+  spread6MPercentile: number;
+  spread1Y: number;
+  spread1YAnnualized: number;
+  spread1YPercentile: number;
+  spread3Y: number;
+  spread3YAnnualized: number;
+  spread3YPercentile: number;
+  spread5Y: number;
+  spread5YAnnualized: number;
+  spread5YPercentile: number;
+  spyCurrentDrawdown: number;
+  rspCurrentDrawdown: number;
+  drawdownDivergence: number;
+  alignedObservationCount: number;
+  overlapStart: string;
+  overlapEnd: string;
+  priceColumnUsed: CapWeightPremiumPriceColumnUsedV1;
+  mappingStatus: CapWeightPremiumMappingStatus;
+}
+
+export interface CapWeightPremiumMethodologyV1 {
+  inputDescription?: string;
+  alignment?: string;
+  noForwardFill?: boolean;
+  spreadDefinition?: string;
+  percentileDefinition?: string;
+  noCausalAttribution?: boolean;
+  noScoreMapping?: boolean;
+  [key: string]: unknown;
+}
+
+export interface CapWeightPremiumSourceV1 {
+  name: string;
+  url?: string;
+  operatorSource?: string;
+  retrievedAt?: string;
+  method?: string;
+  note?: string;
+}
+
+export interface CapWeightPremiumProxyArtifactV1 {
+  artifactVersion: '1';
+  signalId: 'cap-weight-premium-proxy';
+  designOnly?: true;
+  asOf: string;
+  publishedAt: string;
+  source: CapWeightPremiumSourceV1;
+  observationType: 'spy_rsp_cap_weight_premium_snapshot';
+  seriesDefinition: 'spy_rsp_adj_close_cap_weight_premium_v1';
+  updateFrequency: 'weekly';
+  dataQuality: 'verified_manual' | 'manual_unverified';
+  methodology?: CapWeightPremiumMethodologyV1;
+  caveats: string[];
+  observations: CapWeightPremiumObservationsV1;
+}
+
+export interface CapWeightPremiumProxyValidationResult {
+  ok: true;
+  artifact: CapWeightPremiumProxyArtifactV1;
+}
+
+export interface CapWeightPremiumProxyValidationError {
+  ok: false;
+  errors: string[];
+}
+
+export type CapWeightPremiumProxyValidation =
+  | CapWeightPremiumProxyValidationResult
+  | CapWeightPremiumProxyValidationError;
+
 /** CFTC TFF Treasury futures positioning — v1.7b design only. */
 export type TreasuryFuturesMappingStatus = 'not_final';
 

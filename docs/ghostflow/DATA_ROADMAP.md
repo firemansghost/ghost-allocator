@@ -253,7 +253,7 @@ GhostFlow input promotion rules (all phases):
 | **v1.9b.1** | Cap-Weight Premium CSV Study | **Done** — [`cap-weight-premium-study.ts`](../scripts/ghostflow/cap-weight-premium-study.ts); operator CSVs only; not in `ghostflow:check` |
 | **v1.9b.1a** | Cap-Weight Premium Calibration Study | **Done** — [CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md); real SPY/RSP operator run; docs-only |
 | **v1.9b.2** | Cap-Weight Premium Artifact Design | **Done** — [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md); display-only default; docs-only |
-| **v1.9b.3** | Cap-Weight Premium Example JSON + Validator | **Future** — separately approved; no production JSON |
+| **v1.9b.3** | Cap-Weight Premium Example JSON + Validator | **Done** — [`capWeightPremiumProxy.v1.example.json`](../data/ghostflow/artifacts/capWeightPremiumProxy.v1.example.json); no production JSON; not in `validate-artifacts` |
 | **v1.9b.4** | Cap-Weight Premium Production Artifact + Display Card | **Future** — product-gated; `publicSignalCount` decision |
 | **v1.9b.5** | Cap-Weight Premium Mapping Decision | **Future** — likely display-only Option A |
 | **v1.9b.6** | Cap-Weight Premium Score Gate | **Future** — discouraged; not approved |
@@ -276,7 +276,7 @@ Future research candidates inspired by passive market-structure / Mike Green rev
 
 | Candidate | Suggested phase | GhostFlow fit |
 |-----------|-----------------|---------------|
-| Cap-Weight Concentration Premium Lens | **v1.9b.2 Done** · **v1.9b.3 next** | Core — [feasibility](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) · [calibration](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) · [artifact design](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) |
+| Cap-Weight Concentration Premium Lens | **v1.9b.3 Done** · **v1.9b.4 next** | Core — [feasibility](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) · [calibration](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) · [artifact design](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) |
 | Passive Supply / Float Absorption Lens | v1.9c | Core — supply-side complement |
 | Systematic Re-Risking / De-Risking Lens | v1.9d | Core — long-term MOCK retirement path |
 | Protection Bid / Correlation Dispersion Lens | v1.9e | Adjacent — avoid VIX double-count |
@@ -284,7 +284,7 @@ Future research candidates inspired by passive market-structure / Mike Green rev
 | Valuation Stress / Individual-Security CAPE Lens | v1.9g or outside GhostFlow | Outside composite |
 | Credit Catalyst / AI Financing Stress | Outside GhostFlow | Separate product lane |
 
-**Not approved:** production artifacts, example JSON, UI cards, runtime feeds, `publicSignalCount` changes, or score gates. v1.9b.2 artifact design memo complete; v1.9b.3+ separately approved.
+**Not approved:** production artifact JSON, UI cards, runtime feeds, `publicSignalCount` changes, or score gates. v1.9b.3 example + validator complete; v1.9b.4 product-gated.
 
 ---
 
