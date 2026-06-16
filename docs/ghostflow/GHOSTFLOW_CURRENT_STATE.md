@@ -162,7 +162,7 @@ Discipline-first roadmap after v1.7 feature completion — inventory and operato
 
 ## v1.9 recommendation
 
-**Primary v1.9 theme:** GhostFlow **Passive Supply & Concentration Research** — v1.9c.4a operator provenance checklist complete; v1.9c.4 production artifact/UI remains deferred; counts unchanged.
+**Primary v1.9 theme:** GhostFlow **Passive Supply & Concentration Research** — v1.9c.4b operator intake memo complete; no rows collected yet; v1.9c.4 production artifact/UI remains deferred; counts unchanged.
 
 | Phase | Deliverable | Status |
 |-------|-------------|--------|
@@ -178,7 +178,8 @@ Discipline-first roadmap after v1.7 feature completion — inventory and operato
 | **v1.9c.2** | Index Inclusion Event Proxy Artifact Design — [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) | **Done** (docs-only) |
 | **v1.9c.3** | Index Inclusion Event Example JSON + Validator — [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) | **Done** |
 | **v1.9c.4a** | Operator provenance checklist — [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) §14 | **Done** (docs-only) |
-| **v1.9c.4** | Production artifact + display card | **Deferred** — operator-verified event rows required |
+| **v1.9c.4b** | Operator intake memo — [INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md](./INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md) | **Done (scaffold; operator-pending rows)** |
+| **v1.9c.4** | Production artifact + display card | **Deferred** — production-eligible rows + product approval required |
 
 Composite **62 / 58 / 66**, `publicSignalCount` **10**, and Treasury **2**-card lane unchanged.
 

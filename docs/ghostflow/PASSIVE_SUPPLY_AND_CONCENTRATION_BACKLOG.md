@@ -75,7 +75,7 @@ Any future candidate in this backlog starts **display-only / feasibility-only** 
 | # | Candidate | Research value | GhostFlow semantic fit | Likely data availability | Double-count risk | Score-creep risk | Recommended next action | Suggested future phase |
 |---|-----------|------------------|------------------------|--------------------------|-------------------|------------------|-------------------------|------------------------|
 | 1 | **Cap-Weight Concentration Premium Lens** | High — tests whether weighting mechanism itself produces excess return | **High** — natural companion to existing `concentration` card | **High** — SPY/RSP and index price series are public | Low–medium vs `concentration`, `passive-share` | Medium if wired without gate | **v1.9b.2 Done** — [artifact design](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md); **v1.9b.3** or **v1.9c** next per product | **v1.9b.2 Done** · **v1.9b.3 or v1.9c next** |
-| 2 | **Passive Supply / Float Absorption Lens** | High — supply-side complement to demand/flow proxies | **High** — passive market-structure native | Medium — event data fragmented; aggregates harder | Medium vs `etf-flow`, buyback narrative | High if scored naively | **v1.9c.4a Done** — operator provenance checklist; **v1.9c.4 deferred** | **v1.9c.4a Done** · **v1.9c.4 deferred** |
+| 2 | **Passive Supply / Float Absorption Lens** | High — supply-side complement to demand/flow proxies | **High** — passive market-structure native | Medium — event data fragmented; aggregates harder | Medium vs `etf-flow`, buyback narrative | High if scored naively | **v1.9c.4b Done** — operator intake memo (operator-pending); **v1.9c.4 deferred** | **v1.9c.4b Done** · **v1.9c.4 deferred** |
 | 3 | **Systematic Re-Risking / De-Risking Lens** | High — addresses MOCK trust gap on `systematicStrategyPressure` | **Medium–high** — passive flow theme; semantic rename required | Medium — vol/trend public; true CTA exposure harder | Medium vs VIX, CFTC display card | **High** — direct MOCK replacement temptation | Future feasibility; long-term MOCK retirement path only | **v1.9d** |
 | 4 | **Protection Bid / Correlation Dispersion Lens** | Medium–high — options-market uncertainty framing | **Medium** — vol/options adjacent; distinct from VIX amplifier | Medium — VIX/SKEW public; implied correlation harder | **High** vs score-fed VIX and OCC display proxy | High without reweight decision | Future feasibility; display-only default; avoid VIX double-count | **v1.9e** |
 | 5 | **Mega-Cap Autocorrelation / Flow Momentum Lens** | Medium — “machine-powered momentum” hypothesis | **Medium–high** — related to cap-weight premium | High if folded into price-series work | Medium vs breadth, concentration | Medium | **Fold into v1.9b** if clean; else split | **v1.9f** or appendix in **v1.9b** |
@@ -175,9 +175,10 @@ Any future candidate in this backlog starts **display-only / feasibility-only** 
 - No `publicSignalCount` change unless later product-approved
 - **v1.9c.3 scaffold complete** — example JSON + validator/types/tests; no production JSON or UI
 - **v1.9c.4a operator provenance checklist complete** — [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) §14
-- **Next true product step:** **v1.9c.4** production artifact + display UI — **deferred**; blocked on real operator-verified rows and explicit product approval
+- **v1.9c.4b operator intake memo complete** — [INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md](./INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md); no candidate rows collected yet
+- **Next true product step:** **v1.9c.4** production artifact + display UI — **deferred**; blocked on production-eligible rows and explicit product approval
 
-**Completed phases:** **v1.9c** feasibility · **v1.9c.1** source spike · **v1.9c.2** artifact design · **v1.9c.3** example/validator scaffolding · **v1.9c.4a** operator provenance checklist
+**Completed phases:** **v1.9c** feasibility · **v1.9c.1** source spike · **v1.9c.2** artifact design · **v1.9c.3** example/validator scaffolding · **v1.9c.4a** operator provenance checklist · **v1.9c.4b** operator intake memo (scaffold)
 
 **Suggested future phase:** **v1.9c.4** Index Inclusion Event Production Artifact + Display Card (deferred — operator data + product approval required)
 
@@ -384,7 +385,8 @@ Any future candidate in this backlog starts **display-only / feasibility-only** 
 | **v1.9c.2a** | Operator Event Intake Template | **Done** — appendix in design memo §14 |
 | **v1.9c.3** | Index Inclusion Event Example JSON + Validator | **Done** — [`indexInclusionEventProxy.v1.example.json`](../data/ghostflow/artifacts/indexInclusionEventProxy.v1.example.json) |
 | **v1.9c.4a** | Operator Provenance Checklist | **Done** (docs-only) |
-| **v1.9c.4** | Production Artifact + Display Card | **Deferred** — operator-verified rows + product approval required |
+| **v1.9c.4b** | Operator Collection Pass / Intake Memo | **Done (scaffold; operator-pending)** — [INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md](./INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md) |
+| **v1.9c.4** | Production Artifact + Display Card | **Deferred** — production-eligible rows + product approval required |
 | **v1.9c.5** | Mapping Decision | **Future** — likely display-only Option A |
 | **v1.9c.6** | Score Gate | **Future** — discouraged |
 | **v1.9d** | Systematic Re-Risking Proxy Feasibility | **Future** — research-only |

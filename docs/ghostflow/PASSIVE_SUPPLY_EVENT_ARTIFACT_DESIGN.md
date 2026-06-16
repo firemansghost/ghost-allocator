@@ -469,7 +469,7 @@ Reject a candidate production row if:
 
 ### Handoff to v1.9c.4
 
-When operator-verified rows exist, transcribe using §15 intake template → validate with `validateIndexInclusionEventProxyArtifact(..., { mode: 'production' })` → create production JSON only after all checklist items pass. See also [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) — Index Inclusion Event Proxy section.
+When operator-verified rows exist, transcribe using §15 intake template → validate with `validateIndexInclusionEventProxyArtifact(..., { mode: 'production' })` → create production JSON only after all checklist items pass. Record candidate rows in [INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md](./INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md) (v1.9c.4b). See also [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) — Index Inclusion Event Proxy section.
 
 ---
 
