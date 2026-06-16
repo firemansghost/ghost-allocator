@@ -258,8 +258,8 @@ GhostFlow input promotion rules (all phases):
 | **v1.9b.5** | Cap-Weight Premium Mapping Decision | **Future** — likely display-only Option A |
 | **v1.9b.6** | Cap-Weight Premium Score Gate | **Future** — discouraged; not approved |
 | **v1.9c** | Passive Supply / Float Absorption Feasibility | **Done** — [PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md); YELLOW leaning RED; docs-only |
-| **v1.9c.1** | Passive Supply Source Spike | **Future** — recommended; source inventory only |
-| **v1.9c.2** | Passive Supply Event Artifact Design | **Future** — product-gated; if v1.9c.1 viable |
+| **v1.9c.1** | Passive Supply Source Spike | **Done** — [PASSIVE_SUPPLY_SOURCE_SPIKE.md](./PASSIVE_SUPPLY_SOURCE_SPIKE.md); docs-only source inventory; Lane D event path and Lane A/B quarterly context partially viable |
+| **v1.9c.2** | Passive Supply Event Artifact Design | **Future** — product-gated recommended next (with optional quarterly context companion) |
 | **v1.9d** | Systematic Re-Risking Proxy Feasibility | **Future** — research-only |
 | **v1.9e** | Protection Bid / Correlation Dispersion Feasibility | **Future** — research-only |
 | **v1.9f** | Mega-Cap Autocorrelation / Flow Momentum Feasibility | **Future** — optional or folded into v1.9b |
@@ -279,14 +279,14 @@ Future research candidates inspired by passive market-structure / Mike Green rev
 | Candidate | Suggested phase | GhostFlow fit |
 |-----------|-----------------|---------------|
 | Cap-Weight Concentration Premium Lens | **v1.9b.3 Done** · **v1.9b.4 next** | Core — [feasibility](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) · [calibration](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) · [artifact design](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) |
-| Passive Supply / Float Absorption Lens | **v1.9c Done** · **v1.9c.1 next** | Core — [feasibility](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) |
+| Passive Supply / Float Absorption Lens | **v1.9c Done** · **v1.9c.1 Done** · **v1.9c.2 next** | Core — [feasibility](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) · [source spike](./PASSIVE_SUPPLY_SOURCE_SPIKE.md) |
 | Systematic Re-Risking / De-Risking Lens | v1.9d | Core — long-term MOCK retirement path |
 | Protection Bid / Correlation Dispersion Lens | v1.9e | Adjacent — avoid VIX double-count |
 | Mega-Cap Autocorrelation / Flow Momentum Lens | v1.9f or v1.9b appendix | Related to cap-weight premium |
 | Valuation Stress / Individual-Security CAPE Lens | v1.9g or outside GhostFlow | Outside composite |
 | Credit Catalyst / AI Financing Stress | Outside GhostFlow | Separate product lane |
 
-**Not approved:** production artifact JSON, UI cards, runtime feeds, `publicSignalCount` changes, or score gates. v1.9c feasibility memo complete; v1.9c.1 source spike recommended next.
+**Not approved:** production artifact JSON, UI cards, runtime feeds, `publicSignalCount` changes, or score gates. v1.9c feasibility + v1.9c.1 source spike complete; v1.9c.2 remains product-gated.
 
 ---
 
@@ -311,6 +311,7 @@ Full categorized index: [README.md](./README.md). Key canonical docs:
 - [CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) — **v1.9b.1a calibration study** (real operator run; exit 0; docs-only)
 - [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) — **v1.9b.2 artifact design** (display-only default; docs-only)
 - [PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) — **v1.9c passive supply / float absorption feasibility** (YELLOW leaning RED; docs-only)
+- [PASSIVE_SUPPLY_SOURCE_SPIKE.md](./PASSIVE_SUPPLY_SOURCE_SPIKE.md) — **v1.9c.1 source spike** (docs-only; partial source locks; no code/artifact/UI/score changes)
 - [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) — **v1.8b mock retirement decision** (keep-MOCK ×3; no wiring approved)
 - [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) — **v1.8c freshness & dataQuality audit** (policy memo; no JSON changes)
 - [CFTC_TFF_FEASIBILITY.md](./CFTC_TFF_FEASIBILITY.md) — v0.9c TFF/COT feasibility (YELLOW)
