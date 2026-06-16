@@ -280,16 +280,30 @@ Scripts calling `defaultMarketDataProvider.getHistoricalPrices` can trigger Mark
 
 ---
 
-## Implementation ladder (future — not in this audit)
+## Implementation ladder
 
-| Phase | Deliverable | Type |
-|-------|-------------|------|
-| **M1** | Marketstack API Usage Audit — **this memo** | **Done** (docs-only) |
-| **M2** | Build / Preview / Test guard — block Marketstack fallback in build, preview, CI test runs | Code + tests |
-| **M3** | Operator refresh discipline — `ALLOW_MARKETSTACK_FALLBACK`, runbook commands | Code + docs |
-| **M4** | Scheduled job containment — safer daily `force=1` behavior | Workflow + API |
-| **M5** | Cache / de-dupe — symbol + date window (+ as-of) | Code |
-| **M6** | Optional monitoring — counters in logs/diagnostics, no secrets, no extra API calls | Code |
+| Phase | Deliverable | Type | Status |
+|-------|-------------|------|--------|
+| **M1** | Marketstack API Usage Audit — this memo | Docs-only | **Done** |
+| **M2** | Build / Preview / Test guard — fail-closed `ALLOW_MARKETSTACK_FALLBACK` gate | Code + tests | **Done** |
+| **M3** | Operator refresh discipline — runbook commands | Code + docs | Future |
+| **M4** | Scheduled job containment — safer daily `force=1` behavior | Workflow + API | Future |
+| **M5** | Cache / de-dupe — symbol + date window (+ as-of) | Code | Future |
+| **M6** | Optional monitoring — counters in logs/diagnostics | Code | Future |
+
+### M2 guard spec (implemented)
+
+| Component | Behavior |
+|-----------|----------|
+| **Primary gate** | `ALLOW_MARKETSTACK_FALLBACK=true` required in addition to `MARKETSTACK_ACCESS_KEY` |
+| **Hard blocks** | `NODE_ENV=test`, `VERCEL_ENV=preview`, `NEXT_PHASE=phase-production-build`, `DISABLE_MARKETSTACK_FALLBACK=true` |
+| **Direct client belt** | [`lib/ghostregime/marketstackEod.ts`](../../lib/ghostregime/marketstackEod.ts) — `fetchMarketstackEod` returns `guard_blocked` without HTTP |
+| **Fallback orchestrator** | [`lib/ghostregime/marketData.ts`](../../lib/ghostregime/marketData.ts) — evaluates guard before calling Marketstack |
+| **Guard module** | [`lib/ghostregime/marketstackGuard.ts`](../../lib/ghostregime/marketstackGuard.ts) |
+| **Tests** | Mock/stub only — no live HTTP, no real API keys |
+| **Workflow** | No change in M2 — deferred to M4 |
+
+**Production rollout:** After M2 deploy, set `ALLOW_MARKETSTACK_FALLBACK=true` on Vercel Production only when paid fallback is intentionally desired (e.g. weekday cron when Stooq fails).
 
 ---
 
