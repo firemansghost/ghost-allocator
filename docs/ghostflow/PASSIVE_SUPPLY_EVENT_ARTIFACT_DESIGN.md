@@ -1,6 +1,6 @@
 # Index Inclusion Event Proxy — Artifact Design (GhostFlow v1.9c.2 / v1.9c.3)
 
-**Status:** **v1.9c.2 complete** · **v1.9c.3 complete** — design memo + example JSON + validator/types + tests. **Not** scored. No production artifact JSON, UI card, `validate-artifacts` registration, or `buildSnapshot` merge.
+**Status:** **v1.9c.2 complete** · **v1.9c.3 complete** · **v1.9c.4a complete** — design memo + example JSON + validator/types + tests + operator provenance checklist. **v1.9c.4 deferred.** **Not** scored. No production artifact JSON, UI card, `validate-artifacts` registration, or `buildSnapshot` merge.
 
 **Prior work:** [PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) (v1.9c, **YELLOW leaning RED**) · [PASSIVE_SUPPLY_SOURCE_SPIKE.md](./PASSIVE_SUPPLY_SOURCE_SPIKE.md) (v1.9c.1, Lane D **LOCKED (partial)**)
 
@@ -34,7 +34,8 @@ GhostRegime, GhostYield, Models, and builder are out of scope. This track is **i
 | Score gates opened | **No** |
 | `publicSignalCount` | **10** (equity) — unchanged |
 | Treasury lane | **2** separate display-only cards — unchanged |
-| **v1.9c.4** | **Future** — production JSON + display card; product-gated; likely `publicSignalCount` 10 → 11 |
+| **v1.9c.4** | **Future** — production JSON + display card; **deferred** — blocked on operator-verified event rows + explicit product approval; likely `publicSignalCount` 10 → 11 |
+| **v1.9c.4a** | Operator provenance checklist — **Done** (§14) |
 
 ---
 
@@ -367,7 +368,8 @@ Only after operator QA discipline: dual-check of source URLs, count reconciliati
 | **v1.9c.2** | Index Inclusion Event Proxy — **this memo** | **Done** (docs-only) |
 | **v1.9c.2a** | Operator event intake template (§14 appendix) | **Included in this memo** |
 | **v1.9c.3** | Example JSON + validator/types/tests; no production JSON | **Done** |
-| **v1.9c.4** | Production artifact + display-only UI integration | **Future** — product-gated; likely `publicSignalCount` 10 → 11 |
+| **v1.9c.4a** | Operator provenance checklist | **Done** (docs-only; §14) |
+| **v1.9c.4** | Production artifact + display-only UI integration | **Deferred** — operator-verified event rows required; product-gated; likely `publicSignalCount` 10 → 11 |
 | **v1.9c.5** | Mapping decision — likely display-only Option A | **Future** |
 | **v1.9c.6** | Score gate | **Future** — **discouraged / not approved by default** |
 
@@ -414,9 +416,66 @@ Only after operator QA discipline: dual-check of source URLs, count reconciliati
 
 ---
 
-## 14. Operator event intake template (v1.9c.2a appendix)
+## 14. v1.9c.4a Operator Provenance Checklist
 
-Use this markdown table when curating events before v1.9c.3 example JSON. One row per event; transcribe into artifact `events[]` in v1.9c.3+.
+**Status:** **Done** (docs-only). **v1.9c.4 production artifact + UI is deferred.**
+
+Production card and [`indexInclusionEventProxy.v1.json`](../data/ghostflow/artifacts/indexInclusionEventProxy.v1.json) **cannot ship** until real operator-verified index event rows exist. The repo currently contains only synthetic design-only example data in [`indexInclusionEventProxy.v1.example.json`](../data/ghostflow/artifacts/indexInclusionEventProxy.v1.example.json) (`EXMP*` tickers, `example.com` URLs). **Synthetic rows must never be promoted into production.**
+
+### Policy locks
+
+- **v1.9c.4 deferred** — no production JSON, no dashboard card, no `publicSignalCount` change until operator data + product approval
+- **Synthetic `EXMP*` tickers** — example-only; invalid for production
+- **`example.com` URLs** — invalid for production
+- **Public source URLs** — must come from official index-provider announcements or official event pages (Nasdaq IR, FTSE Russell reconstitution, S&P DJI media center, etc.)
+- **No downloaded source files** committed unless separately product-approved — metadata URLs only
+- **Empty event windows** — valid only after **explicit operator review** confirms no major events in the declared window; not as a lazy bootstrap without curation
+
+### Before adding a production event row
+
+Operator must confirm:
+
+1. The event came from an official public index-provider source.
+2. The source URL is stable and public.
+3. The event was manually reviewed.
+4. The provider/source name is recorded.
+5. The announcement date is recorded.
+6. The effective date is recorded, or `null` with explanatory notes.
+7. The source accessed date is recorded.
+8. The affected ticker and company name are recorded.
+9. The index family and index name are recorded.
+10. The action is classified as one of: `add` · `delete` · `rebalance` · `reconstitution` · `unknown`
+11. `operatorVerified` is set to `true` only after manual review.
+12. `floatEstimateAvailable` remains `false`.
+13. `demandEstimateAvailable` remains `false`.
+14. `mappingStatus` remains `not_final`.
+15. No score-like fields are added.
+16. No `publicPassiveInputKey` is added.
+17. No free-float estimate or demand-dollar estimate is inferred.
+
+### Production disqualifiers
+
+Reject a candidate production row if:
+
+- Source URL contains `example.com`
+- Ticker matches `EXMP*` (synthetic example pattern)
+- Source note or caveats say `EXAMPLE / DESIGN ONLY`
+- Source is not public or cannot be verified
+- Source requires restricted redistribution without acceptable citation-only use
+- Effective date is missing and notes do not explain why
+- Action cannot be classified
+- Event is based on rumor, social media, or unsourced news
+- Row includes score, pressure, demand-dollar, or float absorption claims
+
+### Handoff to v1.9c.4
+
+When operator-verified rows exist, transcribe using §15 intake template → validate with `validateIndexInclusionEventProxyArtifact(..., { mode: 'production' })` → create production JSON only after all checklist items pass. See also [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) — Index Inclusion Event Proxy section.
+
+---
+
+## 15. Operator event intake template (v1.9c.2a appendix)
+
+Use this markdown table when curating events before production JSON (v1.9c.4+). One row per event; transcribe into artifact `events[]` after §14 provenance checklist passes. **Do not use `EXMP*` or placeholder URLs in production.**
 
 | eventId | sourceName | sourceUrl | announcedDate | effectiveDate | sourceAccessedDate | indexFamily | indexName | ticker | companyName | action | eventType | operatorVerified | notes |
 |---------|------------|-----------|---------------|---------------|--------------------|-------------|-----------|--------|-------------|--------|-----------|------------------|-------|
@@ -432,7 +491,7 @@ Use this markdown table when curating events before v1.9c.3 example JSON. One ro
 
 ---
 
-## 15. Related documents
+## 16. Related documents
 
 - [PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) — v1.9c feasibility
 - [PASSIVE_SUPPLY_SOURCE_SPIKE.md](./PASSIVE_SUPPLY_SOURCE_SPIKE.md) — v1.9c.1 source verification; Lane D lock

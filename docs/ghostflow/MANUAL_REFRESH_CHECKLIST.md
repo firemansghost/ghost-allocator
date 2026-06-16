@@ -64,6 +64,44 @@ Treasury lane: no structured freshness bands today — dates on cards only. See 
 
 ---
 
+## Index Inclusion Event Proxy — future manual refresh discipline
+
+**Status:** **Future / not live** — no production artifact, no dashboard card.
+
+| Item | Detail |
+|------|--------|
+| **Artifact file (future)** | [`data/ghostflow/artifacts/indexInclusionEventProxy.v1.json`](../../data/ghostflow/artifacts/indexInclusionEventProxy.v1.json) — **does not exist yet** |
+| **Example only** | [`indexInclusionEventProxy.v1.example.json`](../../data/ghostflow/artifacts/indexInclusionEventProxy.v1.example.json) — synthetic `EXMP*` / `example.com`; **never promote to production** |
+| **Production release** | **Blocked** on operator-verified event rows per [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) §14 |
+| **Scoring** | Display-only when live — **not scored**; no `publicPassiveInputKey`; no score fields |
+| **Float / demand** | Do **not** infer free-float or demand-dollar estimates |
+
+**Refresh cadence (when v1.9c.4 ships):**
+
+| When | Action |
+|------|--------|
+| **Weekly** | During major rebalance/reconstitution seasons (Russell, S&P, Nasdaq annual/quarterly windows) |
+| **Monthly** | Otherwise, when no active provider announcement cycle |
+| **Event-driven** | Within **1–2 business days** after official index-provider announcements |
+
+**Operator discipline:**
+
+- Empty `events[]` window is valid **only after explicit operator review** — not as lazy bootstrap
+- Do **not** commit provider downloads (PDFs, CSVs, spreadsheets) — cite public URLs only
+- Do **not** scrape restricted or login-gated sources
+- Do **not** use rumor, social media, or unsourced news as event rows
+- Follow §14 provenance checklist before any production row
+
+**Intake table template** (docs-only — transcribe into artifact `events[]`; do not commit a separate CSV):
+
+| eventId | sourceName | sourceUrl | announcedDate | effectiveDate | sourceAccessedDate | indexFamily | indexName | ticker | companyName | action | eventType | sourceConfidence | notes | operatorVerified |
+|---------|------------|-----------|---------------|---------------|--------------------|-------------|-----------|--------|-------------|--------|-----------|------------------|-------|------------------|
+| *(example)* `russell-2025-prelim-add-XYZ` | FTSE Russell | *(official public URL)* | YYYY-MM-DD | YYYY-MM-DD or null | YYYY-MM-DD | `ftse_russell` | Russell 2000 | XYZ | Example Corp | `add` | `reconstitution` | `high` | Preliminary list; subject to change | true |
+
+**Design reference:** [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) · [DATA_ROADMAP.md](./DATA_ROADMAP.md) v1.9c.4 / v1.9c.4a
+
+---
+
 ## Artifact operator tables
 
 ### 1. Volatility Regime (daily)
