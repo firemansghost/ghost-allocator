@@ -162,7 +162,7 @@ Discipline-first roadmap after v1.7 feature completion — inventory and operato
 
 ## v1.9 recommendation
 
-**Primary v1.9 theme:** GhostFlow **Passive Supply & Concentration Research** — v1.9b.3 example + validator complete; v1.9b.4 product-gated.
+**Primary v1.9 theme:** GhostFlow **Passive Supply & Concentration Research** — v1.9c feasibility complete; v1.9c.1 source spike recommended next.
 
 | Phase | Deliverable | Status |
 |-------|-------------|--------|
@@ -173,6 +173,8 @@ Discipline-first roadmap after v1.7 feature completion — inventory and operato
 | **v1.9b.2** | Cap-Weight Premium Artifact Design — [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) | **Done** (docs-only) |
 | **v1.9b.3** | Example JSON + validator — [`capWeightPremiumProxy.v1.example.json`](../data/ghostflow/artifacts/capWeightPremiumProxy.v1.example.json) | **Done** |
 | **v1.9b.4** | Production artifact + display card | **Future** — product-gated |
+| **v1.9c** | Passive Supply / Float Absorption Feasibility — [PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) | **Done** (docs-only) |
+| **v1.9c.1** | Passive Supply Source Spike | **Future** — recommended next |
 
 Composite **62 / 58 / 66**, `publicSignalCount` **10**, and Treasury **2**-card lane unchanged.
 
