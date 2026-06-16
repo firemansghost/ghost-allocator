@@ -75,7 +75,7 @@ Any future candidate in this backlog starts **display-only / feasibility-only** 
 | # | Candidate | Research value | GhostFlow semantic fit | Likely data availability | Double-count risk | Score-creep risk | Recommended next action | Suggested future phase |
 |---|-----------|------------------|------------------------|--------------------------|-------------------|------------------|-------------------------|------------------------|
 | 1 | **Cap-Weight Concentration Premium Lens** | High — tests whether weighting mechanism itself produces excess return | **High** — natural companion to existing `concentration` card | **High** — SPY/RSP and index price series are public | Low–medium vs `concentration`, `passive-share` | Medium if wired without gate | **v1.9b.2 Done** — [artifact design](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md); **v1.9b.3** or **v1.9c** next per product | **v1.9b.2 Done** · **v1.9b.3 or v1.9c next** |
-| 2 | **Passive Supply / Float Absorption Lens** | High — supply-side complement to demand/flow proxies | **High** — passive market-structure native | Medium — event data fragmented; aggregates harder | Medium vs `etf-flow`, buyback narrative | High if scored naively | **v1.9c.2 Done** — [artifact design](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md); Lane D index inclusion event proxy; **v1.9c.3** product-gated next | **v1.9c.2 Done** · **v1.9c.3 next** |
+| 2 | **Passive Supply / Float Absorption Lens** | High — supply-side complement to demand/flow proxies | **High** — passive market-structure native | Medium — event data fragmented; aggregates harder | Medium vs `etf-flow`, buyback narrative | High if scored naively | **v1.9c.3 Done** — example JSON + validator; **v1.9c.4** product-gated next | **v1.9c.3 Done** · **v1.9c.4 next** |
 | 3 | **Systematic Re-Risking / De-Risking Lens** | High — addresses MOCK trust gap on `systematicStrategyPressure` | **Medium–high** — passive flow theme; semantic rename required | Medium — vol/trend public; true CTA exposure harder | Medium vs VIX, CFTC display card | **High** — direct MOCK replacement temptation | Future feasibility; long-term MOCK retirement path only | **v1.9d** |
 | 4 | **Protection Bid / Correlation Dispersion Lens** | Medium–high — options-market uncertainty framing | **Medium** — vol/options adjacent; distinct from VIX amplifier | Medium — VIX/SKEW public; implied correlation harder | **High** vs score-fed VIX and OCC display proxy | High without reweight decision | Future feasibility; display-only default; avoid VIX double-count | **v1.9e** |
 | 5 | **Mega-Cap Autocorrelation / Flow Momentum Lens** | Medium — “machine-powered momentum” hypothesis | **Medium–high** — related to cap-weight premium | High if folded into price-series work | Medium vs breadth, concentration | Medium | **Fold into v1.9b** if clean; else split | **v1.9f** or appendix in **v1.9b** |
@@ -173,12 +173,12 @@ Any future candidate in this backlog starts **display-only / feasibility-only** 
 - Event-driven / display-only by default
 - No score wiring
 - No `publicSignalCount` change unless later product-approved
-- **v1.9c.2 artifact design complete** — [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md); Lane D index inclusion event proxy; display-only default
-- **Next:** **v1.9c.3** example JSON + validator (product-gated)
+- **v1.9c.3 scaffold complete** — example JSON + validator/types/tests; no production JSON or UI
+- **Next:** **v1.9c.4** production artifact + display UI (product-gated)
 
-**Completed phases:** **v1.9c** feasibility · **v1.9c.1** source spike · **v1.9c.2** artifact design
+**Completed phases:** **v1.9c** feasibility · **v1.9c.1** source spike · **v1.9c.2** artifact design · **v1.9c.3** example/validator scaffolding
 
-**Suggested future phase:** **v1.9c.3** Index Inclusion Event Example JSON + Validator (product-gated)
+**Suggested future phase:** **v1.9c.4** Index Inclusion Event Production Artifact + Display Card (product-gated)
 
 ---
 
@@ -381,7 +381,7 @@ Any future candidate in this backlog starts **display-only / feasibility-only** 
 | **v1.9c.1** | Passive Supply Source Spike | **Done** — [PASSIVE_SUPPLY_SOURCE_SPIKE.md](./PASSIVE_SUPPLY_SOURCE_SPIKE.md); docs-only source verification |
 | **v1.9c.2** | Passive Supply Event Artifact Design | **Done** — [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) |
 | **v1.9c.2a** | Operator Event Intake Template | **Done** — appendix in design memo §14 |
-| **v1.9c.3** | Index Inclusion Event Example JSON + Validator | **Future** — product-gated |
+| **v1.9c.3** | Index Inclusion Event Example JSON + Validator | **Done** — [`indexInclusionEventProxy.v1.example.json`](../data/ghostflow/artifacts/indexInclusionEventProxy.v1.example.json) |
 | **v1.9c.4** | Production Artifact + Display Card | **Future** — product-gated |
 | **v1.9c.5** | Mapping Decision | **Future** — likely display-only Option A |
 | **v1.9c.6** | Score Gate | **Future** — discouraged |
@@ -421,8 +421,8 @@ None of the future phases above are approved for implementation, scoring, artifa
 
 **v1.9c.1** — Passive Supply Source Spike — **Done** ([memo](./PASSIVE_SUPPLY_SOURCE_SPIKE.md)); partial source locks found for event path and quarterly macro context.
 
-**v1.9c.2** — Index Inclusion Event Proxy Artifact Design — **Done** ([memo](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md)); Lane D only; display-only default.
+**v1.9c.3** — Index Inclusion Event Example JSON + Validator — **Done** ([design memo](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md)).
 
-**Candidate next:** **v1.9c.3** Index Inclusion Event Example JSON + Validator (product-gated) or **v1.9b.4** cap-weight production/display per product priority.
+**Candidate next:** **v1.9c.4** Index Inclusion Event Production Artifact + Display Card (product-gated) or **v1.9b.4** cap-weight production/display per product priority.
 
 Real operator run validated SPY/RSP path (exit **0**, adj-close, 5,818 aligned days). Longer-horizon cap-weight premium is elevated; short horizons are mixed — design any future display card with regime caveats.

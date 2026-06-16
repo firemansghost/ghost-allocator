@@ -136,12 +136,12 @@ These memos preserve feasibility, calibration, and mapping history. They may con
 | [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) | **v1.9b.2** display-only artifact design · **v1.9b.3** example JSON + validator scaffolding |
 | [PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) | **v1.9c** passive supply / float absorption — YELLOW leaning RED |
 | [PASSIVE_SUPPLY_SOURCE_SPIKE.md](./PASSIVE_SUPPLY_SOURCE_SPIKE.md) | **v1.9c.1** source spike — Lane D event path partially locked |
-| [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) | **v1.9c.2** index inclusion event proxy — display-only artifact design (Lane D) |
+| [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) | **v1.9c.2** index inclusion event proxy design · **v1.9c.3** example JSON + validator scaffolding |
 
 Topics parked for later evaluation (no score wiring, artifacts, UI cards, or `publicSignalCount` changes approved):
 
 - **Cap-weight concentration premium** — [v1.9b feasibility](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) + [v1.9b.1a calibration](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) + [v1.9b.2–b.3 artifact design](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md); operator CSV study (`npm run ghostflow:cap-weight-premium-study`)
-- **Passive supply / float absorption** — [v1.9c feasibility](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) + [v1.9c.1 source spike](./PASSIVE_SUPPLY_SOURCE_SPIKE.md) + [v1.9c.2 artifact design](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md); Lane D index inclusion event proxy designed; v1.9c.3+ product-gated
+- **Passive supply / float absorption** — [v1.9c feasibility](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) + [v1.9c.1 source spike](./PASSIVE_SUPPLY_SOURCE_SPIKE.md) + [v1.9c.2–c.3 artifact design](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md); example JSON + validator shipped; v1.9c.4 production/display product-gated
 - **Systematic re-risking** — long-term path beyond MOCK **62** and CFTC display proxy
 - **Protection bid / correlation dispersion** — skew, implied correlation, single-stock vs index vol
 - **Mega-cap autocorrelation / flow momentum** — own-price continuation in flow-fed names

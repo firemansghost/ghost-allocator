@@ -604,6 +604,91 @@ export type CapWeightPremiumProxyValidation =
   | CapWeightPremiumProxyValidationResult
   | CapWeightPremiumProxyValidationError;
 
+/** Index inclusion / rebalance event proxy — v1.9c.3 design scaffolding only. */
+export type IndexInclusionEventIndexFamily = 'sp_dji' | 'nasdaq' | 'ftse_russell' | 'other';
+
+export type IndexInclusionEventAction =
+  | 'add'
+  | 'delete'
+  | 'rebalance'
+  | 'reconstitution'
+  | 'unknown';
+
+export type IndexInclusionEventSourceConfidence = 'high' | 'medium' | 'low';
+
+export type IndexInclusionEventMappingStatus = 'not_final';
+
+export interface IndexInclusionEventRecordV1 {
+  eventId: string;
+  sourceName: string;
+  sourceUrl: string;
+  announcedDate: string;
+  effectiveDate: string | null;
+  sourceAccessedDate: string;
+  indexFamily: IndexInclusionEventIndexFamily;
+  indexName: string;
+  ticker: string;
+  companyName?: string;
+  action: IndexInclusionEventAction;
+  eventType?: string;
+  notes?: string;
+  sourceConfidence?: IndexInclusionEventSourceConfidence;
+  operatorVerified: boolean;
+  floatEstimateAvailable: boolean;
+  demandEstimateAvailable: boolean;
+  mappingStatus: IndexInclusionEventMappingStatus;
+  eventSeverityLabel?: string;
+}
+
+export interface IndexInclusionEventObservationsV1 {
+  eventWindowStart: string;
+  eventWindowEnd: string;
+  eventCount: number;
+  upcomingEventCount: number;
+  recentEventCount: number;
+  majorIndexEventCount?: number;
+  sourceEventCount: number;
+  mappingStatus: IndexInclusionEventMappingStatus;
+  events: IndexInclusionEventRecordV1[];
+}
+
+export interface IndexInclusionEventSourceV1 {
+  name: string;
+  url: string;
+  note?: string;
+}
+
+export interface IndexInclusionEventProxyArtifactV1 {
+  artifactVersion: '1';
+  signalId: 'index-inclusion-event-proxy';
+  designOnly?: true;
+  asOf: string;
+  publishedAt: string;
+  source: IndexInclusionEventSourceV1;
+  observationType: 'index_inclusion_rebalance_event_snapshot';
+  seriesDefinition: 'public_index_change_events_v1';
+  updateFrequency: 'event_driven';
+  dataQuality: 'verified_manual' | 'manual_unverified';
+  mappingStatus: IndexInclusionEventMappingStatus;
+  methodology: string;
+  caveats: string[];
+  observations: IndexInclusionEventObservationsV1;
+}
+
+export interface IndexInclusionEventProxyValidationResult {
+  ok: true;
+  artifact: IndexInclusionEventProxyArtifactV1;
+}
+
+export interface IndexInclusionEventProxyValidationError {
+  ok: false;
+  errors: string[];
+}
+
+export type IndexInclusionEventProxyValidation =
+  | IndexInclusionEventProxyValidationResult
+  | IndexInclusionEventProxyValidationError;
+
 /** CFTC TFF Treasury futures positioning — v1.7b design only. */
 export type TreasuryFuturesMappingStatus = 'not_final';
 
