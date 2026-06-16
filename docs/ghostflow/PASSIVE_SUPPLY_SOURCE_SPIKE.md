@@ -183,14 +183,16 @@ This spike counts as **successful (partial)** because:
 
 ## Candidate next step
 
-**Recommended next phase:** **v1.9c.2 Event-based display artifact design (product-gated)**, anchored to Lane D event-path viability, with optional Lane A/B quarterly context companion.
+**Completed:** **v1.9c.2 Event-based display artifact design** — [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md); Lane D index inclusion event proxy; Option A selected (no Lane A/B macro companion in this artifact).
 
-Decision options after this spike:
+**Recommended next phase:** **v1.9c.3** example JSON + validator/types/tests (product-gated).
 
-- **A (recommended):** v1.9c.2 event-based design (index adds/deletes/effective dates).
-- **B (secondary):** v1.9c.2 quarterly macro context design (issuance/buyback context).
-- **C (optional side study):** top-N share-count appendix research only.
-- **D:** keep backlog only if product does not want event/context lane.
+Decision record (v1.9c.1 → v1.9c.2):
+
+- **A (selected):** v1.9c.2 event-based design (index adds/deletes/effective dates) — **Done**
+- **B (deferred):** quarterly macro context companion — separate future artifact if product wants
+- **C (deferred):** top-N share-count appendix research only
+- **D (rejected):** backlog-only deferral
 
 ---
 
