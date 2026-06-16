@@ -1,12 +1,17 @@
-# Index Inclusion Event Proxy — Artifact Design (GhostFlow v1.9c.2)
+# Index Inclusion Event Proxy — Artifact Design (GhostFlow v1.9c.2 / v1.9c.3)
 
-**Status:** **v1.9c.2 complete** — docs-only artifact design memo. **Not** scored. No production artifact JSON, example JSON, UI card, validator, `validate-artifacts` registration, or `buildSnapshot` merge.
+**Status:** **v1.9c.2 complete** · **v1.9c.3 complete** — design memo + example JSON + validator/types + tests. **Not** scored. No production artifact JSON, UI card, `validate-artifacts` registration, or `buildSnapshot` merge.
 
 **Prior work:** [PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) (v1.9c, **YELLOW leaning RED**) · [PASSIVE_SUPPLY_SOURCE_SPIKE.md](./PASSIVE_SUPPLY_SOURCE_SPIKE.md) (v1.9c.1, Lane D **LOCKED (partial)**)
 
-**Future files (v1.9c.3+):**
+**Shipped files (v1.9c.3):**
 
-- Example: `data/ghostflow/artifacts/indexInclusionEventProxy.v1.example.json` (`designOnly: true`, `dataQuality: manual_unverified`)
+- Example: [`indexInclusionEventProxy.v1.example.json`](../data/ghostflow/artifacts/indexInclusionEventProxy.v1.example.json) (`designOnly: true`, `dataQuality: manual_unverified`)
+- Library: [`indexInclusionEventProxy.ts`](../lib/ghostflow/artifacts/indexInclusionEventProxy.ts) — `validateIndexInclusionEventProxyArtifact`; no production loader
+- Tests: [`indexInclusionEventProxy.test.ts`](../lib/ghostflow/__tests__/indexInclusionEventProxy.test.ts)
+
+**Future files (v1.9c.4+):**
+
 - Production: `data/ghostflow/artifacts/indexInclusionEventProxy.v1.json`
 
 GhostRegime, GhostYield, Models, and builder are out of scope. This track is **independent** from GhostRegime Marketstack containment (M2–M4); no Marketstack or Stooq usage in any v1.9c.x phase.
@@ -15,12 +20,12 @@ GhostRegime, GhostYield, Models, and builder are out of scope. This track is **i
 
 ## Status
 
-| Item | v1.9c.2 posture |
-|------|-----------------|
-| Document type | Artifact design memo only |
+| Item | v1.9c.2 / v1.9c.3 posture |
+|------|---------------------------|
+| Document type | Artifact design memo (v1.9c.2) + example/validator scaffolding (v1.9c.3) |
 | Scope option | **Option A** — event artifact design using **Lane D only** |
 | Score changes | **None** — Composite **62** · Passive **58** · Structural **66** unchanged |
-| Example artifact JSON | **None** — deferred to **v1.9c.3** |
+| Example artifact JSON | **Shipped (v1.9c.3)** — `designOnly: true`; not in `validate-artifacts` |
 | Production artifact JSON | **None** — deferred to **v1.9c.4** |
 | UI / components | **None** |
 | Runtime / live fetching | **None** |
@@ -29,7 +34,6 @@ GhostRegime, GhostYield, Models, and builder are out of scope. This track is **i
 | Score gates opened | **No** |
 | `publicSignalCount` | **10** (equity) — unchanged |
 | Treasury lane | **2** separate display-only cards — unchanged |
-| **v1.9c.3** | **Future** — example JSON + validator/types/tests; product-gated |
 | **v1.9c.4** | **Future** — production JSON + display card; product-gated; likely `publicSignalCount` 10 → 11 |
 
 ---
@@ -195,7 +199,7 @@ A **display-only event snapshot** listing recent and upcoming public index inclu
 
 ---
 
-## 7. Artifact schema (future — do not create in v1.9c.2)
+## 7. Artifact schema (implemented in v1.9c.3 validator — do not create production JSON in v1.9c.3)
 
 Field names follow peer display-only artifacts ([OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md](./OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md), [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md)).
 
@@ -362,7 +366,7 @@ Only after operator QA discipline: dual-check of source URLs, count reconciliati
 | **v1.9c.1** | Passive Supply Source Spike | **Done** |
 | **v1.9c.2** | Index Inclusion Event Proxy — **this memo** | **Done** (docs-only) |
 | **v1.9c.2a** | Operator event intake template (§14 appendix) | **Included in this memo** |
-| **v1.9c.3** | Example JSON + validator/types/tests; no production JSON | **Future** — product-gated |
+| **v1.9c.3** | Example JSON + validator/types/tests; no production JSON | **Done** |
 | **v1.9c.4** | Production artifact + display-only UI integration | **Future** — product-gated; likely `publicSignalCount` 10 → 11 |
 | **v1.9c.5** | Mapping decision — likely display-only Option A | **Future** |
 | **v1.9c.6** | Score gate | **Future** — **discouraged / not approved by default** |
@@ -379,13 +383,12 @@ Only after operator QA discipline: dual-check of source URLs, count reconciliati
 
 ---
 
-## 12. Not implemented in v1.9c.2
+## 12. Not implemented in v1.9c.3
 
 | Item | Status |
 |------|--------|
-| Example or production artifact JSON | **No** |
+| Production `indexInclusionEventProxy.v1.json` | **No** — deferred to v1.9c.4 |
 | Display card / `components/ghostflow/*` | **No** |
-| `lib/ghostflow/artifacts/*` validator | **No** |
 | `buildSnapshot` merge | **No** |
 | `signalPresentation` entry | **No** |
 | `validate-artifacts.ts` registration | **No** |
@@ -397,9 +400,9 @@ Only after operator QA discipline: dual-check of source URLs, count reconciliati
 
 ---
 
-## 13. Guardrails (v1.9c.2)
+## 13. Guardrails (v1.9c.2 / v1.9c.3)
 
-- Artifact design memo only — no implementation
+- Artifact design memo (v1.9c.2) + example/validator scaffolding (v1.9c.3) — no production JSON or UI
 - Composite **62 / 58 / 66** unchanged
 - `publicSignalCount` **10** unchanged
 - Treasury **2**-card lane unchanged
