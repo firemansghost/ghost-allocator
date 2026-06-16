@@ -280,10 +280,13 @@ All paths below are **candidate paths only** — not locked. v1.9c.1 must verify
 | Phase | Deliverable | Status |
 |-------|-------------|--------|
 | **v1.9c** | Passive Supply / Float Absorption Feasibility — **this memo** | **Done** (docs-only) |
-| **v1.9c.1** | Passive Supply Source Spike | **Future** — recommended next |
-| **v1.9c.2** | Event-based display artifact design | **Future** — if v1.9c.1 viable; product-gated |
-| **v1.9c.3** | Example JSON + validator | **Future** — if design approved |
-| **v1.9c.4+** | Production / display integration | **Future** — product-gated |
+| **v1.9c.1** | Passive Supply Source Spike | **Done** — recommended next |
+| **v1.9c.2** | Event-based display artifact design | **Done** — [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) |
+| **v1.9c.2a** | Operator event intake template | **Done** — appendix in design memo §14 |
+| **v1.9c.3** | Example JSON + validator | **Future** — product-gated |
+| **v1.9c.4** | Production / display integration | **Future** — product-gated |
+| **v1.9c.5** | Mapping decision | **Future** — likely display-only Option A |
+| **v1.9c.6** | Score gate | **Future** — discouraged |
 
 **Parallel track:** **v1.9b.4** cap-weight production/display integration remains **independent and product-gated**. v1.9c does **not** block or merge into the cap-weight track.
 
@@ -305,6 +308,7 @@ All paths below are **candidate paths only** — not locked. v1.9c.1 must verify
 
 - [PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md](./PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md) — v1.9a research queue
 - [PASSIVE_SUPPLY_SOURCE_SPIKE.md](./PASSIVE_SUPPLY_SOURCE_SPIKE.md) — v1.9c.1 source inventory and verification outcomes
+- [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) — v1.9c.2 index inclusion event proxy artifact design
 - [CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) — v1.9b demand-side return-effect companion
 - [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) — v1.9b.2–b.3 artifact track
 - [CFTC_TFF_FEASIBILITY.md](./CFTC_TFF_FEASIBILITY.md) — parallel feasibility pattern

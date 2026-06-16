@@ -162,7 +162,7 @@ Discipline-first roadmap after v1.7 feature completion — inventory and operato
 
 ## v1.9 recommendation
 
-**Primary v1.9 theme:** GhostFlow **Passive Supply & Concentration Research** — v1.9c feasibility complete; v1.9c.1 source spike recommended next.
+**Primary v1.9 theme:** GhostFlow **Passive Supply & Concentration Research** — v1.9c.2 artifact design complete; v1.9c.3 product-gated next.
 
 | Phase | Deliverable | Status |
 |-------|-------------|--------|
@@ -175,7 +175,8 @@ Discipline-first roadmap after v1.7 feature completion — inventory and operato
 | **v1.9b.4** | Production artifact + display card | **Future** — product-gated |
 | **v1.9c** | Passive Supply / Float Absorption Feasibility — [PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) | **Done** (docs-only) |
 | **v1.9c.1** | Passive Supply Source Spike — [PASSIVE_SUPPLY_SOURCE_SPIKE.md](./PASSIVE_SUPPLY_SOURCE_SPIKE.md) | **Done** (docs-only source verification) |
-| **v1.9c.2** | Passive Supply Event Artifact Design | **Future** — product-gated recommended next |
+| **v1.9c.2** | Index Inclusion Event Proxy Artifact Design — [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) | **Done** (docs-only) |
+| **v1.9c.3** | Example JSON + validator | **Future** — product-gated |
 
 Composite **62 / 58 / 66**, `publicSignalCount` **10**, and Treasury **2**-card lane unchanged.
 
