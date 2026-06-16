@@ -10,30 +10,46 @@ import { checkSeedStatus } from '@/lib/ghostregime/seedStatus';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+function isTruthyParam(value: string | null): boolean {
+  const v = value?.toLowerCase();
+  return v === '1' || v === 'true' || v === 'yes';
+}
+
 export async function GET(request: Request) {
-  // Check for debug parameter (accepts: debug=1, debug=true, debug=yes)
   const { searchParams } = new URL(request.url);
   const debugParam = searchParams.get('debug')?.toLowerCase();
   const debug = debugParam === '1' || debugParam === 'true' || debugParam === 'yes';
-  
-  // Check for force parameter (accepts: force=1, force=true, force=yes)
+
   const forceParam = searchParams.get('force')?.toLowerCase();
   const force = forceParam === '1' || forceParam === 'true' || forceParam === 'yes';
 
-  // Security: force mode requires secret
-  if (force) {
+  const refreshParam = searchParams.get('refresh')?.toLowerCase();
+  const scheduledRefresh =
+    refreshParam === 'scheduled' || isTruthyParam(searchParams.get('refresh'));
+
+  if (force && scheduledRefresh) {
+    return NextResponse.json(
+      {
+        error: 'BAD_REQUEST',
+        message: 'force and refresh=scheduled cannot be used together',
+      },
+      { status: 400 }
+    );
+  }
+
+  const needsCronSecret = force || scheduledRefresh;
+  if (needsCronSecret) {
     const cronSecret = process.env.GHOSTREGIME_CRON_SECRET;
     if (!cronSecret) {
       return NextResponse.json(
         {
           error: 'UNAUTHORIZED',
-          message: 'force mode requires GHOSTREGIME_CRON_SECRET to be configured',
+          message: 'force/scheduled refresh requires GHOSTREGIME_CRON_SECRET to be configured',
         },
         { status: 401 }
       );
     }
 
-    // Check secret from header (preferred) or query param (fallback)
     const headerSecret = request.headers.get('x-ghostregime-cron');
     const querySecret = searchParams.get('cron_secret');
     const providedSecret = headerSecret || querySecret;
@@ -42,14 +58,13 @@ export async function GET(request: Request) {
       return NextResponse.json(
         {
           error: 'UNAUTHORIZED',
-          message: 'force mode requires valid cron secret',
+          message: 'force/scheduled refresh requires valid cron secret',
         },
         { status: 401 }
       );
     }
   }
 
-  // Check seed status first
   const seedStatus = checkSeedStatus();
   if (!seedStatus.exists || seedStatus.isEmpty) {
     return NextResponse.json(
@@ -62,7 +77,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const row = await getGhostRegimeToday(debug, force);
+    const row = await getGhostRegimeToday(debug, force, scheduledRefresh);
     return NextResponse.json(row, {
       headers: {
         'Cache-Control': 'no-store, max-age=0',
@@ -70,8 +85,7 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error('Error in /api/ghostregime/today:', error);
-    
-    // Handle NOT_READY error with diagnostics
+
     if (error instanceof Error && error.message === 'GHOSTREGIME_NOT_READY') {
       const errorWithDiagnostics = error as Error & { diagnostics?: Record<string, unknown> };
 
@@ -84,7 +98,7 @@ export async function GET(request: Request) {
         { status: 503 }
       );
     }
-    
+
     return NextResponse.json(
       {
         error: 'INTERNAL_ERROR',
@@ -94,4 +108,3 @@ export async function GET(request: Request) {
     );
   }
 }
-

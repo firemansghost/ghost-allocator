@@ -27,9 +27,13 @@ If the seed is missing or empty, `/api/ghostregime/today`, `/explain`, and `/his
 - **Workflow**: `.github/workflows/ghostregime-daily.yml`
 - **Actions**:
   1. Guard: skip if seed file missing/empty or `GHOSTREGIME_CRON_SECRET` unset
-  2. Force refresh GhostRegime (`?force=1` with cron secret)
+  2. **Scheduled refresh** GhostRegime (`?refresh=scheduled` with cron secret) — serves fresh persisted snapshot without market fetch when preflight passes; recomputes only when stale/missing/outdated
   3. Check health endpoint
   4. (Optional) Send Slack notification on failure
+
+**Scheduled refresh outcomes (M4):** Success includes `serve_metadata.refresh_outcome` of `scheduled_served_persisted_no_fetch` (no recompute) or `scheduled_recomputed_and_persisted`. Fresh snapshot served without fetch is **success**, not a skipped job.
+
+**Manual operator refresh** still uses `?force=1` (see [Marketstack operator refresh](./MARKETSTACK_OPERATOR_REFRESH.md)).
 
 ### Pre-push verification (local)
 
@@ -71,9 +75,9 @@ For **core US ETF symbols** (SPY, GLD, EEM, HYG, IEF, TIP, TLT, UUP), Stooq rema
 | **Production** | May remain set | **Unset by default**; `true` only during approved fallback window, then unset |
 | **Local dev** | Optional for manual tests | Unset by default; `true` only with budget awareness |
 
-**After M2/M3:** The weekday daily cron remains **Stooq-only** while `ALLOW_MARKETSTACK_FALLBACK` is unset. Redeploy Production after any env change.
+**After M2/M3/M4:** The weekday cron uses **`refresh=scheduled`** (not blind `force=1`). While `ALLOW_MARKETSTACK_FALLBACK` is unset, cron is Stooq-only on recompute paths and skips market fetch entirely when the persisted snapshot is fresh (`max_age_days = 4`, same as `/health`). Redeploy Production after any env change.
 
-**Where to configure Marketstack (scheduled refresh):** The GitHub Actions daily workflow only **calls the live Vercel API** (`?force=1`). Market data is fetched **inside that deployment**, so keys and flags must be set in **Vercel Production** — putting credentials only in GitHub Actions secrets does **not** unlock Marketstack for production refresh.
+**Where to configure Marketstack (manual recovery only):** Scheduled cron does **not** enable Marketstack. Paid fallback is operator-only via temporary `ALLOW_MARKETSTACK_FALLBACK` — see [MARKETSTACK_OPERATOR_REFRESH.md](./MARKETSTACK_OPERATOR_REFRESH.md). Market data for manual `force=1` runs inside the Vercel deployment.
 
 ### Manual Execution
 

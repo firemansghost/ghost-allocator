@@ -51,6 +51,10 @@ import {
 import type { ProviderDiagnostics } from './marketData';
 import { attachServeMetadata } from './serveMetadata';
 import { getPersistSnapshotRejection } from './persistGate';
+import {
+  evaluateScheduledRefreshPreflight,
+  isPersistedRowSchemaOutdated,
+} from './scheduledRefresh';
 
 /** Structured fields attached to stale rows and NOT_READY errors for observability */
 function buildStaleObservationPayload(
@@ -393,7 +397,11 @@ function buildSatelliteReceipts(
 /**
  * Get GhostRegime for today
  */
-export async function getGhostRegimeToday(includeDebug: boolean = false, force: boolean = false): Promise<GhostRegimeRow> {
+export async function getGhostRegimeToday(
+  includeDebug: boolean = false,
+  force: boolean = false,
+  scheduledRefresh: boolean = false
+): Promise<GhostRegimeRow> {
   const runDateUtc = new Date();
   const cutoverDate = CUTOVER_DATE_UTC;
 
@@ -415,6 +423,30 @@ export async function getGhostRegimeToday(includeDebug: boolean = false, force: 
   // Try to read from storage first
   const storage = getStorageAdapter();
   const latest = await storage.readLatest();
+
+  // Scheduled cron: skip market fetch when persisted latest passes health-aligned preflight
+  if (scheduledRefresh && !includeDebug && !force) {
+    const preflight = evaluateScheduledRefreshPreflight(latest, runDateUtc);
+    if (preflight.shouldSkipFetch && latest) {
+      return attachServeMetadata(
+        {
+          ...latest,
+          run_date_utc: formatISO(runDateUtc, { representation: 'date' }),
+          data_source: 'persisted',
+          engine_version: MODEL_VERSION,
+          build_commit:
+            process.env.VERCEL_GIT_COMMIT_SHA || process.env.NEXT_PUBLIC_BUILD_COMMIT || 'unknown',
+        },
+        {
+          runDateUtc,
+          force: false,
+          scheduled: true,
+          refresh_outcome: 'scheduled_served_persisted_no_fetch',
+          persisted_snapshot_preserved: true,
+        }
+      );
+    }
+  }
 
   // Core symbols for diagnostics
   const coreSymbols = [
@@ -567,14 +599,7 @@ export async function getGhostRegimeToday(includeDebug: boolean = false, force: 
     }
 
     // Schema guard: Check if persisted row is outdated (missing required modern fields)
-    const isRowOutdated = (row: GhostRegimeRow | null): boolean => {
-      if (!row) return false;
-      // Check for required modern fields
-      return !row.infl_total_score_pre_tiebreak || 
-             !row.row_computed_at_utc || 
-             !row.row_build_commit || 
-             !row.row_engine_version;
-    };
+    const isRowOutdated = isPersistedRowSchemaOutdated;
 
     // Check if we already have data for this asof_date
     // Skip persisted rows if debug mode or force mode is enabled (force fresh computation)
@@ -675,7 +700,10 @@ export async function getGhostRegimeToday(includeDebug: boolean = false, force: 
             {
               runDateUtc,
               force,
-              refresh_outcome: 'stale_carry_forward_blob_unchanged',
+              scheduled: scheduledRefresh,
+              refresh_outcome: scheduledRefresh
+                ? 'scheduled_stale_carry_forward'
+                : 'stale_carry_forward_blob_unchanged',
               persisted_snapshot_preserved: true,
               stale_reason: 'MISSING_TIEBREAK_INPUT',
               providerDiagnostics,
@@ -732,7 +760,7 @@ export async function getGhostRegimeToday(includeDebug: boolean = false, force: 
           version: MODEL_VERSION,
           lastUpdated: runDateUtc,
         });
-        refreshOutcome = 'computed_and_persisted';
+        refreshOutcome = scheduledRefresh ? 'scheduled_recomputed_and_persisted' : 'computed_and_persisted';
         persistedSnapshotPreserved = false;
       } else {
         persistRejectedReason = persistReject;
@@ -750,13 +778,16 @@ export async function getGhostRegimeToday(includeDebug: boolean = false, force: 
       refreshOutcome = 'computed_not_persisted_debug';
       persistedSnapshotPreserved = true;
     } else if (row.stale) {
-      refreshOutcome = 'stale_carry_forward_blob_unchanged';
+      refreshOutcome = scheduledRefresh
+        ? 'scheduled_stale_carry_forward'
+        : 'stale_carry_forward_blob_unchanged';
       persistedSnapshotPreserved = true;
     }
 
     return attachServeMetadata(row, {
       runDateUtc,
       force,
+      scheduled: scheduledRefresh,
       refresh_outcome: refreshOutcome,
       persisted_snapshot_preserved: persistedSnapshotPreserved,
       providerDiagnostics,

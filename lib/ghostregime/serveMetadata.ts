@@ -49,6 +49,7 @@ export function buildServeMetadata(input: {
   runDateUtc: Date;
   row: Pick<GhostRegimeRow, 'date'>;
   force: boolean;
+  scheduled?: boolean;
   refresh_outcome: GhostRegimeServeMetadata['refresh_outcome'];
   persisted_snapshot_preserved: boolean;
   stale_reason?: string;
@@ -57,11 +58,16 @@ export function buildServeMetadata(input: {
 }): GhostRegimeServeMetadata {
   const runStr = formatISO(input.runDateUtc, { representation: 'date' });
   const snap = input.row.date;
+  const refreshAttempt: GhostRegimeServeMetadata['refresh_attempt'] = input.scheduled
+    ? 'scheduled'
+    : input.force
+      ? 'force'
+      : 'read';
   return {
     run_date_utc: runStr,
     latest_snapshot_date: snap,
     market_snapshot_lag_days: computeMarketSnapshotLagDays(input.runDateUtc, snap),
-    refresh_attempt: input.force ? 'force' : 'read',
+    refresh_attempt: refreshAttempt,
     refresh_outcome: input.refresh_outcome,
     persisted_snapshot_preserved: input.persisted_snapshot_preserved,
     persist_rejected_reason: input.persist_rejected_reason,
@@ -76,6 +82,7 @@ export function attachServeMetadata(
   args: {
     runDateUtc: Date;
     force: boolean;
+    scheduled?: boolean;
     refresh_outcome: GhostRegimeServeMetadata['refresh_outcome'];
     persisted_snapshot_preserved: boolean;
     stale_reason?: string;
@@ -89,6 +96,7 @@ export function attachServeMetadata(
       runDateUtc: args.runDateUtc,
       row,
       force: args.force,
+      scheduled: args.scheduled,
       refresh_outcome: args.refresh_outcome,
       persisted_snapshot_preserved: args.persisted_snapshot_preserved,
       stale_reason: args.stale_reason,

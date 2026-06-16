@@ -4,7 +4,7 @@
 
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import { computeMarketSnapshotLagDays, extractRefreshErrorSummary } from '../serveMetadata';
+import { computeMarketSnapshotLagDays, extractRefreshErrorSummary, buildServeMetadata } from '../serveMetadata';
 import type { ProviderDiagnostics } from '../marketData';
 
 describe('computeMarketSnapshotLagDays', () => {
@@ -49,5 +49,22 @@ describe('extractRefreshErrorSummary', () => {
       proxies: {},
     };
     assert.strictEqual(extractRefreshErrorSummary(pd), 'Stooq gate');
+  });
+});
+
+describe('buildServeMetadata scheduled', () => {
+  it('sets refresh_attempt scheduled and preserves outcome', () => {
+    const run = new Date('2026-06-15T03:30:00.000Z');
+    const meta = buildServeMetadata({
+      runDateUtc: run,
+      row: { date: '2026-06-12' },
+      force: false,
+      scheduled: true,
+      refresh_outcome: 'scheduled_served_persisted_no_fetch',
+      persisted_snapshot_preserved: true,
+    });
+    assert.strictEqual(meta.refresh_attempt, 'scheduled');
+    assert.strictEqual(meta.refresh_outcome, 'scheduled_served_persisted_no_fetch');
+    assert.ok(meta.market_snapshot_lag_days >= 2);
   });
 });
