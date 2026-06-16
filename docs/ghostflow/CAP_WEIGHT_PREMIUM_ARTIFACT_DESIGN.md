@@ -1,16 +1,20 @@
 # Cap-Weight Premium Proxy — Artifact Design (GhostFlow v1.9b.2)
 
-**Status:** **v1.9b.2 complete** — artifact design memo only. **Not** scored. **Not** implemented. No production artifact, example JSON, UI card, validator, or `buildSnapshot` merge in v1.9b.2.
+**Status:** **v1.9b.2 complete** · **v1.9b.3 complete** — design memo + example JSON + validator/types + tests. **Not** scored. No production artifact, UI card, `validate-artifacts` registration, or `buildSnapshot` merge.
 
 **Prior work:** [CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) (v1.9b, **YELLOW leaning GREEN**) · [CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) (v1.9b.1a, real operator run exit **0**)
 
 **Research module:** [`capWeightPremiumHistory.ts`](../lib/ghostflow/research/capWeightPremiumHistory.ts) · **Study script:** [`cap-weight-premium-study.ts`](../scripts/ghostflow/cap-weight-premium-study.ts) — research only; not in `ghostflow:check`
 
-**Future files (not created in v1.9b.2):**
+**Shipped files (v1.9b.3):**
 
-- Example: `data/ghostflow/artifacts/capWeightPremiumProxy.v1.example.json` (v1.9b.3)
-- Production: `data/ghostflow/artifacts/capWeightPremiumProxy.v1.json` (v1.9b.4+)
-- Library: `lib/ghostflow/artifacts/capWeightPremiumProxy.ts` (v1.9b.3+)
+- Example: [`capWeightPremiumProxy.v1.example.json`](../data/ghostflow/artifacts/capWeightPremiumProxy.v1.example.json) (`designOnly: true`, `dataQuality: manual_unverified`)
+- Library: [`capWeightPremiumProxy.ts`](../lib/ghostflow/artifacts/capWeightPremiumProxy.ts) — `validateCapWeightPremiumProxyArtifact`; no production loader
+- Tests: [`capWeightPremiumProxy.test.ts`](../lib/ghostflow/__tests__/capWeightPremiumProxy.test.ts)
+
+**Future files (v1.9b.4+):**
+
+- Production: `data/ghostflow/artifacts/capWeightPremiumProxy.v1.json`
 
 GhostRegime, GhostYield, Models, and builder are out of scope.
 
@@ -18,19 +22,20 @@ GhostRegime, GhostYield, Models, and builder are out of scope.
 
 ## Status
 
-| Item | v1.9b.2 posture |
-|------|-----------------|
-| Document type | Artifact design memo only |
+| Item | v1.9b.2 / v1.9b.3 posture |
+|------|---------------------------|
+| Document type | Artifact design memo (v1.9b.2) + example/validator scaffolding (v1.9b.3) |
 | Score changes | **None** — Composite **62** · Passive **58** · Structural **66** unchanged |
-| Artifact JSON | **None** — no production or example artifacts |
+| Example artifact JSON | **Shipped (v1.9b.3)** — `designOnly: true`; not in `validate-artifacts` |
+| Production artifact JSON | **None** — deferred to v1.9b.4 |
 | UI / components | **None** |
 | Runtime / live fetching | **None** |
 | `buildSnapshot` merge | **None** |
 | `publicPassiveInputKey` | **None** |
 | Score gates opened | **No** |
-| `publicSignalCount` | **10** (equity) — unchanged in v1.9b.2 |
+| `publicSignalCount` | **10** (equity) — unchanged |
 | Treasury lane | **2** separate display-only cards — unchanged |
-| **v1.9b.3** | **Future** — separately approved; example JSON + validator/types + tests |
+| **v1.9b.4** | **Future** — production JSON + display integration; product-gated |
 
 ---
 
@@ -357,7 +362,7 @@ Reference existing `concentration` card as **companion lens, not replacement**.
 | Phase | Deliverable | Status |
 |-------|-------------|--------|
 | **v1.9b.2** | Artifact design memo — **this document** | **Done** (docs-only) |
-| **v1.9b.3** | Example JSON + `capWeightPremiumProxy.ts` validator/types + tests; **no production JSON** | **Future** — separately approved |
+| **v1.9b.3** | Example JSON + `capWeightPremiumProxy.ts` validator/types + tests; **no production JSON** | **Done** |
 | **v1.9b.4** | Production `capWeightPremiumProxy.v1.json` + `validate-artifacts` + `buildSnapshot` display-only merge + card id in `signalPresentation` + DISPLAY ONLY badge | **Future** — product approval + `publicSignalCount` decision |
 | **v1.9b.5** | `CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md` — likely display-only Option A | **Future** |
 | **v1.9b.6** | Score gate (if ever) — **discouraged** | **Future** — not approved |
@@ -371,8 +376,8 @@ Reference existing `concentration` card as **companion lens, not replacement**.
 ## 12. Promotion checklist
 
 - [x] Design memo (this document) — v1.9b.2
-- [ ] Example JSON `capWeightPremiumProxy.v1.example.json` — v1.9b.3
-- [ ] Pure module `capWeightPremiumProxy.ts` + unit tests — v1.9b.3
+- [x] Example JSON `capWeightPremiumProxy.v1.example.json` — v1.9b.3
+- [x] Pure module `capWeightPremiumProxy.ts` + unit tests — v1.9b.3
 - [ ] Production `capWeightPremiumProxy.v1.json` — v1.9b.4
 - [ ] `scripts/ghostflow/validate-artifacts.ts` registration — v1.9b.4
 - [ ] `buildSnapshot` display-only merge — v1.9b.4
@@ -384,12 +389,14 @@ Reference existing `concentration` card as **companion lens, not replacement**.
 
 ---
 
-## 13. Not implemented in v1.9b.2
+## 13. Not implemented (post v1.9b.3)
 
 | Item | Status |
 |------|--------|
-| Production `capWeightPremiumProxy.v1.json` | **No** |
-| Example `capWeightPremiumProxy.v1.example.json` | **No** |
+| Production `capWeightPremiumProxy.v1.json` | **No** — v1.9b.4 |
+| Example `capWeightPremiumProxy.v1.example.json` | **Yes (v1.9b.3)** — `designOnly: true`; unit tests only |
+| `loadCapWeightPremiumProxyArtifact()` | **No** — v1.9b.4 |
+| `validate-artifacts.ts` registration | **No** — v1.9b.4 |
 | Display card / `components/ghostflow/*` | **No** |
 | `buildSnapshot` merge | **No** |
 | `signalPresentation` entry | **No** |

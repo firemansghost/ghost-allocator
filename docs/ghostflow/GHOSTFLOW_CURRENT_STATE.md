@@ -162,7 +162,7 @@ Discipline-first roadmap after v1.7 feature completion — inventory and operato
 
 ## v1.9 recommendation
 
-**Primary v1.9 theme:** GhostFlow **Passive Supply & Concentration Research** — v1.9b.2 artifact design complete; v1.9b.3+ separately approved.
+**Primary v1.9 theme:** GhostFlow **Passive Supply & Concentration Research** — v1.9b.3 example + validator complete; v1.9b.4 product-gated.
 
 | Phase | Deliverable | Status |
 |-------|-------------|--------|
@@ -171,7 +171,8 @@ Discipline-first roadmap after v1.7 feature completion — inventory and operato
 | **v1.9b.1** | Cap-Weight Premium CSV Study — `ghostflow:cap-weight-premium-study` | **Done** (research script) |
 | **v1.9b.1a** | Cap-Weight Premium Calibration Study — [CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) | **Done** (docs-only) |
 | **v1.9b.2** | Cap-Weight Premium Artifact Design — [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) | **Done** (docs-only) |
-| **v1.9b.3** | Example JSON + validator | **Future** — separately approved |
+| **v1.9b.3** | Example JSON + validator — [`capWeightPremiumProxy.v1.example.json`](../data/ghostflow/artifacts/capWeightPremiumProxy.v1.example.json) | **Done** |
+| **v1.9b.4** | Production artifact + display card | **Future** — product-gated |
 
 Composite **62 / 58 / 66**, `publicSignalCount` **10**, and Treasury **2**-card lane unchanged.
 
