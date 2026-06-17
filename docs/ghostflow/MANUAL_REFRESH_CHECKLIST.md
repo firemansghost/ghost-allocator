@@ -118,6 +118,8 @@ Treasury lane: no structured freshness bands today — dates on cards only. See 
 | **Study script** | `npm run ghostflow:cap-weight-premium-study` — operator CSVs only; filter to `Date <= GHOSTFLOW_REFERENCE_AS_OF` before transcribing |
 | **Production values** | Reference-aligned **2026-05-22** v1.9b.4a study — **not** June 15 calibration headline values |
 
+**Mapping decision v1.9b.5:** Cap-Weight Premium Proxy remains display-only and is not scored.
+
 **Refresh cadence:** Weekly manual refresh when operator updates SPY/RSP adjusted-close CSVs.
 
 **Operator discipline:**
@@ -127,7 +129,7 @@ Treasury lane: no structured freshness bands today — dates on cards only. See 
 - Keep `priceColumnUsed` **adjusted / adjusted**
 - Do **not** add score fields, `publicPassiveInputKey`, or `basketScore`
 
-**Design reference:** [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) · [DATA_ROADMAP.md](./DATA_ROADMAP.md) v1.9b.4
+**Design reference:** [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) · [CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md](./CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md) · [DATA_ROADMAP.md](./DATA_ROADMAP.md) v1.9b.4 / v1.9b.5
 
 ---
 

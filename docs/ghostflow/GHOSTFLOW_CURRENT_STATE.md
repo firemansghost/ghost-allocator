@@ -83,7 +83,7 @@ Six artifacts produce signal cards in the equity/public grid. **Not** merged int
 | `retirement-asset-growth` | ICI Retirement Market Table 1 structural assets | `verified_manual` | [v1.2e mapping](./RETIREMENT_FLOW_MAPPING_DECISION.md); quarterly assets ≠ flow pressure; MOCK **58** still scores | Production card | `mappingStatus` **not_final**; quarterly freshness caution normal; **v1.2f** gate discouraged |
 | `options-activity-proxy` | OCC Daily Volume — Index/Others contracts | `manual_unverified` | [v1.4e mapping](./OPTIONS_ACTIVITY_MAPPING_DECISION.md); not 0DTE/GEX; VIX remains scored vol input | Production card | `mappingStatus` **not_final**; **v1.4f** gate discouraged (VIX overlap) |
 | `index-inclusion-events` | Nasdaq IR index change announcements (operator-curated) | `manual_unverified` | [v1.9c.5 mapping](./INDEX_INCLUSION_EVENT_MAPPING_DECISION.md) — display-only by default; no float/demand estimates; not scored | Production card | `mappingStatus` **not_final**; **v1.9c.6** score gate discouraged / not approved |
-| `cap-weight-premium` | SPY/RSP adjusted-close cap-weight premium study (operator CSV) | `manual_unverified` | Display-only SPY/RSP spread/ratio lens; companion to score-fed `concentration`; not causal passive-flow proof; not scored | Production card | `mappingStatus` **not_final**; production values from reference-aligned **2026-05-22** study (not June 15 headline); **v1.9b.5** mapping next; **v1.9b.6** score gate discouraged |
+| `cap-weight-premium` | SPY/RSP adjusted-close cap-weight premium study (operator CSV) | `manual_unverified` | [v1.9b.5 mapping](./CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md) — display-only by default; companion to score-fed `concentration`; not causal passive-flow proof; not scored | Production card | `mappingStatus` **not_final**; reference-aligned **2026-05-22** study; **v1.9b.6** score gate discouraged / not approved |
 
 These cards may appear in the equity signal grid with **DISPLAY ONLY** badges. Their production artifacts refresh display values only — they do **not** replace MOCK composite inputs unless a future product-approved score gate is opened.
 
@@ -164,7 +164,7 @@ Discipline-first roadmap after v1.7 feature completion — inventory and operato
 
 ## v1.9 recommendation
 
-**Primary v1.9 theme:** GhostFlow **Passive Supply & Concentration Research** — v1.9b.4 Cap-Weight Premium production artifact + display card complete; v1.9c.5 Index Inclusion Event mapping decision complete; display-only by default; `publicSignalCount` **12**; scores unchanged.
+**Primary v1.9 theme:** GhostFlow **Passive Supply & Concentration Research** — v1.9b.5 Cap-Weight Premium mapping decision complete; v1.9c.5 Index Inclusion Event mapping decision complete; display-only by default; `publicSignalCount` **12**; scores unchanged.
 
 | Phase | Deliverable | Status |
 |-------|-------------|--------|
@@ -175,7 +175,7 @@ Discipline-first roadmap after v1.7 feature completion — inventory and operato
 | **v1.9b.2** | Cap-Weight Premium Artifact Design — [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) | **Done** (docs-only) |
 | **v1.9b.3** | Example JSON + validator — [`capWeightPremiumProxy.v1.example.json`](../data/ghostflow/artifacts/capWeightPremiumProxy.v1.example.json) | **Done** |
 | **v1.9b.4** | Production artifact + display card — [`capWeightPremiumProxy.v1.json`](../data/ghostflow/artifacts/capWeightPremiumProxy.v1.json) | **Done** — display-only; reference-aligned **2026-05-22** study; `publicSignalCount` **11 → 12**; not scored |
-| **v1.9b.5** | Mapping decision | **Future** — likely display-only Option A |
+| **v1.9b.5** | Mapping decision — [CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md](./CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md) | **Done** — display-only by default; no score mapper selected |
 | **v1.9b.6** | Score gate | **Future** — discouraged / not approved |
 | **v1.9c** | Passive Supply / Float Absorption Feasibility — [PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) | **Done** (docs-only) |
 | **v1.9c.1** | Passive Supply Source Spike — [PASSIVE_SUPPLY_SOURCE_SPIKE.md](./PASSIVE_SUPPLY_SOURCE_SPIKE.md) | **Done** (docs-only source verification) |
