@@ -77,6 +77,8 @@ Treasury lane: no structured freshness bands today — dates on cards only. See 
 | **Float / demand** | Do **not** infer free-float or demand-dollar estimates |
 | **Provenance** | Follow §14 checklist in [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md); record rows in [INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md](./INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md) before transcribing |
 
+**Mapping decision v1.9c.5:** Index Inclusion Event Proxy remains display-only and is not scored. See [INDEX_INCLUSION_EVENT_MAPPING_DECISION.md](./INDEX_INCLUSION_EVENT_MAPPING_DECISION.md).
+
 **Refresh cadence:**
 
 | When | Action |

@@ -82,7 +82,7 @@ Five artifacts produce signal cards in the equity/public grid. **Not** merged in
 | `levered-etf-rebalance` | Tier-1 levered ETF rebalance pressure estimate | `manual_unverified` | [v1.1e mapping](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md); MOCK **55** still scores | Production card | `mappingStatus` **not_final**; **v1.1f** gate discouraged |
 | `retirement-asset-growth` | ICI Retirement Market Table 1 structural assets | `verified_manual` | [v1.2e mapping](./RETIREMENT_FLOW_MAPPING_DECISION.md); quarterly assets ≠ flow pressure; MOCK **58** still scores | Production card | `mappingStatus` **not_final**; quarterly freshness caution normal; **v1.2f** gate discouraged |
 | `options-activity-proxy` | OCC Daily Volume — Index/Others contracts | `manual_unverified` | [v1.4e mapping](./OPTIONS_ACTIVITY_MAPPING_DECISION.md); not 0DTE/GEX; VIX remains scored vol input | Production card | `mappingStatus` **not_final**; **v1.4f** gate discouraged (VIX overlap) |
-| `index-inclusion-events` | Nasdaq IR index change announcements (operator-curated) | `manual_unverified` | [v1.9c.4](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) — event proxy only; no float/demand estimates; not scored | Production card | `mappingStatus` **not_final**; **v1.9c.5** mapping decision next; **v1.9c.6** score gate discouraged |
+| `index-inclusion-events` | Nasdaq IR index change announcements (operator-curated) | `manual_unverified` | [v1.9c.5 mapping](./INDEX_INCLUSION_EVENT_MAPPING_DECISION.md) — display-only by default; no float/demand estimates; not scored | Production card | `mappingStatus` **not_final**; **v1.9c.6** score gate discouraged / not approved |
 
 These cards may appear in the equity signal grid with **DISPLAY ONLY** badges. Their production artifacts refresh display values only — they do **not** replace MOCK composite inputs unless a future product-approved score gate is opened.
 
@@ -163,7 +163,7 @@ Discipline-first roadmap after v1.7 feature completion — inventory and operato
 
 ## v1.9 recommendation
 
-**Primary v1.9 theme:** GhostFlow **Passive Supply & Concentration Research** — v1.9c.4 Index Inclusion Event Proxy production artifact + display-only card shipped; `publicSignalCount` **11**; scores unchanged.
+**Primary v1.9 theme:** GhostFlow **Passive Supply & Concentration Research** — v1.9c.5 Index Inclusion Event mapping decision complete; display-only by default; `publicSignalCount` **11**; scores unchanged.
 
 | Phase | Deliverable | Status |
 |-------|-------------|--------|
@@ -181,8 +181,8 @@ Discipline-first roadmap after v1.7 feature completion — inventory and operato
 | **v1.9c.4a** | Operator provenance checklist — [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) §14 | **Done** (docs-only) |
 | **v1.9c.4b** | Operator intake memo — [INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md](./INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md) | **Done** |
 | **v1.9c.4** | Production artifact + display card — [`indexInclusionEventProxy.v1.json`](../data/ghostflow/artifacts/indexInclusionEventProxy.v1.json) | **Done** — display-only; not scored |
-| **v1.9c.5** | Mapping decision | **Future** — likely display-only Option A |
-| **v1.9c.6** | Score gate | **Future** — discouraged; not approved |
+| **v1.9c.5** | Mapping decision — [INDEX_INCLUSION_EVENT_MAPPING_DECISION.md](./INDEX_INCLUSION_EVENT_MAPPING_DECISION.md) | **Done** — display-only by default; no score mapper selected |
+| **v1.9c.6** | Score gate | **Future** — discouraged / not approved |
 
 Composite **62 / 58 / 66**, `publicSignalCount` **11**, and Treasury **2**-card lane unchanged (scores unchanged).
 
