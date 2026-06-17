@@ -1,18 +1,20 @@
 # Index Inclusion Event Proxy — Artifact Design (GhostFlow v1.9c.2 / v1.9c.3)
 
-**Status:** **v1.9c.2 complete** · **v1.9c.3 complete** · **v1.9c.4a complete** — design memo + example JSON + validator/types + tests + operator provenance checklist. **v1.9c.4 deferred.** **Not** scored. No production artifact JSON, UI card, `validate-artifacts` registration, or `buildSnapshot` merge.
+**Status:** **v1.9c.2 complete** · **v1.9c.3 complete** · **v1.9c.4a complete** · **v1.9c.4 complete** — design memo + example JSON + validator/types + tests + operator provenance checklist + **production artifact + display-only UI card**. **Not** scored. No score wiring, no `publicPassiveInputKey`, no `scoring.ts` changes.
 
 **Prior work:** [PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) (v1.9c, **YELLOW leaning RED**) · [PASSIVE_SUPPLY_SOURCE_SPIKE.md](./PASSIVE_SUPPLY_SOURCE_SPIKE.md) (v1.9c.1, Lane D **LOCKED (partial)**)
 
 **Shipped files (v1.9c.3):**
 
 - Example: [`indexInclusionEventProxy.v1.example.json`](../data/ghostflow/artifacts/indexInclusionEventProxy.v1.example.json) (`designOnly: true`, `dataQuality: manual_unverified`)
-- Library: [`indexInclusionEventProxy.ts`](../lib/ghostflow/artifacts/indexInclusionEventProxy.ts) — `validateIndexInclusionEventProxyArtifact`; no production loader
-- Tests: [`indexInclusionEventProxy.test.ts`](../lib/ghostflow/__tests__/indexInclusionEventProxy.test.ts)
+- Library: [`indexInclusionEventProxy.ts`](../lib/ghostflow/artifacts/indexInclusionEventProxy.ts) — `validateIndexInclusionEventProxyArtifact`; production loader + formatters
+- Tests: [`indexInclusionEventProxy.test.ts`](../lib/ghostflow/__tests__/indexInclusionEventProxy.test.ts) · [`indexInclusionEventDisplay.test.ts`](../lib/ghostflow/__tests__/indexInclusionEventDisplay.test.ts)
 
-**Future files (v1.9c.4+):**
+**Production files (v1.9c.4):**
 
-- Production: `data/ghostflow/artifacts/indexInclusionEventProxy.v1.json`
+- Production: [`indexInclusionEventProxy.v1.json`](../data/ghostflow/artifacts/indexInclusionEventProxy.v1.json) — 4 operator-verified Nasdaq-100 events (Jan/Apr 2026 window)
+- Display card: `index-inclusion-events` in equity public grid — **DISPLAY ONLY**
+- Registered in [`validate-artifacts.ts`](../scripts/ghostflow/validate-artifacts.ts); merged via `buildSnapshot` display-only path
 
 GhostRegime, GhostYield, Models, and builder are out of scope. This track is **independent** from GhostRegime Marketstack containment (M2–M4); no Marketstack or Stooq usage in any v1.9c.x phase.
 
@@ -26,16 +28,18 @@ GhostRegime, GhostYield, Models, and builder are out of scope. This track is **i
 | Scope option | **Option A** — event artifact design using **Lane D only** |
 | Score changes | **None** — Composite **62** · Passive **58** · Structural **66** unchanged |
 | Example artifact JSON | **Shipped (v1.9c.3)** — `designOnly: true`; not in `validate-artifacts` |
-| Production artifact JSON | **None** — deferred to **v1.9c.4** |
-| UI / components | **None** |
+| Production artifact JSON | **Shipped (v1.9c.4)** — [`indexInclusionEventProxy.v1.json`](../data/ghostflow/artifacts/indexInclusionEventProxy.v1.json) |
+| UI / components | **Shipped (v1.9c.4)** — `index-inclusion-events` display-only card |
 | Runtime / live fetching | **None** |
-| `buildSnapshot` merge | **None** |
+| `buildSnapshot` merge | **Display-only (v1.9c.4)** — no score contribution |
 | `publicPassiveInputKey` | **None** |
 | Score gates opened | **No** |
-| `publicSignalCount` | **10** (equity) — unchanged |
+| `publicSignalCount` | **11** (equity) — v1.9c.4 display card added |
 | Treasury lane | **2** separate display-only cards — unchanged |
-| **v1.9c.4** | **Future** — production JSON + display card; **deferred** — blocked on operator-verified event rows + explicit product approval; likely `publicSignalCount` 10 → 11 |
+| **v1.9c.4** | **Done** — production JSON + display card; 4 operator-verified Nasdaq rows; `publicSignalCount` **10 → 11** |
 | **v1.9c.4a** | Operator provenance checklist — **Done** (§14) |
+| **v1.9c.5** | Mapping decision — **Future** |
+| **v1.9c.6** | Score gate — **Future** — discouraged / not approved |
 
 ---
 
@@ -369,7 +373,7 @@ Only after operator QA discipline: dual-check of source URLs, count reconciliati
 | **v1.9c.2a** | Operator event intake template (§14 appendix) | **Included in this memo** |
 | **v1.9c.3** | Example JSON + validator/types/tests; no production JSON | **Done** |
 | **v1.9c.4a** | Operator provenance checklist | **Done** (docs-only; §14) |
-| **v1.9c.4** | Production artifact + display-only UI integration | **Deferred** — operator-verified event rows required; product-gated; likely `publicSignalCount` 10 → 11 |
+| **v1.9c.4** | Production artifact + display-only UI integration | **Done** — `publicSignalCount` **11**; not scored |
 | **v1.9c.5** | Mapping decision — likely display-only Option A | **Future** |
 | **v1.9c.6** | Score gate | **Future** — **discouraged / not approved by default** |
 
@@ -385,46 +389,45 @@ Only after operator QA discipline: dual-check of source URLs, count reconciliati
 
 ---
 
-## 12. Not implemented in v1.9c.3
+## 12. v1.9c.4 shipped (was not implemented in v1.9c.3)
 
 | Item | Status |
 |------|--------|
-| Production `indexInclusionEventProxy.v1.json` | **No** — deferred to v1.9c.4 |
-| Display card / `components/ghostflow/*` | **No** |
-| `buildSnapshot` merge | **No** |
-| `signalPresentation` entry | **No** |
-| `validate-artifacts.ts` registration | **No** |
+| Production `indexInclusionEventProxy.v1.json` | **Yes** — v1.9c.4 |
+| Display card / `components/ghostflow/*` | **Yes** — `index-inclusion-events` |
+| `buildSnapshot` merge | **Yes** — display-only only |
+| `signalPresentation` entry | **Yes** |
+| `validate-artifacts.ts` registration | **Yes** |
 | Score wiring / `scoring.ts` | **No** |
 | `publicPassiveInputKey` | **No** |
 | Runtime/live dashboard fetch | **No** |
 | `mockGhostflowSnapshot` changes | **No** |
-| `publicSignalCount` change | **No** |
+| `publicSignalCount` change | **Yes** — **10 → 11** (display-only card only) |
 
 ---
 
-## 13. Guardrails (v1.9c.2 / v1.9c.3)
+## 13. Guardrails (v1.9c.2 / v1.9c.3 / v1.9c.4)
 
-- Artifact design memo (v1.9c.2) + example/validator scaffolding (v1.9c.3) — no production JSON or UI
+- Artifact design memo (v1.9c.2) + example/validator scaffolding (v1.9c.3) + production artifact + display card (v1.9c.4)
 - Composite **62 / 58 / 66** unchanged
-- `publicSignalCount` **10** unchanged
+- `publicSignalCount` **11** (equity) — fifth display-only card added; no score impact
 - Treasury **2**-card lane unchanged
-- No score gates opened
+- No score gates opened; **v1.9c.6** discouraged / not approved
 - GhostRegime, GhostYield, Models, builder out of scope
 - No Marketstack, Stooq, or live market API calls
-- No build, test, refresh, ETL, smoke, deploy, or workflow commands in this phase
 - No committed downloaded source files or generated research output
 
 ---
 
 ## 14. v1.9c.4a Operator Provenance Checklist
 
-**Status:** **Done** (docs-only). **v1.9c.4 production artifact + UI is deferred.**
+**Status:** **Done** (docs-only). **v1.9c.4 production artifact + UI shipped.**
 
-Production card and [`indexInclusionEventProxy.v1.json`](../data/ghostflow/artifacts/indexInclusionEventProxy.v1.json) **cannot ship** until real operator-verified index event rows exist. The repo currently contains only synthetic design-only example data in [`indexInclusionEventProxy.v1.example.json`](../data/ghostflow/artifacts/indexInclusionEventProxy.v1.example.json) (`EXMP*` tickers, `example.com` URLs). **Synthetic rows must never be promoted into production.**
+Production card and [`indexInclusionEventProxy.v1.json`](../data/ghostflow/artifacts/indexInclusionEventProxy.v1.json) **shipped in v1.9c.4** with four operator-verified Nasdaq-100 rows. Synthetic design-only example data remains in [`indexInclusionEventProxy.v1.example.json`](../data/ghostflow/artifacts/indexInclusionEventProxy.v1.example.json) (`EXMP*` tickers, `example.com` URLs). **Synthetic rows must never be promoted into production.**
 
 ### Policy locks
 
-- **v1.9c.4 deferred** — no production JSON, no dashboard card, no `publicSignalCount` change until operator data + product approval
+- **v1.9c.4 complete** — production JSON + display-only card; `publicSignalCount` **11**; not scored
 - **Synthetic `EXMP*` tickers** — example-only; invalid for production
 - **`example.com` URLs** — invalid for production
 - **Public source URLs** — must come from official index-provider announcements or official event pages (Nasdaq IR, FTSE Russell reconstitution, S&P DJI media center, etc.)

@@ -11,12 +11,12 @@ Field-level quick reference for manually refreshing GhostFlow public-data artifa
 | Class | Items | Affects score? | Operator note |
 |-------|-------|----------------|---------------|
 | **A — Score-fed equity** | vol-regime, etf-flow, passive-share, active-index-flow, concentration, breadth | **Yes** | Can change Composite / Passive / Structural |
-| **B — Display-only equity** | systematic-flow, levered-etf-rebalance, retirement-asset-growth, options-activity-proxy | **No** | MOCK **62 / 55 / 58** unchanged |
+| **B — Display-only equity** | systematic-flow, levered-etf-rebalance, retirement-asset-growth, options-activity-proxy, index-inclusion-events | **No** | MOCK **62 / 55 / 58** unchanged |
 | **C — Treasury lane** | treasury-futures-positioning-proxy, treasury-long-end-income-lens | **No** | Separate lane; not in `publicSignalCount` |
 | **D — Derived/context** | modelZoneProximity, distance-65 | Partial | Refresh **passive-share** only — do not edit separately |
 | **E — MOCK score inputs** | systematic **62**, retirement **58**, levered **55** | Static | **Do not edit** `mockGhostflowSnapshot.ts` |
 
-**Equity dashboard coverage (v1.7):** **6** score-fed public artifacts · **4** display-only public artifact cards (CFTC `systematic-flow`, levered `levered-etf-rebalance`, retirement `retirement-asset-growth`, OCC `options-activity-proxy`) · **`publicSignalCount` 10** when all validate · **0** placeholder cards when artifacts validate. Display-only equity cards do **not** refresh or change the Research Composite — Composite **62** / Passive **58** / Structural **66** and MOCK **62** / **55** / **58** and VIX still drive scored sub-inputs. Quarterly retirement freshness **caution** (46–90 days after release) reflects normal ICI quarterly cadence — not a failed feed or score problem.
+**Equity dashboard coverage (v1.9c.4):** **6** score-fed public artifacts · **5** display-only public artifact cards (CFTC `systematic-flow`, levered `levered-etf-rebalance`, retirement `retirement-asset-growth`, OCC `options-activity-proxy`, index inclusion `index-inclusion-events`) · **`publicSignalCount` 11** when all validate · **0** placeholder cards when artifacts validate. Display-only equity cards do **not** refresh or change the Research Composite — Composite **62** / Passive **58** / Structural **66** and MOCK **62** / **55** / **58** and VIX still drive scored sub-inputs. Quarterly retirement freshness **caution** (46–90 days after release) reflects normal ICI quarterly cadence — not a failed feed or score problem.
 
 **Treasury Plumbing (separate lane):** Two production artifacts (v1.7d–d.1) in display-only UI lane (v1.7e) — **not scored**, **not** in `publicSignalCount`, **no** equity composite merge ([mapping decision](./TREASURY_PLUMBING_MAPPING_DECISION.md)). Treasury artifact refresh updates the **Treasury Plumbing display lane only** — it does **not** affect Composite / Passive / Structural scores and does **not** change `publicSignalCount`. Weekly CFTC: [`treasuryFuturesPositioningProxy.v1.json`](../data/ghostflow/artifacts/treasuryFuturesPositioningProxy.v1.json). Daily FRED: [`treasuryLongEndIncomeLens.v1.json`](../data/ghostflow/artifacts/treasuryLongEndIncomeLens.v1.json) — six-series common-date extract ([BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md](./BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md)); **no forward-fill**. Caveats: futures proxy is public CFTC positioning only — **not** full basis-trade measurement; income lens is **not** investment advice, bond-buying, or duration-allocation advice.
 
@@ -64,19 +64,20 @@ Treasury lane: no structured freshness bands today — dates on cards only. See 
 
 ---
 
-## Index Inclusion Event Proxy — future manual refresh discipline
+## Index Inclusion Event Proxy — manual refresh discipline
 
-**Status:** **Future / not live** — no production artifact, no dashboard card.
+**Status:** **Live (v1.9c.4)** — production artifact + display-only dashboard card.
 
 | Item | Detail |
 |------|--------|
-| **Artifact file (future)** | [`data/ghostflow/artifacts/indexInclusionEventProxy.v1.json`](../../data/ghostflow/artifacts/indexInclusionEventProxy.v1.json) — **does not exist yet** |
+| **Artifact file** | [`data/ghostflow/artifacts/indexInclusionEventProxy.v1.json`](../../data/ghostflow/artifacts/indexInclusionEventProxy.v1.json) |
 | **Example only** | [`indexInclusionEventProxy.v1.example.json`](../../data/ghostflow/artifacts/indexInclusionEventProxy.v1.example.json) — synthetic `EXMP*` / `example.com`; **never promote to production** |
-| **Production release** | **Blocked** on operator-verified event rows per [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) §14 |
-| **Scoring** | Display-only when live — **not scored**; no `publicPassiveInputKey`; no score fields |
+| **Card id** | `index-inclusion-events` — **DISPLAY ONLY** |
+| **Scoring** | **Not scored**; no `publicPassiveInputKey`; no score fields |
 | **Float / demand** | Do **not** infer free-float or demand-dollar estimates |
+| **Provenance** | Follow §14 checklist in [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md); record rows in [INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md](./INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md) before transcribing |
 
-**Refresh cadence (when v1.9c.4 ships):**
+**Refresh cadence:**
 
 | When | Action |
 |------|--------|
@@ -366,7 +367,7 @@ Treasury lane: no structured freshness bands today — dates on cards only. See 
 - [ ] Update **one or both** Treasury production JSON files only
 - [ ] Confirm **no** equity score-fed or display-only files changed unless intentional
 - [ ] Confirm Composite / Passive / Structural **unchanged** (Treasury lane only)
-- [ ] Confirm `publicSignalCount` **10** unchanged
+- [ ] Confirm `publicSignalCount` **11** unchanged (Treasury refresh does not affect equity count)
 - [ ] Run `npm run ghostflow:check`
 
 ---
@@ -378,8 +379,8 @@ Treasury lane: no structured freshness bands today — dates on cards only. See 
 - Signal presentation (`lib/ghostflow/signalPresentation.ts`)
 - Freshness thresholds (`lib/ghostflow/artifactFreshness.ts`, `lib/ghostflow/freshnessSummary.ts`)
 - [`mockGhostflowSnapshot.ts`](../../data/ghostflow/mockGhostflowSnapshot.ts) — MOCK **62 / 58 / 55** inputs
-- `publicSignalCount` — equity grid stays **10**; do not promote display-only or Treasury artifacts
-- Display-only promotion — never wire systematic / levered / retirement / options into score or `raw.signals`
+- `publicSignalCount` — equity grid stays **11**; do not promote display-only or Treasury artifacts into score inputs
+- Display-only promotion — never wire systematic / levered / retirement / options / index-inclusion into score or `raw.signals`
 - Treasury score/grid promotion — Treasury lane stays separate 2-card display-only
 - `mappingStatus: final` — requires separate decision memo; routine refresh keeps **not_final** where applicable
 - Cosmetic `dataQuality` changes — do not bump labels just to make cards look better

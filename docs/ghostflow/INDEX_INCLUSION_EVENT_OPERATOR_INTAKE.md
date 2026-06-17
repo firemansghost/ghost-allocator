@@ -4,16 +4,16 @@
 
 | Item | Value |
 |------|-------|
-| **Phase** | v1.9c.4b |
-| **Status** | Docs-only operator collection pass — **Done (4 rows operator-reviewed; production-eligible pending v1.9c.4 product approval)** |
-| **Production data** | **No** — memo rows are candidates only, not committed artifact JSON |
-| **Dashboard impact** | **None** — no card, no runtime feed |
-| **Production artifact** | **None** — [`indexInclusionEventProxy.v1.json`](../data/ghostflow/artifacts/indexInclusionEventProxy.v1.json) does not exist |
-| **UI card** | **None** |
+| **Phase** | v1.9c.4b (intake) · v1.9c.4 (production) |
+| **Status** | **Done** — 4 rows operator-reviewed; transcribed to production JSON in v1.9c.4 |
+| **Production data** | **Yes** — [`indexInclusionEventProxy.v1.json`](../data/ghostflow/artifacts/indexInclusionEventProxy.v1.json) |
+| **Dashboard impact** | **Display-only** — `index-inclusion-events` card; not scored |
+| **Production artifact** | [`indexInclusionEventProxy.v1.json`](../data/ghostflow/artifacts/indexInclusionEventProxy.v1.json) — 4 Nasdaq-100 events |
+| **UI card** | `index-inclusion-events` — **DISPLAY ONLY** |
 | **Scoring** | **None** — not a Research Composite input |
-| **`publicSignalCount`** | **10** — unchanged |
-| **v1.9c.4** | **Product-gated** — 4 production-eligible rows exist; separate product approval required before production JSON or UI |
-| **Current recommendation** | **Eligible to request v1.9c.4 product approval** |
+| **`publicSignalCount`** | **11** — v1.9c.4 display card added |
+| **v1.9c.4** | **Done** — product approval granted; production JSON + UI shipped |
+| **Next phase** | **v1.9c.5** mapping decision; **v1.9c.6** score gate discouraged |
 
 **Related documents:**
 
@@ -107,9 +107,11 @@ Reject a candidate row if any of the following apply:
 | productionEligible: pending | 0 |
 | operatorVerified: true | 4 |
 
-**Blockers:** v1.9c.4 product approval not requested; production JSON and UI not approved.
+**Blockers:** None — v1.9c.4 complete.
 
-**Recommendation:** eligible to request v1.9c.4 product approval.
+**Recommendation:** **Done** — rows transcribed to production JSON; display-only card live.
+
+**Handoff complete:** v1.9c.4 shipped production artifact + display-only UI. Next: **v1.9c.5** mapping decision; **v1.9c.6** score gate remains discouraged.
 
 **Recommendation logic:**
 
@@ -139,14 +141,15 @@ These are starting points for manual operator review, not an automated source lo
 
 ---
 
-## Handoff to v1.9c.4
+## Handoff to v1.9c.4 — complete
 
-When **production-eligible** rows exist in this memo:
+v1.9c.4 shipped:
 
-1. Operator may **request v1.9c.4 product approval** (separate decision).
-2. Approved rows are transcribed into [`data/ghostflow/artifacts/indexInclusionEventProxy.v1.json`](../data/ghostflow/artifacts/indexInclusionEventProxy.v1.json) only in a future approved v1.9c.4 phase.
-3. Production-mode validation (`validateIndexInclusionEventProxyArtifact(..., { mode: 'production' })`), `validate-artifacts` registration, `buildSnapshot` merge, and UI card wiring remain **future work**.
-4. A future display card would likely move `publicSignalCount` from **10 → 11**, requiring explicit product approval.
-5. **No production JSON** should be created in v1.9c.4b.
+1. Four operator-verified rows transcribed into [`indexInclusionEventProxy.v1.json`](../data/ghostflow/artifacts/indexInclusionEventProxy.v1.json).
+2. Production-mode validation and `validate-artifacts` registration active.
+3. Display-only card `index-inclusion-events` wired via `buildSnapshot`.
+4. `publicSignalCount` moved **10 → 11**; Composite **62 / Passive 58 / Structural 66** unchanged.
 
-See also [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md §15](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md#15-operator-event-intake-template-v1.9c2a-appendix) intake template and [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) future refresh discipline.
+**Next:** **v1.9c.5** mapping decision (likely display-only Option A). **v1.9c.6** score gate discouraged / not approved.
+
+See [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) · [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) Index Inclusion Event Proxy section.

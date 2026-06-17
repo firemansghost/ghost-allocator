@@ -15,6 +15,7 @@ import { validateSystematicFlowProxyArtifact } from '../../lib/ghostflow/artifac
 import { validateLeveredEtfRebalancePressureArtifact } from '../../lib/ghostflow/artifacts/leveredEtfRebalancePressure';
 import { validateRetirementFlowPressureProxyArtifact } from '../../lib/ghostflow/artifacts/retirementFlowPressureProxy';
 import { validateOptionsActivityProxyArtifact } from '../../lib/ghostflow/artifacts/optionsActivityProxy';
+import { validateIndexInclusionEventProxyArtifact } from '../../lib/ghostflow/artifacts/indexInclusionEventProxy';
 import { validateTreasuryFuturesPositioningProxyArtifact } from '../../lib/ghostflow/artifacts/treasuryFuturesPositioningProxy';
 import { validateTreasuryLongEndIncomeLensArtifact } from '../../lib/ghostflow/artifacts/treasuryLongEndIncomeLens';
 import { GHOSTFLOW_REFERENCE_AS_OF } from '../../lib/ghostflow/reference';
@@ -214,6 +215,25 @@ function main(): void {
       o.putCallRatio != null ? `, PCR ${o.putCallRatio.toFixed(2)}` : '';
     console.log(
       `GhostFlow rules: options-activity-proxy OK (index ${indexM}M contracts, ${o.indexShareOfTotalPct}% of total${pcr}, mappingStatus ${o.mappingStatus}, asOf ${optionsRules.artifact.asOf}, published ${optionsRules.artifact.publishedAt})`
+    );
+  }
+
+  const indexInclusionPath = join(
+    root,
+    'data/ghostflow/artifacts/indexInclusionEventProxy.v1.json'
+  );
+  const indexInclusionRules = validateIndexInclusionEventProxyArtifact(
+    loadJson(indexInclusionPath),
+    { mode: 'production', referenceAsOf: GHOSTFLOW_REFERENCE_AS_OF }
+  );
+  if (!indexInclusionRules.ok) {
+    failed = true;
+    console.error('GhostFlow rules failed for index-inclusion-event-proxy:');
+    for (const err of indexInclusionRules.errors) console.error(`  - ${err}`);
+  } else {
+    const o = indexInclusionRules.artifact.observations;
+    console.log(
+      `GhostFlow rules: index-inclusion-event-proxy OK (${o.eventCount} events, window ${o.eventWindowStart}–${o.eventWindowEnd}, mappingStatus ${o.mappingStatus}, asOf ${indexInclusionRules.artifact.asOf}, published ${indexInclusionRules.artifact.publishedAt})`
     );
   }
 

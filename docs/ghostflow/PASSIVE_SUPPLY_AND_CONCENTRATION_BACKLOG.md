@@ -24,7 +24,7 @@ This memo captures future GhostFlow research candidates inspired by recent Mike 
 | New data sources | **None** |
 | Implementation approved | **No** |
 | Score gates opened | **No** (v1.0c, v1.1f, v1.2f, v1.4f, v1.7g, v1.8i remain discouraged) |
-| `publicSignalCount` | **10** (equity) — unchanged |
+| `publicSignalCount` | **11** (equity) — v1.9c.4 display card added |
 | Treasury lane | **2** separate display-only cards — unchanged |
 | All candidates | Start as **feasibility / research-only** unless separately product-approved |
 
@@ -36,7 +36,7 @@ GhostFlow currently tracks:
 
 - **Passive pressure** and **structural fragility** in the equity Research Composite
 - **Six** score-fed public artifacts, **one** derived sub-input, and **three** static MOCK passive inputs
-- **Four** display-only equity/public artifact cards
+- **Five** display-only equity/public artifact cards
 - **Treasury Plumbing** as a separate two-card display-only lane outside `publicSignalCount`
 
 Recent Mike Green material adds a disciplined future research queue around themes that are adjacent to, but not yet covered by, the live dashboard:
@@ -66,7 +66,7 @@ GhostFlow is an **equity passive-pressure / market-structure research gauge**. I
 
 Any future candidate in this backlog starts **display-only / feasibility-only** unless separately approved through product gate, mapping decision, calibration, and test discipline.
 
-**Headline state unchanged:** Composite **62** · Passive **58** · Structural **66** · band *Crowded / Reflexive* · equity `publicSignalCount` **10** · Treasury **2** display-only cards · MOCK **62 / 58 / 55**.
+**Headline state unchanged:** Composite **62** · Passive **58** · Structural **66** · band *Crowded / Reflexive* · equity `publicSignalCount` **11** · Treasury **2** display-only cards · MOCK **62 / 58 / 55**.
 
 ---
 
@@ -75,7 +75,7 @@ Any future candidate in this backlog starts **display-only / feasibility-only** 
 | # | Candidate | Research value | GhostFlow semantic fit | Likely data availability | Double-count risk | Score-creep risk | Recommended next action | Suggested future phase |
 |---|-----------|------------------|------------------------|--------------------------|-------------------|------------------|-------------------------|------------------------|
 | 1 | **Cap-Weight Concentration Premium Lens** | High — tests whether weighting mechanism itself produces excess return | **High** — natural companion to existing `concentration` card | **High** — SPY/RSP and index price series are public | Low–medium vs `concentration`, `passive-share` | Medium if wired without gate | **v1.9b.2 Done** — [artifact design](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md); **v1.9b.3** or **v1.9c** next per product | **v1.9b.2 Done** · **v1.9b.3 or v1.9c next** |
-| 2 | **Passive Supply / Float Absorption Lens** | High — supply-side complement to demand/flow proxies | **High** — passive market-structure native | Medium — event data fragmented; aggregates harder | Medium vs `etf-flow`, buyback narrative | High if scored naively | **v1.9c.4b Done** — operator intake memo (operator-pending); **v1.9c.4 deferred** | **v1.9c.4b Done** · **v1.9c.4 deferred** |
+| 2 | **Passive Supply / Float Absorption Lens** | High — supply-side complement to demand/flow proxies | **High** — passive market-structure native | Medium — event data fragmented; aggregates harder | Medium vs `etf-flow`, buyback narrative | High if scored naively | **v1.9c.4 Done** — production artifact + display-only card | **v1.9c.5** mapping next · **v1.9c.6** score gate discouraged |
 | 3 | **Systematic Re-Risking / De-Risking Lens** | High — addresses MOCK trust gap on `systematicStrategyPressure` | **Medium–high** — passive flow theme; semantic rename required | Medium — vol/trend public; true CTA exposure harder | Medium vs VIX, CFTC display card | **High** — direct MOCK replacement temptation | Future feasibility; long-term MOCK retirement path only | **v1.9d** |
 | 4 | **Protection Bid / Correlation Dispersion Lens** | Medium–high — options-market uncertainty framing | **Medium** — vol/options adjacent; distinct from VIX amplifier | Medium — VIX/SKEW public; implied correlation harder | **High** vs score-fed VIX and OCC display proxy | High without reweight decision | Future feasibility; display-only default; avoid VIX double-count | **v1.9e** |
 | 5 | **Mega-Cap Autocorrelation / Flow Momentum Lens** | Medium — “machine-powered momentum” hypothesis | **Medium–high** — related to cap-weight premium | High if folded into price-series work | Medium vs breadth, concentration | Medium | **Fold into v1.9b** if clean; else split | **v1.9f** or appendix in **v1.9b** |
@@ -172,15 +172,15 @@ Any future candidate in this backlog starts **display-only / feasibility-only** 
 - **v1.9c.1 source spike complete** — [PASSIVE_SUPPLY_SOURCE_SPIKE.md](./PASSIVE_SUPPLY_SOURCE_SPIKE.md); Lane D event path and Lane A/B quarterly context partially viable; Lane E still RED
 - Event-driven / display-only by default
 - No score wiring
-- No `publicSignalCount` change unless later product-approved
-- **v1.9c.3 scaffold complete** — example JSON + validator/types/tests; no production JSON or UI
+- **v1.9c.4 complete** — production JSON + display-only card; `publicSignalCount` **11**; not scored
+- **v1.9c.3 scaffold complete** — example JSON + validator/types/tests
 - **v1.9c.4a operator provenance checklist complete** — [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) §14
-- **v1.9c.4b operator intake memo complete** — [INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md](./INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md); no candidate rows collected yet
-- **Next true product step:** **v1.9c.4** production artifact + display UI — **deferred**; blocked on production-eligible rows and explicit product approval
+- **v1.9c.4b operator intake memo complete** — [INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md](./INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md); 4 rows transcribed
+- **Next true product step:** **v1.9c.5** mapping decision; **v1.9c.6** score gate discouraged
 
-**Completed phases:** **v1.9c** feasibility · **v1.9c.1** source spike · **v1.9c.2** artifact design · **v1.9c.3** example/validator scaffolding · **v1.9c.4a** operator provenance checklist · **v1.9c.4b** operator intake memo (scaffold)
+**Completed phases:** **v1.9c** feasibility · **v1.9c.1** source spike · **v1.9c.2** artifact design · **v1.9c.3** example/validator scaffolding · **v1.9c.4a** operator provenance checklist · **v1.9c.4b** operator intake · **v1.9c.4** production artifact + display card
 
-**Suggested future phase:** **v1.9c.4** Index Inclusion Event Production Artifact + Display Card (deferred — operator data + product approval required)
+**Suggested future phase:** **v1.9c.5** Index Inclusion Event Mapping Decision
 
 ---
 
@@ -385,29 +385,26 @@ Any future candidate in this backlog starts **display-only / feasibility-only** 
 | **v1.9c.2a** | Operator Event Intake Template | **Done** — appendix in design memo §14 |
 | **v1.9c.3** | Index Inclusion Event Example JSON + Validator | **Done** — [`indexInclusionEventProxy.v1.example.json`](../data/ghostflow/artifacts/indexInclusionEventProxy.v1.example.json) |
 | **v1.9c.4a** | Operator Provenance Checklist | **Done** (docs-only) |
-| **v1.9c.4b** | Operator Collection Pass / Intake Memo | **Done (scaffold; operator-pending)** — [INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md](./INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md) |
-| **v1.9c.4** | Production Artifact + Display Card | **Deferred** — production-eligible rows + product approval required |
+| **v1.9c.4b** | Operator Collection Pass / Intake Memo | **Done** — [INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md](./INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md) |
+| **v1.9c.4** | Production Artifact + Display Card | **Done** — display-only; `publicSignalCount` **11**; not scored |
 | **v1.9c.5** | Mapping Decision | **Future** — likely display-only Option A |
-| **v1.9c.6** | Score Gate | **Future** — discouraged |
+| **v1.9c.6** | Score Gate | **Future** — discouraged / not approved |
 | **v1.9d** | Systematic Re-Risking Proxy Feasibility | **Future** — research-only |
 | **v1.9e** | Protection Bid / Correlation Dispersion Feasibility | **Future** — research-only |
 | **v1.9f** | Mega-Cap Autocorrelation / Flow Momentum Feasibility | **Future** — optional or folded into v1.9b |
 | **v1.9g** | Valuation Stress Context Feasibility | **Future** — likely outside GhostFlow core |
 | **Credit Catalyst / AI Financing Stress** | Outside GhostFlow | **Future** — possible separate lane |
 
-None of the future phases above are approved for implementation, scoring, artifacts, UI cards, or `publicSignalCount` changes.
+None of the future phases above are approved for score gates or score wiring. v1.9c.4 display-only card is shipped; scores unchanged.
 
 ---
 
 ## Guardrails
 
 - All candidates start as **feasibility / research-only**.
-- **No score changes** in v1.9a or by default in future phases.
-- **No new cards** without separate UI approval.
-- **No artifacts** or example JSON without design + validation discipline.
-- **No runtime feeds** or live API routes.
-- **`publicSignalCount` remains 10** (equity).
-- **No score gates opened** (v1.0c, v1.1f, v1.2f, v1.4f, v1.7g, v1.8i).
+- **No score changes** from v1.9c.4 display-only card.
+- **No score gates opened** (v1.0c, v1.1f, v1.2f, v1.4f, v1.7g, v1.8i, **v1.9c.6**).
+- **`publicSignalCount` is 11** (equity) — five display-only + six score-fed.
 - **No Treasury merge** into equity composite.
 - **No GhostRegime merge** into GhostFlow.
 - **No investment advice** or trading recommendation framing.
@@ -425,8 +422,8 @@ None of the future phases above are approved for implementation, scoring, artifa
 
 **v1.9c.1** — Passive Supply Source Spike — **Done** ([memo](./PASSIVE_SUPPLY_SOURCE_SPIKE.md)); partial source locks found for event path and quarterly macro context.
 
-**v1.9c.3** — Index Inclusion Event Example JSON + Validator — **Done** ([design memo](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md)).
+**v1.9c.4** — Index Inclusion Event Production Artifact + Display Card — **Done** ([design memo](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md)); display-only; not scored.
 
-**Candidate next:** **v1.9c.4** Index Inclusion Event Production Artifact + Display Card (**deferred** — operator-verified rows required) or **v1.9b.4** cap-weight production/display per product priority.
+**Candidate next:** **v1.9c.5** Index Inclusion Event Mapping Decision or **v1.9b.4** cap-weight production/display per product priority.
 
 Real operator run validated SPY/RSP path (exit **0**, adj-close, 5,818 aligned days). Longer-horizon cap-weight premium is elevated; short horizons are mixed — design any future display card with regime caveats.

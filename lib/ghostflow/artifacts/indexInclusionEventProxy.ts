@@ -1,11 +1,16 @@
 /**
- * GhostFlow v1.9c.3 — Index inclusion event proxy artifact (design scaffolding only).
- * Pure validation helpers. No production loader, freshness, or buildSnapshot merge.
+ * GhostFlow v1.9c.3 / v1.9c.4 — Index inclusion event proxy artifact.
+ * Validation, display helpers, production loader, and buildSnapshot display merge (no score wiring).
  */
 
+import indexInclusionEventProxyArtifactJson from '@/data/ghostflow/artifacts/indexInclusionEventProxy.v1.json';
+import { evaluateMonthlyArtifactFreshness } from '@/lib/ghostflow/artifactFreshness';
+import { GHOSTFLOW_REFERENCE_AS_OF } from '@/lib/ghostflow/reference';
 import type {
+  ArtifactFreshnessResult,
   IndexInclusionEventAction,
   IndexInclusionEventIndexFamily,
+  IndexInclusionEventObservationsV1,
   IndexInclusionEventProxyArtifactV1,
   IndexInclusionEventProxyValidation,
   IndexInclusionEventRecordV1,
@@ -139,6 +144,155 @@ function validateOptionalNonNegativeInteger(
 ): void {
   if (v === undefined) return;
   validateNonNegativeInteger(name, v, errors);
+}
+
+const EXAMPLE_ONLY_PATTERN = /example\s*\/\s*design\s*only/i;
+
+function containsExampleOnlyText(text: string): boolean {
+  return EXAMPLE_ONLY_PATTERN.test(text);
+}
+
+function rejectProductionSyntheticContent(
+  raw: Record<string, unknown>,
+  mode: IndexInclusionEventValidationMode,
+  errors: string[]
+): void {
+  if (mode !== 'production') return;
+
+  const source = raw.source;
+  if (isPlainObject(source)) {
+    const url = source.url;
+    if (typeof url === 'string' && url.includes('example.com')) {
+      errors.push('source.url must not contain example.com in production mode.');
+    }
+    if (typeof source.note === 'string' && containsExampleOnlyText(source.note)) {
+      errors.push('source.note must not contain EXAMPLE / DESIGN ONLY in production mode.');
+    }
+  }
+
+  const caveats = raw.caveats;
+  if (Array.isArray(caveats)) {
+    for (let i = 0; i < caveats.length; i++) {
+      const caveat = caveats[i];
+      if (typeof caveat === 'string' && containsExampleOnlyText(caveat)) {
+        errors.push(
+          `caveats[${i}] must not contain EXAMPLE / DESIGN ONLY in production mode.`
+        );
+      }
+    }
+  }
+
+  const observations = raw.observations;
+  if (!isPlainObject(observations) || !Array.isArray(observations.events)) return;
+
+  for (let i = 0; i < observations.events.length; i++) {
+    const event = observations.events[i];
+    if (!isPlainObject(event)) continue;
+    const label = `observations.events[${i}]`;
+
+    const sourceUrl = event.sourceUrl;
+    if (typeof sourceUrl === 'string' && sourceUrl.includes('example.com')) {
+      errors.push(`${label}.sourceUrl must not contain example.com in production mode.`);
+    }
+
+    const ticker = event.ticker;
+    if (typeof ticker === 'string' && /^EXMP/.test(ticker)) {
+      errors.push(`${label}.ticker must not match EXMP* in production mode.`);
+    }
+
+    const notes = event.notes;
+    if (typeof notes === 'string' && containsExampleOnlyText(notes)) {
+      errors.push(`${label}.notes must not contain EXAMPLE / DESIGN ONLY in production mode.`);
+    }
+  }
+}
+
+function compareIsoDates(a: string, b: string): number {
+  return compareIso(a, b);
+}
+
+function formatActionLabel(action: IndexInclusionEventAction): string {
+  return action;
+}
+
+export function formatIndexInclusionEventCardValue(
+  observations: IndexInclusionEventObservationsV1
+): string {
+  if (observations.eventCount === 0) {
+    return 'No major index events in window';
+  }
+  return `Index events in window: ${observations.eventCount}`;
+}
+
+function latestEffectiveDate(events: IndexInclusionEventRecordV1[]): string | null {
+  let latest: string | null = null;
+  for (const event of events) {
+    if (event.effectiveDate === null) continue;
+    if (latest === null || compareIsoDates(event.effectiveDate, latest) > 0) {
+      latest = event.effectiveDate;
+    }
+  }
+  return latest;
+}
+
+function eventsForCardBody(events: IndexInclusionEventRecordV1[]): IndexInclusionEventRecordV1[] {
+  return [...events]
+    .filter((event) => event.effectiveDate !== null)
+    .sort((a, b) => compareIsoDates(b.effectiveDate!, a.effectiveDate!))
+    .slice(0, 3);
+}
+
+export function buildIndexInclusionEventDisplayExplanation(
+  artifact: IndexInclusionEventProxyArtifactV1
+): string {
+  const { observations } = artifact;
+  const { eventWindowStart, eventWindowEnd, events, eventCount } = observations;
+
+  if (eventCount === 0) {
+    return (
+      `Event window ${eventWindowStart} – ${eventWindowEnd}. No major index events recorded after operator review. ` +
+      `Not included in the Research Composite.`
+    );
+  }
+
+  const latest = latestEffectiveDate(events);
+  const subline =
+    latest !== null
+      ? `Latest effective date: ${latest}. Window ${eventWindowStart} – ${eventWindowEnd}.`
+      : `Event window ${eventWindowStart} – ${eventWindowEnd}.`;
+
+  const rows = eventsForCardBody(events)
+    .map(
+      (event) =>
+        `${event.ticker} · ${formatActionLabel(event.action)} · ${event.indexName} · ${event.effectiveDate}`
+    )
+    .join(' · ');
+
+  return `${subline} ${rows}. Event count is a display metric only — not a pressure score. mappingStatus: ${observations.mappingStatus}; not included in the Research Composite.`;
+}
+
+export function loadIndexInclusionEventProxyArtifact(): IndexInclusionEventProxyValidation {
+  return validateIndexInclusionEventProxyArtifact(indexInclusionEventProxyArtifactJson, {
+    mode: 'production',
+    referenceAsOf: GHOSTFLOW_REFERENCE_AS_OF,
+  });
+}
+
+export function indexInclusionEventFreshnessAnchor(
+  artifact: IndexInclusionEventProxyArtifactV1
+): string {
+  return artifact.publishedAt ?? artifact.asOf;
+}
+
+export function evaluateIndexInclusionEventArtifactFreshness(
+  artifact: IndexInclusionEventProxyArtifactV1,
+  referenceAsOf: string = GHOSTFLOW_REFERENCE_AS_OF
+): ArtifactFreshnessResult {
+  return evaluateMonthlyArtifactFreshness(
+    indexInclusionEventFreshnessAnchor(artifact),
+    referenceAsOf,
+    INDEX_INCLUSION_EVENT_DISPLAY_SIGNAL_NAME
+  );
 }
 
 function classifyEffectiveDate(
@@ -496,6 +650,8 @@ export function validateIndexInclusionEventProxyArtifact(
       }
     }
   }
+
+  rejectProductionSyntheticContent(raw, mode, errors);
 
   if (errors.length > 0) {
     return { ok: false, errors };

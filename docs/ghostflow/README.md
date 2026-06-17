@@ -12,10 +12,10 @@ Entrypoint for GhostFlow docs under `docs/ghostflow/`. For live dashboard invent
 | **Passive Pressure** | **58** |
 | **Structural Fragility** | **66** |
 | **Band** | *Crowded / Reflexive* |
-| **Equity `publicSignalCount`** | **10** |
+| **Equity `publicSignalCount`** | **11** |
 | **Treasury Plumbing** | **2** separate display-only cards |
 
-Treasury is **outside** the equity Research Composite, `buildSnapshot`, `raw.signals`, `meta.publicSignals`, [`PUBLIC_ARTIFACT_SIGNAL_IDS`](../../lib/ghostflow/signalPresentation.ts), and `publicSignalCount`. Do **not** combine equity **10** + Treasury **2** into 12.
+Treasury is **outside** the equity Research Composite, `buildSnapshot`, `raw.signals`, `meta.publicSignals`, [`PUBLIC_ARTIFACT_SIGNAL_IDS`](../../lib/ghostflow/signalPresentation.ts), and `publicSignalCount`. Do **not** combine equity **11** + Treasury **2** into 13.
 
 Three **MOCK** passive score inputs (`systematicStrategyPressure` **62**, `retirementFlowPressureProxy` **58**, `leveredEtfRebalancePressure` **55**) remain unchanged unless a separate product-approved score gate opens.
 
@@ -62,7 +62,7 @@ These **six** equity/public artifacts merge into the Research Composite via `bui
 
 ## Display-only equity artifacts
 
-These **four** production artifacts refresh **display cards only**. They do **not** replace MOCK score inputs. `mappingStatus` remains **`not_final`** unless separately approved. Display-only does **not** mean low quality.
+These **five** production artifacts refresh **display cards only**. They do **not** replace MOCK score inputs. `mappingStatus` remains **`not_final`** unless separately approved. Display-only does **not** mean low quality.
 
 | Card `signalId` | Design | Mapping decision |
 |-----------------|--------|------------------|
@@ -70,6 +70,7 @@ These **four** production artifacts refresh **display cards only**. They do **no
 | `levered-etf-rebalance` | [LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md](./LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md) | [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md) |
 | `retirement-asset-growth` | [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md) | [RETIREMENT_FLOW_MAPPING_DECISION.md](./RETIREMENT_FLOW_MAPPING_DECISION.md) |
 | `options-activity-proxy` | [OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md](./OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md) | [OPTIONS_ACTIVITY_MAPPING_DECISION.md](./OPTIONS_ACTIVITY_MAPPING_DECISION.md) |
+| `index-inclusion-events` | [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) | **v1.9c.5** mapping decision — display-only default |
 
 ---
 
@@ -136,12 +137,12 @@ These memos preserve feasibility, calibration, and mapping history. They may con
 | [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) | **v1.9b.2** display-only artifact design · **v1.9b.3** example JSON + validator scaffolding |
 | [PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) | **v1.9c** passive supply / float absorption — YELLOW leaning RED |
 | [PASSIVE_SUPPLY_SOURCE_SPIKE.md](./PASSIVE_SUPPLY_SOURCE_SPIKE.md) | **v1.9c.1** source spike — Lane D event path partially locked |
-| [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) | **v1.9c.2** index inclusion event proxy design · **v1.9c.3** example JSON + validator scaffolding |
+| [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) | **v1.9c.2** index inclusion event proxy design · **v1.9c.3** example JSON + validator · **v1.9c.4** production artifact + display card |
 
 Topics parked for later evaluation (no score wiring, artifacts, UI cards, or `publicSignalCount` changes approved):
 
 - **Cap-weight concentration premium** — [v1.9b feasibility](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) + [v1.9b.1a calibration](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) + [v1.9b.2–b.3 artifact design](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md); operator CSV study (`npm run ghostflow:cap-weight-premium-study`)
-- **Passive supply / float absorption** — [v1.9c feasibility](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) + [v1.9c.1 source spike](./PASSIVE_SUPPLY_SOURCE_SPIKE.md) + [v1.9c.2–c.3 artifact design](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md); example JSON + validator shipped; v1.9c.4 production/display product-gated
+- **Passive supply / float absorption** — [v1.9c feasibility](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) + [v1.9c.1 source spike](./PASSIVE_SUPPLY_SOURCE_SPIKE.md) + [v1.9c.2–c.4 artifact design](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md); production artifact + display-only card shipped (v1.9c.4); **v1.9c.5** mapping next
 - **Systematic re-risking** — long-term path beyond MOCK **62** and CFTC display proxy
 - **Protection bid / correlation dispersion** — skew, implied correlation, single-stock vs index vol
 - **Mega-cap autocorrelation / flow momentum** — own-price continuation in flow-fed names
@@ -152,7 +153,7 @@ Topics parked for later evaluation (no score wiring, artifacts, UI cards, or `pu
 
 ## Guardrails
 
-- **`publicSignalCount` remains 10** (equity only) — do not promote display-only or Treasury artifacts into score or `meta.publicSignals`.
+- **`publicSignalCount` is 11** (equity only) — do not promote display-only or Treasury artifacts into score inputs.
 - **Treasury remains separate** — 2-card display-only lane outside composite.
 - **Score gates not approved:** v1.0c (CFTC), v1.1f (levered ETF), v1.2f (retirement), v1.4f (options), v1.7g (Treasury), v1.8i (general).
 - **MOCK 62 / 58 / 55** unchanged per [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md).
@@ -161,12 +162,12 @@ Topics parked for later evaluation (no score wiring, artifacts, UI cards, or `pu
 
 ---
 
-## Production artifacts (12)
+## Production artifacts (13)
 
 All validated by `npm run ghostflow:check`:
 
 - **6** score-fed equity JSON files
-- **4** display-only equity JSON files
+- **5** display-only equity JSON files
 - **2** Treasury lane JSON files
 
 See [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) for file paths and lane tables.
