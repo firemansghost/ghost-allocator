@@ -263,12 +263,10 @@ GhostFlow input promotion rules (all phases):
 | **v1.9c.2a** | Operator Event Intake Template | **Done** — appendix in [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) §14 |
 | **v1.9c.3** | Index Inclusion Event Example JSON + Validator | **Done** — [`indexInclusionEventProxy.v1.example.json`](../data/ghostflow/artifacts/indexInclusionEventProxy.v1.example.json); not in `validate-artifacts` |
 | **v1.9c.4a** | Index Inclusion Event Operator Provenance Checklist | **Done** — [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) §14; docs-only intake discipline |
-| **v1.9c.4b** | Index Inclusion Event Operator Collection Pass | **Done (scaffold; operator-pending)** — [INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md](./INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md); no candidate rows yet |
+| **v1.9c.4b** | Index Inclusion Event Operator Collection Pass | **Done** — [INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md](./INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md) |
 | **v1.9c.4** | Index Inclusion Event Production Artifact + Display Card | **Done** — 4 operator-verified Nasdaq rows; display-only; `publicSignalCount` **11**; not scored |
-| **v1.9c.5** | Index Inclusion Event Mapping Decision | **Future** — likely display-only Option A |
+| **v1.9c.5** | Index Inclusion Event Mapping Decision | **Done** — [INDEX_INCLUSION_EVENT_MAPPING_DECISION.md](./INDEX_INCLUSION_EVENT_MAPPING_DECISION.md); display-only by default; no score mapper selected |
 | **v1.9c.6** | Index Inclusion Event Score Gate | **Future** — discouraged / not approved |
-| **v1.9c.5** | Index Inclusion Event Mapping Decision | **Future** — likely display-only Option A |
-| **v1.9c.6** | Index Inclusion Event Score Gate | **Future** — discouraged; not approved by default |
 | **v1.9d** | Systematic Re-Risking Proxy Feasibility | **Future** — research-only |
 | **v1.9e** | Protection Bid / Correlation Dispersion Feasibility | **Future** — research-only |
 | **v1.9f** | Mega-Cap Autocorrelation / Flow Momentum Feasibility | **Future** — optional or folded into v1.9b |
@@ -288,14 +286,14 @@ Future research candidates inspired by passive market-structure / Mike Green rev
 | Candidate | Suggested phase | GhostFlow fit |
 |-----------|-----------------|---------------|
 | Cap-Weight Concentration Premium Lens | **v1.9b.3 Done** · **v1.9b.4 next** | Core — [feasibility](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) · [calibration](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) · [artifact design](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) |
-| Passive Supply / Float Absorption Lens | **v1.9c.4 Done** · **v1.9c.5 next** | Core — [feasibility](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) · [source spike](./PASSIVE_SUPPLY_SOURCE_SPIKE.md) · [artifact design](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) · [operator intake](./INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md) |
+| Passive Supply / Float Absorption Lens | **v1.9c.5 Done** · **v1.9c.6 discouraged** | Core — [feasibility](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) · [source spike](./PASSIVE_SUPPLY_SOURCE_SPIKE.md) · [artifact design](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) · [mapping decision](./INDEX_INCLUSION_EVENT_MAPPING_DECISION.md) |
 | Systematic Re-Risking / De-Risking Lens | v1.9d | Core — long-term MOCK retirement path |
 | Protection Bid / Correlation Dispersion Lens | v1.9e | Adjacent — avoid VIX double-count |
 | Mega-Cap Autocorrelation / Flow Momentum Lens | v1.9f or v1.9b appendix | Related to cap-weight premium |
 | Valuation Stress / Individual-Security CAPE Lens | v1.9g or outside GhostFlow | Outside composite |
 | Credit Catalyst / AI Financing Stress | Outside GhostFlow | Separate product lane |
 
-**Not approved:** score gates for index inclusion events. v1.9c.3 example/validator scaffolding complete; v1.9c.4a operator provenance checklist complete; v1.9c.4b operator intake complete; **v1.9c.4 production artifact + display card shipped** — display-only; **v1.9c.5** mapping decision next; **v1.9c.6** score gate discouraged.
+**Not approved:** v1.9c.6 score gate for index inclusion events. v1.9c.4 production artifact + display card shipped; **v1.9c.5 mapping decision complete** — display-only by default; no score mapper selected; `publicSignalCount` **11** unchanged.
 
 ---
 

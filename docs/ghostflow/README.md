@@ -70,7 +70,7 @@ These **five** production artifacts refresh **display cards only**. They do **no
 | `levered-etf-rebalance` | [LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md](./LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md) | [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md) |
 | `retirement-asset-growth` | [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md) | [RETIREMENT_FLOW_MAPPING_DECISION.md](./RETIREMENT_FLOW_MAPPING_DECISION.md) |
 | `options-activity-proxy` | [OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md](./OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md) | [OPTIONS_ACTIVITY_MAPPING_DECISION.md](./OPTIONS_ACTIVITY_MAPPING_DECISION.md) |
-| `index-inclusion-events` | [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) | **v1.9c.5** mapping decision — display-only default |
+| `index-inclusion-events` | [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) | [INDEX_INCLUSION_EVENT_MAPPING_DECISION.md](./INDEX_INCLUSION_EVENT_MAPPING_DECISION.md) — display-only by default |
 
 ---
 
@@ -137,12 +137,12 @@ These memos preserve feasibility, calibration, and mapping history. They may con
 | [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) | **v1.9b.2** display-only artifact design · **v1.9b.3** example JSON + validator scaffolding |
 | [PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) | **v1.9c** passive supply / float absorption — YELLOW leaning RED |
 | [PASSIVE_SUPPLY_SOURCE_SPIKE.md](./PASSIVE_SUPPLY_SOURCE_SPIKE.md) | **v1.9c.1** source spike — Lane D event path partially locked |
-| [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) | **v1.9c.2** index inclusion event proxy design · **v1.9c.3** example JSON + validator · **v1.9c.4** production artifact + display card |
+| [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) | **v1.9c.2** index inclusion event proxy design · **v1.9c.3** example JSON + validator · **v1.9c.4** production artifact + display card · **v1.9c.5** [mapping decision](./INDEX_INCLUSION_EVENT_MAPPING_DECISION.md) |
 
 Topics parked for later evaluation (no score wiring, artifacts, UI cards, or `publicSignalCount` changes approved):
 
 - **Cap-weight concentration premium** — [v1.9b feasibility](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) + [v1.9b.1a calibration](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) + [v1.9b.2–b.3 artifact design](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md); operator CSV study (`npm run ghostflow:cap-weight-premium-study`)
-- **Passive supply / float absorption** — [v1.9c feasibility](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) + [v1.9c.1 source spike](./PASSIVE_SUPPLY_SOURCE_SPIKE.md) + [v1.9c.2–c.4 artifact design](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md); production artifact + display-only card shipped (v1.9c.4); **v1.9c.5** mapping next
+- **Passive supply / float absorption** — [v1.9c feasibility](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) + [v1.9c.1 source spike](./PASSIVE_SUPPLY_SOURCE_SPIKE.md) + [v1.9c.2–c.4 artifact](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) + [v1.9c.5 mapping](./INDEX_INCLUSION_EVENT_MAPPING_DECISION.md); display-only by default; v1.9c.6 score gate discouraged
 - **Systematic re-risking** — long-term path beyond MOCK **62** and CFTC display proxy
 - **Protection bid / correlation dispersion** — skew, implied correlation, single-stock vs index vol
 - **Mega-cap autocorrelation / flow momentum** — own-price continuation in flow-fed names

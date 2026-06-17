@@ -1,6 +1,6 @@
 # Index Inclusion Event Proxy — Artifact Design (GhostFlow v1.9c.2 / v1.9c.3)
 
-**Status:** **v1.9c.2 complete** · **v1.9c.3 complete** · **v1.9c.4a complete** · **v1.9c.4 complete** — design memo + example JSON + validator/types + tests + operator provenance checklist + **production artifact + display-only UI card**. **Not** scored. No score wiring, no `publicPassiveInputKey`, no `scoring.ts` changes.
+**Status:** **v1.9c.2 complete** · **v1.9c.3 complete** · **v1.9c.4a complete** · **v1.9c.4 complete** · **v1.9c.5 complete** — design memo + example JSON + validator/types + tests + operator provenance checklist + production artifact + display-only UI card + **mapping decision** ([INDEX_INCLUSION_EVENT_MAPPING_DECISION.md](./INDEX_INCLUSION_EVENT_MAPPING_DECISION.md)). Display-only by default. No score mapper selected in v1.9c.5. No score wiring, no `publicPassiveInputKey`, no `scoring.ts` changes.
 
 **Prior work:** [PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) (v1.9c, **YELLOW leaning RED**) · [PASSIVE_SUPPLY_SOURCE_SPIKE.md](./PASSIVE_SUPPLY_SOURCE_SPIKE.md) (v1.9c.1, Lane D **LOCKED (partial)**)
 
@@ -38,7 +38,7 @@ GhostRegime, GhostYield, Models, and builder are out of scope. This track is **i
 | Treasury lane | **2** separate display-only cards — unchanged |
 | **v1.9c.4** | **Done** — production JSON + display card; 4 operator-verified Nasdaq rows; `publicSignalCount` **10 → 11** |
 | **v1.9c.4a** | Operator provenance checklist — **Done** (§14) |
-| **v1.9c.5** | Mapping decision — **Future** |
+| **v1.9c.5** | Mapping decision — **Done** — [INDEX_INCLUSION_EVENT_MAPPING_DECISION.md](./INDEX_INCLUSION_EVENT_MAPPING_DECISION.md) |
 | **v1.9c.6** | Score gate — **Future** — discouraged / not approved |
 
 ---
@@ -374,8 +374,8 @@ Only after operator QA discipline: dual-check of source URLs, count reconciliati
 | **v1.9c.3** | Example JSON + validator/types/tests; no production JSON | **Done** |
 | **v1.9c.4a** | Operator provenance checklist | **Done** (docs-only; §14) |
 | **v1.9c.4** | Production artifact + display-only UI integration | **Done** — `publicSignalCount` **11**; not scored |
-| **v1.9c.5** | Mapping decision — likely display-only Option A | **Future** |
-| **v1.9c.6** | Score gate | **Future** — **discouraged / not approved by default** |
+| **v1.9c.5** | Mapping decision — display-only by default | **Done** — [INDEX_INCLUSION_EVENT_MAPPING_DECISION.md](./INDEX_INCLUSION_EVENT_MAPPING_DECISION.md) |
+| **v1.9c.6** | Score gate | **Future** — discouraged / not approved |
 
 **Deferred (not v1.9c.2):**
 
