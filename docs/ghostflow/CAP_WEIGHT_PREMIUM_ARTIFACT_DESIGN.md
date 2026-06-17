@@ -1,6 +1,8 @@
 # Cap-Weight Premium Proxy — Artifact Design (GhostFlow v1.9b.2)
 
-**Status:** **v1.9b.4 complete** · **v1.9b.3 complete** — design memo + example JSON + validator/types + tests + production JSON + display card. **Not** scored. No `publicPassiveInputKey` or score wiring.
+**Status:** **v1.9b.5 complete** · **v1.9b.4 complete** — design memo + example JSON + validator/types + tests + production JSON + display card + mapping decision. **Not** scored. No `publicPassiveInputKey` or score wiring.
+
+**Mapping decision:** [CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md](./CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md) (v1.9b.5) — display-only by default; `mappingStatus` **not_final**; v1.9b.6 not approved.
 
 **Prior work:** [CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) (v1.9b, **YELLOW leaning GREEN**) · [CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) (v1.9b.1a, real operator run exit **0**)
 
@@ -29,8 +31,8 @@ GhostRegime, GhostYield, Models, and builder are out of scope.
 | `buildSnapshot` merge | **Shipped (v1.9b.4)** — display-only; no score merge |
 | `publicSignalCount` | **12** (equity) — v1.9b.4 display card added (**11 → 12**) |
 | **v1.9b.4** | **Done** — production JSON + display integration; not scored |
-| **v1.9b.5** | **Future** — mapping decision |
-| **v1.9b.6** | **Future** — score gate discouraged / not approved |
+| **v1.9b.5** | **Done** — [CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md](./CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md); display-only Option A; `mappingStatus` **not_final** |
+| **v1.9b.6** | **Future** — score gate discouraged / **not approved** |
 
 ---
 
@@ -228,7 +230,7 @@ Design reference values from v1.9b.1a calibration (2026-06-15):
 
 ### `mappingStatus` posture
 
-- **`not_final`** only — permanently until v1.9b.5 mapping decision; display-only default likely persists even then.
+- **`not_final`** — v1.9b.5 mapping decision complete ([memo](./CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md)); display-only by default persists; no final mapper selected.
 
 ---
 
@@ -358,8 +360,8 @@ Reference existing `concentration` card as **companion lens, not replacement**.
 |-------|-------------|--------|
 | **v1.9b.2** | Artifact design memo — **this document** | **Done** (docs-only) |
 | **v1.9b.3** | Example JSON + `capWeightPremiumProxy.ts` validator/types + tests; **no production JSON** | **Done** |
-| **v1.9b.4** | Production `capWeightPremiumProxy.v1.json` + `validate-artifacts` + `buildSnapshot` display-only merge + card id in `signalPresentation` + DISPLAY ONLY badge | **Future** — product approval + `publicSignalCount` decision |
-| **v1.9b.5** | `CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md` — likely display-only Option A | **Future** |
+| **v1.9b.4** | Production `capWeightPremiumProxy.v1.json` + `validate-artifacts` + `buildSnapshot` display-only merge + card id in `signalPresentation` + DISPLAY ONLY badge | **Done** |
+| **v1.9b.5** | `CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md` — display-only Option A | **Done** |
 | **v1.9b.6** | Score gate (if ever) — **discouraged** | **Future** — not approved |
 
 **Do not combine v1.9b.3 and v1.9b.4** in one PR unless product explicitly approves accelerated promotion. Calibration short-horizon mixedness (1M at 1.9th percentile vs 5Y at 99.6th) warrants staged review.
@@ -373,13 +375,13 @@ Reference existing `concentration` card as **companion lens, not replacement**.
 - [x] Design memo (this document) — v1.9b.2
 - [x] Example JSON `capWeightPremiumProxy.v1.example.json` — v1.9b.3
 - [x] Pure module `capWeightPremiumProxy.ts` + unit tests — v1.9b.3
-- [ ] Production `capWeightPremiumProxy.v1.json` — v1.9b.4
-- [ ] `scripts/ghostflow/validate-artifacts.ts` registration — v1.9b.4
-- [ ] `buildSnapshot` display-only merge — v1.9b.4
-- [ ] `signalPresentation` card id + DISPLAY ONLY badge — v1.9b.4
-- [ ] Freshness helper — v1.9b.4
-- [ ] [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) operator row — v1.9b.4
-- [ ] Mapping decision memo — v1.9b.5
+- [x] Production `capWeightPremiumProxy.v1.json` — v1.9b.4
+- [x] `scripts/ghostflow/validate-artifacts.ts` registration — v1.9b.4
+- [x] `buildSnapshot` display-only merge — v1.9b.4
+- [x] `signalPresentation` card id + DISPLAY ONLY badge — v1.9b.4
+- [x] Freshness helper — v1.9b.4
+- [x] [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) operator row — v1.9b.4
+- [x] Mapping decision memo — v1.9b.5
 - [ ] Score merge / score gate — v1.9b.6 (discouraged)
 
 ---

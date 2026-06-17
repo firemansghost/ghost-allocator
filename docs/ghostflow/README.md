@@ -141,7 +141,7 @@ These memos preserve feasibility, calibration, and mapping history. They may con
 
 Topics parked for later evaluation (no score wiring, artifacts, UI cards, or `publicSignalCount` changes approved):
 
-- **Cap-weight concentration premium** — [v1.9b feasibility](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) + [v1.9b.1a calibration](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) + [v1.9b.2–b.4 artifact design](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md); production artifact [`capWeightPremiumProxy.v1.json`](../data/ghostflow/artifacts/capWeightPremiumProxy.v1.json) (reference-aligned **2026-05-22** study); operator CSV study (`npm run ghostflow:cap-weight-premium-study`)
+- **Cap-weight concentration premium** — [v1.9b feasibility](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) + [v1.9b.1a calibration](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) + [v1.9b.2–b.4 artifact design](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) + [v1.9b.5 mapping decision](./CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md); production artifact [`capWeightPremiumProxy.v1.json`](../data/ghostflow/artifacts/capWeightPremiumProxy.v1.json) (reference-aligned **2026-05-22** study); display-only by default; v1.9b.6 score gate discouraged
 - **Passive supply / float absorption** — [v1.9c feasibility](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) + [v1.9c.1 source spike](./PASSIVE_SUPPLY_SOURCE_SPIKE.md) + [v1.9c.2–c.4 artifact](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) + [v1.9c.5 mapping](./INDEX_INCLUSION_EVENT_MAPPING_DECISION.md); display-only by default; v1.9c.6 score gate discouraged
 - **Systematic re-risking** — long-term path beyond MOCK **62** and CFTC display proxy
 - **Protection bid / correlation dispersion** — skew, implied correlation, single-stock vs index vol
@@ -155,7 +155,7 @@ Topics parked for later evaluation (no score wiring, artifacts, UI cards, or `pu
 
 - **`publicSignalCount` is 12** (equity only) — do not promote display-only or Treasury artifacts into score inputs.
 - **Treasury remains separate** — 2-card display-only lane outside composite.
-- **Score gates not approved:** v1.0c (CFTC), v1.1f (levered ETF), v1.2f (retirement), v1.4f (options), v1.7g (Treasury), v1.8i (general).
+- **Score gates not approved:** v1.0c (CFTC), v1.1f (levered ETF), v1.2f (retirement), v1.4f (options), v1.7g (Treasury), v1.8i (general), v1.9b.6 (cap-weight premium), v1.9c.6 (index inclusion).
 - **MOCK 62 / 58 / 55** unchanged per [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md).
 - **Routine refresh** must not touch `scoring.ts`, `buildSnapshot.ts`, `mockGhostflowSnapshot.ts`, or open score gates — see [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md).
 - **GhostRegime** is a separate product lane — out of GhostFlow scope.

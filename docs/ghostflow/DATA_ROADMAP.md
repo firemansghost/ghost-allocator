@@ -255,8 +255,8 @@ GhostFlow input promotion rules (all phases):
 | **v1.9b.2** | Cap-Weight Premium Artifact Design | **Done** — [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md); display-only default; docs-only |
 | **v1.9b.3** | Cap-Weight Premium Example JSON + Validator | **Done** — [`capWeightPremiumProxy.v1.example.json`](../data/ghostflow/artifacts/capWeightPremiumProxy.v1.example.json); no production JSON; not in `validate-artifacts` |
 | **v1.9b.4** | Cap-Weight Premium Production Artifact + Display Card | **Done** — reference-aligned **2026-05-22** study; display-only; `publicSignalCount` **11 → 12**; not scored |
-| **v1.9b.5** | Cap-Weight Premium Mapping Decision | **Future** — likely display-only Option A |
-| **v1.9b.6** | Cap-Weight Premium Score Gate | **Future** — discouraged; not approved |
+| **v1.9b.5** | Cap-Weight Premium Mapping Decision | **Done** — [CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md](./CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md); display-only by default; no score mapper selected |
+| **v1.9b.6** | Cap-Weight Premium Score Gate | **Future** — discouraged; **not approved** |
 | **v1.9c** | Passive Supply / Float Absorption Feasibility | **Done** — [PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md); YELLOW leaning RED; docs-only |
 | **v1.9c.1** | Passive Supply Source Spike | **Done** — [PASSIVE_SUPPLY_SOURCE_SPIKE.md](./PASSIVE_SUPPLY_SOURCE_SPIKE.md); docs-only source inventory; Lane D event path and Lane A/B quarterly context partially viable |
 | **v1.9c.2** | Passive Supply Event Artifact Design | **Done** — [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md); Lane D event proxy; docs-only |
@@ -285,7 +285,7 @@ Future research candidates inspired by passive market-structure / Mike Green rev
 
 | Candidate | Suggested phase | GhostFlow fit |
 |-----------|-----------------|---------------|
-| Cap-Weight Concentration Premium Lens | **v1.9b.4 Done** · **v1.9b.5 next** | Core — [feasibility](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) · [calibration](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) · [artifact design](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) |
+| Cap-Weight Concentration Premium Lens | **v1.9b.5 Done** — cap-weight track complete through mapping decision | Core — [feasibility](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) · [calibration](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) · [artifact design](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) · [mapping decision](./CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md) |
 | Passive Supply / Float Absorption Lens | **v1.9c.5 Done** · **v1.9c.6 discouraged** | Core — [feasibility](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) · [source spike](./PASSIVE_SUPPLY_SOURCE_SPIKE.md) · [artifact design](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) · [mapping decision](./INDEX_INCLUSION_EVENT_MAPPING_DECISION.md) |
 | Systematic Re-Risking / De-Risking Lens | v1.9d | Core — long-term MOCK retirement path |
 | Protection Bid / Correlation Dispersion Lens | v1.9e | Adjacent — avoid VIX double-count |
@@ -293,7 +293,9 @@ Future research candidates inspired by passive market-structure / Mike Green rev
 | Valuation Stress / Individual-Security CAPE Lens | v1.9g or outside GhostFlow | Outside composite |
 | Credit Catalyst / AI Financing Stress | Outside GhostFlow | Separate product lane |
 
-**Not approved:** v1.9c.6 score gate for index inclusion events. v1.9c.4 production artifact + display card shipped; **v1.9c.5 mapping decision complete** — display-only by default; no score mapper selected; `publicSignalCount` **11** unchanged.
+**Not approved:** v1.9b.6 score gate for cap-weight premium. v1.9b.4 production artifact + display card shipped; **v1.9b.5 mapping decision complete** — display-only by default; no score mapper selected; `publicSignalCount` **12** unchanged.
+
+**Not approved:** v1.9c.6 score gate for index inclusion events. v1.9c.4 production artifact + display card shipped; **v1.9c.5 mapping decision complete** — display-only by default; no score mapper selected; `publicSignalCount` **12** unchanged.
 
 ---
 

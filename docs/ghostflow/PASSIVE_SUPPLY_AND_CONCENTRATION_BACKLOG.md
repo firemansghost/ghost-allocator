@@ -74,7 +74,7 @@ Any future candidate in this backlog starts **display-only / feasibility-only** 
 
 | # | Candidate | Research value | GhostFlow semantic fit | Likely data availability | Double-count risk | Score-creep risk | Recommended next action | Suggested future phase |
 |---|-----------|------------------|------------------------|--------------------------|-------------------|------------------|-------------------------|------------------------|
-| 1 | **Cap-Weight Concentration Premium Lens** | High — tests whether weighting mechanism itself produces excess return | **High** — natural companion to existing `concentration` card | **High** — SPY/RSP and index price series are public | Low–medium vs `concentration`, `passive-share` | Medium if wired without gate | **v1.9b.2 Done** — [artifact design](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md); **v1.9b.3** or **v1.9c** next per product | **v1.9b.2 Done** · **v1.9b.3 or v1.9c next** |
+| 1 | **Cap-Weight Concentration Premium Lens** | High — tests whether weighting mechanism itself produces excess return | **High** — natural companion to existing `concentration` card | **High** — SPY/RSP and index price series are public | Low–medium vs `concentration`, `passive-share` | Medium if wired without gate | **v1.9b.5 Done** — [mapping decision](./CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md); cap-weight track complete through mapping decision; v1.9b.6 discouraged / not approved | **v1.9b.5 Done** — display-only by default |
 | 2 | **Passive Supply / Float Absorption Lens** | High — supply-side complement to demand/flow proxies | **High** — passive market-structure native | Medium — event data fragmented; aggregates harder | Medium vs `etf-flow`, buyback narrative | High if scored naively | **v1.9c.5 Done** — [mapping decision](./INDEX_INCLUSION_EVENT_MAPPING_DECISION.md); display-only by default | **v1.9c.6** score gate discouraged / not approved |
 | 3 | **Systematic Re-Risking / De-Risking Lens** | High — addresses MOCK trust gap on `systematicStrategyPressure` | **Medium–high** — passive flow theme; semantic rename required | Medium — vol/trend public; true CTA exposure harder | Medium vs VIX, CFTC display card | **High** — direct MOCK replacement temptation | Future feasibility; long-term MOCK retirement path only | **v1.9d** |
 | 4 | **Protection Bid / Correlation Dispersion Lens** | Medium–high — options-market uncertainty framing | **Medium** — vol/options adjacent; distinct from VIX amplifier | Medium — VIX/SKEW public; implied correlation harder | **High** vs score-fed VIX and OCC display proxy | High without reweight decision | Future feasibility; display-only default; avoid VIX double-count | **v1.9e** |
@@ -173,15 +173,16 @@ Any future candidate in this backlog starts **display-only / feasibility-only** 
 - Event-driven / display-only by default
 - No score wiring
 - **v1.9b.4 complete** — production JSON + display-only card; reference-aligned **2026-05-22** study; `publicSignalCount` **12**; not scored
+- **v1.9b.5 complete** — [mapping decision](./CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md); display-only by default; cap-weight track complete through mapping decision; v1.9b.6 discouraged / not approved
 - **v1.9c.3 scaffold complete** — example JSON + validator/types/tests
 - **v1.9c.4a operator provenance checklist complete** — [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) §14
 - **v1.9c.4b operator intake memo complete** — [INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md](./INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md); 4 rows transcribed
 - **v1.9c.5 complete** — [mapping decision](./INDEX_INCLUSION_EVENT_MAPPING_DECISION.md); display-only by default; no score mapper selected
-- **Next product step:** **v1.9c.6** score gate — discouraged / not approved
+- **Next product step:** next GhostFlow priority remains **product-owner selected** (v1.9b.6 cap-weight score gate discouraged / not approved)
 
 **Completed phases:** **v1.9c** feasibility · **v1.9c.1** source spike · **v1.9c.2** artifact design · **v1.9c.3** example/validator scaffolding · **v1.9c.4a** operator provenance checklist · **v1.9c.4b** operator intake · **v1.9c.4** production artifact + display card · **v1.9c.5** mapping decision
 
-**Suggested future phase:** **v1.9b.5** cap-weight mapping decision (v1.9b.6 score gate discouraged)
+**Cap-weight track:** complete through **v1.9b.5** mapping decision. **v1.9b.6** score gate remains discouraged and not approved. Next GhostFlow priority remains **product-owner selected**.
 
 ---
 
@@ -380,8 +381,8 @@ Any future candidate in this backlog starts **display-only / feasibility-only** 
 | **v1.9b.2** | Cap-Weight Premium Artifact Design | **Done** — [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) |
 | **v1.9b.3** | Cap-Weight Premium Example JSON + Validator | **Done** — [`capWeightPremiumProxy.v1.example.json`](../data/ghostflow/artifacts/capWeightPremiumProxy.v1.example.json) |
 | **v1.9b.4** | Cap-Weight Premium Production Artifact + Display Card | **Done** — display-only; reference-aligned **2026-05-22**; `publicSignalCount` **12**; not scored |
-| **v1.9b.5** | Cap-Weight Premium Mapping Decision | **Future** — likely display-only Option A |
-| **v1.9b.6** | Cap-Weight Premium Score Gate | **Future** — discouraged / not approved |
+| **v1.9b.5** | Cap-Weight Premium Mapping Decision | **Done** — [CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md](./CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md); display-only by default |
+| **v1.9b.6** | Cap-Weight Premium Score Gate | **Future** — discouraged / **not approved** |
 | **v1.9c** | Passive Supply / Float Absorption Feasibility | **Done** — [PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) |
 | **v1.9c.1** | Passive Supply Source Spike | **Done** — [PASSIVE_SUPPLY_SOURCE_SPIKE.md](./PASSIVE_SUPPLY_SOURCE_SPIKE.md); docs-only source verification |
 | **v1.9c.2** | Passive Supply Event Artifact Design | **Done** — [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) |
@@ -427,6 +428,6 @@ None of the future phases above are approved for score gates or score wiring. v1
 
 **v1.9c.4** — Index Inclusion Event Production Artifact + Display Card — **Done** ([design memo](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md)); display-only; not scored.
 
-**Candidate next:** **v1.9b.5** cap-weight mapping decision (v1.9b.6 score gate discouraged / not approved).
+**Cap-weight track:** complete through **v1.9b.5** mapping decision ([memo](./CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md)). **v1.9b.6** score gate remains discouraged and not approved. Next GhostFlow priority remains **product-owner selected**.
 
-Real operator run validated SPY/RSP path (exit **0**, adj-close, 5,818 aligned days). Longer-horizon cap-weight premium is elevated; short horizons are mixed — design any future display card with regime caveats.
+Real operator run validated SPY/RSP path (exit **0**, adj-close, 5,803 aligned days through 2026-05-22). Longer-horizon cap-weight premium is elevated; short horizons remain regime-dependent — display card copy reflects this framing.
