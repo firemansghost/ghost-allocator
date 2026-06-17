@@ -18,7 +18,7 @@ Living roadmap for GhostFlow score-input sourcing, phase history, and open quest
 
 ### Current dashboard state (v1.7 — after v1.7f)
 
-Release checkpoint summary (detail in [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md)). Equity Research Composite scores unchanged from v1.4d reference snapshot. Treasury Plumbing is a **separate** display-only lane — **not** included in `publicSignalCount` (do **not** combine equity **11** + Treasury **2** into 13).
+Release checkpoint summary (detail in [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md)). Equity Research Composite scores unchanged from v1.4d reference snapshot. Treasury Plumbing is a **separate** display-only lane — **not** included in `publicSignalCount` (do **not** combine equity **12** + Treasury **2** into 14).
 
 #### Equity Research Composite (`buildSnapshot` lane)
 
@@ -30,7 +30,7 @@ Release checkpoint summary (detail in [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_C
 | **MOCK score inputs** | **3** | `systematicStrategyPressure` **62**, `retirementFlowPressureProxy` **58**, `leveredEtfRebalancePressure` **55** |
 | **DISPLAY-ONLY public artifacts** | **4** | [`systematic-flow`](./CFTC_TFF_MAPPING_DECISION.md), [`levered-etf-rebalance`](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md), [`retirement-asset-growth`](./RETIREMENT_FLOW_MAPPING_DECISION.md), [`options-activity-proxy`](./OPTIONS_ACTIVITY_MAPPING_DECISION.md) — equity signal grid only; not in composite |
 | **PLACEHOLDER cards** | **0** | When options activity artifact validates; see retired `odte-options` note below |
-| **`publicSignalCount`** | **11** | Six score-fed public cards + five display-only public signals in `meta.publicSignals` (plus derived context card `distance-65`, separate from this count) |
+| **`publicSignalCount`** | **12** | Six score-fed public cards + six display-only public signals in `meta.publicSignals` (plus derived context card `distance-65`, separate from this count) |
 | **Score-wiring gates** | — | **v1.0c** (CFTC), **v1.1f** (levered ETF), **v1.2f** (retirement), **v1.4f** (options) — product-approved only; discouraged by default |
 
 #### Treasury Plumbing (separate lane — outside composite)
@@ -191,7 +191,7 @@ GhostFlow input promotion rules (all phases):
 
 ## 5. Proposed implementation phases
 
-*Historical rows below show incremental milestones (e.g. `publicSignals` +7, `publicSignalCount` +8, count **9** at v1.2d). **Current equity `publicSignalCount` is **11** (v1.9c.4+).*
+*Historical rows below show incremental milestones (e.g. `publicSignals` +7, `publicSignalCount` +8, count **9** at v1.2d). **Current equity `publicSignalCount` is **12** (v1.9b.4+).*
 
 | Phase | Deliverable | Code / data changes |
 |-------|-------------|---------------------|
@@ -254,7 +254,7 @@ GhostFlow input promotion rules (all phases):
 | **v1.9b.1a** | Cap-Weight Premium Calibration Study | **Done** — [CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md); real SPY/RSP operator run; docs-only |
 | **v1.9b.2** | Cap-Weight Premium Artifact Design | **Done** — [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md); display-only default; docs-only |
 | **v1.9b.3** | Cap-Weight Premium Example JSON + Validator | **Done** — [`capWeightPremiumProxy.v1.example.json`](../data/ghostflow/artifacts/capWeightPremiumProxy.v1.example.json); no production JSON; not in `validate-artifacts` |
-| **v1.9b.4** | Cap-Weight Premium Production Artifact + Display Card | **Future** — product-gated; `publicSignalCount` decision |
+| **v1.9b.4** | Cap-Weight Premium Production Artifact + Display Card | **Done** — reference-aligned **2026-05-22** study; display-only; `publicSignalCount` **11 → 12**; not scored |
 | **v1.9b.5** | Cap-Weight Premium Mapping Decision | **Future** — likely display-only Option A |
 | **v1.9b.6** | Cap-Weight Premium Score Gate | **Future** — discouraged; not approved |
 | **v1.9c** | Passive Supply / Float Absorption Feasibility | **Done** — [PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md); YELLOW leaning RED; docs-only |
@@ -285,7 +285,7 @@ Future research candidates inspired by passive market-structure / Mike Green rev
 
 | Candidate | Suggested phase | GhostFlow fit |
 |-----------|-----------------|---------------|
-| Cap-Weight Concentration Premium Lens | **v1.9b.3 Done** · **v1.9b.4 next** | Core — [feasibility](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) · [calibration](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) · [artifact design](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) |
+| Cap-Weight Concentration Premium Lens | **v1.9b.4 Done** · **v1.9b.5 next** | Core — [feasibility](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) · [calibration](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) · [artifact design](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) |
 | Passive Supply / Float Absorption Lens | **v1.9c.5 Done** · **v1.9c.6 discouraged** | Core — [feasibility](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) · [source spike](./PASSIVE_SUPPLY_SOURCE_SPIKE.md) · [artifact design](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) · [mapping decision](./INDEX_INCLUSION_EVENT_MAPPING_DECISION.md) |
 | Systematic Re-Risking / De-Risking Lens | v1.9d | Core — long-term MOCK retirement path |
 | Protection Bid / Correlation Dispersion Lens | v1.9e | Adjacent — avoid VIX double-count |
@@ -304,7 +304,7 @@ Future research candidates inspired by passive market-structure / Mike Green rev
 3. ~~**Levered ETF scope:**~~ **Resolved (v1.1a–b):** Tier-1 six-ticker universe; single-session `underlyingReturnPct`; formula in [LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md](./LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md). ~~**Levered ETF mapping (v1.1e):**~~ **Resolved:** [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md) — display-only; MOCK **55**. ~~**Levered ETF calibration (v1.1e-calibration):**~~ **Resolved:** [LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md](./LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md) — full fixed-current-AUM return-sensitivity run complete; **v1.1f** score wiring gated on product approval only.
 4. **0DTE data path:** **Display proxy shipped (v1.4d–e):** OCC Index/Others via `options-activity-proxy` — [mapping decision](./OPTIONS_ACTIVITY_MAPPING_DECISION.md) locks display-only; true 0DTE/GEX → paid/vendor; **v1.4f** score gate discouraged (VIX overlap).
 5. ~~**Retirement flows:**~~ **Resolved (v1.2a–b):** [RETIREMENT_FLOW_FEASIBILITY.md](./RETIREMENT_FLOW_FEASIBILITY.md) + [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md) — **YELLOW**; ICI Retirement Market primary; exact ICI table/rows → **v1.2c** operator extract; composite membership → **v1.2d** decision.
-6. **Treasury Plumbing (v1.7a–f):** [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md) · [TREASURY_PLUMBING_MAPPING_DECISION.md](./TREASURY_PLUMBING_MAPPING_DECISION.md) — production artifacts, UI lane, and **display-only mapping decision** complete. Open: optional **v1.7f-calibration**; **v1.7g** score gate discouraged. Treasury lane **separate from equity composite**; equity `publicSignalCount` **11** unchanged by Treasury refresh.
+6. **Treasury Plumbing (v1.7a–f):** [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md) · [TREASURY_PLUMBING_MAPPING_DECISION.md](./TREASURY_PLUMBING_MAPPING_DECISION.md) — production artifacts, UI lane, and **display-only mapping decision** complete. Open: optional **v1.7f-calibration**; **v1.7g** score gate discouraged. Treasury lane **separate from equity composite**; equity `publicSignalCount` **12** unchanged by Treasury refresh.
 
 ---
 

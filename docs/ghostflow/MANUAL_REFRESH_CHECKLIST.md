@@ -11,12 +11,12 @@ Field-level quick reference for manually refreshing GhostFlow public-data artifa
 | Class | Items | Affects score? | Operator note |
 |-------|-------|----------------|---------------|
 | **A — Score-fed equity** | vol-regime, etf-flow, passive-share, active-index-flow, concentration, breadth | **Yes** | Can change Composite / Passive / Structural |
-| **B — Display-only equity** | systematic-flow, levered-etf-rebalance, retirement-asset-growth, options-activity-proxy, index-inclusion-events | **No** | MOCK **62 / 55 / 58** unchanged |
+| **B — Display-only equity** | systematic-flow, levered-etf-rebalance, retirement-asset-growth, options-activity-proxy, index-inclusion-events, cap-weight-premium | **No** | MOCK **62 / 55 / 58** unchanged |
 | **C — Treasury lane** | treasury-futures-positioning-proxy, treasury-long-end-income-lens | **No** | Separate lane; not in `publicSignalCount` |
 | **D — Derived/context** | modelZoneProximity, distance-65 | Partial | Refresh **passive-share** only — do not edit separately |
 | **E — MOCK score inputs** | systematic **62**, retirement **58**, levered **55** | Static | **Do not edit** `mockGhostflowSnapshot.ts` |
 
-**Equity dashboard coverage (v1.9c.4):** **6** score-fed public artifacts · **5** display-only public artifact cards (CFTC `systematic-flow`, levered `levered-etf-rebalance`, retirement `retirement-asset-growth`, OCC `options-activity-proxy`, index inclusion `index-inclusion-events`) · **`publicSignalCount` 11** when all validate · **0** placeholder cards when artifacts validate. Display-only equity cards do **not** refresh or change the Research Composite — Composite **62** / Passive **58** / Structural **66** and MOCK **62** / **55** / **58** and VIX still drive scored sub-inputs. Quarterly retirement freshness **caution** (46–90 days after release) reflects normal ICI quarterly cadence — not a failed feed or score problem.
+**Equity dashboard coverage (v1.9b.4):** **6** score-fed public artifacts · **6** display-only public artifact cards (CFTC `systematic-flow`, levered `levered-etf-rebalance`, retirement `retirement-asset-growth`, OCC `options-activity-proxy`, index inclusion `index-inclusion-events`, cap-weight `cap-weight-premium`) · **`publicSignalCount` 12** when all validate · **0** placeholder cards when artifacts validate. Display-only equity cards do **not** refresh or change the Research Composite — Composite **62** / Passive **58** / Structural **66** and MOCK **62** / **55** / **58** and VIX still drive scored sub-inputs. Quarterly retirement freshness **caution** (46–90 days after release) reflects normal ICI quarterly cadence — not a failed feed or score problem.
 
 **Treasury Plumbing (separate lane):** Two production artifacts (v1.7d–d.1) in display-only UI lane (v1.7e) — **not scored**, **not** in `publicSignalCount`, **no** equity composite merge ([mapping decision](./TREASURY_PLUMBING_MAPPING_DECISION.md)). Treasury artifact refresh updates the **Treasury Plumbing display lane only** — it does **not** affect Composite / Passive / Structural scores and does **not** change `publicSignalCount`. Weekly CFTC: [`treasuryFuturesPositioningProxy.v1.json`](../data/ghostflow/artifacts/treasuryFuturesPositioningProxy.v1.json). Daily FRED: [`treasuryLongEndIncomeLens.v1.json`](../data/ghostflow/artifacts/treasuryLongEndIncomeLens.v1.json) — six-series common-date extract ([BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md](./BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md)); **no forward-fill**. Caveats: futures proxy is public CFTC positioning only — **not** full basis-trade measurement; income lens is **not** investment advice, bond-buying, or duration-allocation advice.
 
@@ -102,6 +102,32 @@ Treasury lane: no structured freshness bands today — dates on cards only. See 
 | *(example)* `russell-2025-prelim-add-XYZ` | FTSE Russell | *(official public URL)* | YYYY-MM-DD | YYYY-MM-DD or null | YYYY-MM-DD | `ftse_russell` | Russell 2000 | XYZ | Example Corp | `add` | `reconstitution` | `high` | Preliminary list; subject to change | true |
 
 **Design reference:** [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) · [DATA_ROADMAP.md](./DATA_ROADMAP.md) v1.9c.4 / v1.9c.4a
+
+---
+
+## Cap-Weight Premium Proxy — manual refresh discipline
+
+**Status:** **Live (v1.9b.4)** — production artifact + display-only dashboard card.
+
+| Item | Detail |
+|------|--------|
+| **Artifact file** | [`data/ghostflow/artifacts/capWeightPremiumProxy.v1.json`](../../data/ghostflow/artifacts/capWeightPremiumProxy.v1.json) |
+| **Example only** | [`capWeightPremiumProxy.v1.example.json`](../../data/ghostflow/artifacts/capWeightPremiumProxy.v1.example.json) — `designOnly: true`; **never promote to production** |
+| **Card id** | `cap-weight-premium` — **DISPLAY ONLY** |
+| **Scoring** | **Not scored**; no `publicPassiveInputKey`; no score fields |
+| **Study script** | `npm run ghostflow:cap-weight-premium-study` — operator CSVs only; filter to `Date <= GHOSTFLOW_REFERENCE_AS_OF` before transcribing |
+| **Production values** | Reference-aligned **2026-05-22** v1.9b.4a study — **not** June 15 calibration headline values |
+
+**Refresh cadence:** Weekly manual refresh when operator updates SPY/RSP adjusted-close CSVs.
+
+**Operator discipline:**
+
+- Transcribe from study output JSON after operator review — do not runtime-fetch Yahoo/Stooq/Marketstack in production path
+- Keep `asOf` and `observations.latestDate` ≤ `GHOSTFLOW_REFERENCE_AS_OF` unless reference date is explicitly bumped
+- Keep `priceColumnUsed` **adjusted / adjusted**
+- Do **not** add score fields, `publicPassiveInputKey`, or `basketScore`
+
+**Design reference:** [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) · [DATA_ROADMAP.md](./DATA_ROADMAP.md) v1.9b.4
 
 ---
 
@@ -369,7 +395,7 @@ Treasury lane: no structured freshness bands today — dates on cards only. See 
 - [ ] Update **one or both** Treasury production JSON files only
 - [ ] Confirm **no** equity score-fed or display-only files changed unless intentional
 - [ ] Confirm Composite / Passive / Structural **unchanged** (Treasury lane only)
-- [ ] Confirm `publicSignalCount` **11** unchanged (Treasury refresh does not affect equity count)
+- [ ] Confirm `publicSignalCount` **12** unchanged (Treasury refresh does not affect equity count)
 - [ ] Run `npm run ghostflow:check`
 
 ---
@@ -381,8 +407,8 @@ Treasury lane: no structured freshness bands today — dates on cards only. See 
 - Signal presentation (`lib/ghostflow/signalPresentation.ts`)
 - Freshness thresholds (`lib/ghostflow/artifactFreshness.ts`, `lib/ghostflow/freshnessSummary.ts`)
 - [`mockGhostflowSnapshot.ts`](../../data/ghostflow/mockGhostflowSnapshot.ts) — MOCK **62 / 58 / 55** inputs
-- `publicSignalCount` — equity grid stays **11**; do not promote display-only or Treasury artifacts into score inputs
-- Display-only promotion — never wire systematic / levered / retirement / options / index-inclusion into score or `raw.signals`
+- `publicSignalCount` — equity grid stays **12**; do not promote display-only or Treasury artifacts into score inputs
+- Display-only promotion — never wire systematic / levered / retirement / options / index-inclusion / cap-weight into score or `raw.signals`
 - Treasury score/grid promotion — Treasury lane stays separate 2-card display-only
 - `mappingStatus: final` — requires separate decision memo; routine refresh keeps **not_final** where applicable
 - Cosmetic `dataQuality` changes — do not bump labels just to make cards look better

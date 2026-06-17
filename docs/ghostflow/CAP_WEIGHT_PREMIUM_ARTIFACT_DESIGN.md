@@ -1,20 +1,17 @@
 # Cap-Weight Premium Proxy — Artifact Design (GhostFlow v1.9b.2)
 
-**Status:** **v1.9b.2 complete** · **v1.9b.3 complete** — design memo + example JSON + validator/types + tests. **Not** scored. No production artifact, UI card, `validate-artifacts` registration, or `buildSnapshot` merge.
+**Status:** **v1.9b.4 complete** · **v1.9b.3 complete** — design memo + example JSON + validator/types + tests + production JSON + display card. **Not** scored. No `publicPassiveInputKey` or score wiring.
 
 **Prior work:** [CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) (v1.9b, **YELLOW leaning GREEN**) · [CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) (v1.9b.1a, real operator run exit **0**)
 
 **Research module:** [`capWeightPremiumHistory.ts`](../lib/ghostflow/research/capWeightPremiumHistory.ts) · **Study script:** [`cap-weight-premium-study.ts`](../scripts/ghostflow/cap-weight-premium-study.ts) — research only; not in `ghostflow:check`
 
-**Shipped files (v1.9b.3):**
+**Shipped files (v1.9b.3 / v1.9b.4):**
 
 - Example: [`capWeightPremiumProxy.v1.example.json`](../data/ghostflow/artifacts/capWeightPremiumProxy.v1.example.json) (`designOnly: true`, `dataQuality: manual_unverified`)
-- Library: [`capWeightPremiumProxy.ts`](../lib/ghostflow/artifacts/capWeightPremiumProxy.ts) — `validateCapWeightPremiumProxyArtifact`; no production loader
-- Tests: [`capWeightPremiumProxy.test.ts`](../lib/ghostflow/__tests__/capWeightPremiumProxy.test.ts)
-
-**Future files (v1.9b.4+):**
-
-- Production: `data/ghostflow/artifacts/capWeightPremiumProxy.v1.json`
+- Production: [`capWeightPremiumProxy.v1.json`](../data/ghostflow/artifacts/capWeightPremiumProxy.v1.json) — reference-aligned **2026-05-22** v1.9b.4a study; `publishedAt` **2026-06-17**
+- Library: [`capWeightPremiumProxy.ts`](../lib/ghostflow/artifacts/capWeightPremiumProxy.ts) — validator, loader, formatters, freshness, `buildSnapshot` display merge
+- Tests: [`capWeightPremiumProxy.test.ts`](../lib/ghostflow/__tests__/capWeightPremiumProxy.test.ts) · [`capWeightPremiumDisplay.test.ts`](../lib/ghostflow/__tests__/capWeightPremiumDisplay.test.ts)
 
 GhostRegime, GhostYield, Models, and builder are out of scope.
 
@@ -27,15 +24,13 @@ GhostRegime, GhostYield, Models, and builder are out of scope.
 | Document type | Artifact design memo (v1.9b.2) + example/validator scaffolding (v1.9b.3) |
 | Score changes | **None** — Composite **62** · Passive **58** · Structural **66** unchanged |
 | Example artifact JSON | **Shipped (v1.9b.3)** — `designOnly: true`; not in `validate-artifacts` |
-| Production artifact JSON | **None** — deferred to v1.9b.4 |
-| UI / components | **None** |
-| Runtime / live fetching | **None** |
-| `buildSnapshot` merge | **None** |
-| `publicPassiveInputKey` | **None** |
-| Score gates opened | **No** |
-| `publicSignalCount` | **10** (equity) — unchanged |
-| Treasury lane | **2** separate display-only cards — unchanged |
-| **v1.9b.4** | **Future** — production JSON + display integration; product-gated |
+| Production artifact JSON | **Shipped (v1.9b.4)** — reference-aligned **2026-05-22** study; in `validate-artifacts` |
+| UI / components | **Shipped (v1.9b.4)** — display-only card `cap-weight-premium` |
+| `buildSnapshot` merge | **Shipped (v1.9b.4)** — display-only; no score merge |
+| `publicSignalCount` | **12** (equity) — v1.9b.4 display card added (**11 → 12**) |
+| **v1.9b.4** | **Done** — production JSON + display integration; not scored |
+| **v1.9b.5** | **Future** — mapping decision |
+| **v1.9b.6** | **Future** — score gate discouraged / not approved |
 
 ---
 

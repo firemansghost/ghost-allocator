@@ -56,7 +56,7 @@ assert.strictEqual(indexEvents!.artifactPublishedAt, '2026-06-16');
 const scoredIndexEvents = scored.signals.find((s) => s.id === 'index-inclusion-events')!;
 assert.strictEqual(signalCardBadgeLabelForSignal(scoredIndexEvents, 'public'), 'DISPLAY ONLY');
 
-assert.strictEqual(meta.publicSignalCount, 11);
+assert.strictEqual(meta.publicSignalCount, 12);
 assert.ok(meta.publicSignals.some((s) => s.signalId === 'index-inclusion-events'));
 assert.ok(!meta.publicPassiveInputKeys?.includes('index-inclusion-events' as never));
 

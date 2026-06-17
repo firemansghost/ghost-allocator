@@ -2,8 +2,9 @@
 
 **GhostFlow docs:** [README](./README.md) · [Current state](./GHOSTFLOW_CURRENT_STATE.md) · [Roadmap](./DATA_ROADMAP.md)
 
-**Status:** Research / calibration results memo only — docs-only; real operator-run output; no score, artifact, UI, or runtime changes.  
-**Run date:** 2026-06-15 (via `npm run ghostflow:cap-weight-premium-study`)  
+**Status:** Research / calibration results memo only — docs-only; real operator-run output; production artifact v1.9b.4 uses reference-aligned **2026-05-22** study (v1.9b.4a), **not** the June 15 headline run below.  
+**Run date:** 2026-06-15 (via `npm run ghostflow:cap-weight-premium-study`) — calibration reference only  
+**Production transcription:** v1.9b.4a reference-aligned run through **2026-05-22** — see [`capWeightPremiumProxy.v1.json`](../data/ghostflow/artifacts/capWeightPremiumProxy.v1.json)  
 **Related:** [CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) · [PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md](./PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md) · [`cap-weight-premium-study.ts`](../scripts/ghostflow/cap-weight-premium-study.ts) · [`capWeightPremiumHistory.ts`](../lib/ghostflow/research/capWeightPremiumHistory.ts)
 
 GhostRegime, GhostYield, Models, and builder are out of scope. This study does **not** change the Research Composite.

@@ -1,0 +1,67 @@
+{
+  "artifactVersion": "1",
+  "signalId": "cap-weight-premium-proxy",
+  "asOf": "2026-05-22",
+  "publishedAt": "2026-06-17",
+  "source": {
+    "name": "SPY + RSP adjusted-close CSV (operator study)",
+    "operatorSource": "Operator-filtered Yahoo Finance adjusted-close CSVs through 2026-05-22; transcribed via cap-weight-premium-study",
+    "retrievedAt": "2026-06-17T00:00:00Z",
+    "method": "operator_csv_adj_close",
+    "note": "Reference-aligned v1.9b.4a study output (asOf 2026-05-22). Not a runtime feed; manual transcription from local study JSON."
+  },
+  "observationType": "spy_rsp_cap_weight_premium_snapshot",
+  "seriesDefinition": "spy_rsp_adj_close_cap_weight_premium_v1",
+  "updateFrequency": "weekly",
+  "dataQuality": "manual_unverified",
+  "methodology": {
+    "inputDescription": "Operator-provided SPY and RSP daily CSV with Date and Adj Close columns filtered to Date <= 2026-05-22",
+    "alignment": "Inner-join on common dates only",
+    "noForwardFill": true,
+    "spreadDefinition": "SPY total return minus RSP total return over rolling windows",
+    "percentileDefinition": "Percentile of current spread or ratio versus aligned history since overlap start",
+    "noCausalAttribution": true,
+    "noScoreMapping": true
+  },
+  "caveats": [
+    "SPY/RSP proxy for cap-weight premium; does not estimate passive-flow causality and is not a trading signal.",
+    "Not an AI-bubble signal; not trading advice or allocation guidance",
+    "Adjusted-close data required for production-quality artifact",
+    "ETF fees, tracking drift, and RSP quarterly rebalance mechanics add noise",
+    "Display-only by default; no Research Composite impact",
+    "mappingStatus not_final — no score mapping"
+  ],
+  "observations": {
+    "latestDate": "2026-05-22",
+    "spyAdjustedClose": 745.64,
+    "rspAdjustedClose": 206.580266,
+    "spyRspRatio": 3.6094,
+    "ratioPercentile": 99.6,
+    "spread1M": 3.21,
+    "spread1MPercentile": 97.3,
+    "spread3M": 6.79,
+    "spread3MPercentile": 98.6,
+    "spread6M": 0.23,
+    "spread6MPercentile": 51.6,
+    "spread1Y": 9.76,
+    "spread1YAnnualized": 9.77,
+    "spread1YPercentile": 92.7,
+    "spread3Y": 33.83,
+    "spread3YAnnualized": 7.94,
+    "spread3YPercentile": 97.4,
+    "spread5Y": 42.74,
+    "spread5YAnnualized": 5.59,
+    "spread5YPercentile": 99.8,
+    "spyCurrentDrawdown": -0.34,
+    "rspCurrentDrawdown": 0,
+    "drawdownDivergence": -0.34,
+    "alignedObservationCount": 5803,
+    "overlapStart": "2003-05-01",
+    "overlapEnd": "2026-05-22",
+    "priceColumnUsed": {
+      "spy": "adjusted",
+      "rsp": "adjusted"
+    },
+    "mappingStatus": "not_final"
+  }
+}

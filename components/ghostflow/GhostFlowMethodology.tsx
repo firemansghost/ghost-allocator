@@ -102,9 +102,9 @@ export function GhostFlowMethodology({
             breadth), <strong className="text-zinc-300">one derived structural input</strong> (model-zone proximity from ICI
             index share), and <strong className="text-zinc-300">three static MOCK passive inputs</strong> (systematic{' '}
             <strong className="text-zinc-300">62</strong>, retirement-flow <strong className="text-zinc-300">58</strong>,
-            levered ETF <strong className="text-zinc-300">55</strong>). Five <strong className="text-zinc-300">display-only public artifact
+            levered ETF <strong className="text-zinc-300">55</strong>). Six <strong className="text-zinc-300">display-only public artifact
             cards</strong> (CFTC TFF positioning, levered ETF rebalance estimate, retirement asset growth, OCC index options
-            intensity from Daily Volume Statistics, index inclusion event proxy) show measured context but do <strong className="text-zinc-300">not</strong>{' '}
+            intensity from Daily Volume Statistics, index inclusion event proxy, cap-weight premium proxy) show measured context but do <strong className="text-zinc-300">not</strong>{' '}
             feed the composite. The scored options/vol input remains CBOE VIX — not the OCC activity card (not 0DTE/GEX). The ICI
             index share score
             input is not a market-wide passive-share estimate.
@@ -631,12 +631,12 @@ export function GhostFlowMethodology({
           <li>Does not provide buy/sell recommendations or allocation advice.</li>
           <li>Does not treat model-stress zones or ~65% reference levels as guaranteed outcomes or precise tripwires.</li>
           <li>
-            Does not use live feeds. Six score-fed manual public artifacts plus five display-only public cards and static MOCK
+            Does not use live feeds. Six score-fed manual public artifacts plus six display-only public cards and static MOCK
             composite inputs elsewhere.
           </li>
           <li>
             Does not treat display-only CFTC, levered ETF rebalance, retirement asset-growth, OCC index options intensity,
-            or index inclusion event proxy cards as Research Composite inputs — MOCK <strong className="text-zinc-300">62</strong>,{' '}
+            index inclusion event proxy, or cap-weight premium proxy cards as Research Composite inputs — MOCK <strong className="text-zinc-300">62</strong>,{' '}
             <strong className="text-zinc-300">55</strong>, and <strong className="text-zinc-300">58</strong> still drive
             those passive sub-inputs; VIX still drives options/vol.
           </li>

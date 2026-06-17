@@ -16,6 +16,7 @@ import { validateLeveredEtfRebalancePressureArtifact } from '../../lib/ghostflow
 import { validateRetirementFlowPressureProxyArtifact } from '../../lib/ghostflow/artifacts/retirementFlowPressureProxy';
 import { validateOptionsActivityProxyArtifact } from '../../lib/ghostflow/artifacts/optionsActivityProxy';
 import { validateIndexInclusionEventProxyArtifact } from '../../lib/ghostflow/artifacts/indexInclusionEventProxy';
+import { validateCapWeightPremiumProxyArtifact } from '../../lib/ghostflow/artifacts/capWeightPremiumProxy';
 import { validateTreasuryFuturesPositioningProxyArtifact } from '../../lib/ghostflow/artifacts/treasuryFuturesPositioningProxy';
 import { validateTreasuryLongEndIncomeLensArtifact } from '../../lib/ghostflow/artifacts/treasuryLongEndIncomeLens';
 import { GHOSTFLOW_REFERENCE_AS_OF } from '../../lib/ghostflow/reference';
@@ -234,6 +235,25 @@ function main(): void {
     const o = indexInclusionRules.artifact.observations;
     console.log(
       `GhostFlow rules: index-inclusion-event-proxy OK (${o.eventCount} events, window ${o.eventWindowStart}–${o.eventWindowEnd}, mappingStatus ${o.mappingStatus}, asOf ${indexInclusionRules.artifact.asOf}, published ${indexInclusionRules.artifact.publishedAt})`
+    );
+  }
+
+  const capWeightPremiumPath = join(
+    root,
+    'data/ghostflow/artifacts/capWeightPremiumProxy.v1.json'
+  );
+  const capWeightPremiumRules = validateCapWeightPremiumProxyArtifact(
+    loadJson(capWeightPremiumPath),
+    { mode: 'production', referenceAsOf: GHOSTFLOW_REFERENCE_AS_OF }
+  );
+  if (!capWeightPremiumRules.ok) {
+    failed = true;
+    console.error('GhostFlow rules failed for cap-weight-premium-proxy:');
+    for (const err of capWeightPremiumRules.errors) console.error(`  - ${err}`);
+  } else {
+    const o = capWeightPremiumRules.artifact.observations;
+    console.log(
+      `GhostFlow rules: cap-weight-premium-proxy OK (latest ${o.latestDate}, 5Y percentile ${o.spread5YPercentile}, ratio percentile ${o.ratioPercentile}, mappingStatus ${o.mappingStatus}, asOf ${capWeightPremiumRules.artifact.asOf}, published ${capWeightPremiumRules.artifact.publishedAt})`
     );
   }
 
