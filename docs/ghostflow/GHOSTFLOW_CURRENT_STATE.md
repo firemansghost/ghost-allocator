@@ -27,7 +27,7 @@ Canonical inventory after the **v1.7** release checkpoint. Theme for v1.8: **Gho
 | [`buildSnapshot.ts`](../../lib/ghostflow/buildSnapshot.ts) | Merges mock snapshot + validated public artifacts before scoring |
 | [`scoring.ts`](../../lib/ghostflow/scoring.ts) | Composite / Passive / Structural sub-scores and band |
 | [`GhostFlowSignalGrid`](../../components/ghostflow/GhostFlowSignalGrid.tsx) | Equity/public signal cards (score-fed + display-only + derived context) |
-| **`publicSignalCount`** | **11** — six score-fed public cards + five display-only public signals in `meta.publicSignals` |
+| **`publicSignalCount`** | **12** — six score-fed public cards + six display-only public signals in `meta.publicSignals` |
 
 Derived context card `distance-65` appears in the grid but is **not** counted in `publicSignalCount`.
 
@@ -39,7 +39,7 @@ Derived context card `distance-65` appears in the grid but is **not** counted in
 | [`GhostFlowTreasuryPlumbing`](../../components/ghostflow/GhostFlowTreasuryPlumbing.tsx) | Two-card display-only section on dashboard |
 | **Card count** | **2** production-backed display-only cards |
 
-**Counting rule:** Equity `publicSignalCount` = **11**. Treasury display lane = **2** cards. **Do not** combine into 13. Treasury is outside `raw.signals`, `meta.publicSignals`, and [`PUBLIC_ARTIFACT_SIGNAL_IDS`](../../lib/ghostflow/signalPresentation.ts).
+**Counting rule:** Equity `publicSignalCount` = **12**. Treasury display lane = **2** cards. **Do not** combine into 14. Treasury is outside `raw.signals`, `meta.publicSignals`, and [`PUBLIC_ARTIFACT_SIGNAL_IDS`](../../lib/ghostflow/signalPresentation.ts).
 
 ---
 
@@ -51,7 +51,7 @@ Derived context card `distance-65` appears in the grid but is **not** counted in
 | **Passive Pressure** | **58** |
 | **Structural Fragility** | **66** |
 | **Band** | *Crowded / Reflexive* |
-| **`publicSignalCount`** | **11** (equity only) |
+| **`publicSignalCount`** | **12** (equity only) |
 | **Treasury cards** | **2** separate display-only cards |
 | **Treasury scored** | **No** — does not affect Composite / Passive / Structural |
 
@@ -74,7 +74,7 @@ Six artifacts merge into the Research Composite via `buildSnapshot`. All in `gho
 
 ## Display-only equity/public cards
 
-Five artifacts produce signal cards in the equity/public grid. **Not** merged into composite scores. Related passive score slots remain **MOCK** (see below).
+Six artifacts produce signal cards in the equity/public grid. **Not** merged into composite scores. Related passive score slots remain **MOCK** (see below).
 
 | Signal id | Source | dataQuality | Why display-only | Status | Open issue |
 |-----------|--------|-------------|------------------|--------|------------|
@@ -83,6 +83,7 @@ Five artifacts produce signal cards in the equity/public grid. **Not** merged in
 | `retirement-asset-growth` | ICI Retirement Market Table 1 structural assets | `verified_manual` | [v1.2e mapping](./RETIREMENT_FLOW_MAPPING_DECISION.md); quarterly assets ≠ flow pressure; MOCK **58** still scores | Production card | `mappingStatus` **not_final**; quarterly freshness caution normal; **v1.2f** gate discouraged |
 | `options-activity-proxy` | OCC Daily Volume — Index/Others contracts | `manual_unverified` | [v1.4e mapping](./OPTIONS_ACTIVITY_MAPPING_DECISION.md); not 0DTE/GEX; VIX remains scored vol input | Production card | `mappingStatus` **not_final**; **v1.4f** gate discouraged (VIX overlap) |
 | `index-inclusion-events` | Nasdaq IR index change announcements (operator-curated) | `manual_unverified` | [v1.9c.5 mapping](./INDEX_INCLUSION_EVENT_MAPPING_DECISION.md) — display-only by default; no float/demand estimates; not scored | Production card | `mappingStatus` **not_final**; **v1.9c.6** score gate discouraged / not approved |
+| `cap-weight-premium` | SPY/RSP adjusted-close cap-weight premium study (operator CSV) | `manual_unverified` | Display-only SPY/RSP spread/ratio lens; companion to score-fed `concentration`; not causal passive-flow proof; not scored | Production card | `mappingStatus` **not_final**; production values from reference-aligned **2026-05-22** study (not June 15 headline); **v1.9b.5** mapping next; **v1.9b.6** score gate discouraged |
 
 These cards may appear in the equity signal grid with **DISPLAY ONLY** badges. Their production artifacts refresh display values only — they do **not** replace MOCK composite inputs unless a future product-approved score gate is opened.
 
@@ -163,7 +164,7 @@ Discipline-first roadmap after v1.7 feature completion — inventory and operato
 
 ## v1.9 recommendation
 
-**Primary v1.9 theme:** GhostFlow **Passive Supply & Concentration Research** — v1.9c.5 Index Inclusion Event mapping decision complete; display-only by default; `publicSignalCount` **11**; scores unchanged.
+**Primary v1.9 theme:** GhostFlow **Passive Supply & Concentration Research** — v1.9b.4 Cap-Weight Premium production artifact + display card complete; v1.9c.5 Index Inclusion Event mapping decision complete; display-only by default; `publicSignalCount` **12**; scores unchanged.
 
 | Phase | Deliverable | Status |
 |-------|-------------|--------|
@@ -173,7 +174,9 @@ Discipline-first roadmap after v1.7 feature completion — inventory and operato
 | **v1.9b.1a** | Cap-Weight Premium Calibration Study — [CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) | **Done** (docs-only) |
 | **v1.9b.2** | Cap-Weight Premium Artifact Design — [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) | **Done** (docs-only) |
 | **v1.9b.3** | Example JSON + validator — [`capWeightPremiumProxy.v1.example.json`](../data/ghostflow/artifacts/capWeightPremiumProxy.v1.example.json) | **Done** |
-| **v1.9b.4** | Production artifact + display card | **Future** — product-gated |
+| **v1.9b.4** | Production artifact + display card — [`capWeightPremiumProxy.v1.json`](../data/ghostflow/artifacts/capWeightPremiumProxy.v1.json) | **Done** — display-only; reference-aligned **2026-05-22** study; `publicSignalCount` **11 → 12**; not scored |
+| **v1.9b.5** | Mapping decision | **Future** — likely display-only Option A |
+| **v1.9b.6** | Score gate | **Future** — discouraged / not approved |
 | **v1.9c** | Passive Supply / Float Absorption Feasibility — [PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) | **Done** (docs-only) |
 | **v1.9c.1** | Passive Supply Source Spike — [PASSIVE_SUPPLY_SOURCE_SPIKE.md](./PASSIVE_SUPPLY_SOURCE_SPIKE.md) | **Done** (docs-only source verification) |
 | **v1.9c.2** | Index Inclusion Event Proxy Artifact Design — [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) | **Done** (docs-only) |
@@ -184,7 +187,7 @@ Discipline-first roadmap after v1.7 feature completion — inventory and operato
 | **v1.9c.5** | Mapping decision — [INDEX_INCLUSION_EVENT_MAPPING_DECISION.md](./INDEX_INCLUSION_EVENT_MAPPING_DECISION.md) | **Done** — display-only by default; no score mapper selected |
 | **v1.9c.6** | Score gate | **Future** — discouraged / not approved |
 
-Composite **62 / 58 / 66**, `publicSignalCount` **11**, and Treasury **2**-card lane unchanged (scores unchanged).
+Composite **62 / 58 / 66**, `publicSignalCount` **12**, and Treasury **2**-card lane unchanged (scores unchanged).
 
 ---
 
@@ -192,7 +195,7 @@ Composite **62 / 58 / 66**, `publicSignalCount` **11**, and Treasury **2**-card 
 
 - Score wiring (v1.0c, v1.1f, v1.2f, v1.4f, v1.7g)
 - Treasury score, percentiles, or status bands (v1.7f.1)
-- `publicSignalCount` change (do not combine equity 11 + Treasury 2)
+- `publicSignalCount` change (do not combine equity 12 + Treasury 2)
 - Runtime / live dashboard fetching
 - New data sources without feasibility memo
 - Replacing MOCK inputs without source verification and product gate
@@ -208,6 +211,6 @@ Composite **62 / 58 / 66**, `publicSignalCount` **11**, and Treasury **2**-card 
 | Score change | **No** — Composite **62 / 58 / 66** unchanged |
 | Artifact JSON change | **No** |
 | UI / code change | **No** |
-| `publicSignalCount` | **11** (equity) — five display-only + six score-fed |
+| `publicSignalCount` | **12** (equity) — six display-only + six score-fed |
 | Treasury lane | **2** separate display-only cards — unchanged |
 | Trust tests | [`ghostflowCurrentState.test.ts`](../../lib/ghostflow/__tests__/ghostflowCurrentState.test.ts) · [`treasuryPlumbingDisplay.test.ts`](../../lib/ghostflow/__tests__/treasuryPlumbingDisplay.test.ts) |

@@ -24,7 +24,7 @@ This memo captures future GhostFlow research candidates inspired by recent Mike 
 | New data sources | **None** |
 | Implementation approved | **No** |
 | Score gates opened | **No** (v1.0c, v1.1f, v1.2f, v1.4f, v1.7g, v1.8i remain discouraged) |
-| `publicSignalCount` | **11** (equity) — v1.9c.4 display card added |
+| `publicSignalCount` | **12** (equity) — v1.9b.4 display card added |
 | Treasury lane | **2** separate display-only cards — unchanged |
 | All candidates | Start as **feasibility / research-only** unless separately product-approved |
 
@@ -66,7 +66,7 @@ GhostFlow is an **equity passive-pressure / market-structure research gauge**. I
 
 Any future candidate in this backlog starts **display-only / feasibility-only** unless separately approved through product gate, mapping decision, calibration, and test discipline.
 
-**Headline state unchanged:** Composite **62** · Passive **58** · Structural **66** · band *Crowded / Reflexive* · equity `publicSignalCount` **11** · Treasury **2** display-only cards · MOCK **62 / 58 / 55**.
+**Headline state unchanged:** Composite **62** · Passive **58** · Structural **66** · band *Crowded / Reflexive* · equity `publicSignalCount` **12** · Treasury **2** display-only cards · MOCK **62 / 58 / 55**.
 
 ---
 
@@ -172,7 +172,7 @@ Any future candidate in this backlog starts **display-only / feasibility-only** 
 - **v1.9c.1 source spike complete** — [PASSIVE_SUPPLY_SOURCE_SPIKE.md](./PASSIVE_SUPPLY_SOURCE_SPIKE.md); Lane D event path and Lane A/B quarterly context partially viable; Lane E still RED
 - Event-driven / display-only by default
 - No score wiring
-- **v1.9c.4 complete** — production JSON + display-only card; `publicSignalCount` **11**; not scored
+- **v1.9b.4 complete** — production JSON + display-only card; reference-aligned **2026-05-22** study; `publicSignalCount` **12**; not scored
 - **v1.9c.3 scaffold complete** — example JSON + validator/types/tests
 - **v1.9c.4a operator provenance checklist complete** — [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) §14
 - **v1.9c.4b operator intake memo complete** — [INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md](./INDEX_INCLUSION_EVENT_OPERATOR_INTAKE.md); 4 rows transcribed
@@ -181,7 +181,7 @@ Any future candidate in this backlog starts **display-only / feasibility-only** 
 
 **Completed phases:** **v1.9c** feasibility · **v1.9c.1** source spike · **v1.9c.2** artifact design · **v1.9c.3** example/validator scaffolding · **v1.9c.4a** operator provenance checklist · **v1.9c.4b** operator intake · **v1.9c.4** production artifact + display card · **v1.9c.5** mapping decision
 
-**Suggested future phase:** **v1.9b.4** cap-weight production/display per product priority (v1.9c.6 score gate discouraged)
+**Suggested future phase:** **v1.9b.5** cap-weight mapping decision (v1.9b.6 score gate discouraged)
 
 ---
 
@@ -379,7 +379,9 @@ Any future candidate in this backlog starts **display-only / feasibility-only** 
 | **v1.9b.1a** | Cap-Weight Premium Calibration Study | **Done** — [CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) |
 | **v1.9b.2** | Cap-Weight Premium Artifact Design | **Done** — [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) |
 | **v1.9b.3** | Cap-Weight Premium Example JSON + Validator | **Done** — [`capWeightPremiumProxy.v1.example.json`](../data/ghostflow/artifacts/capWeightPremiumProxy.v1.example.json) |
-| **v1.9b.4** | Cap-Weight Premium Production Artifact + Display Card | **Future** — product-gated |
+| **v1.9b.4** | Cap-Weight Premium Production Artifact + Display Card | **Done** — display-only; reference-aligned **2026-05-22**; `publicSignalCount` **12**; not scored |
+| **v1.9b.5** | Cap-Weight Premium Mapping Decision | **Future** — likely display-only Option A |
+| **v1.9b.6** | Cap-Weight Premium Score Gate | **Future** — discouraged / not approved |
 | **v1.9c** | Passive Supply / Float Absorption Feasibility | **Done** — [PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) |
 | **v1.9c.1** | Passive Supply Source Spike | **Done** — [PASSIVE_SUPPLY_SOURCE_SPIKE.md](./PASSIVE_SUPPLY_SOURCE_SPIKE.md); docs-only source verification |
 | **v1.9c.2** | Passive Supply Event Artifact Design | **Done** — [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) |
@@ -405,7 +407,7 @@ None of the future phases above are approved for score gates or score wiring. v1
 - All candidates start as **feasibility / research-only**.
 - **No score changes** from v1.9c.4 display-only card.
 - **No score gates opened** (v1.0c, v1.1f, v1.2f, v1.4f, v1.7g, v1.8i, **v1.9c.6**).
-- **`publicSignalCount` is 11** (equity) — five display-only + six score-fed.
+- **`publicSignalCount` is 12** (equity) — six display-only + six score-fed.
 - **No Treasury merge** into equity composite.
 - **No GhostRegime merge** into GhostFlow.
 - **No investment advice** or trading recommendation framing.
@@ -425,6 +427,6 @@ None of the future phases above are approved for score gates or score wiring. v1
 
 **v1.9c.4** — Index Inclusion Event Production Artifact + Display Card — **Done** ([design memo](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md)); display-only; not scored.
 
-**Candidate next:** **v1.9b.4** cap-weight production/display per product priority (v1.9c.6 index-inclusion score gate discouraged / not approved).
+**Candidate next:** **v1.9b.5** cap-weight mapping decision (v1.9b.6 score gate discouraged / not approved).
 
 Real operator run validated SPY/RSP path (exit **0**, adj-close, 5,818 aligned days). Longer-horizon cap-weight premium is elevated; short horizons are mixed — design any future display card with regime caveats.

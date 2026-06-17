@@ -1,9 +1,13 @@
 /**
- * GhostFlow v1.9b.3 — Cap-weight premium proxy artifact (design scaffolding only).
- * Pure validation helpers. No production loader, freshness, or buildSnapshot merge.
+ * GhostFlow v1.9b.3 / v1.9b.4 — Cap-weight premium proxy artifact.
+ * Validation, display helpers, production loader, and buildSnapshot display merge (no score wiring).
  */
 
+import capWeightPremiumProxyArtifactJson from '@/data/ghostflow/artifacts/capWeightPremiumProxy.v1.json';
+import { evaluateWeeklyArtifactFreshness } from '@/lib/ghostflow/artifactFreshness';
+import { GHOSTFLOW_REFERENCE_AS_OF } from '@/lib/ghostflow/reference';
 import type {
+  ArtifactFreshnessResult,
   CapWeightPremiumObservationsV1,
   CapWeightPremiumPriceColumnUsed,
   CapWeightPremiumProxyArtifactV1,
@@ -30,7 +34,7 @@ export const CAP_WEIGHT_PREMIUM_DISPLAY_SIGNAL_NAME =
   'Cap-Weight Premium Proxy' as const;
 
 export const CAP_WEIGHT_PREMIUM_DISPLAY_CARD_CAVEAT =
-  'Display-only SPY/RSP cap-weight premium proxy; not causal proof, not a trading signal, and not included in the Research Composite.';
+  'SPY/RSP proxy for cap-weight premium; does not estimate passive-flow causality and is not a trading signal.';
 
 /** Relative tolerance for SPY/RSP ratio reconciliation. */
 export const RATIO_RECONCILIATION_TOLERANCE = 0.0001;
@@ -158,15 +162,103 @@ function validatePriceColumnUsed(
   if (rsp !== 'adjusted' && rsp !== 'close') {
     errors.push('observations.priceColumnUsed.rsp must be "adjusted" or "close".');
   }
-  if (mode === 'example') {
+  if (mode === 'example' || mode === 'production') {
     if (spy !== 'adjusted') {
-      errors.push('observations.priceColumnUsed.spy must be "adjusted" in example mode.');
+      errors.push(
+        `observations.priceColumnUsed.spy must be "adjusted" in ${mode} mode.`
+      );
     }
     if (rsp !== 'adjusted') {
-      errors.push('observations.priceColumnUsed.rsp must be "adjusted" in example mode.');
+      errors.push(
+        `observations.priceColumnUsed.rsp must be "adjusted" in ${mode} mode.`
+      );
     }
   }
   return spy === 'adjusted' || spy === 'close' ? (rsp === 'adjusted' || rsp === 'close') : false;
+}
+
+const EXAMPLE_ONLY_PATTERN = /example\s*\/\s*design\s*only/i;
+
+function containsExampleOnlyText(text: string): boolean {
+  return EXAMPLE_ONLY_PATTERN.test(text);
+}
+
+function rejectProductionSyntheticContent(
+  raw: Record<string, unknown>,
+  mode: CapWeightPremiumValidationMode,
+  errors: string[]
+): void {
+  if (mode !== 'production') return;
+
+  const source = raw.source;
+  if (isPlainObject(source)) {
+    const url = source.url;
+    if (typeof url === 'string' && url.includes('example.com')) {
+      errors.push('source.url must not contain example.com in production mode.');
+    }
+    if (typeof source.note === 'string' && containsExampleOnlyText(source.note)) {
+      errors.push('source.note must not contain EXAMPLE / DESIGN ONLY in production mode.');
+    }
+  }
+
+  const caveats = raw.caveats;
+  if (Array.isArray(caveats)) {
+    for (let i = 0; i < caveats.length; i++) {
+      const caveat = caveats[i];
+      if (typeof caveat === 'string' && containsExampleOnlyText(caveat)) {
+        errors.push(
+          `caveats[${i}] must not contain EXAMPLE / DESIGN ONLY in production mode.`
+        );
+      }
+    }
+  }
+}
+
+function formatSpreadPct(value: number): string {
+  const sign = value >= 0 ? '+' : '';
+  return `${sign}${value.toFixed(2)}%`;
+}
+
+export function formatCapWeightPremiumCardValue(
+  observations: CapWeightPremiumObservationsV1
+): string {
+  return `5Y premium percentile: ${observations.spread5YPercentile.toFixed(1)}`;
+}
+
+export function buildCapWeightPremiumDisplayExplanation(
+  artifact: CapWeightPremiumProxyArtifactV1
+): string {
+  const { observations: o } = artifact;
+  return (
+    `SPY/RSP ratio ${o.spyRspRatio.toFixed(4)} · 5Y spread ${formatSpreadPct(o.spread5Y)} · ` +
+    `1M spread ${formatSpreadPct(o.spread1M)} · ratio percentile ${o.ratioPercentile.toFixed(1)}. ` +
+    `Aligned history ${o.overlapStart} – ${o.overlapEnd} (${o.alignedObservationCount.toLocaleString('en-US')} observations). ` +
+    `Percentiles are display context only — not a pressure score. mappingStatus: ${o.mappingStatus}; not included in the Research Composite.`
+  );
+}
+
+export function loadCapWeightPremiumProxyArtifact(): CapWeightPremiumProxyValidation {
+  return validateCapWeightPremiumProxyArtifact(capWeightPremiumProxyArtifactJson, {
+    mode: 'production',
+    referenceAsOf: GHOSTFLOW_REFERENCE_AS_OF,
+  });
+}
+
+export function capWeightPremiumFreshnessAnchor(
+  artifact: CapWeightPremiumProxyArtifactV1
+): string {
+  return artifact.publishedAt ?? artifact.asOf;
+}
+
+export function evaluateCapWeightPremiumArtifactFreshness(
+  artifact: CapWeightPremiumProxyArtifactV1,
+  referenceAsOf: string = GHOSTFLOW_REFERENCE_AS_OF
+): ArtifactFreshnessResult {
+  return evaluateWeeklyArtifactFreshness(
+    capWeightPremiumFreshnessAnchor(artifact),
+    referenceAsOf,
+    CAP_WEIGHT_PREMIUM_DISPLAY_SIGNAL_NAME
+  );
 }
 
 export function validateCapWeightPremiumProxyArtifact(
@@ -351,6 +443,8 @@ export function validateCapWeightPremiumProxyArtifact(
 
     validatePriceColumnUsed(observations.priceColumnUsed, mode, errors);
   }
+
+  rejectProductionSyntheticContent(raw, mode, errors);
 
   if (errors.length > 0) {
     return { ok: false, errors };

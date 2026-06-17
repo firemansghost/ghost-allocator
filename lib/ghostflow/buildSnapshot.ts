@@ -63,6 +63,8 @@ import type {
   IndexConcentrationArtifactV1,
   IndexInclusionEventProxyArtifactV1,
   IndexInclusionEventProxyValidation,
+  CapWeightPremiumProxyArtifactV1,
+  CapWeightPremiumProxyValidation,
   MarketBreadthArtifactV1,
   PassiveShareProxyArtifactV1,
   LeveredEtfRebalancePressureArtifactV1,
@@ -119,6 +121,15 @@ import {
   INDEX_INCLUSION_EVENT_DISPLAY_SIGNAL_NAME,
   loadIndexInclusionEventProxyArtifact,
 } from './artifacts/indexInclusionEventProxy';
+import {
+  buildCapWeightPremiumDisplayExplanation,
+  CAP_WEIGHT_PREMIUM_DISPLAY_CARD_CAVEAT,
+  CAP_WEIGHT_PREMIUM_DISPLAY_SIGNAL_ID,
+  CAP_WEIGHT_PREMIUM_DISPLAY_SIGNAL_NAME,
+  evaluateCapWeightPremiumArtifactFreshness,
+  formatCapWeightPremiumCardValue,
+  loadCapWeightPremiumProxyArtifact,
+} from './artifacts/capWeightPremiumProxy';
 import {
   buildVolRegimeExplanation,
   formatVolRegimeDisplayValue,
@@ -805,6 +816,77 @@ export function mergeIndexInclusionEventDisplayIfValid(
   };
 }
 
+/** Display-only cap-weight premium card — does not merge into passive/structural score inputs. */
+export function applyCapWeightPremiumDisplayArtifact(
+  raw: GhostFlowRawSnapshot,
+  artifact: CapWeightPremiumProxyArtifactV1,
+  referenceAsOf: string
+): ApplyArtifactOutcome {
+  const freshness = evaluateCapWeightPremiumArtifactFreshness(artifact, referenceAsOf);
+  const { observations } = artifact;
+
+  raw.signals = replaceSignal(raw.signals, {
+    id: CAP_WEIGHT_PREMIUM_DISPLAY_SIGNAL_ID,
+    name: CAP_WEIGHT_PREMIUM_DISPLAY_SIGNAL_NAME,
+    value: formatCapWeightPremiumCardValue(observations),
+    numericValue: observations.spread5YPercentile,
+    explanation: buildCapWeightPremiumDisplayExplanation(artifact),
+    cardCaveat: CAP_WEIGHT_PREMIUM_DISPLAY_CARD_CAVEAT,
+    dataStatus: 'public_proxy',
+    updateFrequencyTarget: 'Weekly (manual artifact)',
+    sourceName: artifact.source.name,
+    sourceUrl: artifact.source.url,
+    sourceNote: artifact.source.note,
+    dataQuality: artifact.dataQuality,
+    artifactAsOf: artifact.asOf,
+    artifactPublishedAt: artifact.publishedAt,
+    freshnessStatus: freshness.status,
+  });
+
+  const publicSignal: GhostFlowPublicSignalMeta = {
+    signalId: CAP_WEIGHT_PREMIUM_DISPLAY_SIGNAL_ID,
+    name: CAP_WEIGHT_PREMIUM_DISPLAY_SIGNAL_NAME,
+    sourceName: artifact.source.name,
+    sourceUrl: artifact.source.url,
+    asOf: artifact.asOf,
+    publishedAt: artifact.publishedAt,
+    freshnessStatus: freshness.status,
+  };
+
+  return {
+    raw,
+    warnings: freshness.warnings,
+    publicSignal,
+  };
+}
+
+export function mergeCapWeightPremiumDisplayIfValid(
+  raw: GhostFlowRawSnapshot,
+  validation: CapWeightPremiumProxyValidation,
+  referenceAsOf: string
+): {
+  raw: GhostFlowRawSnapshot;
+  warnings: string[];
+  publicSignal?: GhostFlowPublicSignalMeta;
+} {
+  if (!validation.ok) {
+    return {
+      raw,
+      warnings: [
+        `Cap-Weight Premium Proxy artifact invalid or missing (${validation.errors.join('; ')}). No display card added.`,
+      ],
+    };
+  }
+
+  const result = applyCapWeightPremiumDisplayArtifact(raw, validation.artifact, referenceAsOf);
+
+  return {
+    raw: result.raw,
+    warnings: result.warnings,
+    publicSignal: result.publicSignal,
+  };
+}
+
 function buildMeta(
   raw: GhostFlowRawSnapshot,
   warnings: string[],
@@ -1077,6 +1159,16 @@ export function buildGhostFlowSnapshot(
   raw = indexInclusionDisplay.raw;
   warnings.push(...indexInclusionDisplay.warnings);
   if (indexInclusionDisplay.publicSignal) publicSignals.push(indexInclusionDisplay.publicSignal);
+
+  const capWeightValidation = loadCapWeightPremiumProxyArtifact();
+  const capWeightDisplay = mergeCapWeightPremiumDisplayIfValid(
+    raw,
+    capWeightValidation,
+    referenceAsOf
+  );
+  raw = capWeightDisplay.raw;
+  warnings.push(...capWeightDisplay.warnings);
+  if (capWeightDisplay.publicSignal) publicSignals.push(capWeightDisplay.publicSignal);
 
   return buildMeta(raw, warnings, publicSignals, publicPassiveInputKeys, publicStructuralInputKeys);
 }

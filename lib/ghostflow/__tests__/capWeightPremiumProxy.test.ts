@@ -1,9 +1,15 @@
 /**
- * Cap-weight premium proxy artifact — design-only validator tests (v1.9b.3).
+ * Cap-weight premium proxy artifact — validator tests (v1.9b.3 design + v1.9b.4 production).
  */
 
 import assert from 'node:assert/strict';
-import { validateCapWeightPremiumProxyArtifact } from '@/lib/ghostflow/artifacts/capWeightPremiumProxy';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import {
+  loadCapWeightPremiumProxyArtifact,
+  validateCapWeightPremiumProxyArtifact,
+} from '@/lib/ghostflow/artifacts/capWeightPremiumProxy';
+import { GHOSTFLOW_REFERENCE_AS_OF } from '@/lib/ghostflow/reference';
 import {
   cloneCapWeightPremiumExample,
   FIXTURE_CAP_WEIGHT_PREMIUM_EXAMPLE,
@@ -145,5 +151,72 @@ badPriceCol.observations.priceColumnUsed = { spy: 'close', rsp: 'adjusted' };
 const badPriceColResult = validateCapWeightPremiumProxyArtifact(badPriceCol, { mode: 'example' });
 assert.ok(!badPriceColResult.ok);
 assert.ok(badPriceColResult.errors.some((e) => e.includes('priceColumnUsed.spy')));
+
+// --- production JSON validates ---
+const productionLoaded = loadCapWeightPremiumProxyArtifact();
+assert.ok(productionLoaded.ok, productionLoaded.ok ? '' : productionLoaded.errors.join('; '));
+assert.strictEqual(productionLoaded.artifact.asOf, '2026-05-22');
+assert.strictEqual(productionLoaded.artifact.observations.latestDate, '2026-05-22');
+assert.strictEqual(productionLoaded.artifact.observations.spread5YPercentile, 99.8);
+assert.strictEqual(productionLoaded.artifact.publishedAt, '2026-06-17');
+assert.strictEqual(productionLoaded.artifact.designOnly, undefined);
+
+const productionRaw = JSON.parse(
+  readFileSync(
+    join(process.cwd(), 'data/ghostflow/artifacts/capWeightPremiumProxy.v1.json'),
+    'utf8'
+  )
+) as Record<string, unknown>;
+
+// --- production rejects designOnly ---
+const prodDesignOnly = { ...productionRaw, designOnly: true };
+const prodDesignOnlyResult = validateCapWeightPremiumProxyArtifact(prodDesignOnly, {
+  mode: 'production',
+  referenceAsOf: GHOSTFLOW_REFERENCE_AS_OF,
+});
+assert.ok(!prodDesignOnlyResult.ok);
+assert.ok(prodDesignOnlyResult.errors.some((e) => e.includes('designOnly')));
+
+// --- production rejects EXAMPLE / DESIGN ONLY in source note ---
+const prodExampleNote = JSON.parse(JSON.stringify(productionRaw)) as Record<string, unknown>;
+(prodExampleNote.source as Record<string, unknown>).note = 'EXAMPLE / DESIGN ONLY — bad';
+const prodExampleNoteResult = validateCapWeightPremiumProxyArtifact(prodExampleNote, {
+  mode: 'production',
+  referenceAsOf: GHOSTFLOW_REFERENCE_AS_OF,
+});
+assert.ok(!prodExampleNoteResult.ok);
+assert.ok(prodExampleNoteResult.errors.some((e) => e.includes('EXAMPLE / DESIGN ONLY')));
+
+// --- production rejects publicPassiveInputKey ---
+const prodPassiveKey = { ...productionRaw, publicPassiveInputKey: 'concentration' };
+const prodPassiveKeyResult = validateCapWeightPremiumProxyArtifact(prodPassiveKey, {
+  mode: 'production',
+  referenceAsOf: GHOSTFLOW_REFERENCE_AS_OF,
+});
+assert.ok(!prodPassiveKeyResult.ok);
+assert.ok(prodPassiveKeyResult.errors.some((e) => e.includes('publicPassiveInputKey')));
+
+// --- production rejects ratio mismatch ---
+const prodBadRatio = JSON.parse(JSON.stringify(productionRaw)) as Record<string, unknown>;
+(prodBadRatio.observations as Record<string, unknown>).spyRspRatio = 9.99;
+const prodBadRatioResult = validateCapWeightPremiumProxyArtifact(prodBadRatio, {
+  mode: 'production',
+  referenceAsOf: GHOSTFLOW_REFERENCE_AS_OF,
+});
+assert.ok(!prodBadRatioResult.ok);
+assert.ok(prodBadRatioResult.errors.some((e) => e.includes('spyRspRatio')));
+
+// --- production rejects close price column ---
+const prodBadPriceCol = JSON.parse(JSON.stringify(productionRaw)) as Record<string, unknown>;
+(prodBadPriceCol.observations as Record<string, unknown>).priceColumnUsed = {
+  spy: 'close',
+  rsp: 'adjusted',
+};
+const prodBadPriceColResult = validateCapWeightPremiumProxyArtifact(prodBadPriceCol, {
+  mode: 'production',
+  referenceAsOf: GHOSTFLOW_REFERENCE_AS_OF,
+});
+assert.ok(!prodBadPriceColResult.ok);
+assert.ok(prodBadPriceColResult.errors.some((e) => e.includes('priceColumnUsed.spy')));
 
 console.log('capWeightPremiumProxy.test.ts: all assertions passed');
