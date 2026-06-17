@@ -16,6 +16,7 @@ const DISPLAY_ONLY_IDS = [
   'levered-etf-rebalance',
   'retirement-asset-growth',
   'options-activity-proxy',
+  'index-inclusion-events',
 ] as const;
 
 const SCORE_FED_PUBLIC_IDS = [
@@ -35,7 +36,7 @@ assert.strictEqual(scored.score.subScores.passivePressure, 58);
 assert.strictEqual(scored.score.subScores.structuralFragility, 66);
 assert.strictEqual(ghostFlowBandLabel(scored.score.band), 'Crowded / Reflexive');
 
-assert.strictEqual(meta.publicSignalCount, 10);
+assert.strictEqual(meta.publicSignalCount, 11);
 
 assert.strictEqual(raw.passivePressure.systematicStrategyPressure, 62);
 assert.strictEqual(raw.passivePressure.retirementFlowPressureProxy, 58);
@@ -71,7 +72,8 @@ for (const id of SCORE_FED_PUBLIC_IDS) {
 
 assert.deepStrictEqual(grouped.mockProxies.map((s) => s.id), []);
 
-assert.strictEqual(PUBLIC_ARTIFACT_SIGNAL_IDS.length, 10);
+assert.strictEqual(PUBLIC_ARTIFACT_SIGNAL_IDS.length, 11);
+assert.ok(PUBLIC_ARTIFACT_SIGNAL_IDS.includes('index-inclusion-events'));
 assert.ok(PUBLIC_ARTIFACT_SIGNAL_IDS.includes('retirement-asset-growth'));
 assert.ok(PUBLIC_ARTIFACT_SIGNAL_IDS.includes('options-activity-proxy'));
 assert.ok(!raw.signals.some((s) => s.id === 'odte-options'));

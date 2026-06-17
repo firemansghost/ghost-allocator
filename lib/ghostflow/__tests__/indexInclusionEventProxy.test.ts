@@ -3,7 +3,9 @@
  */
 
 import assert from 'node:assert/strict';
+import productionJson from '@/data/ghostflow/artifacts/indexInclusionEventProxy.v1.json';
 import { validateIndexInclusionEventProxyArtifact } from '@/lib/ghostflow/artifacts/indexInclusionEventProxy';
+import { GHOSTFLOW_REFERENCE_AS_OF } from '@/lib/ghostflow/reference';
 import {
   cloneIndexInclusionEventExample,
   FIXTURE_INDEX_INCLUSION_EVENT_EXAMPLE,
@@ -215,5 +217,57 @@ badWindow.observations.eventWindowEnd = '2026-05-01';
 const badWindowResult = validateIndexInclusionEventProxyArtifact(badWindow, { mode: 'example' });
 assert.ok(!badWindowResult.ok);
 assert.ok(badWindowResult.errors.some((e) => e.includes('eventWindowStart')));
+
+// --- production JSON validates ---
+const productionOk = validateIndexInclusionEventProxyArtifact(productionJson, {
+  mode: 'production',
+  referenceAsOf: GHOSTFLOW_REFERENCE_AS_OF,
+});
+assert.ok(productionOk.ok, productionOk.ok ? '' : productionOk.errors.join('; '));
+
+// --- production rejects example.com URL ---
+const prodExampleUrl = JSON.parse(JSON.stringify(productionJson)) as typeof productionJson;
+prodExampleUrl.observations.events[0].sourceUrl = 'https://example.com/bad';
+const prodExampleUrlResult = validateIndexInclusionEventProxyArtifact(prodExampleUrl, {
+  mode: 'production',
+});
+assert.ok(!prodExampleUrlResult.ok);
+assert.ok(prodExampleUrlResult.errors.some((e) => e.includes('example.com')));
+
+// --- production rejects EXMP* ticker ---
+const prodExmp = JSON.parse(JSON.stringify(productionJson)) as typeof productionJson;
+prodExmp.observations.events[0].ticker = 'EXMP1';
+const prodExmpResult = validateIndexInclusionEventProxyArtifact(prodExmp, { mode: 'production' });
+assert.ok(!prodExmpResult.ok);
+assert.ok(prodExmpResult.errors.some((e) => e.includes('EXMP')));
+
+// --- production rejects EXAMPLE / DESIGN ONLY in caveats ---
+const prodDesignCaveat = JSON.parse(JSON.stringify(productionJson)) as typeof productionJson;
+prodDesignCaveat.caveats = ['EXAMPLE / DESIGN ONLY'];
+const prodDesignCaveatResult = validateIndexInclusionEventProxyArtifact(prodDesignCaveat, {
+  mode: 'production',
+});
+assert.ok(!prodDesignCaveatResult.ok);
+assert.ok(
+  prodDesignCaveatResult.errors.some((e) =>
+    e.toLowerCase().includes('example / design only')
+  )
+);
+
+// --- production rejects designOnly ---
+const prodDesignOnly = JSON.parse(JSON.stringify(productionJson)) as Record<string, unknown>;
+prodDesignOnly.designOnly = true;
+const prodDesignOnlyResult = validateIndexInclusionEventProxyArtifact(prodDesignOnly, {
+  mode: 'production',
+});
+assert.ok(!prodDesignOnlyResult.ok);
+assert.ok(prodDesignOnlyResult.errors.some((e) => e.includes('designOnly')));
+
+// --- production rejects score-like field ---
+const prodScore = JSON.parse(JSON.stringify(productionJson)) as Record<string, unknown>;
+prodScore.mappedPressureScore = 60;
+const prodScoreResult = validateIndexInclusionEventProxyArtifact(prodScore, { mode: 'production' });
+assert.ok(!prodScoreResult.ok);
+assert.ok(prodScoreResult.errors.some((e) => e.includes('mappedPressureScore')));
 
 console.log('indexInclusionEventProxy.test.ts: all assertions passed');

@@ -61,6 +61,8 @@ import type {
   GhostFlowPublicSignalMeta,
   GhostFlowSnapshotMeta,
   IndexConcentrationArtifactV1,
+  IndexInclusionEventProxyArtifactV1,
+  IndexInclusionEventProxyValidation,
   MarketBreadthArtifactV1,
   PassiveShareProxyArtifactV1,
   LeveredEtfRebalancePressureArtifactV1,
@@ -108,6 +110,15 @@ import {
   OPTIONS_ACTIVITY_DISPLAY_SIGNAL_ID,
   OPTIONS_ACTIVITY_DISPLAY_SIGNAL_NAME,
 } from './artifacts/optionsActivityProxy';
+import {
+  buildIndexInclusionEventDisplayExplanation,
+  evaluateIndexInclusionEventArtifactFreshness,
+  formatIndexInclusionEventCardValue,
+  INDEX_INCLUSION_EVENT_DISPLAY_CARD_CAVEAT,
+  INDEX_INCLUSION_EVENT_DISPLAY_SIGNAL_ID,
+  INDEX_INCLUSION_EVENT_DISPLAY_SIGNAL_NAME,
+  loadIndexInclusionEventProxyArtifact,
+} from './artifacts/indexInclusionEventProxy';
 import {
   buildVolRegimeExplanation,
   formatVolRegimeDisplayValue,
@@ -719,6 +730,81 @@ export function mergeOptionsActivityDisplayIfValid(
   };
 }
 
+/** Display-only index inclusion event card — does not merge into passive/structural score inputs. */
+export function applyIndexInclusionEventDisplayArtifact(
+  raw: GhostFlowRawSnapshot,
+  artifact: IndexInclusionEventProxyArtifactV1,
+  referenceAsOf: string
+): ApplyArtifactOutcome {
+  const freshness = evaluateIndexInclusionEventArtifactFreshness(artifact, referenceAsOf);
+  const { observations } = artifact;
+
+  raw.signals = replaceSignal(raw.signals, {
+    id: INDEX_INCLUSION_EVENT_DISPLAY_SIGNAL_ID,
+    name: INDEX_INCLUSION_EVENT_DISPLAY_SIGNAL_NAME,
+    value: formatIndexInclusionEventCardValue(observations),
+    numericValue: observations.eventCount,
+    explanation: buildIndexInclusionEventDisplayExplanation(artifact),
+    cardCaveat: INDEX_INCLUSION_EVENT_DISPLAY_CARD_CAVEAT,
+    dataStatus: 'public_proxy',
+    updateFrequencyTarget: 'Event-driven (manual artifact)',
+    sourceName: artifact.source.name,
+    sourceUrl: artifact.source.url,
+    sourceNote: artifact.source.note,
+    dataQuality: artifact.dataQuality,
+    artifactAsOf: artifact.asOf,
+    artifactPublishedAt: artifact.publishedAt,
+    freshnessStatus: freshness.status,
+  });
+
+  const publicSignal: GhostFlowPublicSignalMeta = {
+    signalId: INDEX_INCLUSION_EVENT_DISPLAY_SIGNAL_ID,
+    name: INDEX_INCLUSION_EVENT_DISPLAY_SIGNAL_NAME,
+    sourceName: artifact.source.name,
+    sourceUrl: artifact.source.url,
+    asOf: artifact.asOf,
+    publishedAt: artifact.publishedAt,
+    freshnessStatus: freshness.status,
+  };
+
+  return {
+    raw,
+    warnings: freshness.warnings,
+    publicSignal,
+  };
+}
+
+export function mergeIndexInclusionEventDisplayIfValid(
+  raw: GhostFlowRawSnapshot,
+  validation: IndexInclusionEventProxyValidation,
+  referenceAsOf: string
+): {
+  raw: GhostFlowRawSnapshot;
+  warnings: string[];
+  publicSignal?: GhostFlowPublicSignalMeta;
+} {
+  if (!validation.ok) {
+    return {
+      raw,
+      warnings: [
+        `Index Inclusion Event Proxy artifact invalid or missing (${validation.errors.join('; ')}). No display card added.`,
+      ],
+    };
+  }
+
+  const result = applyIndexInclusionEventDisplayArtifact(
+    raw,
+    validation.artifact,
+    referenceAsOf
+  );
+
+  return {
+    raw: result.raw,
+    warnings: result.warnings,
+    publicSignal: result.publicSignal,
+  };
+}
+
 function buildMeta(
   raw: GhostFlowRawSnapshot,
   warnings: string[],
@@ -981,6 +1067,16 @@ export function buildGhostFlowSnapshot(
   raw = optionsDisplay.raw;
   warnings.push(...optionsDisplay.warnings);
   if (optionsDisplay.publicSignal) publicSignals.push(optionsDisplay.publicSignal);
+
+  const indexInclusionValidation = loadIndexInclusionEventProxyArtifact();
+  const indexInclusionDisplay = mergeIndexInclusionEventDisplayIfValid(
+    raw,
+    indexInclusionValidation,
+    referenceAsOf
+  );
+  raw = indexInclusionDisplay.raw;
+  warnings.push(...indexInclusionDisplay.warnings);
+  if (indexInclusionDisplay.publicSignal) publicSignals.push(indexInclusionDisplay.publicSignal);
 
   return buildMeta(raw, warnings, publicSignals, publicPassiveInputKeys, publicStructuralInputKeys);
 }
