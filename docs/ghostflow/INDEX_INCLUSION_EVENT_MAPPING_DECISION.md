@@ -6,6 +6,8 @@
 
 This memo formalizes the **v1.9c.5 mapping/product decision** for the operator-curated **Index Inclusion Event Proxy** (`index-inclusion-event-proxy`). No score mapper is selected in v1.9c.5. Future score wiring remains product-gated and discouraged. **v1.9c.6 is not approved.**
 
+> **Current-state footnote (v1.9d):** At v1.9c.5 decision time, equity `publicSignalCount` was **11** (index inclusion display card shipped in v1.9c.4). Current equity `publicSignalCount` is **12** after v1.9b.4 (cap-weight premium display card). See [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) · [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md).
+
 ---
 
 ## Status

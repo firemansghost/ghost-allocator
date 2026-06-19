@@ -27,8 +27,9 @@ Read in this order for onboarding:
 
 1. **[DATA_ROADMAP.md](./DATA_ROADMAP.md)** — Living phase ladder, promotion taxonomy, and open questions. Use for *why* a phase shipped and what gates remain closed.
 2. **[GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md)** — Canonical inventory: score-fed vs display-only vs MOCK vs derived vs Treasury lanes, counts, and guardrails.
-3. **[OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md)** — Canonical operator workflow: taxonomy, cadence map, validation matrix, and refresh guardrails.
-4. **[MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md)** — Field-level quick reference: per-artifact tables, cadence mini-checklists, and validation commands.
+3. **[GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md)** — v1.9d canonical 12-signal table: card ids, artifact `signalId`s, lanes, score boundaries, and Treasury separation.
+4. **[OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md)** — Canonical operator workflow: taxonomy, cadence map, validation matrix, and refresh guardrails.
+5. **[MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md)** — Field-level quick reference: per-artifact tables, cadence mini-checklists, and validation commands.
 
 ---
 
@@ -167,7 +168,7 @@ Topics parked for later evaluation (no score wiring, artifacts, UI cards, or `pu
 All validated by `npm run ghostflow:check`:
 
 - **6** score-fed equity JSON files
-- **5** display-only equity JSON files
+- **6** display-only equity JSON files
 - **2** Treasury lane JSON files
 
-See [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) for file paths and lane tables.
+See [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) for file paths and lane tables · [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md) for the canonical 12-signal inventory table.

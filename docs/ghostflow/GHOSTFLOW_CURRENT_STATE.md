@@ -1,20 +1,21 @@
-# GhostFlow Current State (v1.8a)
+# GhostFlow Current State (v1.9d)
 
-**GhostFlow docs:** [README](./README.md) · [Current state](./GHOSTFLOW_CURRENT_STATE.md) · [Roadmap](./DATA_ROADMAP.md)
+**GhostFlow docs:** [README](./README.md) · [Current state](./GHOSTFLOW_CURRENT_STATE.md) · [Public signal inventory](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md) · [Roadmap](./DATA_ROADMAP.md)
 
-Canonical inventory after the **v1.7** release checkpoint. Theme for v1.8: **GhostFlow Data Quality & Mock Score Discipline**.
+Canonical inventory after **v1.9b.5** (cap-weight premium mapping) and **v1.9c.5** (index inclusion mapping) checkpoints, aligned by **v1.9d** public signal inventory memo. Theme through v1.9: **Passive Supply & Concentration Research** with display-only defaults and operator doc discipline.
 
-**Related:** [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md) (canonical operator workflow) · [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) (field quick reference) · [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) (v1.8c freshness & `dataQuality` policy)
+**Related:** [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md) (v1.9d canonical 12-signal table) · [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md) (canonical operator workflow) · [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) (field quick reference) · [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) (freshness & `dataQuality` policy)
 
 ---
 
 ## Status
 
-- **Current as of:** v1.8a — after v1.7 checkpoint (Treasury Plumbing display-only mapping complete).
-- **Document type:** Documentation inventory only — no score, artifact, UI, runtime, or data changes in v1.8a.
+- **Current as of:** v1.9d — after v1.9b.5 / v1.9c.5 mapping decisions and v1.9d public signal inventory alignment (docs-only).
+- **Document type:** Documentation inventory only — no score, artifact, UI, runtime, or data changes in v1.9d.
 - **Baseline reference:** [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) = `2026-05-22` (production composite snapshot).
-- **GhostRegime boundary:** GhostRegime (including BTC provider work) is a separate product lane — not in GhostFlow v1.8 scope.
-- **Freshness & dataQuality policy:** [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) — canonical cadence thresholds, label definitions, and 12-artifact inventory (v1.8c docs-only).
+- **Canonical 12-signal table:** [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md).
+- **GhostRegime boundary:** GhostRegime (including BTC provider work) is a separate product lane — not in GhostFlow v1.9 scope.
+- **Freshness & dataQuality policy:** [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) — cadence thresholds and label definitions; inventory rows superseded for counts by v1.9d memo where noted.
 
 ---
 
