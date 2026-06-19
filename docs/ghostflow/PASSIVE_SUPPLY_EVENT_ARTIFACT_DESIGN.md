@@ -41,7 +41,7 @@ GhostRegime, GhostYield, Models, and builder are out of scope. This track is **i
 | **v1.9c.5** | Mapping decision — **Done** — [INDEX_INCLUSION_EVENT_MAPPING_DECISION.md](./INDEX_INCLUSION_EVENT_MAPPING_DECISION.md) |
 | **v1.9c.6** | Score gate — **Future** — discouraged / not approved |
 
----
+> **Current-state footnote (v1.9d):** Status table counts above reflect v1.9c.4 shipment (`publicSignalCount` **11**). Current equity `publicSignalCount` is **12** after v1.9b.4 cap-weight premium display card. Canonical inventory: [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md) · [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md).
 
 ## 1. Purpose
 

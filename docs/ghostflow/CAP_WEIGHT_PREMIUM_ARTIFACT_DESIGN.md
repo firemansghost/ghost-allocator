@@ -390,19 +390,20 @@ Reference existing `concentration` card as **companion lens, not replacement**.
 
 | Item | Status |
 |------|--------|
-| Production `capWeightPremiumProxy.v1.json` | **No** — v1.9b.4 |
+| Production `capWeightPremiumProxy.v1.json` | **Yes (v1.9b.4)** — reference-aligned **2026-05-22** study |
 | Example `capWeightPremiumProxy.v1.example.json` | **Yes (v1.9b.3)** — `designOnly: true`; unit tests only |
-| `loadCapWeightPremiumProxyArtifact()` | **No** — v1.9b.4 |
-| `validate-artifacts.ts` registration | **No** — v1.9b.4 |
-| Display card / `components/ghostflow/*` | **No** |
-| `buildSnapshot` merge | **No** |
-| `signalPresentation` entry | **No** |
-| `validate-artifacts.ts` registration | **No** |
-| Score wiring / `scoring.ts` | **No** |
+| `loadCapWeightPremiumProxyArtifact()` | **Yes (v1.9b.4)** |
+| `validate-artifacts.ts` registration | **Yes (v1.9b.4)** |
+| Display card / `components/ghostflow/*` | **Yes (v1.9b.4)** — `cap-weight-premium` display-only card |
+| `buildSnapshot` merge | **Display-only (v1.9b.4)** — no score contribution |
+| `signalPresentation` entry | **Yes (v1.9b.4)** |
+| Score wiring / `scoring.ts` | **No** — [v1.9b.5 mapping](./CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md) display-only by default |
 | `publicPassiveInputKey` | **No** |
 | Runtime/live dashboard fetch | **No** |
 | `mockGhostflowSnapshot` changes | **No** |
-| `publicSignalCount` change | **No** |
+| `publicSignalCount` change | **Yes (v1.9b.4)** — **11 → 12** (display-only card only); current **12** per [inventory memo](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md) |
+
+> **Current-state footnote (v1.9d):** Production display card exists; mapping decision keeps cap-weight premium **display-only**. No score path. Treasury remains separate (**2** cards outside equity count).
 
 ---
 
@@ -422,7 +423,7 @@ Reference existing `concentration` card as **companion lens, not replacement**.
 
 - Artifact design memo only — no implementation
 - Composite **62 / 58 / 66** unchanged
-- `publicSignalCount` **10** unchanged
+- `publicSignalCount` **12** (equity) — v1.9b.4 display card; see [inventory memo](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md)
 - Treasury **2**-card lane unchanged
 - No score gates opened
 - GhostRegime out of scope
