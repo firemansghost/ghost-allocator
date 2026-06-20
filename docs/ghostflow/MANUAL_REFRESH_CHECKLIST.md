@@ -11,7 +11,7 @@ Field-level quick reference for manually refreshing GhostFlow public-data artifa
 | Class | Items | Affects score? | Operator note |
 |-------|-------|----------------|---------------|
 | **A — Score-fed equity** | vol-regime, etf-flow, passive-share, active-index-flow, concentration, breadth | **Yes** | Can change Composite / Passive / Structural |
-| **B — Display-only equity** | systematic-flow, levered-etf-rebalance, retirement-asset-growth, options-activity-proxy, index-inclusion-events, cap-weight-premium | **No** | MOCK **62 / 55 / 58** unchanged |
+| **B — Display-only equity** | systematic-flow, levered-etf-rebalance, retirement-asset-growth, options-activity-proxy, index-inclusion-events, cap-weight-premium | **No** | Card refresh ≠ composite input — **does not** update MOCK score slots **62 / 58 / 55** in `mockGhostflowSnapshot.ts`; see [MOCK_SCORE_RETIREMENT_ROADMAP.md](./MOCK_SCORE_RETIREMENT_ROADMAP.md) |
 | **C — Treasury lane** | treasury-futures-positioning-proxy, treasury-long-end-income-lens | **No** | Separate lane; not in `publicSignalCount` |
 | **D — Derived/context** | modelZoneProximity, distance-65 | Partial | Refresh **passive-share** only — do not edit separately |
 | **E — MOCK score inputs** | systematic **62**, retirement **58**, levered **55** | Static | **Do not edit** `mockGhostflowSnapshot.ts` |
