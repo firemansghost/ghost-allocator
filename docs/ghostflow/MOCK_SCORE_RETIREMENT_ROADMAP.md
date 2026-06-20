@@ -125,7 +125,7 @@ Equity `publicSignalCount` **12** counts public signal **cards** — it does **n
 
 | Option | Description | Risk | Score change | v1.10 |
 |--------|-------------|------|--------------|-------|
-| **A — Disclosure cleanup** | Stronger UI/docs that three passive slots are static assumptions | Low | No | Useful but does not solve mock dependency — queued as **v1.10a** (optional future) |
+| **A — Disclosure cleanup** | Stronger UI/docs that three passive slots are static assumptions | Low | No | **Done (v1.10a)** — trust badges, ScoreCard, Methodology, Dashboard/ScoreDrivers copy |
 | **B — Roadmap memo** | Formal retirement ladder and gate requirements | Low | No | **Selected for v1.10** |
 | **C — Remove/reweight mocks** | Change Passive formula weights or drop slots | **High** | Yes | Requires product approval + score impact study — **not approved** |
 | **D — Wire display artifacts into score** | Promote CFTC/retirement/levered into composite | **High** | Yes | Reverses or bypasses prior mapping decisions — **not approved** |
@@ -141,7 +141,7 @@ No gate may be skipped. Required order for any mock retirement, replacement, or 
 
 | Step | Gate | v1.10 status |
 |------|------|---------------|
-| 1 | **Disclosure** — users/operators understand MOCK vs public vs display-only | Partially done in UI/docs; optional **v1.10a** UI pass |
+| 1 | **Disclosure** — users/operators understand MOCK vs public vs display-only | **Done (v1.10a)** — trust badges, ScoreCard, Methodology, Dashboard/ScoreDrivers |
 | 2 | **Research / calibration** — existing studies cited per input | CFTC v1.0a, levered v1.1e-calibration, retirement v1.2e |
 | 3 | **Mapping decision revision** — update or supersede v1.0b / v1.1e / v1.2e only with new evidence | **Not opened** |
 | 4 | **Product approval** — explicit gate (v1.0c / v1.1f / v1.2f / v1.8i) | **Not approved** |
@@ -191,16 +191,25 @@ v1.10 **supersedes stale counts** in v1.8b (e.g. `publicSignalCount` **10**) via
 
 ---
 
+## v1.10a UI disclosure cleanup (Done)
+
+**Status:** UI copy-only — **no score, artifact, or runtime change.**
+
+| Area | v1.10a change |
+|------|---------------|
+| Trust badges | `4` → `6` display-only public artifacts |
+| ScoreCard | Mixed disclaimer lists all six display-only cards + MOCK 62/58/55 |
+| Methodology | Passive weight list marks PUBLIC vs MOCK inline |
+| Dashboard scope | 12 equity public signals (6+6); Treasury separate |
+| ScoreDrivers | Footer states all six display-only cards do not feed score |
+
+Composite **62** / Passive **58** / Structural **66** and `publicSignalCount` **12** unchanged.
+
+---
+
 ## Optional future v1.10a
 
-**Not in v1.10 scope.** A future **v1.10a** phase may improve UI disclosure only (no score change), including:
-
-- Stale **"4 display-only"** wording in trust badges if still present ([`GhostFlowTrustBadges.tsx`](../../components/ghostflow/GhostFlowTrustBadges.tsx))
-- Score-card display-only list completeness ([`GhostFlowScoreCard.tsx`](../../components/ghostflow/GhostFlowScoreCard.tsx))
-- Semantic label drift between score sub-input labels and display card titles
-- Passive weight list marking PUBLIC vs MOCK inline in methodology
-
-Requires separate product approval. **Do not implement UI changes in v1.10.**
+**Superseded by v1.10a Done above.** Remaining optional polish (if any): semantic label drift between score sub-input names and display card titles — not required for v1.10a closure.
 
 ---
 
@@ -228,7 +237,7 @@ Requires separate product approval. **Do not implement UI changes in v1.10.**
 | Phase | Scope | Status |
 |-------|--------|--------|
 | **v1.10** | This roadmap memo + doc cross-links | **Done** (docs-only) |
-| **v1.10a** | Optional UI disclosure cleanup | **Future** — not approved in v1.10 |
+| **v1.10a** | UI disclosure cleanup | **Done** — copy-only; see roadmap § v1.10a |
 | **v1.0c / v1.1f / v1.2f** | Individual score wiring gates | **Not approved** |
 | **v1.8i** | Broader Passive reweight / mock retirement | **Future only** |
 | **v1.9d.future** | Systematic re-risking feasibility (research) | **Future** — long-term MOCK path |

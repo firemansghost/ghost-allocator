@@ -104,6 +104,8 @@ Together these inputs are **55% of Passive Pressure** and **27.5% of Composite**
 
 Display artifacts refresh cards only — they do **not** replace these score inputs. Gates **v1.0c / v1.1f / v1.2f** remain **not approved / discouraged**.
 
+**v1.10a UI disclosure:** Dashboard copy now states 12 equity public signals (6 score-fed + 6 display-only), Treasury separate, and MOCK **62 / 58 / 55** vs display-only cards — see [MOCK_SCORE_RETIREMENT_ROADMAP.md](./MOCK_SCORE_RETIREMENT_ROADMAP.md) § v1.10a. No score change.
+
 ---
 
 ## DERIVED inputs
