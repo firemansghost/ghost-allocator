@@ -38,7 +38,8 @@ Read in this order for onboarding:
 | Doc | Purpose |
 |-----|---------|
 | [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) | Freshness thresholds, `dataQuality` label policy, and 12-artifact inventory |
-| [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) | Keep-MOCK decisions for three passive score inputs; no replacements or score wiring approved |
+| [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) | v1.8b keep-MOCK policy decision for three passive score inputs |
+| [MOCK_SCORE_RETIREMENT_ROADMAP.md](./MOCK_SCORE_RETIREMENT_ROADMAP.md) | **v1.10** operational retirement roadmap — requirements, decision ladder, gate table; no score wiring approved |
 
 No score wiring without an explicit product gate (**v1.0c**, **v1.1f**, **v1.2f**, **v1.4f**, **v1.7g**, **v1.8i** — all discouraged / not approved).
 

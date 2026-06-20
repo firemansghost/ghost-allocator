@@ -74,6 +74,8 @@ Display order follows [`GhostFlowSignalGrid.tsx`](../../components/ghostflow/Gho
 | Cap-Weight Premium Proxy | **No** score path — [v1.9b.5 mapping](./CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md) display-only by default |
 | Composite / Passive / Structural | **62 / 58 / 66** — **unchanged** |
 
+**Score integrity (v1.10):** Three MOCK passive score inputs (`systematicStrategyPressure` **62**, `retirementFlowPressureProxy` **58**, `leveredEtfRebalancePressure` **55**) live in [`mockGhostflowSnapshot.ts`](../../data/ghostflow/mockGhostflowSnapshot.ts) — **outside** the 12 equity public signal cards. Display-only cards for systematic, retirement, and levered ETF refresh dashboard context only. Retirement requirements and gate ladder: [MOCK_SCORE_RETIREMENT_ROADMAP.md](./MOCK_SCORE_RETIREMENT_ROADMAP.md).
+
 Display-only card refreshes update dashboard cards only. They do **not** change Research Composite scores unless a future product gate explicitly approves score wiring (all current gates discouraged / not approved).
 
 ---

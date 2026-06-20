@@ -8,6 +8,8 @@
 
 This memo formalizes **how to handle each remaining MOCK passive score input**. It does **not** execute retirement, replacement, or score wiring. GhostRegime is out of scope.
 
+> **Current-state footnote (v1.10):** This is the **v1.8b historical policy decision** (keep/defer all three mocks). The **v1.10 operational follow-up** is [MOCK_SCORE_RETIREMENT_ROADMAP.md](./MOCK_SCORE_RETIREMENT_ROADMAP.md) — retirement requirements, decision ladder, and gate table. Current equity `publicSignalCount` is **12** per [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md) (v1.9d). v1.10 supersedes stale counts here via cross-link only — the v1.8b body below is preserved as written.
+
 ---
 
 ## Status

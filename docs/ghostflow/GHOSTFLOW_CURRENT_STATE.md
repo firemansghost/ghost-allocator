@@ -92,7 +92,7 @@ These cards may appear in the equity signal grid with **DISPLAY ONLY** badges. T
 
 ## MOCK score inputs
 
-Three static values from [`mockGhostflowSnapshot.ts`](../../data/ghostflow/mockGhostflowSnapshot.ts) feed the Research Composite. **v1.8b decision memo:** [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) — docs-only; mock values unchanged; no score wiring approved.
+Three static values from [`mockGhostflowSnapshot.ts`](../../data/ghostflow/mockGhostflowSnapshot.ts) feed the Research Composite. **v1.8b policy:** [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md). **v1.10 operational roadmap:** [MOCK_SCORE_RETIREMENT_ROADMAP.md](./MOCK_SCORE_RETIREMENT_ROADMAP.md) — retirement requirements, decision ladder, and gate table; docs-only; no score wiring approved.
 
 Together these inputs are **55% of Passive Pressure** and **27.5% of Composite** — a trust/disclosure issue documented in v1.8b, not authorization to change scores.
 
@@ -132,7 +132,7 @@ Separate dashboard lane — **not** in equity composite or `publicSignalCount`.
 
 ## Open roadmap questions
 
-1. ~~**Mock retirement**~~ **Resolved (v1.8b):** [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) — all three passive MOCK inputs **kept**; no replacements or retirements executed; gates **v1.0c / v1.1f / v1.2f / v1.4f** remain discouraged.
+1. ~~**Mock retirement policy**~~ **Resolved (v1.8b):** [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) — all three passive MOCK inputs **kept**; no replacements or retirements executed. **Operational roadmap (v1.10):** [MOCK_SCORE_RETIREMENT_ROADMAP.md](./MOCK_SCORE_RETIREMENT_ROADMAP.md) — retirement requirements, decision ladder, score-impact prerequisites; gates **v1.0c / v1.1f / v1.2f / v1.8i** remain not approved.
 2. **Calibration backlog** — v1.4e-calibration (options), v1.7f-calibration (Treasury), plus existing CFTC/levered/retirement studies — research-only vs display percentiles (not approved for UI).
 3. **0DTE / true GEX path** — OCC Index/Others proxy shipped display-only; true 0DTE/GEX still YELLOW/RED per [ODTE_OPTIONS_FEASIBILITY.md](./ODTE_OPTIONS_FEASIBILITY.md).
 4. **Passive-flow next source** — Any new public proxy must avoid double-counting ICI index share / active-index-flow already in composite.
