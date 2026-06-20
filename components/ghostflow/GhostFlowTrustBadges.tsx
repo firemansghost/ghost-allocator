@@ -1,14 +1,14 @@
 const TRUST_BADGE_CLASS =
   'inline-flex items-center rounded-md border border-amber-500/30 bg-amber-950/25 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-amber-200/90';
 
-/** Single-line coverage summary for the GhostFlow preview (v0.9f). */
+/** Single-line coverage summary for the GhostFlow preview (v1.10a). */
 export const GHOSTFLOW_COVERAGE_SUMMARY =
-  '6 public score artifacts · 1 derived score input · 4 display-only public artifacts · 3 static mock score inputs' as const;
+  '6 public score artifacts · 1 derived score input · 6 display-only public artifacts · 3 static mock score inputs' as const;
 
 export const GHOSTFLOW_COVERAGE_BADGES_MIXED = [
   '6 public score artifacts',
   '1 derived score input',
-  '4 display-only public artifacts',
+  '6 display-only public artifacts',
   '3 static mock score inputs',
   'Research preview',
   'Not a forecast',

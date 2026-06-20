@@ -84,14 +84,15 @@ export function GhostFlowScoreCard({
               (model-zone proximity from ICI index share).
             </li>
             <li>
-              <span className="text-amber-200/90">Static placeholders:</span> systematic{' '}
-              <strong className="font-semibold text-amber-100/95">62</strong>, retirement{' '}
+              <span className="text-amber-200/90">Static MOCK assumptions:</span> three Passive inputs remain static —
+              systematic <strong className="font-semibold text-amber-100/95">62</strong>, retirement{' '}
               <strong className="font-semibold text-amber-100/95">58</strong>, levered ETF{' '}
               <strong className="font-semibold text-amber-100/95">55</strong> (VIX still scores options/vol at 20%).
             </li>
             <li>
-              <span className="text-amber-200/90">Displayed only:</span> CFTC positioning, levered ETF rebalance,
-              retirement asset growth, and OCC options activity — visible context, not composite inputs.
+              <span className="text-amber-200/90">Displayed only:</span> systematic-flow (CFTC), levered-etf-rebalance,
+              retirement-asset-growth, options-activity-proxy, index-inclusion-events, cap-weight-premium — visible
+              context, not composite inputs. Related public cards do not replace those MOCK score inputs.
             </li>
           </ul>
         )}

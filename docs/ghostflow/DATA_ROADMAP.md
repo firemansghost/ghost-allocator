@@ -270,7 +270,7 @@ GhostFlow input promotion rules (all phases):
 | **v1.9d** | Public Signal Inventory / Display-Only Consistency Cleanup | **Done** — [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md); docs-only; `publicSignalCount` **12** (6 score-fed + 6 display-only); Treasury separate; no score/artifact/UI changes |
 | **v1.9d.future** | Systematic Re-Risking Proxy Feasibility | **Future** — research-only; backlog candidate #3 in [PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md](./PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md) |
 | **v1.10** | Mock Score Retirement / Score Integrity Roadmap | **Done** — [MOCK_SCORE_RETIREMENT_ROADMAP.md](./MOCK_SCORE_RETIREMENT_ROADMAP.md); docs-only; three MOCK passive inputs documented; no score/artifact/UI changes; no score gates approved |
-| **v1.10a** | UI Disclosure Cleanup (optional) | **Future** — trust badges, score-card display-only list, semantic label drift; **not** in v1.10 |
+| **v1.10a** | UI Disclosure Cleanup | **Done** — trust badges (6 display-only), ScoreCard mixed disclaimer, Methodology PUBLIC/MOCK labels, Dashboard scope + ScoreDrivers footer; [MOCK_SCORE_RETIREMENT_ROADMAP.md](./MOCK_SCORE_RETIREMENT_ROADMAP.md); no score/artifact change |
 | **v1.9e** | Protection Bid / Correlation Dispersion Feasibility | **Future** — research-only |
 | **v1.9f** | Mega-Cap Autocorrelation / Flow Momentum Feasibility | **Future** — optional or folded into v1.9b |
 | **v1.9g** | Valuation Stress Context Feasibility | **Future** — likely outside GhostFlow core |

@@ -86,9 +86,10 @@ export function GhostFlowDashboard() {
       <GlassCard className="p-4 sm:p-5 border-amber-500/20 bg-amber-950/15">
         <p className="text-sm text-zinc-200 leading-relaxed max-w-4xl">
           <strong className="text-amber-200/95">Scope:</strong> Six score-fed public artifacts, one derived input, and
-          three static MOCK placeholders feed the research composite. Display-only equity cards and Treasury Plumbing
-          provide separate context — they do not change the score. ICI index share is a fund/ETF proxy, not a
-          market-wide passive-share estimate. Full methodology below.
+          three static MOCK placeholders feed the research composite. Twelve equity public signal cards (6 score-fed + 6
+          display-only); Treasury remains separate. Display-only equity cards and Treasury Plumbing provide separate
+          context — they do not change the score. ICI index share is a fund/ETF proxy, not a market-wide passive-share
+          estimate. Full methodology below.
         </p>
       </GlassCard>
 

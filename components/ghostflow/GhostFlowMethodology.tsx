@@ -113,11 +113,11 @@ export function GhostFlowMethodology({
             <div className="rounded-xl border border-zinc-800/80 bg-neutral-950/40 p-3">
               <p className="font-semibold text-zinc-300 mb-2">Passive Pressure</p>
               <ul className="space-y-1 text-zinc-500">
-                <li>25% ETF / fund-flow impulse (public ICI weekly in v0.3+)</li>
-                <li>20% systematic strategy pressure</li>
-                <li>20% options / volatility amplifier (public VIX)</li>
-                <li>20% retirement-flow pressure proxy</li>
-                <li>15% levered ETF rebalance pressure</li>
+                <li>25% ETF / fund-flow impulse (public ICI weekly in v0.3+) — PUBLIC</li>
+                <li>20% systematic strategy pressure — MOCK</li>
+                <li>20% options / volatility amplifier (public VIX) — PUBLIC</li>
+                <li>20% retirement-flow pressure proxy — MOCK</li>
+                <li>15% levered ETF rebalance pressure — MOCK</li>
               </ul>
             </div>
             <div className="rounded-xl border border-zinc-800/80 bg-neutral-950/40 p-3">
