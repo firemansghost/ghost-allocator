@@ -92,7 +92,7 @@ These cards may appear in the equity signal grid with **DISPLAY ONLY** badges. T
 
 ## MOCK score inputs
 
-Three static values from [`mockGhostflowSnapshot.ts`](../../data/ghostflow/mockGhostflowSnapshot.ts) feed the Research Composite. **v1.8b policy:** [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md). **v1.10 operational roadmap:** [MOCK_SCORE_RETIREMENT_ROADMAP.md](./MOCK_SCORE_RETIREMENT_ROADMAP.md) — retirement requirements, decision ladder, and gate table; docs-only; no score wiring approved.
+Three static values from [`mockGhostflowSnapshot.ts`](../../data/ghostflow/mockGhostflowSnapshot.ts) feed the Research Composite. **v1.8b policy:** [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md). **v1.10 operational roadmap:** [MOCK_SCORE_RETIREMENT_ROADMAP.md](./MOCK_SCORE_RETIREMENT_ROADMAP.md) — retirement requirements, decision ladder, and gate table; docs-only; no score wiring approved. **v1.10c production score baseline:** [SCORE_REPRODUCTION_BASELINE.md](./SCORE_REPRODUCTION_BASELINE.md) — canonical reproduction of Composite **62** / Passive **58** / Structural **66** from production merged score inputs (distinguishes mock defaults **64** / **70** from production ETF **75** / vol **34**).
 
 Together these inputs are **55% of Passive Pressure** and **27.5% of Composite** — a trust/disclosure issue documented in v1.8b, not authorization to change scores.
 

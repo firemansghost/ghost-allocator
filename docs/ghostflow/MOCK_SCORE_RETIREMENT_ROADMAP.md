@@ -2,7 +2,7 @@
 
 **GhostFlow docs:** [README](./README.md) · [Current state](./GHOSTFLOW_CURRENT_STATE.md) · [Public signal inventory](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md) · [Roadmap](./DATA_ROADMAP.md)
 
-**Related:** [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) (v1.8b policy decision) · [CFTC_TFF_MAPPING_DECISION.md](./CFTC_TFF_MAPPING_DECISION.md) · [RETIREMENT_FLOW_MAPPING_DECISION.md](./RETIREMENT_FLOW_MAPPING_DECISION.md) · [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md)
+**Related:** [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) (v1.8b policy decision) · [SCORE_REPRODUCTION_BASELINE.md](./SCORE_REPRODUCTION_BASELINE.md) (v1.10c canonical production baseline) · [CFTC_TFF_MAPPING_DECISION.md](./CFTC_TFF_MAPPING_DECISION.md) · [RETIREMENT_FLOW_MAPPING_DECISION.md](./RETIREMENT_FLOW_MAPPING_DECISION.md) · [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md)
 
 This memo is the **v1.10 operational retirement roadmap** for the three remaining MOCK passive score inputs. It does **not** execute retirement, replacement, reweighting, or score wiring. GhostRegime, GhostYield, Models, and builder are out of scope.
 
@@ -36,15 +36,17 @@ Passive = 0.25·ETF + 0.20·systematic + 0.20·vol + 0.20·retirement + 0.15·le
 
 **Composite:** `50% Passive + 50% Structural`
 
-Reference build values come from [`mockGhostflowSnapshot.ts`](../../data/ghostflow/mockGhostflowSnapshot.ts) merged with production artifacts via [`buildSnapshot.ts`](../../lib/ghostflow/buildSnapshot.ts). Only **two** passive keys receive `publicPassiveInputKey` from artifacts today (`etfFundFlowImpulse`, `optionsVolatilityAmplifier`).
+[`buildSnapshot.ts`](../../lib/ghostflow/buildSnapshot.ts) clones [`mockGhostflowSnapshot.ts`](../../data/ghostflow/mockGhostflowSnapshot.ts) then overwrites score slots from validated production artifacts. Only **two** passive keys receive `publicPassiveInputKey` from artifacts today (`etfFundFlowImpulse`, `optionsVolatilityAmplifier`).
 
-| Input key | Current value | Passive weight | Composite weight | Source type | Related card / artifact | `publicPassiveInputKey` | Mapping status | Replacement readiness | Known caveats |
-|-----------|---------------|----------------|------------------|-------------|-------------------------|-------------------------|----------------|----------------------|---------------|
-| `etfFundFlowImpulse` | **64** | **25%** | **12.5%** | Public score-fed | `etf-flow` — `etfNetIssuance.v1.json` | **Yes** | Production / scored | **Ready** | ICI weekly estimated net issuance |
-| `systematicStrategyPressure` | **62** | **20%** | **10%** | **MOCK / static** | `systematic-flow` — `systematicFlowProxy.v1.json` | **No** | [v1.0b display-only](CFTC_TFF_MAPPING_DECISION.md) | **Low** — v1.0c gated | CFTC futures positioning ≠ systematic strategy; Mapping A card score (e.g. 93) ≠ MOCK 62; moderate VIX/ETF narrative overlap |
-| `optionsVolatilityAmplifier` | **70** | **20%** | **10%** | Public score-fed | `vol-regime` — `volatilityRegime.v1.json` (scored) | **Yes** | Production / scored | **Ready** | `options-activity-proxy` is **separate display-only** — OCC Index/Others; VIX remains scored vol input ([v1.4e](OPTIONS_ACTIVITY_MAPPING_DECISION.md)) |
-| `retirementFlowPressureProxy` | **58** | **20%** | **10%** | **MOCK / static** | `retirement-asset-growth` — `retirementFlowPressureProxy.v1.json` | **No** | [v1.2e display-only](RETIREMENT_FLOW_MAPPING_DECISION.md); `not_final` | **Very low** — v1.2f discouraged | Asset growth ≠ retirement-flow pressure; quarterly cadence; **high ICI overlap** with scored etf/passive-share/active-index-flow |
-| `leveredEtfRebalancePressure` | **55** | **15%** | **7.5%** | **MOCK / static** | `levered-etf-rebalance` — `leveredEtfRebalancePressure.v1.json` | **No** | [v1.1e display-only](LEVERED_ETF_REBALANCE_MAPPING_DECISION.md); `not_final` | **Low–medium** — v1.1f gated | Fixed-current-AUM estimate; `manual_unverified`; not true historical AUM calibration |
+**v1.10c baseline:** Canonical **production merged score-input values** (reference `2026-05-22`) are in [SCORE_REPRODUCTION_BASELINE.md](./SCORE_REPRODUCTION_BASELINE.md). The **mock default** column below is the static fallback in `mockGhostflowSnapshot.ts` — **not** the production baseline for public score-fed keys when artifacts validate.
+
+| Input key | Mock default | Production baseline (v1.10c) | Passive weight | Composite weight | Source type | Related card / artifact | `publicPassiveInputKey` | Mapping status | Replacement readiness | Known caveats |
+|-----------|--------------|------------------------------|----------------|------------------|-------------|-------------------------|-------------------------|----------------|----------------------|---------------|
+| `etfFundFlowImpulse` | **64** | **75** | **25%** | **12.5%** | Public score-fed | `etf-flow` — `etfNetIssuance.v1.json` | **Yes** | Production / scored | **Ready** | ICI weekly estimated net issuance (**33,919** $M → proxy **75**) |
+| `systematicStrategyPressure` | **62** | **62** | **20%** | **10%** | **MOCK / static** | `systematic-flow` — `systematicFlowProxy.v1.json` | **No** | [v1.0b display-only](CFTC_TFF_MAPPING_DECISION.md) | **Low** — v1.0c gated | CFTC futures positioning ≠ systematic strategy; Mapping A card score (e.g. 93) ≠ MOCK 62; moderate VIX/ETF narrative overlap |
+| `optionsVolatilityAmplifier` | **70** | **34** | **20%** | **10%** | Public score-fed | `vol-regime` — `volatilityRegime.v1.json` (scored) | **Yes** | Production / scored | **Ready** | VIX **16.7** → proxy **34**; `options-activity-proxy` is **separate display-only** ([v1.4e](OPTIONS_ACTIVITY_MAPPING_DECISION.md)) |
+| `retirementFlowPressureProxy` | **58** | **58** | **20%** | **10%** | **MOCK / static** | `retirement-asset-growth` — `retirementFlowPressureProxy.v1.json` | **No** | [v1.2e display-only](RETIREMENT_FLOW_MAPPING_DECISION.md); `not_final` | **Very low** — v1.2f discouraged | Asset growth ≠ retirement-flow pressure; quarterly cadence; **high ICI overlap** with scored etf/passive-share/active-index-flow |
+| `leveredEtfRebalancePressure` | **55** | **55** | **15%** | **7.5%** | **MOCK / static** | `levered-etf-rebalance` — `leveredEtfRebalancePressure.v1.json` | **No** | [v1.1e display-only](LEVERED_ETF_REBALANCE_MAPPING_DECISION.md); `not_final` | **Low–medium** — v1.1f gated | Fixed-current-AUM estimate; `manual_unverified`; not true historical AUM calibration |
 
 **MOCK burden:** three static inputs = **55% of Passive Pressure** (20% + 20% + 15%) and **27.5% of Composite** (half of 55%).
 
@@ -239,6 +241,7 @@ Composite **62** / Passive **58** / Structural **66** and `publicSignalCount` **
 | **v1.10** | This roadmap memo + doc cross-links | **Done** (docs-only) |
 | **v1.10a** | UI disclosure cleanup | **Done** — copy-only; see roadmap § v1.10a |
 | **v1.10b** | Coverage-copy test harness | **Done** — `ghostflowCoverageCopy.test.ts` in `test:ghostflow` / `ghostflow:check` |
+| **v1.10c** | Score reproduction baseline / mock contribution audit | **Done** — [SCORE_REPRODUCTION_BASELINE.md](./SCORE_REPRODUCTION_BASELINE.md); docs-only; no blocker |
 | **v1.0c / v1.1f / v1.2f** | Individual score wiring gates | **Not approved** |
 | **v1.8i** | Broader Passive reweight / mock retirement | **Future only** |
 | **v1.9d.future** | Systematic re-risking feasibility (research) | **Future** — long-term MOCK path |
