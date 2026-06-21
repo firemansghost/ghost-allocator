@@ -205,11 +205,13 @@ Consolidated results. Structural **66** for every row unless noted. Band labels 
 
 | Phase | Scope |
 |-------|--------|
-| **v1.10e** | Disclosure-only finalization / no-score-change policy (Scenario B path) |
+| **v1.10e** | **Done** — [MOCK_SCORE_NO_CHANGE_POLICY.md](./MOCK_SCORE_NO_CHANGE_POLICY.md) selected Option A (Scenario B path); v1.10 sequence closed |
 | **v1.8i** | Full Passive pillar rewrite / reweighting study — **explicit product approval only** |
 | **v1.0c / v1.1f / v1.2f** | Individual score wiring gates — **only if product-approved** after calibration + score-impact tables |
 
 If any gate opens later: prefer **Mapping C** (CFTC), **capped/percentile** (levered), not Mapping A or raw display-card values. Retirement **retire/remove** may be more plausible than wiring the current artifact.
+
+**v1.10e policy (Option A):** [MOCK_SCORE_NO_CHANGE_POLICY.md](./MOCK_SCORE_NO_CHANGE_POLICY.md) adopted Scenario **B** (disclosure-only / freeze mocks) as the product decision. This scenario memo remains a **research reference only** — no implementation authorized.
 
 ---
 
