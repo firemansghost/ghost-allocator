@@ -229,6 +229,12 @@ Prior docs mixed **mock snapshot defaults** with **production merged score-input
 
 ---
 
+## v1.10e no-score-change policy
+
+**Done (docs-only):** [MOCK_SCORE_NO_CHANGE_POLICY.md](./MOCK_SCORE_NO_CHANGE_POLICY.md) — formal Option A decision; v1.10 score-integrity sequence closed; gates remain closed. **This v1.10c baseline remains canonical** until a product-approved score change.
+
+---
+
 ## Future score-impact prerequisites
 
 Before any **future** score-impact work beyond v1.10d or any score wiring gate:
