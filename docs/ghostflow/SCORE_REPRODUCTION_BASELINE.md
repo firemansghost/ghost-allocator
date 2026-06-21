@@ -223,9 +223,15 @@ Prior docs mixed **mock snapshot defaults** with **production merged score-input
 
 ---
 
-## Future v1.10d score-impact prerequisites
+## v1.10d score-impact scenario study
 
-Before any score-impact scenario study or score wiring gate:
+**Done (docs/research-only):** [MOCK_SCORE_IMPACT_SCENARIOS.md](./MOCK_SCORE_IMPACT_SCENARIOS.md) — hypothetical Passive / Composite outcomes if MOCK passive inputs were retired, reweighted, or replaced under gated scenarios. All scenario deltas compare against this v1.10c baseline (**58 / 66 / 62**). **No score, artifact, UI, runtime, test, or package changes.**
+
+---
+
+## Future score-impact prerequisites
+
+Before any **future** score-impact work beyond v1.10d or any score wiring gate:
 
 1. **Baseline lock** — v1.10c values must reproduce current Composite **62** / Passive **58** / Structural **66** from code + artifacts at study time.
 2. **Scenario deltas** — compare against v1.10c baseline tables (per-input value, weighted term, sub-scores, composite, band).

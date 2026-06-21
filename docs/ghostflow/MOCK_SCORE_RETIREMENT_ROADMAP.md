@@ -2,7 +2,7 @@
 
 **GhostFlow docs:** [README](./README.md) · [Current state](./GHOSTFLOW_CURRENT_STATE.md) · [Public signal inventory](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md) · [Roadmap](./DATA_ROADMAP.md)
 
-**Related:** [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) (v1.8b policy decision) · [SCORE_REPRODUCTION_BASELINE.md](./SCORE_REPRODUCTION_BASELINE.md) (v1.10c canonical production baseline) · [CFTC_TFF_MAPPING_DECISION.md](./CFTC_TFF_MAPPING_DECISION.md) · [RETIREMENT_FLOW_MAPPING_DECISION.md](./RETIREMENT_FLOW_MAPPING_DECISION.md) · [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md)
+**Related:** [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) (v1.8b policy decision) · [SCORE_REPRODUCTION_BASELINE.md](./SCORE_REPRODUCTION_BASELINE.md) (v1.10c canonical production baseline) · [MOCK_SCORE_IMPACT_SCENARIOS.md](./MOCK_SCORE_IMPACT_SCENARIOS.md) (v1.10d score-impact scenario study) · [CFTC_TFF_MAPPING_DECISION.md](./CFTC_TFF_MAPPING_DECISION.md) · [RETIREMENT_FLOW_MAPPING_DECISION.md](./RETIREMENT_FLOW_MAPPING_DECISION.md) · [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md)
 
 This memo is the **v1.10 operational retirement roadmap** for the three remaining MOCK passive score inputs. It does **not** execute retirement, replacement, reweighting, or score wiring. GhostRegime, GhostYield, Models, and builder are out of scope.
 
@@ -242,6 +242,7 @@ Composite **62** / Passive **58** / Structural **66** and `publicSignalCount` **
 | **v1.10a** | UI disclosure cleanup | **Done** — copy-only; see roadmap § v1.10a |
 | **v1.10b** | Coverage-copy test harness | **Done** — `ghostflowCoverageCopy.test.ts` in `test:ghostflow` / `ghostflow:check` |
 | **v1.10c** | Score reproduction baseline / mock contribution audit | **Done** — [SCORE_REPRODUCTION_BASELINE.md](./SCORE_REPRODUCTION_BASELINE.md); docs-only; no blocker |
+| **v1.10d** | Mock retirement score-impact scenario study | **Done** — [MOCK_SCORE_IMPACT_SCENARIOS.md](./MOCK_SCORE_IMPACT_SCENARIOS.md); docs/research-only; v1.10c prerequisite satisfied; gates unchanged |
 | **v1.0c / v1.1f / v1.2f** | Individual score wiring gates | **Not approved** |
 | **v1.8i** | Broader Passive reweight / mock retirement | **Future only** |
 | **v1.9d.future** | Systematic re-risking feasibility (research) | **Future** — long-term MOCK path |

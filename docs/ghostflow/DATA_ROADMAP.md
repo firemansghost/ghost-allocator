@@ -273,6 +273,7 @@ GhostFlow input promotion rules (all phases):
 | **v1.10a** | UI Disclosure Cleanup | **Done** — trust badges (6 display-only), ScoreCard mixed disclaimer, Methodology PUBLIC/MOCK labels, Dashboard scope + ScoreDrivers footer; [MOCK_SCORE_RETIREMENT_ROADMAP.md](./MOCK_SCORE_RETIREMENT_ROADMAP.md); no score/artifact change |
 | **v1.10b** | Coverage Copy Test Harness Integration | **Done** — `ghostflowCoverageCopy.test.ts` wired into `test:ghostflow` / `ghostflow:check`; no score/artifact/UI/runtime change |
 | **v1.10c** | Score Reproduction Baseline / Mock Contribution Audit | **Done** — [SCORE_REPRODUCTION_BASELINE.md](./SCORE_REPRODUCTION_BASELINE.md); docs-only canonical production score baseline; distinguishes mock snapshot defaults from production merged score inputs; no score/artifact/UI/runtime/test/package changes |
+| **v1.10d** | Mock Retirement Score-Impact Scenario Study | **Done** — [MOCK_SCORE_IMPACT_SCENARIOS.md](./MOCK_SCORE_IMPACT_SCENARIOS.md); docs/research-only; scenario table vs v1.10c baseline; no score/artifact/UI/runtime/test/package changes; no score gates approved |
 | **v1.9e** | Protection Bid / Correlation Dispersion Feasibility | **Future** — research-only |
 | **v1.9f** | Mega-Cap Autocorrelation / Flow Momentum Feasibility | **Future** — optional or folded into v1.9b |
 | **v1.9g** | Valuation Stress Context Feasibility | **Future** — likely outside GhostFlow core |
