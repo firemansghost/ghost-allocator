@@ -126,7 +126,7 @@ function parseNumberToken(s: string): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-function detectColumns(headers: string[]): ColumnDetection | null {
+function detectColumns(headers: string[], seriesLabel: string): ColumnDetection | null {
   const normalized = headers.map(normalizeHeader);
   const lower = normalized.map((h) => h.toLowerCase());
 
@@ -135,8 +135,11 @@ function detectColumns(headers: string[]): ColumnDetection | null {
 
   let valueIdx = lower.findIndex((h) => h === 'close');
   let valueColHeuristic = false;
+  if (valueIdx < 0 && seriesLabel === 'SKEW') {
+    valueIdx = lower.findIndex((h) => h === 'skew');
+  }
   if (valueIdx < 0) {
-    valueIdx = lower.findIndex((h) => h === 'skew' || h === 'index' || h === 'value' || h === 'level');
+    valueIdx = lower.findIndex((h) => h === 'index' || h === 'value' || h === 'level');
     valueColHeuristic = valueIdx >= 0;
   }
   if (valueIdx < 0) {
@@ -196,7 +199,7 @@ function parseIndexCsv(path: string, label: string): ParseResult {
   base.delimiter = delimiter === '\t' ? 'tab' : 'comma';
   base.headers = parseCsvRow(lines[0]!, delimiter).map(normalizeHeader);
 
-  const detection = detectColumns(base.headers);
+  const detection = detectColumns(base.headers, label);
   if (!detection) {
     return { ...base, error: 'Could not detect date and value columns' };
   }
@@ -296,7 +299,12 @@ function evaluateLock(parsed: ParseResult, minRows: number, seriesLabel: string)
     detection.dateCol.toLowerCase().includes('date');
 
   if (passReady) {
-    return { lock: 'PASS', reasons: [`${seriesLabel}: stable Date + Close columns; ${rowCount} rows; latest ${latest.value}.`] };
+    return {
+      lock: 'PASS',
+      reasons: [
+        `${seriesLabel}: stable date and value columns (${detection.dateCol}, ${detection.valueCol}); ${rowCount} rows; latest ${latest.value}.`,
+      ],
+    };
   }
 
   const partialSignals =

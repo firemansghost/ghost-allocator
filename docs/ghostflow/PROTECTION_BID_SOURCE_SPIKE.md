@@ -59,7 +59,7 @@ Lock a **repeatable, operator-grade, public Cboe SKEW history path** that could 
 
 | # | Source | Operator path (verify) | Format | Repeatable? | History | Likely columns | Cadence | Burden | License | Rating | Future artifact? |
 |---|--------|------------------------|--------|-------------|---------|----------------|---------|--------|---------|--------|------------------|
-| **A** | **Cboe CDN daily index history (primary)** | Expected mirror of VIX: `https://cdn.cboe.com/api/global/us_indices/daily_prices/SKEW_History.csv` | CSV | **Likely** (same CDN class as VIX) | Long daily | `Date`, `Open`, `High`, `Low`, `Close` | Daily | Low | Cboe index — manual extract + attribution; do not commit raw CSV | **GREEN–YELLOW** | **Yes** if verified |
+| **A** | **Cboe CDN daily index history (primary)** | **Locked:** `https://cdn.cboe.com/api/global/us_indices/daily_prices/SKEW_History.csv` | CSV (`DATE,SKEW`) | **Yes** | Long daily | `DATE`, `SKEW` | Daily | Low | Cboe index — manual extract + attribution; do not commit raw CSV | **GREEN–YELLOW** → **PASS** | **Yes** — verified |
 | **B** | **Cboe index detail / historical download** | Cboe Global Indices → SKEW → historical data link | CSV or export | Maybe | Long | Same as A if CSV | Daily | Low–medium | Same as A | **YELLOW** | Yes if link stable |
 | **C** | **Cboe chart-only / delayed quote UI** | Index quote pages | HTML/chart | No | Limited | N/A | Daily | High | Unclear | **RED** | No |
 | **D** | **Third-party mirrors** (Yahoo, Stooq, etc.) | Various | CSV/API | Variable | Long | Ticker-dependent | Daily | Medium | Non-canonical | **RED** | No — out of scope |
@@ -79,25 +79,25 @@ Lock a **repeatable, operator-grade, public Cboe SKEW history path** that could 
 
 | Field | SKEW (primary) | Correlation (optional) |
 |-------|----------------|------------------------|
-| Source URL / description | Expected: Cboe CDN `SKEW_History.csv` (see [ARTIFACT_RUNBOOK.md](./ARTIFACT_RUNBOOK.md) VIX analogue) | Not inspected |
-| Local file path | **Not run** — no operator CSV in repo during v1.9e.1 implementation | N/A |
-| Run command | `npx tsx scripts/ghostflow/skew-source-spike.ts --skew-csv <local-path>` | — |
-| Run date | **Pending** | **SKIPPED** |
-| Row count | **Pending** | — |
-| First date | **Pending** | — |
-| Latest date | **Pending** | — |
-| Latest value | **Pending** | — |
-| Date column | **Pending** (expected `Date`) | — |
-| Value column | **Pending** (expected `Close`) | — |
-| Source lock result | **PENDING** | **SKIPPED** |
-| Notes | Operator must download CSV locally, run script, update this table. **Do not commit CSV.** | Defer unless clean public COR CSV verified |
+| Source URL / description | `https://cdn.cboe.com/api/global/us_indices/daily_prices/SKEW_History.csv` | Not inspected |
+| Local file path | `tmp/skew-spike/SKEW_History.csv` — **not committed** (under gitignored `tmp/`) | N/A |
+| Run command | `npx tsx scripts/ghostflow/skew-source-spike.ts --skew-csv tmp/skew-spike/SKEW_History.csv` | — |
+| Run date | 2026-06-18 (operator verification; v1.9e.1a column lock) | **SKIPPED** |
+| Headers | `DATE,SKEW` | — |
+| Row count | **9,167** | — |
+| First date | **1990-01-02** | — |
+| Latest date | **2026-06-18** | — |
+| Latest value | **146.72** | — |
+| Date column | **DATE** | — |
+| Value column | **SKEW** (index level — first-class, not heuristic) | — |
+| Source lock result | **`SKEW_SOURCE_LOCK: PASS`** | **`CORR_SOURCE_LOCK: SKIPPED`** |
+| Notes | Cboe SKEW file is a **two-column index-level** CSV, not OHLC; `SKEW` is the index level/value column (analogous to VIX `Close`). v1.9e.1a parser treats `DATE,SKEW` as locked format. **Do not commit CSV.** | Defer unless clean public COR CSV verified |
 
-**Operator steps to complete verification:**
+**Operator refresh path (locked):**
 
-1. Download SKEW history CSV from Cboe (browser) → e.g. `tmp/skew-spike/SKEW_History.csv`
-2. Run: `npx tsx scripts/ghostflow/skew-source-spike.ts --skew-csv tmp/skew-spike/SKEW_History.csv`
-3. Record stdout fields in this log; set lock to PASS / PARTIAL / FAIL
-4. Optional: `--corr-csv` if COR1M (or similar) CSV obtained
+1. Download from Cboe CDN URL above → save locally (e.g. `tmp/skew-spike/SKEW_History.csv`)
+2. Run spike script to sanity-check latest row
+3. Copy latest `DATE` → ISO `asOf`, `SKEW` → future artifact observation field (v1.9e.2+ design only)
 
 ---
 
@@ -131,10 +131,10 @@ Lock a **repeatable, operator-grade, public Cboe SKEW history path** that could 
 
 | Series | Result | Rationale |
 |--------|--------|-----------|
-| **SKEW** | **PENDING** | Script shipped; no operator CSV run during v1.9e.1 implementation — **do not claim PASS** |
-| **Correlation** | **SKIPPED** | No `--corr-csv` run; implied-correlation public path not verified in this phase |
+| **SKEW** | **PASS** | Cboe CDN `SKEW_History.csv` verified; `DATE,SKEW` format locked (v1.9e.1a); 9,167 rows; latest **146.72** as of **2026-06-18** |
+| **Correlation** | **SKIPPED** | No `--corr-csv` run; implied-correlation public path not verified |
 
-**v1.9e.2 recommendation:** **Not yet** — complete operator verification first. Proceed to artifact design only on SKEW **PASS**, or clearly acceptable **PARTIAL** with documented operator workaround.
+**v1.9e.2 recommendation:** **Eligible to plan** — SKEW source lock **PASS**. Proceed to artifact design (SKEW-only, display-only default) when product approves. **No production artifact or dashboard card yet.** `publicSignalCount` remains **12**.
 
 ---
 
@@ -142,7 +142,7 @@ Lock a **repeatable, operator-grade, public Cboe SKEW history path** that could 
 
 | Condition | Next phase |
 |-----------|------------|
-| **SKEW PASS** | **v1.9e.2** — artifact design, SKEW-only, display-only default |
+| **SKEW PASS** | **v1.9e.2** — artifact design, SKEW-only, display-only default (**plan next**; not started; no artifact/card yet) |
 | **SKEW PARTIAL** | Operator source checklist / manual cleanup → then v1.9e.2 |
 | **SKEW FAIL + correlation PASS** | Separate implied-correlation feasibility/design path — **not** SKEW card |
 | **Both FAIL** | Stop lane; document research-only / paid-vendor status |
