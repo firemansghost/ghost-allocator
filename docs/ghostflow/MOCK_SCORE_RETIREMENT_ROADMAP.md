@@ -238,6 +238,7 @@ Composite **62** / Passive **58** / Structural **66** and `publicSignalCount` **
 |-------|--------|--------|
 | **v1.10** | This roadmap memo + doc cross-links | **Done** (docs-only) |
 | **v1.10a** | UI disclosure cleanup | **Done** — copy-only; see roadmap § v1.10a |
+| **v1.10b** | Coverage-copy test harness | **Done** — `ghostflowCoverageCopy.test.ts` in `test:ghostflow` / `ghostflow:check` |
 | **v1.0c / v1.1f / v1.2f** | Individual score wiring gates | **Not approved** |
 | **v1.8i** | Broader Passive reweight / mock retirement | **Future only** |
 | **v1.9d.future** | Systematic re-risking feasibility (research) | **Future** — long-term MOCK path |

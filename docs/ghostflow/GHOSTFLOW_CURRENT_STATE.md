@@ -106,6 +106,8 @@ Display artifacts refresh cards only — they do **not** replace these score inp
 
 **v1.10a UI disclosure:** Dashboard copy now states 12 equity public signals (6 score-fed + 6 display-only), Treasury separate, and MOCK **62 / 58 / 55** vs display-only cards — see [MOCK_SCORE_RETIREMENT_ROADMAP.md](./MOCK_SCORE_RETIREMENT_ROADMAP.md) § v1.10a. No score change.
 
+**v1.10b test harness:** [`ghostflowCoverageCopy.test.ts`](../../lib/ghostflow/__tests__/ghostflowCoverageCopy.test.ts) runs as part of `npm run test:ghostflow` (and `ghostflow:check`) to guard trust-badge coverage copy (6 display-only).
+
 ---
 
 ## DERIVED inputs
