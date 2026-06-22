@@ -193,6 +193,7 @@ Suggested messages: see [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST
 | [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) | Field-level quick checklist + per-artifact tables |
 | [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) | Freshness thresholds & `dataQuality` policy |
 | [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md) | Canonical **13-signal** inventory |
+| [CURRENT_DATA_READINESS_AUDIT.md](./CURRENT_DATA_READINESS_AUDIT.md) | **v1.13** operating readiness — audit date **2026-06-22**; dashboard reference **2026-05-22** |
 | [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) | Canonical dashboard inventory |
 | [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) | MOCK keep policy |
 | [ARTIFACT_RUNBOOK.md](./ARTIFACT_RUNBOOK.md) · [BREADTH_ARTIFACT_RUNBOOK.md](./BREADTH_ARTIFACT_RUNBOOK.md) · [ETF_ARTIFACT_RUNBOOK.md](./ETF_ARTIFACT_RUNBOOK.md) · etc. | Per-source deep dives |

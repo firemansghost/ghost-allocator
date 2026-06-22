@@ -286,6 +286,7 @@ GhostFlow input promotion rules (all phases):
 | **v1.9e.4** | Tail Skew Context Production Artifact + Display-Only Card | **Done** — [`tailSkewContext.v1.json`](../data/ghostflow/artifacts/tailSkewContext.v1.json); reference-aligned **2026-05-22**; display-only; `publicSignalCount` **12 → 13**; not scored |
 | **v1.9e.5** | Tail Skew Context Mapping Decision | **Done** — [TAIL_SKEW_MAPPING_DECISION.md](./TAIL_SKEW_MAPPING_DECISION.md); docs-only; Option A display-only; `mappingStatus` **not_final**; no mapper; **v1.9e.6 discouraged / not approved** unless product reopens score gate |
 | **v1.12** | Public Signal Integrity Checkpoint | **Done** — [GHOSTFLOW_PUBLIC_SIGNAL_INTEGRITY_CHECKPOINT.md](./GHOSTFLOW_PUBLIC_SIGNAL_INTEGRITY_CHECKPOINT.md); docs + UI-copy cleanup; `publicSignalCount` **13** (6 score-fed + 7 display-only); no score/artifact/runtime changes |
+| **v1.13** | Current Data Readiness Audit | **Done** — [CURRENT_DATA_READINESS_AUDIT.md](./CURRENT_DATA_READINESS_AUDIT.md); docs-only; audit date **2026-06-22**; dashboard reference **2026-05-22**; no refresh; next: **v1.14** reference-date policy · **v1.15** operator refresh after policy |
 | **v1.9f** | Mega-Cap Autocorrelation / Flow Momentum Feasibility | **Future** — optional or folded into v1.9b |
 | **v1.9g** | Valuation Stress Context Feasibility | **Future** — likely outside GhostFlow core |
 | **Credit Catalyst / AI Financing Stress** | Outside GhostFlow | **Future** — possible separate lane (GhostRegime / GhostYield / Credit Plumbing) |
