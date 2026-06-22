@@ -77,7 +77,7 @@ Any future candidate in this backlog starts **display-only / feasibility-only** 
 | 1 | **Cap-Weight Concentration Premium Lens** | High — tests whether weighting mechanism itself produces excess return | **High** — natural companion to existing `concentration` card | **High** — SPY/RSP and index price series are public | Low–medium vs `concentration`, `passive-share` | Medium if wired without gate | **v1.9b.5 Done** — [mapping decision](./CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md); cap-weight track complete through mapping decision; v1.9b.6 discouraged / not approved | **v1.9b.5 Done** — display-only by default |
 | 2 | **Passive Supply / Float Absorption Lens** | High — supply-side complement to demand/flow proxies | **High** — passive market-structure native | Medium — event data fragmented; aggregates harder | Medium vs `etf-flow`, buyback narrative | High if scored naively | **v1.9c.5 Done** — [mapping decision](./INDEX_INCLUSION_EVENT_MAPPING_DECISION.md); display-only by default | **v1.9c.6** score gate discouraged / not approved |
 | 3 | **Systematic Re-Risking / De-Risking Lens** | High — addresses MOCK trust gap on `systematicStrategyPressure` | **Medium–high** — passive flow theme; semantic rename required | Medium — vol/trend public; true CTA exposure harder | Medium vs VIX, CFTC display card | **High** — direct MOCK replacement temptation | Future feasibility; long-term MOCK retirement path only | **v1.9d** |
-| 4 | **Protection Bid / Correlation Dispersion Lens** | Medium–high — options-market uncertainty framing | **Medium** — vol/options adjacent; distinct from VIX amplifier | Medium — VIX/SKEW public; implied correlation harder | **High** vs score-fed VIX and OCC display proxy | High without reweight decision | **v1.9e.2 Done** — [Tail Skew Context design](./TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md); SKEW-only display-only; correlation deferred; v1.9e.6 discouraged | **v1.9e.3** example JSON + validator |
+| 4 | **Protection Bid / Correlation Dispersion Lens** | Medium–high — options-market uncertainty framing | **Medium** — vol/options adjacent; distinct from VIX amplifier | Medium — VIX/SKEW public; implied correlation harder | **High** vs score-fed VIX and OCC display proxy | High without reweight decision | **v1.9e.3 Done** — example JSON + validator; [Tail Skew Context design](./TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md); no production card yet | **v1.9e.4** production JSON + display-only card (product-approved) |
 | 5 | **Mega-Cap Autocorrelation / Flow Momentum Lens** | Medium — “machine-powered momentum” hypothesis | **Medium–high** — related to cap-weight premium | High if folded into price-series work | Medium vs breadth, concentration | Medium | **Fold into v1.9b** if clean; else split | **v1.9f** or appendix in **v1.9b** |
 | 6 | **Valuation Stress / Individual-Security CAPE Lens** | Medium — valuation context | **Low** for composite — valuation regime, not passive flow | Medium — per-stock history work heavy | Low in composite; narrative overlap risk | Low in composite; high if forced into GhostFlow | Park as **outside-core** context candidate | **v1.9g** or defer outside GhostFlow |
 | 7 | **Credit Catalyst / AI Financing Stress Lane** | High for macro/credit product | **Outside core** — not equity passive-pressure gauge | Medium — spreads, filings, distressed data | N/A to composite | N/A — do not fold in | Document only; separate lane if product wants | Outside GhostFlow |
@@ -262,11 +262,12 @@ Any future candidate in this backlog starts **display-only / feasibility-only** 
 
 - **v1.9e feasibility complete** — [PROTECTION_BID_CORRELATION_DISPERSION_FEASIBILITY.md](./PROTECTION_BID_CORRELATION_DISPERSION_FEASIBILITY.md); overall **YELLOW**; **Option A** — SKEW-first display-only path
 - **v1.9e.1 source spike complete** — [PROTECTION_BID_SOURCE_SPIKE.md](./PROTECTION_BID_SOURCE_SPIKE.md); Cboe SKEW source lock **PASS** (`DATE,SKEW`); correlation **SKIPPED**
-- **v1.9e.2 artifact design complete** — [TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md](./TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md); **Tail Skew Context** / `tail-skew-context-proxy`; SKEW-only; display-only; no JSON/card yet
+- **v1.9e.2 artifact design complete** — [TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md](./TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md); **Tail Skew Context** / `tail-skew-context-proxy`; SKEW-only; display-only
+- **v1.9e.3 example scaffold complete** — [`tailSkewContext.v1.example.json`](../../data/ghostflow/artifacts/tailSkewContext.v1.example.json); validator [`tailSkewContext.ts`](../../lib/ghostflow/artifacts/tailSkewContext.ts); no production JSON/card yet
 - Display-only by default; **no score wiring**; v1.9e.6 score gate **discouraged / not approved**
 - Avoid double-counting VIX (`optionsVolatilityAmplifier`) and OCC volume (`options-activity-proxy`)
 
-**Suggested next phase:** **v1.9e.3** — example artifact + validator/types/tests (`publicSignalCount` remains 12)
+**Suggested next phase:** **v1.9e.4** — production artifact + display-only card (`publicSignalCount` remains 12 until card ships)
 
 ---
 
@@ -398,6 +399,7 @@ Any future candidate in this backlog starts **display-only / feasibility-only** 
 | **v1.9e** | Protection Bid / Correlation Dispersion Feasibility | **Done** — [PROTECTION_BID_CORRELATION_DISPERSION_FEASIBILITY.md](./PROTECTION_BID_CORRELATION_DISPERSION_FEASIBILITY.md); **YELLOW**; SKEW-first display-only path; v1.9e.6 discouraged |
 | **v1.9e.1** | Protection Bid Source Spike / Operator Source Review | **Done** — [PROTECTION_BID_SOURCE_SPIKE.md](./PROTECTION_BID_SOURCE_SPIKE.md); SKEW lock **PASS**; correlation SKIPPED |
 | **v1.9e.2** | Tail Skew Context Artifact Design | **Done** — [TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md](./TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md); SKEW-only display-only; v1.9e.6 discouraged |
+| **v1.9e.3** | Tail Skew Context Example Artifact + Validator Scaffold | **Done** — example JSON + validator/types/tests; no production JSON/UI/buildSnapshot; `publicSignalCount` **12** |
 | **v1.9f** | Mega-Cap Autocorrelation / Flow Momentum Feasibility | **Future** — optional or folded into v1.9b |
 | **v1.9g** | Valuation Stress Context Feasibility | **Future** — likely outside GhostFlow core |
 | **Credit Catalyst / AI Financing Stress** | Outside GhostFlow | **Future** — possible separate lane |
