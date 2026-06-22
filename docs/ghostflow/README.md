@@ -12,7 +12,7 @@ Entrypoint for GhostFlow docs under `docs/ghostflow/`. For live dashboard invent
 | **Passive Pressure** | **58** |
 | **Structural Fragility** | **66** |
 | **Band** | *Crowded / Reflexive* |
-| **Equity `publicSignalCount`** | **12** |
+| **Equity `publicSignalCount`** | **13** |
 | **Treasury Plumbing** | **2** separate display-only cards |
 
 Treasury is **outside** the equity Research Composite, `buildSnapshot`, `raw.signals`, `meta.publicSignals`, [`PUBLIC_ARTIFACT_SIGNAL_IDS`](../../lib/ghostflow/signalPresentation.ts), and `publicSignalCount`. Do **not** combine equity **12** + Treasury **2** into 14.

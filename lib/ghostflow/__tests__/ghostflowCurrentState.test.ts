@@ -18,6 +18,7 @@ const DISPLAY_ONLY_IDS = [
   'options-activity-proxy',
   'index-inclusion-events',
   'cap-weight-premium',
+  'tail-skew-context',
 ] as const;
 
 const SCORE_FED_PUBLIC_IDS = [
@@ -37,7 +38,7 @@ assert.strictEqual(scored.score.subScores.passivePressure, 58);
 assert.strictEqual(scored.score.subScores.structuralFragility, 66);
 assert.strictEqual(ghostFlowBandLabel(scored.score.band), 'Crowded / Reflexive');
 
-assert.strictEqual(meta.publicSignalCount, 12);
+assert.strictEqual(meta.publicSignalCount, 13);
 
 assert.strictEqual(raw.passivePressure.systematicStrategyPressure, 62);
 assert.strictEqual(raw.passivePressure.retirementFlowPressureProxy, 58);
@@ -73,7 +74,8 @@ for (const id of SCORE_FED_PUBLIC_IDS) {
 
 assert.deepStrictEqual(grouped.mockProxies.map((s) => s.id), []);
 
-assert.strictEqual(PUBLIC_ARTIFACT_SIGNAL_IDS.length, 12);
+assert.strictEqual(PUBLIC_ARTIFACT_SIGNAL_IDS.length, 13);
+assert.ok(PUBLIC_ARTIFACT_SIGNAL_IDS.includes('tail-skew-context'));
 assert.ok(PUBLIC_ARTIFACT_SIGNAL_IDS.includes('index-inclusion-events'));
 assert.ok(PUBLIC_ARTIFACT_SIGNAL_IDS.includes('cap-weight-premium'));
 assert.ok(PUBLIC_ARTIFACT_SIGNAL_IDS.includes('retirement-asset-growth'));

@@ -63,7 +63,7 @@ assert.strictEqual(
   raw.signals.find((s) => s.id === 'vol-regime')?.numericValue,
   volAmp
 );
-assert.strictEqual(meta.publicSignalCount, 12);
+assert.strictEqual(meta.publicSignalCount, 13);
 assert.ok(meta.publicSignals.some((s) => s.signalId === 'options-activity-proxy'));
 
 assert.strictEqual(scored.score.score, 62);

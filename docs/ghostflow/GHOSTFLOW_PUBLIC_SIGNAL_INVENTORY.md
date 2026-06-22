@@ -23,9 +23,9 @@
 
 | Item | Value |
 |------|--------|
-| **`publicSignalCount`** | **12** (equity only) |
+| **`publicSignalCount`** | **13** (equity only) |
 | **Score-fed equity/public artifacts** | **6** |
-| **Display-only equity/public artifacts** | **6** |
+| **Display-only equity/public artifacts** | **7** |
 | **Treasury lane** | **2** separate display-only cards — **not** counted in equity `publicSignalCount` |
 | **Composite** | **62** |
 | **Passive Pressure** | **58** |
@@ -33,13 +33,13 @@
 | **Band** | *Crowded / Reflexive* |
 | **Reference date** | [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) = `2026-05-22` |
 
-**Counting rule:** Equity `publicSignalCount` = **12**. Treasury display lane = **2** cards. **Do not** combine into 14.
+**Counting rule:** Equity `publicSignalCount` = **13**. Treasury display lane = **2** cards. **Do not** combine into 15.
 
 ---
 
 ## Equity public signal inventory
 
-All **12** equity public signals appear in `meta.publicSignals` when production JSON validates. Derived context card `distance-65` is **not** counted in `publicSignalCount`.
+All **13** equity public signals appear in `meta.publicSignals` when production JSON validates. Derived context card `distance-65` is **not** counted in `publicSignalCount`.
 
 | # | Card id | Artifact `signalId` | Display title | Lane | `dataStatus` | `dataQuality` | `publicPassiveInputKey` | Composite impact | Production JSON | validate-artifacts | Display order |
 |---|---------|---------------------|---------------|------|--------------|---------------|-------------------------|------------------|-----------------|-------------------|---------------|
@@ -55,8 +55,11 @@ All **12** equity public signals appear in `meta.publicSignals` when production 
 | 10 | `options-activity-proxy` | `options-activity-proxy` | Index Options Intensity Proxy | Display-only | `public_proxy` | `manual_unverified` | — | **None** — VIX remains scored vol input | `optionsActivityProxy.v1.json` | Yes | 10 |
 | 11 | `index-inclusion-events` | `index-inclusion-event-proxy` | Index Inclusion Event Proxy | Display-only | `public_proxy` | `manual_unverified` | — | **None** — no score path | `indexInclusionEventProxy.v1.json` | Yes | 11 |
 | 12 | `cap-weight-premium` | `cap-weight-premium-proxy` | Cap-Weight Premium Proxy | Display-only | `public_proxy` | `manual_unverified` | — | **None** — no score path | `capWeightPremiumProxy.v1.json` | Yes | 12 |
+| 13 | `tail-skew-context` | `tail-skew-context-proxy` | Tail Skew Context | Display-only | `public_proxy` | `manual_unverified` | — | **None** — VIX remains scored vol input; SKEW is tail-skew display context | `tailSkewContext.v1.json` | Yes | 13 |
 
-**JSON `signalId` vs card id:** Rows 7–9 and 11–12 use different JSON `signalId` values than dashboard card ids — document only; do not change without product approval.
+**JSON `signalId` vs card id:** Rows 7–9, 11–13 use different JSON `signalId` values than dashboard card ids — document only; do not change without product approval.
+
+**Tail Skew vs VIX vs OCC:** `vol-regime` (VIX) is score-fed vol **level**. `tail-skew-context` (SKEW) is display-only tail-skew **context** — reference-aligned **2026-05-22** (`asOf`); source CSV extends through **2026-06-18** (`latestSourceDate`). `options-activity-proxy` (OCC) is display-only volume intensity.
 
 Display order follows [`GhostFlowSignalGrid.tsx`](../../components/ghostflow/GhostFlowSignalGrid.tsx) section ordering: score-fed block first, then display-only block.
 
@@ -72,6 +75,7 @@ Display order follows [`GhostFlowSignalGrid.tsx`](../../components/ghostflow/Gho
 | MOCK passive inputs (unchanged) | `systematicStrategyPressure` **62**, `retirementFlowPressureProxy` **58**, `leveredEtfRebalancePressure` **55** |
 | Index Inclusion Event Proxy | **No** score path — [v1.9c.5 mapping](./INDEX_INCLUSION_EVENT_MAPPING_DECISION.md) display-only by default |
 | Cap-Weight Premium Proxy | **No** score path — [v1.9b.5 mapping](./CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md) display-only by default |
+| Tail Skew Context | **No** score path — [v1.9e.4](./TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md) display-only; VIX remains score-fed vol input |
 | Composite / Passive / Structural | **62 / 58 / 66** — **unchanged** |
 
 **Score integrity (v1.10):** Three MOCK passive score inputs (`systematicStrategyPressure` **62**, `retirementFlowPressureProxy` **58**, `leveredEtfRebalancePressure` **55**) live in [`mockGhostflowSnapshot.ts`](../../data/ghostflow/mockGhostflowSnapshot.ts) — **outside** the 12 equity public signal cards. Display-only cards for systematic, retirement, and levered ETF refresh dashboard context only. Retirement requirements and gate ladder: [MOCK_SCORE_RETIREMENT_ROADMAP.md](./MOCK_SCORE_RETIREMENT_ROADMAP.md). **v1.10c production baseline:** [SCORE_REPRODUCTION_BASELINE.md](./SCORE_REPRODUCTION_BASELINE.md) — canonical score math, ten production score-input values, and MOCK/public contribution tables.
@@ -101,7 +105,7 @@ Treasury refresh updates the Treasury Plumbing display lane only — no Composit
 
 ## Current display-only list
 
-The **six** display-only equity/public cards are:
+The **seven** display-only equity/public cards are:
 
 1. `systematic-flow`
 2. `levered-etf-rebalance`
@@ -109,6 +113,7 @@ The **six** display-only equity/public cards are:
 4. `options-activity-proxy`
 5. `index-inclusion-events`
 6. `cap-weight-premium`
+7. `tail-skew-context`
 
 ---
 
@@ -119,9 +124,9 @@ The **six** display-only equity/public cards are:
 | Composite | **62** |
 | Passive Pressure | **58** |
 | Structural Fragility | **66** |
-| `publicSignalCount` | **12** (equity) |
+| `publicSignalCount` | **13** (equity) |
 | Score-fed equity/public | **6** |
-| Display-only equity/public | **6** |
+| Display-only equity/public | **7** |
 | Treasury Plumbing | **2** separate display-only cards |
 | [`scoring.ts`](../../lib/ghostflow/scoring.ts) | Unchanged |
 | [`buildSnapshot.ts`](../../lib/ghostflow/buildSnapshot.ts) | Unchanged |

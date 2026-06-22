@@ -14,18 +14,16 @@ This memo defines the **display-only** Cboe SKEW card schema. **v1.9e.3** added 
 
 ## Status
 
-| Item | v1.9e.3 posture |
+| Item | v1.9e.4 posture |
 |------|------------------|
-| Document type | **Artifact design memo** (+ v1.9e.3 scaffold) |
-| Production artifact JSON | **None** — deferred to **v1.9e.4** |
+| Document type | **Artifact design memo** (+ v1.9e.3 scaffold + v1.9e.4 production) |
+| Production artifact JSON | **Done** — [`tailSkewContext.v1.json`](../../data/ghostflow/artifacts/tailSkewContext.v1.json) (reference-aligned **2026-05-22**) |
 | Example artifact JSON | **Done** — [`tailSkewContext.v1.example.json`](../../data/ghostflow/artifacts/tailSkewContext.v1.example.json) (`designOnly: true`) |
-| Validator / types / tests | **Done** — [`tailSkewContext.ts`](../../lib/ghostflow/artifacts/tailSkewContext.ts) · [`tailSkewContextProxy.test.ts`](../../lib/ghostflow/__tests__/tailSkewContextProxy.test.ts) |
-| UI / dashboard card | **None** — deferred to **v1.9e.4** |
+| Validator / types / tests | **Done** — [`tailSkewContext.ts`](../../lib/ghostflow/artifacts/tailSkewContext.ts) · [`tailSkewContextProxy.test.ts`](../../lib/ghostflow/__tests__/tailSkewContextProxy.test.ts) · [`tailSkewContextDisplay.test.ts`](../../lib/ghostflow/__tests__/tailSkewContextDisplay.test.ts) |
+| UI / dashboard card | **Done** — `tail-skew-context` display-only card |
 | Score change | **None** |
-| Runtime change | **None** |
-| `loadTailSkewContextArtifact` / buildSnapshot merge | **None** |
 | `publicPassiveInputKey` | **None** |
-| **`publicSignalCount`** | **12** (equity) — **unchanged** |
+| **`publicSignalCount`** | **13** (equity) — **12 → 13** display-only card only |
 
 ---
 
@@ -294,8 +292,8 @@ Any future calibration remains **display-only** unless product explicitly reopen
 |-------|-------------|--------|---------------------|
 | **v1.9e.2** | This design memo | No | **12** |
 | **v1.9e.3** | Example JSON + validator/types/tests | No | **12** — **Done** |
-| **v1.9e.3a** (optional) | SKEW historical percentile calibration study | No | **12** |
-| **v1.9e.4** | Production JSON + display-only card | No | **12 → 13** (product-approved) |
+| **v1.9e.4** | Production JSON + display-only card | No | **12 → 13** — **Done** |
+| **v1.9e.3a** (optional) | SKEW historical percentile calibration study | No | **13** |
 | **v1.9e.5** | Mapping decision — expected display-only | No | 13 |
 | **v1.9e.6** | Score gate | **Discouraged** | — |
 

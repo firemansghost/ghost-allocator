@@ -60,7 +60,7 @@ assert.strictEqual(capWeight!.artifactPublishedAt, '2026-06-17');
 const scoredCapWeight = scored.signals.find((s) => s.id === 'cap-weight-premium')!;
 assert.strictEqual(signalCardBadgeLabelForSignal(scoredCapWeight, 'public'), 'DISPLAY ONLY');
 
-assert.strictEqual(meta.publicSignalCount, 12);
+assert.strictEqual(meta.publicSignalCount, 13);
 assert.ok(meta.publicSignals.some((s) => s.signalId === 'cap-weight-premium'));
 assert.ok(!meta.publicPassiveInputKeys?.includes('cap-weight-premium' as never));
 
@@ -72,7 +72,7 @@ assert.strictEqual(ghostFlowBandLabel(scored.score.band), 'Crowded / Reflexive')
 const grouped = groupSignalsByPresentation(scored.signals);
 assert.ok(grouped.publicArtifacts.some((s) => s.id === 'cap-weight-premium'));
 
-assert.strictEqual(PUBLIC_ARTIFACT_SIGNAL_IDS.length, 12);
+assert.strictEqual(PUBLIC_ARTIFACT_SIGNAL_IDS.length, 13);
 assert.ok(PUBLIC_ARTIFACT_SIGNAL_IDS.includes('cap-weight-premium'));
 
 const invalidMerge = mergeCapWeightPremiumDisplayIfValid(

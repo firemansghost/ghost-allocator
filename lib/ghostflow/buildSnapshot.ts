@@ -131,6 +131,16 @@ import {
   loadCapWeightPremiumProxyArtifact,
 } from './artifacts/capWeightPremiumProxy';
 import {
+  buildTailSkewDisplayExplanation,
+  evaluateTailSkewArtifactFreshness,
+  formatTailSkewCardValue,
+  loadTailSkewContextArtifact,
+  TAIL_SKEW_DISPLAY_CARD_CAVEAT,
+  TAIL_SKEW_DISPLAY_SIGNAL_ID,
+  TAIL_SKEW_DISPLAY_SIGNAL_NAME,
+} from './artifacts/tailSkewContext';
+import type { TailSkewContextArtifactV1, TailSkewContextValidation } from './artifacts/types';
+import {
   buildVolRegimeExplanation,
   formatVolRegimeDisplayValue,
   loadVolatilityRegimeArtifact,
@@ -887,6 +897,77 @@ export function mergeCapWeightPremiumDisplayIfValid(
   };
 }
 
+/** Display-only Tail Skew Context card — does not merge into passive/structural score inputs. */
+export function applyTailSkewContextDisplayArtifact(
+  raw: GhostFlowRawSnapshot,
+  artifact: TailSkewContextArtifactV1,
+  referenceAsOf: string
+): ApplyArtifactOutcome {
+  const freshness = evaluateTailSkewArtifactFreshness(artifact, referenceAsOf);
+  const { observations } = artifact;
+
+  raw.signals = replaceSignal(raw.signals, {
+    id: TAIL_SKEW_DISPLAY_SIGNAL_ID,
+    name: TAIL_SKEW_DISPLAY_SIGNAL_NAME,
+    value: formatTailSkewCardValue(observations),
+    numericValue: observations.currentSkew,
+    explanation: buildTailSkewDisplayExplanation(artifact),
+    cardCaveat: artifact.display?.caveat ?? TAIL_SKEW_DISPLAY_CARD_CAVEAT,
+    dataStatus: 'public_proxy',
+    updateFrequencyTarget: 'Daily (manual artifact)',
+    sourceName: artifact.source.name,
+    sourceUrl: artifact.source.url,
+    sourceNote: artifact.source.note,
+    dataQuality: artifact.dataQuality,
+    artifactAsOf: artifact.asOf,
+    artifactPublishedAt: artifact.publishedAt,
+    freshnessStatus: freshness.status,
+  });
+
+  const publicSignal: GhostFlowPublicSignalMeta = {
+    signalId: TAIL_SKEW_DISPLAY_SIGNAL_ID,
+    name: TAIL_SKEW_DISPLAY_SIGNAL_NAME,
+    sourceName: artifact.source.name,
+    sourceUrl: artifact.source.url,
+    asOf: artifact.asOf,
+    publishedAt: artifact.publishedAt,
+    freshnessStatus: freshness.status,
+  };
+
+  return {
+    raw,
+    warnings: freshness.warnings,
+    publicSignal,
+  };
+}
+
+export function mergeTailSkewContextDisplayIfValid(
+  raw: GhostFlowRawSnapshot,
+  validation: TailSkewContextValidation,
+  referenceAsOf: string
+): {
+  raw: GhostFlowRawSnapshot;
+  warnings: string[];
+  publicSignal?: GhostFlowPublicSignalMeta;
+} {
+  if (!validation.ok) {
+    return {
+      raw,
+      warnings: [
+        `Tail Skew Context artifact invalid or missing (${validation.errors.join('; ')}). No display card added.`,
+      ],
+    };
+  }
+
+  const result = applyTailSkewContextDisplayArtifact(raw, validation.artifact, referenceAsOf);
+
+  return {
+    raw: result.raw,
+    warnings: result.warnings,
+    publicSignal: result.publicSignal,
+  };
+}
+
 function buildMeta(
   raw: GhostFlowRawSnapshot,
   warnings: string[],
@@ -1169,6 +1250,16 @@ export function buildGhostFlowSnapshot(
   raw = capWeightDisplay.raw;
   warnings.push(...capWeightDisplay.warnings);
   if (capWeightDisplay.publicSignal) publicSignals.push(capWeightDisplay.publicSignal);
+
+  const tailSkewValidation = loadTailSkewContextArtifact();
+  const tailSkewDisplay = mergeTailSkewContextDisplayIfValid(
+    raw,
+    tailSkewValidation,
+    referenceAsOf
+  );
+  raw = tailSkewDisplay.raw;
+  warnings.push(...tailSkewDisplay.warnings);
+  if (tailSkewDisplay.publicSignal) publicSignals.push(tailSkewDisplay.publicSignal);
 
   return buildMeta(raw, warnings, publicSignals, publicPassiveInputKeys, publicStructuralInputKeys);
 }

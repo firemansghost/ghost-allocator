@@ -17,6 +17,7 @@ import { validateRetirementFlowPressureProxyArtifact } from '../../lib/ghostflow
 import { validateOptionsActivityProxyArtifact } from '../../lib/ghostflow/artifacts/optionsActivityProxy';
 import { validateIndexInclusionEventProxyArtifact } from '../../lib/ghostflow/artifacts/indexInclusionEventProxy';
 import { validateCapWeightPremiumProxyArtifact } from '../../lib/ghostflow/artifacts/capWeightPremiumProxy';
+import { validateTailSkewContextArtifact } from '../../lib/ghostflow/artifacts/tailSkewContext';
 import { validateTreasuryFuturesPositioningProxyArtifact } from '../../lib/ghostflow/artifacts/treasuryFuturesPositioningProxy';
 import { validateTreasuryLongEndIncomeLensArtifact } from '../../lib/ghostflow/artifacts/treasuryLongEndIncomeLens';
 import { GHOSTFLOW_REFERENCE_AS_OF } from '../../lib/ghostflow/reference';
@@ -254,6 +255,22 @@ function main(): void {
     const o = capWeightPremiumRules.artifact.observations;
     console.log(
       `GhostFlow rules: cap-weight-premium-proxy OK (latest ${o.latestDate}, 5Y percentile ${o.spread5YPercentile}, ratio percentile ${o.ratioPercentile}, mappingStatus ${o.mappingStatus}, asOf ${capWeightPremiumRules.artifact.asOf}, published ${capWeightPremiumRules.artifact.publishedAt})`
+    );
+  }
+
+  const tailSkewPath = join(root, 'data/ghostflow/artifacts/tailSkewContext.v1.json');
+  const tailSkewRules = validateTailSkewContextArtifact(loadJson(tailSkewPath), {
+    mode: 'production',
+    referenceAsOf: GHOSTFLOW_REFERENCE_AS_OF,
+  });
+  if (!tailSkewRules.ok) {
+    failed = true;
+    console.error('GhostFlow rules failed for tail-skew-context-proxy:');
+    for (const err of tailSkewRules.errors) console.error(`  - ${err}`);
+  } else {
+    const o = tailSkewRules.artifact.observations;
+    console.log(
+      `GhostFlow rules: tail-skew-context-proxy OK (SKEW ${o.currentSkew}, daily change ${o.dailyChange}, mappingStatus ${o.mappingStatus}, asOf ${tailSkewRules.artifact.asOf}, published ${tailSkewRules.artifact.publishedAt})`
     );
   }
 

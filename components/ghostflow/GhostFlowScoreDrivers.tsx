@@ -76,10 +76,12 @@ export function GhostFlowScoreDrivers() {
         </div>
 
         <p className="text-xs text-amber-300/85 leading-relaxed border-t border-zinc-800/80 pt-3">
-          All six display-only equity public cards (CFTC systematic-flow, levered-etf-rebalance,
-          retirement-asset-growth, options-activity-proxy, index-inclusion-events, cap-weight-premium) do not feed the
-          score. Systematic strategy pressure, retirement-flow pressure, and levered ETF rebalance pressure remain static
-          MOCK score inputs (62 / 58 / 55) until mapping and score-wiring are explicitly approved.
+          All seven display-only equity public cards (CFTC systematic-flow, levered-etf-rebalance,
+          retirement-asset-growth, options-activity-proxy, index-inclusion-events, cap-weight-premium,
+          tail-skew-context) do not feed the score. Tail Skew (SKEW) is display-only context — not a score input; VIX
+          remains the score-fed volatility level. Systematic strategy pressure, retirement-flow pressure, and levered
+          ETF rebalance pressure remain static MOCK score inputs (62 / 58 / 55) until mapping and score-wiring are
+          explicitly approved.
         </p>
       </GlassCard>
     </section>
