@@ -30,6 +30,7 @@ Per-artifact deep dives: see linked runbooks at the bottom of this page.
 |---------|------|-----------|----------------|
 | **Daily** | After US market close (~6:00 PM ET) | Volatility Regime (VIX) + Market Breadth Participation | Update [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) **after** both daily artifacts align to the same last trading day |
 | **Daily** | After OCC session volume is published | Index Options Intensity Proxy (`options-activity-proxy`) | Display-only — updates [`optionsActivityProxy.v1.json`](../data/ghostflow/artifacts/optionsActivityProxy.v1.json) only; **not** scored; not 0DTE/GEX ([OPTIONS_ACTIVITY_MAPPING_DECISION.md](./OPTIONS_ACTIVITY_MAPPING_DECISION.md)) |
+| **Daily** | After Cboe SKEW CSV available (operator download) | Tail Skew Context (`tail-skew-context`) | Display-only — [`tailSkewContext.v1.json`](../data/ghostflow/artifacts/tailSkewContext.v1.json); verify with `npx tsx scripts/ghostflow/skew-source-spike.ts --skew-csv <local-path>`; **not** scored; reference-align `asOf` per [v1.14](./DATA_ROADMAP.md) policy ([TAIL_SKEW_MAPPING_DECISION.md](./TAIL_SKEW_MAPPING_DECISION.md)); **v1.13 audit:** no refresh performed |
 | **Daily** | After FRED business-day yields update | Treasury Long-End Income Lens (`treasury-long-end-income-lens`) | `npm run ghostflow:fred-treasury-yields-spike` (or `--local-dir tmp/fred` / `--fred-api` if CSV blocked); align **common asOf** across DGS30, DFII30, DGS2, DGS5, DGS10, T10YIE; update [`treasuryLongEndIncomeLens.v1.json`](../data/ghostflow/artifacts/treasuryLongEndIncomeLens.v1.json); **not investment advice**; **not scored** |
 | **Weekly** | After ICI ETF estimated net issuance release | ETF Net Issuance Pressure | Optional reference bump if you also run the daily pass |
 | **Weekly** | After CFTC TFF Friday release | CFTC TFF Positioning Proxy (equity `systematic-flow`) | Production candidate validated; **not merged into GhostFlow score** — MOCK **62** unchanged; **v1.0c** gate not approved |
@@ -38,7 +39,7 @@ Per-artifact deep dives: see linked runbooks at the bottom of this page.
 | **Monthly** | After new SSGA SPY US monthly fact sheet PDF | Index Concentration | PDF month-end `asOf`; PDF control date `publishedAt` |
 | **Quarterly** | After ICI Quarterly Retirement Market Data release | Retirement Asset Growth Proxy | Display-only card `retirement-asset-growth`; **not scored** (MOCK **58**); `mappingStatus` **not_final** |
 
-**Daily group:** VIX + Market Breadth + OCC Index Options Intensity (display-only) + `GHOSTFLOW_REFERENCE_AS_OF` (when running the full daily pass)
+**Daily group:** VIX + Market Breadth + OCC Index Options Intensity (display-only) + Tail Skew Context (display-only) + `GHOSTFLOW_REFERENCE_AS_OF` (when running the full daily pass)
 
 **Weekly group:** ETF Net Issuance + CFTC TFF Positioning Proxy (display-only; MOCK **62** score input unchanged; **v1.0c** not approved)
 
