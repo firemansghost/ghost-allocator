@@ -55,7 +55,7 @@ All **13** equity public signals appear in `meta.publicSignals` when production 
 | 10 | `options-activity-proxy` | `options-activity-proxy` | Index Options Intensity Proxy | Display-only | `public_proxy` | `manual_unverified` | — | **None** — VIX remains scored vol input | `optionsActivityProxy.v1.json` | Yes | 10 |
 | 11 | `index-inclusion-events` | `index-inclusion-event-proxy` | Index Inclusion Event Proxy | Display-only | `public_proxy` | `manual_unverified` | — | **None** — no score path | `indexInclusionEventProxy.v1.json` | Yes | 11 |
 | 12 | `cap-weight-premium` | `cap-weight-premium-proxy` | Cap-Weight Premium Proxy | Display-only | `public_proxy` | `manual_unverified` | — | **None** — no score path | `capWeightPremiumProxy.v1.json` | Yes | 12 |
-| 13 | `tail-skew-context` | `tail-skew-context-proxy` | Tail Skew Context | Display-only | `public_proxy` | `manual_unverified` | — | **None** — VIX remains scored vol input; SKEW is tail-skew display context | `tailSkewContext.v1.json` | Yes | 13 |
+| 13 | `tail-skew-context` | `tail-skew-context-proxy` | Tail Skew Context | Display-only | `public_proxy` | `manual_unverified` | — | **None** — [v1.9e.5 mapping](./TAIL_SKEW_MAPPING_DECISION.md) display-only; VIX remains scored vol input | `tailSkewContext.v1.json` | Yes | 13 |
 
 **JSON `signalId` vs card id:** Rows 7–9, 11–13 use different JSON `signalId` values than dashboard card ids — document only; do not change without product approval.
 
@@ -75,7 +75,7 @@ Display order follows [`GhostFlowSignalGrid.tsx`](../../components/ghostflow/Gho
 | MOCK passive inputs (unchanged) | `systematicStrategyPressure` **62**, `retirementFlowPressureProxy` **58**, `leveredEtfRebalancePressure` **55** |
 | Index Inclusion Event Proxy | **No** score path — [v1.9c.5 mapping](./INDEX_INCLUSION_EVENT_MAPPING_DECISION.md) display-only by default |
 | Cap-Weight Premium Proxy | **No** score path — [v1.9b.5 mapping](./CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md) display-only by default |
-| Tail Skew Context | **No** score path — [v1.9e.4](./TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md) display-only; VIX remains score-fed vol input |
+| Tail Skew Context | **No** score path — [v1.9e.5 mapping](./TAIL_SKEW_MAPPING_DECISION.md) display-only by default; VIX remains score-fed vol input |
 | Composite / Passive / Structural | **62 / 58 / 66** — **unchanged** |
 
 **Score integrity (v1.10):** Three MOCK passive score inputs (`systematicStrategyPressure` **62**, `retirementFlowPressureProxy` **58**, `leveredEtfRebalancePressure` **55**) live in [`mockGhostflowSnapshot.ts`](../../data/ghostflow/mockGhostflowSnapshot.ts) — **outside** the 12 equity public signal cards. Display-only cards for systematic, retirement, and levered ETF refresh dashboard context only. Retirement requirements and gate ladder: [MOCK_SCORE_RETIREMENT_ROADMAP.md](./MOCK_SCORE_RETIREMENT_ROADMAP.md). **v1.10c production baseline:** [SCORE_REPRODUCTION_BASELINE.md](./SCORE_REPRODUCTION_BASELINE.md) — canonical score math, ten production score-input values, and MOCK/public contribution tables.

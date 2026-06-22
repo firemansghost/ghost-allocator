@@ -279,7 +279,8 @@ GhostFlow input promotion rules (all phases):
 | **v1.9e.1** | Protection Bid Source Spike / Operator Source Review | **Done** — [PROTECTION_BID_SOURCE_SPIKE.md](./PROTECTION_BID_SOURCE_SPIKE.md); SKEW source lock **PASS** (`DATE,SKEW`; v1.9e.1a column lock); correlation **SKIPPED**; no score/artifact/UI/runtime/package; `publicSignalCount` **12** unchanged |
 | **v1.9e.2** | Tail Skew Context Artifact Design | **Done** — [TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md](./TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md); docs-only; SKEW-only display-only schema; no JSON/UI/score/runtime; `publicSignalCount` **12** unchanged |
 | **v1.9e.3** | Tail Skew Context Example Artifact + Validator Scaffold | **Done** — example JSON + validator; `publicSignalCount` **12** unchanged |
-| **v1.9e.4** | Tail Skew Context Production Artifact + Display-Only Card | **Done** — [`tailSkewContext.v1.json`](../data/ghostflow/artifacts/tailSkewContext.v1.json); reference-aligned **2026-05-22**; display-only; `publicSignalCount` **12 → 13**; not scored; next: **v1.9e.5** mapping decision |
+| **v1.9e.4** | Tail Skew Context Production Artifact + Display-Only Card | **Done** — [`tailSkewContext.v1.json`](../data/ghostflow/artifacts/tailSkewContext.v1.json); reference-aligned **2026-05-22**; display-only; `publicSignalCount` **12 → 13**; not scored |
+| **v1.9e.5** | Tail Skew Context Mapping Decision | **Done** — [TAIL_SKEW_MAPPING_DECISION.md](./TAIL_SKEW_MAPPING_DECISION.md); docs-only; Option A display-only; `mappingStatus` **not_final**; no mapper; **v1.9e.6 discouraged / not approved** unless product reopens score gate |
 | **v1.9f** | Mega-Cap Autocorrelation / Flow Momentum Feasibility | **Future** — optional or folded into v1.9b |
 | **v1.9g** | Valuation Stress Context Feasibility | **Future** — likely outside GhostFlow core |
 | **Credit Catalyst / AI Financing Stress** | Outside GhostFlow | **Future** — possible separate lane (GhostRegime / GhostYield / Credit Plumbing) |
@@ -299,7 +300,7 @@ Future research candidates inspired by passive market-structure / Mike Green rev
 | Cap-Weight Concentration Premium Lens | **v1.9b.5 Done** — cap-weight track complete through mapping decision | Core — [feasibility](./CAP_WEIGHT_CONCENTRATION_PREMIUM_FEASIBILITY.md) · [calibration](./CAP_WEIGHT_PREMIUM_CALIBRATION_STUDY.md) · [artifact design](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) · [mapping decision](./CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md) |
 | Passive Supply / Float Absorption Lens | **v1.9c.5 Done** · **v1.9c.6 discouraged** | Core — [feasibility](./PASSIVE_SUPPLY_FLOAT_ABSORPTION_FEASIBILITY.md) · [source spike](./PASSIVE_SUPPLY_SOURCE_SPIKE.md) · [artifact design](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) · [mapping decision](./INDEX_INCLUSION_EVENT_MAPPING_DECISION.md) |
 | Systematic Re-Risking / De-Risking Lens | v1.9d.future (backlog) | Core — long-term MOCK retirement path |
-| Protection Bid / Correlation Dispersion Lens | v1.9e | Adjacent — avoid VIX double-count |
+| Protection Bid / Correlation Dispersion Lens | **v1.9e.5 Done** — [mapping decision](./TAIL_SKEW_MAPPING_DECISION.md); **v1.9e.6 discouraged** | Adjacent — avoid VIX double-count |
 | Mega-Cap Autocorrelation / Flow Momentum Lens | v1.9f or v1.9b appendix | Related to cap-weight premium |
 | Valuation Stress / Individual-Security CAPE Lens | v1.9g or outside GhostFlow | Outside composite |
 | Credit Catalyst / AI Financing Stress | Outside GhostFlow | Separate product lane |
@@ -307,6 +308,8 @@ Future research candidates inspired by passive market-structure / Mike Green rev
 **Not approved:** v1.9b.6 score gate for cap-weight premium. v1.9b.4 production artifact + display card shipped; **v1.9b.5 mapping decision complete** — display-only by default; no score mapper selected; `publicSignalCount` **12** unchanged.
 
 **Not approved:** v1.9c.6 score gate for index inclusion events. v1.9c.4 production artifact + display card shipped; **v1.9c.5 mapping decision complete** — display-only by default; no score mapper selected; `publicSignalCount` **12** unchanged.
+
+**Not approved:** v1.9e.6 score gate for Tail Skew Context. v1.9e.4 production artifact + display card shipped; **v1.9e.5 mapping decision complete** — display-only by default; no score mapper selected; VIX remains score-fed vol input; `publicSignalCount` **13** unchanged.
 
 ---
 

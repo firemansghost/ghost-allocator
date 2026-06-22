@@ -24,7 +24,7 @@ This memo captures future GhostFlow research candidates inspired by recent Mike 
 | New data sources | **None** |
 | Implementation approved | **No** |
 | Score gates opened | **No** (v1.0c, v1.1f, v1.2f, v1.4f, v1.7g, v1.8i remain discouraged) |
-| `publicSignalCount` | **12** (equity) — v1.9b.4 display card added |
+| `publicSignalCount` | **13** (equity) — v1.9e.4 display card added |
 | Treasury lane | **2** separate display-only cards — unchanged |
 | All candidates | Start as **feasibility / research-only** unless separately product-approved |
 
@@ -36,7 +36,7 @@ GhostFlow currently tracks:
 
 - **Passive pressure** and **structural fragility** in the equity Research Composite
 - **Six** score-fed public artifacts, **one** derived sub-input, and **three** static MOCK passive inputs
-- **Five** display-only equity/public artifact cards
+- **Seven** display-only equity/public artifact cards
 - **Treasury Plumbing** as a separate two-card display-only lane outside `publicSignalCount`
 
 Recent Mike Green material adds a disciplined future research queue around themes that are adjacent to, but not yet covered by, the live dashboard:
@@ -66,7 +66,7 @@ GhostFlow is an **equity passive-pressure / market-structure research gauge**. I
 
 Any future candidate in this backlog starts **display-only / feasibility-only** unless separately approved through product gate, mapping decision, calibration, and test discipline.
 
-**Headline state unchanged:** Composite **62** · Passive **58** · Structural **66** · band *Crowded / Reflexive* · equity `publicSignalCount` **12** · Treasury **2** display-only cards · MOCK **62 / 58 / 55**.
+**Headline state unchanged:** Composite **62** · Passive **58** · Structural **66** · band *Crowded / Reflexive* · equity `publicSignalCount` **13** · Treasury **2** display-only cards · MOCK **62 / 58 / 55**.
 
 ---
 
@@ -77,7 +77,7 @@ Any future candidate in this backlog starts **display-only / feasibility-only** 
 | 1 | **Cap-Weight Concentration Premium Lens** | High — tests whether weighting mechanism itself produces excess return | **High** — natural companion to existing `concentration` card | **High** — SPY/RSP and index price series are public | Low–medium vs `concentration`, `passive-share` | Medium if wired without gate | **v1.9b.5 Done** — [mapping decision](./CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md); cap-weight track complete through mapping decision; v1.9b.6 discouraged / not approved | **v1.9b.5 Done** — display-only by default |
 | 2 | **Passive Supply / Float Absorption Lens** | High — supply-side complement to demand/flow proxies | **High** — passive market-structure native | Medium — event data fragmented; aggregates harder | Medium vs `etf-flow`, buyback narrative | High if scored naively | **v1.9c.5 Done** — [mapping decision](./INDEX_INCLUSION_EVENT_MAPPING_DECISION.md); display-only by default | **v1.9c.6** score gate discouraged / not approved |
 | 3 | **Systematic Re-Risking / De-Risking Lens** | High — addresses MOCK trust gap on `systematicStrategyPressure` | **Medium–high** — passive flow theme; semantic rename required | Medium — vol/trend public; true CTA exposure harder | Medium vs VIX, CFTC display card | **High** — direct MOCK replacement temptation | Future feasibility; long-term MOCK retirement path only | **v1.9d** |
-| 4 | **Protection Bid / Correlation Dispersion Lens** | Medium–high — options-market uncertainty framing | **Medium** — vol/options adjacent; distinct from VIX amplifier | Medium — VIX/SKEW public; implied correlation harder | **High** vs score-fed VIX and OCC display proxy | High without reweight decision | **v1.9e.4 Done** — production JSON + display card; [Tail Skew Context design](./TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md); reference-aligned **2026-05-22** | **v1.9e.5** mapping decision |
+| 4 | **Protection Bid / Correlation Dispersion Lens** | Medium–high — options-market uncertainty framing | **Medium** — vol/options adjacent; distinct from VIX amplifier | Medium — VIX/SKEW public; implied correlation harder | **High** vs score-fed VIX and OCC display proxy | High without reweight decision | **v1.9e.5 Done** — [mapping decision](./TAIL_SKEW_MAPPING_DECISION.md); display-only by default; v1.9e.6 discouraged / not approved | **v1.9e.5 Done** — display-only; v1.9e.6 discouraged |
 | 5 | **Mega-Cap Autocorrelation / Flow Momentum Lens** | Medium — “machine-powered momentum” hypothesis | **Medium–high** — related to cap-weight premium | High if folded into price-series work | Medium vs breadth, concentration | Medium | **Fold into v1.9b** if clean; else split | **v1.9f** or appendix in **v1.9b** |
 | 6 | **Valuation Stress / Individual-Security CAPE Lens** | Medium — valuation context | **Low** for composite — valuation regime, not passive flow | Medium — per-stock history work heavy | Low in composite; narrative overlap risk | Low in composite; high if forced into GhostFlow | Park as **outside-core** context candidate | **v1.9g** or defer outside GhostFlow |
 | 7 | **Credit Catalyst / AI Financing Stress Lane** | High for macro/credit product | **Outside core** — not equity passive-pressure gauge | Medium — spreads, filings, distressed data | N/A to composite | N/A — do not fold in | Document only; separate lane if product wants | Outside GhostFlow |
@@ -265,10 +265,11 @@ Any future candidate in this backlog starts **display-only / feasibility-only** 
 - **v1.9e.2 artifact design complete** — [TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md](./TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md); **Tail Skew Context** / `tail-skew-context-proxy`; SKEW-only; display-only
 - **v1.9e.3 example scaffold complete** — [`tailSkewContext.v1.example.json`](../../data/ghostflow/artifacts/tailSkewContext.v1.example.json); validator [`tailSkewContext.ts`](../../lib/ghostflow/artifacts/tailSkewContext.ts)
 - **v1.9e.4 production card complete** — [`tailSkewContext.v1.json`](../../data/ghostflow/artifacts/tailSkewContext.v1.json); display-only `tail-skew-context`; `publicSignalCount` **13**; not scored
+- **v1.9e.5 mapping decision complete** — [TAIL_SKEW_MAPPING_DECISION.md](./TAIL_SKEW_MAPPING_DECISION.md); Option A display-only; `mappingStatus` **not_final**; no mapper selected
 - Display-only by default; **no score wiring**; v1.9e.6 score gate **discouraged / not approved**
 - Avoid double-counting VIX (`optionsVolatilityAmplifier`) and OCC volume (`options-activity-proxy`)
 
-**Suggested next phase:** **v1.9e.5** — mapping decision (expected display-only)
+**Suggested next phase:** Tail Skew track complete through **v1.9e.5** mapping decision. **v1.9e.6** score gate remains discouraged and not approved. Next GhostFlow priority remains **product-owner selected**.
 
 ---
 
@@ -402,6 +403,7 @@ Any future candidate in this backlog starts **display-only / feasibility-only** 
 | **v1.9e.2** | Tail Skew Context Artifact Design | **Done** — [TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md](./TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md); SKEW-only display-only; v1.9e.6 discouraged |
 | **v1.9e.3** | Tail Skew Context Example Artifact + Validator Scaffold | **Done** — example JSON + validator/types/tests |
 | **v1.9e.4** | Tail Skew Context Production Artifact + Display-Only Card | **Done** — reference-aligned production JSON + display card; `publicSignalCount` **13**; not scored |
+| **v1.9e.5** | Tail Skew Context Mapping Decision | **Done** — [TAIL_SKEW_MAPPING_DECISION.md](./TAIL_SKEW_MAPPING_DECISION.md); display-only by default; v1.9e.6 discouraged / not approved |
 | **v1.9f** | Mega-Cap Autocorrelation / Flow Momentum Feasibility | **Future** — optional or folded into v1.9b |
 | **v1.9g** | Valuation Stress Context Feasibility | **Future** — likely outside GhostFlow core |
 | **Credit Catalyst / AI Financing Stress** | Outside GhostFlow | **Future** — possible separate lane |
@@ -414,8 +416,8 @@ None of the future phases above are approved for score gates or score wiring. v1
 
 - All candidates start as **feasibility / research-only**.
 - **No score changes** from v1.9c.4 display-only card.
-- **No score gates opened** (v1.0c, v1.1f, v1.2f, v1.4f, v1.7g, v1.8i, **v1.9c.6**).
-- **`publicSignalCount` is 12** (equity) — six display-only + six score-fed.
+- **No score gates opened** (v1.0c, v1.1f, v1.2f, v1.4f, v1.7g, v1.8i, **v1.9c.6**, **v1.9e.6**).
+- **`publicSignalCount` is 13** (equity) — seven display-only + six score-fed.
 - **No Treasury merge** into equity composite.
 - **No GhostRegime merge** into GhostFlow.
 - **No investment advice** or trading recommendation framing.
