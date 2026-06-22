@@ -233,8 +233,8 @@ GhostFlow reaches **usable current-data MVP** when **all** of the following hold
 | Phase | Deliverable | Status |
 |-------|-------------|--------|
 | **v1.13** | This readiness audit | **Done** (docs-only) |
-| **v1.14** | Reference-date / operator policy memo | **Future** |
-| **v1.15** | Operator refresh execution (artifact JSON) | **Future** — after v1.14 |
+| **v1.14** | Reference-date / operator policy | **Done** — [REFERENCE_DATE_AND_OPERATOR_POLICY.md](./REFERENCE_DATE_AND_OPERATOR_POLICY.md) |
+| **v1.15** | Operator refresh execution (artifact JSON) | **Next** — after v1.14 policy |
 
 ---
 

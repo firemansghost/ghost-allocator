@@ -6,7 +6,7 @@
 
 This memo is the **canonical production score reproduction baseline** for GhostFlow. It documents exact score math, production merged score-input values, per-input contributions, and the distinction between score inputs and display-only card values. It does **not** change scoring, artifacts, UI, runtime, tests, or package configuration.
 
-> **v1.13 footnote:** This memo records the **v1.10c** baseline at equity `publicSignalCount` **12** (6 score-fed + 6 display-only). Current inventory is **13** signals (7 display-only) after Tail Skew v1.9e.4 — see [CURRENT_DATA_READINESS_AUDIT.md](./CURRENT_DATA_READINESS_AUDIT.md). Score math and **62 / 58 / 66** reproduction at reference **2026-05-22** remain authoritative here.
+> **v1.13 footnote:** This memo records the **v1.10c** baseline at equity `publicSignalCount` **12** (6 score-fed + 6 display-only). Current inventory is **13** signals (7 display-only) after Tail Skew v1.9e.4 — see [CURRENT_DATA_READINESS_AUDIT.md](./CURRENT_DATA_READINESS_AUDIT.md). Score math and **62 / 58 / 66** reproduction at reference **2026-05-22** remain authoritative here. **v1.15 refresh score-impact reports** use this baseline unless a newer baseline is explicitly established.
 
 ---
 

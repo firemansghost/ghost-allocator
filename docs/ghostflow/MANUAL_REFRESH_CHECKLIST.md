@@ -2,9 +2,9 @@
 
 **Operator path:** [README](./README.md) · [Discipline](./OPERATOR_REFRESH_DISCIPLINE.md) · [Checklist](./MANUAL_REFRESH_CHECKLIST.md)
 
-Field-level quick reference for manually refreshing GhostFlow public-data artifacts. **Canonical workflow:** [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md). **Canonical 13-signal inventory:** [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md). **No live fetches, no scraping, no cron, no API routes** — values are hand-edited into static JSON files committed to the repo.
+Field-level quick reference for manually refreshing GhostFlow public-data artifacts. **Canonical workflow:** [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md). **Reference bump gates:** [REFERENCE_DATE_AND_OPERATOR_POLICY.md](./REFERENCE_DATE_AND_OPERATOR_POLICY.md) (v1.14 — bump `GHOSTFLOW_REFERENCE_AS_OF` only when `vol-regime` and `breadth` share target session). **Canonical 13-signal inventory:** [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md). **No live fetches, no scraping, no cron, no API routes** — values are hand-edited into static JSON files committed to the repo.
 
-**Related:** [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md) — taxonomy, cadence map, validation matrix, guardrails · [DATA_ROADMAP.md](./DATA_ROADMAP.md) · [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) · [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md)
+**Related:** [REFERENCE_DATE_AND_OPERATOR_POLICY.md](./REFERENCE_DATE_AND_OPERATOR_POLICY.md) · [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md) — taxonomy, cadence map, validation matrix, guardrails · [DATA_ROADMAP.md](./DATA_ROADMAP.md) · [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) · [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md)
 
 ## Taxonomy legend
 
@@ -30,7 +30,7 @@ Per-artifact deep dives: see linked runbooks at the bottom of this page.
 |---------|------|-----------|----------------|
 | **Daily** | After US market close (~6:00 PM ET) | Volatility Regime (VIX) + Market Breadth Participation | Update [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) **after** both daily artifacts align to the same last trading day |
 | **Daily** | After OCC session volume is published | Index Options Intensity Proxy (`options-activity-proxy`) | Display-only — updates [`optionsActivityProxy.v1.json`](../data/ghostflow/artifacts/optionsActivityProxy.v1.json) only; **not** scored; not 0DTE/GEX ([OPTIONS_ACTIVITY_MAPPING_DECISION.md](./OPTIONS_ACTIVITY_MAPPING_DECISION.md)) |
-| **Daily** | After Cboe SKEW CSV available (operator download) | Tail Skew Context (`tail-skew-context`) | Display-only — [`tailSkewContext.v1.json`](../data/ghostflow/artifacts/tailSkewContext.v1.json); verify with `npx tsx scripts/ghostflow/skew-source-spike.ts --skew-csv <local-path>`; **not** scored; reference-align `asOf` per [v1.14](./DATA_ROADMAP.md) policy ([TAIL_SKEW_MAPPING_DECISION.md](./TAIL_SKEW_MAPPING_DECISION.md)); **v1.13 audit:** no refresh performed |
+| **Daily** | After Cboe SKEW CSV available (operator download) | Tail Skew Context (`tail-skew-context`) | Display-only — [`tailSkewContext.v1.json`](../data/ghostflow/artifacts/tailSkewContext.v1.json); verify with `npx tsx scripts/ghostflow/skew-source-spike.ts --skew-csv <local-path>`; **not** scored; card `asOf` follows [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) per [REFERENCE_DATE_AND_OPERATOR_POLICY.md](./REFERENCE_DATE_AND_OPERATOR_POLICY.md) — `latestSourceDate` is metadata only ([TAIL_SKEW_MAPPING_DECISION.md](./TAIL_SKEW_MAPPING_DECISION.md)) |
 | **Daily** | After FRED business-day yields update | Treasury Long-End Income Lens (`treasury-long-end-income-lens`) | `npm run ghostflow:fred-treasury-yields-spike` (or `--local-dir tmp/fred` / `--fred-api` if CSV blocked); align **common asOf** across DGS30, DFII30, DGS2, DGS5, DGS10, T10YIE; update [`treasuryLongEndIncomeLens.v1.json`](../data/ghostflow/artifacts/treasuryLongEndIncomeLens.v1.json); **not investment advice**; **not scored** |
 | **Weekly** | After ICI ETF estimated net issuance release | ETF Net Issuance Pressure | Optional reference bump if you also run the daily pass |
 | **Weekly** | After CFTC TFF Friday release | CFTC TFF Positioning Proxy (equity `systematic-flow`) | Production candidate validated; **not merged into GhostFlow score** — MOCK **62** unchanged; **v1.0c** gate not approved |
@@ -354,7 +354,7 @@ Treasury lane: no structured freshness bands today — dates on cards only. See 
 - [ ] Cross-check breadth against Barchart `$S5FI`; set `dataQuality` and document in `source.note`
 - [ ] Update OCC Index/Others in `optionsActivityProxy.v1.json` **(B — display-only)**
 - [ ] Optional: update Treasury FRED income lens `treasuryLongEndIncomeLens.v1.json` **(C — Treasury lane)**
-- [ ] Update `GHOSTFLOW_REFERENCE_AS_OF` in [`lib/ghostflow/reference.ts`](../../lib/ghostflow/reference.ts) **only after** daily score-fed artifacts share the same last trading day
+- [ ] **Gate C (reference bump):** Update `GHOSTFLOW_REFERENCE_AS_OF` in [`lib/ghostflow/reference.ts`](../../lib/ghostflow/reference.ts) **only after** `vol-regime` and `breadth` both have `asOf` = target last US trading session — see [REFERENCE_DATE_AND_OPERATOR_POLICY.md](./REFERENCE_DATE_AND_OPERATOR_POLICY.md); if either daily score-fed artifact is missing or misaligned, **do not bump**
 - [ ] Run `npm run ghostflow:check`
 - [ ] Run full validation suite before commit/PR (see below)
 
