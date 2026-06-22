@@ -7,6 +7,8 @@
 **Reference date:** [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) = `2026-05-22` (equity freshness narrative)  
 **Related:** [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md) · [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) · [DATA_ROADMAP.md](./DATA_ROADMAP.md) · [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) · [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md)
 
+> **v1.12 note:** Current equity `publicSignalCount` is **13** (**6** score-fed + **7** display-only) after Tail Skew v1.9e.4. Score policy unchanged — see [GHOSTFLOW_PUBLIC_SIGNAL_INTEGRITY_CHECKPOINT.md](./GHOSTFLOW_PUBLIC_SIGNAL_INTEGRITY_CHECKPOINT.md). Inventory rows below updated for v1.12; v1.8c–v1.9d audit narrative preserved where historical.
+
 > **v1.9d note:** Older audit rows predating v1.9c.4 (index inclusion) and v1.9b.4 (cap-weight premium) are **superseded** by [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md) for canonical signal counts and lane classification. Freshness thresholds and `dataQuality` policy below remain authoritative unless a future memo explicitly revises them.
 
 GhostRegime is out of scope.
@@ -25,7 +27,7 @@ GhostRegime is out of scope.
 | Freshness evaluators | **Unchanged** |
 | Validation scripts | **Unchanged** |
 | Score gates | **Not opened** |
-| `publicSignalCount` | **12** (equity) — **6** score-fed + **6** display-only |
+| `publicSignalCount` | **13** (equity) — **6** score-fed + **7** display-only |
 | Treasury lane | **2** separate display-only cards |
 
 ---
@@ -35,7 +37,7 @@ GhostRegime is out of scope.
 | Class | Count | Scored? | In `meta.publicSignals`? | Notes |
 |-------|-------|---------|--------------------------|-------|
 | **Score-fed equity/public** | **6** | Yes — merge via `buildSnapshot` | Yes | vol-regime, etf-flow, passive-share, active-index-flow, concentration, breadth |
-| **Display-only equity/public** | **6** | No | Yes | systematic-flow, levered-etf-rebalance, retirement-asset-growth, options-activity-proxy, index-inclusion-events, cap-weight-premium |
+| **Display-only equity/public** | **7** | No | Yes | systematic-flow, levered-etf-rebalance, retirement-asset-growth, options-activity-proxy, index-inclusion-events, cap-weight-premium, tail-skew-context |
 | **Treasury separate lane** | **2** | No | **No** | treasury-futures-positioning-proxy, treasury-long-end-income-lens — `treasuryPlumbingDisplay` only |
 | **Derived / context** | **1** card | Partial — `modelZoneProximity` scored when passive-share public | Card: `distance-65` | Not in `publicSignalCount` |
 | **MOCK score inputs** | **3** | Yes — static from mock snapshot | No artifact | systematic **62**, retirement **58**, levered **55** — [v1.8b](./MOCK_SCORE_RETIREMENT_PLAN.md) |
@@ -76,7 +78,7 @@ Freshness is computed at build time against `GHOSTFLOW_REFERENCE_AS_OF`. Treasur
 | Cadence class | Artifacts (examples) | Freshness anchor | Fresh | Caution | Stale | Operator note |
 |---------------|----------------------|------------------|-------|---------|-------|---------------|
 | **Daily (VIX, breadth)** | `vol-regime`, `breadth` | `asOf` | ≤2 **trading** days | 3–5 trading | >5 trading | Bump reference after daily pass; trading-day math in [`artifactFreshness.ts`](../../lib/ghostflow/artifactFreshness.ts) |
-| **Daily (options)** | `options-activity-proxy` | `publishedAt ?? asOf` | ≤2 trading | 3–5 trading | >5 trading | Display-only OCC Index/Others proxy; **not** 0DTE/GEX |
+| **Daily (options / skew)** | `options-activity-proxy`, `tail-skew-context` | `publishedAt ?? asOf` | ≤2 trading | 3–5 trading | >5 trading | Display-only; OCC Index/Others proxy **not** 0DTE/GEX; SKEW **not** VIX |
 | **Weekly (ETF)** | `etf-flow` | `publishedAt ?? asOf` | ≤7 **calendar** days | 8–14 | >14 | ICI weekly estimated net issuance |
 | **Monthly (ICI / SSGA)** | `passive-share`, `active-index-flow`, `concentration` | `publishedAt ?? asOf` | ≤35 calendar | 36–55 | >55 | Caution between releases is **normal** for monthly manual artifacts |
 | **CFTC systematic** | `systematic-flow` | `publishedAt ?? asOf` | ≤10 calendar | 11–17 | >17 | Weekly CFTC TFF; display-only; MOCK **62** unchanged |
@@ -90,7 +92,7 @@ Freshness is computed at build time against `GHOSTFLOW_REFERENCE_AS_OF`. Treasur
 
 ## Production artifact inventory
 
-Evaluated against reference **`2026-05-22`**. All **14** production JSON files (12 equity + 2 Treasury) validated by `npm run ghostflow:check`. Canonical lane table: [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md).
+Evaluated against reference **`2026-05-22`**. All **15** production JSON files (13 equity + 2 Treasury) validated by `npm run ghostflow:check`. Canonical lane table: [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md).
 
 | File | Card / lane id | Lane | dataQuality | mappingStatus | asOf | publishedAt | Cadence | Freshness @ ref | ghostflow:check | Open issue |
 |------|----------------|------|-------------|---------------|------|-------------|---------|-----------------|-----------------|------------|
@@ -106,6 +108,7 @@ Evaluated against reference **`2026-05-22`**. All **14** production JSON files (
 | `optionsActivityProxy.v1.json` | `options-activity-proxy` | Display-only | `manual_unverified` | `not_final` | 2026-05-22 | 2026-05-22 | Daily | **fresh** | Yes | OCC spike in `source.note`; label defensible per policy |
 | `indexInclusionEventProxy.v1.json` | `index-inclusion-events` | Display-only | `manual_unverified` | `not_final` | 2026-05-22 | 2026-06-16 | Event/manual | **fresh** | Yes | JSON `signalId`: `index-inclusion-event-proxy`; operator-curated Nasdaq rows |
 | `capWeightPremiumProxy.v1.json` | `cap-weight-premium` | Display-only | `manual_unverified` | `not_final` | 2026-05-22 | 2026-06-17 | Weekly (study) | **fresh** | Yes | JSON `signalId`: `cap-weight-premium-proxy`; reference-aligned SPY/RSP study |
+| `tailSkewContext.v1.json` | `tail-skew-context` | Display-only | `manual_unverified` | `not_final` | 2026-05-22 | 2026-06-18 | Daily (SKEW) | **fresh** | Yes | JSON `signalId`: `tail-skew-context-proxy`; reference-aligned `asOf`; source CSV through 2026-06-18 |
 | `treasuryFuturesPositioningProxy.v1.json` | `treasury-futures-positioning-proxy` | Treasury | `manual_unverified` | `not_final` | 2026-05-26 | 2026-06-04 | Weekly CFTC | **No equity band** | Yes | Separate lane; `asOf` can exceed equity ref |
 | `treasuryLongEndIncomeLens.v1.json` | `treasury-long-end-income-lens` | Treasury | `verified_manual` | `not_final` | 2026-06-02 | 2026-06-04 | Daily FRED | **No equity band** | Yes | FRED common-date design; not investment advice |
 
@@ -118,6 +121,7 @@ Evaluated against reference **`2026-05-22`**. All **14** production JSON files (
 | `retirement-flow-pressure-proxy` | `retirement-asset-growth` |
 | `index-inclusion-event-proxy` | `index-inclusion-events` |
 | `cap-weight-premium-proxy` | `cap-weight-premium` |
+| `tail-skew-context-proxy` | `tail-skew-context` |
 
 ---
 
@@ -129,7 +133,7 @@ Evaluated against reference **`2026-05-22`**. All **14** production JSON files (
 - Weekly and monthly thresholds are **less aggressive** than daily — monthly caution on concentration (43 days) reflects normal gap between SSGA releases.
 - Retirement quarterly caution includes **normal-cadence language** in code and checklist (46–90 days after release).
 - Display-only artifacts remain **separate from score** ([v1.8b](./MOCK_SCORE_RETIREMENT_PLAN.md)).
-- `ghostflow:check` validates **all 14** production JSON files (12 equity + 2 Treasury) ([`validate-artifacts.ts`](../../scripts/ghostflow/validate-artifacts.ts)).
+- `ghostflow:check` validates **all 15** production JSON files (13 equity + 2 Treasury) ([`validate-artifacts.ts`](../../scripts/ghostflow/validate-artifacts.ts)).
 - Per-card `freshnessStatus` and `dataQuality` appear on equity signal cards ([`GhostFlowSignalGrid.tsx`](../../components/ghostflow/GhostFlowSignalGrid.tsx)).
 
 ### Gaps / inconsistencies
@@ -155,7 +159,7 @@ Evaluated against reference **`2026-05-22`**. All **14** production JSON files (
 3. **No production JSON metadata or observation value changes** in v1.8c.
 4. **No freshness evaluator or summary code changes** in v1.8c.
 5. **No UI changes** in v1.8c.
-6. **No score gates opened**; `publicSignalCount` remains **12** (equity).
+6. **No score gates opened**; current equity `publicSignalCount` is **13** (v1.12); v1.8c decision text preserved below as historical.
 
 ---
 
@@ -172,12 +176,12 @@ Evaluated against reference **`2026-05-22`**. All **14** production JSON files (
 
 ## No-score-change confirmation
 
-| Check | v1.9d result |
-|-------|--------------|
+| Check | v1.12 current state |
+|-------|---------------------|
 | Composite | **62** |
 | Passive Pressure | **58** |
 | Structural Fragility | **66** |
-| `publicSignalCount` | **12** (equity) — **6** score-fed + **6** display-only |
+| `publicSignalCount` | **13** (equity) — **6** score-fed + **7** display-only |
 | Treasury Plumbing | **2** separate display-only cards |
 | [`scoring.ts`](../../lib/ghostflow/scoring.ts) | Unchanged |
 | [`buildSnapshot.ts`](../../lib/ghostflow/buildSnapshot.ts) | Unchanged |

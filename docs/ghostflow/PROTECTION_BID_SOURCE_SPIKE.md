@@ -21,7 +21,7 @@ Research/operator source spike for a possible future **display-only** Cboe SKEW 
 | Runtime change | **None** |
 | Package change | **None** |
 | `publicPassiveInputKey` | **None** |
-| **`publicSignalCount`** | **12** (equity) — **unchanged** |
+| **`publicSignalCount`** | **12** (equity) at v1.9e.1 spike time — **unchanged** by spike; current state **13** after v1.9e.4 |
 | Research script | [`skew-source-spike.ts`](../../scripts/ghostflow/skew-source-spike.ts) — operator CSV only |
 
 ---
@@ -134,7 +134,7 @@ Lock a **repeatable, operator-grade, public Cboe SKEW history path** that could 
 | **SKEW** | **PASS** | Cboe CDN `SKEW_History.csv` verified; `DATE,SKEW` format locked (v1.9e.1a); 9,167 rows; latest **146.72** as of **2026-06-18** |
 | **Correlation** | **SKIPPED** | No `--corr-csv` run; implied-correlation public path not verified |
 
-**v1.9e.4 recommendation:** **Done** — production artifact [`tailSkewContext.v1.json`](../../data/ghostflow/artifacts/tailSkewContext.v1.json); display-only card `tail-skew-context`; test [`tailSkewContextDisplay.test.ts`](../../lib/ghostflow/__tests__/tailSkewContextDisplay.test.ts). Reference-aligned **2026-05-22** (`asOf`); source CSV through **2026-06-18**. `publicSignalCount` **13**. Next: **v1.9e.5** mapping decision.
+**v1.9e.4 recommendation:** **Done** — production artifact [`tailSkewContext.v1.json`](../../data/ghostflow/artifacts/tailSkewContext.v1.json); display-only card `tail-skew-context`; test [`tailSkewContextDisplay.test.ts`](../../lib/ghostflow/__tests__/tailSkewContextDisplay.test.ts). Reference-aligned **2026-05-22** (`asOf`); source CSV through **2026-06-18**. `publicSignalCount` **13**. **v1.9e.5 mapping decision Done** — [TAIL_SKEW_MAPPING_DECISION.md](./TAIL_SKEW_MAPPING_DECISION.md).
 
 ---
 
@@ -142,7 +142,7 @@ Lock a **repeatable, operator-grade, public Cboe SKEW history path** that could 
 
 | Condition | Next phase |
 |-----------|------------|
-| **SKEW PASS** | **v1.9e.4 Done** — production + display card; [TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md](./TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md); next **v1.9e.5** mapping |
+| **SKEW PASS** | **v1.9e.5 Done** — mapping decision; [TAIL_SKEW_MAPPING_DECISION.md](./TAIL_SKEW_MAPPING_DECISION.md); display-only by default |
 | **SKEW PARTIAL** | Operator source checklist / manual cleanup → then v1.9e.2 |
 | **SKEW FAIL + correlation PASS** | Separate implied-correlation feasibility/design path — **not** SKEW card |
 | **Both FAIL** | Stop lane; document research-only / paid-vendor status |
@@ -159,7 +159,7 @@ Score gate **v1.9e.6** remains **discouraged / not approved** regardless of spik
 - VIX remains sole score-fed options/vol input — no VIX narrative duplication in score
 - No OCC duplicate card under protection-bid label
 - No 0DTE / Gamma / GEX / dealer claims without source proof
-- `publicSignalCount` remains **12**
+- `publicSignalCount` remains **13** (equity) at current state — spike memo v1.9e.1 scope unchanged
 - Downloaded CSVs stay local — **never commit** to repo
 
 ---
@@ -171,7 +171,7 @@ Score gate **v1.9e.6** remains **discouraged / not approved** regardless of spik
 | **Passive Pressure** | **58** — unchanged |
 | **Structural Fragility** | **66** — unchanged |
 | **Composite** | **62** — unchanged |
-| **`publicSignalCount`** | **12** — unchanged |
+| **`publicSignalCount`** | **13** at current state (v1.9e.4+) — **unchanged** by v1.9e.1 spike |
 | [`scoring.ts`](../../lib/ghostflow/scoring.ts) | **Unchanged** |
 | [`buildSnapshot.ts`](../../lib/ghostflow/buildSnapshot.ts) | **Unchanged** |
 | Production artifact JSON | **Unchanged** |

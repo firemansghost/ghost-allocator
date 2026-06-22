@@ -6,6 +6,8 @@
 
 This memo is the **v1.10e final policy decision** that closes the v1.10 score-integrity sequence. It formally selects **Option A: keep current scoring model and disclosure**. It does **not** change scoring, artifacts, UI, runtime, tests, or package configuration.
 
+> **v1.12 current-state footnote:** Equity `publicSignalCount` is now **13** after Tail Skew v1.9e.4 (seven display-only public cards including `tail-skew-context`). **This v1.10e policy is unchanged** — Tail Skew remains display-only with no score contribution; Composite **62 / Passive 58 / Structural 66** unchanged. See [GHOSTFLOW_PUBLIC_SIGNAL_INTEGRITY_CHECKPOINT.md](./GHOSTFLOW_PUBLIC_SIGNAL_INTEGRITY_CHECKPOINT.md) · [TAIL_SKEW_MAPPING_DECISION.md](./TAIL_SKEW_MAPPING_DECISION.md).
+
 ---
 
 ## Status

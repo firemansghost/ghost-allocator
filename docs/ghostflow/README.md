@@ -15,7 +15,7 @@ Entrypoint for GhostFlow docs under `docs/ghostflow/`. For live dashboard invent
 | **Equity `publicSignalCount`** | **13** |
 | **Treasury Plumbing** | **2** separate display-only cards |
 
-Treasury is **outside** the equity Research Composite, `buildSnapshot`, `raw.signals`, `meta.publicSignals`, [`PUBLIC_ARTIFACT_SIGNAL_IDS`](../../lib/ghostflow/signalPresentation.ts), and `publicSignalCount`. Do **not** combine equity **12** + Treasury **2** into 14.
+Treasury is **outside** the equity Research Composite, `buildSnapshot`, `raw.signals`, `meta.publicSignals`, [`PUBLIC_ARTIFACT_SIGNAL_IDS`](../../lib/ghostflow/signalPresentation.ts), and `publicSignalCount`. Do **not** combine equity **13** + Treasury **2** into 15.
 
 Three **MOCK** passive score inputs (`systematicStrategyPressure` **62**, `retirementFlowPressureProxy` **58**, `leveredEtfRebalancePressure` **55**) remain unchanged unless a separate product-approved score gate opens.
 
@@ -27,7 +27,7 @@ Read in this order for onboarding:
 
 1. **[DATA_ROADMAP.md](./DATA_ROADMAP.md)** — Living phase ladder, promotion taxonomy, and open questions. Use for *why* a phase shipped and what gates remain closed.
 2. **[GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md)** — Canonical inventory: score-fed vs display-only vs MOCK vs derived vs Treasury lanes, counts, and guardrails.
-3. **[GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md)** — v1.9d canonical 12-signal table: card ids, artifact `signalId`s, lanes, score boundaries, and Treasury separation.
+3. **[GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md)** — canonical **13-signal** table: card ids, artifact `signalId`s, lanes, score boundaries, and Treasury separation.
 4. **[OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md)** — Canonical operator workflow: taxonomy, cadence map, validation matrix, and refresh guardrails.
 5. **[MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md)** — Field-level quick reference: per-artifact tables, cadence mini-checklists, and validation commands.
 
@@ -37,7 +37,7 @@ Read in this order for onboarding:
 
 | Doc | Purpose |
 |-----|---------|
-| [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) | Freshness thresholds, `dataQuality` label policy, and 12-artifact inventory |
+| [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) | Freshness thresholds, `dataQuality` label policy, and production artifact inventory |
 | [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) | v1.8b keep-MOCK policy decision for three passive score inputs |
 | [MOCK_SCORE_RETIREMENT_ROADMAP.md](./MOCK_SCORE_RETIREMENT_ROADMAP.md) | **v1.10** operational retirement roadmap — requirements, decision ladder, gate table; no score wiring approved |
 | [MOCK_SCORE_NO_CHANGE_POLICY.md](./MOCK_SCORE_NO_CHANGE_POLICY.md) | **v1.10e** final no-score-change policy — Option A selected; v1.10 score-integrity sequence closed |
@@ -65,7 +65,7 @@ These **six** equity/public artifacts merge into the Research Composite via `bui
 
 ## Display-only equity artifacts
 
-These **five** production artifacts refresh **display cards only**. They do **not** replace MOCK score inputs. `mappingStatus` remains **`not_final`** unless separately approved. Display-only does **not** mean low quality.
+These **seven** production artifacts refresh **display cards only**. They do **not** replace MOCK score inputs. `mappingStatus` remains **`not_final`** unless separately approved. Display-only does **not** mean low quality.
 
 | Card `signalId` | Design | Mapping decision |
 |-----------------|--------|------------------|
@@ -74,6 +74,8 @@ These **five** production artifacts refresh **display cards only**. They do **no
 | `retirement-asset-growth` | [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md) | [RETIREMENT_FLOW_MAPPING_DECISION.md](./RETIREMENT_FLOW_MAPPING_DECISION.md) |
 | `options-activity-proxy` | [OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md](./OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md) | [OPTIONS_ACTIVITY_MAPPING_DECISION.md](./OPTIONS_ACTIVITY_MAPPING_DECISION.md) |
 | `index-inclusion-events` | [PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md](./PASSIVE_SUPPLY_EVENT_ARTIFACT_DESIGN.md) | [INDEX_INCLUSION_EVENT_MAPPING_DECISION.md](./INDEX_INCLUSION_EVENT_MAPPING_DECISION.md) — display-only by default |
+| `cap-weight-premium` | [CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md](./CAP_WEIGHT_PREMIUM_ARTIFACT_DESIGN.md) | [CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md](./CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md) — display-only by default |
+| `tail-skew-context` | [TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md](./TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md) | [TAIL_SKEW_MAPPING_DECISION.md](./TAIL_SKEW_MAPPING_DECISION.md) — display-only; VIX remains score-fed vol input |
 
 ---
 
@@ -156,21 +158,21 @@ Topics parked for later evaluation (no score wiring, artifacts, UI cards, or `pu
 
 ## Guardrails
 
-- **`publicSignalCount` is 12** (equity only) — do not promote display-only or Treasury artifacts into score inputs.
+- **`publicSignalCount` is 13** (equity only) — do not promote display-only or Treasury artifacts into score inputs.
 - **Treasury remains separate** — 2-card display-only lane outside composite.
-- **Score gates not approved:** v1.0c (CFTC), v1.1f (levered ETF), v1.2f (retirement), v1.4f (options), v1.7g (Treasury), v1.8i (general), v1.9b.6 (cap-weight premium), v1.9c.6 (index inclusion).
+- **Score gates not approved:** v1.0c (CFTC), v1.1f (levered ETF), v1.2f (retirement), v1.4f (options), v1.7g (Treasury), v1.8i (general), v1.9b.6 (cap-weight premium), v1.9c.6 (index inclusion), **v1.9e.6** (Tail Skew).
 - **MOCK 62 / 58 / 55** unchanged per [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md).
 - **Routine refresh** must not touch `scoring.ts`, `buildSnapshot.ts`, `mockGhostflowSnapshot.ts`, or open score gates — see [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md).
 - **GhostRegime** is a separate product lane — out of GhostFlow scope.
 
 ---
 
-## Production artifacts (13)
+## Production artifacts (15 total)
 
 All validated by `npm run ghostflow:check`:
 
 - **6** score-fed equity JSON files
-- **6** display-only equity JSON files
+- **7** display-only equity JSON files
 - **2** Treasury lane JSON files
 
-See [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) for file paths and lane tables · [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md) for the canonical 12-signal inventory table.
+See [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) for file paths and lane tables · [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md) for the canonical **13-signal** inventory table.

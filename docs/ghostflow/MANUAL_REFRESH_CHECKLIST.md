@@ -1,8 +1,8 @@
-# GhostFlow Manual Refresh Checklist (v1.9d — operator quick checklist)
+# GhostFlow Manual Refresh Checklist (v1.12 — operator quick checklist)
 
 **Operator path:** [README](./README.md) · [Discipline](./OPERATOR_REFRESH_DISCIPLINE.md) · [Checklist](./MANUAL_REFRESH_CHECKLIST.md)
 
-Field-level quick reference for manually refreshing GhostFlow public-data artifacts. **Canonical workflow:** [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md). **Canonical 12-signal inventory:** [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md). **No live fetches, no scraping, no cron, no API routes** — values are hand-edited into static JSON files committed to the repo.
+Field-level quick reference for manually refreshing GhostFlow public-data artifacts. **Canonical workflow:** [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md). **Canonical 13-signal inventory:** [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md). **No live fetches, no scraping, no cron, no API routes** — values are hand-edited into static JSON files committed to the repo.
 
 **Related:** [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md) — taxonomy, cadence map, validation matrix, guardrails · [DATA_ROADMAP.md](./DATA_ROADMAP.md) · [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) · [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md)
 
@@ -397,7 +397,7 @@ Treasury lane: no structured freshness bands today — dates on cards only. See 
 - [ ] Update **one or both** Treasury production JSON files only
 - [ ] Confirm **no** equity score-fed or display-only files changed unless intentional
 - [ ] Confirm Composite / Passive / Structural **unchanged** (Treasury lane only)
-- [ ] Confirm `publicSignalCount` **12** unchanged (Treasury refresh does not affect equity count)
+- [ ] Confirm `publicSignalCount` **13** unchanged (Treasury refresh does not affect equity count)
 - [ ] Run `npm run ghostflow:check`
 
 ---
@@ -409,8 +409,8 @@ Treasury lane: no structured freshness bands today — dates on cards only. See 
 - Signal presentation (`lib/ghostflow/signalPresentation.ts`)
 - Freshness thresholds (`lib/ghostflow/artifactFreshness.ts`, `lib/ghostflow/freshnessSummary.ts`)
 - [`mockGhostflowSnapshot.ts`](../../data/ghostflow/mockGhostflowSnapshot.ts) — MOCK **62 / 58 / 55** inputs
-- `publicSignalCount` — equity grid stays **12**; do not promote display-only or Treasury artifacts into score inputs
-- Display-only promotion — never wire systematic / levered / retirement / options / index-inclusion / cap-weight into score or `raw.signals`
+- `publicSignalCount` — equity grid stays **13**; do not promote display-only or Treasury artifacts into score inputs
+- Display-only promotion — never wire systematic / levered / retirement / options / index-inclusion / cap-weight / tail-skew into score or `raw.signals`
 - Treasury score/grid promotion — Treasury lane stays separate 2-card display-only
 - `mappingStatus: final` — requires separate decision memo; routine refresh keeps **not_final** where applicable
 - Cosmetic `dataQuality` changes — do not bump labels just to make cards look better

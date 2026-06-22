@@ -16,9 +16,9 @@ Living roadmap for GhostFlow score-input sourcing, phase history, and open quest
 
 **v1.9 theme:** GhostFlow **Passive Supply & Concentration Research** — [PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md](./PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md). Future feasibility candidates only; no implementation, scores, artifacts, UI cards, or `publicSignalCount` changes approved.
 
-### Current dashboard state (v1.7 — after v1.7f)
+### Current dashboard state (v1.12 — after v1.9e.5)
 
-Release checkpoint summary (detail in [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md)). Equity Research Composite scores unchanged from v1.4d reference snapshot. Treasury Plumbing is a **separate** display-only lane — **not** included in `publicSignalCount` (do **not** combine equity **12** + Treasury **2** into 14).
+Release checkpoint summary (detail in [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) · [integrity checkpoint](./GHOSTFLOW_PUBLIC_SIGNAL_INTEGRITY_CHECKPOINT.md)). Treasury Plumbing is a **separate** display-only lane — **not** included in `publicSignalCount` (do **not** combine equity **13** + Treasury **2** into 15).
 
 #### Equity Research Composite (`buildSnapshot` lane)
 
@@ -28,10 +28,10 @@ Release checkpoint summary (detail in [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_C
 | **PUBLIC score artifacts** | **6** | vol-regime, etf-flow, passive-share, active-index-flow, concentration, breadth — merged into composite |
 | **DERIVED score input** | **1** | `modelZoneProximity` (from ICI index share) |
 | **MOCK score inputs** | **3** | `systematicStrategyPressure` **62**, `retirementFlowPressureProxy` **58**, `leveredEtfRebalancePressure` **55** |
-| **DISPLAY-ONLY public artifacts** | **4** | [`systematic-flow`](./CFTC_TFF_MAPPING_DECISION.md), [`levered-etf-rebalance`](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md), [`retirement-asset-growth`](./RETIREMENT_FLOW_MAPPING_DECISION.md), [`options-activity-proxy`](./OPTIONS_ACTIVITY_MAPPING_DECISION.md) — equity signal grid only; not in composite |
-| **PLACEHOLDER cards** | **0** | When options activity artifact validates; see retired `odte-options` note below |
-| **`publicSignalCount`** | **12** | Six score-fed public cards + six display-only public signals in `meta.publicSignals` (plus derived context card `distance-65`, separate from this count) |
-| **Score-wiring gates** | — | **v1.0c** (CFTC), **v1.1f** (levered ETF), **v1.2f** (retirement), **v1.4f** (options) — product-approved only; discouraged by default |
+| **DISPLAY-ONLY public artifacts** | **7** | [`systematic-flow`](./CFTC_TFF_MAPPING_DECISION.md), [`levered-etf-rebalance`](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md), [`retirement-asset-growth`](./RETIREMENT_FLOW_MAPPING_DECISION.md), [`options-activity-proxy`](./OPTIONS_ACTIVITY_MAPPING_DECISION.md), [`index-inclusion-events`](./INDEX_INCLUSION_EVENT_MAPPING_DECISION.md), [`cap-weight-premium`](./CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md), [`tail-skew-context`](./TAIL_SKEW_MAPPING_DECISION.md) — equity signal grid only; not in composite |
+| **PLACEHOLDER cards** | **0** | When production artifacts validate; see retired `odte-options` note below |
+| **`publicSignalCount`** | **13** | Six score-fed public cards + seven display-only public signals in `meta.publicSignals` (plus derived context card `distance-65`, separate from this count) |
+| **Score-wiring gates** | — | **v1.0c** (CFTC), **v1.1f** (levered ETF), **v1.2f** (retirement), **v1.4f** (options), **v1.9e.6** (Tail Skew) — product-approved only; discouraged by default |
 
 #### Treasury Plumbing (separate lane — outside composite)
 
@@ -98,6 +98,9 @@ Ten sub-inputs feed the research composite (50% Passive Pressure + 50% Structura
 | `levered-etf-rebalance` | Levered ETF Rebalance Pressure Proxy | [`leveredEtfRebalancePressure.v1.json`](../data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.json) | **No** — MOCK **55** still drives composite |
 | `retirement-asset-growth` | Retirement Asset Growth Proxy | [`retirementFlowPressureProxy.v1.json`](../data/ghostflow/artifacts/retirementFlowPressureProxy.v1.json) | **No** — MOCK **58** still drives composite |
 | `options-activity-proxy` | Index Options Intensity Proxy | [`optionsActivityProxy.v1.json`](../data/ghostflow/artifacts/optionsActivityProxy.v1.json) | **No** — VIX `optionsVolatilityAmplifier` still drives composite options/vol slot |
+| `index-inclusion-events` | Index Inclusion Event Proxy | [`indexInclusionEventProxy.v1.json`](../data/ghostflow/artifacts/indexInclusionEventProxy.v1.json) | **No** — no score path ([v1.9c.5 mapping](./INDEX_INCLUSION_EVENT_MAPPING_DECISION.md)) |
+| `cap-weight-premium` | Cap-Weight Premium Proxy | [`capWeightPremiumProxy.v1.json`](../data/ghostflow/artifacts/capWeightPremiumProxy.v1.json) | **No** — no score path ([v1.9b.5 mapping](./CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md)) |
+| `tail-skew-context` | Tail Skew Context | [`tailSkewContext.v1.json`](../data/ghostflow/artifacts/tailSkewContext.v1.json) | **No** — VIX remains score-fed vol input ([v1.9e.5 mapping](./TAIL_SKEW_MAPPING_DECISION.md)) |
 
 ### Retired placeholder (`odte-options`)
 
@@ -108,6 +111,7 @@ Ten sub-inputs feed the research composite (50% Passive Pressure + 50% Structura
 - **Display-only** public cards are **not** Research Composite inputs. They may show 0–100 context readings that do not affect the composite.
 - **CFTC / levered / retirement** display cards (`systematic-flow`, `levered-etf-rebalance`, `retirement-asset-growth`) are **separate** from MOCK score sub-inputs **62** / **55** / **58** (`systematicStrategyPressure`, `leveredEtfRebalancePressure`, `retirementFlowPressureProxy`).
 - **Options activity** (`options-activity-proxy`, OCC Index/Others cleared volume) is **display-only** and **not** 0DTE/GEX. The **score-fed** options/vol input is **`optionsVolatilityAmplifier`** via CBOE **VIX** only — do not confuse OCC activity with VIX implied volatility.
+- **Tail Skew** (`tail-skew-context`, Cboe SKEW) is **display-only** tail-skew context — **not** VIX, not 0DTE/GEX, not a score input ([v1.9e.5 mapping](./TAIL_SKEW_MAPPING_DECISION.md)).
 
 ---
 
@@ -191,7 +195,7 @@ GhostFlow input promotion rules (all phases):
 
 ## 5. Proposed implementation phases
 
-*Historical rows below show incremental milestones (e.g. `publicSignals` +7, `publicSignalCount` +8, count **9** at v1.2d). **Current equity `publicSignalCount` is **12** (v1.9b.4+).*
+*Historical rows below show incremental milestones (e.g. `publicSignals` +7, `publicSignalCount` +8, count **9** at v1.2d). **Current equity `publicSignalCount` is **13** (v1.9e.4+).*
 
 | Phase | Deliverable | Code / data changes |
 |-------|-------------|---------------------|
@@ -281,6 +285,7 @@ GhostFlow input promotion rules (all phases):
 | **v1.9e.3** | Tail Skew Context Example Artifact + Validator Scaffold | **Done** — example JSON + validator; `publicSignalCount` **12** unchanged |
 | **v1.9e.4** | Tail Skew Context Production Artifact + Display-Only Card | **Done** — [`tailSkewContext.v1.json`](../data/ghostflow/artifacts/tailSkewContext.v1.json); reference-aligned **2026-05-22**; display-only; `publicSignalCount` **12 → 13**; not scored |
 | **v1.9e.5** | Tail Skew Context Mapping Decision | **Done** — [TAIL_SKEW_MAPPING_DECISION.md](./TAIL_SKEW_MAPPING_DECISION.md); docs-only; Option A display-only; `mappingStatus` **not_final**; no mapper; **v1.9e.6 discouraged / not approved** unless product reopens score gate |
+| **v1.12** | Public Signal Integrity Checkpoint | **Done** — [GHOSTFLOW_PUBLIC_SIGNAL_INTEGRITY_CHECKPOINT.md](./GHOSTFLOW_PUBLIC_SIGNAL_INTEGRITY_CHECKPOINT.md); docs + UI-copy cleanup; `publicSignalCount` **13** (6 score-fed + 7 display-only); no score/artifact/runtime changes |
 | **v1.9f** | Mega-Cap Autocorrelation / Flow Momentum Feasibility | **Future** — optional or folded into v1.9b |
 | **v1.9g** | Valuation Stress Context Feasibility | **Future** — likely outside GhostFlow core |
 | **Credit Catalyst / AI Financing Stress** | Outside GhostFlow | **Future** — possible separate lane (GhostRegime / GhostYield / Credit Plumbing) |
@@ -320,7 +325,7 @@ Future research candidates inspired by passive market-structure / Mike Green rev
 3. ~~**Levered ETF scope:**~~ **Resolved (v1.1a–b):** Tier-1 six-ticker universe; single-session `underlyingReturnPct`; formula in [LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md](./LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md). ~~**Levered ETF mapping (v1.1e):**~~ **Resolved:** [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md) — display-only; MOCK **55**. ~~**Levered ETF calibration (v1.1e-calibration):**~~ **Resolved:** [LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md](./LEVERED_ETF_REBALANCE_CALIBRATION_STUDY.md) — full fixed-current-AUM return-sensitivity run complete; **v1.1f** score wiring gated on product approval only.
 4. **0DTE data path:** **Display proxy shipped (v1.4d–e):** OCC Index/Others via `options-activity-proxy` — [mapping decision](./OPTIONS_ACTIVITY_MAPPING_DECISION.md) locks display-only; true 0DTE/GEX → paid/vendor; **v1.4f** score gate discouraged (VIX overlap).
 5. ~~**Retirement flows:**~~ **Resolved (v1.2a–b):** [RETIREMENT_FLOW_FEASIBILITY.md](./RETIREMENT_FLOW_FEASIBILITY.md) + [RETIREMENT_FLOW_ARTIFACT_DESIGN.md](./RETIREMENT_FLOW_ARTIFACT_DESIGN.md) — **YELLOW**; ICI Retirement Market primary; exact ICI table/rows → **v1.2c** operator extract; composite membership → **v1.2d** decision.
-6. **Treasury Plumbing (v1.7a–f):** [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md) · [TREASURY_PLUMBING_MAPPING_DECISION.md](./TREASURY_PLUMBING_MAPPING_DECISION.md) — production artifacts, UI lane, and **display-only mapping decision** complete. Open: optional **v1.7f-calibration**; **v1.7g** score gate discouraged. Treasury lane **separate from equity composite**; equity `publicSignalCount` **12** unchanged by Treasury refresh.
+6. **Treasury Plumbing (v1.7a–f):** [TREASURY_PLUMBING_FEASIBILITY.md](./TREASURY_PLUMBING_FEASIBILITY.md) · [TREASURY_PLUMBING_MAPPING_DECISION.md](./TREASURY_PLUMBING_MAPPING_DECISION.md) — production artifacts, UI lane, and **display-only mapping decision** complete. Open: optional **v1.7f-calibration**; **v1.7g** score gate discouraged. Treasury lane **separate from equity composite**; equity `publicSignalCount` **13** unchanged by Treasury refresh.
 
 ---
 
