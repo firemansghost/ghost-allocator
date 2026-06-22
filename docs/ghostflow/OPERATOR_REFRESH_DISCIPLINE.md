@@ -1,9 +1,9 @@
-# Operator Refresh Discipline (GhostFlow v1.9d)
+# Operator Refresh Discipline (GhostFlow v1.12)
 
 **Operator path:** [README](./README.md) · [Discipline](./OPERATOR_REFRESH_DISCIPLINE.md) · [Checklist](./MANUAL_REFRESH_CHECKLIST.md)
 
-**Status:** Canonical operator workflow — refreshed for **v1.9d** public signal inventory alignment; **docs-only**; no artifact JSON, score, UI, runtime, or schema changes in v1.9d.  
-**Related:** [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) (field reference) · [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md) (canonical 12-signal table) · [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) (freshness & `dataQuality` policy) · [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) · [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md)
+**Status:** Canonical operator workflow — aligned by **v1.12** public signal integrity checkpoint; **docs-only** in v1.12; no artifact JSON, score, UI, runtime, or schema changes in v1.12.  
+**Related:** [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) (field reference) · [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md) (canonical **13-signal** table) · [GHOSTFLOW_PUBLIC_SIGNAL_INTEGRITY_CHECKPOINT.md](./GHOSTFLOW_PUBLIC_SIGNAL_INTEGRITY_CHECKPOINT.md) (v1.12 audit) · [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) (freshness & `dataQuality` policy) · [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) · [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md)
 
 | Deferred | Posture |
 |----------|---------|
@@ -15,13 +15,13 @@
 
 ## Status
 
-| Item | v1.9d posture |
+| Item | v1.12 posture |
 |------|---------------|
 | Document type | Operator refresh discipline |
 | Production JSON | **Unchanged** |
 | Score | Composite **62** / Passive **58** / Structural **66** — **unchanged** |
-| `publicSignalCount` | **12** (equity) — **unchanged** |
-| UI / code / runtime | **Unchanged** |
+| `publicSignalCount` | **13** (equity) — **unchanged** |
+| UI / code / runtime | **Unchanged** (v1.12 docs alignment only) |
 
 ---
 
@@ -38,8 +38,8 @@
 
 | Class | Items | Operator action | Affects score? | Affects `publicSignalCount`? | Display-only? | Validation | Do-not-touch warning |
 |-------|-------|-----------------|---------------|------------------------------|---------------|------------|----------------------|
-| **A — Score-fed equity** | vol-regime, etf-flow, passive-share, active-index-flow, concentration, breadth | Edit artifact JSON on cadence | **Yes** — can change Composite / Passive / Structural | No (stays **12**) | No | `npm run ghostflow:check` | Do not promote display-only artifacts here; do not edit mock snapshot |
-| **B — Display-only equity** | systematic-flow, levered-etf-rebalance, retirement-asset-growth, options-activity-proxy, index-inclusion-events, cap-weight-premium | Edit artifact JSON | **No** — MOCK **62 / 55 / 58** unchanged; no score path for index-inclusion or cap-weight | No (stays **12**) | **Yes** | `ghostflow:check` | Card refresh ≠ composite input — display-only refreshes do **not** affect scores unless a future score gate is explicitly approved |
+| **A — Score-fed equity** | vol-regime, etf-flow, passive-share, active-index-flow, concentration, breadth | Edit artifact JSON on cadence | **Yes** — can change Composite / Passive / Structural | No (stays **13**) | No | `npm run ghostflow:check` | Do not promote display-only artifacts here; do not edit mock snapshot |
+| **B — Display-only equity** | systematic-flow, levered-etf-rebalance, retirement-asset-growth, options-activity-proxy, index-inclusion-events, cap-weight-premium, tail-skew-context | Edit artifact JSON | **No** — MOCK **62 / 55 / 58** unchanged; no score path for display-only lanes | No (stays **13**) | **Yes** | `ghostflow:check` | Card refresh ≠ composite input — display-only refreshes do **not** affect scores unless a future score gate is explicitly approved |
 | **C — Treasury lane** | treasury-futures-positioning-proxy, treasury-long-end-income-lens | Edit Treasury JSON only | **No** | **No** — outside equity grid | **Yes** (separate lane) | `ghostflow:check` | Never add to `buildSnapshot`, `raw.signals`, or `publicSignalCount` |
 | **D — Derived/context** | modelZoneProximity (score), distance-65 (card) | **Do not edit separately** — refresh `passive-share` | Partial — `modelZoneProximity` when passive-share public | No | Card only for distance-65 | `ghostflow:check` | Do not create a separate derived JSON artifact |
 | **E — MOCK score inputs** | systematicStrategyPressure **62**, retirementFlowPressureProxy **58**, leveredEtfRebalancePressure **55** | **Do not edit** [`mockGhostflowSnapshot.ts`](../../data/ghostflow/mockGhostflowSnapshot.ts) | Only if explicit product gate (not routine) | No | N/A | N/A | Never bump mocks to match display cards |
@@ -55,6 +55,7 @@ Reference: [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) for *
 | **Daily** | vol-regime, breadth | ≤2 trading days | 3–5 trading | >5 trading | **Yes** | `ghostflow:check` + bump ref after daily pass |
 | **Daily** | options-activity-proxy | same | same | >5 trading | No | `ghostflow:check` |
 | **Daily** | treasury-long-end-income-lens | manual FRED common date | — | missing common `asOf` / validator fail | No | `ghostflow:check` |
+| **Daily** | tail-skew-context (SKEW) | ≤2 trading | 3–5 trading | >5 trading | No | `ghostflow:check` |
 | **Weekly** | etf-flow | ≤7 calendar days | 8–14 | >14 | **Yes** | `ghostflow:check` |
 | **Weekly** | systematic-flow (CFTC) | ≤10 calendar | 11–17 | >17 | No | `ghostflow:check` |
 | **Weekly** | treasury-futures-positioning-proxy | CFTC release lag | — | report-week mismatch / validator fail | No | `ghostflow:check` |
@@ -101,10 +102,10 @@ npm run ghostflow:check
 
 | Refresh type | Composite | `publicSignalCount` | Treasury lane |
 |--------------|-------------|---------------------|---------------|
-| Score-fed (A) only | May change | **12** | unchanged |
-| Display-only (B) only | **Unchanged** (62/58/66 if mocks unchanged) | **12** | unchanged |
-| Treasury (C) only | **Unchanged** | **12** | 2 cards updated |
-| Derived (D) | Follows passive-share | **12** | unchanged |
+| Score-fed (A) only | May change | **13** | unchanged |
+| Display-only (B) only | **Unchanged** (62/58/66 if mocks unchanged) | **13** | unchanged |
+| Treasury (C) only | **Unchanged** | **13** | 2 cards updated |
+| Derived (D) | Follows passive-share | **13** | unchanged |
 
 **Full pre-PR (artifact value commits):**
 
@@ -191,7 +192,7 @@ Suggested messages: see [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST
 | [README.md](./README.md) | GhostFlow doc index and onboarding path |
 | [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) | Field-level quick checklist + per-artifact tables |
 | [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) | Freshness thresholds & `dataQuality` policy |
-| [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md) | Canonical 12-signal inventory (v1.9d) |
+| [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md) | Canonical **13-signal** inventory |
 | [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) | Canonical dashboard inventory |
 | [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) | MOCK keep policy |
 | [ARTIFACT_RUNBOOK.md](./ARTIFACT_RUNBOOK.md) · [BREADTH_ARTIFACT_RUNBOOK.md](./BREADTH_ARTIFACT_RUNBOOK.md) · [ETF_ARTIFACT_RUNBOOK.md](./ETF_ARTIFACT_RUNBOOK.md) · etc. | Per-source deep dives |
@@ -199,15 +200,15 @@ Suggested messages: see [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST
 
 ---
 
-## No-score-change confirmation (v1.9d)
+## No-score-change confirmation (v1.12)
 
 | Check | Result |
 |-------|--------|
 | Composite | **62** |
 | Passive Pressure | **58** |
 | Structural Fragility | **66** |
-| `publicSignalCount` | **12** (equity) |
+| `publicSignalCount` | **13** (equity) |
 | Treasury Plumbing | **2** separate display-only cards |
-| Production JSON | Unchanged in v1.9d |
-| Score / code / UI | Unchanged in v1.9d |
+| Production JSON | Unchanged in v1.12 |
+| Score / code / runtime | Unchanged in v1.12 |
 | GhostRegime | Out of scope |

@@ -318,20 +318,24 @@ Tail Skew Context is **companion context**, not a replacement for VIX and not an
 
 ## No-change confirmation
 
+### Historical — v1.9e.3 scaffold (preserved)
+
 | Item | v1.9e.3 confirmation |
 |------|---------------------|
+| Production artifact JSON | Example only — production deferred to v1.9e.4 |
+| UI / display-card tests | Not yet shipped |
+| **`publicSignalCount`** | **12** — unchanged at v1.9e.3 |
+
+### Current — post v1.9e.5
+
+| Item | Current state |
+|------|---------------|
 | [`scoring.ts`](../../lib/ghostflow/scoring.ts) | **Unchanged** |
-| [`buildSnapshot.ts`](../../lib/ghostflow/buildSnapshot.ts) | **Unchanged** |
-| [`mockGhostflowSnapshot.ts`](../../data/ghostflow/mockGhostflowSnapshot.ts) | **Unchanged** |
-| Production artifact JSON | **Unchanged** — `tailSkewContext.v1.json` **not created** |
-| UI / display-card tests | **Unchanged** |
-| `validate-artifacts.ts` | **Unchanged** — example validated via unit test only |
-| Composite / Passive / Structural scores | **62 / 58 / 66** — **unchanged** |
-| **`publicSignalCount`** | **12** — **unchanged** |
-| **Passive Pressure** | **58** — unchanged |
-| **Structural Fragility** | **66** — unchanged |
-| **Composite** | **62** — unchanged |
-| **`publicSignalCount`** | **12** — unchanged |
+| [`buildSnapshot.ts`](../../lib/ghostflow/buildSnapshot.ts) | Display merge only — no score path |
+| Production artifact | [`tailSkewContext.v1.json`](../../data/ghostflow/artifacts/tailSkewContext.v1.json) — **shipped v1.9e.4** |
+| Composite / Passive / Structural | **62 / 58 / 66** — **unchanged** |
+| **`publicSignalCount`** | **13** (equity) |
+| **`publicPassiveInputKey`** | **None** for Tail Skew |
 | GhostRegime / Marketstack / GhostYield / Models / builder | **Untouched** |
 
-No score changes without explicit product approval.
+No score changes without explicit product approval (v1.9e.6 discouraged).

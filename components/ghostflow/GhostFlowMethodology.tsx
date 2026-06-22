@@ -631,14 +631,14 @@ export function GhostFlowMethodology({
           <li>Does not provide buy/sell recommendations or allocation advice.</li>
           <li>Does not treat model-stress zones or ~65% reference levels as guaranteed outcomes or precise tripwires.</li>
           <li>
-            Does not use live feeds. Six score-fed manual public artifacts plus six display-only public cards and static MOCK
+            Does not use live feeds. Six score-fed manual public artifacts plus seven display-only public cards and static MOCK
             composite inputs elsewhere.
           </li>
           <li>
             Does not treat display-only CFTC, levered ETF rebalance, retirement asset-growth, OCC index options intensity,
-            index inclusion event proxy, or cap-weight premium proxy cards as Research Composite inputs — MOCK <strong className="text-zinc-300">62</strong>,{' '}
+            index inclusion event proxy, cap-weight premium proxy, or Tail Skew context cards as Research Composite inputs — MOCK <strong className="text-zinc-300">62</strong>,{' '}
             <strong className="text-zinc-300">55</strong>, and <strong className="text-zinc-300">58</strong> still drive
-            those passive sub-inputs; VIX still drives options/vol.
+            those passive sub-inputs; VIX still drives options/vol; SKEW is display-only tail-skew context, not a VIX replacement.
           </li>
           <li>
             Does not treat ETF net issuance, active/index flow differential, ICI Index Share Proxy, index

@@ -1,21 +1,21 @@
-# GhostFlow Current State (v1.9d)
+# GhostFlow Current State (v1.12)
 
 **GhostFlow docs:** [README](./README.md) · [Current state](./GHOSTFLOW_CURRENT_STATE.md) · [Public signal inventory](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md) · [Roadmap](./DATA_ROADMAP.md)
 
-Canonical inventory after **v1.9b.5** (cap-weight premium mapping) and **v1.9c.5** (index inclusion mapping) checkpoints, aligned by **v1.9d** public signal inventory memo. Theme through v1.9: **Passive Supply & Concentration Research** with display-only defaults and operator doc discipline.
+Canonical inventory after Tail Skew **v1.9e.4** (production card) and **v1.9e.5** (mapping decision), aligned by **v1.12** public signal integrity checkpoint. Theme through v1.9: **Passive Supply & Concentration Research** with display-only defaults and operator doc discipline.
 
-**Related:** [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md) (v1.9d canonical 12-signal table) · [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md) (canonical operator workflow) · [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) (field quick reference) · [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) (freshness & `dataQuality` policy)
+**Related:** [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md) (canonical **13-signal** table) · [GHOSTFLOW_PUBLIC_SIGNAL_INTEGRITY_CHECKPOINT.md](./GHOSTFLOW_PUBLIC_SIGNAL_INTEGRITY_CHECKPOINT.md) (v1.12 audit) · [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md) (canonical operator workflow) · [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) (field quick reference) · [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) (freshness & `dataQuality` policy)
 
 ---
 
 ## Status
 
-- **Current as of:** v1.9d — after v1.9b.5 / v1.9c.5 mapping decisions and v1.9d public signal inventory alignment (docs-only).
-- **Document type:** Documentation inventory only — no score, artifact, UI, runtime, or data changes in v1.9d.
+- **Current as of:** v1.12 — after Tail Skew v1.9e.4/v1.9e.5 and v1.12 integrity checkpoint (docs + UI-copy cleanup).
+- **Document type:** Documentation inventory — v1.12 docs/UI-copy alignment only; no score, artifact, or runtime changes.
 - **Baseline reference:** [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) = `2026-05-22` (production composite snapshot).
-- **Canonical 12-signal table:** [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md).
+- **Canonical 13-signal table:** [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md).
 - **GhostRegime boundary:** GhostRegime (including BTC provider work) is a separate product lane — not in GhostFlow v1.9 scope.
-- **Freshness & dataQuality policy:** [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) — cadence thresholds and label definitions; inventory rows superseded for counts by v1.9d memo where noted.
+- **Freshness & dataQuality policy:** [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) — cadence thresholds and label definitions; inventory counts governed by v1.12 checkpoint and public signal inventory.
 
 ---
 

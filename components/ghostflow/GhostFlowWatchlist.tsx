@@ -4,6 +4,7 @@ const WATCH_TARGETS = [
   'OCC index options intensity — display-only; Index/Others column; mapping not final (v1.4e)',
   'Index inclusion event proxy — display-only; Nasdaq-100 component changes; mapping not final (v1.9c.4)',
   'Cap-weight premium proxy — display-only; SPY/RSP spread/ratio; mapping not final (v1.9b.4)',
+  'Tail Skew context — display-only; Cboe SKEW tail-skew pricing; not a score input; mapping not final (v1.9e.5)',
   'CTA / vol-control proxy',
   'Levered ETF rebalance pressure — display-only artifact; mapping not final (v1.1e)',
   'Retirement asset growth — display-only ICI quarterly artifact; mapping not final (v1.2e)',
@@ -20,11 +21,11 @@ export function GhostFlowWatchlist() {
       <GlassCard className="p-4 sm:p-6">
         <p className="text-sm text-zinc-400 leading-relaxed mb-4">
           GhostFlow uses six public score artifacts, one derived score input (model-zone proximity from ICI index
-          share), six display-only public artifacts (CFTC TFF, levered ETF rebalance, retirement asset growth, OCC index
-          options intensity, index inclusion event proxy, cap-weight premium proxy), and three static mock score inputs in the equity research composite ({`publicSignalCount`}{' '}
-          12). Treasury Plumbing is a separate display-only lane — not in the equity signal grid or{' '}
+          share), seven display-only public artifacts (CFTC TFF, levered ETF rebalance, retirement asset growth, OCC index
+          options intensity, index inclusion event proxy, cap-weight premium proxy, Tail Skew context), and three static mock score inputs in the equity research composite ({`publicSignalCount`}{' '}
+          13). Treasury Plumbing is a separate display-only lane — not in the equity signal grid or{' '}
           {`publicSignalCount`}. Options activity is not 0DTE/GEX and not score-fed — VIX remains the scored options/vol
-          input. Retirement-flow pressure stays MOCK 58 (v1.2e display-only); levered mapping (v1.1e) and score wiring
+          input. Tail Skew (SKEW) is display-only tail-skew context — not a score input. Retirement-flow pressure stays MOCK 58 (v1.2e display-only); levered mapping (v1.1e) and score wiring
           (v1.1f / v1.2f) remain product-gated; CFTC score wiring is separately gated.
         </p>
         <ul className="grid gap-2 sm:grid-cols-2 text-sm text-zinc-300">
