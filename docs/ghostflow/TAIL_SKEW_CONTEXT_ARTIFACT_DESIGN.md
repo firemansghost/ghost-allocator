@@ -4,19 +4,19 @@
 
 **Research umbrella:** [PROTECTION_BID_CORRELATION_DISPERSION_FEASIBILITY.md](./PROTECTION_BID_CORRELATION_DISPERSION_FEASIBILITY.md) · [PROTECTION_BID_SOURCE_SPIKE.md](./PROTECTION_BID_SOURCE_SPIKE.md)
 
-**Related:** [ARTIFACT_RUNBOOK.md](./ARTIFACT_RUNBOOK.md) (VIX manual extract) · [OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md](./OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md) · [OPTIONS_ACTIVITY_MAPPING_DECISION.md](./OPTIONS_ACTIVITY_MAPPING_DECISION.md) · [ODTE_OPTIONS_FEASIBILITY.md](./ODTE_OPTIONS_FEASIBILITY.md) · [MOCK_SCORE_NO_CHANGE_POLICY.md](./MOCK_SCORE_NO_CHANGE_POLICY.md)
+**Related:** [ARTIFACT_RUNBOOK.md](./ARTIFACT_RUNBOOK.md) (VIX manual extract) · [OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md](./OPTIONS_ACTIVITY_ARTIFACT_DESIGN.md) · [OPTIONS_ACTIVITY_MAPPING_DECISION.md](./OPTIONS_ACTIVITY_MAPPING_DECISION.md) · [TAIL_SKEW_MAPPING_DECISION.md](./TAIL_SKEW_MAPPING_DECISION.md) · [ODTE_OPTIONS_FEASIBILITY.md](./ODTE_OPTIONS_FEASIBILITY.md) · [MOCK_SCORE_NO_CHANGE_POLICY.md](./MOCK_SCORE_NO_CHANGE_POLICY.md)
 
 **Spike script:** [`skew-source-spike.ts`](../scripts/ghostflow/skew-source-spike.ts) — operator CSV only; not in `ghostflow:check`
 
-This memo defines the **display-only** Cboe SKEW card schema. **v1.9e.3** added the example JSON, validator, types, and focused unit tests. Production JSON, UI, and `buildSnapshot` integration remain deferred to **v1.9e.4**.
+This memo defines the **display-only** Cboe SKEW card schema. **v1.9e.3** added the example JSON, validator, types, and focused unit tests. **v1.9e.4** shipped production JSON, UI, and `buildSnapshot` display merge. **v1.9e.5** mapping decision confirms display-only posture — [TAIL_SKEW_MAPPING_DECISION.md](./TAIL_SKEW_MAPPING_DECISION.md).
 
 ---
 
 ## Status
 
-| Item | v1.9e.4 posture |
+| Item | v1.9e.5 posture |
 |------|------------------|
-| Document type | **Artifact design memo** (+ v1.9e.3 scaffold + v1.9e.4 production) |
+| Document type | **Artifact design memo** (+ v1.9e.3 scaffold + v1.9e.4 production + v1.9e.5 mapping decision) |
 | Production artifact JSON | **Done** — [`tailSkewContext.v1.json`](../../data/ghostflow/artifacts/tailSkewContext.v1.json) (reference-aligned **2026-05-22**) |
 | Example artifact JSON | **Done** — [`tailSkewContext.v1.example.json`](../../data/ghostflow/artifacts/tailSkewContext.v1.example.json) (`designOnly: true`) |
 | Validator / types / tests | **Done** — [`tailSkewContext.ts`](../../lib/ghostflow/artifacts/tailSkewContext.ts) · [`tailSkewContextProxy.test.ts`](../../lib/ghostflow/__tests__/tailSkewContextProxy.test.ts) · [`tailSkewContextDisplay.test.ts`](../../lib/ghostflow/__tests__/tailSkewContextDisplay.test.ts) |
@@ -24,6 +24,7 @@ This memo defines the **display-only** Cboe SKEW card schema. **v1.9e.3** added 
 | Score change | **None** |
 | `publicPassiveInputKey` | **None** |
 | **`publicSignalCount`** | **13** (equity) — **12 → 13** display-only card only |
+| **Mapping decision** | **Done** — [TAIL_SKEW_MAPPING_DECISION.md](./TAIL_SKEW_MAPPING_DECISION.md); Option A display-only; no mapper; v1.9e.6 discouraged |
 
 ---
 
@@ -121,7 +122,7 @@ Future **`tailSkewContext.v1`** JSON — **do not create in v1.9e.2**. Field nam
 | `updateFrequency` | `"daily"` | yes | |
 | `dataQuality` | `verified_manual` \| `manual_unverified` | yes | Initial production likely `manual_unverified` |
 | `dataStatus` | `"public_proxy"` | recommended | Card lane |
-| `mappingStatus` | `"not_final"` | yes | Only allowed value until v1.9e.5 |
+| `mappingStatus` | `"not_final"` | yes | Remains **`not_final`** per [v1.9e.5 mapping decision](./TAIL_SKEW_MAPPING_DECISION.md) |
 | `units` | `"index_level"` | yes | SKEW is unitless index level |
 | `caveats` | `string[]` | yes | Non-empty |
 | `methodology` | object | recommended | Index definition; `noScoreMapping: true` |
@@ -294,8 +295,8 @@ Any future calibration remains **display-only** unless product explicitly reopen
 | **v1.9e.3** | Example JSON + validator/types/tests | No | **12** — **Done** |
 | **v1.9e.4** | Production JSON + display-only card | No | **12 → 13** — **Done** |
 | **v1.9e.3a** (optional) | SKEW historical percentile calibration study | No | **13** |
-| **v1.9e.5** | Mapping decision — expected display-only | No | 13 |
-| **v1.9e.6** | Score gate | **Discouraged** | — |
+| **v1.9e.5** | Mapping decision — display-only confirmed | No | **13** — **Done** |
+| **v1.9e.6** | Score gate | **Discouraged / not approved** | — |
 
 Correlation dispersion remains **out of scope** until separate source lock.
 
@@ -309,7 +310,7 @@ Correlation dispersion remains **out of scope** until separate source lock.
 | **OCC / `options-activity-proxy`** | Display-only **volume** — do not duplicate under protection-bid label |
 | **0DTE feasibility** | SKEW must not be labeled 0DTE/GEX |
 | **v1.10e no-score-change policy** | No score wiring without explicit gate |
-| **Public signal inventory** | Do **not** add 13th signal until v1.9e.4 ships |
+| **Public signal inventory** | Tail Skew is signal **13** — [mapping decision](./TAIL_SKEW_MAPPING_DECISION.md) confirms display-only |
 
 Tail Skew Context is **companion context**, not a replacement for VIX and not another options-volume card.
 
