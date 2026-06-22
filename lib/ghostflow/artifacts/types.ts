@@ -689,7 +689,7 @@ export type IndexInclusionEventProxyValidation =
   | IndexInclusionEventProxyValidationResult
   | IndexInclusionEventProxyValidationError;
 
-/** Cboe SKEW tail-skew context — v1.9e.3 example/validator scaffolding only. */
+/** Cboe SKEW tail-skew context — v1.9e.3+ example/validator; v1.9e.4 production display card. */
 export type TailSkewMappingStatus = 'not_final';
 
 export interface TailSkewLatestObservationV1 {
@@ -709,9 +709,13 @@ export interface TailSkewContextObservationsV1 {
 export interface TailSkewHistorySummaryV1 {
   rowCount: number;
   firstDate: string;
-  latestDate: string;
-  latestValue: number;
+  /** Full CSV extent — may be after artifact asOf */
+  latestSourceDate: string;
+  latestSourceValue: number;
   sourceLockStatus?: string;
+  /** @deprecated v1.9e.3 example — use latestSourceDate/Value */
+  latestDate?: string;
+  latestValue?: number;
 }
 
 export interface TailSkewDisplayV1 {

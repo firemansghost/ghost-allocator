@@ -61,7 +61,7 @@ assert.strictEqual(
 assert.strictEqual(raw.passivePressure.retirementFlowPressureProxy, 58);
 assert.ok(!meta.publicPassiveInputKeys?.includes('retirementFlowPressureProxy'));
 assert.strictEqual(meta.publicStructuralInputKeys?.length, 4);
-assert.strictEqual(meta.publicSignalCount, 12);
+assert.strictEqual(meta.publicSignalCount, 13);
 assert.ok(meta.publicSignals.some((s) => s.signalId === 'retirement-asset-growth'));
 
 assert.strictEqual(scored.score.score, 62);

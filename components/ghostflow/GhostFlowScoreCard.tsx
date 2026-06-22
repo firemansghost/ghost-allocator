@@ -91,8 +91,9 @@ export function GhostFlowScoreCard({
             </li>
             <li>
               <span className="text-amber-200/90">Displayed only:</span> systematic-flow (CFTC), levered-etf-rebalance,
-              retirement-asset-growth, options-activity-proxy, index-inclusion-events, cap-weight-premium — visible
-              context, not composite inputs. Related public cards do not replace those MOCK score inputs.
+              retirement-asset-growth, options-activity-proxy, index-inclusion-events, cap-weight-premium,
+              tail-skew-context — visible context, not composite inputs. Tail Skew (SKEW) is display-only and not a
+              score input; VIX remains the score-fed vol level. Related public cards do not replace MOCK score inputs.
             </li>
           </ul>
         )}

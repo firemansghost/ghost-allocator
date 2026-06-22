@@ -134,7 +134,7 @@ Lock a **repeatable, operator-grade, public Cboe SKEW history path** that could 
 | **SKEW** | **PASS** | Cboe CDN `SKEW_History.csv` verified; `DATE,SKEW` format locked (v1.9e.1a); 9,167 rows; latest **146.72** as of **2026-06-18** |
 | **Correlation** | **SKIPPED** | No `--corr-csv` run; implied-correlation public path not verified |
 
-**v1.9e.3 recommendation:** **Done** — example artifact [`tailSkewContext.v1.example.json`](../../data/ghostflow/artifacts/tailSkewContext.v1.example.json); validator [`tailSkewContext.ts`](../../lib/ghostflow/artifacts/tailSkewContext.ts); test [`tailSkewContextProxy.test.ts`](../../lib/ghostflow/__tests__/tailSkewContextProxy.test.ts). **No production artifact or dashboard card yet.** Next: **v1.9e.4** production JSON + display-only card (product-approved). `publicSignalCount` remains **12**.
+**v1.9e.4 recommendation:** **Done** — production artifact [`tailSkewContext.v1.json`](../../data/ghostflow/artifacts/tailSkewContext.v1.json); display-only card `tail-skew-context`; test [`tailSkewContextDisplay.test.ts`](../../lib/ghostflow/__tests__/tailSkewContextDisplay.test.ts). Reference-aligned **2026-05-22** (`asOf`); source CSV through **2026-06-18**. `publicSignalCount` **13**. Next: **v1.9e.5** mapping decision.
 
 ---
 
@@ -142,7 +142,7 @@ Lock a **repeatable, operator-grade, public Cboe SKEW history path** that could 
 
 | Condition | Next phase |
 |-----------|------------|
-| **SKEW PASS** | **v1.9e.3 Done** — example + validator scaffold; [TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md](./TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md); next **v1.9e.4** production + card |
+| **SKEW PASS** | **v1.9e.4 Done** — production + display card; [TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md](./TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md); next **v1.9e.5** mapping |
 | **SKEW PARTIAL** | Operator source checklist / manual cleanup → then v1.9e.2 |
 | **SKEW FAIL + correlation PASS** | Separate implied-correlation feasibility/design path — **not** SKEW card |
 | **Both FAIL** | Stop lane; document research-only / paid-vendor status |

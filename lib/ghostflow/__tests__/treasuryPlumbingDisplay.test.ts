@@ -75,7 +75,7 @@ assert.strictEqual(mixed.cards[0].status, 'unavailable');
 assert.strictEqual(mixed.cards[1].status, 'ok');
 
 const { raw, meta } = buildGhostFlowSnapshot();
-assert.strictEqual(meta.publicSignalCount, 12);
+assert.strictEqual(meta.publicSignalCount, 13);
 assert.ok(!raw.signals.some((s) => s.id === 'treasury-futures-positioning-proxy'));
 assert.ok(!raw.signals.some((s) => s.id === 'treasury-long-end-income-lens'));
 

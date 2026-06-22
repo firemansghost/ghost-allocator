@@ -1,10 +1,9 @@
 {
   "artifactVersion": "1",
   "signalId": "tail-skew-context-proxy",
-  "designOnly": true,
-  "title": "Tail Skew Context (design example)",
-  "asOf": "2026-06-18",
-  "publishedAt": "2026-06-18",
+  "title": "Tail Skew Context",
+  "asOf": "2026-05-22",
+  "publishedAt": "2026-06-16",
   "dataStatus": "public_proxy",
   "mappingStatus": "not_final",
   "units": "index_level",
@@ -13,8 +12,8 @@
     "url": "https://cdn.cboe.com/api/global/us_indices/daily_prices/SKEW_History.csv",
     "sourceName": "Cboe Global Indices — SKEW",
     "sourceUrl": "https://cdn.cboe.com/api/global/us_indices/daily_prices/SKEW_History.csv",
-    "sourceAccessedDate": "2026-06-18",
-    "note": "EXAMPLE / DESIGN ONLY — operator-verified reference from Cboe CDN SKEW_History.csv (DATE,SKEW). Not used in GhostFlow score, buildSnapshot, or dashboard. Production values require operator manual extract; verify with npx tsx scripts/ghostflow/skew-source-spike.ts."
+    "sourceAccessedDate": "2026-06-16",
+    "note": "Operator-verified manual extract from Cboe CDN SKEW_History.csv (DATE,SKEW). Reference-aligned to GhostFlow asOf 2026-05-22. Verify with npx tsx scripts/ghostflow/skew-source-spike.ts --skew-csv <local-path>."
   },
   "observationType": "cboe_skew_daily_snapshot",
   "seriesDefinition": "cboe_skew_daily_index_level_v1",
@@ -32,14 +31,14 @@
     "Not a trading signal. Not an allocation recommendation. mappingStatus not_final"
   ],
   "observations": {
-    "currentSkew": 146.72,
+    "currentSkew": 137.39,
     "latestObservation": {
-      "date": "2026-06-18",
-      "skew": 146.72
+      "date": "2026-05-22",
+      "skew": 137.39
     },
-    "priorSessionSkew": 142.62,
-    "dailyChange": 4.1,
-    "dailyChangePct": 2.87,
+    "priorSessionSkew": 136.96,
+    "dailyChange": 0.43,
+    "dailyChangePct": 0.31,
     "mappingStatus": "not_final"
   },
   "historySummary": {
@@ -50,8 +49,8 @@
     "sourceLockStatus": "PASS"
   },
   "display": {
-    "headline": "SKEW index level: 146.72",
-    "body": "Cboe SKEW tracks SPX tail-skew pricing; higher readings can indicate richer outlier-risk protection pricing.",
+    "headline": "SKEW index level: 137.39",
+    "body": "Cboe SKEW tracks SPX tail-skew pricing; higher readings can indicate richer outlier-risk protection pricing. VIX remains the score-fed volatility level input.",
     "caveat": "Display-only tail-skew context. Not VIX, not 0DTE, not dealer gamma, and not a score input.",
     "badge": "DISPLAY ONLY"
   },
@@ -61,5 +60,5 @@
     "csvFormat": "DATE,SKEW",
     "transcriptionMethod": "manual_from_cboe_csv"
   },
-  "operatorNotes": "Design reference from operator verification 2026-06-18; CSV not committed."
+  "operatorNotes": "Reference-aligned to GhostFlow asOf 2026-05-22 (SKEW 137.39). Source CSV extends through 2026-06-18 (146.72) — metadata only, not card primary value."
 }

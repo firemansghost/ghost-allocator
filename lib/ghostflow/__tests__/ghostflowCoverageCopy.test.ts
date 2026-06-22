@@ -9,14 +9,20 @@ import {
 } from '@/components/ghostflow/GhostFlowTrustBadges';
 
 assert.ok(
-  GHOSTFLOW_COVERAGE_SUMMARY.includes('6 display-only'),
-  'coverage summary must state 6 display-only public artifacts'
+  GHOSTFLOW_COVERAGE_SUMMARY.includes('7 display-only'),
+  'coverage summary must state 7 display-only public artifacts'
 );
 assert.ok(
-  !GHOSTFLOW_COVERAGE_SUMMARY.includes('4 display-only'),
-  'coverage summary must not contain stale 4 display-only count'
+  !GHOSTFLOW_COVERAGE_SUMMARY.includes('6 display-only'),
+  'coverage summary must not contain stale 6 display-only count'
 );
 assert.ok(
-  GHOSTFLOW_COVERAGE_BADGES_MIXED.includes('6 display-only public artifacts'),
-  'mixed badges must include 6 display-only public artifacts'
+  GHOSTFLOW_COVERAGE_BADGES_MIXED.includes('7 display-only public artifacts'),
+  'mixed badges must include 7 display-only public artifacts'
 );
+assert.ok(
+  !GHOSTFLOW_COVERAGE_BADGES_MIXED.includes('6 display-only public artifacts'),
+  'mixed badges must not contain stale 6 display-only count'
+);
+
+console.log('ghostflow/ghostflowCoverageCopy.test.ts: ok');

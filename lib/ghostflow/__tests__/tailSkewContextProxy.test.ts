@@ -1,5 +1,5 @@
 /**
- * Tail Skew Context artifact — validator tests (v1.9e.3 example scaffold only).
+ * Tail Skew Context artifact — validator tests (v1.9e.3 example + v1.9e.4 production).
  */
 
 import assert from 'node:assert/strict';
@@ -8,6 +8,7 @@ import { join } from 'node:path';
 import {
   computeTailSkewDailyChange,
   computeTailSkewDailyChangePct,
+  loadTailSkewContextArtifact,
   reconcileTailSkewDailyChange,
   reconcileTailSkewDailyChangePct,
   SKEW_CHANGE_TOLERANCE,
@@ -15,6 +16,7 @@ import {
   TAIL_SKEW_PRODUCTION_ARTIFACT_PATH,
   validateTailSkewContextArtifact,
 } from '@/lib/ghostflow/artifacts/tailSkewContext';
+import { GHOSTFLOW_REFERENCE_AS_OF } from '@/lib/ghostflow/reference';
 import {
   cloneTailSkewExample,
   FIXTURE_TAIL_SKEW_EXAMPLE,
@@ -34,6 +36,15 @@ const prodFail = validateTailSkewContextArtifact(FIXTURE_TAIL_SKEW_EXAMPLE, {
 });
 assert.ok(!prodFail.ok);
 assert.ok(prodFail.errors.some((e) => e.includes('designOnly')));
+
+// --- production JSON validates in production mode ---
+const productionPath = join(process.cwd(), TAIL_SKEW_PRODUCTION_ARTIFACT_PATH);
+assert.ok(existsSync(productionPath), 'Production tailSkewContext.v1.json must exist in v1.9e.4');
+
+const productionOk = loadTailSkewContextArtifact();
+assert.ok(productionOk.ok, productionOk.ok ? '' : productionOk.errors.join('; '));
+assert.strictEqual(productionOk.artifact.asOf, GHOSTFLOW_REFERENCE_AS_OF);
+assert.strictEqual(productionOk.artifact.observations.currentSkew, 137.39);
 
 // --- wrong signalId fails ---
 const wrongId = cloneTailSkewExample();
@@ -84,23 +95,29 @@ const badChangePctResult = validateTailSkewContextArtifact(badChangePct, { mode:
 assert.ok(!badChangePctResult.ok);
 assert.ok(badChangePctResult.errors.some((e) => e.includes('dailyChangePct')));
 
-// --- historySummary.latestDate !== asOf fails ---
-const badLatestDate = cloneTailSkewExample();
-if (badLatestDate.historySummary) {
-  badLatestDate.historySummary.latestDate = '2026-06-17';
+// --- historySummary.latestSourceDate before asOf fails ---
+const badSourceDate = cloneTailSkewExample();
+if (badSourceDate.historySummary) {
+  badSourceDate.historySummary.latestSourceDate = '2026-06-17';
 }
-const badLatestDateResult = validateTailSkewContextArtifact(badLatestDate, { mode: 'example' });
-assert.ok(!badLatestDateResult.ok);
-assert.ok(badLatestDateResult.errors.some((e) => e.includes('latestDate')));
+const badSourceDateResult = validateTailSkewContextArtifact(badSourceDate, {
+  mode: 'example',
+  referenceAsOf: FIXTURE_TAIL_SKEW_REFERENCE_ASOF,
+});
+assert.ok(!badSourceDateResult.ok);
+assert.ok(badSourceDateResult.errors.some((e) => e.includes('latestSourceDate')));
 
-// --- historySummary.latestValue !== currentSkew fails ---
-const badLatestValue = cloneTailSkewExample();
-if (badLatestValue.historySummary) {
-  badLatestValue.historySummary.latestValue = 100;
+// --- observations.latestObservation.date !== asOf fails ---
+const badObsDate = cloneTailSkewExample();
+if (badObsDate.observations.latestObservation) {
+  badObsDate.observations.latestObservation.date = '2026-06-17';
 }
-const badLatestValueResult = validateTailSkewContextArtifact(badLatestValue, { mode: 'example' });
-assert.ok(!badLatestValueResult.ok);
-assert.ok(badLatestValueResult.errors.some((e) => e.includes('latestValue')));
+const badObsDateResult = validateTailSkewContextArtifact(badObsDate, {
+  mode: 'example',
+  referenceAsOf: FIXTURE_TAIL_SKEW_REFERENCE_ASOF,
+});
+assert.ok(!badObsDateResult.ok);
+assert.ok(badObsDateResult.errors.some((e) => e.includes('latestObservation.date')));
 
 // --- forbidden score field fails ---
 const scoreField = cloneTailSkewExample() as Record<string, unknown>;
@@ -137,20 +154,13 @@ assert.ok(passiveKeyResult.errors.some((e) => e.includes('publicPassiveInputKey'
 // --- helper math tests ---
 assert.ok(Math.abs(computeTailSkewDailyChange(146.72, 142.62) - 4.1) < SKEW_CHANGE_TOLERANCE);
 assert.ok(Math.abs(computeTailSkewDailyChangePct(4.1, 142.62) - 2.87) < 0.01);
-assert.ok(reconcileTailSkewDailyChange(146.72, 142.62, 4.1));
-assert.ok(reconcileTailSkewDailyChangePct(4.1, 142.62, 2.87));
+assert.ok(reconcileTailSkewDailyChange(137.39, 136.96, 0.43));
+assert.ok(reconcileTailSkewDailyChangePct(0.43, 136.96, 0.31));
 
 // --- locked Cboe URL constant ---
 assert.strictEqual(
   FIXTURE_TAIL_SKEW_EXAMPLE.source.url,
   TAIL_SKEW_CBOE_CSV_URL
-);
-
-// --- no production artifact file is read or required ---
-const productionPath = join(process.cwd(), TAIL_SKEW_PRODUCTION_ARTIFACT_PATH);
-assert.ok(
-  !existsSync(productionPath),
-  'Production tailSkewContext.v1.json must not exist in v1.9e.3'
 );
 
 console.log('tailSkewContextProxy.test.ts: all assertions passed');

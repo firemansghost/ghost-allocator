@@ -94,6 +94,7 @@ function artifactDateLabel(signalId: string): string {
   if (signalId === 'options-activity-proxy') return 'Session';
   if (signalId === 'index-inclusion-events') return 'Event window';
   if (signalId === 'cap-weight-premium') return 'As of';
+  if (signalId === 'tail-skew-context') return 'As of';
   if (
     signalId === 'active-index-flow' ||
     signalId === 'concentration' ||
@@ -225,6 +226,7 @@ const DISPLAY_ONLY_SIGNAL_ORDER = [
   'options-activity-proxy',
   'index-inclusion-events',
   'cap-weight-premium',
+  'tail-skew-context',
 ] as const;
 
 function orderSignals(
@@ -282,7 +284,7 @@ export function GhostFlowSignalGrid({
           Market-structure signals
         </h2>
         <p className="mt-2 text-xs text-zinc-500 leading-relaxed max-w-3xl">
-          Six public score artifacts and one derived input feed the Research Composite. Six additional public artifacts
+          Six public score artifacts and one derived input feed the Research Composite. Seven additional public artifacts
           are display-only context cards — visible on the dashboard, but not score inputs.
         </p>
       </div>

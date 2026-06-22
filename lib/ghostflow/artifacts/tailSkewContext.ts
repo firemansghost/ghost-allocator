@@ -1,12 +1,17 @@
+import tailSkewContextArtifactJson from '@/data/ghostflow/artifacts/tailSkewContext.v1.json';
+import { evaluateDailyArtifactFreshness } from '@/lib/ghostflow/artifactFreshness';
+import { GHOSTFLOW_REFERENCE_AS_OF } from '@/lib/ghostflow/reference';
 import type {
+  ArtifactFreshnessResult,
   TailSkewContextArtifactV1,
+  TailSkewContextObservationsV1,
   TailSkewContextValidation,
 } from './types';
 
 export const TAIL_SKEW_EXAMPLE_ARTIFACT_PATH =
   'data/ghostflow/artifacts/tailSkewContext.v1.example.json';
 
-/** Production path constant only — file must not exist until v1.9e.4. */
+/** Production artifact path — v1.9e.4. */
 export const TAIL_SKEW_PRODUCTION_ARTIFACT_PATH =
   'data/ghostflow/artifacts/tailSkewContext.v1.json';
 
@@ -17,6 +22,9 @@ export const TAIL_SKEW_CBOE_CSV_URL =
   'https://cdn.cboe.com/api/global/us_indices/daily_prices/SKEW_History.csv';
 export const TAIL_SKEW_DISPLAY_SIGNAL_ID = 'tail-skew-context';
 export const TAIL_SKEW_DISPLAY_SIGNAL_NAME = 'Tail Skew Context';
+
+export const TAIL_SKEW_DISPLAY_CARD_CAVEAT =
+  'Display-only tail-skew context. Not VIX, not 0DTE, not dealer gamma, and not a score input.';
 
 export const SKEW_CHANGE_TOLERANCE = 0.01;
 export const SKEW_PCT_TOLERANCE = 0.05;
@@ -127,6 +135,47 @@ function normalizeValidateOptions(options?: TailSkewValidateOptions): {
     mode: options?.mode ?? 'example',
     referenceAsOf: options?.referenceAsOf,
   };
+}
+
+export function formatTailSkewCardValue(observations: TailSkewContextObservationsV1): string {
+  return `SKEW index level: ${observations.currentSkew.toFixed(2)}`;
+}
+
+export function buildTailSkewDisplayExplanation(artifact: TailSkewContextArtifactV1): string {
+  const { observations: o } = artifact;
+  const changeSign = (o.dailyChange ?? 0) >= 0 ? '+' : '';
+  const pctSign = (o.dailyChangePct ?? 0) >= 0 ? '+' : '';
+  const changePart =
+    isFiniteNumber(o.dailyChange) && isFiniteNumber(o.dailyChangePct)
+      ? ` Session change ${changeSign}${o.dailyChange!.toFixed(2)} (${pctSign}${o.dailyChangePct!.toFixed(2)}%).`
+      : '';
+  const history = artifact.historySummary;
+  const sourceTail =
+    history?.latestSourceDate && isFiniteNumber(history.latestSourceValue)
+      ? ` Source CSV extends through ${history.latestSourceDate} (${history.latestSourceValue.toFixed(2)}) — display context only.`
+      : '';
+  return (
+    `${artifact.display?.body ?? 'Cboe SKEW tracks SPX tail-skew pricing context.'}${changePart}` +
+    ` VIX remains the score-fed volatility level. mappingStatus: ${o.mappingStatus}; not included in the Research Composite.${sourceTail}`
+  );
+}
+
+export function loadTailSkewContextArtifact(): TailSkewContextValidation {
+  return validateTailSkewContextArtifact(tailSkewContextArtifactJson, {
+    mode: 'production',
+    referenceAsOf: GHOSTFLOW_REFERENCE_AS_OF,
+  });
+}
+
+export function evaluateTailSkewArtifactFreshness(
+  artifact: TailSkewContextArtifactV1,
+  referenceAsOf: string = GHOSTFLOW_REFERENCE_AS_OF
+): ArtifactFreshnessResult {
+  return evaluateDailyArtifactFreshness(
+    artifact.asOf,
+    referenceAsOf,
+    TAIL_SKEW_DISPLAY_SIGNAL_NAME
+  );
 }
 
 export function computeTailSkewDailyChange(current: number, prior: number): number {
@@ -382,6 +431,32 @@ export function validateTailSkewContextArtifact(
         );
       }
     }
+
+    const latestObservation = observations.latestObservation;
+    if (latestObservation !== undefined) {
+      if (!isPlainObject(latestObservation)) {
+        errors.push('observations.latestObservation must be an object when present.');
+      } else {
+        const obsDate = latestObservation.date;
+        if (typeof obsDate !== 'string' || !parseIsoDate(obsDate)) {
+          errors.push('observations.latestObservation.date must be a valid ISO date (YYYY-MM-DD).');
+        } else if (
+          typeof asOf === 'string' &&
+          parseIsoDate(asOf) &&
+          obsDate !== asOf
+        ) {
+          errors.push('observations.latestObservation.date must match asOf.');
+        }
+        const obsSkew = latestObservation.skew;
+        if (!isFiniteNumber(obsSkew) || obsSkew <= 0) {
+          errors.push(
+            'observations.latestObservation.skew must be a finite number greater than zero.'
+          );
+        } else if (isFiniteNumber(currentSkew) && obsSkew !== currentSkew) {
+          errors.push('observations.latestObservation.skew must match observations.currentSkew.');
+        }
+      }
+    }
   }
 
   const historySummary = raw.historySummary;
@@ -400,22 +475,23 @@ export function validateTailSkewContextArtifact(
         );
       }
 
-      const latestDate = historySummary.latestDate;
-      if (typeof latestDate !== 'string' || !parseIsoDate(latestDate)) {
-        errors.push('historySummary.latestDate must be a valid ISO date (YYYY-MM-DD).');
-      } else if (typeof asOf === 'string' && parseIsoDate(asOf) && latestDate !== asOf) {
-        errors.push('historySummary.latestDate must match asOf.');
+      const latestSourceDate = historySummary.latestSourceDate;
+      if (typeof latestSourceDate !== 'string' || !parseIsoDate(latestSourceDate)) {
+        errors.push('historySummary.latestSourceDate must be a valid ISO date (YYYY-MM-DD).');
+      } else if (
+        typeof asOf === 'string' &&
+        parseIsoDate(asOf) &&
+        parseIsoDate(latestSourceDate) &&
+        compareIso(latestSourceDate, asOf) < 0
+      ) {
+        errors.push('historySummary.latestSourceDate cannot be before asOf.');
       }
 
-      const latestValue = historySummary.latestValue;
-      if (!isPlainNumberPositive(latestValue)) {
-        errors.push('historySummary.latestValue must be a finite number greater than zero.');
-      } else if (
-        isPlainObject(observations) &&
-        isFiniteNumber(observations.currentSkew) &&
-        latestValue !== observations.currentSkew
-      ) {
-        errors.push('historySummary.latestValue must match observations.currentSkew.');
+      const latestSourceValue = historySummary.latestSourceValue;
+      if (!isPlainNumberPositive(latestSourceValue)) {
+        errors.push(
+          'historySummary.latestSourceValue must be a finite number greater than zero.'
+        );
       }
 
       const firstDate = historySummary.firstDate;
@@ -423,6 +499,8 @@ export function validateTailSkewContextArtifact(
         errors.push('historySummary.firstDate must be a valid ISO date (YYYY-MM-DD).');
       }
     }
+  } else if (mode === 'production') {
+    errors.push('historySummary is required for production artifact (mode: production).');
   }
 
   validateDisplayLanguage(raw, errors);

@@ -60,7 +60,7 @@ assert.strictEqual(
 assert.strictEqual(raw.passivePressure.leveredEtfRebalancePressure, 55);
 assert.ok(!meta.publicPassiveInputKeys?.includes('leveredEtfRebalancePressure'));
 assert.strictEqual(meta.publicStructuralInputKeys?.length, 4);
-assert.strictEqual(meta.publicSignalCount, 12);
+assert.strictEqual(meta.publicSignalCount, 13);
 assert.ok(meta.publicSignals.some((s) => s.signalId === 'levered-etf-rebalance'));
 
 assert.strictEqual(scored.score.score, 62);
