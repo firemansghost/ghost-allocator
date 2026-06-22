@@ -134,7 +134,7 @@ Lock a **repeatable, operator-grade, public Cboe SKEW history path** that could 
 | **SKEW** | **PASS** | Cboe CDN `SKEW_History.csv` verified; `DATE,SKEW` format locked (v1.9e.1a); 9,167 rows; latest **146.72** as of **2026-06-18** |
 | **Correlation** | **SKIPPED** | No `--corr-csv` run; implied-correlation public path not verified |
 
-**v1.9e.2 recommendation:** **Eligible to plan** — SKEW source lock **PASS**. Proceed to artifact design (SKEW-only, display-only default) when product approves. **No production artifact or dashboard card yet.** `publicSignalCount` remains **12**.
+**v1.9e.2 recommendation:** **Done** — [TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md](./TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md). SKEW source lock **PASS** enabled artifact design planning. **No production artifact or dashboard card yet.** Next: **v1.9e.3** example JSON + validator. `publicSignalCount` remains **12**.
 
 ---
 
@@ -142,7 +142,7 @@ Lock a **repeatable, operator-grade, public Cboe SKEW history path** that could 
 
 | Condition | Next phase |
 |-----------|------------|
-| **SKEW PASS** | **v1.9e.2** — artifact design, SKEW-only, display-only default (**plan next**; not started; no artifact/card yet) |
+| **SKEW PASS** | **v1.9e.2 Done** — [TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md](./TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md); next **v1.9e.3** example + validator; no artifact/card yet |
 | **SKEW PARTIAL** | Operator source checklist / manual cleanup → then v1.9e.2 |
 | **SKEW FAIL + correlation PASS** | Separate implied-correlation feasibility/design path — **not** SKEW card |
 | **Both FAIL** | Stop lane; document research-only / paid-vendor status |
