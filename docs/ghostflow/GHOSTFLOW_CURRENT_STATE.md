@@ -4,13 +4,13 @@
 
 Canonical inventory after Tail Skew **v1.9e.4** (production card) and **v1.9e.5** (mapping decision), aligned by **v1.12** public signal integrity checkpoint. Theme through v1.9: **Passive Supply & Concentration Research** with display-only defaults and operator doc discipline.
 
-**Related:** [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md) (canonical **13-signal** table) · [GHOSTFLOW_PUBLIC_SIGNAL_INTEGRITY_CHECKPOINT.md](./GHOSTFLOW_PUBLIC_SIGNAL_INTEGRITY_CHECKPOINT.md) (v1.12 audit) · [CURRENT_DATA_READINESS_AUDIT.md](./CURRENT_DATA_READINESS_AUDIT.md) (v1.13 operating readiness — audit date **2026-06-22**) · [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md) (canonical operator workflow) · [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) (field quick reference) · [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) (freshness & `dataQuality` policy)
+**Related:** [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md) (canonical **13-signal** table) · [GHOSTFLOW_PUBLIC_SIGNAL_INTEGRITY_CHECKPOINT.md](./GHOSTFLOW_PUBLIC_SIGNAL_INTEGRITY_CHECKPOINT.md) (v1.12 audit) · [CURRENT_DATA_READINESS_AUDIT.md](./CURRENT_DATA_READINESS_AUDIT.md) (v1.13 operating readiness — audit date **2026-06-22**) · [REFERENCE_DATE_AND_OPERATOR_POLICY.md](./REFERENCE_DATE_AND_OPERATOR_POLICY.md) (v1.14 reference bump gates) · [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md) (canonical operator workflow) · [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) (field quick reference) · [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) (freshness & `dataQuality` policy)
 
 ---
 
 ## Status
 
-- **Current as of:** v1.13 — [current data readiness audit](./CURRENT_DATA_READINESS_AUDIT.md) (audit date **2026-06-22**; dashboard reference **2026-05-22**; no refresh performed).
+- **Current as of:** v1.14 — [reference-date & operator policy](./REFERENCE_DATE_AND_OPERATOR_POLICY.md) (dashboard reference **2026-05-22** until v1.15; no refresh performed).
 - **Document type:** Documentation inventory — v1.12 docs/UI-copy alignment only; no score, artifact, or runtime changes.
 - **Baseline reference:** [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) = `2026-05-22` (production composite snapshot).
 - **Canonical 13-signal table:** [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md).

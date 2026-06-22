@@ -3,7 +3,7 @@
 **Operator path:** [README](./README.md) · [Discipline](./OPERATOR_REFRESH_DISCIPLINE.md) · [Checklist](./MANUAL_REFRESH_CHECKLIST.md)
 
 **Status:** Canonical operator workflow — aligned by **v1.12** public signal integrity checkpoint; **docs-only** in v1.12; no artifact JSON, score, UI, runtime, or schema changes in v1.12.  
-**Related:** [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) (field reference) · [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md) (canonical **13-signal** table) · [GHOSTFLOW_PUBLIC_SIGNAL_INTEGRITY_CHECKPOINT.md](./GHOSTFLOW_PUBLIC_SIGNAL_INTEGRITY_CHECKPOINT.md) (v1.12 audit) · [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) (freshness & `dataQuality` policy) · [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) · [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md)
+**Related:** [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) (field reference) · [REFERENCE_DATE_AND_OPERATOR_POLICY.md](./REFERENCE_DATE_AND_OPERATOR_POLICY.md) (v1.14 reference bump gates) · [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md) (canonical **13-signal** table) · [GHOSTFLOW_PUBLIC_SIGNAL_INTEGRITY_CHECKPOINT.md](./GHOSTFLOW_PUBLIC_SIGNAL_INTEGRITY_CHECKPOINT.md) (v1.12 audit) · [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) (freshness & `dataQuality` policy) · [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) · [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md)
 
 | Deferred | Posture |
 |----------|---------|
@@ -91,6 +91,17 @@ Reference: [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) for *
 - Do **not** rewrite caveats to imply scoring.
 - Do **not** set `mappingStatus: final` without a separate decision memo.
 - Do **not** edit [`mockGhostflowSnapshot.ts`](../../data/ghostflow/mockGhostflowSnapshot.ts).
+
+### Reference bump (Gate C)
+
+Before editing [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts):
+
+1. Choose target = **last completed US equity trading session** with both daily score-fed sources available.
+2. Confirm `vol-regime` and `breadth` both have `asOf` = target.
+3. If either is missing, invalid, or misaligned — **do not bump**.
+4. Display-only, Treasury, weekly/monthly/quarterly lag, and MOCK inputs do **not** block the bump (display-only stale state must still be disclosed).
+
+Canonical policy: [REFERENCE_DATE_AND_OPERATOR_POLICY.md](./REFERENCE_DATE_AND_OPERATOR_POLICY.md).
 
 ### Post-refresh
 
@@ -194,6 +205,7 @@ Suggested messages: see [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST
 | [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) | Freshness thresholds & `dataQuality` policy |
 | [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md) | Canonical **13-signal** inventory |
 | [CURRENT_DATA_READINESS_AUDIT.md](./CURRENT_DATA_READINESS_AUDIT.md) | **v1.13** operating readiness — audit date **2026-06-22**; dashboard reference **2026-05-22** |
+| [REFERENCE_DATE_AND_OPERATOR_POLICY.md](./REFERENCE_DATE_AND_OPERATOR_POLICY.md) | **v1.14** reference bump gates — vol-regime + breadth required |
 | [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) | Canonical dashboard inventory |
 | [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) | MOCK keep policy |
 | [ARTIFACT_RUNBOOK.md](./ARTIFACT_RUNBOOK.md) · [BREADTH_ARTIFACT_RUNBOOK.md](./BREADTH_ARTIFACT_RUNBOOK.md) · [ETF_ARTIFACT_RUNBOOK.md](./ETF_ARTIFACT_RUNBOOK.md) · etc. | Per-source deep dives |
