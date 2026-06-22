@@ -137,7 +137,7 @@ Separate dashboard lane — **not** in equity composite or `publicSignalCount`.
 ## Open roadmap questions
 
 1. ~~**Mock retirement policy**~~ **Resolved (v1.8b):** [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) — all three passive MOCK inputs **kept**; no replacements or retirements executed. **Operational roadmap (v1.10):** [MOCK_SCORE_RETIREMENT_ROADMAP.md](./MOCK_SCORE_RETIREMENT_ROADMAP.md) — retirement requirements, decision ladder, score-impact prerequisites; gates **v1.0c / v1.1f / v1.2f / v1.8i** remain not approved.
-2. **Calibration backlog** — v1.4e-calibration (options), v1.7f-calibration (Treasury), plus existing CFTC/levered/retirement studies — research-only vs display percentiles (not approved for UI). **v1.9e.1** Cboe SKEW source lock **PASS** — [PROTECTION_BID_SOURCE_SPIKE.md](./PROTECTION_BID_SOURCE_SPIKE.md); next: **v1.9e.2** artifact design (display-only).
+2. **Calibration backlog** — v1.4e-calibration (options), v1.7f-calibration (Treasury), plus existing CFTC/levered/retirement studies — research-only vs display percentiles (not approved for UI). **v1.9e.2** Tail Skew Context design **Done** — [TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md](./TAIL_SKEW_CONTEXT_ARTIFACT_DESIGN.md); no card yet; next **v1.9e.3**.
 3. **0DTE / true GEX path** — OCC Index/Others proxy shipped display-only; true 0DTE/GEX still YELLOW/RED per [ODTE_OPTIONS_FEASIBILITY.md](./ODTE_OPTIONS_FEASIBILITY.md).
 4. **Passive-flow next source** — Any new public proxy must avoid double-counting ICI index share / active-index-flow already in composite.
 5. ~~**Doc sprawl**~~ **Resolved (v1.8e):** [README.md](./README.md) — doc index and onboarding path; targeted stale-line banners on historical memos; no file moves/archives.
