@@ -8,23 +8,22 @@
 
 **Spike script:** [`skew-source-spike.ts`](../scripts/ghostflow/skew-source-spike.ts) — operator CSV only; not in `ghostflow:check`
 
-This memo is a **docs-only artifact design** for a future **display-only** Cboe SKEW card. It does **not** create JSON, validators, UI, score wiring, or runtime behavior.
+This memo defines the **display-only** Cboe SKEW card schema. **v1.9e.3** added the example JSON, validator, types, and focused unit tests. Production JSON, UI, and `buildSnapshot` integration remain deferred to **v1.9e.4**.
 
 ---
 
 ## Status
 
-| Item | v1.9e.2 posture |
+| Item | v1.9e.3 posture |
 |------|------------------|
-| Document type | **Artifact design memo** |
-| Scope | **Docs-only** |
-| Production artifact JSON | **None** |
-| Example artifact JSON | **None** |
-| Validator / types / tests | **None** |
-| UI / dashboard card | **None** |
+| Document type | **Artifact design memo** (+ v1.9e.3 scaffold) |
+| Production artifact JSON | **None** — deferred to **v1.9e.4** |
+| Example artifact JSON | **Done** — [`tailSkewContext.v1.example.json`](../../data/ghostflow/artifacts/tailSkewContext.v1.example.json) (`designOnly: true`) |
+| Validator / types / tests | **Done** — [`tailSkewContext.ts`](../../lib/ghostflow/artifacts/tailSkewContext.ts) · [`tailSkewContextProxy.test.ts`](../../lib/ghostflow/__tests__/tailSkewContextProxy.test.ts) |
+| UI / dashboard card | **None** — deferred to **v1.9e.4** |
 | Score change | **None** |
 | Runtime change | **None** |
-| Package change | **None** |
+| `loadTailSkewContextArtifact` / buildSnapshot merge | **None** |
 | `publicPassiveInputKey` | **None** |
 | **`publicSignalCount`** | **12** (equity) — **unchanged** |
 
@@ -294,7 +293,7 @@ Any future calibration remains **display-only** unless product explicitly reopen
 | Phase | Deliverable | Score? | `publicSignalCount` |
 |-------|-------------|--------|---------------------|
 | **v1.9e.2** | This design memo | No | **12** |
-| **v1.9e.3** | Example JSON + validator/types/tests | No | **12** |
+| **v1.9e.3** | Example JSON + validator/types/tests | No | **12** — **Done** |
 | **v1.9e.3a** (optional) | SKEW historical percentile calibration study | No | **12** |
 | **v1.9e.4** | Production JSON + display-only card | No | **12 → 13** (product-approved) |
 | **v1.9e.5** | Mapping decision — expected display-only | No | 13 |
@@ -320,13 +319,16 @@ Tail Skew Context is **companion context**, not a replacement for VIX and not an
 
 ## No-change confirmation
 
-| Item | v1.9e.2 confirmation |
+| Item | v1.9e.3 confirmation |
 |------|---------------------|
 | [`scoring.ts`](../../lib/ghostflow/scoring.ts) | **Unchanged** |
 | [`buildSnapshot.ts`](../../lib/ghostflow/buildSnapshot.ts) | **Unchanged** |
 | [`mockGhostflowSnapshot.ts`](../../data/ghostflow/mockGhostflowSnapshot.ts) | **Unchanged** |
-| Production / example artifact JSON | **Unchanged** |
-| UI / tests / `package.json` | **Unchanged** |
+| Production artifact JSON | **Unchanged** — `tailSkewContext.v1.json` **not created** |
+| UI / display-card tests | **Unchanged** |
+| `validate-artifacts.ts` | **Unchanged** — example validated via unit test only |
+| Composite / Passive / Structural scores | **62 / 58 / 66** — **unchanged** |
+| **`publicSignalCount`** | **12** — **unchanged** |
 | **Passive Pressure** | **58** — unchanged |
 | **Structural Fragility** | **66** — unchanged |
 | **Composite** | **62** — unchanged |

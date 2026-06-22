@@ -689,6 +689,98 @@ export type IndexInclusionEventProxyValidation =
   | IndexInclusionEventProxyValidationResult
   | IndexInclusionEventProxyValidationError;
 
+/** Cboe SKEW tail-skew context — v1.9e.3 example/validator scaffolding only. */
+export type TailSkewMappingStatus = 'not_final';
+
+export interface TailSkewLatestObservationV1 {
+  date: string;
+  skew: number;
+}
+
+export interface TailSkewContextObservationsV1 {
+  currentSkew: number;
+  latestObservation?: TailSkewLatestObservationV1;
+  priorSessionSkew?: number;
+  dailyChange?: number;
+  dailyChangePct?: number;
+  mappingStatus: TailSkewMappingStatus;
+}
+
+export interface TailSkewHistorySummaryV1 {
+  rowCount: number;
+  firstDate: string;
+  latestDate: string;
+  latestValue: number;
+  sourceLockStatus?: string;
+}
+
+export interface TailSkewDisplayV1 {
+  headline: string;
+  body: string;
+  caveat: string;
+  badge: string;
+}
+
+export interface TailSkewProvenanceV1 {
+  operatorRunCommand: string;
+  spikeScriptVersion: string;
+  csvFormat: string;
+  transcriptionMethod: string;
+}
+
+export interface TailSkewSourceV1 {
+  name: string;
+  url: string;
+  sourceName?: string;
+  sourceUrl?: string;
+  sourceAccessedDate?: string;
+  note?: string;
+}
+
+export interface TailSkewMethodologyV1 {
+  indexDefinition?: string;
+  noScoreMapping?: boolean;
+  [key: string]: unknown;
+}
+
+export interface TailSkewContextArtifactV1 {
+  artifactVersion: '1';
+  signalId: 'tail-skew-context-proxy';
+  designOnly?: true;
+  title?: string;
+  asOf: string;
+  publishedAt: string;
+  dataStatus?: 'public_proxy';
+  mappingStatus?: TailSkewMappingStatus;
+  units?: 'index_level';
+  source: TailSkewSourceV1;
+  observationType: 'cboe_skew_daily_snapshot';
+  seriesDefinition: 'cboe_skew_daily_index_level_v1';
+  updateFrequency: 'daily';
+  dataQuality: 'verified_manual' | 'manual_unverified';
+  methodology?: TailSkewMethodologyV1;
+  caveats: string[];
+  observations: TailSkewContextObservationsV1;
+  historySummary?: TailSkewHistorySummaryV1;
+  display?: TailSkewDisplayV1;
+  provenance?: TailSkewProvenanceV1;
+  operatorNotes?: string;
+}
+
+export interface TailSkewContextValidationResult {
+  ok: true;
+  artifact: TailSkewContextArtifactV1;
+}
+
+export interface TailSkewContextValidationError {
+  ok: false;
+  errors: string[];
+}
+
+export type TailSkewContextValidation =
+  | TailSkewContextValidationResult
+  | TailSkewContextValidationError;
+
 /** CFTC TFF Treasury futures positioning — v1.7b design only. */
 export type TreasuryFuturesMappingStatus = 'not_final';
 
