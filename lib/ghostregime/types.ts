@@ -156,8 +156,19 @@ export interface GhostRegimeRow {
         outcome: string;
       }
     >;
-    /** Stooq vs Marketstack routing (ETF fallback) */
+    /** Stooq vs Yahoo vs Marketstack routing (ETF fallback chain) */
     feed_routing?: Record<string, string>;
+    /** Yahoo chart probe when ETF fallback ran (or failed) */
+    yahoo_probe?: Record<
+      string,
+      {
+        request_url_display: string;
+        http_status: number;
+        outcome: string;
+        body_preview?: string;
+        rows_parsed?: number;
+      }
+    >;
     marketstack_probe?: Record<
       string,
       {

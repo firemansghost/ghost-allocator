@@ -2,7 +2,7 @@
 
 **GhostRegime ops:** [RUNBOOK](./RUNBOOK.md) · [API Usage Audit](./MARKETSTACK_API_USAGE_AUDIT.md)
 
-M3 operator guide — when and how to enable paid Marketstack fallback, run a controlled refresh, verify results, and shut fallback back off. **Docs only;** enforcement is in the M2 guard (`lib/ghostregime/marketstackGuard.ts`).
+M3 operator guide — when and how to enable **emergency** paid Marketstack fallback (after Stooq **and** Yahoo fail), run a controlled refresh, verify results, and shut fallback back off. **Docs only;** enforcement is in the M2 guard (`lib/ghostregime/marketstackGuard.ts`).
 
 ---
 
@@ -13,8 +13,9 @@ M3 operator guide — when and how to enable paid Marketstack fallback, run a co
 | **Default** | Marketstack fallback is **disabled** |
 | **Key alone** | `MARKETSTACK_ACCESS_KEY` **does not spend quota** after M2 |
 | **Paid unlock** | `ALLOW_MARKETSTACK_FALLBACK=true` is required to spend Marketstack quota |
-| **Role** | Marketstack is a **paid recovery fallback**, not the normal data source |
+| **Role** | Marketstack is a **paid emergency fallback**, not the normal data source |
 | **Primary source** | **Stooq** remains first for core US ETF symbols (SPY, GLD, EEM, HYG, IEF, TIP, TLT, UUP) |
+| **Free fallback** | **Yahoo Finance chart** runs automatically when Stooq fails (no env flag). Expect `resolvedIds` like `yahoo:SPY` in Production after deploy. |
 
 Fallback ETF set and guard behavior are documented in the [API Usage Audit](./MARKETSTACK_API_USAGE_AUDIT.md) (M1/M2).
 
@@ -28,7 +29,7 @@ Fallback ETF set and guard behavior are documented in the [API Usage Audit](./MA
 | **Tests / build** | N/A (hard-blocked by M2) | N/A | **Never** |
 | **Local dev** | Optional locally | **Unset by default** | Only if both set intentionally and briefly |
 | **Production** | May remain set (credential on file) | **Unset by default** | Only during an approved paid fallback window |
-| **Weekday cron (until M4)** | May exist on Production | **Should stay unset** | Cron remains **Stooq-only** by default |
+| **Weekday cron (until M4)** | May exist on Production | **Should stay unset** | Cron uses Stooq → Yahoo by default; Marketstack only if both fail **and** ALLOW is set |
 
 **Preview:** Never deploy with `MARKETSTACK_ACCESS_KEY` or `ALLOW_MARKETSTACK_FALLBACK`. M2 also hard-blocks Preview at runtime.
 
@@ -40,9 +41,9 @@ Fallback ETF set and guard behavior are documented in the [API Usage Audit](./MA
 
 ## Safe manual paid recovery checklist
 
-Use only when Stooq has failed for fallback ETF symbols and a paid recovery refresh is worth the cost.
+Use only when **both Stooq and Yahoo** have failed for fallback ETF symbols and a paid recovery refresh is worth the cost.
 
-1. **Confirm Stooq failure** — Inspect `provider_diagnostics.stooq_probe`, `feed_routing`, and `errors` on a stale `today` response or `?debug=1` run. Confirm the issue is Stooq (gate, empty CSV, parse error), not unrelated providers (BTC, PDBC, VIX).
+1. **Confirm Stooq and Yahoo failure** — Inspect `provider_diagnostics.stooq_probe`, `yahoo_probe`, `feed_routing`, and `errors` on a stale `today` response or `?debug=1` run. Confirm Stooq failed first and Yahoo did not recover (e.g. `feed_routing` shows `→ Yahoo (chart_failed)` or similar), not unrelated providers (BTC, PDBC, VIX).
 
 2. **Check Marketstack usage/budget** — Review the Marketstack dashboard before spending quota.
 
@@ -61,9 +62,11 @@ curl -H "x-ghostregime-cron: $SECRET" \
 
 7. **Verify response / diagnostics:**
    - `stale=false` if persist succeeded (or understand `serve_metadata` if not)
-   - `provider_diagnostics.marketstack_probe` — `outcome: ok` only for symbols that needed fallback; not `guard_blocked`
+   - `provider_diagnostics.yahoo_probe` — should show `chart_ok` for symbols recovered by Yahoo when Stooq failed
+   - `provider_diagnostics.marketstack_probe` — `outcome: ok` only for symbols that needed **emergency** fallback after Yahoo; not `guard_blocked`
    - `guard_reason` — should be absent on successful Marketstack rows; if ALLOW was active, failed symbols should not show `marketstack_disabled_by_guard`
-   - `feed_routing` — e.g. `Stooq (…) → Marketstack (ok, rows=…)` only where expected
+   - `feed_routing` — e.g. `Stooq (stooq_browser_challenge) → Yahoo (chart_ok, rows=…)` when Yahoo wins; `Stooq (…) → Yahoo (…) → Marketstack (ok, rows=…)` only when Yahoo also failed
+   - `resolvedIds` — prefer `yahoo:SPY` etc. in normal operation; `marketstack:SPY` indicates emergency paid fallback
    - **No secrets** in JSON (`access_key`, raw key values, or full URLs with keys)
 
 8. **Confirm scope** — Only the eight fallback ETFs should use Marketstack. PDBC, BTC-USD, and VIX use other paths.
@@ -80,7 +83,7 @@ curl -H "x-ghostregime-cron: $SECRET" \
 
 | Check | Expected when fallback is off |
 |-------|-------------------------------|
-| **ALLOW unset** | If Stooq fails for a fallback ETF, `marketstack_probe[symbol].outcome` is `guard_blocked` with `guard_reason: marketstack_disabled_by_guard` |
+| **ALLOW unset** | If Stooq and Yahoo both fail for a fallback ETF, `marketstack_probe[symbol].outcome` is `guard_blocked` with `guard_reason: marketstack_disabled_by_guard` |
 | **Weekday cron** | Marketstack dashboard usage should **not** increase when ALLOW is unset |
 | **Build / `verify:ghostregime`** | No Marketstack HTTP (M2 build/test guards) |
 | **Preview** | No key, no ALLOW; hard-blocked even if misconfigured |

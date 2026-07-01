@@ -43,18 +43,23 @@ One command runs build, lint, and a focused set of GhostRegime unit tests (persi
 npm run verify:ghostregime
 ```
 
-### Marketstack fallback (optional, opt-in)
+### ETF provider chain (core US symbols)
 
-**Operator discipline (M3):** [MARKETSTACK_OPERATOR_REFRESH.md](./MARKETSTACK_OPERATOR_REFRESH.md) — when to enable paid fallback, controlled refresh checklist, verification, and rollback.
+For **core US ETF symbols** (SPY, GLD, EEM, HYG, IEF, TIP, TLT, UUP), the durable provider chain is:
 
-For **core US ETF symbols** (SPY, GLD, EEM, HYG, IEF, TIP, TLT, UUP), Stooq remains the **first** data source. If Stooq fails (gate, empty CSV, parse error, etc.), the engine may request **one** Marketstack EOD series per symbol **only for those tickers**, and only when **both** of the following are set in the deployment environment:
+**Stooq → Yahoo Finance chart (free fallback) → Marketstack EOD (emergency/paid) → fail closed**
 
-1. `MARKETSTACK_ACCESS_KEY` — Marketstack dashboard access key (do not commit)
-2. `ALLOW_MARKETSTACK_FALLBACK=true` — explicit opt-in to spend paid Marketstack quota (**temporary only** — unset after a controlled refresh)
+1. **Stooq** — primary CSV source (`STOOQ_API_KEY` optional but recommended when Stooq serves the API-key gate).
+2. **Yahoo** — automatic free fallback when Stooq is not usable (browser/JS challenge, API-key gate, empty CSV, non-CSV body, HTTP failure, zero rows). No env flag required. Diagnostics: `provider_diagnostics.yahoo_probe`, `feed_routing` (e.g. `Stooq (stooq_browser_challenge) → Yahoo (chart_ok, rows=421)`), `resolvedIds` (`yahoo:SPY`, etc.).
+3. **Marketstack** — emergency paid fallback **only if Yahoo also fails**, and only when **both** are set:
+   - `MARKETSTACK_ACCESS_KEY` — Marketstack dashboard access key (do not commit)
+   - `ALLOW_MARKETSTACK_FALLBACK=true` — explicit opt-in to spend paid quota (**temporary only** — unset once Yahoo fallback is verified in Production)
 
 **M2 guard (fail-closed):** The presence of `MARKETSTACK_ACCESS_KEY` alone is **not** enough to trigger Marketstack calls. Fallback is also blocked during tests (`NODE_ENV=test`), Vercel Preview (`VERCEL_ENV=preview`), and Next.js production builds (`NEXT_PHASE=phase-production-build`). Optional kill switch: `DISABLE_MARKETSTACK_FALLBACK=true`.
 
-**ALLOW is not permanent.** Enable `ALLOW_MARKETSTACK_FALLBACK=true` only for an approved paid fallback window, run **one** controlled `force=1` refresh, verify diagnostics, then **unset ALLOW** and redeploy. Do not leave ALLOW enabled for the weekday cron (Stooq-only default until M4).
+**ALLOW is not permanent.** After deploying Yahoo ETF fallback, verify scheduled refresh succeeds with `resolvedIds` showing `yahoo:*` (not `marketstack:*`), then **unset `ALLOW_MARKETSTACK_FALLBACK`** on Vercel Production and redeploy. Enable ALLOW only for an approved paid recovery when **both** Stooq and Yahoo fail.
+
+**Operator discipline (M3):** [MARKETSTACK_OPERATOR_REFRESH.md](./MARKETSTACK_OPERATOR_REFRESH.md) — when to enable paid fallback, controlled refresh checklist, verification, and rollback.
 
 **Preview:** Do not set `MARKETSTACK_ACCESS_KEY` or `ALLOW_MARKETSTACK_FALLBACK` on Preview deployments.
 
@@ -62,7 +67,7 @@ For **core US ETF symbols** (SPY, GLD, EEM, HYG, IEF, TIP, TLT, UUP), Stooq rema
 
 **Emergency rollback:** Unset `ALLOW_MARKETSTACK_FALLBACK`; optionally set `DISABLE_MARKETSTACK_FALLBACK=true`; redeploy Production. Details in [operator refresh — rollback](./MARKETSTACK_OPERATOR_REFRESH.md#emergency-rollback).
 
-**PDBC** and **BTC-USD** keep their existing AlphaVantage/DBC and Stooq→CoinGecko paths — they are not routed through Marketstack.
+**PDBC** and **BTC-USD** keep their existing AlphaVantage/DBC and Yahoo→Stooq→CoinGecko paths — they are not routed through the ETF Yahoo/Marketstack chain.
 
 **Usage audit:** [MARKETSTACK_API_USAGE_AUDIT.md](./MARKETSTACK_API_USAGE_AUDIT.md) — call paths, trigger classification, and billing containment (M2 guard implemented).
 
@@ -72,12 +77,12 @@ For **core US ETF symbols** (SPY, GLD, EEM, HYG, IEF, TIP, TLT, UUP), Stooq rema
 |-------------|--------------------------|------------------------------|
 | **Preview** | Do not set | Do not set |
 | **Development** (Vercel) | Do not set | Do not set |
-| **Production** | May remain set | **Unset by default**; `true` only during approved fallback window, then unset |
+| **Production** | May remain set | **Unset by default**; `true` only during approved emergency fallback, then unset after Yahoo verified |
 | **Local dev** | Optional for manual tests | Unset by default; `true` only with budget awareness |
 
-**After M2/M3/M4:** The weekday cron uses **`refresh=scheduled`** (not blind `force=1`). While `ALLOW_MARKETSTACK_FALLBACK` is unset, cron is Stooq-only on recompute paths and skips market fetch entirely when the persisted snapshot is fresh (`max_age_days = 4`, same as `/health`). Redeploy Production after any env change.
+**After M2/M3/M4:** The weekday cron uses **`refresh=scheduled`**. Yahoo ETF fallback runs automatically when Stooq fails (no env flag). Marketstack runs only when Yahoo fails **and** ALLOW is set. Cron skips market fetch entirely when the persisted snapshot is fresh (`max_age_days = 4`, same as `/health`). Redeploy Production after any env change.
 
-**Where to configure Marketstack (manual recovery only):** Scheduled cron does **not** enable Marketstack. Paid fallback is operator-only via temporary `ALLOW_MARKETSTACK_FALLBACK` — see [MARKETSTACK_OPERATOR_REFRESH.md](./MARKETSTACK_OPERATOR_REFRESH.md). Market data for manual `force=1` runs inside the Vercel deployment.
+**Where to configure Marketstack (emergency recovery only):** Scheduled cron does **not** enable Marketstack by default. Paid fallback is operator-only via temporary `ALLOW_MARKETSTACK_FALLBACK` — see [MARKETSTACK_OPERATOR_REFRESH.md](./MARKETSTACK_OPERATOR_REFRESH.md). Market data for manual `force=1` runs inside the Vercel deployment.
 
 ### Manual Execution
 
@@ -220,7 +225,8 @@ curl https://ghost-allocator.vercel.app/api/ghostregime/health
 - **AlphaVantage**: Verify `ALPHAVANTAGE_API_KEY` in Vercel env vars
 - **CBOE VIX**: Usually reliable, check if CSV format changed
 - **Stooq**: Stooq may return **API-key / captcha instructions** (plaintext) instead of CSV when `STOOQ_API_KEY` is not set. Obtain a key via [Stooq get_apikey](https://stooq.com/q/d/?s=spy.us&get_apikey), then set `STOOQ_API_KEY` in Vercel. Responses are classified as `stooq_apikey_gate` in `stooq_probe`, not as “empty history” without explanation.
-- **BTC-USD**: **Yahoo Finance chart** is the primary bootstrap provider (600+ calendar days). Fallback order: **Yahoo → Stooq `btcusd` → CoinGecko public (recent-only)**. ETFs still use Stooq first (optional Marketstack fallback).
+- **BTC-USD**: **Yahoo Finance chart** is the primary bootstrap provider (600+ calendar days). Fallback order: **Yahoo → Stooq `btcusd` → CoinGecko public (recent-only)**.
+- **Core ETFs (SPY, GLD, …)**: **Stooq → Yahoo chart (free) → Marketstack (emergency/paid, ALLOW-gated) → fail closed**. Check `yahoo_probe`, `stooq_probe`, and `feed_routing` in diagnostics.
 
 ### Typical Provider Issues
 
@@ -235,7 +241,7 @@ curl https://ghost-allocator.vercel.app/api/ghostregime/health
 
 **Stooq**:
 - **API key required**: Plaintext body starting with “Get your apikey” means CSV was not returned — configure `STOOQ_API_KEY`.
-- **Browser / JS challenge**: HTML bodies mentioning JavaScript or browser verification are classified as `stooq_browser_challenge`. **Do not rely on Stooq for BTC bootstrap** — Yahoo is primary for `BTC-USD`.
+- **Browser / JS challenge**: HTML bodies mentioning JavaScript or browser verification are classified as `stooq_browser_challenge`. For **BTC-USD**, Yahoo is primary. For **core ETFs**, Yahoo chart fallback runs automatically after Stooq failure.
 - **Symbol mapping**: Verify `STOOQ_SYMBOL_MAP` in `lib/ghostregime/marketData.ts`
 - **Diagnostics**: `provider_diagnostics.stooq_probe[symbol].body_preview` shows the first ~500 chars of the response; `outcome` distinguishes `stooq_apikey_gate`, `stooq_browser_challenge`, `non_csv_unexpected`, `csv_ok`, etc.
 

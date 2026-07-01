@@ -15,10 +15,18 @@ describe('buildYahooChartUrl', () => {
   it('includes BTC-USD and unix period bounds', () => {
     const start = new Date('2024-01-01T00:00:00Z');
     const end = new Date('2024-06-01T00:00:00Z');
-    const url = buildYahooChartUrl(start, end);
+    const url = buildYahooChartUrl('BTC-USD', start, end);
     assert.match(url, /BTC-USD/);
     assert.match(url, /period1=/);
     assert.match(url, /interval=1d/);
+  });
+
+  it('includes SPY ticker for ETF fallback URL construction', () => {
+    const start = new Date('2024-01-01T00:00:00Z');
+    const end = new Date('2024-06-01T00:00:00Z');
+    const url = buildYahooChartUrl('SPY', start, end);
+    assert.match(url, /\/chart\/SPY\?/);
+    assert.match(url, /period2=/);
   });
 });
 

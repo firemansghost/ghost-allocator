@@ -53,6 +53,8 @@ const STOOQ_GATE_BODY = `Get your apikey:
 1. Open https://stooq.com/q/d/?s=spy.us&get_apikey
 `;
 
+const YAHOO_EMPTY_CHART = JSON.stringify({ chart: { result: [] } });
+
 const MARKETSTACK_FIXTURE = {
   data: [
     { date: '2024-01-02T00:00:00+0000', close: 100, symbol: 'SPY' },
@@ -82,6 +84,9 @@ describe('DefaultMarketDataProvider Marketstack guard', () => {
       if (url.includes('stooq.com')) {
         return { ok: true, status: 200, headers: new Headers(), text: async () => STOOQ_GATE_BODY } as Response;
       }
+      if (url.includes('query1.finance.yahoo.com')) {
+        return { ok: true, status: 200, text: async () => YAHOO_EMPTY_CHART } as Response;
+      }
       throw new Error(`unexpected fetch: ${url}`);
     }) as typeof fetch;
 
@@ -92,6 +97,7 @@ describe('DefaultMarketDataProvider Marketstack guard', () => {
 
     const diag = provider.getDiagnostics();
     assert.ok(requestedUrls.every((u) => !u.includes('api.marketstack.com')));
+    assert.strictEqual(diag.yahoo_probe?.[MARKET_SYMBOLS.SPY]?.outcome, 'missing_result');
     assert.strictEqual(diag.marketstack_probe?.[MARKET_SYMBOLS.SPY]?.outcome, 'guard_blocked');
     assert.strictEqual(
       diag.marketstack_probe?.[MARKET_SYMBOLS.SPY]?.guard_reason,
@@ -113,6 +119,9 @@ describe('DefaultMarketDataProvider Marketstack guard', () => {
       requestedUrls.push(url);
       if (url.includes('stooq.com')) {
         return { ok: true, status: 200, headers: new Headers(), text: async () => STOOQ_GATE_BODY } as Response;
+      }
+      if (url.includes('query1.finance.yahoo.com')) {
+        return { ok: true, status: 200, text: async () => YAHOO_EMPTY_CHART } as Response;
       }
       if (url.includes('api.marketstack.com')) {
         return {
@@ -148,6 +157,9 @@ describe('DefaultMarketDataProvider Marketstack guard', () => {
       if (url.includes('stooq.com')) {
         return { ok: true, status: 200, headers: new Headers(), text: async () => STOOQ_GATE_BODY } as Response;
       }
+      if (url.includes('query1.finance.yahoo.com')) {
+        return { ok: true, status: 200, text: async () => YAHOO_EMPTY_CHART } as Response;
+      }
       throw new Error(`unexpected fetch: ${url}`);
     }) as typeof fetch;
 
@@ -158,6 +170,7 @@ describe('DefaultMarketDataProvider Marketstack guard', () => {
 
     assert.ok(requestedUrls.every((u) => !u.includes('api.marketstack.com')));
     const diag = provider.getDiagnostics();
+    assert.strictEqual(diag.yahoo_probe?.[MARKET_SYMBOLS.SPY]?.outcome, 'missing_result');
     assert.strictEqual(
       diag.marketstack_probe?.[MARKET_SYMBOLS.SPY]?.guard_reason,
       'marketstack_key_missing'
