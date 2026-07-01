@@ -1,7 +1,8 @@
 /**
  * GhostRegime Market Data Provider
- * Yahoo chart (BTC-USD bootstrap), Stooq CSV for US ETFs (+ optional STOOQ_API_KEY),
- * CoinGecko recent-only BTC gap-fill, CBOE (VIX), AlphaVantage (PDBC with DBC/Stooq fallback)
+ * Yahoo chart (BTC-USD bootstrap + ETF fallback), Stooq CSV for US ETFs (+ optional STOOQ_API_KEY),
+ * Marketstack emergency ETF fallback, CoinGecko recent-only BTC gap-fill, CBOE (VIX),
+ * AlphaVantage (PDBC with DBC/Stooq fallback)
  */
 
 import type { MarketDataPoint } from './types';
@@ -23,6 +24,7 @@ import {
 } from './providerCapabilities';
 import {
   fetchYahooBtcChart,
+  fetchYahooChart,
   formatYahooFailureHint,
   type YahooChartDebug,
 } from './yahooChart';
@@ -759,9 +761,20 @@ export interface ProviderDiagnostics {
   stooq_probe?: Record<string, StooqFetchDebug>;
   /** BTC-USD multi-provider chain probe */
   btc_probe?: BtcMarketProbe;
-  /** One line per symbol: primary Stooq outcome, optional Marketstack fallback result */
+  /** One line per symbol: Stooq → Yahoo → Marketstack chain outcome */
   feed_routing?: Record<string, string>;
-  /** Marketstack EOD probe when fallback ran (or failed) */
+  /** Yahoo chart probe when ETF fallback ran (or failed) */
+  yahoo_probe?: Record<
+    string,
+    {
+      request_url_display: string;
+      http_status: number;
+      outcome: string;
+      body_preview?: string;
+      rows_parsed?: number;
+    }
+  >;
+  /** Marketstack EOD probe when emergency fallback ran (or failed) */
   marketstack_probe?: Record<
     string,
     {
@@ -892,63 +905,89 @@ export class DefaultMarketDataProvider implements MarketDataProvider {
             this.diagnostics.feed_routing ??= {};
             this.diagnostics.feed_routing[symbol] = 'Stooq (csv_ok)';
           } else if (isMarketstackEtfFallbackSymbol(symbol)) {
-            const guard = evaluateMarketstackFallbackAllowed();
-            if (!guard.allowed) {
-              this.diagnostics.resolvedIds[symbol] = result.resolvedId;
-              this.diagnostics.marketstack_probe ??= {};
-              this.diagnostics.marketstack_probe[symbol] = {
-                request_display: '(guard blocked — no request sent)',
-                http_status: 0,
-                outcome: 'guard_blocked',
-                guard_reason: guard.denyReason,
-              };
-              this.diagnostics.errors[symbol] =
-                `${formatStooqFailureHint(result.debug)} | ${formatMarketstackGuardSkipMessage(guard.denyReason!)}`;
-              this.diagnostics.feed_routing ??= {};
+            this.diagnostics.feed_routing ??= {};
+            const stooqPart = `Stooq (${result.debug.outcome})`;
+
+            const yahoo = await fetchYahooChart(symbol, symbol, startDate, endDate);
+            this.diagnostics.yahoo_probe ??= {};
+            this.diagnostics.yahoo_probe[symbol] = {
+              request_url_display: yahoo.debug.request_url_display,
+              http_status: yahoo.debug.http_status,
+              outcome: yahoo.debug.outcome,
+              body_preview: yahoo.debug.body_preview,
+              rows_parsed: yahoo.debug.rows_parsed,
+            };
+
+            const yahooUsable = yahoo.debug.outcome === 'chart_ok' && yahoo.data.length > 0;
+            if (yahooUsable) {
+              symbolData = yahoo.data;
+              this.diagnostics.resolvedIds[symbol] = `yahoo:${symbol}`;
               this.diagnostics.feed_routing[symbol] =
-                `Stooq (${result.debug.outcome}) → Marketstack skipped (${guard.denyReason})`;
+                `${stooqPart} → Yahoo (chart_ok, rows=${yahoo.data.length})`;
             } else {
-              const msKey = process.env.MARKETSTACK_ACCESS_KEY?.trim();
-              if (msKey) {
-                const ms = await fetchMarketstackEod(symbol, startDate, endDate, msKey);
-                this.diagnostics.marketstack_probe ??= {};
-                this.diagnostics.marketstack_probe[symbol] = {
-                  request_display: ms.debug.request_display,
-                  http_status: ms.debug.http_status,
-                  outcome: ms.debug.outcome,
-                  body_preview: ms.debug.body_preview,
-                  pages_fetched: ms.debug.pages_fetched,
-                  api_message: ms.debug.api_message,
-                  guard_reason: ms.debug.guard_reason,
-                };
-                if (ms.data.length > 0) {
-                  symbolData = ms.data;
-                  this.diagnostics.resolvedIds[symbol] = `marketstack:${symbol}`;
-                  this.diagnostics.feed_routing ??= {};
-                  this.diagnostics.feed_routing[symbol] =
-                    `Stooq (${result.debug.outcome}) → Marketstack (${ms.debug.outcome}, rows=${ms.data.length})`;
-                } else {
-                  this.diagnostics.resolvedIds[symbol] = result.resolvedId;
-                  this.diagnostics.errors[symbol] =
-                    `${formatStooqFailureHint(result.debug)} | Marketstack: ${formatMarketstackFailureHint(ms.debug)}`;
-                  this.diagnostics.feed_routing ??= {};
-                  this.diagnostics.feed_routing[symbol] =
-                    `Stooq (${result.debug.outcome}) → Marketstack failed (${ms.debug.outcome})`;
-                }
-              } else {
+              const yahooPart =
+                yahoo.debug.outcome === 'chart_ok'
+                  ? 'Yahoo (chart_ok, rows=0)'
+                  : `Yahoo (${yahoo.debug.outcome}${
+                      yahoo.debug.rows_parsed !== undefined
+                        ? `, rows=${yahoo.debug.rows_parsed}`
+                        : ''
+                    })`;
+
+              const guard = evaluateMarketstackFallbackAllowed();
+              if (!guard.allowed) {
                 this.diagnostics.resolvedIds[symbol] = result.resolvedId;
                 this.diagnostics.marketstack_probe ??= {};
                 this.diagnostics.marketstack_probe[symbol] = {
-                  request_display: '(no key — no request sent)',
+                  request_display: '(guard blocked — no request sent)',
                   http_status: 0,
                   outcome: 'guard_blocked',
-                  guard_reason: 'marketstack_key_missing',
+                  guard_reason: guard.denyReason,
                 };
                 this.diagnostics.errors[symbol] =
-                  `${formatStooqFailureHint(result.debug)} | ${formatMarketstackGuardSkipMessage('marketstack_key_missing')}`;
-                this.diagnostics.feed_routing ??= {};
+                  `${formatStooqFailureHint(result.debug)} | ${formatYahooFailureHint(yahoo.debug)} | ${formatMarketstackGuardSkipMessage(guard.denyReason!)}`;
                 this.diagnostics.feed_routing[symbol] =
-                  `Stooq (${result.debug.outcome}); Marketstack not configured`;
+                  `${stooqPart} → ${yahooPart} → Marketstack (guard_blocked)`;
+              } else {
+                const msKey = process.env.MARKETSTACK_ACCESS_KEY?.trim();
+                if (msKey) {
+                  const ms = await fetchMarketstackEod(symbol, startDate, endDate, msKey);
+                  this.diagnostics.marketstack_probe ??= {};
+                  this.diagnostics.marketstack_probe[symbol] = {
+                    request_display: ms.debug.request_display,
+                    http_status: ms.debug.http_status,
+                    outcome: ms.debug.outcome,
+                    body_preview: ms.debug.body_preview,
+                    pages_fetched: ms.debug.pages_fetched,
+                    api_message: ms.debug.api_message,
+                    guard_reason: ms.debug.guard_reason,
+                  };
+                  if (ms.data.length > 0) {
+                    symbolData = ms.data;
+                    this.diagnostics.resolvedIds[symbol] = `marketstack:${symbol}`;
+                    this.diagnostics.feed_routing[symbol] =
+                      `${stooqPart} → ${yahooPart} → Marketstack (${ms.debug.outcome}, rows=${ms.data.length})`;
+                  } else {
+                    this.diagnostics.resolvedIds[symbol] = result.resolvedId;
+                    this.diagnostics.errors[symbol] =
+                      `${formatStooqFailureHint(result.debug)} | ${formatYahooFailureHint(yahoo.debug)} | Marketstack: ${formatMarketstackFailureHint(ms.debug)}`;
+                    this.diagnostics.feed_routing[symbol] =
+                      `${stooqPart} → ${yahooPart} → Marketstack failed (${ms.debug.outcome})`;
+                  }
+                } else {
+                  this.diagnostics.resolvedIds[symbol] = result.resolvedId;
+                  this.diagnostics.marketstack_probe ??= {};
+                  this.diagnostics.marketstack_probe[symbol] = {
+                    request_display: '(no key — no request sent)',
+                    http_status: 0,
+                    outcome: 'guard_blocked',
+                    guard_reason: 'marketstack_key_missing',
+                  };
+                  this.diagnostics.errors[symbol] =
+                    `${formatStooqFailureHint(result.debug)} | ${formatYahooFailureHint(yahoo.debug)} | ${formatMarketstackGuardSkipMessage('marketstack_key_missing')}`;
+                  this.diagnostics.feed_routing[symbol] =
+                    `${stooqPart} → ${yahooPart} → Marketstack (guard_blocked)`;
+                }
               }
             }
           } else {

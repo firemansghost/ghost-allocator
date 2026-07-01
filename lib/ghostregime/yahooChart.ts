@@ -1,5 +1,5 @@
 /**
- * Yahoo Finance chart API — BTC-USD daily close series for GhostRegime VAMS bootstrap.
+ * Yahoo Finance chart API — daily close series for GhostRegime (BTC-USD bootstrap + ETF fallback).
  */
 
 import type { MarketDataPoint } from './types';
@@ -30,11 +30,15 @@ function calculateReturn(prevClose: number, currentClose: number): number {
   return (currentClose - prevClose) / prevClose;
 }
 
-export function buildYahooChartUrl(startDate: Date, endDate: Date): string {
+export function buildYahooChartUrl(
+  yahooTicker: string,
+  startDate: Date,
+  endDate: Date
+): string {
   const period1 = Math.floor(startDate.getTime() / 1000);
   const period2 = Math.floor(endDate.getTime() / 1000);
   return `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(
-    YAHOO_BTC_SYMBOL
+    yahooTicker
   )}?period1=${period1}&period2=${period2}&interval=1d`;
 }
 
@@ -119,11 +123,13 @@ export function parseYahooChartBody(
   return { data: rows, outcome: 'chart_ok' };
 }
 
-export async function fetchYahooBtcChart(
+export async function fetchYahooChart(
+  outputSymbol: string,
+  yahooTicker: string,
   startDate: Date,
   endDate: Date
 ): Promise<{ data: MarketDataPoint[]; debug: YahooChartDebug; error?: string }> {
-  const url = buildYahooChartUrl(startDate, endDate);
+  const url = buildYahooChartUrl(yahooTicker, startDate, endDate);
   try {
     const response = await fetch(url, {
       headers: {
@@ -157,7 +163,7 @@ export async function fetchYahooBtcChart(
       return { data: [], debug, error: formatYahooFailureHint(debug) };
     }
 
-    const parsed = parseYahooChartBody(MARKET_SYMBOLS.BTC_USD, json, startDate, endDate);
+    const parsed = parseYahooChartBody(outputSymbol, json, startDate, endDate);
     const debug: YahooChartDebug = {
       request_url_display: url,
       http_status: response.status,
@@ -180,4 +186,11 @@ export async function fetchYahooBtcChart(
     };
     return { data: [], debug, error: formatYahooFailureHint(debug) };
   }
+}
+
+export async function fetchYahooBtcChart(
+  startDate: Date,
+  endDate: Date
+): Promise<{ data: MarketDataPoint[]; debug: YahooChartDebug; error?: string }> {
+  return fetchYahooChart(MARKET_SYMBOLS.BTC_USD, YAHOO_BTC_SYMBOL, startDate, endDate);
 }

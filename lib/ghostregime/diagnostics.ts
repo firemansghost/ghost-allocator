@@ -55,6 +55,8 @@ function getProviderName(symbol: string, providerDiagnostics?: ProviderDiagnosti
     if (rid.startsWith('yahoo:')) return 'Yahoo';
     if (rid.startsWith('coingecko')) return 'CoinGecko';
     return 'Stooq';
+  } else if (providerDiagnostics?.resolvedIds?.[symbol]?.startsWith('yahoo:')) {
+    return 'Yahoo';
   } else if (providerDiagnostics?.resolvedIds?.[symbol]?.startsWith('marketstack:')) {
     return 'Marketstack';
   } else {
