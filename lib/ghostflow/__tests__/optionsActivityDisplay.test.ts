@@ -29,7 +29,7 @@ const artifact = production.artifact;
 
 assert.strictEqual(
   formatOptionsActivityCardValue(artifact.observations),
-  'Index 5.7M contracts · 7.5% of total'
+  'Index 5.5M contracts · 7.5% of total'
 );
 
 const fresh = evaluateOptionsActivityArtifactFreshness(artifact, GHOSTFLOW_REFERENCE_AS_OF);
@@ -42,8 +42,8 @@ const options = raw.signals.find((s) => s.id === 'options-activity-proxy');
 assert.ok(options, 'options-activity-proxy signal must exist');
 assert.strictEqual(options!.dataStatus, 'public_proxy');
 assert.strictEqual(options!.name, OPTIONS_ACTIVITY_DISPLAY_SIGNAL_NAME);
-assert.strictEqual(options!.numericValue, 7.52);
-assert.ok(options!.value.includes('Index 5.7M contracts'));
+assert.strictEqual(options!.numericValue, 7.54);
+assert.ok(options!.value.includes('Index 5.5M contracts'));
 assert.ok(options!.value.includes('7.5% of total'));
 assert.ok(!options!.value.includes('PCR'));
 assert.strictEqual(options!.cardCaveat, OPTIONS_ACTIVITY_DISPLAY_CARD_CAVEAT);

@@ -43,12 +43,12 @@ assert.ok(existsSync(productionPath), 'Production tailSkewContext.v1.json must e
 
 const productionOk = loadTailSkewContextArtifact();
 assert.ok(productionOk.ok, productionOk.ok ? '' : productionOk.errors.join('; '));
-assert.strictEqual(productionOk.artifact.asOf, '2026-05-22');
+assert.strictEqual(productionOk.artifact.asOf, '2026-06-18');
 assert.ok(
   productionOk.artifact.asOf < GHOSTFLOW_REFERENCE_AS_OF,
-  'display-only tail-skew asOf lags equity reference until display refresh'
+  'display-only tail-skew asOf lags equity reference when Cboe CSV lacks reference session'
 );
-assert.strictEqual(productionOk.artifact.observations.currentSkew, 137.39);
+assert.strictEqual(productionOk.artifact.observations.currentSkew, 146.72);
 
 // --- wrong signalId fails ---
 const wrongId = cloneTailSkewExample();
@@ -158,8 +158,8 @@ assert.ok(passiveKeyResult.errors.some((e) => e.includes('publicPassiveInputKey'
 // --- helper math tests ---
 assert.ok(Math.abs(computeTailSkewDailyChange(146.72, 142.62) - 4.1) < SKEW_CHANGE_TOLERANCE);
 assert.ok(Math.abs(computeTailSkewDailyChangePct(4.1, 142.62) - 2.87) < 0.01);
-assert.ok(reconcileTailSkewDailyChange(137.39, 136.96, 0.43));
-assert.ok(reconcileTailSkewDailyChangePct(0.43, 136.96, 0.31));
+assert.ok(reconcileTailSkewDailyChange(146.72, 142.62, 4.1));
+assert.ok(reconcileTailSkewDailyChangePct(4.1, 142.62, 2.87));
 
 // --- locked Cboe URL constant ---
 assert.strictEqual(

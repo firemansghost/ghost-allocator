@@ -29,14 +29,14 @@ assert.ok(production.ok, production.ok ? '' : production.errors.join('; '));
 
 const artifact = production.artifact;
 
-assert.strictEqual(artifact.asOf, '2026-05-22');
-assert.strictEqual(artifact.observations.currentSkew, 137.39);
+assert.strictEqual(artifact.asOf, '2026-06-18');
+assert.strictEqual(artifact.observations.currentSkew, 146.72);
 assert.strictEqual(artifact.historySummary?.latestSourceDate, '2026-06-18');
 assert.strictEqual(artifact.historySummary?.latestSourceValue, 146.72);
 
 assert.strictEqual(
   formatTailSkewCardValue(artifact.observations),
-  'SKEW index level: 137.39'
+  'SKEW index level: 146.72'
 );
 
 const fresh = evaluateTailSkewArtifactFreshness(artifact, GHOSTFLOW_REFERENCE_AS_OF);
@@ -52,10 +52,10 @@ const tailSkew = raw.signals.find((s) => s.id === 'tail-skew-context');
 assert.ok(tailSkew, 'tail-skew-context signal must exist');
 assert.strictEqual(tailSkew!.dataStatus, 'public_proxy');
 assert.strictEqual(tailSkew!.name, TAIL_SKEW_DISPLAY_SIGNAL_NAME);
-assert.strictEqual(tailSkew!.numericValue, 137.39);
-assert.strictEqual(tailSkew!.value, 'SKEW index level: 137.39');
+assert.strictEqual(tailSkew!.numericValue, 146.72);
+assert.strictEqual(tailSkew!.value, 'SKEW index level: 146.72');
 assert.ok(tailSkew!.cardCaveat?.includes('not a score input'));
-assert.strictEqual(tailSkew!.artifactAsOf, '2026-05-22');
+assert.strictEqual(tailSkew!.artifactAsOf, '2026-06-18');
 
 const scoredTailSkew = scored.signals.find((s) => s.id === 'tail-skew-context')!;
 assert.strictEqual(signalCardBadgeLabelForSignal(scoredTailSkew, 'public'), 'DISPLAY ONLY');
