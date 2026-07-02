@@ -80,11 +80,11 @@ assert.strictEqual(mappingPercentile(3, [1, 2, 3, 4, 5]), 50);
 // --- score preview ---
 const mock = previewScoreWithLevered(55);
 assert.strictEqual(mock.passivePressure, 45);
-assert.strictEqual(mock.composite, 55);
+assert.strictEqual(mock.composite, 56);
 assert.strictEqual(mock.band, 'elevated_flow');
 const l56 = previewScoreWithLevered(56);
 assert.strictEqual(l56.passivePressure, 45);
-assert.strictEqual(l56.composite, 55);
+assert.strictEqual(l56.composite, 56);
 assert.strictEqual(l56.band, 'elevated_flow');
 
 // --- mapping comparison shape ---

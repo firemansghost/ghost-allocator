@@ -1,19 +1,19 @@
 {
   "artifactVersion": "1",
   "signalId": "active-index-flow",
-  "asOf": "2026-03-31",
-  "publishedAt": "2026-04-30",
+  "asOf": "2026-05-31",
+  "publishedAt": "2026-06-30",
   "source": {
     "name": "ICI Active and Index Investing",
     "url": "https://www.ici.org/research/stats/combined_active_index",
-    "note": "Manual extract: Domestic equity Active and Index net monthly flows (mutual funds + ETFs), millions USD."
+    "note": "Manual extract: Domestic equity Active and Index net monthly flows (mutual funds + ETFs), millions USD. ICI May 2026 release (2026-06-30)."
   },
   "seriesDefinition": "domestic_equity_active_index_monthly_net_flows",
   "updateFrequency": "monthly",
   "dataQuality": "verified_manual",
   "observations": {
-    "activeDomesticEquityNetFlowMillionsUsd": -22251,
-    "indexDomesticEquityNetFlowMillionsUsd": 31463
+    "activeDomesticEquityNetFlowMillionsUsd": -27032,
+    "indexDomesticEquityNetFlowMillionsUsd": 33209
   },
   "optionalObservations": {
     "worldEquityActiveMillionsUsd": null,
