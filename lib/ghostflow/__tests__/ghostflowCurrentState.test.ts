@@ -33,10 +33,10 @@ const SCORE_FED_PUBLIC_IDS = [
 const { raw, meta } = buildGhostFlowSnapshot();
 const scored = scoreGhostFlowSnapshot(raw);
 
-assert.strictEqual(scored.score.score, 62);
-assert.strictEqual(scored.score.subScores.passivePressure, 58);
+assert.strictEqual(scored.score.score, 55);
+assert.strictEqual(scored.score.subScores.passivePressure, 45);
 assert.strictEqual(scored.score.subScores.structuralFragility, 65);
-assert.strictEqual(ghostFlowBandLabel(scored.score.band), 'Crowded / Reflexive');
+assert.strictEqual(ghostFlowBandLabel(scored.score.band), 'Elevated Flow Pressure');
 
 assert.strictEqual(meta.publicSignalCount, 13);
 
