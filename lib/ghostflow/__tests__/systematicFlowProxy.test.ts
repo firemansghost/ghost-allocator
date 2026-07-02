@@ -133,7 +133,7 @@ assert.strictEqual(production.basket.basketNetPctOi, -18.5);
 assert.strictEqual(production.basket.basketScore, 93);
 
 const prodFresh = evaluateSystematicFlowProxyArtifactFreshness(production, GHOSTFLOW_REFERENCE_AS_OF);
-assert.strictEqual(prodFresh.status, 'fresh');
+assert.strictEqual(prodFresh.status, 'stale');
 
 const loaded = loadSystematicFlowProxyArtifact();
 assert.ok(loaded.ok, loaded.ok ? '' : loaded.errors.join('; '));

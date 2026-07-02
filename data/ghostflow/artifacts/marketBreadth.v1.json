@@ -1,23 +1,23 @@
 {
   "artifactVersion": "1",
   "signalId": "breadth",
-  "asOf": "2026-05-22",
-  "publishedAt": "2026-05-22",
+  "asOf": "2026-07-01",
+  "publishedAt": "2026-07-01",
   "source": {
     "name": "StockCharts S&P 500 % Above 50-Day SMA ($SPXA50R)",
-    "url": "https://stockcharts.com/sc3/ui/?s=%24SPXA50R",
-    "note": "Manual extract: last trading-day EOD close from StockCharts $SPXA50R SharpChart (2026-05-22 close 58.0). Cross-checked against Barchart S&P 500 Stocks Above 50-Day Average ($S5FI) reading 56.77 on the same session — directionally consistent (both above 50%) but vendors differ by 1.2 pp, so left manual_unverified. Not a live feed."
+    "url": "https://stockcharts.com/freecharts/symbolsummary.html?sym=$SPXA50R",
+    "note": "Manual extract (v1.15b, 2026-07-02): 2026-07-01 EOD close 64.0 from StockCharts $SPXA50R daily data. Barchart $S5FI 2026-07-01 session EOD cross-check not obtained in this pass — primary StockCharts reading only; left manual_unverified per runbook. Not a live feed."
   },
   "seriesDefinition": "sp500_percent_above_50_day_ma",
   "updateFrequency": "daily",
   "dataQuality": "manual_unverified",
   "observations": {
-    "sp500Above50DayMaPercent": 58.0
+    "sp500Above50DayMaPercent": 64.0
   },
   "optionalObservations": {
     "sourceSymbol": "$SPXA50R",
     "sp500Above200DayMaPercent": null,
     "backupSourceName": "Barchart S&P 500 Stocks Above 50-Day Average ($S5FI)",
-    "backupReadingPercent": 56.77
+    "backupReadingPercent": null
   }
 }

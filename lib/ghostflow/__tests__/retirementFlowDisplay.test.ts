@@ -34,9 +34,9 @@ const fresh = evaluateRetirementFlowPressureArtifactFreshness(
   production,
   GHOSTFLOW_REFERENCE_AS_OF
 );
-assert.strictEqual(fresh.status, 'caution');
+assert.strictEqual(fresh.status, 'stale');
 assert.ok(
-  fresh.warnings.some((w) => w.includes('Normal quarterly ICI cadence'))
+  fresh.warnings.some((w) => w.includes('stale') || w.includes('Refresh recommended'))
 );
 
 const { raw, meta } = buildGhostFlowSnapshot();
@@ -66,7 +66,7 @@ assert.ok(meta.publicSignals.some((s) => s.signalId === 'retirement-asset-growth
 
 assert.strictEqual(scored.score.score, 62);
 assert.strictEqual(scored.score.subScores.passivePressure, 58);
-assert.strictEqual(scored.score.subScores.structuralFragility, 66);
+assert.strictEqual(scored.score.subScores.structuralFragility, 65);
 assert.strictEqual(ghostFlowBandLabel(scored.score.band), 'Crowded / Reflexive');
 
 const grouped = groupSignalsByPresentation(scored.signals);
