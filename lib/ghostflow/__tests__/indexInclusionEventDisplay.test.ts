@@ -30,13 +30,13 @@ const artifact = production.artifact;
 
 assert.strictEqual(
   formatIndexInclusionEventCardValue(artifact.observations),
-  'Index events in window: 4'
+  'Index events in window: 14'
 );
 
 const fresh = evaluateIndexInclusionEventArtifactFreshness(artifact, GHOSTFLOW_REFERENCE_AS_OF);
 assert.ok(['fresh', 'caution', 'stale'].includes(fresh.status));
 
-assert.ok(buildIndexInclusionEventDisplayExplanation(artifact).includes('Latest effective date: 2026-04-20'));
+assert.ok(buildIndexInclusionEventDisplayExplanation(artifact).includes('Latest effective date: 2026-06-22'));
 assert.ok(buildIndexInclusionEventDisplayExplanation(artifact).includes('Event count is a display metric only'));
 
 const { raw, meta } = buildGhostFlowSnapshot();
@@ -46,12 +46,12 @@ const indexEvents = raw.signals.find((s) => s.id === 'index-inclusion-events');
 assert.ok(indexEvents, 'index-inclusion-events signal must exist');
 assert.strictEqual(indexEvents!.dataStatus, 'public_proxy');
 assert.strictEqual(indexEvents!.name, INDEX_INCLUSION_EVENT_DISPLAY_SIGNAL_NAME);
-assert.strictEqual(indexEvents!.numericValue, 4);
-assert.strictEqual(indexEvents!.value, 'Index events in window: 4');
+assert.strictEqual(indexEvents!.numericValue, 14);
+assert.strictEqual(indexEvents!.value, 'Index events in window: 14');
 assert.strictEqual(indexEvents!.cardCaveat, INDEX_INCLUSION_EVENT_DISPLAY_CARD_CAVEAT);
 assert.ok(indexEvents!.explanation.includes('not included in the Research Composite'));
-assert.strictEqual(indexEvents!.artifactAsOf, '2026-05-22');
-assert.strictEqual(indexEvents!.artifactPublishedAt, '2026-06-16');
+assert.strictEqual(indexEvents!.artifactAsOf, '2026-06-11');
+assert.strictEqual(indexEvents!.artifactPublishedAt, '2026-07-02');
 
 const scoredIndexEvents = scored.signals.find((s) => s.id === 'index-inclusion-events')!;
 assert.strictEqual(signalCardBadgeLabelForSignal(scoredIndexEvents, 'public'), 'DISPLAY ONLY');

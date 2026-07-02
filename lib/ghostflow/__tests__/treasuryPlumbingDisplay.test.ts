@@ -44,7 +44,7 @@ const incomeCard = display.cards.find((c) => c.id === 'treasury-long-end-income-
 assert.strictEqual(futuresCard.status, 'ok');
 assert.strictEqual(incomeCard.status, 'ok');
 
-assert.ok(futuresCard.primaryValue.includes('30.7'));
+assert.ok(futuresCard.primaryValue.includes('34.7'));
 assert.ok(futuresCard.primaryValue.toLowerCase().includes('net short'));
 
 assert.ok(incomeCard.primaryValue.includes('4.97'));

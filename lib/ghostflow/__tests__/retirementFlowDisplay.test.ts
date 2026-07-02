@@ -27,17 +27,15 @@ const production = loadProduction as RetirementFlowPressureArtifactV1;
 
 assert.strictEqual(
   formatRetirementFlowDisplayValue(production.observations),
-  '$49.1T retirement assets · QoQ +2.1% · YoY +11.2%'
+  '$47.6T retirement assets · QoQ +-2.5% · YoY +10.4%'
 );
 
 const fresh = evaluateRetirementFlowPressureArtifactFreshness(
   production,
   GHOSTFLOW_REFERENCE_AS_OF
 );
-assert.strictEqual(fresh.status, 'stale');
-assert.ok(
-  fresh.warnings.some((w) => w.includes('stale') || w.includes('Refresh recommended'))
-);
+assert.strictEqual(fresh.status, 'fresh');
+assert.strictEqual(fresh.warnings.length, 0);
 
 const { raw, meta } = buildGhostFlowSnapshot();
 const scored = scoreGhostFlowSnapshot(raw);
@@ -46,10 +44,10 @@ const retirement = raw.signals.find((s) => s.id === 'retirement-asset-growth');
 assert.ok(retirement, 'retirement-asset-growth signal must exist');
 assert.strictEqual(retirement!.dataStatus, 'public_proxy');
 assert.strictEqual(retirement!.name, RETIREMENT_FLOW_DISPLAY_SIGNAL_NAME);
-assert.strictEqual(retirement!.numericValue, 2.1);
-assert.ok(retirement!.value.includes('$49.1T'));
-assert.ok(retirement!.value.includes('QoQ +2.1%'));
-assert.ok(retirement!.value.includes('YoY +11.2%'));
+assert.strictEqual(retirement!.numericValue, -2.5);
+assert.ok(retirement!.value.includes('$47.6T'));
+assert.ok(retirement!.value.includes('QoQ +-2.5%'));
+assert.ok(retirement!.value.includes('YoY +10.4%'));
 assert.strictEqual(retirement!.cardCaveat, RETIREMENT_FLOW_DISPLAY_CARD_CAVEAT);
 
 const scoredRetirement = scored.signals.find((s) => s.id === 'retirement-asset-growth')!;

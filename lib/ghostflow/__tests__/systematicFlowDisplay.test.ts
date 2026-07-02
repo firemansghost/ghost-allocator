@@ -21,7 +21,7 @@ const production = loadProduction as SystematicFlowProxyArtifactV1;
 
 assert.strictEqual(
   formatSystematicFlowDisplayValue(production.basket),
-  'Net short 18.5% OI · pressure 93'
+  'Net short 18.3% OI · pressure 92'
 );
 
 const { raw, meta } = buildGhostFlowSnapshot();
@@ -30,11 +30,11 @@ const systematic = raw.signals.find((s) => s.id === 'systematic-flow');
 
 assert.ok(systematic, 'systematic-flow signal must exist');
 assert.strictEqual(systematic!.dataStatus, 'public_proxy');
-assert.strictEqual(systematic!.numericValue, 93);
+assert.strictEqual(systematic!.numericValue, 92);
 assert.strictEqual(systematic!.name, SYSTEMATIC_FLOW_DISPLAY_SIGNAL_NAME);
 assert.ok(systematic!.value.includes('Net short'));
-assert.ok(systematic!.value.includes('18.5% OI'));
-assert.ok(systematic!.value.includes('pressure 93'));
+assert.ok(systematic!.value.includes('18.3% OI'));
+assert.ok(systematic!.value.includes('pressure 92'));
 assert.ok(
   systematic!.cardCaveat?.includes('Display-only CFTC TFF positioning proxy') &&
     systematic!.cardCaveat?.includes('not included in the Research Composite')

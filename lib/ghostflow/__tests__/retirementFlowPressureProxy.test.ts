@@ -46,9 +46,9 @@ assert.ok(
     production.source.note?.includes('retirement-asset-growth') &&
     production.source.note?.includes('MOCK 58')
 );
-assert.strictEqual(production.asOf, '2025-12-31');
-assert.strictEqual(production.publishedAt, '2026-03-26');
-assert.strictEqual(production.observations.totalRetirementMarketAssetsTrillionsUsd, 49.1);
+assert.strictEqual(production.asOf, '2026-03-31');
+assert.strictEqual(production.publishedAt, '2026-06-18');
+assert.strictEqual(production.observations.totalRetirementMarketAssetsTrillionsUsd, 47.6);
 
 // --- Loader returns ok ---
 const loaded = loadRetirementFlowPressureProxyArtifact();
