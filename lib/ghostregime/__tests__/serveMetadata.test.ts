@@ -4,7 +4,7 @@
 
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import { computeMarketSnapshotLagDays, extractRefreshErrorSummary, buildServeMetadata } from '../serveMetadata';
+import { computeMarketSnapshotLagDays, extractRefreshErrorSummary, buildServeMetadata, buildEtfProviderRoutingSummary } from '../serveMetadata';
 import type { ProviderDiagnostics } from '../marketData';
 
 describe('computeMarketSnapshotLagDays', () => {
@@ -49,6 +49,57 @@ describe('extractRefreshErrorSummary', () => {
       proxies: {},
     };
     assert.strictEqual(extractRefreshErrorSummary(pd), 'Stooq gate');
+  });
+});
+
+describe('buildEtfProviderRoutingSummary', () => {
+  it('summarizes Yahoo ETF fallback when Stooq failed', () => {
+    const pd: ProviderDiagnostics = {
+      resolvedIds: {
+        SPY: 'yahoo:SPY',
+        GLD: 'yahoo:GLD',
+        HYG: 'yahoo:HYG',
+        IEF: 'yahoo:IEF',
+        EEM: 'yahoo:EEM',
+        TIP: 'yahoo:TIP',
+        TLT: 'yahoo:TLT',
+        UUP: 'yahoo:UUP',
+      },
+      errors: {},
+      proxies: {},
+      stooq_probe: {
+        SPY: {
+          request_url_display: 'x',
+          http_status: 200,
+          content_type: 'text/html',
+          body_preview: 'javascript',
+          outcome: 'stooq_browser_challenge',
+        },
+      },
+      feed_routing: {
+        SPY: 'Stooq (stooq_browser_challenge) → Yahoo (chart_ok, rows=421)',
+      },
+    };
+    const summary = buildEtfProviderRoutingSummary(pd);
+    assert.strictEqual(summary?.marketstack_used, false);
+    assert.strictEqual(summary?.yahoo_etf_fallback_used, true);
+    assert.strictEqual(summary?.stooq_browser_challenge_detected, true);
+    assert.strictEqual(summary?.symbols.find((s) => s.symbol === 'SPY')?.provider, 'Yahoo');
+  });
+
+  it('detects Marketstack emergency fallback', () => {
+    const pd: ProviderDiagnostics = {
+      resolvedIds: { SPY: 'marketstack:SPY', GLD: 'yahoo:GLD' },
+      errors: {},
+      proxies: {},
+      feed_routing: {
+        SPY: 'Stooq (stooq_apikey_gate) → Yahoo (missing_result, rows=0) → Marketstack (ok, rows=400)',
+        GLD: 'Stooq (stooq_browser_challenge) → Yahoo (chart_ok, rows=421)',
+      },
+    };
+    const summary = buildEtfProviderRoutingSummary(pd);
+    assert.strictEqual(summary?.marketstack_used, true);
+    assert.strictEqual(summary?.yahoo_etf_fallback_used, true);
   });
 });
 

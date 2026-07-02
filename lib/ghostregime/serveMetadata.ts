@@ -3,8 +3,9 @@
  */
 
 import { formatISO, parseISO, differenceInCalendarDays } from 'date-fns';
-import type { GhostRegimeRow, GhostRegimeServeMetadata } from './types';
+import type { GhostRegimeRow, GhostRegimeServeMetadata, GhostRegimeEtfProviderRoutingSummary } from './types';
 import type { ProviderDiagnostics } from './marketData';
+import { MARKETSTACK_ETF_FALLBACK_SYMBOLS } from './marketstackEod';
 
 /** Calendar days from market snapshot date to this request's run date (UTC date). */
 export function computeMarketSnapshotLagDays(runDateUtc: Date, snapshotDateStr: string): number {
@@ -45,6 +46,41 @@ export function extractRefreshErrorSummary(pd?: ProviderDiagnostics): string | u
   return undefined;
 }
 
+function providerLabelFromResolvedId(resolvedId: string): string {
+  if (resolvedId.startsWith('yahoo:')) return 'Yahoo';
+  if (resolvedId.startsWith('marketstack:')) return 'Marketstack';
+  return 'Stooq';
+}
+
+/** Compact ETF routing for operators (serve-time only; derived from existing provider diagnostics). */
+export function buildEtfProviderRoutingSummary(
+  pd?: ProviderDiagnostics
+): GhostRegimeEtfProviderRoutingSummary | undefined {
+  if (!pd) return undefined;
+
+  const symbols = [...MARKETSTACK_ETF_FALLBACK_SYMBOLS].sort().map((symbol) => {
+    const resolvedId = pd.resolvedIds?.[symbol] ?? '';
+    return {
+      symbol,
+      provider: providerLabelFromResolvedId(resolvedId),
+      resolved_id: resolvedId || undefined,
+      routing: pd.feed_routing?.[symbol],
+    };
+  });
+
+  const stooqProbe = pd.stooq_probe ?? {};
+  const stooqBrowserChallenge = Object.values(stooqProbe).some(
+    (p) => p.outcome === 'stooq_browser_challenge'
+  );
+
+  return {
+    symbols,
+    marketstack_used: symbols.some((s) => s.provider === 'Marketstack'),
+    yahoo_etf_fallback_used: symbols.some((s) => s.provider === 'Yahoo'),
+    stooq_browser_challenge_detected: stooqBrowserChallenge,
+  };
+}
+
 export function buildServeMetadata(input: {
   runDateUtc: Date;
   row: Pick<GhostRegimeRow, 'date'>;
@@ -73,6 +109,7 @@ export function buildServeMetadata(input: {
     persist_rejected_reason: input.persist_rejected_reason,
     stale_reason: input.stale_reason,
     refresh_error_summary: extractRefreshErrorSummary(input.providerDiagnostics),
+    etf_provider_routing: buildEtfProviderRoutingSummary(input.providerDiagnostics),
   };
 }
 

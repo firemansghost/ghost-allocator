@@ -101,6 +101,91 @@ jobs:
                   lines.append(f"- **{label}**: `{val}`")
               return lines
 
+          CORE_ETF_SYMBOLS = ["SPY", "GLD", "HYG", "IEF", "EEM", "TIP", "TLT", "UUP"]
+
+          def provider_label_from_resolved_id(resolved_id):
+              rid = resolved_id or ""
+              if rid.startswith("yahoo:"):
+                  return "Yahoo"
+              if rid.startswith("marketstack:"):
+                  return "Marketstack"
+              return "Stooq"
+
+          def extract_etf_provider_routing(data):
+              """Prefer serve_metadata.etf_provider_routing; fall back to provider_diagnostics."""
+              sm = data.get("serve_metadata") or {}
+              routing = sm.get("etf_provider_routing")
+              if routing:
+                  return routing
+              pd = data.get("provider_diagnostics") or {}
+              resolved = pd.get("resolvedIds") or {}
+              feed = pd.get("feed_routing") or {}
+              stooq_probe = pd.get("stooq_probe") or {}
+              if not resolved and not feed and not stooq_probe:
+                  return None
+              symbols = []
+              for sym in CORE_ETF_SYMBOLS:
+                  rid = resolved.get(sym, "")
+                  symbols.append({
+                      "symbol": sym,
+                      "provider": provider_label_from_resolved_id(rid),
+                      "resolved_id": rid or None,
+                      "routing": feed.get(sym),
+                  })
+              return {
+                  "symbols": symbols,
+                  "marketstack_used": any(s["provider"] == "Marketstack" for s in symbols),
+                  "yahoo_etf_fallback_used": any(s["provider"] == "Yahoo" for s in symbols),
+                  "stooq_browser_challenge_detected": any(
+                      (p or {}).get("outcome") == "stooq_browser_challenge"
+                      for p in stooq_probe.values()
+                  ),
+              }
+
+          def append_provider_routing_summary(summary_lines, data):
+              sm = data.get("serve_metadata") or {}
+              outcome = sm.get("refresh_outcome")
+              if outcome == "scheduled_served_persisted_no_fetch":
+                  summary_lines.append("")
+                  summary_lines.append("## Provider routing")
+                  summary_lines.append("")
+                  summary_lines.append("_No market fetch this run (fresh persisted snapshot). Provider routing was not refreshed._")
+                  return
+
+              routing = extract_etf_provider_routing(data)
+              if not routing:
+                  summary_lines.append("")
+                  summary_lines.append("## Provider routing")
+                  summary_lines.append("")
+                  summary_lines.append("_Provider routing not available in API response (older deploy or no market fetch diagnostics)._")
+                  return
+
+              summary_lines.append("")
+              summary_lines.append("## Provider routing")
+              summary_lines.append("")
+              summary_lines.append("| Symbol | Provider | Routing |")
+              summary_lines.append("| ------ | -------- | ------- |")
+              for row in routing.get("symbols", []):
+                  sym = row.get("symbol", "")
+                  provider = row.get("provider", "")
+                  route = (row.get("routing") or "—").replace("|", "\\|")
+                  summary_lines.append(f"| {sym} | {provider} | {route} |")
+              summary_lines.append("")
+              summary_lines.append(f"- **Marketstack used**: `{'yes' if routing.get('marketstack_used') else 'no'}`")
+              summary_lines.append(f"- **Yahoo ETF fallback used**: `{'yes' if routing.get('yahoo_etf_fallback_used') else 'no'}`")
+              summary_lines.append(f"- **Stooq browser challenge detected**: `{'yes' if routing.get('stooq_browser_challenge_detected') else 'no'}`")
+
+              if routing.get("marketstack_used"):
+                  ms_syms = [r["symbol"] for r in routing.get("symbols", []) if r.get("provider") == "Marketstack"]
+                  summary_lines.append("")
+                  summary_lines.append(f"⚠️ **Marketstack fallback was used for**: {', '.join(ms_syms)}")
+              elif routing.get("yahoo_etf_fallback_used") and routing.get("stooq_browser_challenge_detected"):
+                  summary_lines.append("")
+                  summary_lines.append("✅ **Yahoo ETF fallback handled Stooq failure; Marketstack was not used.**")
+              elif routing.get("yahoo_etf_fallback_used"):
+                  summary_lines.append("")
+                  summary_lines.append("✅ **Yahoo ETF fallback was used; Marketstack was not used.**")
+
           def print_failure_diagnostics(data, label):
               """Stdout + step summary: full JSON and structured stale/history fields."""
               print(f"--- {label}: full response JSON ---")
@@ -167,6 +252,7 @@ jobs:
                   failed_symbols = [s for s, status in data['core_symbol_status'].items() if not status.get('ok', False)]
                   if failed_symbols:
                       summary_lines.append(f"**Failed symbols**: {', '.join(failed_symbols)}")
+              append_provider_routing_summary(summary_lines, data)
               
               with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
                   f.write('\n'.join(summary_lines))
@@ -188,6 +274,7 @@ jobs:
                   failed_symbols = [s for s, status in data['core_symbol_status'].items() if not status.get('ok', False)]
                   if failed_symbols:
                       summary_lines.append(f"**Failed symbols**: {', '.join(failed_symbols)}")
+              append_provider_routing_summary(summary_lines, data)
               
               with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
                   f.write('\n'.join(summary_lines))
@@ -245,6 +332,7 @@ jobs:
           summary_lines.append("")
           summary_lines.append(f"- **risk_score**: `{data.get('risk_score', 'N/A')}`")
           summary_lines.append(f"- **infl_score**: `{data.get('infl_score', 'N/A')}`")
+          append_provider_routing_summary(summary_lines, data)
           
           with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
               f.write('\n'.join(summary_lines))
