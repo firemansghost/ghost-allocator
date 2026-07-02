@@ -1,18 +1,18 @@
 {
   "artifactVersion": "1",
   "signalId": "etf-flow",
-  "asOf": "2026-05-13",
-  "publishedAt": "2026-05-19",
+  "asOf": "2026-06-24",
+  "publishedAt": "2026-06-30",
   "source": {
     "name": "ICI Estimated ETF Net Issuance",
     "url": "https://www.ici.org/research/stats/etf_flows",
-    "note": "Manual extract: Domestic equity row, millions USD, week ended date from ICI weekly release."
+    "note": "Manual extract: Domestic equity row -4,807 millions USD (outflow), week ended 2026-06-24 from ICI release dated 2026-06-30."
   },
   "seriesDefinition": "domestic_equity_etf_estimated_weekly_net_issuance",
   "updateFrequency": "weekly",
   "dataQuality": "verified_manual",
   "observations": {
-    "domesticEquityNetIssuanceMillionsUsd": 33919
+    "domesticEquityNetIssuanceMillionsUsd": -4807
   },
   "optionalObservations": {
     "totalEtfNetIssuanceMillionsUsd": null,

@@ -60,10 +60,10 @@ assert.strictEqual(meta.publicSignalCount, 13);
 assert.ok(meta.publicSignals.some((s) => s.signalId === 'index-inclusion-events'));
 assert.ok(!meta.publicPassiveInputKeys?.includes('index-inclusion-events' as never));
 
-assert.strictEqual(scored.score.score, 62);
-assert.strictEqual(scored.score.subScores.passivePressure, 58);
+assert.strictEqual(scored.score.score, 55);
+assert.strictEqual(scored.score.subScores.passivePressure, 45);
 assert.strictEqual(scored.score.subScores.structuralFragility, 65);
-assert.strictEqual(ghostFlowBandLabel(scored.score.band), 'Crowded / Reflexive');
+assert.strictEqual(ghostFlowBandLabel(scored.score.band), 'Elevated Flow Pressure');
 
 const grouped = groupSignalsByPresentation(scored.signals);
 assert.ok(grouped.publicArtifacts.some((s) => s.id === 'index-inclusion-events'));
