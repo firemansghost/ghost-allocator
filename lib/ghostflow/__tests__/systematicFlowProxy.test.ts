@@ -128,12 +128,12 @@ assert.ok(
     production.source.note?.includes('systematic-flow') &&
     production.source.note?.includes('MOCK 62')
 );
-assert.strictEqual(production.publishedAt, '2026-05-22');
-assert.strictEqual(production.basket.basketNetPctOi, -18.5);
-assert.strictEqual(production.basket.basketScore, 93);
+assert.strictEqual(production.publishedAt, '2026-06-27');
+assert.strictEqual(production.basket.basketNetPctOi, -18.3);
+assert.strictEqual(production.basket.basketScore, 92);
 
 const prodFresh = evaluateSystematicFlowProxyArtifactFreshness(production, GHOSTFLOW_REFERENCE_AS_OF);
-assert.strictEqual(prodFresh.status, 'stale');
+assert.strictEqual(prodFresh.status, 'fresh');
 
 const loaded = loadSystematicFlowProxyArtifact();
 assert.ok(loaded.ok, loaded.ok ? '' : loaded.errors.join('; '));

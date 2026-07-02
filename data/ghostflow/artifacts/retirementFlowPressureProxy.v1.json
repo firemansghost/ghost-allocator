@@ -1,12 +1,12 @@
 {
   "artifactVersion": "1",
   "signalId": "retirement-flow-pressure-proxy",
-  "asOf": "2025-12-31",
-  "publishedAt": "2026-03-26",
+  "asOf": "2026-03-31",
+  "publishedAt": "2026-06-18",
   "source": {
-    "name": "ICI — The US Retirement Market, Fourth Quarter 2025 (Table 1)",
-    "url": "https://www.ici.org/statistical-report/ret_25_q4",
-    "note": "Production display-only artifact (equity card retirement-asset-growth); not wired into GhostFlow Research Composite score (retirementFlowPressureProxy remains MOCK 58). Workbook: ret_25_q4_data.xls (https://www.ici.org/statistical-report/ret_25_q4_data.xls). Worksheet: Table 1 — US Total Retirement Assets. Units: billions USD in workbook; artifact trillions USD (÷1000). Quarter: 2025-Q4 (period end 2025-12-31). Release published 2026-03-26. Total retirement market assets = sum of Table 1 components for period 2025:Q4 (row 113): IRAs + DC plans + Private-sector DB plans + State and local government DB plans + Federal DB plans + Annuities = 49,124 billion ($49.1T per release). IRA: column IRAs, row 2025:Q4 = 19,220 billion ($19.2T). DC: column DC plans1, row 2025:Q4 = 14,197 billion ($14.2T). Prior quarter total: sum 2025:Q3 row = 48,131 billion ($48.1T). Prior year total: sum 2024:Q4 row = 44,171 billion ($44.2T). QoQ/YoY growth % from ICI release headline (2.1%, 11.2%) consistent with Table 1 sums within reconciliation tolerance."
+    "name": "ICI — The US Retirement Market, First Quarter 2026 (Table 1)",
+    "url": "https://www.ici.org/statistical-report/ret_26_q1",
+    "note": "Production display-only artifact (equity card retirement-asset-growth); not wired into GhostFlow Research Composite score (retirementFlowPressureProxy remains MOCK 58). Workbook: ret_26_q1_data.xls (https://www.ici.org/statistical-report/ret_26_q1_data.xls). Worksheet: Table 1 — US Total Retirement Assets. Units: billions USD in workbook; artifact trillions USD (÷1000). Quarter: 2026-Q1 (period end 2026-03-31). Release published 2026-06-18. Total retirement market assets = Table 1 total column row 2026:Q1 = 47,598 billion ($47.6T per release). IRA: column IRAs, row 2026:Q1 = 18,175 billion ($18.2T). DC: column DC plans1, row 2026:Q1 = 13,802 billion ($13.8T). Prior quarter total: Table 1 row 2025:Q4 = 48,798 billion ($48.8T). Prior year total: Table 1 row 2025:Q1 = 43,050 billion ($43.1T). QoQ growth % from ICI release headline (-2.5%) consistent with Table 1 sums. YoY growth % reconciled from artifact trillions (10.4%) consistent with Table 1 totals."
   },
   "observationType": "quarterly_retirement_market_snapshot",
   "seriesDefinition": "ici_retirement_market_quarterly_assets_v1",
@@ -20,13 +20,13 @@
     "Display-only public card in equity signal grid; not merged into buildSnapshot or Research Composite"
   ],
   "observations": {
-    "totalRetirementMarketAssetsTrillionsUsd": 49.1,
-    "definedContributionAssetsTrillionsUsd": 14.2,
-    "iraAssetsTrillionsUsd": 19.2,
-    "priorQuarterTotalAssetsTrillionsUsd": 48.1,
-    "priorYearTotalAssetsTrillionsUsd": 44.2,
-    "quarterOverQuarterAssetGrowthPct": 2.1,
-    "yearOverYearAssetGrowthPct": 11.2,
+    "totalRetirementMarketAssetsTrillionsUsd": 47.6,
+    "definedContributionAssetsTrillionsUsd": 13.8,
+    "iraAssetsTrillionsUsd": 18.2,
+    "priorQuarterTotalAssetsTrillionsUsd": 48.8,
+    "priorYearTotalAssetsTrillionsUsd": 43.1,
+    "quarterOverQuarterAssetGrowthPct": -2.5,
+    "yearOverYearAssetGrowthPct": 10.4,
     "mappingStatus": "not_final"
   }
 }
