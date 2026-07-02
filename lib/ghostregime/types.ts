@@ -76,6 +76,22 @@ export interface GhostRegimeServeMetadata {
   persist_rejected_reason?: string;
   stale_reason?: string;
   refresh_error_summary?: string;
+  /** Compact ETF provider chain summary (serve-time only; not persisted). */
+  etf_provider_routing?: GhostRegimeEtfProviderRoutingSummary;
+}
+
+export interface GhostRegimeEtfProviderRoutingRow {
+  symbol: string;
+  provider: string;
+  resolved_id?: string;
+  routing?: string;
+}
+
+export interface GhostRegimeEtfProviderRoutingSummary {
+  symbols: GhostRegimeEtfProviderRoutingRow[];
+  marketstack_used: boolean;
+  yahoo_etf_fallback_used: boolean;
+  stooq_browser_challenge_detected: boolean;
 }
 
 export interface CoreSymbolStatus {
