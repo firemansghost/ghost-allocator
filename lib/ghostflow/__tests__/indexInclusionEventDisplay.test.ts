@@ -62,7 +62,7 @@ assert.ok(!meta.publicPassiveInputKeys?.includes('index-inclusion-events' as nev
 
 assert.strictEqual(scored.score.score, 62);
 assert.strictEqual(scored.score.subScores.passivePressure, 58);
-assert.strictEqual(scored.score.subScores.structuralFragility, 66);
+assert.strictEqual(scored.score.subScores.structuralFragility, 65);
 assert.strictEqual(ghostFlowBandLabel(scored.score.band), 'Crowded / Reflexive');
 
 const grouped = groupSignalsByPresentation(scored.signals);

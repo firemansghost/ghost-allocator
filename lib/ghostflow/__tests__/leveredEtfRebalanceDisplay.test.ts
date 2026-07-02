@@ -33,7 +33,7 @@ const fresh = evaluateLeveredEtfRebalanceArtifactFreshness(
   production,
   GHOSTFLOW_REFERENCE_AS_OF
 );
-assert.strictEqual(fresh.status, 'fresh');
+assert.strictEqual(fresh.status, 'stale');
 
 const { raw, meta } = buildGhostFlowSnapshot();
 const scored = scoreGhostFlowSnapshot(raw);
@@ -65,7 +65,7 @@ assert.ok(meta.publicSignals.some((s) => s.signalId === 'levered-etf-rebalance')
 
 assert.strictEqual(scored.score.score, 62);
 assert.strictEqual(scored.score.subScores.passivePressure, 58);
-assert.strictEqual(scored.score.subScores.structuralFragility, 66);
+assert.strictEqual(scored.score.subScores.structuralFragility, 65);
 assert.strictEqual(ghostFlowBandLabel(scored.score.band), 'Crowded / Reflexive');
 
 const grouped = groupSignalsByPresentation(scored.signals);

@@ -43,7 +43,11 @@ assert.ok(existsSync(productionPath), 'Production tailSkewContext.v1.json must e
 
 const productionOk = loadTailSkewContextArtifact();
 assert.ok(productionOk.ok, productionOk.ok ? '' : productionOk.errors.join('; '));
-assert.strictEqual(productionOk.artifact.asOf, GHOSTFLOW_REFERENCE_AS_OF);
+assert.strictEqual(productionOk.artifact.asOf, '2026-05-22');
+assert.ok(
+  productionOk.artifact.asOf < GHOSTFLOW_REFERENCE_AS_OF,
+  'display-only tail-skew asOf lags equity reference until display refresh'
+);
 assert.strictEqual(productionOk.artifact.observations.currentSkew, 137.39);
 
 // --- wrong signalId fails ---
