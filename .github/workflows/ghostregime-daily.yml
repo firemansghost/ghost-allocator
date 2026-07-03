@@ -3,7 +3,13 @@ name: GhostRegime Daily Refresh
 on:
   schedule:
     - cron: "30 3 * * 1-5"  # 3:30 AM UTC, Monday-Friday (after US market close)
-  workflow_dispatch:  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      force_refresh:
+        description: "Force recompute and persist even if snapshot is fresh"
+        required: false
+        default: false
+        type: boolean
   # NOTE: No push/pull_request triggers - this workflow should only run on schedule or manual dispatch
 
 permissions:
@@ -51,10 +57,15 @@ jobs:
         id: refresh
         if: steps.guard.outputs.skip != 'true'
         env:
-          URL: https://ghost-allocator.vercel.app/api/ghostregime/today?refresh=scheduled
+          FORCE_REFRESH: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.force_refresh == 'true' }}
           CRON_SECRET: ${{ secrets.GHOSTREGIME_CRON_SECRET }}
         run: |
           set -euo pipefail
+          if [ "${FORCE_REFRESH}" = "true" ]; then
+            URL="https://ghost-allocator.vercel.app/api/ghostregime/today?force=1"
+          else
+            URL="https://ghost-allocator.vercel.app/api/ghostregime/today?refresh=scheduled"
+          fi
           RESP="$(curl -sS --fail --retry 3 --retry-delay 5 -H "x-ghostregime-cron: ${CRON_SECRET}" "${URL}&cb=$(date +%s)")"
           echo "$RESP" > /tmp/refresh_response.json
 
