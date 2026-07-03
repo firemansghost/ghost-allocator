@@ -89,7 +89,9 @@ For **core US ETF symbols** (SPY, GLD, EEM, HYG, IEF, TIP, TLT, UUP), the durabl
 **Via GitHub Actions UI**:
 1. Go to: `https://github.com/firemansghost/ghost-allocator/actions`
 2. Select "GhostRegime Daily Refresh" workflow
-3. Click "Run workflow" → "Run workflow"
+3. Click "Run workflow"
+4. **Default** (force refresh unchecked): same as scheduled — `?refresh=scheduled`; skips market fetch when snapshot is fresh
+5. **Force refresh** (check **Force recompute and persist even if snapshot is fresh**): calls `?force=1`; use to verify provider routing (e.g. Yahoo-only with Marketstack disabled) when preflight would otherwise skip fetch
 
 **Via API** (requires secret). Use the **root domain** as base URL (not a path like `/ghostregime`):
 ```bash
