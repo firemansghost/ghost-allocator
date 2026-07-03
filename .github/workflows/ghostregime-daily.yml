@@ -57,15 +57,39 @@ jobs:
         id: refresh
         if: steps.guard.outputs.skip != 'true'
         env:
-          FORCE_REFRESH: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.force_refresh == 'true' }}
+          EVENT_NAME: ${{ github.event_name }}
+          INPUTS_FORCE_REFRESH: ${{ inputs.force_refresh }}
+          EVENT_INPUTS_FORCE_REFRESH: ${{ github.event.inputs.force_refresh }}
           CRON_SECRET: ${{ secrets.GHOSTREGIME_CRON_SECRET }}
         run: |
           set -euo pipefail
-          if [ "${FORCE_REFRESH}" = "true" ]; then
-            URL="https://ghost-allocator.vercel.app/api/ghostregime/today?force=1"
-          else
-            URL="https://ghost-allocator.vercel.app/api/ghostregime/today?refresh=scheduled"
+          REQUEST_QUERY="refresh=scheduled"
+          REQUEST_MODE="scheduled"
+          FORCE_REFRESH_RAW="${INPUTS_FORCE_REFRESH:-${EVENT_INPUTS_FORCE_REFRESH:-}}"
+
+          if [ "${EVENT_NAME}" = "workflow_dispatch" ]; then
+            case "$(printf '%s' "${FORCE_REFRESH_RAW}" | tr '[:upper:]' '[:lower:]')" in
+              true|1|yes|on)
+                REQUEST_QUERY="force=1"
+                REQUEST_MODE="manual_force"
+                ;;
+            esac
           fi
+
+          URL="https://ghost-allocator.vercel.app/api/ghostregime/today?${REQUEST_QUERY}"
+
+          {
+            echo "### Request routing (debug)"
+            echo "- **event_name**: \`${EVENT_NAME}\`"
+            echo "- **force_refresh input (inputs)**: \`${INPUTS_FORCE_REFRESH:-_(unset)_}\`"
+            echo "- **force_refresh input (github.event.inputs)**: \`${EVENT_INPUTS_FORCE_REFRESH:-_(unset)_}\`"
+            echo "- **request mode**: \`${REQUEST_MODE}\`"
+            echo "- **request query**: \`${REQUEST_QUERY}\`"
+            echo ""
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+          echo "Request routing: event=${EVENT_NAME} inputs.force_refresh=${INPUTS_FORCE_REFRESH:-} github.event.inputs.force_refresh=${EVENT_INPUTS_FORCE_REFRESH:-} mode=${REQUEST_MODE} query=${REQUEST_QUERY}"
+
           RESP="$(curl -sS --fail --retry 3 --retry-delay 5 -H "x-ghostregime-cron: ${CRON_SECRET}" "${URL}&cb=$(date +%s)")"
           echo "$RESP" > /tmp/refresh_response.json
 

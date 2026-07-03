@@ -91,7 +91,7 @@ For **core US ETF symbols** (SPY, GLD, EEM, HYG, IEF, TIP, TLT, UUP), the durabl
 2. Select "GhostRegime Daily Refresh" workflow
 3. Click "Run workflow"
 4. **Default** (force refresh unchecked): same as scheduled — `?refresh=scheduled`; skips market fetch when snapshot is fresh
-5. **Force refresh** (check **Force recompute and persist even if snapshot is fresh**): calls `?force=1`; use to verify provider routing (e.g. Yahoo-only with Marketstack disabled) when preflight would otherwise skip fetch
+5. **Force refresh** (check **Force recompute and persist even if snapshot is fresh**): calls `?force=1`; use to verify provider routing (e.g. Yahoo-only with Marketstack disabled) when preflight would otherwise skip fetch. The job summary **Request routing (debug)** section must show `request mode: manual_force` and `request query: force=1` before the API response is parsed.
 
 **Via API** (requires secret). Use the **root domain** as base URL (not a path like `/ghostregime`):
 ```bash
