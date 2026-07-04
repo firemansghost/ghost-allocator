@@ -160,6 +160,8 @@ npm run ghostflow:cap-weight-premium-study -- --spy-csv tmp/ghostflow/marketstac
 
 Each symbol writes `{SYMBOL}.csv` (`Date,Close`) plus `{SYMBOL}.marketstack.meta.json` provenance sidecar. See [GHOSTFLOW_BLOCKER_SOURCE_STRATEGY.md](./GHOSTFLOW_BLOCKER_SOURCE_STRATEGY.md) § Cap-weight.
 
+**Coverage gate (fail-closed):** The helper exits non-zero when returned rows are insufficient for the default cap-weight study (≥1261 aligned rows) or when the last returned date is too far before `date-to`. First live run (2026-07-04) returned only **1000 rows per symbol** (2016-07-05 → 2020-06-23) with **1 API call each** — insufficient for study; do **not** use for artifact refresh. Use `--allow-partial` only for exploratory output.
+
 **Operator discipline:**
 
 - Transcribe from study output JSON after operator review — do not runtime-fetch Yahoo/Stooq/Marketstack in production path
