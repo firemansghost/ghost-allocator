@@ -123,6 +123,43 @@ Treasury lane: no structured freshness bands today — dates on cards only. See 
 
 **Refresh cadence:** Weekly manual refresh when operator updates SPY/RSP adjusted-close CSVs.
 
+### Preferred production path (adjusted close)
+
+1. Export **SPY** and **RSP** **adjusted-close** daily CSVs through `GHOSTFLOW_REFERENCE_AS_OF` (Yahoo Finance or equivalent operator export).
+2. Run the study:
+
+```bash
+npm run ghostflow:cap-weight-premium-study -- --spy-csv path/to/spy.csv --rsp-csv path/to/rsp.csv
+```
+
+3. Review study JSON; transcribe verified fields into the artifact with `priceColumnUsed: adjusted`.
+
+### Conditional helper — Marketstack EOD close export
+
+**Not production-primary.** GhostFlow does **not** use GhostRegime `ALLOW_MARKETSTACK_FALLBACK`. Requires `MARKETSTACK_ACCESS_KEY` plus explicit `--allow-marketstack` or `--source marketstack`.
+
+Marketstack output is **close-only** (not adjusted close). If used for study or artifact transcription, keep `dataQuality: manual_unverified` unless adjusted-close equivalence is proven; document caveat in `source.note`.
+
+**Dry run (no API calls, shows request estimate):**
+
+```bash
+npm run ghostflow:marketstack-eod-csv-export -- --allow-marketstack --symbols SPY,RSP --date-from 2003-01-01 --date-to 2026-07-01 --dry-run
+```
+
+**Export CSVs** (default `tmp/ghostflow/marketstack/`):
+
+```bash
+npm run ghostflow:marketstack-eod-csv-export -- --allow-marketstack --symbols SPY,RSP --date-from 2003-01-01 --date-to 2026-07-01 --out-dir tmp/ghostflow/marketstack
+```
+
+**Run study on exported close-only CSVs:**
+
+```bash
+npm run ghostflow:cap-weight-premium-study -- --spy-csv tmp/ghostflow/marketstack/SPY.csv --rsp-csv tmp/ghostflow/marketstack/RSP.csv
+```
+
+Each symbol writes `{SYMBOL}.csv` (`Date,Close`) plus `{SYMBOL}.marketstack.meta.json` provenance sidecar. See [GHOSTFLOW_BLOCKER_SOURCE_STRATEGY.md](./GHOSTFLOW_BLOCKER_SOURCE_STRATEGY.md) § Cap-weight.
+
 **Operator discipline:**
 
 - Transcribe from study output JSON after operator review — do not runtime-fetch Yahoo/Stooq/Marketstack in production path
