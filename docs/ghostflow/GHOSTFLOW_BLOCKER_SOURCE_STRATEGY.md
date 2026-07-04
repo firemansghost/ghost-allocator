@@ -203,13 +203,17 @@ Repo [`marketstackEod.ts`](../../lib/ghostregime/marketstackEod.ts) parses **`cl
 4. Transcribe verified fields into `capWeightPremiumProxy.v1.json`; filter dates ≤ reference.
 5. Run `npm run ghostflow:check`. Display-only — no Composite impact.
 
-**Conditional Marketstack helper path (future script):**
+**Conditional Marketstack helper path (shipped):**
 
-- Export `Date,Close` CSV for SPY + RSP via explicit `--source marketstack --allow-marketstack`
+Script: `npm run ghostflow:marketstack-eod-csv-export` — [`marketstack-eod-csv-export.ts`](../../scripts/ghostflow/marketstack-eod-csv-export.ts)
+
+- Requires `MARKETSTACK_ACCESS_KEY` + `--allow-marketstack` or `--source marketstack` (no GhostRegime `ALLOW_MARKETSTACK_FALLBACK`)
+- Default output: `tmp/ghostflow/marketstack/{SYMBOL}.csv` with `Date,Close` + `{SYMBOL}.marketstack.meta.json` provenance
+- Use `--dry-run` first to see estimated API call count (~12 for full SPY+RSP history)
 - Run study with `Close` column (parser records `priceColumnUsed: close`)
 - Set `source.note` that series used unadjusted EOD close from Marketstack; keep `dataQuality: manual_unverified` unless cross-checked against adj-close source
 
-**Best Marketstack candidate** for a future operator export script — still secondary to adj-close CSVs for production quality.
+Still secondary to adj-close CSVs for production quality.
 
 ---
 
