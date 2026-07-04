@@ -30,6 +30,8 @@ Read in this order for onboarding:
 3. **[GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md)** — canonical **13-signal** table: card ids, artifact `signalId`s, lanes, score boundaries, and Treasury separation.
 4. **[OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md)** — Canonical operator workflow: taxonomy, cadence map, validation matrix, and refresh guardrails.
 5. **[MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md)** — Field-level quick reference: per-artifact tables, cadence mini-checklists, and validation commands.
+6. **[GHOSTFLOW_V115_REFRESH_CHECKPOINT.md](./GHOSTFLOW_V115_REFRESH_CHECKPOINT.md)** — v1.15 refresh record (authoritative score state through 2026-07-01).
+7. **[GHOSTFLOW_BLOCKER_SOURCE_STRATEGY.md](./GHOSTFLOW_BLOCKER_SOURCE_STRATEGY.md)** — Open blocker source policy: canonical paths, Marketstack helper roles, request budget.
 
 ---
 
