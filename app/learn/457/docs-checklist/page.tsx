@@ -14,10 +14,10 @@ export default function Learn457DocsChecklistPage() {
     <div className="flex justify-center">
       <div className="w-full max-w-4xl space-y-8 pb-10">
         <Link
-          href="/learn"
+          href="/learn/457"
           className="inline-flex items-center text-xs font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-1 -mt-2"
         >
-          ← Back to Learn
+          ← Back to 457 Basics
         </Link>
 
         {/* Header */}
@@ -26,7 +26,8 @@ export default function Learn457DocsChecklistPage() {
             457 Plan Docs Checklist
           </h1>
           <p className="mt-3 text-sm sm:text-base text-zinc-300 leading-relaxed">
-            The fastest way to turn &quot;Coming Soon&quot; into an actual plan-specific playbook.
+            A field guide for collecting plan documents: what to obtain, where to look, and what facts to extract
+            for a plan-specific playbook (e.g. the OKC template).
           </p>
           <p className="mt-2 text-xs text-zinc-500 italic">
             Education only. Verify everything with HR or your plan provider.

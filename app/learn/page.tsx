@@ -195,6 +195,10 @@ export default function LearnPage() {
             </GlassCard>
           </div>
         </section>
+
+        <p className="text-[10px] text-zinc-500 italic text-center">
+          Education, not advice. Verify plan rules with HR or your plan administrator.
+        </p>
       </div>
     </div>
   );
