@@ -16,10 +16,10 @@ export default function Learn457OKCPage() {
     <div className="flex justify-center">
       <div className="w-full max-w-4xl space-y-8 pb-10">
         <Link
-          href="/learn"
+          href="/learn/457"
           className="inline-flex items-center text-xs font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-1 -mt-2"
         >
-          ← Back to Learn
+          ← Back to 457 Basics
         </Link>
 
         {/* Header */}
@@ -28,10 +28,11 @@ export default function Learn457OKCPage() {
             OKC 457(b) Playbook
           </h1>
           <p className="mt-3 text-sm sm:text-base text-zinc-300 leading-relaxed">
-            A practical implementation guide for Oklahoma City first responders.
+            A practical implementation template for Oklahoma City first responders. Structure is live; OKC-specific
+            fund names, fees, and sweep rules remain pending plan-document verification.
           </p>
           <div className="mt-4 flex flex-wrap gap-4 text-xs text-zinc-400">
-            <span>Status: Template (plan-doc details pending)</span>
+            <span>Status: Template — pending plan-doc verification</span>
             <span>Last updated: {lastUpdated}</span>
           </div>
         </GlassCard>
@@ -168,6 +169,10 @@ export default function Learn457OKCPage() {
             </Link>
           </p>
         </GlassCard>
+
+        <p className="text-[10px] text-zinc-500 italic text-center">
+          Education, not advice. OKC-specific steps require verification against your plan documents and HR.
+        </p>
       </div>
     </div>
   );

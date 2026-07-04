@@ -130,9 +130,9 @@ export default function Learn457Page() {
               options regularly and ensure your allocation matches your risk tolerance and time horizon.
             </li>
             <li>
-              <span className="font-semibold text-zinc-200">Not taking advantage of employer matching:</span> If
-              your plan offers matching contributions, contribute at least enough to get the full match—it's free
-              money.
+              <span className="font-semibold text-zinc-200">Employer matching (if offered):</span> Many
+              457(b) plans do not match like 401(k) plans. If yours does, contribute at least enough to get
+              the full match—it&apos;s free money when available.
             </li>
           </ul>
         </GlassCard>
@@ -189,6 +189,10 @@ export default function Learn457Page() {
             </Link>
           </p>
         </GlassCard>
+
+        <p className="text-[10px] text-zinc-500 italic text-center">
+          Education, not advice. Verify limits, fees, and distribution rules with your plan documents and HR.
+        </p>
       </div>
     </div>
   );

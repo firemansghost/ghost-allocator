@@ -132,6 +132,10 @@ export function GlossaryContent() {
             </Link>
           </p>
         </GlassCard>
+
+        <p className="text-[10px] text-zinc-500 italic text-center">
+          Education, not advice. Definitions are simplified—verify details with your plan or a qualified professional.
+        </p>
       </div>
     </div>
   );

@@ -71,8 +71,11 @@ export default function MasterclassPage() {
               rel="noopener noreferrer"
               className="inline-flex items-center rounded-full bg-amber-400 px-5 py-2 text-sm font-semibold text-black hover:bg-amber-300 transition shadow-md shadow-amber-400/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 min-h-[44px]"
             >
-              Browse the Masterclass on Substack →
+              Browse the Masterclass on Substack ↗
             </a>
+            <p className="mt-2 text-xs text-zinc-500">
+              Opens on Substack (external site). Ghost Allocator curates the reading order here.
+            </p>
           </div>
         </GlassCard>
 
@@ -83,7 +86,7 @@ export default function MasterclassPage() {
             <div className="space-y-3">
               {startHereItems.map((item) => (
                 <GlassCard key={item.id} className="p-5 sm:p-6">
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <span className="text-xs font-semibold text-amber-300 uppercase tracking-wide">
@@ -102,7 +105,7 @@ export default function MasterclassPage() {
                           rel="noopener noreferrer"
                           className="inline-flex items-center rounded-full bg-amber-400 px-4 py-2 text-xs font-semibold text-black hover:bg-amber-300 transition shadow-md shadow-amber-400/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 min-h-[36px]"
                         >
-                          Read on Substack →
+                          Read on Substack ↗
                         </a>
                       ) : (
                         <a
@@ -111,7 +114,7 @@ export default function MasterclassPage() {
                           rel="noopener noreferrer"
                           className="inline-flex items-center rounded-full bg-zinc-700 px-4 py-2 text-xs font-semibold text-zinc-200 hover:bg-zinc-600 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 min-h-[36px]"
                         >
-                          Browse on Substack →
+                          Browse on Substack ↗
                         </a>
                       )}
                     </div>
@@ -151,7 +154,7 @@ export default function MasterclassPage() {
                               rel="noopener noreferrer"
                               className="inline-flex items-center text-xs font-medium text-amber-400 hover:text-amber-300 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-2 py-1"
                             >
-                              Read on Substack →
+                              Read on Substack ↗
                             </a>
                           ) : (
                             <a
@@ -160,7 +163,7 @@ export default function MasterclassPage() {
                               rel="noopener noreferrer"
                               className="inline-flex items-center text-xs font-medium text-zinc-400 hover:text-zinc-300 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 rounded px-2 py-1"
                             >
-                              Browse on Substack →
+                              Browse on Substack ↗
                             </a>
                           )}
                         </div>
@@ -202,6 +205,10 @@ export default function MasterclassPage() {
             </Link>
           </p>
         </GlassCard>
+
+        <p className="text-[10px] text-zinc-500 italic text-center">
+          Education, not advice. External articles on Substack reflect the author&apos;s views, not portfolio recommendations.
+        </p>
       </div>
     </div>
   );
