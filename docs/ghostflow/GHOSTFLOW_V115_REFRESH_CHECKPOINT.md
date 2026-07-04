@@ -192,10 +192,10 @@ Display-only and Treasury-lane refreshes (v1.15c, v1.15f) did **not** change Com
 
 ### GhostFlow
 
-1. **Resolve blockers** in priority order when sources become available:
+1. **Resolve blockers** in priority order when sources become available — see **[GHOSTFLOW_BLOCKER_SOURCE_STRATEGY.md](./GHOSTFLOW_BLOCKER_SOURCE_STRATEGY.md)** for Marketstack roles, request budget, and canonical vs helper source policy:
    - **Score-fed:** `indexConcentration` when SSGA US PDF updates (requires score-impact report).
-   - **Treasury:** `treasuryLongEndIncomeLens` when FRED API or local CSVs succeed.
-   - **Display-only:** `leveredEtfRebalancePressure`, `capWeightPremiumProxy` on operator manual extract.
+   - **Treasury:** `treasuryLongEndIncomeLens` when FRED API or local CSVs succeed (Marketstack **not appropriate**).
+   - **Display-only:** `capWeightPremiumProxy` (adj-close CSV primary; Marketstack close export **helper only**), `leveredEtfRebalancePressure` (issuer AUM manual; Marketstack **helper** for QQQ/SPY/IWM returns only).
 2. **Routine cadence** per [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md): daily (vol, breadth, options, tail-skew, Treasury FRED when unblocked); weekly (ETF flow, CFTC systematic, Treasury futures, levered ETF when unblocked); monthly (ICI structural, SSGA concentration); quarterly (retirement).
 3. **Do not** open score gates or change MOCK inputs without explicit product approval.
 
@@ -222,6 +222,7 @@ At checkpoint authoring: `npm run ghostflow:check` **passed** (all 15 production
 These memos may still show pre-v1.15 headline scores (**62 / 58 / 66**) or reference **2026-05-22**. This checkpoint is the **authoritative v1.15 refresh record** for score state and blocker status until those docs are updated in a future docs pass:
 
 - [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md)
+- [GHOSTFLOW_BLOCKER_SOURCE_STRATEGY.md](./GHOSTFLOW_BLOCKER_SOURCE_STRATEGY.md) — v1.15 open blocker source policy (Marketstack roles, operator sequence)
 - [SCORE_REPRODUCTION_BASELINE.md](./SCORE_REPRODUCTION_BASELINE.md)
 - [CURRENT_DATA_READINESS_AUDIT.md](./CURRENT_DATA_READINESS_AUDIT.md)
 - [DATA_ROADMAP.md](./DATA_ROADMAP.md)
