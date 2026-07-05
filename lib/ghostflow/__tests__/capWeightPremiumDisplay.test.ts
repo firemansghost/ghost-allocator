@@ -31,16 +31,16 @@ const artifact = production.artifact;
 
 assert.strictEqual(
   formatCapWeightPremiumCardValue(artifact.observations),
-  '5Y premium percentile: 99.8'
+  '5Y premium percentile: 97.9'
 );
 
 const fresh = evaluateCapWeightPremiumArtifactFreshness(artifact, GHOSTFLOW_REFERENCE_AS_OF);
 assert.ok(['fresh', 'caution', 'stale'].includes(fresh.status));
 
-assert.ok(buildCapWeightPremiumDisplayExplanation(artifact).includes('SPY/RSP ratio 3.6094'));
-assert.ok(buildCapWeightPremiumDisplayExplanation(artifact).includes('5Y spread +42.74%'));
-assert.ok(buildCapWeightPremiumDisplayExplanation(artifact).includes('1M spread +3.21%'));
-assert.ok(buildCapWeightPremiumDisplayExplanation(artifact).includes('ratio percentile 99.6'));
+assert.ok(buildCapWeightPremiumDisplayExplanation(artifact).includes('SPY/RSP ratio 3.4945'));
+assert.ok(buildCapWeightPremiumDisplayExplanation(artifact).includes('5Y spread +33.27%'));
+assert.ok(buildCapWeightPremiumDisplayExplanation(artifact).includes('1M spread -3.83%'));
+assert.ok(buildCapWeightPremiumDisplayExplanation(artifact).includes('ratio percentile 97.6'));
 assert.ok(buildCapWeightPremiumDisplayExplanation(artifact).includes('not a pressure score'));
 
 const { raw, meta } = buildGhostFlowSnapshot();
@@ -50,12 +50,12 @@ const capWeight = raw.signals.find((s) => s.id === 'cap-weight-premium');
 assert.ok(capWeight, 'cap-weight-premium signal must exist');
 assert.strictEqual(capWeight!.dataStatus, 'public_proxy');
 assert.strictEqual(capWeight!.name, CAP_WEIGHT_PREMIUM_DISPLAY_SIGNAL_NAME);
-assert.strictEqual(capWeight!.numericValue, 99.8);
-assert.strictEqual(capWeight!.value, '5Y premium percentile: 99.8');
+assert.strictEqual(capWeight!.numericValue, 97.9);
+assert.strictEqual(capWeight!.value, '5Y premium percentile: 97.9');
 assert.strictEqual(capWeight!.cardCaveat, CAP_WEIGHT_PREMIUM_DISPLAY_CARD_CAVEAT);
 assert.ok(capWeight!.explanation.includes('not included in the Research Composite'));
-assert.strictEqual(capWeight!.artifactAsOf, '2026-05-22');
-assert.strictEqual(capWeight!.artifactPublishedAt, '2026-06-17');
+assert.strictEqual(capWeight!.artifactAsOf, '2026-07-01');
+assert.strictEqual(capWeight!.artifactPublishedAt, '2026-07-05');
 
 const scoredCapWeight = scored.signals.find((s) => s.id === 'cap-weight-premium')!;
 assert.strictEqual(signalCardBadgeLabelForSignal(scoredCapWeight, 'public'), 'DISPLAY ONLY');

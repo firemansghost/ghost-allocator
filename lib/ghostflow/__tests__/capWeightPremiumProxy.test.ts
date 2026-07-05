@@ -155,10 +155,10 @@ assert.ok(badPriceColResult.errors.some((e) => e.includes('priceColumnUsed.spy')
 // --- production JSON validates ---
 const productionLoaded = loadCapWeightPremiumProxyArtifact();
 assert.ok(productionLoaded.ok, productionLoaded.ok ? '' : productionLoaded.errors.join('; '));
-assert.strictEqual(productionLoaded.artifact.asOf, '2026-05-22');
-assert.strictEqual(productionLoaded.artifact.observations.latestDate, '2026-05-22');
-assert.strictEqual(productionLoaded.artifact.observations.spread5YPercentile, 99.8);
-assert.strictEqual(productionLoaded.artifact.publishedAt, '2026-06-17');
+assert.strictEqual(productionLoaded.artifact.asOf, '2026-07-01');
+assert.strictEqual(productionLoaded.artifact.observations.latestDate, '2026-07-01');
+assert.strictEqual(productionLoaded.artifact.observations.spread5YPercentile, 97.9);
+assert.strictEqual(productionLoaded.artifact.publishedAt, '2026-07-05');
 assert.strictEqual(productionLoaded.artifact.designOnly, undefined);
 
 const productionRaw = JSON.parse(
