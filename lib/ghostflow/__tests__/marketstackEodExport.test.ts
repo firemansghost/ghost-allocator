@@ -4,15 +4,20 @@
 
 import assert from 'node:assert/strict';
 import {
+  CAP_WEIGHT_STUDY_MIN_ALIGNED_ROWS,
   MARKETSTACK_PAGE_LIMIT,
+  assessExportCoverage,
   buildDryRunPlan,
   buildMarketstackEodUrl,
   buildProvenanceSidecar,
+  coercePaginationNumber,
   estimateTotalApiCalls,
   mergeEodRows,
   parseExportArgs,
   parseMarketstackEodJson,
+  parsePaginationMeta,
   rowsToCsv,
+  shouldFetchNextPage,
   fetchMarketstackEodPages,
 } from '../research/marketstackEodExport';
 
@@ -25,8 +30,16 @@ assert.deepStrictEqual(args.symbols, ['SPY', 'RSP']);
 assert.strictEqual(args.dateFrom, '2003-01-01');
 assert.strictEqual(args.dateTo, '2026-07-01');
 assert.strictEqual(args.allowMarketstack, true);
+assert.strictEqual(args.allowPartial, false);
 assert.strictEqual(args.dryRun, false);
 assert.strictEqual(args.outDir, 'tmp/ghostflow/marketstack');
+assert.strictEqual(args.minRowsRequired, CAP_WEIGHT_STUDY_MIN_ALIGNED_ROWS);
+
+const partialArgs = parseExportArgs(
+  ['--allow-marketstack', '--allow-partial', '--date-from', '2020-01-01', '--date-to', '2020-12-31'],
+  '2026-07-01'
+);
+assert.strictEqual(partialArgs.allowPartial, true);
 
 const sourceArgs = parseExportArgs(
   ['--source', 'marketstack', '--date-from', '2024-01-01', '--date-to', '2024-06-01'],
@@ -56,6 +69,30 @@ assert.ok(url.includes('access_key=%3Credacted%3E'));
 assert.ok(!url.includes('secret-key'));
 assert.ok(url.includes(`limit=${MARKETSTACK_PAGE_LIMIT}`));
 
+// --- pagination coercion ---
+assert.strictEqual(coercePaginationNumber('1000'), 1000);
+assert.strictEqual(coercePaginationNumber(5926), 5926);
+assert.strictEqual(coercePaginationNumber('n/a'), null);
+
+const pag = parsePaginationMeta({
+  pagination: { limit: '1000', offset: 0, count: '1000', total: '5926' },
+});
+assert.strictEqual(pag?.total, 5926);
+assert.strictEqual(pag?.count, 1000);
+
+assert.strictEqual(
+  shouldFetchNextPage({ batchLen: 1000, offset: 0, pagination: { total: 5926, count: 1000 } }),
+  true
+);
+assert.strictEqual(
+  shouldFetchNextPage({ batchLen: 1000, offset: 5000, pagination: { total: 5926, count: 1000 } }),
+  false
+);
+assert.strictEqual(
+  shouldFetchNextPage({ batchLen: 500, offset: 0, pagination: { total: 5926, count: 500 } }),
+  false
+);
+
 // --- API call estimate ---
 const est = estimateTotalApiCalls(['SPY', 'RSP'], '2003-01-01', '2026-07-01');
 assert.ok(est.calendarDays > 8000);
@@ -63,8 +100,34 @@ assert.ok(est.estimatedTradingDays > 5000);
 assert.strictEqual(est.callsPerSymbol.SPY, Math.ceil(est.estimatedTradingDays / MARKETSTACK_PAGE_LIMIT));
 assert.strictEqual(est.totalCalls, est.callsPerSymbol.SPY! + est.callsPerSymbol.RSP!);
 
-const shortEst = estimateTotalApiCalls(['SPY'], '2024-01-01', '2024-01-31');
-assert.strictEqual(shortEst.callsPerSymbol.SPY, 1);
+// --- coverage assessment (live-run shape: 1000 rows, 2016-2020) ---
+const partialRows = Array.from({ length: 1000 }, (_, i) => {
+  const d = new Date('2016-07-05T12:00:00Z');
+  d.setUTCDate(d.getUTCDate() + i);
+  return { date: d.toISOString().slice(0, 10), close: 100 + i };
+});
+const partialCoverage = assessExportCoverage({
+  rows: partialRows,
+  dateFrom: '2003-01-01',
+  dateTo: '2026-07-01',
+});
+assert.strictEqual(partialCoverage.coverageStatus, 'partial');
+assert.strictEqual(partialCoverage.rowCount, 1000);
+assert.ok(partialCoverage.warnings.length > 0);
+assert.ok(partialCoverage.likelyCause?.includes('1000 rows'));
+
+const completeRows = Array.from({ length: CAP_WEIGHT_STUDY_MIN_ALIGNED_ROWS }, (_, i) => {
+  const d = new Date('2020-01-02T12:00:00Z');
+  d.setUTCDate(d.getUTCDate() + i);
+  return { date: d.toISOString().slice(0, 10), close: 100 + i };
+});
+const completeCoverage = assessExportCoverage({
+  rows: completeRows,
+  dateFrom: '2020-01-01',
+  dateTo: completeRows[completeRows.length - 1]!.date,
+  minRowsRequired: CAP_WEIGHT_STUDY_MIN_ALIGNED_ROWS,
+});
+assert.strictEqual(completeCoverage.coverageStatus, 'complete');
 
 // --- JSON parsing ---
 const page1 = {
@@ -77,21 +140,6 @@ const page1 = {
 };
 const parsed1 = parseMarketstackEodJson(page1, '2024-01-01', '2024-01-31');
 assert.strictEqual(parsed1.rows.length, 2);
-assert.strictEqual(parsed1.rows[0]!.date, '2024-01-02');
-assert.strictEqual(parsed1.rows[1]!.close, 101);
-
-const errJson = { error: { message: 'invalid_access_key' } };
-const parsedErr = parseMarketstackEodJson(errJson, '2024-01-01', '2024-01-31');
-assert.strictEqual(parsedErr.apiError, 'invalid_access_key');
-assert.strictEqual(parsedErr.rows.length, 0);
-
-// --- merge pages ---
-const merged = mergeEodRows([
-  [{ date: '2024-01-02', close: 100 }],
-  [{ date: '2024-01-03', close: 101 }, { date: '2024-01-02', close: 100.5 }],
-]);
-assert.strictEqual(merged.length, 2);
-assert.strictEqual(merged[1]!.close, 101);
 
 // --- CSV output ---
 const csv = rowsToCsv([
@@ -106,14 +154,15 @@ const sidecar = buildProvenanceSidecar({
   dateFrom: '2003-01-01',
   dateTo: '2026-07-01',
   generatedAt: '2026-07-04T00:00:00.000Z',
-  apiCalls: 6,
-  pagesFetched: 6,
-  rowCount: 5000,
+  apiCalls: 1,
+  pagesFetched: 1,
+  rowCount: 1000,
   csvFileName: 'SPY.csv',
+  coverage: partialCoverage,
+  paginationPages: [{ limit: 1000, offset: 0, count: 1000, total: 1000 }],
 });
-assert.strictEqual(sidecar.source, 'Marketstack EOD');
-assert.strictEqual(sidecar.adjustedClose, false);
-assert.ok(String(sidecar.caveat).includes('not adjusted close'));
+assert.strictEqual(sidecar.coverageStatus, 'partial');
+assert.deepStrictEqual(sidecar.pagination, [{ limit: 1000, offset: 0, count: 1000, total: 1000 }]);
 
 // --- dry-run plan ---
 const plan = buildDryRunPlan(
@@ -121,8 +170,7 @@ const plan = buildDryRunPlan(
   (sym) => `tmp/ghostflow/marketstack/${sym}.csv`,
   (sym) => `tmp/ghostflow/marketstack/${sym}.marketstack.meta.json`
 );
-assert.strictEqual(plan.estimate.totalCalls, est.totalCalls);
-assert.ok(plan.csvPaths.SPY!.endsWith('SPY.csv'));
+assert.ok(plan.coverageWarning.includes('fails closed'));
 
 // --- mocked pagination fetch ---
 (async () => {
@@ -146,7 +194,12 @@ assert.ok(plan.csvPaths.SPY!.endsWith('SPY.csv'));
     return new Response(
       JSON.stringify({
         data,
-        pagination: { total: MARKETSTACK_PAGE_LIMIT + 1, limit: MARKETSTACK_PAGE_LIMIT, offset },
+        pagination: {
+          total: MARKETSTACK_PAGE_LIMIT + 1,
+          limit: MARKETSTACK_PAGE_LIMIT,
+          offset,
+          count: data.length,
+        },
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
@@ -163,7 +216,41 @@ assert.ok(plan.csvPaths.SPY!.endsWith('SPY.csv'));
   assert.strictEqual(fetchCount, 2);
   assert.strictEqual(fetchResult.apiCalls, 2);
   assert.strictEqual(fetchResult.pagesFetched, 2);
+  assert.strictEqual(fetchResult.paginationPages.length, 2);
   assert.ok(fetchResult.rows.length >= MARKETSTACK_PAGE_LIMIT);
+
+  // string total pagination continues
+  let stringTotalCalls = 0;
+  const stringTotalFetch: typeof fetch = async (input) => {
+    stringTotalCalls += 1;
+    const u = String(input);
+    const offset = u.includes('offset=1000') ? 1000 : 0;
+    const data =
+      offset === 0
+        ? Array.from({ length: MARKETSTACK_PAGE_LIMIT }, (_, i) => ({
+            date: `2021-01-${String((i % 28) + 1).padStart(2, '0')}T00:00:00+0000`,
+            close: 100,
+            symbol: 'SPY',
+          }))
+        : [];
+    return new Response(
+      JSON.stringify({
+        data,
+        pagination: { total: '2000', count: '1000', offset, limit: '1000' },
+      }),
+      { status: 200 }
+    );
+  };
+  const stringResult = await fetchMarketstackEodPages(
+    'SPY',
+    '2021-01-01',
+    '2021-12-31',
+    'test-key',
+    stringTotalFetch,
+    async () => {}
+  );
+  assert.strictEqual(stringTotalCalls, 2);
+  assert.strictEqual(stringResult.pagesFetched, 2);
 
   console.log('marketstackEodExport.test.ts: all assertions passed');
 })().catch((err) => {

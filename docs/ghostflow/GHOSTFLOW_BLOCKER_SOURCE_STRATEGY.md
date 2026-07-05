@@ -209,7 +209,10 @@ Script: `npm run ghostflow:marketstack-eod-csv-export` — [`marketstack-eod-csv
 
 - Requires `MARKETSTACK_ACCESS_KEY` + `--allow-marketstack` or `--source marketstack` (no GhostRegime `ALLOW_MARKETSTACK_FALLBACK`)
 - Default output: `tmp/ghostflow/marketstack/{SYMBOL}.csv` with `Date,Close` + `{SYMBOL}.marketstack.meta.json` provenance
-- Use `--dry-run` first to see estimated API call count (~12 for full SPY+RSP history)
+- Use `--dry-run` first to see estimated API call count (~12 for full SPY+RSP history if pagination is unrestricted)
+- **Fail-closed coverage gate:** export aborts unless rows ≥1261 (default cap-weight minimum) and last date is near `date-to`; sidecar records `coverageStatus: complete|partial` and pagination metadata
+- **First live run (2026-07-04):** only 1000 rows/symbol (2016-07-05 → 2020-06-23), 1 API call each — study failed (`need at least 1261`). Likely Marketstack plan/API row cap, not sufficient for full-history cap-weight. **Do not use for artifact refresh.**
+- `--allow-partial` writes exploratory output but still exits non-zero with warnings
 - Run study with `Close` column (parser records `priceColumnUsed: close`)
 - Set `source.note` that series used unadjusted EOD close from Marketstack; keep `dataQuality: manual_unverified` unless cross-checked against adj-close source
 
