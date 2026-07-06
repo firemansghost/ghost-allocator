@@ -378,14 +378,17 @@ Each symbol writes `{SYMBOL}.csv` (`Date,Close`) plus `{SYMBOL}.marketstack.meta
 
 ### 10. Treasury Long-End Income Lens (daily-ish — Treasury lane only)
 
+**Status:** **Live (v1.7d.1)** — production artifact + Treasury Plumbing display card. **Refreshed to 2026-07-01** (v1.15j / PR #122). **No longer a v1.15 blocker.**
+
 | Item | Detail |
 |------|--------|
 | **Production file** | [`data/ghostflow/artifacts/treasuryLongEndIncomeLens.v1.json`](../../data/ghostflow/artifacts/treasuryLongEndIncomeLens.v1.json) |
 | **Spike helper** | `npm run ghostflow:fred-treasury-yields-spike` (or `--local-dir tmp/fred` / `--fred-api` if CSV blocked) |
 | **Source** | FRED: DGS30, DFII30, DGS2, DGS5, DGS10, T10YIE — **common asOf** across all six |
+| **Production values** | Reference-aligned **2026-07-01** — official FRED API (`fred_api`); live graph CSV timed out; API fallback succeeded; DGS30 **4.97** · DFII30 **2.78** · DGS2 **4.17** · DGS5 **4.24** · DGS10 **4.48** · T10YIE **2.23** · curve2s30s **0.80** · curve5s30s **0.73** · curve10s30s **0.49** · display **30Y 4.97% · Real 2.78% · 10s30s +0.49 pp**; `dataQuality` **verified_manual**; scores unchanged (**56 / 45 / 67**) |
 | **Fields to update** | `asOf`, `publishedAt`, yield/breakeven observations; `dataQuality`; **no forward-fill** |
-| **`asOf` rule** | Latest **common** FRED business date across all six series |
-| **Lane** | **Treasury Plumbing only** — not scored; not investment advice |
+| **`asOf` rule** | Latest **common** FRED business date across all six series on or before `GHOSTFLOW_REFERENCE_AS_OF` |
+| **Lane** | **Treasury Plumbing only** — not scored; not investment advice; not in `publicSignalCount` |
 | **Caveat** | Not bond-buying or duration-allocation advice |
 | **Deep dive** | [BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md](./BOND_NEGLECT_INCOME_LENS_ARTIFACT_DESIGN.md) |
 
