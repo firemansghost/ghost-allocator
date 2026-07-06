@@ -2,7 +2,7 @@
 
 **Status:** Operator strategy — documentation only.  
 **Authoritative refresh record:** [GHOSTFLOW_V115_REFRESH_CHECKPOINT.md](./GHOSTFLOW_V115_REFRESH_CHECKPOINT.md)  
-**Date:** 2026-07-04
+**Date:** 2026-07-04 (updated **2026-07-06** — cap-weight blocker resolved)
 
 > **Warning:** This document does **not** authorize artifact updates by itself. Do not edit production JSON, scoring, reference, buildSnapshot, mock snapshot, validators, or UI from this memo alone. Transcribe only after operator verification and existing runbook gates.
 
@@ -10,16 +10,16 @@
 
 ## Executive summary
 
-GhostFlow v1.15 is **current** on reference **2026-07-01** with **four source blockers** remaining. This memo decides, artifact by artifact, whether **Marketstack** may help operator refresh work and documents the **canonical operator path** for each blocker.
+GhostFlow v1.15 is **current** on reference **2026-07-01** with **three source blockers** remaining. Cap-weight premium proxy was **refreshed to 2026-07-01** (v1.15h / PR #118). This memo decides, artifact by artifact, whether **Marketstack** may help operator refresh work and documents the **canonical operator path** for each blocker.
 
 **Headline decisions:**
 
-| Blocker | Marketstack role | Best next action |
-|---------|------------------|------------------|
-| Treasury long-end income lens | **not appropriate** | FRED API key or local FRED CSVs |
-| Levered ETF rebalance pressure | **helper** (index returns only) | Manual issuer AUM + QQQ/SPY/IWM return extract |
-| Cap-weight premium proxy | **helper** (EOD close export only; conditional) | Yahoo/manual **adjusted-close** CSVs → study script |
-| Index concentration | **not appropriate** | Watch US SSGA SPY PDF until holdings update |
+| Blocker | Marketstack role | Status / next action |
+|---------|------------------|----------------------|
+| Treasury long-end income lens | **not appropriate** | **Open** — FRED API key or local FRED CSVs |
+| Levered ETF rebalance pressure | **helper** (index returns only) | **Open** — manual issuer AUM + QQQ/SPY/IWM return extract |
+| Cap-weight premium proxy | **helper** (EOD close export only; not production) | **Resolved** — Yahoo adj-close study → artifact **2026-07-01**; Marketstack insufficient for full history |
+| Index concentration | **not appropriate** | **Open** — watch US SSGA SPY PDF until holdings update |
 
 **Marketstack is not wired into GhostFlow production paths.** Existing repo integration is **GhostRegime-only** ([`lib/ghostregime/marketstackEod.ts`](../../lib/ghostregime/marketstackEod.ts)) and parses **unadjusted `close`** from `/v1/eod` only. GhostFlow operator helpers must **not** reuse GhostRegime `ALLOW_MARKETSTACK_FALLBACK` by default.
 
@@ -37,14 +37,21 @@ GhostFlow v1.15 is **current** on reference **2026-07-01** with **four source bl
 | v1.10e no-score-change policy | **Active** |
 | MOCK passive inputs | **62 / 58 / 55** unchanged |
 
-### Open blockers (v1.15g)
+### Open blockers (post v1.15h)
 
 | # | Artifact | Lane | Artifact `asOf` | Blocker |
 |---|----------|------|-----------------|---------|
 | 1 | `treasuryLongEndIncomeLens.v1.json` | Treasury display | 2026-06-02 | FRED timeout; no `FRED_API_KEY`; empty `tmp/fred/` |
 | 2 | `leveredEtfRebalancePressure.v1.json` | Display-only | 2026-05-22 | Six-row issuer AUM + QQQ/SPY/IWM return not refreshed ≤ 2026-07-01 |
-| 3 | `capWeightPremiumProxy.v1.json` | Display-only | 2026-05-22 | Fresh SPY/RSP adj-close CSVs through 2026-07-01 |
-| 4 | `indexConcentration.v1.json` | **Score-fed** | 2026-03-31 | US SSGA SPY PDF still **2026-03-31** holdings |
+| 3 | `indexConcentration.v1.json` | **Score-fed** | 2026-03-31 | US SSGA SPY PDF still **2026-03-31** holdings |
+
+### Resolved (v1.15h)
+
+| Artifact | Refreshed `asOf` | Source | Score impact |
+|----------|------------------|--------|--------------|
+| `capWeightPremiumProxy.v1.json` | **2026-07-01** | Yahoo Finance v8 chart API adjusted-close operator download (`operator_csv_adj_close`); **no Marketstack** | **None** — **56 / 45 / 67**; `publicSignalCount` **13** |
+
+**Refreshed headline values:** aligned **5,829** · SPY **745.76** · RSP **213.41** · ratio **3.4945** (pctile **97.6**) · 1Y spread **2.67** · 3Y **25.52** · 5Y **33.27** · `dataQuality` **verified_manual**.
 
 ---
 
@@ -164,12 +171,27 @@ Issuer AUM **cannot** be sourced from Marketstack.
 
 ---
 
-### C. Cap-weight premium proxy
+### C. Cap-weight premium proxy — **resolved (v1.15h)**
 
 **Artifact:** `data/ghostflow/artifacts/capWeightPremiumProxy.v1.json`  
-**Lane:** Display-only; no score wiring (`mappingStatus: not_final`)
+**Lane:** Display-only; no score wiring (`mappingStatus: not_final`)  
+**Status:** **Refreshed** to **2026-07-01** (PR #118). **No longer a blocker.**
 
-#### Required data
+#### Production refresh record (2026-07-01)
+
+| Item | Value |
+|------|--------|
+| **Source** | Yahoo Finance v8 chart API adjusted-close operator download |
+| **Method** | `operator_csv_adj_close` via `cap-weight-premium-study` |
+| **Marketstack** | **Not used** for artifact refresh |
+| **`dataQuality`** | `verified_manual` |
+| **Aligned observations** | **5,829** |
+| **SPY / RSP adj close** | **745.76** / **213.41** |
+| **Ratio / pctile** | **3.4945** / **97.6** |
+| **1Y / 3Y / 5Y spread** | **2.67** / **25.52** / **33.27** |
+| **Score impact** | **None** — Composite **56** · Passive **45** · Structural **67** |
+
+#### Required data (future refreshes)
 
 - **SPY** and **RSP** daily price history through `GHOSTFLOW_REFERENCE_AS_OF` (**2026-07-01**)
 - Production-quality path requires **adjusted close** (artifact methodology and caveats state this explicitly)
@@ -265,14 +287,14 @@ Use **index weights**, not fund weights if both appear. `asOf` = holdings month-
 |----------|---------------|------------------|------------------|-----------------------------------|------------------------|-----------------|----------------------|
 | `treasuryLongEndIncomeLens` | 6 FRED yields/breakeven | FRED (API or CSV) | **not appropriate** | **no** — FRED only | **0** | Official Fed series; prior API success 2026-06-02 | `FRED_API_KEY` or `tmp/fred/` CSVs → spike → transcribe |
 | `leveredEtfRebalancePressure` | 6× AUM + 3× index return | Issuer pages + StockAnalysis/CSV | **helper** (returns only) | **conditional** — AUM always manual; returns helper OK with `source.note` | **~3** (QQQ/SPY/IWM, short window) | Close ≠ adj; issuer AUM not from API | Six-row manual extract ≤ 2026-07-01 |
-| `capWeightPremiumProxy` | SPY/RSP daily history | Yahoo/manual **adj-close** CSV | **helper** (close export only) | **conditional** — adj-close primary; close-only helper with caveat | **~12** (full history SPY+RSP, paginated EOD) | Close-only ≠ adj-close for spread quality | Adj-close CSVs → study → transcribe |
+| `capWeightPremiumProxy` | SPY/RSP daily history | Yahoo/manual **adj-close** CSV | **helper** (close export only) | **resolved** — Yahoo adj-close primary used for **2026-07-01** refresh; Marketstack insufficient | **~12** (theoretical; failed under current access) | Close-only ≠ adj-close; Marketstack 1000-row cap | **Done** v1.15h; future: Yahoo adj-close → study |
 | `indexConcentration` | Top-10 index weight % | US SSGA SPY PDF | **not appropriate** | **no** — PDF only | **0** | Holdings not derivable from EOD | Watch PDF; score-impact report when updated |
 
 ### Marketstack role definitions
 
 | Role | Meaning |
 |------|---------|
-| **primary** | Canonical production source (none of the four blockers use Marketstack as primary today) |
+| **primary** | Canonical production source (cap-weight resolved via Yahoo adj-close; none of the three remaining blockers use Marketstack as primary) |
 | **helper** | Operator-local export to CSV/JSON; manual transcription required |
 | **cross-check only** | Sanity check against canonical source; not written to artifact |
 | **not appropriate** | Data type or provenance mismatch; do not spend quota |
@@ -302,18 +324,18 @@ Well under monthly allowance. A one-time full cap-weight history pull (~12 calls
 
 Implement / unblock in this order (based on repo readiness and Marketstack fit):
 
-1. **Cap-weight premium** — Yahoo/manual adj-close CSVs → existing study script (fastest unblock; best future Marketstack helper ROI for close export)
+1. ~~**Cap-weight premium**~~ — **Done (v1.15h)** — Yahoo adj-close CSVs → study → artifact **2026-07-01**
 2. **Levered ETF rebalance** — hybrid manual AUM + index return (Marketstack optional helper for QQQ/SPY/IWM only)
 3. **Treasury FRED income lens** — `FRED_API_KEY` or local CSVs (zero Marketstack)
 4. **Index concentration** — watch-only until US SSGA PDF updates; score-impact report required when unblocked
 
-### Next implementation task (code — out of scope for this doc)
+### Marketstack helper status (code)
 
-First code follow-up after this strategy: **GhostFlow Marketstack EOD→CSV export helper** for cap-weight (and optionally levered returns), with:
+**Shipped:** `ghostflow:marketstack-eod-csv-export` — [`marketstack-eod-csv-export.ts`](../../scripts/ghostflow/marketstack-eod-csv-export.ts)
 
-- `--source marketstack --allow-marketstack` explicit opt-in
-- `MARKETSTACK_ACCESS_KEY` only
-- Output compatible with `cap-weight-premium-study` (`Date,Close` or `Date,Adj Close` if confirmed)
+- `--source marketstack --allow-marketstack` explicit opt-in; `MARKETSTACK_ACCESS_KEY` only
+- Fail-closed coverage gate; **not** sufficient for full-history cap-weight under current operator access
+- **Cap-weight production path:** Yahoo/manual adjusted-close CSVs (used for v1.15h refresh)
 - No GhostRegime `ALLOW_MARKETSTACK_FALLBACK` coupling
 
 ---

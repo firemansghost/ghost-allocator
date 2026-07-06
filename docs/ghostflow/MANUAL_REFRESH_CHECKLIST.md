@@ -108,7 +108,7 @@ Treasury lane: no structured freshness bands today — dates on cards only. See 
 
 ## Cap-Weight Premium Proxy — manual refresh discipline
 
-**Status:** **Live (v1.9b.4)** — production artifact + display-only dashboard card.
+**Status:** **Live (v1.9b.4)** — production artifact + display-only dashboard card. **Refreshed to 2026-07-01** (v1.15h / PR #118). **No longer a v1.15 blocker.**
 
 | Item | Detail |
 |------|--------|
@@ -117,7 +117,7 @@ Treasury lane: no structured freshness bands today — dates on cards only. See 
 | **Card id** | `cap-weight-premium` — **DISPLAY ONLY** |
 | **Scoring** | **Not scored**; no `publicPassiveInputKey`; no score fields |
 | **Study script** | `npm run ghostflow:cap-weight-premium-study` — operator CSVs only; filter to `Date <= GHOSTFLOW_REFERENCE_AS_OF` before transcribing |
-| **Production values** | Reference-aligned **2026-05-22** v1.9b.4a study — **not** June 15 calibration headline values |
+| **Production values** | Reference-aligned **2026-07-01** — Yahoo adj-close study; `dataQuality` **verified_manual**; aligned **5,829**; ratio **3.4945** (pctile **97.6**); 1Y/3Y/5Y spread **2.67 / 25.52 / 33.27**; scores unchanged (**56 / 45 / 67**) |
 
 **Mapping decision v1.9b.5:** Cap-Weight Premium Proxy remains display-only and is not scored.
 
@@ -160,7 +160,7 @@ npm run ghostflow:cap-weight-premium-study -- --spy-csv tmp/ghostflow/marketstac
 
 Each symbol writes `{SYMBOL}.csv` (`Date,Close`) plus `{SYMBOL}.marketstack.meta.json` provenance sidecar. See [GHOSTFLOW_BLOCKER_SOURCE_STRATEGY.md](./GHOSTFLOW_BLOCKER_SOURCE_STRATEGY.md) § Cap-weight.
 
-**Coverage gate (fail-closed):** The helper exits non-zero when returned rows are insufficient for the default cap-weight study (≥1261 aligned rows) or when the last returned date is too far before `date-to`. First live run (2026-07-04) returned only **1000 rows per symbol** (2016-07-05 → 2020-06-23) with **1 API call each** — insufficient for study; do **not** use for artifact refresh. Use `--allow-partial` only for exploratory output.
+**Coverage gate (fail-closed):** The helper exits non-zero when returned rows are insufficient for the default cap-weight study (≥1261 aligned rows) or when the last returned date is too far before `date-to`. First live run (2026-07-04) returned only **1000 rows per symbol** (2016-07-05 → 2020-06-23) with **1 API call each** — insufficient for study; do **not** use for artifact refresh. **v1.15h production refresh used Yahoo adj-close only.** Use `--allow-partial` only for exploratory output.
 
 **Operator discipline:**
 
