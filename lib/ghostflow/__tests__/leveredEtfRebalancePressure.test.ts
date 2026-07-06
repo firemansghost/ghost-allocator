@@ -71,9 +71,9 @@ assert.ok(
     production.source.note?.includes('levered-etf-rebalance') &&
     production.source.note?.includes('MOCK 55')
 );
-assert.strictEqual(production.asOf, '2026-05-22');
-assert.strictEqual(production.publishedAt, '2026-05-28');
-assert.strictEqual(production.dataQuality, 'manual_unverified');
+assert.strictEqual(production.asOf, '2026-07-01');
+assert.strictEqual(production.publishedAt, '2026-07-06');
+assert.strictEqual(production.dataQuality, 'verified_manual');
 
 // --- Example fails production mode ---
 const exampleProdFail = validateLeveredEtfRebalancePressureArtifact(

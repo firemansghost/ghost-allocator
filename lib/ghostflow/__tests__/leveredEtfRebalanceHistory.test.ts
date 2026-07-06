@@ -9,7 +9,6 @@ import { computeEstimatedRebalanceNotional } from '@/lib/ghostflow/artifacts/lev
 import {
   AGGREGATE_NOTIONAL_TOLERANCE_MILLIONS,
   AGGREGATE_PCT_TOLERANCE,
-  PRODUCTION_ARTIFACT_CROSS_CHECK_DATE,
   alignSessions,
   aumMapFromProductionRows,
   buildLeveredMappingComparison,
@@ -29,16 +28,16 @@ const aumMap = aumMapFromProductionRows(artifact.etfRows);
 const aumResolver = fixedCurrentAumResolver(aumMap);
 
 const prodReturns: DailyProxyReturns = {
-  date: PRODUCTION_ARTIFACT_CROSS_CHECK_DATE,
-  qqqPct: 0.42,
-  spyPct: 0.39,
-  iwmPct: 0.93,
+  date: artifact.asOf,
+  qqqPct: -1.52,
+  spyPct: -0.14,
+  iwmPct: -0.38,
 };
 
 // --- row notional ---
 assert.strictEqual(
-  Math.round(computeEstimatedRebalanceNotional(38352.89, 3, 0.42) * 100) / 100,
-  966.49
+  Math.round(computeEstimatedRebalanceNotional(35276.57, 3, -1.52) * 100) / 100,
+  -3217.22
 );
 
 // --- session aggregate cross-check ---
@@ -55,7 +54,7 @@ assert.ok(
   Math.abs(o.aggregateAbsRebalanceNotionalMillionsUsd - artifact.observations.aggregateAbsRebalanceNotionalMillionsUsd) <=
     AGGREGATE_NOTIONAL_TOLERANCE_MILLIONS
 );
-assert.strictEqual(o.dominantDirection, 'buy_underlying');
+assert.strictEqual(o.dominantDirection, 'sell_underlying');
 
 // --- skip missing IWM ---
 const missingIwm: DailyProxyReturns = {
