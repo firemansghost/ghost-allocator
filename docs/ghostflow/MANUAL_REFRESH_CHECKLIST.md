@@ -233,18 +233,23 @@ Each symbol writes `{SYMBOL}.csv` (`Date,Close`) plus `{SYMBOL}.marketstack.meta
 
 ### 3b. Levered ETF Rebalance Pressure (weekly — validated candidate, not scored)
 
+**Status:** **Live (v1.1d+)** — production artifact + display-only dashboard card. **Refreshed to 2026-07-01** (v1.15i / PR #120). **No longer a v1.15 blocker.**
+
 | Item | Detail |
 |------|--------|
 | **Production file** | [`data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.json`](../../data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.json) — included in `npm run ghostflow:validate-artifacts` |
+| **Current production** | `asOf` **2026-07-01** · `publishedAt` **2026-07-06** · `dataQuality` **verified_manual** · display **Est. sell $3.70B · 8.24% of universe AUM** · **sell_underlying** |
+| **Card id** | `levered-etf-rebalance` — **DISPLAY ONLY** |
+| **Score impact** | **None** — MOCK **55** unchanged; Composite **56** · Passive **45** · Structural **67**; `publicSignalCount` **13** |
 | **Example file** | [`data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.example.json`](../../data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.example.json) — design reference only; unit tests (`mode: example`) |
 | **Universe** | TQQQ, SQQQ, UPRO, SPXU, TNA, TZA — `tier1_six_ticker_3x_index_etf_v1` |
-| **Primary AUM** | ProShares fund pages (TQQQ/SQQQ/UPRO/SPXU); StockAnalysis or Direxion for TNA/TZA |
+| **Primary AUM** | ProShares fund pages (TQQQ/SQQQ/UPRO/SPXU); StockAnalysis for TNA/TZA when Direxion/ETFdb blocked; Finviz cross-check optional |
 | **Index returns** | StockAnalysis QQQ/SPY/IWM history — **one session** `% change` per row `returnAsOf` |
 | **`asOf` rule** | Session date for index returns (ISO `YYYY-MM-DD`); aligns across QQQ/SPY/IWM rows |
 | **`publishedAt` rule** | Date when AUM sources were captured (may be after `asOf` if issuer AUM lags index session) |
 | **Row fields** | Recompute `estimatedRebalanceNotionalMillionsUsd` and `estimatedRebalanceDirection` via formula; recompute `observations` aggregates with `computeAggregateLeveredEtfRebalanceMetrics` |
 | **`dataQuality` rule** | `verified_manual` only if issuer AUM **and** cross-check reviewed for **all six** rows; else `manual_unverified` |
-| **Status** | v1.1d: display-only `levered-etf-rebalance` card when artifact validates. **v1.1e:** mapping decision recorded — [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md); artifact remains display-only; `observations.mappingStatus` stays **not_final**; score input remains MOCK **55**. **v1.1e-calibration** required before **v1.1f** score-wiring gate |
+| **Status** | v1.1d: display-only `levered-etf-rebalance` card when artifact validates. **v1.15i:** refreshed **2026-07-01** via operator six-row AUM packet (ProShares + StockAnalysis; Finviz cross-check; **no Marketstack**). **v1.1e:** mapping decision — [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md); artifact remains display-only; `observations.mappingStatus` stays **not_final**; score input remains MOCK **55**. TZA: Finviz cross-check **20.35%** gap — StockAnalysis primary operator-accepted (not averaged) |
 | **Deep dive** | [LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md](./LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md) · [LEVERED_ETF_REBALANCE_MAPPING_DECISION.md](./LEVERED_ETF_REBALANCE_MAPPING_DECISION.md) · [LEVERED_ETF_REBALANCE_FEASIBILITY.md](./LEVERED_ETF_REBALANCE_FEASIBILITY.md) |
 
 ---
