@@ -26,14 +26,14 @@ const production = loadProduction as LeveredEtfRebalancePressureArtifactV1;
 
 assert.strictEqual(
   formatLeveredEtfRebalanceDisplayValue(production.observations),
-  'Est. buy $1.34B · 2.78% of universe AUM'
+  'Est. sell $3.70B · 8.24% of universe AUM'
 );
 
 const fresh = evaluateLeveredEtfRebalanceArtifactFreshness(
   production,
   GHOSTFLOW_REFERENCE_AS_OF
 );
-assert.strictEqual(fresh.status, 'stale');
+assert.strictEqual(fresh.status, 'fresh');
 
 const { raw, meta } = buildGhostFlowSnapshot();
 const scored = scoreGhostFlowSnapshot(raw);
@@ -42,10 +42,10 @@ const levered = raw.signals.find((s) => s.id === 'levered-etf-rebalance');
 assert.ok(levered, 'levered-etf-rebalance signal must exist');
 assert.strictEqual(levered!.dataStatus, 'public_proxy');
 assert.strictEqual(levered!.name, LEVERED_ETF_REBALANCE_DISPLAY_SIGNAL_NAME);
-assert.strictEqual(levered!.numericValue, 2.78);
-assert.ok(levered!.value.includes('buy'));
-assert.ok(levered!.value.includes('$1.34B'));
-assert.ok(levered!.value.includes('2.78%'));
+assert.strictEqual(levered!.numericValue, 8.24);
+assert.ok(levered!.value.includes('sell'));
+assert.ok(levered!.value.includes('$3.70B'));
+assert.ok(levered!.value.includes('8.24%'));
 assert.ok(
   levered!.cardCaveat?.includes('Display-only levered ETF rebalance estimate') &&
     levered!.cardCaveat?.includes('not included in the Research Composite')
