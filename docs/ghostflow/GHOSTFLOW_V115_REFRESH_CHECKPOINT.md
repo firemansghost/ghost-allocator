@@ -2,8 +2,8 @@
 
 **GhostFlow docs:** [README](./README.md) · [Current state](./GHOSTFLOW_CURRENT_STATE.md) · [Reference date policy](./REFERENCE_DATE_AND_OPERATOR_POLICY.md) · [Manual refresh checklist](./MANUAL_REFRESH_CHECKLIST.md) · [Operator refresh discipline](./OPERATOR_REFRESH_DISCIPLINE.md)
 
-**Checkpoint date:** 2026-07-02 (updated **2026-07-06** — cap-weight blocker resolved)  
-**Status:** v1.15 operator refresh cycle **complete** except **three source blockers** (see register below). Cap-weight premium proxy **resolved** in v1.15h (PR #118).  
+**Checkpoint date:** 2026-07-02 (updated **2026-07-06** — cap-weight and levered ETF blockers resolved)  
+**Status:** v1.15 operator refresh cycle **complete** except **two source blockers** (see register below). Cap-weight premium proxy **resolved** in v1.15h (PR #118). Levered ETF rebalance pressure **resolved** in v1.15i (PR #120).  
 **Document type:** Refresh checkpoint / blocker register — **docs only**; no artifact, score, runtime, or code changes in this memo.
 
 ---
@@ -12,7 +12,7 @@
 
 GhostFlow **v1.15a.2 through v1.15g** executed the approved operator refresh sequence after [REFERENCE_DATE_AND_OPERATOR_POLICY.md](./REFERENCE_DATE_AND_OPERATOR_POLICY.md). The dashboard reference was bumped to **`2026-07-01`**. Score-fed daily, weekly, and partial monthly refreshes moved the Research Composite from **62 → 55 → 56** (Passive **58 → 45**; Structural **65 → 67**). Display-only and Treasury-lane artifacts were refreshed where verified sources were available.
 
-**Three artifacts remain blocked** by source availability (FRED timeout, manual operator extracts, SSGA PDF lag). Cap-weight premium proxy was **refreshed to 2026-07-01** via Yahoo adjusted-close study (PR #118). Score gates remain **closed**; v1.10e no-score-change policy remains **active**. Equity `publicSignalCount` remains **13**; Treasury lane remains **2** separate display-only cards.
+**Two artifacts remain blocked** by source availability (FRED timeout, SSGA PDF lag). Cap-weight premium proxy was **refreshed to 2026-07-01** via Yahoo adjusted-close study (PR #118). Levered ETF rebalance pressure was **refreshed to 2026-07-01** via operator six-row AUM packet (PR #120). Score gates remain **closed**; v1.10e no-score-change policy remains **active**. Equity `publicSignalCount` remains **13**; Treasury lane remains **2** separate display-only cards.
 
 ---
 
@@ -56,6 +56,7 @@ Display-only artifact refreshes do **not** replace these MOCK values. No `public
 | **v1.15f** | Weekly display + Treasury separate | `systematicFlowProxy`, `treasuryFuturesPositioningProxy`, `retirementFlowPressureProxy` (Q1 2026), `indexInclusionEventProxy` (June rebalance) refreshed; scores unchanged |
 | **v1.15g** | Blocker cleanup / source watch | **No blockers resolved**; no files changed; `npm run ghostflow:check` passed |
 | **v1.15h** | Cap-weight premium display refresh | `capWeightPremiumProxy` → **2026-07-01** via Yahoo adj-close study (PR #118); **blocker resolved**; scores unchanged |
+| **v1.15i** | Levered ETF rebalance display refresh | `leveredEtfRebalancePressure` → **2026-07-01** via operator six-row AUM packet (PR #120); **blocker resolved**; scores unchanged |
 
 ---
 
@@ -77,7 +78,7 @@ Display-only artifact refreshes do **not** replace these MOCK values. No `public
 | Signal id | File | asOf | publishedAt | Key value / note | Refreshed in |
 |-----------|------|------|-------------|------------------|--------------|
 | `systematic-flow` | `systematicFlowProxy.v1.json` | 2026-06-23 | 2026-06-27 | Basket net short **18.3% OI** · pressure **92** | v1.15f |
-| `levered-etf-rebalance` | `leveredEtfRebalancePressure.v1.json` | 2026-05-22 | 2026-05-28 | Session **2026-05-22** | **Blocked** |
+| `levered-etf-rebalance` | `leveredEtfRebalancePressure.v1.json` | 2026-07-01 | 2026-07-06 | **Est. sell $3.70B · 8.24%** of universe AUM | **v1.15i** |
 | `retirement-asset-growth` | `retirementFlowPressureProxy.v1.json` | 2026-03-31 | 2026-06-18 | **$47.6T** · QoQ **−2.5%** · YoY **+10.4%** (Q1 2026) | v1.15f |
 | `options-activity-proxy` | `optionsActivityProxy.v1.json` | 2026-07-01 | 2026-07-01 | Index **5.5M** contracts | v1.15c |
 | `index-inclusion-events` | `indexInclusionEventProxy.v1.json` | 2026-06-11 | 2026-07-02 | **14** events · window through **2026-06-22** | v1.15f |
@@ -103,7 +104,7 @@ Baseline before v1.15 (reference **2026-05-22**): Composite **62** · Passive **
 | **v1.15b** (daily) | 62 | 58 | 66 | Crowded / Reflexive | VIX + breadth refresh; reference bump only |
 | **v1.15d** (weekly ETF) | **55** | **45** | 65 | Elevated Flow Pressure | ETF outflow **−$4.807B** |
 | **v1.15e** (monthly partial) | **56** | 45 | **67** | Elevated Flow Pressure | ICI passive share + active/index flows; concentration blocked |
-| **v1.15f / v1.15g / v1.15h** | 56 | 45 | 67 | Elevated Flow Pressure | Display/Treasury/cap-weight only — **no score change** |
+| **v1.15f / v1.15g / v1.15h / v1.15i** | 56 | 45 | 67 | Elevated Flow Pressure | Display/Treasury/cap-weight/levered ETF only — **no score change** |
 
 Display-only and Treasury-lane refreshes (v1.15c, v1.15f) did **not** change Composite / Passive / Structural.
 
@@ -114,16 +115,18 @@ Display-only and Treasury-lane refreshes (v1.15c, v1.15f) did **not** change Com
 | # | Artifact | Lane | Current asOf | Blocker | Score impact if resolved |
 |---|----------|------|--------------|---------|--------------------------|
 | 1 | `treasuryLongEndIncomeLens.v1.json` | Treasury display | 2026-06-02 | FRED live CSV timeout; `FRED_API_KEY` not set; no local CSVs in `tmp/fred/` | **None** — separate lane |
-| 2 | `leveredEtfRebalancePressure.v1.json` | Display-only | 2026-05-22 | Full six-row ProShares/Direxion AUM + QQQ/SPY/IWM return operator extract not verified through session ≤ 2026-07-01 | **None** — MOCK **55** unchanged |
-| 3 | `indexConcentration.v1.json` | **Score-fed** | 2026-03-31 | Canonical US SSGA SPY fact sheet PDF still shows **2026-03-31** holdings | **Yes** — Structural + Composite via existing scoring |
+| 2 | `indexConcentration.v1.json` | **Score-fed** | 2026-03-31 | Canonical US SSGA SPY fact sheet PDF still shows **2026-03-31** holdings | **Yes** — Structural + Composite via existing scoring |
 
-### Resolved (v1.15h)
+### Resolved (v1.15h / v1.15i)
 
 | Artifact | Lane | Refreshed `asOf` | Source | Score impact |
 |----------|------|------------------|--------|--------------|
 | `capWeightPremiumProxy.v1.json` | Display-only | **2026-07-01** | Yahoo Finance v8 chart API adjusted-close operator download (`operator_csv_adj_close`); **no Marketstack** | **None** — Composite **56** · Passive **45** · Structural **67** unchanged; `publicSignalCount` **13** |
+| `leveredEtfRebalancePressure.v1.json` | Display-only | **2026-07-01** | ProShares Net Assets (TQQQ/SQQQ/UPRO/SPXU) + StockAnalysis AUM (TNA/TZA) + StockAnalysis returns (QQQ/SPY/IWM); Finviz cross-check TNA/TZA; **no Marketstack** | **None** — MOCK **55** unchanged; Composite **56** · Passive **45** · Structural **67**; `publicSignalCount` **13** |
 
-**Key refreshed values (2026-07-01):** aligned **5,829** · SPY adj **745.76** · RSP adj **213.41** · ratio **3.4945** · ratio pctile **97.6** · 1Y spread **2.67** · 3Y **25.52** · 5Y **33.27** · `dataQuality` **verified_manual**.
+**Cap-weight key values (2026-07-01):** aligned **5,829** · SPY adj **745.76** · RSP adj **213.41** · ratio **3.4945** · ratio pctile **97.6** · 1Y spread **2.67** · 3Y **25.52** · 5Y **33.27** · `dataQuality` **verified_manual**.
+
+**Levered ETF key values (2026-07-01):** aggregate AUM **44932.79M** · abs rebalance notional **3701.72M** · rebalance **8.24%** of universe AUM · `dominantDirection` **sell_underlying** · display **Est. sell $3.70B · 8.24% of universe AUM** · `dataQuality` **verified_manual**. TZA Finviz cross-check differed **20.35%** from StockAnalysis; StockAnalysis primary operator-accepted (not averaged).
 
 ---
 
@@ -142,16 +145,24 @@ Display-only and Treasury-lane refreshes (v1.15c, v1.15f) did **not** change Com
 3. Update artifact only when all six series share a verified common `asOf` (no forward-fill).
 4. Run `npm run ghostflow:check`. Treasury lane only — does not affect `publicSignalCount` or Composite.
 
-### 2. Levered ETF rebalance pressure
+### 2. Levered ETF rebalance pressure — **resolved (v1.15i)**
 
 **Artifact:** `data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.json`  
-**Runbook:** [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) §3b · [LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md](./LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md)
+**Status:** **Refreshed** to **2026-07-01** (PR #120). No longer a blocker.
 
-1. Capture issuer AUM for all six tickers (**TQQQ, SQQQ, UPRO, SPXU, TNA, TZA**) from ProShares/Direxion fund pages.
-2. Capture single-session underlying returns for **QQQ, SPY, IWM** for target session ≤ **2026-07-01** (StockAnalysis or approved source).
-3. Recompute row-level rebalance estimates and aggregate observations per validator.
-4. Set `dataQuality: verified_manual` only after full six-row review.
-5. Do **not** wire into scoring; MOCK **55** remains.
+| Item | Value |
+|------|--------|
+| **Source** | ProShares official Net Assets (TQQQ/SQQQ/UPRO/SPXU, fetched **2026-07-06**); StockAnalysis AUM for TNA/TZA (Direxion/ETFdb blocked); Finviz cross-check TNA/TZA; StockAnalysis close-based daily returns QQQ/SPY/IWM **2026-07-01**; Yahoo adj-close cross-check **0.00 pp** delta; **no Marketstack** |
+| **`dataQuality`** | `verified_manual` |
+| **Aggregate AUM** | **44932.79M** |
+| **Abs rebalance notional** | **3701.72M** |
+| **Rebalance % of universe AUM** | **8.24** |
+| **`dominantDirection`** | **sell_underlying** |
+| **Display preview** | **Est. sell $3.70B · 8.24% of universe AUM** |
+| **TZA note** | Finviz cross-check **20.35%** below StockAnalysis; StockAnalysis primary operator-accepted; values **not averaged** |
+| **Score impact** | **None** — MOCK **55** unchanged; Composite **56** · Passive **45** · Structural **67**; `publicSignalCount` **13** |
+
+**Runbook:** [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) §3b · [LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md](./LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md)
 
 ### 3. Cap-weight premium proxy — **resolved (v1.15h)**
 
@@ -209,9 +220,9 @@ Display-only and Treasury-lane refreshes (v1.15c, v1.15f) did **not** change Com
 1. **Resolve blockers** in priority order when sources become available — see **[GHOSTFLOW_BLOCKER_SOURCE_STRATEGY.md](./GHOSTFLOW_BLOCKER_SOURCE_STRATEGY.md)** for Marketstack roles, request budget, and canonical vs helper source policy:
    - **Score-fed:** `indexConcentration` when SSGA US PDF updates (requires score-impact report).
    - **Treasury:** `treasuryLongEndIncomeLens` when FRED API or local CSVs succeed (Marketstack **not appropriate**).
-   - **Display-only:** `leveredEtfRebalancePressure` (issuer AUM manual; Marketstack **helper** for QQQ/SPY/IWM returns only).
    - **Resolved:** `capWeightPremiumProxy` refreshed **2026-07-01** via Yahoo adj-close (v1.15h).
-2. **Routine cadence** per [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md): daily (vol, breadth, options, tail-skew, Treasury FRED when unblocked); weekly (ETF flow, CFTC systematic, Treasury futures, levered ETF when unblocked); monthly (ICI structural, SSGA concentration); quarterly (retirement).
+   - **Resolved:** `leveredEtfRebalancePressure` refreshed **2026-07-01** via operator six-row AUM packet (v1.15i).
+2. **Routine cadence** per [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md): daily (vol, breadth, options, tail-skew, Treasury FRED when unblocked); weekly (ETF flow, CFTC systematic, Treasury futures, levered ETF per §3b); monthly (ICI structural, SSGA concentration); quarterly (retirement).
 3. **Do not** open score gates or change MOCK inputs without explicit product approval.
 
 ### Cross-product note (GhostRegime — separate lane)

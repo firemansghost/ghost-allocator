@@ -2,7 +2,7 @@
 
 **Status:** Operator strategy — documentation only.  
 **Authoritative refresh record:** [GHOSTFLOW_V115_REFRESH_CHECKPOINT.md](./GHOSTFLOW_V115_REFRESH_CHECKPOINT.md)  
-**Date:** 2026-07-04 (updated **2026-07-06** — cap-weight blocker resolved)
+**Date:** 2026-07-04 (updated **2026-07-06** — cap-weight and levered ETF blockers resolved)
 
 > **Warning:** This document does **not** authorize artifact updates by itself. Do not edit production JSON, scoring, reference, buildSnapshot, mock snapshot, validators, or UI from this memo alone. Transcribe only after operator verification and existing runbook gates.
 
@@ -10,14 +10,14 @@
 
 ## Executive summary
 
-GhostFlow v1.15 is **current** on reference **2026-07-01** with **three source blockers** remaining. Cap-weight premium proxy was **refreshed to 2026-07-01** (v1.15h / PR #118). This memo decides, artifact by artifact, whether **Marketstack** may help operator refresh work and documents the **canonical operator path** for each blocker.
+GhostFlow v1.15 is **current** on reference **2026-07-01** with **two source blockers** remaining. Cap-weight premium proxy was **refreshed to 2026-07-01** (v1.15h / PR #118). Levered ETF rebalance pressure was **refreshed to 2026-07-01** (v1.15i / PR #120). This memo decides, artifact by artifact, whether **Marketstack** may help operator refresh work and documents the **canonical operator path** for each blocker.
 
 **Headline decisions:**
 
 | Blocker | Marketstack role | Status / next action |
 |---------|------------------|----------------------|
 | Treasury long-end income lens | **not appropriate** | **Open** — FRED API key or local FRED CSVs |
-| Levered ETF rebalance pressure | **helper** (index returns only) | **Open** — manual issuer AUM + QQQ/SPY/IWM return extract |
+| Levered ETF rebalance pressure | **helper** (index returns only) | **Resolved** — operator six-row AUM packet → artifact **2026-07-01**; **no Marketstack** |
 | Cap-weight premium proxy | **helper** (EOD close export only; not production) | **Resolved** — Yahoo adj-close study → artifact **2026-07-01**; Marketstack insufficient for full history |
 | Index concentration | **not appropriate** | **Open** — watch US SSGA SPY PDF until holdings update |
 
@@ -37,21 +37,23 @@ GhostFlow v1.15 is **current** on reference **2026-07-01** with **three source b
 | v1.10e no-score-change policy | **Active** |
 | MOCK passive inputs | **62 / 58 / 55** unchanged |
 
-### Open blockers (post v1.15h)
+### Open blockers (post v1.15i)
 
 | # | Artifact | Lane | Artifact `asOf` | Blocker |
 |---|----------|------|-----------------|---------|
 | 1 | `treasuryLongEndIncomeLens.v1.json` | Treasury display | 2026-06-02 | FRED timeout; no `FRED_API_KEY`; empty `tmp/fred/` |
-| 2 | `leveredEtfRebalancePressure.v1.json` | Display-only | 2026-05-22 | Six-row issuer AUM + QQQ/SPY/IWM return not refreshed ≤ 2026-07-01 |
-| 3 | `indexConcentration.v1.json` | **Score-fed** | 2026-03-31 | US SSGA SPY PDF still **2026-03-31** holdings |
+| 2 | `indexConcentration.v1.json` | **Score-fed** | 2026-03-31 | US SSGA SPY PDF still **2026-03-31** holdings |
 
-### Resolved (v1.15h)
+### Resolved (v1.15h / v1.15i)
 
 | Artifact | Refreshed `asOf` | Source | Score impact |
 |----------|------------------|--------|--------------|
 | `capWeightPremiumProxy.v1.json` | **2026-07-01** | Yahoo Finance v8 chart API adjusted-close operator download (`operator_csv_adj_close`); **no Marketstack** | **None** — **56 / 45 / 67**; `publicSignalCount` **13** |
+| `leveredEtfRebalancePressure.v1.json` | **2026-07-01** | ProShares Net Assets + StockAnalysis AUM/returns; Finviz cross-check; **no Marketstack** | **None** — MOCK **55**; **56 / 45 / 67**; `publicSignalCount` **13** |
 
-**Refreshed headline values:** aligned **5,829** · SPY **745.76** · RSP **213.41** · ratio **3.4945** (pctile **97.6**) · 1Y spread **2.67** · 3Y **25.52** · 5Y **33.27** · `dataQuality` **verified_manual**.
+**Cap-weight headline values:** aligned **5,829** · SPY **745.76** · RSP **213.41** · ratio **3.4945** (pctile **97.6**) · 1Y spread **2.67** · 3Y **25.52** · 5Y **33.27** · `dataQuality` **verified_manual**.
+
+**Levered ETF headline values:** aggregate AUM **44932.79M** · abs notional **3701.72M** · **8.24%** of universe AUM · **sell_underlying** · display **Est. sell $3.70B · 8.24% of universe AUM** · TZA Finviz gap **20.35%** (StockAnalysis primary accepted).
 
 ---
 
@@ -135,39 +137,35 @@ Six FRED series on a **common business `asOf`** (no forward-fill):
 
 ---
 
-### B. Levered ETF rebalance pressure
+### B. Levered ETF rebalance pressure — **resolved (v1.15i)**
 
 **Artifact:** `data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.json`  
-**Lane:** Display-only equity card; score input `leveredEtfRebalancePressure` remains **MOCK 55**
+**Lane:** Display-only equity card; score input `leveredEtfRebalancePressure` remains **MOCK 55**  
+**Status:** **Refreshed** to **2026-07-01** (PR #120). **No longer a blocker.**
 
-#### Required data
+#### Production refresh record (2026-07-01)
 
-| Ingredient | Source (canonical) | Notes |
-|------------|-------------------|--------|
-| AUM for **TQQQ, SQQQ, UPRO, SPXU, TNA, TZA** | **ProShares / Direxion issuer fund pages** | Manual HTML extract; record `aumAsOf` per row |
-| Underlying return **QQQ, SPY, IWM** | StockAnalysis (current production note) or operator CSV | Single-session or artifact-window return % |
+| Item | Value |
+|------|--------|
+| **AUM — ProShares** | TQQQ/SQQQ/UPRO/SPXU from official ProShares Net Assets pages (fetched **2026-07-06**) |
+| **AUM — Direxion pair** | TNA/TZA from StockAnalysis (Direxion and ETFdb blocked at fetch) |
+| **Cross-check** | Finviz ETF snapshot for TNA/TZA; TNA within **2.76%**; TZA Finviz **20.35%** below StockAnalysis — StockAnalysis primary operator-accepted (not averaged) |
+| **Returns** | StockAnalysis close-based daily change QQQ **−1.52%** · SPY **−0.14%** · IWM **−0.38%** on **2026-07-01**; Yahoo adj-close cross-check **0.00 pp** |
+| **Aggregates** | AUM **44932.79M** · abs notional **3701.72M** · **8.24%** · **sell_underlying** |
+| **Display** | **Est. sell $3.70B · 8.24% of universe AUM** |
+| **`dataQuality`** | `verified_manual` |
+| **Marketstack** | **Not used** |
+| **Score impact** | **None** — MOCK **55**; Composite **56** · Passive **45** · Structural **67**; `publicSignalCount` **13** |
 
-Issuer AUM **cannot** be sourced from Marketstack.
+#### Future refresh workflow
 
-#### Marketstack assessment
-
-**helper** — index-return leg only.
-
-- Marketstack EOD can supply **QQQ, SPY, IWM** daily `close` for operator-local return calculation (same semantics as Stooq path in [`levered-etf-rebalance-history-study.ts`](../../scripts/ghostflow/levered-etf-rebalance-history-study.ts)).
-- Repo parser uses **unadjusted close** — must match production `underlyingReturnPct` methodology (currently StockAnalysis daily change).
-- **cross-check only** if StockAnalysis/Stooq already used as primary.
-
-**Not approved as primary** for production artifact without runbook update and operator `source.note` documenting symbol, session date, and cross-check.
-
-#### Recommended operator workflow
-
-1. Capture **six issuer AUM** values with `aumAsOf` ≤ refresh window from ProShares/Direxion pages.
-2. Capture **QQQ, SPY, IWM** return for target session ≤ **2026-07-01** (StockAnalysis primary; Stooq CSV or future Marketstack helper optional).
-3. Recompute per-row `estimatedRebalanceNotionalMillionsUsd` and aggregate observations per [LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md](./LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md).
+1. Capture **six issuer AUM** values (ProShares for TQQQ/SQQQ/UPRO/SPXU; StockAnalysis or Direxion for TNA/TZA when accessible).
+2. Capture **QQQ, SPY, IWM** single-session return for target session ≤ reference (StockAnalysis primary).
+3. Recompute per-row and aggregate observations per [LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md](./LEVERED_ETF_REBALANCE_ARTIFACT_DESIGN.md).
 4. Set `dataQuality: verified_manual` only after full six-row review.
 5. Run `npm run ghostflow:check`. Display-only — MOCK **55** unchanged.
 
-**Future helper (not in this pass):** optional script exporting QQQ/SPY/IWM EOD CSV via `--source marketstack --allow-marketstack` for operator review before transcription.
+**Optional helper:** Marketstack EOD can supply QQQ/SPY/IWM **close** for operator-local return calculation — **cross-check only** unless runbook updated.
 
 ---
 
@@ -286,7 +284,7 @@ Use **index weights**, not fund weights if both appear. `asOf` = holdings month-
 | Artifact | Required data | Canonical source | Marketstack role | Approved for production artifact? | Request est. / refresh | Provenance note | Next operator action |
 |----------|---------------|------------------|------------------|-----------------------------------|------------------------|-----------------|----------------------|
 | `treasuryLongEndIncomeLens` | 6 FRED yields/breakeven | FRED (API or CSV) | **not appropriate** | **no** — FRED only | **0** | Official Fed series; prior API success 2026-06-02 | `FRED_API_KEY` or `tmp/fred/` CSVs → spike → transcribe |
-| `leveredEtfRebalancePressure` | 6× AUM + 3× index return | Issuer pages + StockAnalysis/CSV | **helper** (returns only) | **conditional** — AUM always manual; returns helper OK with `source.note` | **~3** (QQQ/SPY/IWM, short window) | Close ≠ adj; issuer AUM not from API | Six-row manual extract ≤ 2026-07-01 |
+| `leveredEtfRebalancePressure` | 6× AUM + 3× index return | Issuer pages + StockAnalysis/CSV | **helper** (returns only) | **resolved** — operator packet primary for **2026-07-01** refresh; **no Marketstack** | **~3** (theoretical) | AUM manual; TZA Finviz gap documented | **Done** v1.15i; future: ProShares + StockAnalysis per §3b |
 | `capWeightPremiumProxy` | SPY/RSP daily history | Yahoo/manual **adj-close** CSV | **helper** (close export only) | **resolved** — Yahoo adj-close primary used for **2026-07-01** refresh; Marketstack insufficient | **~12** (theoretical; failed under current access) | Close-only ≠ adj-close; Marketstack 1000-row cap | **Done** v1.15h; future: Yahoo adj-close → study |
 | `indexConcentration` | Top-10 index weight % | US SSGA SPY PDF | **not appropriate** | **no** — PDF only | **0** | Holdings not derivable from EOD | Watch PDF; score-impact report when updated |
 
@@ -294,7 +292,7 @@ Use **index weights**, not fund weights if both appear. `asOf` = holdings month-
 
 | Role | Meaning |
 |------|---------|
-| **primary** | Canonical production source (cap-weight resolved via Yahoo adj-close; none of the three remaining blockers use Marketstack as primary) |
+| **primary** | Canonical production source (cap-weight and levered ETF resolved without Marketstack; remaining blockers do not use Marketstack as primary) |
 | **helper** | Operator-local export to CSV/JSON; manual transcription required |
 | **cross-check only** | Sanity check against canonical source; not written to artifact |
 | **not appropriate** | Data type or provenance mismatch; do not spend quota |
