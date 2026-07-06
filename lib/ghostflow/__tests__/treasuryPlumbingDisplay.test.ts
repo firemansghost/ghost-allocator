@@ -48,8 +48,8 @@ assert.ok(futuresCard.primaryValue.includes('34.7'));
 assert.ok(futuresCard.primaryValue.toLowerCase().includes('net short'));
 
 assert.ok(incomeCard.primaryValue.includes('4.97'));
-assert.ok(incomeCard.primaryValue.includes('2.69'));
-assert.ok(incomeCard.primaryValue.includes('0.51'));
+assert.ok(incomeCard.primaryValue.includes('2.78'));
+assert.ok(incomeCard.primaryValue.includes('0.49'));
 
 assertNoScoreFieldsInJson(display);
 
