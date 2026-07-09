@@ -117,7 +117,7 @@ Treasury lane: no structured freshness bands today — dates on cards only. See 
 | **Card id** | `cap-weight-premium` — **DISPLAY ONLY** |
 | **Scoring** | **Not scored**; no `publicPassiveInputKey`; no score fields |
 | **Study script** | `npm run ghostflow:cap-weight-premium-study` — operator CSVs only; filter to `Date <= GHOSTFLOW_REFERENCE_AS_OF` before transcribing |
-| **Production values** | Reference-aligned **2026-07-01** — Yahoo adj-close study; `dataQuality` **verified_manual**; aligned **5,829**; ratio **3.4945** (pctile **97.6**); 1Y/3Y/5Y spread **2.67 / 25.52 / 33.27**; scores unchanged (**56 / 45 / 67**) |
+| **Production values** | Reference-aligned **2026-07-01** — Yahoo adj-close study; `dataQuality` **verified_manual**; aligned **5,829**; ratio **3.4945** (pctile **97.6**); 1Y/3Y/5Y spread **2.67 / 25.52 / 33.27**; display-only (no score wiring) |
 
 **Mapping decision v1.9b.5:** Cap-Weight Premium Proxy remains display-only and is not scored.
 
@@ -240,7 +240,7 @@ Each symbol writes `{SYMBOL}.csv` (`Date,Close`) plus `{SYMBOL}.marketstack.meta
 | **Production file** | [`data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.json`](../../data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.json) — included in `npm run ghostflow:validate-artifacts` |
 | **Current production** | `asOf` **2026-07-01** · `publishedAt` **2026-07-06** · `dataQuality` **verified_manual** · display **Est. sell $3.70B · 8.24% of universe AUM** · **sell_underlying** |
 | **Card id** | `levered-etf-rebalance` — **DISPLAY ONLY** |
-| **Score impact** | **None** — MOCK **55** unchanged; Composite **56** · Passive **45** · Structural **67**; `publicSignalCount` **13** |
+| **Score impact** | **None** — MOCK **55** unchanged; display-only; `publicSignalCount` **13** |
 | **Example file** | [`data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.example.json`](../../data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.example.json) — design reference only; unit tests (`mode: example`) |
 | **Universe** | TQQQ, SQQQ, UPRO, SPXU, TNA, TZA — `tier1_six_ticker_3x_index_etf_v1` |
 | **Primary AUM** | ProShares fund pages (TQQQ/SQQQ/UPRO/SPXU); StockAnalysis for TNA/TZA when Direxion/ETFdb blocked; Finviz cross-check optional |
@@ -273,10 +273,14 @@ Each symbol writes `{SYMBOL}.csv` (`Date,Close`) plus `{SYMBOL}.marketstack.meta
 
 ### 4. ETF Net Issuance Pressure (weekly)
 
+**Status:** **Live** — score-fed `etf-flow`. **Refreshed to week ended 2026-07-01** (v1.15k / PR #124).
+
 | Item | Detail |
 |------|--------|
 | **Artifact file** | [`data/ghostflow/artifacts/etfNetIssuance.v1.json`](../../data/ghostflow/artifacts/etfNetIssuance.v1.json) |
 | **Source URL** | [ICI ETF flows](https://www.ici.org/research/stats/etf_flows) · [Weekly estimated ETF net issuance](https://www.ici.org/research/statistics/etfs/weekly-estimated-etf-net-issuance) |
+| **Production values** | Week ended **2026-07-01** · ICI release **2026-07-07** · domestic equity **+$16,271M** · `dataQuality` **verified_manual** · ETF proxy **56** · scores **Composite 60 · Passive 53 · Structural 67** · `publicSignalCount` **13** |
+| **Prior-week revision note** | Same ICI table revises week ended **2026-06-24** domestic equity from prior artifact **−4,807M** to **−3,732M** (schema has no prior-week field; documented in `source.note`) |
 | **Fields to update** | `asOf`, `publishedAt`, `observations.domesticEquityNetIssuanceMillionsUsd`, `dataQuality` |
 | **Units** | **Millions USD** (e.g. `33919` for ~$33.9B display). Do not store billions in JSON |
 | **`asOf` rule** | **Week ended** date (ISO `YYYY-MM-DD`) |
@@ -385,7 +389,7 @@ Each symbol writes `{SYMBOL}.csv` (`Date,Close`) plus `{SYMBOL}.marketstack.meta
 | **Production file** | [`data/ghostflow/artifacts/treasuryLongEndIncomeLens.v1.json`](../../data/ghostflow/artifacts/treasuryLongEndIncomeLens.v1.json) |
 | **Spike helper** | `npm run ghostflow:fred-treasury-yields-spike` (or `--local-dir tmp/fred` / `--fred-api` if CSV blocked) |
 | **Source** | FRED: DGS30, DFII30, DGS2, DGS5, DGS10, T10YIE — **common asOf** across all six |
-| **Production values** | Reference-aligned **2026-07-01** — official FRED API (`fred_api`); live graph CSV timed out; API fallback succeeded; DGS30 **4.97** · DFII30 **2.78** · DGS2 **4.17** · DGS5 **4.24** · DGS10 **4.48** · T10YIE **2.23** · curve2s30s **0.80** · curve5s30s **0.73** · curve10s30s **0.49** · display **30Y 4.97% · Real 2.78% · 10s30s +0.49 pp**; `dataQuality` **verified_manual**; scores unchanged (**56 / 45 / 67**) |
+| **Production values** | Reference-aligned **2026-07-01** — official FRED API (`fred_api`); live graph CSV timed out; API fallback succeeded; DGS30 **4.97** · DFII30 **2.78** · DGS2 **4.17** · DGS5 **4.24** · DGS10 **4.48** · T10YIE **2.23** · curve2s30s **0.80** · curve5s30s **0.73** · curve10s30s **0.49** · display **30Y 4.97% · Real 2.78% · 10s30s +0.49 pp**; `dataQuality` **verified_manual**; Treasury lane only (not scored) |
 | **Fields to update** | `asOf`, `publishedAt`, yield/breakeven observations; `dataQuality`; **no forward-fill** |
 | **`asOf` rule** | Latest **common** FRED business date across all six series on or before `GHOSTFLOW_REFERENCE_AS_OF` |
 | **Lane** | **Treasury Plumbing only** — not scored; not investment advice; not in `publicSignalCount` |

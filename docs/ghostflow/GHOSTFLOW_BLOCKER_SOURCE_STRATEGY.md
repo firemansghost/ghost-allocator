@@ -2,7 +2,7 @@
 
 **Status:** Operator strategy — documentation only.  
 **Authoritative refresh record:** [GHOSTFLOW_V115_REFRESH_CHECKPOINT.md](./GHOSTFLOW_V115_REFRESH_CHECKPOINT.md)  
-**Date:** 2026-07-04 (updated **2026-07-06** — cap-weight, levered ETF, and Treasury long-end blockers resolved)
+**Date:** 2026-07-04 (updated **2026-07-09** — ETF net issuance score-fed refresh v1.15k)
 
 > **Warning:** This document does **not** authorize artifact updates by itself. Do not edit production JSON, scoring, reference, buildSnapshot, mock snapshot, validators, or UI from this memo alone. Transcribe only after operator verification and existing runbook gates.
 
@@ -10,7 +10,7 @@
 
 ## Executive summary
 
-GhostFlow v1.15 is **current** on reference **2026-07-01** with **one source blocker** remaining. Cap-weight premium proxy was **refreshed to 2026-07-01** (v1.15h / PR #118). Levered ETF rebalance pressure was **refreshed to 2026-07-01** (v1.15i / PR #120). Treasury long-end income lens was **refreshed to 2026-07-01** (v1.15j / PR #122). This memo decides, artifact by artifact, whether **Marketstack** may help operator refresh work and documents the **canonical operator path** for each blocker.
+GhostFlow v1.15 is **current** on reference **2026-07-01** with **one source blocker** remaining. Cap-weight premium proxy was **refreshed to 2026-07-01** (v1.15h / PR #118). Levered ETF rebalance pressure was **refreshed to 2026-07-01** (v1.15i / PR #120). Treasury long-end income lens was **refreshed to 2026-07-01** (v1.15j / PR #122). ETF net issuance was **refreshed to week ended 2026-07-01** (v1.15k / PR #124) — Composite **60** · Passive **53** · Structural **67**. This memo decides, artifact by artifact, whether **Marketstack** may help operator refresh work and documents the **canonical operator path** for each blocker.
 
 **Headline decisions:**
 
@@ -30,26 +30,30 @@ GhostFlow v1.15 is **current** on reference **2026-07-01** with **one source blo
 | Item | Value |
 |------|--------|
 | `GHOSTFLOW_REFERENCE_AS_OF` | **2026-07-01** |
-| Composite / Passive / Structural | **56 / 45 / 67** |
+| Composite / Passive / Structural | **60 / 53 / 67** |
 | Band | Elevated Flow Pressure |
 | `publicSignalCount` | **13** |
 | Score gates | **Closed** |
 | v1.10e no-score-change policy | **Active** |
 | MOCK passive inputs | **62 / 58 / 55** unchanged |
+| Gate C daily package | **Deferred** — no reference bump; VIX/breadth not refreshed pending official CBOE/StockCharts verification |
 
-### Open blockers (post v1.15j)
+### Open blockers (post v1.15k)
 
 | # | Artifact | Lane | Artifact `asOf` | Blocker |
 |---|----------|------|-----------------|---------|
 | 1 | `indexConcentration.v1.json` | **Score-fed** | 2026-03-31 | US SSGA SPY PDF still **2026-03-31** holdings |
 
-### Resolved (v1.15h / v1.15i / v1.15j)
+**Not blockers (optional ready):** `systematicFlowProxy.v1.json` and `treasuryFuturesPositioningProxy.v1.json` may refresh to CFTC TFF **as of 2026-06-30** in a separate display/Treasury pass.
+
+### Resolved (v1.15h / v1.15i / v1.15j) + score-fed (v1.15k)
 
 | Artifact | Refreshed `asOf` | Source | Score impact |
 |----------|------------------|--------|--------------|
-| `capWeightPremiumProxy.v1.json` | **2026-07-01** | Yahoo Finance v8 chart API adjusted-close operator download (`operator_csv_adj_close`); **no Marketstack** | **None** — **56 / 45 / 67**; `publicSignalCount` **13** |
-| `leveredEtfRebalancePressure.v1.json` | **2026-07-01** | ProShares Net Assets + StockAnalysis AUM/returns; Finviz cross-check; **no Marketstack** | **None** — MOCK **55**; **56 / 45 / 67**; `publicSignalCount` **13** |
-| `treasuryLongEndIncomeLens.v1.json` | **2026-07-01** | Official FRED API via `ghostflow:fred-treasury-yields-spike`; live graph CSV timed out; API fallback succeeded; common date ≤ reference; **no forward-fill** | **None** — Treasury lane only; **56 / 45 / 67**; `publicSignalCount` **13** |
+| `capWeightPremiumProxy.v1.json` | **2026-07-01** | Yahoo Finance v8 chart API adjusted-close operator download (`operator_csv_adj_close`); **no Marketstack** | **None** at refresh time |
+| `leveredEtfRebalancePressure.v1.json` | **2026-07-01** | ProShares Net Assets + StockAnalysis AUM/returns; Finviz cross-check; **no Marketstack** | **None** — MOCK **55** |
+| `treasuryLongEndIncomeLens.v1.json` | **2026-07-01** | Official FRED API via `ghostflow:fred-treasury-yields-spike`; live graph CSV timed out; API fallback succeeded; common date ≤ reference; **no forward-fill** | **None** — Treasury lane only |
+| `etfNetIssuance.v1.json` | **2026-07-01** (week ended) | Official ICI Estimated ETF Net Issuance release **2026-07-07**; domestic equity **+$16,271M**; prior week revised **−4,807 → −3,732** (note only) | ETF proxy **25 → 56**; Passive **45 → 53**; Composite **56 → 60**; Structural **67**; `publicSignalCount` **13** |
 
 **Cap-weight headline values:** aligned **5,829** · SPY **745.76** · RSP **213.41** · ratio **3.4945** (pctile **97.6**) · 1Y spread **2.67** · 3Y **25.52** · 5Y **33.27** · `dataQuality` **verified_manual**.
 
