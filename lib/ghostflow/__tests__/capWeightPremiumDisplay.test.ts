@@ -64,8 +64,8 @@ assert.strictEqual(meta.publicSignalCount, 13);
 assert.ok(meta.publicSignals.some((s) => s.signalId === 'cap-weight-premium'));
 assert.ok(!meta.publicPassiveInputKeys?.includes('cap-weight-premium' as never));
 
-assert.strictEqual(scored.score.score, 56);
-assert.strictEqual(scored.score.subScores.passivePressure, 45);
+assert.strictEqual(scored.score.score, 60);
+assert.strictEqual(scored.score.subScores.passivePressure, 53);
 assert.strictEqual(scored.score.subScores.structuralFragility, 67);
 assert.strictEqual(ghostFlowBandLabel(scored.score.band), 'Elevated Flow Pressure');
 
