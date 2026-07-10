@@ -219,6 +219,7 @@ Each symbol writes `{SYMBOL}.csv` (`Date,Close`) plus `{SYMBOL}.marketstack.meta
 | **Spike helper** | `npm run ghostflow:cftc-tff-spike` (operator-only; prints latest PRE rows) |
 | **Calibration study** | `npm run ghostflow:cftc-tff-history-study` (research only; see [CFTC_TFF_CALIBRATION_STUDY.md](./CFTC_TFF_CALIBRATION_STUDY.md)) |
 | **Source** | [CFTC PRE TFF Futures Only](https://publicreporting.cftc.gov/Commitments-of-Traders/TFF-Futures-Only/gpe5-46if/about_data) (`gpe5-46if`) |
+| **Current production** | `asOf` **2026-06-30** · `publishedAt` **2026-07-03** · basket net short **19.4% OI** · pressure **97** · `dataQuality` **verified_manual** · MOCK systematic **62** unchanged |
 | **MVP contracts** | `13874A` E-mini S&P 500, `209742` Nasdaq Mini, `239742` Russell E-mini — all `usedInScore: true` |
 | **VIX context** | `1170E1` in `vixContext`; **`usedInScore: false`** |
 | **`asOf` rule** | CFTC Tuesday report date (`report_date_as_yyyy_mm_dd`); must equal every contract `observations.reportDate` |
@@ -371,6 +372,7 @@ Each symbol writes `{SYMBOL}.csv` (`Date,Close`) plus `{SYMBOL}.marketstack.meta
 | **Production file** | [`data/ghostflow/artifacts/treasuryFuturesPositioningProxy.v1.json`](../../data/ghostflow/artifacts/treasuryFuturesPositioningProxy.v1.json) |
 | **Spike helper** | `npm run ghostflow:treasury-cftc-pre-spike` (contract discovery + PRE extract aid) |
 | **Source** | CFTC PRE TFF — UST futures basket (2Y/5Y/10Y/30Y); see [TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md](./TREASURY_BASIS_TRADE_ARTIFACT_DESIGN.md) |
+| **Current production** | `asOf` **2026-06-30** · `publishedAt` **2026-07-03** · basket lev net **−34.6% OI** · **net_short** · basket lev net **−6,206,938** · **4** core contracts · `dataQuality` **verified_manual** |
 | **Fields to update** | `asOf`, `publishedAt`, contract rows, basket metrics — recompute; `dataQuality`, `mappingStatus` stays **not_final** |
 | **`asOf` rule** | CFTC Tuesday report date; aligned across contracts |
 | **`publishedAt` rule** | Friday CFTC release date for that report |
