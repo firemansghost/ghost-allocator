@@ -2,8 +2,8 @@
 
 **GhostFlow docs:** [README](./README.md) · [Current state](./GHOSTFLOW_CURRENT_STATE.md) · [Reference date policy](./REFERENCE_DATE_AND_OPERATOR_POLICY.md) · [Manual refresh checklist](./MANUAL_REFRESH_CHECKLIST.md) · [Operator refresh discipline](./OPERATOR_REFRESH_DISCIPLINE.md)
 
-**Checkpoint date:** 2026-07-02 (updated **2026-07-09** — ETF net issuance score-fed refresh v1.15k)  
-**Status:** v1.15 operator refresh cycle **complete** except **one source blocker** (see register below). Cap-weight premium proxy **resolved** in v1.15h (PR #118). Levered ETF rebalance pressure **resolved** in v1.15i (PR #120). Treasury long-end income lens **resolved** in v1.15j (PR #122). ETF net issuance **refreshed** in v1.15k (PR #124).  
+**Checkpoint date:** 2026-07-02 (updated **2026-07-09** — CFTC display/Treasury refresh v1.15l)  
+**Status:** v1.15 operator refresh cycle **complete** except **one source blocker** (see register below). Cap-weight premium proxy **resolved** in v1.15h (PR #118). Levered ETF rebalance pressure **resolved** in v1.15i (PR #120). Treasury long-end income lens **resolved** in v1.15j (PR #122). ETF net issuance **refreshed** in v1.15k (PR #124). CFTC display/Treasury **refreshed** in v1.15l (PR #126).  
 **Document type:** Refresh checkpoint / blocker register — **docs only**; no artifact, score, runtime, or code changes in this memo.
 
 ---
@@ -12,7 +12,7 @@
 
 GhostFlow **v1.15a.2 through v1.15g** executed the approved operator refresh sequence after [REFERENCE_DATE_AND_OPERATOR_POLICY.md](./REFERENCE_DATE_AND_OPERATOR_POLICY.md). The dashboard reference was bumped to **`2026-07-01`**. Score-fed daily, weekly, and partial monthly refreshes moved the Research Composite from **62 → 55 → 56** (Passive **58 → 45**; Structural **65 → 67**). Display-only and Treasury-lane artifacts were refreshed where verified sources were available. **v1.15k** then refreshed weekly ETF net issuance (week ended **2026-07-01**), moving Composite **56 → 60** and Passive **45 → 53** (Structural **67** unchanged).
 
-**One artifact remains blocked** by source availability (SSGA PDF lag). Cap-weight premium proxy was **refreshed to 2026-07-01** via Yahoo adjusted-close study (PR #118). Levered ETF rebalance pressure was **refreshed to 2026-07-01** via operator six-row AUM packet (PR #120). Treasury long-end income lens was **refreshed to 2026-07-01** via official FRED API (PR #122). ETF net issuance was **refreshed to week ended 2026-07-01** via ICI (PR #124). **No Gate C daily package** in v1.15k — `GHOSTFLOW_REFERENCE_AS_OF` remains **2026-07-01**; VIX/breadth not refreshed. Score gates remain **closed**; v1.10e no-score-change policy remains **active**. Equity `publicSignalCount` remains **13**; Treasury lane remains **2** separate display-only cards.
+**One artifact remains blocked** by source availability (SSGA PDF lag). Cap-weight premium proxy was **refreshed to 2026-07-01** via Yahoo adjusted-close study (PR #118). Levered ETF rebalance pressure was **refreshed to 2026-07-01** via operator six-row AUM packet (PR #120). Treasury long-end income lens was **refreshed to 2026-07-01** via official FRED API (PR #122). ETF net issuance was **refreshed to week ended 2026-07-01** via ICI (PR #124). CFTC systematic-flow and Treasury futures positioning were **refreshed to report date 2026-06-30** via PRE `gpe5-46if` (PR #126 / v1.15l) — display/Treasury only; scores unchanged. **No Gate C daily package** in v1.15k–l — `GHOSTFLOW_REFERENCE_AS_OF` remains **2026-07-01**; VIX/breadth not refreshed. Score gates remain **closed**; v1.10e no-score-change policy remains **active**. Equity `publicSignalCount` remains **13**; Treasury lane remains **2** separate display-only cards.
 
 ---
 
@@ -59,6 +59,7 @@ Display-only artifact refreshes do **not** replace these MOCK values. No `public
 | **v1.15i** | Levered ETF rebalance display refresh | `leveredEtfRebalancePressure` → **2026-07-01** via operator six-row AUM packet (PR #120); **blocker resolved**; scores unchanged |
 | **v1.15j** | Treasury long-end income lens refresh | `treasuryLongEndIncomeLens` → **2026-07-01** via official FRED API (PR #122); **blocker resolved**; scores unchanged |
 | **v1.15k** | Weekly ETF score-fed refresh | `etfNetIssuance` → week ended **2026-07-01** (domestic equity **+$16,271M**; ICI release **2026-07-07**, PR #124); ETF proxy **25 → 56**; Composite **56 → 60**; Passive **45 → 53**; Structural **67** unchanged; **no** Gate C / reference bump |
+| **v1.15l** | Weekly CFTC display + Treasury | `systematicFlowProxy` + `treasuryFuturesPositioningProxy` → TFF Futures Only **2026-06-30** (`gpe5-46if`, published **2026-07-03**, PR #126); scores unchanged; **no** Gate C / reference bump |
 
 ---
 
@@ -79,7 +80,7 @@ Display-only artifact refreshes do **not** replace these MOCK values. No `public
 
 | Signal id | File | asOf | publishedAt | Key value / note | Refreshed in |
 |-----------|------|------|-------------|------------------|--------------|
-| `systematic-flow` | `systematicFlowProxy.v1.json` | 2026-06-23 | 2026-06-27 | Basket net short **18.3% OI** · pressure **92** | v1.15f |
+| `systematic-flow` | `systematicFlowProxy.v1.json` | 2026-06-30 | 2026-07-03 | Basket net short **19.4% OI** · pressure **97** | **v1.15l** |
 | `levered-etf-rebalance` | `leveredEtfRebalancePressure.v1.json` | 2026-07-01 | 2026-07-06 | **Est. sell $3.70B · 8.24%** of universe AUM | **v1.15i** |
 | `retirement-asset-growth` | `retirementFlowPressureProxy.v1.json` | 2026-03-31 | 2026-06-18 | **$47.6T** · QoQ **−2.5%** · YoY **+10.4%** (Q1 2026) | v1.15f |
 | `options-activity-proxy` | `optionsActivityProxy.v1.json` | 2026-07-01 | 2026-07-01 | Index **5.5M** contracts | v1.15c |
@@ -91,7 +92,7 @@ Display-only artifact refreshes do **not** replace these MOCK values. No `public
 
 | Signal id | File | asOf | publishedAt | Key value / note | Refreshed in |
 |-----------|------|------|-------------|------------------|--------------|
-| `treasury-futures-positioning-proxy` | `treasuryFuturesPositioningProxy.v1.json` | 2026-06-23 | 2026-07-02 | Lev net **−34.7% OI** · net short | v1.15f |
+| `treasury-futures-positioning-proxy` | `treasuryFuturesPositioningProxy.v1.json` | 2026-06-30 | 2026-07-03 | Lev net **−34.6% OI** · net short · basket lev net **−6,206,938** | **v1.15l** |
 | `treasury-long-end-income-lens` | `treasuryLongEndIncomeLens.v1.json` | 2026-07-01 | 2026-07-06 | 30Y nom **4.97%** · real **2.78%** · 10s30s **+0.49 pp** | **v1.15j** |
 
 ---
@@ -109,7 +110,7 @@ Baseline before v1.15 (reference **2026-05-22**): Composite **62** · Passive **
 | **v1.15f / v1.15g / v1.15h / v1.15i / v1.15j** | 56 | 45 | 67 | Elevated Flow Pressure | Display/Treasury/cap-weight/levered ETF only — **no score change** |
 | **v1.15k** (weekly ETF) | **60** | **53** | 67 | Elevated Flow Pressure | ETF inflow **+$16.271B**; proxy **25 → 56** |
 
-Display-only and Treasury-lane refreshes (v1.15c, v1.15f, v1.15h–j) did **not** change Composite / Passive / Structural. **v1.15k** did (score-fed ETF only).
+Display-only and Treasury-lane refreshes (v1.15c, v1.15f, v1.15h–j, **v1.15l**) did **not** change Composite / Passive / Structural. **v1.15k** did (score-fed ETF only).
 
 ---
 
@@ -146,6 +147,19 @@ Display-only and Treasury-lane refreshes (v1.15c, v1.15f, v1.15h–j) did **not*
 | **ETF flow proxy** | **25 → 56** |
 | **Score impact** | Passive **45 → 53** · Composite **56 → 60** · Structural **67** unchanged · `publicSignalCount` **13** · band *Elevated Flow Pressure* |
 | **Not in this pass** | No `GHOSTFLOW_REFERENCE_AS_OF` bump; no VIX/breadth Gate C daily package; no display-only or CFTC refreshes |
+
+### Display/Treasury refresh (v1.15l) — CFTC TFF Futures Only
+
+| Item | Value |
+|------|--------|
+| **Artifacts** | `systematicFlowProxy.v1.json` · `treasuryFuturesPositioningProxy.v1.json` |
+| **`asOf` / report date** | **2026-06-30** (2026 Report Week 26) |
+| **`publishedAt`** | **2026-07-03** (CFTC Friday release) |
+| **Source** | CFTC PRE Socrata dataset **`gpe5-46if`** — TFF Futures Only |
+| **Systematic key values** | Basket net **−19.4% OI** · direction **net_short** · display pressure **97** · basket net contracts **−513,444** · MOCK systematic **62** unchanged |
+| **Treasury key values** | Basket lev net **−34.6% OI** · direction **net_short** · basket lev net **−6,206,938** · **4** core contracts |
+| **Score impact** | **None** — Composite **60** · Passive **53** · Structural **67** · `publicSignalCount` **13** · `GHOSTFLOW_REFERENCE_AS_OF` **2026-07-01** |
+| **Not in this pass** | No Gate C daily package; no reference bump; no score-fed artifact changes |
 
 ---
 
@@ -248,10 +262,10 @@ Display-only and Treasury-lane refreshes (v1.15c, v1.15f, v1.15h–j) did **not*
    - **Resolved:** `leveredEtfRebalancePressure` refreshed **2026-07-01** via operator six-row AUM packet (v1.15i).
    - **Resolved:** `treasuryLongEndIncomeLens` refreshed **2026-07-01** via official FRED API (v1.15j).
    - **Resolved (score-fed):** `etfNetIssuance` refreshed week ended **2026-07-01** via ICI (v1.15k / PR #124).
-2. **Optional ready (not blockers):** `systematicFlowProxy` and `treasuryFuturesPositioningProxy` may refresh to CFTC TFF **as of 2026-06-30** in a separate display/Treasury pass.
-3. **Gate C daily package (deferred):** newer VIX/breadth market data may exist after reference **2026-07-01**, but do **not** bump `GHOSTFLOW_REFERENCE_AS_OF` or refresh VIX/breadth until official CBOE / StockCharts values are operator-verified for a chosen target session.
-4. **Routine cadence** per [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md): daily (vol, breadth, options, tail-skew, Treasury FRED); weekly (ETF flow, CFTC systematic, Treasury futures, levered ETF per §3b); monthly (ICI structural, SSGA concentration); quarterly (retirement).
-5. **Do not** open score gates or change MOCK inputs without explicit product approval.
+   - **Resolved (display/Treasury):** `systematicFlowProxy` + `treasuryFuturesPositioningProxy` refreshed to CFTC TFF **2026-06-30** via PRE `gpe5-46if` (v1.15l / PR #126).
+2. **Gate C daily package (deferred):** newer VIX/breadth market data may exist after reference **2026-07-01**, but do **not** bump `GHOSTFLOW_REFERENCE_AS_OF` or refresh VIX/breadth until official CBOE / StockCharts values are operator-verified for a chosen target session.
+3. **Routine cadence** per [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md): daily (vol, breadth, options, tail-skew, Treasury FRED); weekly (ETF flow, CFTC systematic, Treasury futures, levered ETF per §3b); monthly (ICI structural, SSGA concentration); quarterly (retirement).
+4. **Do not** open score gates or change MOCK inputs without explicit product approval.
 
 ### Cross-product note (GhostRegime — separate lane)
 
