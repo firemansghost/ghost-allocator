@@ -13,7 +13,9 @@ import {
 } from '../refresh/registry';
 import type {
   GhostFlowDisplayOnlyRegistryEntry,
+  GhostFlowRefreshRegistryEntry,
   GhostFlowScoreFedRegistryEntry,
+  GhostFlowSourceAdapter,
   GhostFlowTreasuryRegistryEntry,
 } from '../refresh/types';
 
@@ -52,6 +54,70 @@ const MOCK_SCORE_INPUTS = [
   'retirementFlowPressureProxy',
   'leveredEtfRebalancePressure',
 ] as const;
+
+/** Exact cadence + freshness policy mappings (authoritative operating metadata). */
+const EXPECTED_CADENCE_FRESHNESS = {
+  volatilityRegime: {
+    cadence: 'daily_trading',
+    freshnessPolicyId: 'daily_trading_v1',
+  },
+  marketBreadth: {
+    cadence: 'daily_trading',
+    freshnessPolicyId: 'daily_trading_v1',
+  },
+  etfNetIssuance: {
+    cadence: 'weekly',
+    freshnessPolicyId: 'weekly_calendar_v1',
+  },
+  passiveShareProxy: {
+    cadence: 'monthly',
+    freshnessPolicyId: 'monthly_calendar_v1',
+  },
+  activeIndexFlow: {
+    cadence: 'monthly',
+    freshnessPolicyId: 'monthly_calendar_v1',
+  },
+  indexConcentration: {
+    cadence: 'monthly',
+    freshnessPolicyId: 'monthly_calendar_v1',
+  },
+  systematicFlowProxy: {
+    cadence: 'weekly',
+    freshnessPolicyId: 'cftc_weekly_release_v1',
+  },
+  leveredEtfRebalancePressure: {
+    cadence: 'weekly',
+    freshnessPolicyId: 'levered_etf_release_v1',
+  },
+  retirementFlowPressureProxy: {
+    cadence: 'quarterly',
+    freshnessPolicyId: 'retirement_quarterly_release_v1',
+  },
+  optionsActivityProxy: {
+    cadence: 'daily_trading',
+    freshnessPolicyId: 'daily_trading_v1',
+  },
+  indexInclusionEventProxy: {
+    cadence: 'event',
+    freshnessPolicyId: 'monthly_calendar_v1',
+  },
+  capWeightPremiumProxy: {
+    cadence: 'weekly',
+    freshnessPolicyId: 'weekly_calendar_v1',
+  },
+  tailSkewContext: {
+    cadence: 'daily_trading',
+    freshnessPolicyId: 'daily_trading_v1',
+  },
+  treasuryFuturesPositioningProxy: {
+    cadence: 'weekly',
+    freshnessPolicyId: 'weekly_calendar_v1',
+  },
+  treasuryLongEndIncomeLens: {
+    cadence: 'daily_trading',
+    freshnessPolicyId: 'daily_trading_v1',
+  },
+} as const;
 
 assertGhostFlowRefreshRegistryValid();
 
@@ -108,7 +174,7 @@ for (const entry of gateC) {
   assert.strictEqual(entry.failureSeverity, 'blocking_score_fed');
 }
 
-// Unrelated score-fed failures remain isolated (own candidate groups / artifact acceptance)
+// Unrelated score-fed failures remain isolated
 const nonGateCScoreFed = scoreFed.filter(
   (e) => e.candidateGroupId !== GATE_C_CANDIDATE_GROUP_ID
 );
@@ -153,7 +219,7 @@ assert.deepStrictEqual(passiveShare.scoreInputs, [
   },
 ]);
 
-// MOCK score slots absent from registry inventory and scoreInputs
+// MOCK score slots and derived distance-65 absent from registry inventory
 assert.ok(!ids.includes('systematicStrategyPressure' as never));
 assert.ok(!ids.includes('distance-65' as never));
 assert.ok(!ids.includes('modelZoneProximity' as never));
@@ -173,11 +239,29 @@ for (const entry of GHOSTFLOW_REFRESH_REGISTRY) {
   assert.strictEqual(entry.approvalPolicy, 'human_required');
 }
 
-// No Marketstack
+// No Marketstack in production registry
 const serialized = JSON.stringify(GHOSTFLOW_REFRESH_REGISTRY).toLowerCase();
 assert.ok(!serialized.includes('marketstack'));
 
-// Readiness classifications (verified starting point)
+// Negative: validator inspects the passed registry, not only the global constant
+const marketstackPoisoned: GhostFlowRefreshRegistryEntry[] = [
+  {
+    ...GHOSTFLOW_REFRESH_REGISTRY[0],
+    canonicalSource: {
+      ...GHOSTFLOW_REFRESH_REGISTRY[0].canonicalSource,
+      sourceName: 'Marketstack EOD export',
+      sourceLocator: 'https://api.marketstack.com/v1/eod',
+    },
+  },
+];
+const poisonedIssues = validateGhostFlowRefreshRegistry(marketstackPoisoned);
+assert.ok(
+  poisonedIssues.some((i) => i.code === 'marketstack_reference'),
+  'custom registry containing Marketstack must fail validation'
+);
+assert.deepStrictEqual(validateGhostFlowRefreshRegistry(), []);
+
+// Readiness classifications
 const byId = Object.fromEntries(
   GHOSTFLOW_REFRESH_REGISTRY.map((e) => [e.artifactId, e])
 ) as Record<(typeof EXPECTED_ALL)[number], (typeof GHOSTFLOW_REFRESH_REGISTRY)[number]>;
@@ -240,24 +324,59 @@ assert.deepStrictEqual(spikeIds, [
   'treasuryLongEndIncomeLens',
 ]);
 
-// Freshness policy identifiers only (no numeric thresholds in registry)
-const freshnessIds = new Set(
-  GHOSTFLOW_REFRESH_REGISTRY.map((e) => e.freshnessPolicyId)
-);
-for (const id of freshnessIds) {
-  assert.ok(
-    /_v1$/.test(id),
-    `freshnessPolicyId must be a policy identifier, got ${id}`
+// Exact cadence + freshnessPolicyId mappings for all 15
+for (const entry of GHOSTFLOW_REFRESH_REGISTRY) {
+  const expected =
+    EXPECTED_CADENCE_FRESHNESS[entry.artifactId as keyof typeof EXPECTED_CADENCE_FRESHNESS];
+  assert.ok(expected, `missing expected mapping for ${entry.artifactId}`);
+  assert.strictEqual(
+    entry.cadence,
+    expected.cadence,
+    `${entry.artifactId} cadence`
+  );
+  assert.strictEqual(
+    entry.freshnessPolicyId,
+    expected.freshnessPolicyId,
+    `${entry.artifactId} freshnessPolicyId`
   );
 }
+
 assert.ok(!serialized.includes('freshmax'));
 assert.ok(!serialized.includes('staleafter'));
 assert.ok(!/"freshMaxDays"/.test(JSON.stringify(GHOSTFLOW_REFRESH_REGISTRY)));
 assert.ok(!/"staleAfterDays"/.test(JSON.stringify(GHOSTFLOW_REFRESH_REGISTRY)));
 
+// History policy: accepted normalized observations only — no raw-source commit policy
+for (const entry of GHOSTFLOW_REFRESH_REGISTRY) {
+  assert.strictEqual(entry.historyPolicy, 'accepted_normalized_observation');
+}
+assert.ok(!serialized.includes('raw_source'));
+assert.ok(!serialized.includes('commit_raw'));
+assert.ok(!serialized.includes('raw_history'));
+assert.ok(!serialized.includes('research_append_optional'));
+assert.ok(!serialized.includes('operator_study_only'));
+
+// Retirement locator is stable (not a quarterly release URL)
+assert.strictEqual(
+  byId.retirementFlowPressureProxy.canonicalSource.sourceLocator,
+  'https://www.ici.org/research/statistics/quarterly-retirement-market-data'
+);
+assert.ok(
+  !byId.retirementFlowPressureProxy.canonicalSource.sourceLocator.includes('ret_26_q1')
+);
+
 // Durable provenance excludes local-path / secret fields
 for (const key of GHOSTFLOW_DURABLE_PROVENANCE_FIELD_KEYS) {
   assert.ok(!/path|tmp|workspace|body|apiKey|token|cookie/i.test(key));
 }
+
+// Adapter contract: implemented instances require parserVersion; metadata envelopes exist
+type _AdapterRequiresParserVersion = GhostFlowSourceAdapter<
+  unknown,
+  unknown,
+  unknown
+>['parserVersion'];
+const _parserVersionCheck: _AdapterRequiresParserVersion = '1.0.0';
+assert.strictEqual(typeof _parserVersionCheck, 'string');
 
 console.log('ghostflow/refreshRegistry.test.ts: ok');

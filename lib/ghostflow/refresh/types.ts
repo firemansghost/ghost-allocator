@@ -47,13 +47,17 @@ export type GhostFlowAdapterImplementationStatus =
   | 'spike_available'
   | 'implemented';
 
+/**
+ * Identifiers for existing freshness evaluator semantics.
+ * Numeric thresholds remain owned by artifactFreshness.ts / per-artifact evaluators.
+ */
 export type GhostFlowFreshnessPolicyId =
   | 'daily_trading_v1'
   | 'weekly_calendar_v1'
   | 'monthly_calendar_v1'
-  | 'quarterly_calendar_v1'
-  | 'event_driven_v1'
-  | 'study_context_v1';
+  | 'cftc_weekly_release_v1'
+  | 'levered_etf_release_v1'
+  | 'retirement_quarterly_release_v1';
 
 export type GhostFlowAcceptanceUnit = 'artifact' | 'candidate_group';
 
@@ -62,10 +66,11 @@ export type GhostFlowFailureSeverity =
   | 'nonfatal_display'
   | 'nonfatal_treasury';
 
-export type GhostFlowHistoryPolicy =
-  | 'none'
-  | 'research_append_optional'
-  | 'operator_study_only';
+/**
+ * Intended retention for accepted normalized observations.
+ * Raw downloads remain temporary; this policy does not authorize committing raw source material.
+ */
+export type GhostFlowHistoryPolicy = 'accepted_normalized_observation';
 
 export type GhostFlowRefreshIssueStage =
   | 'fetch'
@@ -157,16 +162,28 @@ export const GHOSTFLOW_DURABLE_PROVENANCE_FIELD_KEYS = [
   'parserVersion',
 ] as const satisfies ReadonlyArray<keyof GhostFlowDurableProvenance>;
 
+/**
+ * Shared source metadata that survives fetch → parse → normalize.
+ * Constructed at fetch; copied through envelopes; used to build durable provenance.
+ */
+export interface GhostFlowSourceMetadata {
+  sourceId: string;
+  sourceLocator: string;
+  retrievedAt: string;
+  contentType?: string;
+  contentSha256: string;
+}
+
 /** Ephemeral fetch envelope — raw payload is not durable provenance. */
 export interface GhostFlowFetchedSource<TRaw> {
   raw: TRaw;
-  fetchMetadata: {
-    sourceId: string;
-    sourceLocator: string;
-    retrievedAt: string;
-    contentType?: string;
-    contentSha256: string;
-  };
+  sourceMetadata: GhostFlowSourceMetadata;
+}
+
+/** Parsed envelope — preserves fetch metadata without embedding it in TParsed. */
+export interface GhostFlowParsedSource<TParsed> {
+  parsed: TParsed;
+  sourceMetadata: GhostFlowSourceMetadata;
 }
 
 export interface GhostFlowNormalizedObservation<TFields> {
@@ -193,18 +210,20 @@ export interface GhostFlowNormalizeContext {
 /**
  * Deterministic source adapter stages.
  * Adapters must not score, map pressure, write production JSON, or open PRs.
+ * `parserVersion` is required on every implemented adapter instance.
  */
 export interface GhostFlowSourceAdapter<TRaw, TParsed, TFields> {
   id: string;
+  parserVersion: string;
   fetch(
     context: GhostFlowFetchContext
   ): Promise<GhostFlowStageResult<GhostFlowFetchedSource<TRaw>>>;
   parse(
     source: GhostFlowFetchedSource<TRaw>,
     context: GhostFlowParseContext
-  ): GhostFlowStageResult<TParsed>;
+  ): GhostFlowStageResult<GhostFlowParsedSource<TParsed>>;
   normalize(
-    parsed: TParsed,
+    source: GhostFlowParsedSource<TParsed>,
     context: GhostFlowNormalizeContext
   ): GhostFlowStageResult<GhostFlowNormalizedObservation<TFields>>;
 }

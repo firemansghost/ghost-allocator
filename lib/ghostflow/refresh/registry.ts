@@ -42,7 +42,7 @@ export const GHOSTFLOW_REFRESH_REGISTRY = [
     approvalPolicy: 'human_required',
     authentication: { kind: 'none' },
     failureSeverity: 'blocking_score_fed',
-    historyPolicy: 'none',
+    historyPolicy: 'accepted_normalized_observation',
     scoreInputs: [
       {
         axis: 'passive',
@@ -75,7 +75,7 @@ export const GHOSTFLOW_REFRESH_REGISTRY = [
     approvalPolicy: 'human_required',
     authentication: { kind: 'none' },
     failureSeverity: 'blocking_score_fed',
-    historyPolicy: 'none',
+    historyPolicy: 'accepted_normalized_observation',
     scoreInputs: [
       {
         axis: 'structural',
@@ -107,7 +107,7 @@ export const GHOSTFLOW_REFRESH_REGISTRY = [
     approvalPolicy: 'human_required',
     authentication: { kind: 'none' },
     failureSeverity: 'blocking_score_fed',
-    historyPolicy: 'none',
+    historyPolicy: 'accepted_normalized_observation',
     scoreInputs: [
       {
         axis: 'passive',
@@ -139,7 +139,7 @@ export const GHOSTFLOW_REFRESH_REGISTRY = [
     approvalPolicy: 'human_required',
     authentication: { kind: 'none' },
     failureSeverity: 'blocking_score_fed',
-    historyPolicy: 'none',
+    historyPolicy: 'accepted_normalized_observation',
     scoreInputs: [
       {
         axis: 'structural',
@@ -176,7 +176,7 @@ export const GHOSTFLOW_REFRESH_REGISTRY = [
     approvalPolicy: 'human_required',
     authentication: { kind: 'none' },
     failureSeverity: 'blocking_score_fed',
-    historyPolicy: 'none',
+    historyPolicy: 'accepted_normalized_observation',
     scoreInputs: [
       {
         axis: 'structural',
@@ -209,7 +209,7 @@ export const GHOSTFLOW_REFRESH_REGISTRY = [
     approvalPolicy: 'human_required',
     authentication: { kind: 'none' },
     failureSeverity: 'blocking_score_fed',
-    historyPolicy: 'none',
+    historyPolicy: 'accepted_normalized_observation',
     scoreInputs: [
       {
         axis: 'structural',
@@ -239,19 +239,19 @@ export const GHOSTFLOW_REFRESH_REGISTRY = [
       implementationStatus: 'spike_available',
       spikeScriptPath: 'scripts/ghostflow/cftc-tff-spike.ts',
     },
-    freshnessPolicyId: 'weekly_calendar_v1',
+    freshnessPolicyId: 'cftc_weekly_release_v1',
     referenceDateRole: 'lagging_allowed',
     automationReadiness: 'green',
     approvalPolicy: 'human_required',
     authentication: { kind: 'none' },
     failureSeverity: 'nonfatal_display',
-    historyPolicy: 'research_append_optional',
+    historyPolicy: 'accepted_normalized_observation',
   },
   {
     artifactId: 'leveredEtfRebalancePressure',
     artifactPath: 'data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.json',
     lane: 'display_only_equity',
-    cadence: 'daily_trading',
+    cadence: 'weekly',
     candidateGroupId: 'levered_etf_issuer_packet',
     acceptanceUnit: 'artifact',
     canonicalSource: {
@@ -266,13 +266,13 @@ export const GHOSTFLOW_REFRESH_REGISTRY = [
       implementationStatus: 'spike_available',
       spikeScriptPath: 'scripts/ghostflow/levered-etf-rebalance-history-study.ts',
     },
-    freshnessPolicyId: 'daily_trading_v1',
+    freshnessPolicyId: 'levered_etf_release_v1',
     referenceDateRole: 'lagging_allowed',
     automationReadiness: 'red',
     approvalPolicy: 'human_required',
     authentication: { kind: 'manual_operator' },
     failureSeverity: 'nonfatal_display',
-    historyPolicy: 'research_append_optional',
+    historyPolicy: 'accepted_normalized_observation',
   },
   {
     artifactId: 'retirementFlowPressureProxy',
@@ -284,7 +284,8 @@ export const GHOSTFLOW_REFRESH_REGISTRY = [
     canonicalSource: {
       sourceFamilyId: 'ici_retirement_market_table1',
       sourceName: 'ICI — The US Retirement Market (Table 1)',
-      sourceLocator: 'https://www.ici.org/statistical-report/ret_26_q1',
+      sourceLocator:
+        'https://www.ici.org/research/statistics/quarterly-retirement-market-data',
     },
     sourceFormat: 'spreadsheet',
     adapter: {
@@ -292,13 +293,13 @@ export const GHOSTFLOW_REFRESH_REGISTRY = [
       implementationStatus: 'spike_available',
       spikeScriptPath: 'scripts/ghostflow/retirement-flow-history-study.ts',
     },
-    freshnessPolicyId: 'quarterly_calendar_v1',
+    freshnessPolicyId: 'retirement_quarterly_release_v1',
     referenceDateRole: 'lagging_allowed',
     automationReadiness: 'red',
     approvalPolicy: 'human_required',
     authentication: { kind: 'none' },
     failureSeverity: 'nonfatal_display',
-    historyPolicy: 'research_append_optional',
+    historyPolicy: 'accepted_normalized_observation',
   },
   {
     artifactId: 'optionsActivityProxy',
@@ -325,7 +326,7 @@ export const GHOSTFLOW_REFRESH_REGISTRY = [
     approvalPolicy: 'human_required',
     authentication: { kind: 'none' },
     failureSeverity: 'nonfatal_display',
-    historyPolicy: 'none',
+    historyPolicy: 'accepted_normalized_observation',
   },
   {
     artifactId: 'indexInclusionEventProxy',
@@ -344,19 +345,20 @@ export const GHOSTFLOW_REFRESH_REGISTRY = [
       adapterId: 'index-inclusion-operator-intake',
       implementationStatus: 'planned',
     },
-    freshnessPolicyId: 'event_driven_v1',
+    // Event cadence; freshness uses shared monthly calendar evaluator semantics.
+    freshnessPolicyId: 'monthly_calendar_v1',
     referenceDateRole: 'none',
     automationReadiness: 'red',
     approvalPolicy: 'human_required',
     authentication: { kind: 'manual_operator' },
     failureSeverity: 'nonfatal_display',
-    historyPolicy: 'none',
+    historyPolicy: 'accepted_normalized_observation',
   },
   {
     artifactId: 'capWeightPremiumProxy',
     artifactPath: 'data/ghostflow/artifacts/capWeightPremiumProxy.v1.json',
     lane: 'display_only_equity',
-    cadence: 'study',
+    cadence: 'weekly',
     candidateGroupId: 'cap_weight_premium_operator_study',
     acceptanceUnit: 'artifact',
     canonicalSource: {
@@ -370,13 +372,13 @@ export const GHOSTFLOW_REFRESH_REGISTRY = [
       implementationStatus: 'spike_available',
       spikeScriptPath: 'scripts/ghostflow/cap-weight-premium-study.ts',
     },
-    freshnessPolicyId: 'study_context_v1',
+    freshnessPolicyId: 'weekly_calendar_v1',
     referenceDateRole: 'lagging_allowed',
     automationReadiness: 'yellow',
     approvalPolicy: 'human_required',
     authentication: { kind: 'manual_operator' },
     failureSeverity: 'nonfatal_display',
-    historyPolicy: 'operator_study_only',
+    historyPolicy: 'accepted_normalized_observation',
   },
   {
     artifactId: 'tailSkewContext',
@@ -403,7 +405,7 @@ export const GHOSTFLOW_REFRESH_REGISTRY = [
     approvalPolicy: 'human_required',
     authentication: { kind: 'none' },
     failureSeverity: 'nonfatal_display',
-    historyPolicy: 'none',
+    historyPolicy: 'accepted_normalized_observation',
   },
 
   // --- Treasury display (2) ---
@@ -433,7 +435,7 @@ export const GHOSTFLOW_REFRESH_REGISTRY = [
     approvalPolicy: 'human_required',
     authentication: { kind: 'none' },
     failureSeverity: 'nonfatal_treasury',
-    historyPolicy: 'research_append_optional',
+    historyPolicy: 'accepted_normalized_observation',
   },
   {
     artifactId: 'treasuryLongEndIncomeLens',
@@ -463,7 +465,7 @@ export const GHOSTFLOW_REFRESH_REGISTRY = [
       envName: 'FRED_API_KEY',
     },
     failureSeverity: 'nonfatal_treasury',
-    historyPolicy: 'none',
+    historyPolicy: 'accepted_normalized_observation',
   },
 ] as const satisfies readonly GhostFlowRefreshRegistryEntry[];
 
@@ -487,8 +489,10 @@ const FORBIDDEN_PROVENANCE_PATH_KEYS = [
   'cookie',
 ] as const;
 
-function registrySerializedHaystack(): string {
-  return JSON.stringify(GHOSTFLOW_REFRESH_REGISTRY).toLowerCase();
+function registrySerializedHaystack(
+  registry: readonly GhostFlowRefreshRegistryEntry[]
+): string {
+  return JSON.stringify(registry).toLowerCase();
 }
 
 /**
@@ -620,7 +624,7 @@ export function validateGhostFlowRefreshRegistry(
     }
   }
 
-  const haystack = registrySerializedHaystack();
+  const haystack = registrySerializedHaystack(registry);
   if (haystack.includes('marketstack')) {
     issues.push({
       code: 'marketstack_reference',
