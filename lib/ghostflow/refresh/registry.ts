@@ -17,6 +17,14 @@ import {
   CBOE_VIX_SOURCE_LOCATOR,
   CBOE_VIX_SOURCE_NAME,
 } from './adapters/cboeVixHistoryCsvMeta';
+import {
+  CFTC_TFF_DATASET_PAGE_LOCATOR,
+  CFTC_TFF_SOURCE_FAMILY_ID,
+  CFTC_TFF_SOURCE_NAME,
+  CFTC_TFF_SYSTEMATIC_ADAPTER_ID,
+  CFTC_TFF_SYSTEMATIC_ARTIFACT_ID,
+  CFTC_TFF_SYSTEMATIC_PARSER_VERSION,
+} from './adapters/cftcTffSocrataMeta';
 
 export {
   GATE_C_ARTIFACT_IDS,
@@ -229,23 +237,22 @@ export const GHOSTFLOW_REFRESH_REGISTRY = [
 
   // --- Display-only equity (7) ---
   {
-    artifactId: 'systematicFlowProxy',
+    artifactId: CFTC_TFF_SYSTEMATIC_ARTIFACT_ID,
     artifactPath: 'data/ghostflow/artifacts/systematicFlowProxy.v1.json',
     lane: 'display_only_equity',
     cadence: 'weekly',
     candidateGroupId: 'cftc_tff_systematic_display',
     acceptanceUnit: 'artifact',
     canonicalSource: {
-      sourceFamilyId: 'cftc_tff_socrata',
-      sourceName: 'CFTC Public Reporting Environment — TFF Futures Only',
-      sourceLocator:
-        'https://publicreporting.cftc.gov/Commitments-of-Traders/TFF-Futures-Only/gpe5-46if/about_data',
+      sourceFamilyId: CFTC_TFF_SOURCE_FAMILY_ID,
+      sourceName: CFTC_TFF_SOURCE_NAME,
+      sourceLocator: CFTC_TFF_DATASET_PAGE_LOCATOR,
     },
     sourceFormat: 'json_api',
     adapter: {
-      adapterId: 'cftc-tff-systematic-socrata',
-      implementationStatus: 'spike_available',
-      spikeScriptPath: 'scripts/ghostflow/cftc-tff-spike.ts',
+      adapterId: CFTC_TFF_SYSTEMATIC_ADAPTER_ID,
+      implementationStatus: 'implemented',
+      parserVersion: CFTC_TFF_SYSTEMATIC_PARSER_VERSION,
     },
     freshnessPolicyId: 'cftc_weekly_release_v1',
     referenceDateRole: 'lagging_allowed',

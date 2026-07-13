@@ -11,6 +11,13 @@ import {
   CBOE_VIX_SOURCE_NAME,
 } from '../refresh/adapters/cboeVixHistoryCsvMeta';
 import {
+  CFTC_TFF_DATASET_PAGE_LOCATOR,
+  CFTC_TFF_SOURCE_FAMILY_ID,
+  CFTC_TFF_SOURCE_NAME,
+  CFTC_TFF_SYSTEMATIC_ADAPTER_ID,
+  CFTC_TFF_SYSTEMATIC_PARSER_VERSION,
+} from '../refresh/adapters/cftcTffSocrataMeta';
+import {
   assertGhostFlowRefreshRegistryValid,
   GATE_C_ARTIFACT_IDS,
   GATE_C_CANDIDATE_GROUP_ID,
@@ -307,7 +314,7 @@ assert.deepStrictEqual(byId.capWeightPremiumProxy.authentication, {
   kind: 'manual_operator',
 });
 
-// Adapter implementation-status rules — VIX is the only implemented adapter
+// Adapter implementation-status rules — VIX + CFTC systematic are implemented
 for (const entry of GHOSTFLOW_REFRESH_REGISTRY) {
   if (entry.artifactId === 'volatilityRegime') {
     assert.strictEqual(entry.adapter.implementationStatus, 'implemented');
@@ -324,12 +331,40 @@ for (const entry of GHOSTFLOW_REFRESH_REGISTRY) {
     assert.strictEqual(entry.failureSeverity, 'blocking_score_fed');
     continue;
   }
+  if (entry.artifactId === 'systematicFlowProxy') {
+    assert.strictEqual(entry.adapter.implementationStatus, 'implemented');
+    assert.strictEqual(entry.adapter.adapterId, CFTC_TFF_SYSTEMATIC_ADAPTER_ID);
+    if (entry.adapter.implementationStatus === 'implemented') {
+      assert.strictEqual(
+        entry.adapter.parserVersion,
+        CFTC_TFF_SYSTEMATIC_PARSER_VERSION
+      );
+    }
+    assert.strictEqual(entry.canonicalSource.sourceFamilyId, CFTC_TFF_SOURCE_FAMILY_ID);
+    assert.strictEqual(entry.canonicalSource.sourceName, CFTC_TFF_SOURCE_NAME);
+    assert.strictEqual(
+      entry.canonicalSource.sourceLocator,
+      CFTC_TFF_DATASET_PAGE_LOCATOR
+    );
+    assert.strictEqual(entry.lane, 'display_only_equity');
+    assert.strictEqual(entry.automationReadiness, 'green');
+    assert.strictEqual(entry.failureSeverity, 'nonfatal_display');
+    assert.strictEqual(entry.referenceDateRole, 'lagging_allowed');
+    assert.deepStrictEqual(entry.authentication, { kind: 'none' });
+    assert.strictEqual(entry.approvalPolicy, 'human_required');
+    continue;
+  }
   assert.ok(
     entry.adapter.implementationStatus === 'planned' ||
       entry.adapter.implementationStatus === 'spike_available'
   );
   assert.ok(!('parserVersion' in entry.adapter));
 }
+
+assert.strictEqual(
+  byId.treasuryFuturesPositioningProxy.adapter.implementationStatus,
+  'spike_available'
+);
 
 assert.deepStrictEqual([...GATE_C_ARTIFACT_IDS].sort(), [
   'marketBreadth',
@@ -345,10 +380,19 @@ assert.deepStrictEqual(spikeIds, [
   'leveredEtfRebalancePressure',
   'optionsActivityProxy',
   'retirementFlowPressureProxy',
-  'systematicFlowProxy',
   'tailSkewContext',
   'treasuryFuturesPositioningProxy',
   'treasuryLongEndIncomeLens',
+]);
+
+const implementedIds = GHOSTFLOW_REFRESH_REGISTRY.filter(
+  (e) => e.adapter.implementationStatus === 'implemented'
+)
+  .map((e) => e.artifactId)
+  .sort();
+assert.deepStrictEqual(implementedIds, [
+  'systematicFlowProxy',
+  'volatilityRegime',
 ]);
 
 const plannedIds = GHOSTFLOW_REFRESH_REGISTRY.filter(

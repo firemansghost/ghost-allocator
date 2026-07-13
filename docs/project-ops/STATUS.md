@@ -1,16 +1,16 @@
 # STATUS
 
 ## Current State (GhostFlow — 2026-07-13)
-PR **#133** merged the breadth-source feasibility decision on `main` (`18ab040`).
-PR **#132** previously merged the CBOE VIX CSV adapter (implemented, **unwired**).
+PR **#134** merged the breadth operator-packet specification on `main` (`c503042`).
+PR **#133** established the breadth-source authorization block; Gate C remains blocked; no provider approved.
 
-**Breadth operator-packet specification completed** ([BREADTH_ARTIFACT_RUNBOOK.md](../ghostflow/BREADTH_ARTIFACT_RUNBOOK.md)):
-- Typed manual intake packet + evidence checklist (research / intake design only)
-- Stale direct StockCharts/Barchart production-refresh instructions quarantined
-- Manual checklist and reference-date policy reconciled with the authorization block
-- Operator packet remains **intake-only** — does not approve a provider or authorize production refresh
+**CFTC TFF systematic adapter implemented** (fixture-driven, unwired):
+- Official CFTC Public Reporting Environment TFF Futures Only (`gpe5-46if`) fetch / parse / normalize
+- Normalizes registered ES / NQ / RTY / VIX contract observations only
+- Basket calculation and pressure mapping remain downstream
+- `systematicFlowProxy` remains display-only; MOCK systematic **62** unchanged
+- No production artifact refresh; adapter not wired to runtime or workflows
 
-No breadth source approved. No production breadth refresh occurred. Gate C remains blocked. VIX adapter remains unwired.
 Production GhostFlow state remains unchanged:
 - `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
 - Composite / Passive / Structural: 60 / 53 / 67
@@ -18,14 +18,21 @@ Production GhostFlow state remains unchanged:
 - `publicSignalCount`: 13
 - MOCK systematic / retirement / levered: 62 / 58 / 55
 
+Breadth and Gate C remain blocked. VIX adapter remains unwired.
+
 ## Recommended next work
-1. Decide whether to seek written provider permission **or** investigate an exact licensed provider SKU (neither path approved yet)
-2. Do **not** implement StockCharts HTML automation, scrapers, or a Gate C production runner
-3. Registry `sourceFormat` change only after Bobby product approval **and** provider authorization evidence
+1. Implement the Treasury CFTC adapter by reusing the Socrata source boundary **or** implement the FRED Treasury adapter (neither claimed approved/implemented here)
+2. Do **not** wire systematic adapter into production refresh, CLI, or workflows yet
+3. Breadth: decide written provider permission **or** licensed SKU investigation (neither approved)
 
 Last updated: 2026-07-13
 
 ---
+
+## Archive — Breadth operator packet (2026-07-13)
+PR **#133** merged the breadth-source feasibility decision on `main` (`18ab040`).
+PR **#132** previously merged the CBOE VIX CSV adapter (implemented, **unwired**).
+Breadth operator-packet runbook completed; intake-only; no provider approved; Gate C blocked.
 
 ## Archive — Education / V1 snapshot (2026-01-21)
 Ghost Allocator is stable and usable: onboarding + builder flow works, Schwab sleeve logic is clean (Gold and Commodities are always separate), and GhostRegime diagnostics are local-first and usable without production secrets. We are deliberately holding off on BTC parity mismatch investigation for now (watchlist item, not a blocker).
