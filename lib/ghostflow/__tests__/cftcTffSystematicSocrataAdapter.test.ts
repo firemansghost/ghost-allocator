@@ -9,6 +9,7 @@ import path from 'path';
 import {
   CFTC_TFF_SYSTEMATIC_SOCRATA_ADAPTER,
   createCftcTffSystematicSocrataAdapter,
+  parseCftcTffReportDateCell,
   type CftcTffFetchClient,
   type CftcTffFetchResponse,
 } from '../refresh/adapters/cftcTffSystematicSocrata';
@@ -191,6 +192,34 @@ assert.ok(!/token/i.test(queryUrl));
 assert.ok(!/2026-07-09/.test(queryUrl));
 assert.ok(!/now/i.test(queryUrl));
 
+// --- Report-date cell parsing (fail-closed on observed Socrata shape) ---
+
+assert.strictEqual(
+  parseCftcTffReportDateCell('2026-07-07T00:00:00.000'),
+  '2026-07-07'
+);
+assert.strictEqual(
+  parseCftcTffReportDateCell(' 2026-07-07T00:00:00.000 '),
+  '2026-07-07'
+);
+for (const invalid of [
+  '2026-07-07T99:99:99.000',
+  '2026-07-07T25:72:91.000',
+  '2026-07-07T12:30:00.000',
+  '2026-07-07T00:00:00',
+  '2026-07-07T00:00:00.000Z',
+  '2026-07-07T00:00:00.000-05:00',
+  '2026-07-07',
+  '2026-07-07T00:00:00.000junk',
+  '2026-02-30T00:00:00.000',
+]) {
+  assert.strictEqual(
+    parseCftcTffReportDateCell(invalid),
+    null,
+    `expected null for ${invalid}`
+  );
+}
+
 async function fetched(
   text: string
 ): Promise<GhostFlowFetchedSource<string>> {
@@ -359,6 +388,21 @@ async function fetched(
 
   {
     const source = await fetched(FIXTURE_CFTC_INVALID_CALENDAR_DATE);
+    assertFailCode(
+      createCftcTffSystematicSocrataAdapter().parse(source, {
+        nowIso: ADAPTER_TEST_NOW_ISO,
+      }),
+      'cftc_tff_invalid_report_date'
+    );
+  }
+
+  {
+    const badTimestamp = JSON.parse(FIXTURE_CFTC_LATEST_COMPLETE) as Record<
+      string,
+      unknown
+    >[];
+    badTimestamp[0]!.report_date_as_yyyy_mm_dd = '2026-07-07T99:99:99.000';
+    const source = await fetched(JSON.stringify(badTimestamp));
     assertFailCode(
       createCftcTffSystematicSocrataAdapter().parse(source, {
         nowIso: ADAPTER_TEST_NOW_ISO,

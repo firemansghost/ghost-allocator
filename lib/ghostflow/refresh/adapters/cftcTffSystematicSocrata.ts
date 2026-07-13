@@ -150,19 +150,15 @@ function isJsonContentType(contentType: string | undefined): boolean {
 
 /**
  * Convert observed Socrata report_date_as_yyyy_mm_dd to YYYY-MM-DD.
- * Official sample shape: `YYYY-MM-DDTHH:mm:ss.sss` (no Z). Also accepts plain YYYY-MM-DD.
- * Does not use permissive Date.parse on an unverified cell.
+ * Accepts only the official probe representation: `YYYY-MM-DDT00:00:00.000`.
+ * Does not use Date.parse, timezone conversion, or substring-only validation.
  */
 export function parseCftcTffReportDateCell(raw: unknown): string | null {
   if (typeof raw !== 'string') return null;
-  const trimmed = raw.trim();
-  const match =
-    /^(\d{4}-\d{2}-\d{2})(?:T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?)?$/.exec(
-      trimmed
-    );
+  const match = /^(\d{4}-\d{2}-\d{2})T00:00:00\.000$/.exec(raw.trim());
   if (!match) return null;
-  const iso = match[1]!;
-  return isValidCalendarDate(iso) ? iso : null;
+  const reportDate = match[1]!;
+  return isValidCalendarDate(reportDate) ? reportDate : null;
 }
 
 function cellAsTrimmedString(raw: unknown): string | null {
