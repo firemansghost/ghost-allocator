@@ -1,18 +1,21 @@
 # STATUS
 
 ## Current State (GhostFlow — 2026-07-13)
-GhostFlow Phase 1 foundation is in place through PRs #128–#131:
+PR **#132** merged the official CBOE VIX History CSV adapter on `main` (`83780ac`).
+GhostFlow Phase 1 foundation (PRs #128–#131) plus VIX adapter (#132) are in place:
 - production score baseline fixture
 - typed 15-artifact refresh registry
 - offline report model + fixture-driven planner
 - Gate C atomicity and provenance/timestamp validation
+- CBOE VIX adapter (`cboe-vix-history-csv` / `1.0.0`) **implemented**, fixture-tested, **unwired** (no CLI/workflow/candidate/artifact writer/runtime)
 
-First GREEN source adapter is now implemented for the official CBOE VIX History CSV (`cboe-vix-history-csv`, parser `1.0.0`):
-- fixture-tested with an injected fetch boundary
-- not wired to a CLI, workflow, candidate writer, artifact writer, or runtime
-- no production refresh occurred
+**Breadth source feasibility audit completed** (`docs/ghostflow/MARKET_BREADTH_SOURCE_FEASIBILITY.md`):
+- StockCharts `$SPXA50R` **direct HTML automation: RED** (Usage Limitations forbid programmatic/automated access without prior approval; page is JS-dependent)
+- **Recommended path:** preserve breadth as a **manual operator packet**; leave Gate C automation blocked until a documented licensed machine source exists
+- Do **not** implement `stockcharts-spxa50r-html` without written permission
 
-Gate C remains incomplete without the breadth source.
+Gate C remains incomplete (VIX half implemented; breadth still manual-only).
+No production refresh occurred.
 Production GhostFlow state remains unchanged:
 - `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
 - Composite / Passive / Structural: 60 / 53 / 67
@@ -21,9 +24,9 @@ Production GhostFlow state remains unchanged:
 - MOCK systematic / retirement / levered: 62 / 58 / 55
 
 ## Recommended next work
-1. Read-only breadth-source adapter spike
-2. Breadth adapter implementation if the source proves deterministic enough
-3. Report-only Gate C adapter runner (after both adapters exist)
+1. Docs-only `marketBreadth` operator-packet intake design (Bobby approval before any registry `sourceFormat` change)
+2. Optional commercial track: confirm a licensed SKU (StockCharts written approval or Barchart OnDemand / other) for exact S&P 500 % above 50DMA — only after Bobby approval
+3. Do **not** start a Gate C adapter runner until a valid breadth input path is decided
 
 Last updated: 2026-07-13
 

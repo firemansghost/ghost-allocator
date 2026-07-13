@@ -1,22 +1,23 @@
 # HANDOFF
 
 ## Last Session Summary (2026-07-13)
-GhostFlow Phase 1 foundation (PRs #128–#131) is complete. Implemented the first GREEN source adapter for the official CBOE VIX History CSV (`cboe-vix-history-csv` / parser `1.0.0`) with injected fetch, deterministic CSV parse/normalize, synthetic fixtures, and registry status `implemented`. Adapter is not wired to CLI, workflow, candidate/artifact writers, or runtime. No production refresh; scores and reference date unchanged. Gate C still requires breadth.
+PR **#132** is on `main` (`83780ac`) — CBOE VIX CSV adapter implemented but unwired. Completed a read-only **marketBreadth source feasibility audit** (docs-only). StockCharts `$SPXA50R` direct automation is **RED** (Usage Limitations prohibit programmatic access without prior approval; HTML is JS-dependent). Recommendation: **preserve breadth as a manual operator packet**; keep Gate C manual/automation-blocked. No production refresh; scores and reference unchanged.
 
 ## State of Work
-- GhostFlow refresh contracts, registry, planner, and VIX CSV adapter are in place.
+- VIX: GREEN adapter exists (unwired). Breadth: no lawful deterministic machine path confirmed for the exact series.
+- Feasibility memo: `docs/ghostflow/MARKET_BREADTH_SOURCE_FEASIBILITY.md`
 - Production GhostFlow remains locked at reference `2026-07-01`, scores `60 / 53 / 67`, `publicSignalCount` 13, MOCK `62 / 58 / 55`.
-- Breadth adapter and Gate C runner are not started.
+- Gate C remains incomplete without an approved breadth input path.
 - Core app remains stable; education section remains live.
 
 ## Priority for Next Session
-1) Read-only breadth-source adapter spike
-2) Breadth adapter implementation if the source is deterministic enough
-3) Report-only Gate C adapter runner (after both adapters)
+1) Docs-only breadth operator-packet intake design (registry change only after Bobby approval)
+2) Optional: commercial SKU confirmation for exact S&P 500 % above 50DMA — only if Bobby wants that track
+3) Do not build Gate C runner or StockCharts HTML scraper
 
 ## Open Questions
-- Is StockCharts `$SPXA50R` stable enough for a deterministic breadth adapter, or is an alternate GREEN path required?
-- Should the next Gate C runner remain report-only until both adapters are human-reviewed end-to-end?
+- Does Bobby want to seek written StockCharts permission / Pro CSV workflow formalization, or pursue a licensed vendor SKU?
+- Should registry later move `marketBreadth` from planned HTML to `operator_packet` after an explicit decision?
 
 ---
 
