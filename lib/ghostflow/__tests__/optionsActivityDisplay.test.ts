@@ -21,6 +21,7 @@ import {
 import { ghostFlowBandLabel, scoreGhostFlowSnapshot } from '../scoring';
 import { GHOSTFLOW_REFERENCE_AS_OF } from '../reference';
 import { MOCK_GHOSTFLOW_SNAPSHOT } from '@/data/ghostflow/mockGhostflowSnapshot';
+import { PRODUCTION_SCORE_BASELINE } from './fixtures/productionScoreBaseline';
 
 const production = loadOptionsActivityProxyArtifact();
 assert.ok(production.ok, production.ok ? '' : production.errors.join('; '));
@@ -63,13 +64,16 @@ assert.strictEqual(
   raw.signals.find((s) => s.id === 'vol-regime')?.numericValue,
   volAmp
 );
-assert.strictEqual(meta.publicSignalCount, 13);
+assert.strictEqual(meta.publicSignalCount, PRODUCTION_SCORE_BASELINE.publicSignalCount);
 assert.ok(meta.publicSignals.some((s) => s.signalId === 'options-activity-proxy'));
 
-assert.strictEqual(scored.score.score, 60);
-assert.strictEqual(scored.score.subScores.passivePressure, 53);
-assert.strictEqual(scored.score.subScores.structuralFragility, 67);
-assert.strictEqual(ghostFlowBandLabel(scored.score.band), 'Elevated Flow Pressure');
+assert.strictEqual(scored.score.score, PRODUCTION_SCORE_BASELINE.composite);
+assert.strictEqual(scored.score.subScores.passivePressure, PRODUCTION_SCORE_BASELINE.passive);
+assert.strictEqual(
+  scored.score.subScores.structuralFragility,
+  PRODUCTION_SCORE_BASELINE.structural
+);
+assert.strictEqual(ghostFlowBandLabel(scored.score.band), PRODUCTION_SCORE_BASELINE.bandLabel);
 
 const grouped = groupSignalsByPresentation(scored.signals);
 assert.ok(grouped.publicArtifacts.some((s) => s.id === 'options-activity-proxy'));

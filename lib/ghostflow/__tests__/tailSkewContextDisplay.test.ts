@@ -23,6 +23,7 @@ import {
 import { ghostFlowBandLabel, scoreGhostFlowSnapshot } from '../scoring';
 import { GHOSTFLOW_REFERENCE_AS_OF } from '../reference';
 import { MOCK_GHOSTFLOW_SNAPSHOT } from '@/data/ghostflow/mockGhostflowSnapshot';
+import { PRODUCTION_SCORE_BASELINE } from './fixtures/productionScoreBaseline';
 
 const production = loadTailSkewContextArtifact();
 assert.ok(production.ok, production.ok ? '' : production.errors.join('; '));
@@ -60,14 +61,17 @@ assert.strictEqual(tailSkew!.artifactAsOf, '2026-06-18');
 const scoredTailSkew = scored.signals.find((s) => s.id === 'tail-skew-context')!;
 assert.strictEqual(signalCardBadgeLabelForSignal(scoredTailSkew, 'public'), 'DISPLAY ONLY');
 
-assert.strictEqual(meta.publicSignalCount, 13);
+assert.strictEqual(meta.publicSignalCount, PRODUCTION_SCORE_BASELINE.publicSignalCount);
 assert.ok(meta.publicSignals.some((s) => s.signalId === 'tail-skew-context'));
 assert.ok(!meta.publicPassiveInputKeys?.includes('tail-skew-context' as never));
 
-assert.strictEqual(scored.score.score, 60);
-assert.strictEqual(scored.score.subScores.passivePressure, 53);
-assert.strictEqual(scored.score.subScores.structuralFragility, 67);
-assert.strictEqual(ghostFlowBandLabel(scored.score.band), 'Elevated Flow Pressure');
+assert.strictEqual(scored.score.score, PRODUCTION_SCORE_BASELINE.composite);
+assert.strictEqual(scored.score.subScores.passivePressure, PRODUCTION_SCORE_BASELINE.passive);
+assert.strictEqual(
+  scored.score.subScores.structuralFragility,
+  PRODUCTION_SCORE_BASELINE.structural
+);
+assert.strictEqual(ghostFlowBandLabel(scored.score.band), PRODUCTION_SCORE_BASELINE.bandLabel);
 
 const grouped = groupSignalsByPresentation(scored.signals);
 assert.ok(grouped.publicArtifacts.some((s) => s.id === 'tail-skew-context'));
@@ -81,7 +85,10 @@ const displayOnlyCount = grouped.publicArtifacts.filter(
 assert.strictEqual(scoreFedCount, 6);
 assert.strictEqual(displayOnlyCount, 7);
 
-assert.strictEqual(PUBLIC_ARTIFACT_SIGNAL_IDS.length, 13);
+assert.strictEqual(
+  PUBLIC_ARTIFACT_SIGNAL_IDS.length,
+  PRODUCTION_SCORE_BASELINE.publicSignalCount
+);
 assert.ok(PUBLIC_ARTIFACT_SIGNAL_IDS.includes('tail-skew-context'));
 
 const invalidMerge = mergeTailSkewContextDisplayIfValid(

@@ -22,6 +22,7 @@ import { GHOSTFLOW_REFERENCE_AS_OF } from '../reference';
 import loadProduction from '@/data/ghostflow/artifacts/retirementFlowPressureProxy.v1.json';
 import type { RetirementFlowPressureArtifactV1 } from '../artifacts/types';
 import { MOCK_GHOSTFLOW_SNAPSHOT } from '@/data/ghostflow/mockGhostflowSnapshot';
+import { PRODUCTION_SCORE_BASELINE } from './fixtures/productionScoreBaseline';
 
 const production = loadProduction as RetirementFlowPressureArtifactV1;
 
@@ -56,16 +57,22 @@ assert.strictEqual(
   'DISPLAY ONLY'
 );
 
-assert.strictEqual(raw.passivePressure.retirementFlowPressureProxy, 58);
+assert.strictEqual(
+  raw.passivePressure.retirementFlowPressureProxy,
+  PRODUCTION_SCORE_BASELINE.mockPassiveInputs.retirementFlowPressureProxy
+);
 assert.ok(!meta.publicPassiveInputKeys?.includes('retirementFlowPressureProxy'));
 assert.strictEqual(meta.publicStructuralInputKeys?.length, 4);
-assert.strictEqual(meta.publicSignalCount, 13);
+assert.strictEqual(meta.publicSignalCount, PRODUCTION_SCORE_BASELINE.publicSignalCount);
 assert.ok(meta.publicSignals.some((s) => s.signalId === 'retirement-asset-growth'));
 
-assert.strictEqual(scored.score.score, 60);
-assert.strictEqual(scored.score.subScores.passivePressure, 53);
-assert.strictEqual(scored.score.subScores.structuralFragility, 67);
-assert.strictEqual(ghostFlowBandLabel(scored.score.band), 'Elevated Flow Pressure');
+assert.strictEqual(scored.score.score, PRODUCTION_SCORE_BASELINE.composite);
+assert.strictEqual(scored.score.subScores.passivePressure, PRODUCTION_SCORE_BASELINE.passive);
+assert.strictEqual(
+  scored.score.subScores.structuralFragility,
+  PRODUCTION_SCORE_BASELINE.structural
+);
+assert.strictEqual(ghostFlowBandLabel(scored.score.band), PRODUCTION_SCORE_BASELINE.bandLabel);
 
 const grouped = groupSignalsByPresentation(scored.signals);
 assert.ok(grouped.publicArtifacts.some((s) => s.id === 'retirement-asset-growth'));

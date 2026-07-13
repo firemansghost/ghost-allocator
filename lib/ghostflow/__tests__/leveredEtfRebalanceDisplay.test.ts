@@ -21,6 +21,7 @@ import { GHOSTFLOW_REFERENCE_AS_OF } from '../reference';
 import loadProduction from '@/data/ghostflow/artifacts/leveredEtfRebalancePressure.v1.json';
 import type { LeveredEtfRebalancePressureArtifactV1 } from '../artifacts/types';
 import { MOCK_GHOSTFLOW_SNAPSHOT } from '@/data/ghostflow/mockGhostflowSnapshot';
+import { PRODUCTION_SCORE_BASELINE } from './fixtures/productionScoreBaseline';
 
 const production = loadProduction as LeveredEtfRebalancePressureArtifactV1;
 
@@ -57,16 +58,22 @@ assert.strictEqual(
   'DISPLAY ONLY'
 );
 
-assert.strictEqual(raw.passivePressure.leveredEtfRebalancePressure, 55);
+assert.strictEqual(
+  raw.passivePressure.leveredEtfRebalancePressure,
+  PRODUCTION_SCORE_BASELINE.mockPassiveInputs.leveredEtfRebalancePressure
+);
 assert.ok(!meta.publicPassiveInputKeys?.includes('leveredEtfRebalancePressure'));
 assert.strictEqual(meta.publicStructuralInputKeys?.length, 4);
-assert.strictEqual(meta.publicSignalCount, 13);
+assert.strictEqual(meta.publicSignalCount, PRODUCTION_SCORE_BASELINE.publicSignalCount);
 assert.ok(meta.publicSignals.some((s) => s.signalId === 'levered-etf-rebalance'));
 
-assert.strictEqual(scored.score.score, 60);
-assert.strictEqual(scored.score.subScores.passivePressure, 53);
-assert.strictEqual(scored.score.subScores.structuralFragility, 67);
-assert.strictEqual(ghostFlowBandLabel(scored.score.band), 'Elevated Flow Pressure');
+assert.strictEqual(scored.score.score, PRODUCTION_SCORE_BASELINE.composite);
+assert.strictEqual(scored.score.subScores.passivePressure, PRODUCTION_SCORE_BASELINE.passive);
+assert.strictEqual(
+  scored.score.subScores.structuralFragility,
+  PRODUCTION_SCORE_BASELINE.structural
+);
+assert.strictEqual(ghostFlowBandLabel(scored.score.band), PRODUCTION_SCORE_BASELINE.bandLabel);
 
 const grouped = groupSignalsByPresentation(scored.signals);
 assert.ok(grouped.publicArtifacts.some((s) => s.id === 'levered-etf-rebalance'));
