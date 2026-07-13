@@ -57,9 +57,10 @@ export function isValidCalendarDate(value: string): boolean {
   );
 }
 
-/** Pure ISO timestamp check: expected shape and finite Date.parse. */
+/** Pure ISO timestamp check: expected shape, real calendar date, and finite Date.parse. */
 export function isValidIsoTimestamp(value: string): boolean {
   if (!ISO_TIMESTAMP_SHAPE_RE.test(value)) return false;
+  if (!isValidCalendarDate(value.slice(0, 10))) return false;
   const parsed = Date.parse(value);
   return Number.isFinite(parsed);
 }
