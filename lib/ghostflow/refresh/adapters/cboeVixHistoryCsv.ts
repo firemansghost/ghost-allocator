@@ -385,18 +385,17 @@ export function createCboeVixHistoryCsvAdapter(
         );
       }
 
-      // History CSVs may contain rows after a point-in-time nowIso; exclude them.
-      // Fail closed only when every observation is after the UTC now date.
-      const notAfterNow = source.parsed.filter((row) => row.observationAsOf <= nowDate);
-      if (notAfterNow.length === 0) {
-        return fail(
-          'normalize',
-          'vix_normalize_future_observation',
-          `All CBOE VIX observations are after nowIso UTC date ${nowDate}`
-        );
+      for (const row of source.parsed) {
+        if (row.observationAsOf > nowDate) {
+          return fail(
+            'normalize',
+            'vix_normalize_future_observation',
+            `CBOE VIX observation ${row.observationAsOf} is after nowIso UTC date ${nowDate}`
+          );
+        }
       }
 
-      const eligible = notAfterNow.filter((row) => row.observationAsOf <= ceiling);
+      const eligible = source.parsed.filter((row) => row.observationAsOf <= ceiling);
       if (eligible.length === 0) {
         return fail(
           'normalize',

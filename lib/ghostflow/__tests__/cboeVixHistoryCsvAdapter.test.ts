@@ -293,7 +293,7 @@ async function fetched(
     assert.strictEqual(parsed.ok, true);
     if (!parsed.ok) throw new Error('unreachable');
 
-    // 2026-07-02T23:30:00-05:00 → UTC 2026-07-03 → select 2026-07-03
+    // 2026-07-02T23:30:00-05:00 → UTC 2026-07-03; source through 2026-07-03
     const negativeOffset = adapter.normalize(parsed.value, {
       nowIso: '2026-07-02T23:30:00-05:00',
     });
@@ -302,8 +302,12 @@ async function fetched(
     assert.strictEqual(negativeOffset.value.observationAsOf, '2026-07-03');
     assert.strictEqual(negativeOffset.value.fields.vixClose, 16.8);
 
-    // 2026-07-03T00:30:00+05:00 → UTC 2026-07-02 → select 2026-07-02
-    const positiveOffset = adapter.normalize(parsed.value, {
+    // Positive-offset: UTC 2026-07-02 requires a source envelope without later rows.
+    const throughJuly2 = {
+      ...parsed.value,
+      parsed: parsed.value.parsed.filter((row) => row.observationAsOf <= '2026-07-02'),
+    };
+    const positiveOffset = adapter.normalize(throughJuly2, {
       nowIso: '2026-07-03T00:30:00+05:00',
     });
     assert.strictEqual(positiveOffset.ok, true);
@@ -356,14 +360,14 @@ async function fetched(
     });
     assert.strictEqual(parsed.ok, true);
     if (!parsed.ok) throw new Error('unreachable');
-    // Rows after UTC nowDate are excluded; mixed history still normalizes.
-    const mixed = adapter.normalize(parsed.value, { nowIso: ADAPTER_TEST_NOW_ISO });
-    assert.strictEqual(mixed.ok, true);
-    if (!mixed.ok) throw new Error('unreachable');
-    assert.strictEqual(mixed.value.observationAsOf, '2026-07-09');
-    assert.strictEqual(mixed.value.fields.vixClose, 16.59);
 
-    // All observations after UTC nowDate still fail closed.
+    // Mixed: eligible rows plus any observation after nowDate → fail closed
+    assertFailCode(
+      adapter.normalize(parsed.value, { nowIso: ADAPTER_TEST_NOW_ISO }),
+      'vix_normalize_future_observation'
+    );
+
+    // All-future source → same failure code
     assertFailCode(
       adapter.normalize(parsed.value, { nowIso: '2026-06-01T12:00:00.000Z' }),
       'vix_normalize_future_observation'
