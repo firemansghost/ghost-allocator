@@ -1,9 +1,9 @@
 # GhostFlow Market Breadth Source Feasibility Audit
 
-**Status:** Research / documentation only — no adapter, registry, artifact, score, or runtime change.  
-**Audit date:** 2026-07-13  
-**Starting `main` SHA:** `83780ac5b3aa94403602dc387e9e25fca7d9fc65` (PR #132 CBOE VIX adapter merged)  
-**Series under review:** S&P 500 percentage of constituents above their 50-day moving average  
+**Status:** Research / documentation only — no adapter, registry, artifact, score, or runtime change.
+**Audit date:** 2026-07-13
+**Starting `main` SHA:** `83780ac5b3aa94403602dc387e9e25fca7d9fc65` (PR #132 CBOE VIX adapter merged)
+**Series under review:** S&P 500 percentage of constituents above their 50-day moving average
 **Canonical GhostFlow field:** `sp500Above50DayMaPercent` on `marketBreadth.v1.json`
 
 > **Disclaimer:** This memo is an operational feasibility assessment, not legal advice. Policy classifications are based on publicly published provider documentation accessed on the audit date.
@@ -44,7 +44,7 @@ A future source adapter for breadth must normalize **only** raw percentage + dur
 
 ## 3. Current StockCharts technical findings
 
-**Canonical page (registry):**  
+**Canonical page (registry):**
 https://stockcharts.com/freecharts/symbolsummary.html?sym=$SPXA50R
 
 ### Access observations (2026-07-13, non-authenticated)
@@ -164,24 +164,24 @@ Required (non-exhaustive):
 
 **Why**
 
-1. Official StockCharts Usage Limitations forbid automated/programmatic website access without prior approval.  
-2. Raw HTML is not a deterministic GhostFlow parse surface (JS-dependent; symbol/value absent in static body).  
-3. No verified licensed API currently delivers the exact `$SPXA50R` / S&P 500 constituent series under project-held rights.  
-4. GhostFlow already operates breadth as manual JSON with explicit `dataQuality` and Barchart cross-check rules.  
+1. Official StockCharts Usage Limitations forbid automated/programmatic website access without prior approval.
+2. Raw HTML is not a deterministic GhostFlow parse surface (JS-dependent; symbol/value absent in static body).
+3. No verified licensed API currently delivers the exact `$SPXA50R` / S&P 500 constituent series under project-held rights.
+4. GhostFlow already operates breadth as manual JSON with explicit `dataQuality` and Barchart cross-check rules.
 5. VIX automation (PR #132) does not unblock Gate C; breadth remains the second Gate C half.
 
 **What this implies**
 
-- Leave breadth automation **blocked**.  
-- Keep Gate C **manual** (no Gate C adapter runner that requires auto breadth).  
-- Do **not** implement `stockcharts-spxa50r-html`.  
+- Leave breadth automation **blocked**.
+- Keep Gate C **manual** (no Gate C adapter runner that requires auto breadth).
+- Do **not** implement `stockcharts-spxa50r-html`.
 - Prefer clarifying operator-packet intake docs before any registry format change.
 
 **Product gate requiring Bobby’s explicit approval**
 
-- Buying StockCharts Pro / seeking written StockCharts redistribution or automation permission  
-- Purchasing Barchart OnDemand (or other vendor) **after** written confirmation of S&P 500 constituent breadth SKU  
-- Approving a derived-breadth methodology project  
+- Buying StockCharts Pro / seeking written StockCharts redistribution or automation permission
+- Purchasing Barchart OnDemand (or other vendor) **after** written confirmation of S&P 500 constituent breadth SKU
+- Approving a derived-breadth methodology project
 - Changing registry `sourceFormat` from `html` to `operator_packet` (or other)
 
 **Smallest next PR**
