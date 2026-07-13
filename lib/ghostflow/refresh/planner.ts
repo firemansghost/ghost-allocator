@@ -20,15 +20,15 @@ import {
   type GhostFlowRefreshReportStatus,
   type GhostFlowRefreshSuggestedAction,
 } from './report';
+import { isValidCalendarDate, isValidIsoTimestamp } from './dateValidation';
 import type {
   GhostFlowRefreshIssue,
   GhostFlowRefreshRegistryEntry,
   GhostFlowStageResult,
 } from './types';
 
-const ISO_DATE_SHAPE_RE = /^\d{4}-\d{2}-\d{2}$/;
-const ISO_TIMESTAMP_SHAPE_RE =
-  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
+export { isValidCalendarDate, isValidIsoTimestamp } from './dateValidation';
+
 const SHA256_HEX_RE = /^[0-9a-fA-F]{64}$/;
 
 function blockIssue(code: string, message: string): GhostFlowRefreshIssue {
@@ -37,32 +37,6 @@ function blockIssue(code: string, message: string): GhostFlowRefreshIssue {
 
 function reconcileIssue(code: string, message: string): GhostFlowRefreshIssue {
   return { stage: 'reconcile', code, severity: 'block', message };
-}
-
-/** Pure calendar-date check: YYYY-MM-DD shape and real UTC calendar day. */
-export function isValidCalendarDate(value: string): boolean {
-  if (!ISO_DATE_SHAPE_RE.test(value)) return false;
-  const [ys, ms, ds] = value.split('-');
-  const year = Number(ys);
-  const month = Number(ms);
-  const day = Number(ds);
-  if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) {
-    return false;
-  }
-  const utc = new Date(Date.UTC(year, month - 1, day));
-  return (
-    utc.getUTCFullYear() === year &&
-    utc.getUTCMonth() === month - 1 &&
-    utc.getUTCDate() === day
-  );
-}
-
-/** Pure ISO timestamp check: expected shape, real calendar date, and finite Date.parse. */
-export function isValidIsoTimestamp(value: string): boolean {
-  if (!ISO_TIMESTAMP_SHAPE_RE.test(value)) return false;
-  if (!isValidCalendarDate(value.slice(0, 10))) return false;
-  const parsed = Date.parse(value);
-  return Number.isFinite(parsed);
 }
 
 export function isValidSha256Hex(value: string): boolean {

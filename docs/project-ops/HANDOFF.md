@@ -1,6 +1,26 @@
 # HANDOFF
 
-## Last Session Summary (2026-01-21)
+## Last Session Summary (2026-07-13)
+GhostFlow Phase 1 foundation (PRs #128–#131) is complete. Implemented the first GREEN source adapter for the official CBOE VIX History CSV (`cboe-vix-history-csv` / parser `1.0.0`) with injected fetch, deterministic CSV parse/normalize, synthetic fixtures, and registry status `implemented`. Adapter is not wired to CLI, workflow, candidate/artifact writers, or runtime. No production refresh; scores and reference date unchanged. Gate C still requires breadth.
+
+## State of Work
+- GhostFlow refresh contracts, registry, planner, and VIX CSV adapter are in place.
+- Production GhostFlow remains locked at reference `2026-07-01`, scores `60 / 53 / 67`, `publicSignalCount` 13, MOCK `62 / 58 / 55`.
+- Breadth adapter and Gate C runner are not started.
+- Core app remains stable; education section remains live.
+
+## Priority for Next Session
+1) Read-only breadth-source adapter spike
+2) Breadth adapter implementation if the source is deterministic enough
+3) Report-only Gate C adapter runner (after both adapters)
+
+## Open Questions
+- Is StockCharts `$SPXA50R` stable enough for a deterministic breadth adapter, or is an alternate GREEN path required?
+- Should the next Gate C runner remain report-only until both adapters are human-reviewed end-to-end?
+
+---
+
+## Archive — Education session (2026-01-21)
 Added "457(b) in 5 Minutes" quick reference to education section:
 - Created reusable component (components/learn/457InFiveMinutes.tsx) with scannable format
 - Added prominent section to /learn/457 page (positioned after header, before longer content)

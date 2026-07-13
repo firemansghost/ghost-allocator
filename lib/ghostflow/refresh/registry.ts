@@ -9,6 +9,14 @@ import {
   GHOSTFLOW_DURABLE_PROVENANCE_FIELD_KEYS,
   type GhostFlowRefreshRegistryEntry,
 } from './types';
+import {
+  CBOE_VIX_ADAPTER_ID,
+  CBOE_VIX_ARTIFACT_ID,
+  CBOE_VIX_PARSER_VERSION,
+  CBOE_VIX_SOURCE_FAMILY_ID,
+  CBOE_VIX_SOURCE_LOCATOR,
+  CBOE_VIX_SOURCE_NAME,
+} from './adapters/cboeVixHistoryCsvMeta';
 
 export {
   GATE_C_ARTIFACT_IDS,
@@ -19,22 +27,22 @@ export {
 export const GHOSTFLOW_REFRESH_REGISTRY = [
   // --- Score-fed equity (6) ---
   {
-    artifactId: 'volatilityRegime',
+    artifactId: CBOE_VIX_ARTIFACT_ID,
     artifactPath: 'data/ghostflow/artifacts/volatilityRegime.v1.json',
     lane: 'score_fed_equity',
     cadence: 'daily_trading',
     candidateGroupId: GATE_C_CANDIDATE_GROUP_ID,
     acceptanceUnit: 'candidate_group',
     canonicalSource: {
-      sourceFamilyId: 'cboe_vix_official_csv',
-      sourceName: 'CBOE VIX History',
-      sourceLocator:
-        'https://cdn.cboe.com/api/global/us_indices/daily_prices/VIX_History.csv',
+      sourceFamilyId: CBOE_VIX_SOURCE_FAMILY_ID,
+      sourceName: CBOE_VIX_SOURCE_NAME,
+      sourceLocator: CBOE_VIX_SOURCE_LOCATOR,
     },
     sourceFormat: 'csv',
     adapter: {
-      adapterId: 'cboe-vix-history-csv',
-      implementationStatus: 'planned',
+      adapterId: CBOE_VIX_ADAPTER_ID,
+      implementationStatus: 'implemented',
+      parserVersion: CBOE_VIX_PARSER_VERSION,
     },
     freshnessPolicyId: 'daily_trading_v1',
     referenceDateRole: 'gate_c_required',

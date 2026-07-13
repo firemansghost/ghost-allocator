@@ -1,6 +1,35 @@
 # STATUS
 
-## Current State
+## Current State (GhostFlow — 2026-07-13)
+GhostFlow Phase 1 foundation is in place through PRs #128–#131:
+- production score baseline fixture
+- typed 15-artifact refresh registry
+- offline report model + fixture-driven planner
+- Gate C atomicity and provenance/timestamp validation
+
+First GREEN source adapter is now implemented for the official CBOE VIX History CSV (`cboe-vix-history-csv`, parser `1.0.0`):
+- fixture-tested with an injected fetch boundary
+- not wired to a CLI, workflow, candidate writer, artifact writer, or runtime
+- no production refresh occurred
+
+Gate C remains incomplete without the breadth source.
+Production GhostFlow state remains unchanged:
+- `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
+- Composite / Passive / Structural: 60 / 53 / 67
+- Band: Elevated Flow Pressure
+- `publicSignalCount`: 13
+- MOCK systematic / retirement / levered: 62 / 58 / 55
+
+## Recommended next work
+1. Read-only breadth-source adapter spike
+2. Breadth adapter implementation if the source proves deterministic enough
+3. Report-only Gate C adapter runner (after both adapters exist)
+
+Last updated: 2026-07-13
+
+---
+
+## Archive — Education / V1 snapshot (2026-01-21)
 Ghost Allocator is stable and usable: onboarding + builder flow works, Schwab sleeve logic is clean (Gold and Commodities are always separate), and GhostRegime diagnostics are local-first and usable without production secrets. We are deliberately holding off on BTC parity mismatch investigation for now (watchlist item, not a blocker).
 
 Education section (V1.1) is now live:
