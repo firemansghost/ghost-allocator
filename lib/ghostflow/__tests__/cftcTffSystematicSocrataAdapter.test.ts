@@ -164,7 +164,10 @@ assert.strictEqual(
 assert.strictEqual(CFTC_TFF_SYSTEMATIC_ARTIFACT_ID, 'systematicFlowProxy');
 assert.strictEqual(systematicEntry.lane, 'display_only_equity');
 assert.strictEqual(systematicEntry.failureSeverity, 'nonfatal_display');
-assert.strictEqual(treasuryEntry.adapter.implementationStatus, 'spike_available');
+assert.strictEqual(treasuryEntry.adapter.implementationStatus, 'implemented');
+if (treasuryEntry.adapter.implementationStatus === 'implemented') {
+  assert.strictEqual(treasuryEntry.adapter.parserVersion, '1.0.0');
+}
 
 {
   const adapterSource = readFileSync(
