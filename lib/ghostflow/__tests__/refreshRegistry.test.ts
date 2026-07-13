@@ -1,0 +1,263 @@
+/**
+ * GhostFlow refresh registry — inventory and contract invariants.
+ */
+
+import assert from 'assert';
+import {
+  assertGhostFlowRefreshRegistryValid,
+  GATE_C_ARTIFACT_IDS,
+  GATE_C_CANDIDATE_GROUP_ID,
+  GHOSTFLOW_DURABLE_PROVENANCE_FIELD_KEYS,
+  GHOSTFLOW_REFRESH_REGISTRY,
+  validateGhostFlowRefreshRegistry,
+} from '../refresh/registry';
+import type {
+  GhostFlowDisplayOnlyRegistryEntry,
+  GhostFlowScoreFedRegistryEntry,
+  GhostFlowTreasuryRegistryEntry,
+} from '../refresh/types';
+
+const EXPECTED_SCORE_FED = [
+  'volatilityRegime',
+  'marketBreadth',
+  'etfNetIssuance',
+  'passiveShareProxy',
+  'activeIndexFlow',
+  'indexConcentration',
+] as const;
+
+const EXPECTED_DISPLAY = [
+  'systematicFlowProxy',
+  'leveredEtfRebalancePressure',
+  'retirementFlowPressureProxy',
+  'optionsActivityProxy',
+  'indexInclusionEventProxy',
+  'capWeightPremiumProxy',
+  'tailSkewContext',
+] as const;
+
+const EXPECTED_TREASURY = [
+  'treasuryFuturesPositioningProxy',
+  'treasuryLongEndIncomeLens',
+] as const;
+
+const EXPECTED_ALL = [
+  ...EXPECTED_SCORE_FED,
+  ...EXPECTED_DISPLAY,
+  ...EXPECTED_TREASURY,
+] as const;
+
+const MOCK_SCORE_INPUTS = [
+  'systematicStrategyPressure',
+  'retirementFlowPressureProxy',
+  'leveredEtfRebalancePressure',
+] as const;
+
+assertGhostFlowRefreshRegistryValid();
+
+const issues = validateGhostFlowRefreshRegistry();
+assert.deepStrictEqual(issues, []);
+
+const ids = GHOSTFLOW_REFRESH_REGISTRY.map((e) => e.artifactId);
+assert.deepStrictEqual([...ids].sort(), [...EXPECTED_ALL].sort());
+assert.strictEqual(GHOSTFLOW_REFRESH_REGISTRY.length, 15);
+
+const paths = GHOSTFLOW_REFRESH_REGISTRY.map((e) => e.artifactPath);
+assert.strictEqual(new Set(ids).size, ids.length);
+assert.strictEqual(new Set(paths).size, paths.length);
+
+const scoreFed = GHOSTFLOW_REFRESH_REGISTRY.filter(
+  (e): e is GhostFlowScoreFedRegistryEntry => e.lane === 'score_fed_equity'
+);
+const displayOnly = GHOSTFLOW_REFRESH_REGISTRY.filter(
+  (e): e is GhostFlowDisplayOnlyRegistryEntry => e.lane === 'display_only_equity'
+);
+const treasury = GHOSTFLOW_REFRESH_REGISTRY.filter(
+  (e): e is GhostFlowTreasuryRegistryEntry => e.lane === 'treasury_display'
+);
+
+assert.strictEqual(scoreFed.length, 6);
+assert.strictEqual(displayOnly.length, 7);
+assert.strictEqual(treasury.length, 2);
+assert.deepStrictEqual(
+  scoreFed.map((e) => e.artifactId).sort(),
+  [...EXPECTED_SCORE_FED].sort()
+);
+assert.deepStrictEqual(
+  displayOnly.map((e) => e.artifactId).sort(),
+  [...EXPECTED_DISPLAY].sort()
+);
+assert.deepStrictEqual(
+  treasury.map((e) => e.artifactId).sort(),
+  [...EXPECTED_TREASURY].sort()
+);
+
+// Gate C atomicity
+const gateC = GHOSTFLOW_REFRESH_REGISTRY.filter(
+  (e) => e.candidateGroupId === GATE_C_CANDIDATE_GROUP_ID
+);
+assert.strictEqual(gateC.length, 2);
+assert.deepStrictEqual(
+  gateC.map((e) => e.artifactId).sort(),
+  [...GATE_C_ARTIFACT_IDS].sort()
+);
+for (const entry of gateC) {
+  assert.strictEqual(entry.acceptanceUnit, 'candidate_group');
+  assert.strictEqual(entry.referenceDateRole, 'gate_c_required');
+  assert.strictEqual(entry.lane, 'score_fed_equity');
+  assert.strictEqual(entry.failureSeverity, 'blocking_score_fed');
+}
+
+// Unrelated score-fed failures remain isolated (own candidate groups / artifact acceptance)
+const nonGateCScoreFed = scoreFed.filter(
+  (e) => e.candidateGroupId !== GATE_C_CANDIDATE_GROUP_ID
+);
+assert.strictEqual(nonGateCScoreFed.length, 4);
+for (const entry of nonGateCScoreFed) {
+  assert.strictEqual(entry.acceptanceUnit, 'artifact');
+  assert.ok(entry.candidateGroupId.trim().length > 0);
+  assert.notStrictEqual(entry.candidateGroupId, GATE_C_CANDIDATE_GROUP_ID);
+}
+assert.strictEqual(
+  new Set(nonGateCScoreFed.map((e) => e.candidateGroupId)).size,
+  nonGateCScoreFed.length
+);
+
+// Score-fed vs display/Treasury firewall
+for (const entry of scoreFed) {
+  assert.ok(entry.scoreInputs.length >= 1);
+  assert.strictEqual(entry.failureSeverity, 'blocking_score_fed');
+}
+for (const entry of displayOnly) {
+  assert.ok(!('scoreInputs' in entry));
+  assert.strictEqual(entry.failureSeverity, 'nonfatal_display');
+}
+for (const entry of treasury) {
+  assert.ok(!('scoreInputs' in entry));
+  assert.strictEqual(entry.failureSeverity, 'nonfatal_treasury');
+}
+
+// Passive-share documents direct + derived inputs
+const passiveShare = scoreFed.find((e) => e.artifactId === 'passiveShareProxy');
+assert.ok(passiveShare);
+assert.deepStrictEqual(passiveShare.scoreInputs, [
+  {
+    axis: 'structural',
+    key: 'passiveShareProxy',
+    relationship: 'direct',
+  },
+  {
+    axis: 'structural',
+    key: 'modelZoneProximity',
+    relationship: 'derived',
+  },
+]);
+
+// MOCK score slots absent from registry inventory and scoreInputs
+assert.ok(!ids.includes('systematicStrategyPressure' as never));
+assert.ok(!ids.includes('distance-65' as never));
+assert.ok(!ids.includes('modelZoneProximity' as never));
+for (const entry of scoreFed) {
+  for (const input of entry.scoreInputs) {
+    if (input.axis === 'passive') {
+      assert.ok(
+        !(MOCK_SCORE_INPUTS as readonly string[]).includes(input.key),
+        `registry must not treat MOCK slot ${input.key} as a score-fed source input`
+      );
+    }
+  }
+}
+
+// Human approval for all
+for (const entry of GHOSTFLOW_REFRESH_REGISTRY) {
+  assert.strictEqual(entry.approvalPolicy, 'human_required');
+}
+
+// No Marketstack
+const serialized = JSON.stringify(GHOSTFLOW_REFRESH_REGISTRY).toLowerCase();
+assert.ok(!serialized.includes('marketstack'));
+
+// Readiness classifications (verified starting point)
+const byId = Object.fromEntries(
+  GHOSTFLOW_REFRESH_REGISTRY.map((e) => [e.artifactId, e])
+) as Record<(typeof EXPECTED_ALL)[number], (typeof GHOSTFLOW_REFRESH_REGISTRY)[number]>;
+
+assert.strictEqual(byId.volatilityRegime.automationReadiness, 'green');
+assert.strictEqual(byId.systematicFlowProxy.automationReadiness, 'green');
+assert.strictEqual(byId.treasuryFuturesPositioningProxy.automationReadiness, 'green');
+assert.strictEqual(byId.treasuryLongEndIncomeLens.automationReadiness, 'green');
+
+assert.strictEqual(byId.marketBreadth.automationReadiness, 'yellow');
+assert.strictEqual(byId.etfNetIssuance.automationReadiness, 'yellow');
+assert.strictEqual(byId.passiveShareProxy.automationReadiness, 'yellow');
+assert.strictEqual(byId.activeIndexFlow.automationReadiness, 'yellow');
+assert.strictEqual(byId.indexConcentration.automationReadiness, 'yellow');
+assert.strictEqual(byId.optionsActivityProxy.automationReadiness, 'yellow');
+assert.strictEqual(byId.capWeightPremiumProxy.automationReadiness, 'yellow');
+assert.strictEqual(byId.tailSkewContext.automationReadiness, 'yellow');
+
+assert.strictEqual(byId.leveredEtfRebalancePressure.automationReadiness, 'red');
+assert.strictEqual(byId.indexInclusionEventProxy.automationReadiness, 'red');
+assert.strictEqual(byId.retirementFlowPressureProxy.automationReadiness, 'red');
+
+// Authentication classifications
+assert.deepStrictEqual(byId.volatilityRegime.authentication, { kind: 'none' });
+assert.deepStrictEqual(byId.treasuryLongEndIncomeLens.authentication, {
+  kind: 'optional_env',
+  envName: 'FRED_API_KEY',
+});
+assert.deepStrictEqual(byId.leveredEtfRebalancePressure.authentication, {
+  kind: 'manual_operator',
+});
+assert.deepStrictEqual(byId.indexInclusionEventProxy.authentication, {
+  kind: 'manual_operator',
+});
+assert.deepStrictEqual(byId.capWeightPremiumProxy.authentication, {
+  kind: 'manual_operator',
+});
+
+// Adapter implementation-status rules — none claimed implemented
+for (const entry of GHOSTFLOW_REFRESH_REGISTRY) {
+  assert.ok(
+    entry.adapter.implementationStatus === 'planned' ||
+      entry.adapter.implementationStatus === 'spike_available'
+  );
+  assert.ok(!('parserVersion' in entry.adapter));
+}
+
+const spikeIds = GHOSTFLOW_REFRESH_REGISTRY.filter(
+  (e) => e.adapter.implementationStatus === 'spike_available'
+).map((e) => e.artifactId)
+  .sort();
+assert.deepStrictEqual(spikeIds, [
+  'capWeightPremiumProxy',
+  'leveredEtfRebalancePressure',
+  'optionsActivityProxy',
+  'retirementFlowPressureProxy',
+  'systematicFlowProxy',
+  'tailSkewContext',
+  'treasuryFuturesPositioningProxy',
+  'treasuryLongEndIncomeLens',
+]);
+
+// Freshness policy identifiers only (no numeric thresholds in registry)
+const freshnessIds = new Set(
+  GHOSTFLOW_REFRESH_REGISTRY.map((e) => e.freshnessPolicyId)
+);
+for (const id of freshnessIds) {
+  assert.ok(
+    /_v1$/.test(id),
+    `freshnessPolicyId must be a policy identifier, got ${id}`
+  );
+}
+assert.ok(!serialized.includes('freshmax'));
+assert.ok(!serialized.includes('staleafter'));
+assert.ok(!/"freshMaxDays"/.test(JSON.stringify(GHOSTFLOW_REFRESH_REGISTRY)));
+assert.ok(!/"staleAfterDays"/.test(JSON.stringify(GHOSTFLOW_REFRESH_REGISTRY)));
+
+// Durable provenance excludes local-path / secret fields
+for (const key of GHOSTFLOW_DURABLE_PROVENANCE_FIELD_KEYS) {
+  assert.ok(!/path|tmp|workspace|body|apiKey|token|cookie/i.test(key));
+}
+
+console.log('ghostflow/refreshRegistry.test.ts: ok');
