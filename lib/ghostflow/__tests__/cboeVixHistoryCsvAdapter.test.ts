@@ -282,6 +282,46 @@ async function fetched(
     assert.strictEqual(capped.value.fields.vixClose, 16.59);
   }
 
+  // UTC date ceiling must come from the represented instant, not the timestamp prefix.
+  {
+    const adapter = createCboeVixHistoryCsvAdapter({
+      fetchClient: trackingClient(textResponse(FIXTURE_VIX_VALID_LF)).client,
+    });
+    const parsed = adapter.parse(await fetched(FIXTURE_VIX_VALID_LF), {
+      nowIso: ADAPTER_TEST_NOW_ISO,
+    });
+    assert.strictEqual(parsed.ok, true);
+    if (!parsed.ok) throw new Error('unreachable');
+
+    // 2026-07-02T23:30:00-05:00 → UTC 2026-07-03 → select 2026-07-03
+    const negativeOffset = adapter.normalize(parsed.value, {
+      nowIso: '2026-07-02T23:30:00-05:00',
+    });
+    assert.strictEqual(negativeOffset.ok, true);
+    if (!negativeOffset.ok) throw new Error('unreachable');
+    assert.strictEqual(negativeOffset.value.observationAsOf, '2026-07-03');
+    assert.strictEqual(negativeOffset.value.fields.vixClose, 16.8);
+
+    // 2026-07-03T00:30:00+05:00 → UTC 2026-07-02 → select 2026-07-02
+    const positiveOffset = adapter.normalize(parsed.value, {
+      nowIso: '2026-07-03T00:30:00+05:00',
+    });
+    assert.strictEqual(positiveOffset.ok, true);
+    if (!positiveOffset.ok) throw new Error('unreachable');
+    assert.strictEqual(positiveOffset.value.observationAsOf, '2026-07-02');
+    assert.strictEqual(positiveOffset.value.fields.vixClose, 16.59);
+
+    // Explicit earlier referenceAsOf still wins over UTC date from nowIso
+    const referenceWins = adapter.normalize(parsed.value, {
+      nowIso: '2026-07-02T23:30:00-05:00',
+      referenceAsOf: '2026-07-02',
+    });
+    assert.strictEqual(referenceWins.ok, true);
+    if (!referenceWins.ok) throw new Error('unreachable');
+    assert.strictEqual(referenceWins.value.observationAsOf, '2026-07-02');
+    assert.strictEqual(referenceWins.value.fields.vixClose, 16.59);
+  }
+
   {
     const adapter = createCboeVixHistoryCsvAdapter({
       fetchClient: trackingClient(textResponse(FIXTURE_VIX_VALID_LF)).client,
@@ -316,8 +356,16 @@ async function fetched(
     });
     assert.strictEqual(parsed.ok, true);
     if (!parsed.ok) throw new Error('unreachable');
+    // Rows after UTC nowDate are excluded; mixed history still normalizes.
+    const mixed = adapter.normalize(parsed.value, { nowIso: ADAPTER_TEST_NOW_ISO });
+    assert.strictEqual(mixed.ok, true);
+    if (!mixed.ok) throw new Error('unreachable');
+    assert.strictEqual(mixed.value.observationAsOf, '2026-07-09');
+    assert.strictEqual(mixed.value.fields.vixClose, 16.59);
+
+    // All observations after UTC nowDate still fail closed.
     assertFailCode(
-      adapter.normalize(parsed.value, { nowIso: ADAPTER_TEST_NOW_ISO }),
+      adapter.normalize(parsed.value, { nowIso: '2026-06-01T12:00:00.000Z' }),
       'vix_normalize_future_observation'
     );
   }

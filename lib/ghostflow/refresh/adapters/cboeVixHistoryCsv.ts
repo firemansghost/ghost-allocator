@@ -354,7 +354,8 @@ export function createCboeVixHistoryCsvAdapter(
         );
       }
 
-      const nowDate = context.nowIso.slice(0, 10);
+      // UTC calendar date of the represented instant (not the timestamp's written prefix).
+      const nowDate = new Date(context.nowIso).toISOString().slice(0, 10);
       if (!isValidCalendarDate(nowDate)) {
         return fail(
           'normalize',
@@ -384,17 +385,18 @@ export function createCboeVixHistoryCsvAdapter(
         );
       }
 
-      for (const row of source.parsed) {
-        if (row.observationAsOf > nowDate) {
-          return fail(
-            'normalize',
-            'vix_normalize_future_observation',
-            `CBOE VIX observation ${row.observationAsOf} is after nowIso UTC date ${nowDate}`
-          );
-        }
+      // History CSVs may contain rows after a point-in-time nowIso; exclude them.
+      // Fail closed only when every observation is after the UTC now date.
+      const notAfterNow = source.parsed.filter((row) => row.observationAsOf <= nowDate);
+      if (notAfterNow.length === 0) {
+        return fail(
+          'normalize',
+          'vix_normalize_future_observation',
+          `All CBOE VIX observations are after nowIso UTC date ${nowDate}`
+        );
       }
 
-      const eligible = source.parsed.filter((row) => row.observationAsOf <= ceiling);
+      const eligible = notAfterNow.filter((row) => row.observationAsOf <= ceiling);
       if (eligible.length === 0) {
         return fail(
           'normalize',
