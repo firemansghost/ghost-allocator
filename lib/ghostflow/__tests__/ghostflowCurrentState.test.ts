@@ -10,6 +10,8 @@ import {
   signalCardBadgeLabelForSignal,
 } from '../signalPresentation';
 import { ghostFlowBandLabel, scoreGhostFlowSnapshot } from '../scoring';
+import { GHOSTFLOW_REFERENCE_AS_OF } from '../reference';
+import { PRODUCTION_SCORE_BASELINE } from './fixtures/productionScoreBaseline';
 
 const DISPLAY_ONLY_IDS = [
   'systematic-flow',
@@ -33,16 +35,29 @@ const SCORE_FED_PUBLIC_IDS = [
 const { raw, meta } = buildGhostFlowSnapshot();
 const scored = scoreGhostFlowSnapshot(raw);
 
-assert.strictEqual(scored.score.score, 60);
-assert.strictEqual(scored.score.subScores.passivePressure, 53);
-assert.strictEqual(scored.score.subScores.structuralFragility, 67);
-assert.strictEqual(ghostFlowBandLabel(scored.score.band), 'Elevated Flow Pressure');
+assert.strictEqual(GHOSTFLOW_REFERENCE_AS_OF, PRODUCTION_SCORE_BASELINE.referenceAsOf);
+assert.strictEqual(scored.score.score, PRODUCTION_SCORE_BASELINE.composite);
+assert.strictEqual(scored.score.subScores.passivePressure, PRODUCTION_SCORE_BASELINE.passive);
+assert.strictEqual(
+  scored.score.subScores.structuralFragility,
+  PRODUCTION_SCORE_BASELINE.structural
+);
+assert.strictEqual(ghostFlowBandLabel(scored.score.band), PRODUCTION_SCORE_BASELINE.bandLabel);
 
-assert.strictEqual(meta.publicSignalCount, 13);
+assert.strictEqual(meta.publicSignalCount, PRODUCTION_SCORE_BASELINE.publicSignalCount);
 
-assert.strictEqual(raw.passivePressure.systematicStrategyPressure, 62);
-assert.strictEqual(raw.passivePressure.retirementFlowPressureProxy, 58);
-assert.strictEqual(raw.passivePressure.leveredEtfRebalancePressure, 55);
+assert.strictEqual(
+  raw.passivePressure.systematicStrategyPressure,
+  PRODUCTION_SCORE_BASELINE.mockPassiveInputs.systematicStrategyPressure
+);
+assert.strictEqual(
+  raw.passivePressure.retirementFlowPressureProxy,
+  PRODUCTION_SCORE_BASELINE.mockPassiveInputs.retirementFlowPressureProxy
+);
+assert.strictEqual(
+  raw.passivePressure.leveredEtfRebalancePressure,
+  PRODUCTION_SCORE_BASELINE.mockPassiveInputs.leveredEtfRebalancePressure
+);
 
 const passiveKeys = meta.publicPassiveInputKeys ?? [];
 assert.ok(!passiveKeys.includes('systematicStrategyPressure'));
@@ -74,7 +89,10 @@ for (const id of SCORE_FED_PUBLIC_IDS) {
 
 assert.deepStrictEqual(grouped.mockProxies.map((s) => s.id), []);
 
-assert.strictEqual(PUBLIC_ARTIFACT_SIGNAL_IDS.length, 13);
+assert.strictEqual(
+  PUBLIC_ARTIFACT_SIGNAL_IDS.length,
+  PRODUCTION_SCORE_BASELINE.publicSignalCount
+);
 assert.ok(PUBLIC_ARTIFACT_SIGNAL_IDS.includes('tail-skew-context'));
 assert.ok(PUBLIC_ARTIFACT_SIGNAL_IDS.includes('index-inclusion-events'));
 assert.ok(PUBLIC_ARTIFACT_SIGNAL_IDS.includes('cap-weight-premium'));

@@ -16,6 +16,7 @@ import {
 import { ghostFlowBandLabel, scoreGhostFlowSnapshot } from '../scoring';
 import loadProduction from '@/data/ghostflow/artifacts/systematicFlowProxy.v1.json';
 import type { SystematicFlowProxyArtifactV1 } from '../artifacts/types';
+import { PRODUCTION_SCORE_BASELINE } from './fixtures/productionScoreBaseline';
 
 const production = loadProduction as SystematicFlowProxyArtifactV1;
 
@@ -40,15 +41,21 @@ assert.ok(
     systematic!.cardCaveat?.includes('not included in the Research Composite')
 );
 
-assert.strictEqual(raw.passivePressure.systematicStrategyPressure, 62);
+assert.strictEqual(
+  raw.passivePressure.systematicStrategyPressure,
+  PRODUCTION_SCORE_BASELINE.mockPassiveInputs.systematicStrategyPressure
+);
 assert.ok(!meta.publicPassiveInputKeys.includes('systematicStrategyPressure'));
-assert.strictEqual(meta.publicSignalCount, 13);
+assert.strictEqual(meta.publicSignalCount, PRODUCTION_SCORE_BASELINE.publicSignalCount);
 assert.ok(meta.publicSignals.some((s) => s.signalId === 'systematic-flow'));
 
-assert.strictEqual(scored.score.score, 60);
-assert.strictEqual(scored.score.subScores.passivePressure, 53);
-assert.strictEqual(scored.score.subScores.structuralFragility, 67);
-assert.strictEqual(ghostFlowBandLabel(scored.score.band), 'Elevated Flow Pressure');
+assert.strictEqual(scored.score.score, PRODUCTION_SCORE_BASELINE.composite);
+assert.strictEqual(scored.score.subScores.passivePressure, PRODUCTION_SCORE_BASELINE.passive);
+assert.strictEqual(
+  scored.score.subScores.structuralFragility,
+  PRODUCTION_SCORE_BASELINE.structural
+);
+assert.strictEqual(ghostFlowBandLabel(scored.score.band), PRODUCTION_SCORE_BASELINE.bandLabel);
 
 const grouped = groupSignalsByPresentation(scored.signals);
 assert.ok(grouped.publicArtifacts.some((s) => s.id === 'systematic-flow'));

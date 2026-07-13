@@ -23,6 +23,7 @@ import {
 import { ghostFlowBandLabel, scoreGhostFlowSnapshot } from '../scoring';
 import { GHOSTFLOW_REFERENCE_AS_OF } from '../reference';
 import { MOCK_GHOSTFLOW_SNAPSHOT } from '@/data/ghostflow/mockGhostflowSnapshot';
+import { PRODUCTION_SCORE_BASELINE } from './fixtures/productionScoreBaseline';
 
 const production = loadCapWeightPremiumProxyArtifact();
 assert.ok(production.ok, production.ok ? '' : production.errors.join('; '));
@@ -60,19 +61,25 @@ assert.strictEqual(capWeight!.artifactPublishedAt, '2026-07-05');
 const scoredCapWeight = scored.signals.find((s) => s.id === 'cap-weight-premium')!;
 assert.strictEqual(signalCardBadgeLabelForSignal(scoredCapWeight, 'public'), 'DISPLAY ONLY');
 
-assert.strictEqual(meta.publicSignalCount, 13);
+assert.strictEqual(meta.publicSignalCount, PRODUCTION_SCORE_BASELINE.publicSignalCount);
 assert.ok(meta.publicSignals.some((s) => s.signalId === 'cap-weight-premium'));
 assert.ok(!meta.publicPassiveInputKeys?.includes('cap-weight-premium' as never));
 
-assert.strictEqual(scored.score.score, 60);
-assert.strictEqual(scored.score.subScores.passivePressure, 53);
-assert.strictEqual(scored.score.subScores.structuralFragility, 67);
-assert.strictEqual(ghostFlowBandLabel(scored.score.band), 'Elevated Flow Pressure');
+assert.strictEqual(scored.score.score, PRODUCTION_SCORE_BASELINE.composite);
+assert.strictEqual(scored.score.subScores.passivePressure, PRODUCTION_SCORE_BASELINE.passive);
+assert.strictEqual(
+  scored.score.subScores.structuralFragility,
+  PRODUCTION_SCORE_BASELINE.structural
+);
+assert.strictEqual(ghostFlowBandLabel(scored.score.band), PRODUCTION_SCORE_BASELINE.bandLabel);
 
 const grouped = groupSignalsByPresentation(scored.signals);
 assert.ok(grouped.publicArtifacts.some((s) => s.id === 'cap-weight-premium'));
 
-assert.strictEqual(PUBLIC_ARTIFACT_SIGNAL_IDS.length, 13);
+assert.strictEqual(
+  PUBLIC_ARTIFACT_SIGNAL_IDS.length,
+  PRODUCTION_SCORE_BASELINE.publicSignalCount
+);
 assert.ok(PUBLIC_ARTIFACT_SIGNAL_IDS.includes('cap-weight-premium'));
 
 const invalidMerge = mergeCapWeightPremiumDisplayIfValid(

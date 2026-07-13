@@ -22,6 +22,7 @@ import {
 import { ghostFlowBandLabel, scoreGhostFlowSnapshot } from '../scoring';
 import { GHOSTFLOW_REFERENCE_AS_OF } from '../reference';
 import { MOCK_GHOSTFLOW_SNAPSHOT } from '@/data/ghostflow/mockGhostflowSnapshot';
+import { PRODUCTION_SCORE_BASELINE } from './fixtures/productionScoreBaseline';
 
 const production = loadIndexInclusionEventProxyArtifact();
 assert.ok(production.ok, production.ok ? '' : production.errors.join('; '));
@@ -56,14 +57,17 @@ assert.strictEqual(indexEvents!.artifactPublishedAt, '2026-07-02');
 const scoredIndexEvents = scored.signals.find((s) => s.id === 'index-inclusion-events')!;
 assert.strictEqual(signalCardBadgeLabelForSignal(scoredIndexEvents, 'public'), 'DISPLAY ONLY');
 
-assert.strictEqual(meta.publicSignalCount, 13);
+assert.strictEqual(meta.publicSignalCount, PRODUCTION_SCORE_BASELINE.publicSignalCount);
 assert.ok(meta.publicSignals.some((s) => s.signalId === 'index-inclusion-events'));
 assert.ok(!meta.publicPassiveInputKeys?.includes('index-inclusion-events' as never));
 
-assert.strictEqual(scored.score.score, 60);
-assert.strictEqual(scored.score.subScores.passivePressure, 53);
-assert.strictEqual(scored.score.subScores.structuralFragility, 67);
-assert.strictEqual(ghostFlowBandLabel(scored.score.band), 'Elevated Flow Pressure');
+assert.strictEqual(scored.score.score, PRODUCTION_SCORE_BASELINE.composite);
+assert.strictEqual(scored.score.subScores.passivePressure, PRODUCTION_SCORE_BASELINE.passive);
+assert.strictEqual(
+  scored.score.subScores.structuralFragility,
+  PRODUCTION_SCORE_BASELINE.structural
+);
+assert.strictEqual(ghostFlowBandLabel(scored.score.band), PRODUCTION_SCORE_BASELINE.bandLabel);
 
 const grouped = groupSignalsByPresentation(scored.signals);
 assert.ok(grouped.publicArtifacts.some((s) => s.id === 'index-inclusion-events'));
