@@ -10,11 +10,12 @@ GhostFlow Phase 1 foundation (PRs #128–#131) plus VIX adapter (#132) are in pl
 - CBOE VIX adapter (`cboe-vix-history-csv` / `1.0.0`) **implemented**, fixture-tested, **unwired** (no CLI/workflow/candidate/artifact writer/runtime)
 
 **Breadth source feasibility audit completed** (`docs/ghostflow/MARKET_BREADTH_SOURCE_FEASIBILITY.md`):
-- StockCharts `$SPXA50R` **direct HTML automation: RED** (Usage Limitations forbid programmatic/automated access without prior approval; page is JS-dependent)
-- **Recommended path:** preserve breadth as a **manual operator packet**; leave Gate C automation blocked until a documented licensed machine source exists
-- Do **not** implement `stockcharts-spxa50r-html` without written permission
+- StockCharts `$SPXA50R` **HTML automation: RED / blocked** (Usage Limitations forbid programmatic/automated access without prior approval; page is JS-dependent)
+- **Recommended path:** design a typed **manual operator-packet** intake mechanism, but keep **production breadth refresh blocked** until source authorization is resolved
+- StockCharts **manual transcription is not production-approved** under this audit (operator research / workflow design only; PERMISSION_REQUIRED for publication or production refresh)
+- Do **not** implement `stockcharts-spxa50r-html`
 
-Gate C remains incomplete (VIX half implemented; breadth still manual-only).
+Gate C remains incomplete. Breadth production refresh remains blocked pending source authorization.
 No production refresh occurred.
 Production GhostFlow state remains unchanged:
 - `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
@@ -24,9 +25,9 @@ Production GhostFlow state remains unchanged:
 - MOCK systematic / retirement / levered: 62 / 58 / 55
 
 ## Recommended next work
-1. Docs-only `marketBreadth` operator-packet intake design (Bobby approval before any registry `sourceFormat` change)
-2. Optional commercial track: confirm a licensed SKU (StockCharts written approval or Barchart OnDemand / other) for exact S&P 500 % above 50DMA — only after Bobby approval
-3. Do **not** start a Gate C adapter runner until a valid breadth input path is decided
+1. Docs-only `marketBreadth` operator-packet intake design + evidence checklist (not for production use until source authorization)
+2. Resolve source authorization (written StockCharts permission or exact licensed provider SKU) — Bobby approval required before purchasing or requesting access; Bobby approval alone does not create data rights
+3. Do **not** start a Gate C production refresh or HTML scraper
 
 Last updated: 2026-07-13
 
