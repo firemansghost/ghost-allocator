@@ -4,6 +4,13 @@
 
 import assert from 'assert';
 import {
+  CBOE_VIX_ADAPTER_ID,
+  CBOE_VIX_PARSER_VERSION,
+  CBOE_VIX_SOURCE_FAMILY_ID,
+  CBOE_VIX_SOURCE_LOCATOR,
+  CBOE_VIX_SOURCE_NAME,
+} from '../refresh/adapters/cboeVixHistoryCsvMeta';
+import {
   assertGhostFlowRefreshRegistryValid,
   GATE_C_ARTIFACT_IDS,
   GATE_C_CANDIDATE_GROUP_ID,
@@ -300,14 +307,34 @@ assert.deepStrictEqual(byId.capWeightPremiumProxy.authentication, {
   kind: 'manual_operator',
 });
 
-// Adapter implementation-status rules — none claimed implemented
+// Adapter implementation-status rules — VIX is the only implemented adapter
 for (const entry of GHOSTFLOW_REFRESH_REGISTRY) {
+  if (entry.artifactId === 'volatilityRegime') {
+    assert.strictEqual(entry.adapter.implementationStatus, 'implemented');
+    assert.strictEqual(entry.adapter.adapterId, CBOE_VIX_ADAPTER_ID);
+    if (entry.adapter.implementationStatus === 'implemented') {
+      assert.strictEqual(entry.adapter.parserVersion, CBOE_VIX_PARSER_VERSION);
+    }
+    assert.strictEqual(entry.canonicalSource.sourceFamilyId, CBOE_VIX_SOURCE_FAMILY_ID);
+    assert.strictEqual(entry.canonicalSource.sourceName, CBOE_VIX_SOURCE_NAME);
+    assert.strictEqual(entry.canonicalSource.sourceLocator, CBOE_VIX_SOURCE_LOCATOR);
+    assert.strictEqual(entry.candidateGroupId, GATE_C_CANDIDATE_GROUP_ID);
+    assert.strictEqual(entry.acceptanceUnit, 'candidate_group');
+    assert.strictEqual(entry.referenceDateRole, 'gate_c_required');
+    assert.strictEqual(entry.failureSeverity, 'blocking_score_fed');
+    continue;
+  }
   assert.ok(
     entry.adapter.implementationStatus === 'planned' ||
       entry.adapter.implementationStatus === 'spike_available'
   );
   assert.ok(!('parserVersion' in entry.adapter));
 }
+
+assert.deepStrictEqual([...GATE_C_ARTIFACT_IDS].sort(), [
+  'marketBreadth',
+  'volatilityRegime',
+]);
 
 const spikeIds = GHOSTFLOW_REFRESH_REGISTRY.filter(
   (e) => e.adapter.implementationStatus === 'spike_available'
@@ -322,6 +349,19 @@ assert.deepStrictEqual(spikeIds, [
   'tailSkewContext',
   'treasuryFuturesPositioningProxy',
   'treasuryLongEndIncomeLens',
+]);
+
+const plannedIds = GHOSTFLOW_REFRESH_REGISTRY.filter(
+  (e) => e.adapter.implementationStatus === 'planned'
+).map((e) => e.artifactId)
+  .sort();
+assert.deepStrictEqual(plannedIds, [
+  'activeIndexFlow',
+  'etfNetIssuance',
+  'indexConcentration',
+  'indexInclusionEventProxy',
+  'marketBreadth',
+  'passiveShareProxy',
 ]);
 
 // Exact cadence + freshnessPolicyId mappings for all 15
