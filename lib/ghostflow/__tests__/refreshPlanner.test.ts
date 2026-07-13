@@ -613,6 +613,15 @@ function assertOk(
 
 {
   const result = buildGhostFlowRefreshReport({
+    generatedAt: '2026-02-31T12:00:00Z',
+    requestedArtifactIds: ['etfNetIssuance'],
+    attempts: [noNewerAttempt('etfNetIssuance')],
+  });
+  assertFailCode(result, 'invalid_generated_at');
+}
+
+{
+  const result = buildGhostFlowRefreshReport({
     generatedAt: PLANNER_GENERATED_AT,
     requestedArtifactIds: ['etfNetIssuance'],
     attempts: [candidateAttempt('etfNetIssuance', '2026-02-31')],
@@ -637,9 +646,42 @@ function assertOk(
   const result = buildGhostFlowRefreshReport({
     generatedAt: PLANNER_GENERATED_AT,
     requestedArtifactIds: ['etfNetIssuance'],
+    attempts: [
+      candidateAttempt('etfNetIssuance', '2026-07-08', {
+        retrievedAt: '2026-02-31T12:00:00Z',
+      }),
+    ],
+  });
+  assertFailCode(result, 'invalid_candidate_retrieved_at');
+}
+
+{
+  const result = buildGhostFlowRefreshReport({
+    generatedAt: PLANNER_GENERATED_AT,
+    requestedArtifactIds: ['etfNetIssuance'],
     attempts: [noNewerAttempt('etfNetIssuance', { currentAsOf: '2026-13-01' })],
   });
   assertFailCode(result, 'invalid_current_observation_as_of');
+}
+
+// Positive ISO timestamps (leap day, offset, and ordinary day)
+{
+  for (const retrievedAt of [
+    '2026-02-28T12:00:00Z',
+    '2024-02-29T12:00:00.000Z',
+    '2026-07-09T12:00:00-05:00',
+  ] as const) {
+    const result = buildGhostFlowRefreshReport({
+      generatedAt: PLANNER_GENERATED_AT,
+      requestedArtifactIds: ['etfNetIssuance'],
+      attempts: [
+        candidateAttempt('etfNetIssuance', '2026-07-08', {
+          retrievedAt,
+        }),
+      ],
+    });
+    assertOk(result);
+  }
 }
 
 // --- Hardening: SHA-256 ---
