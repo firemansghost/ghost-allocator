@@ -2,7 +2,22 @@
 
 **Operator path:** [README](./README.md) · [Discipline](./OPERATOR_REFRESH_DISCIPLINE.md) · [Checklist](./MANUAL_REFRESH_CHECKLIST.md)
 
-Field-level quick reference for manually refreshing GhostFlow public-data artifacts. **Canonical workflow:** [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md). **Reference bump gates:** [REFERENCE_DATE_AND_OPERATOR_POLICY.md](./REFERENCE_DATE_AND_OPERATOR_POLICY.md) (v1.14 — bump `GHOSTFLOW_REFERENCE_AS_OF` only when `vol-regime` and `breadth` share target session). **Canonical 13-signal inventory:** [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md). **No live fetches, no scraping, no cron, no API routes** — values are hand-edited into static JSON files committed to the repo.
+> **Current breadth / Gate C policy (after PR #133):**
+>
+> ```text
+> Market breadth production refresh is blocked pending source authorization.
+> Do not follow older StockCharts/Barchart transcription procedures.
+> Do not bump GHOSTFLOW_REFERENCE_AS_OF through Gate C until an authorized breadth source is approved.
+> ```
+>
+> - VIX adapter exists but remains **unwired**.
+> - Breadth production source is **blocked**.
+> - **Gate C cannot execute.**
+> - Reference date **cannot** advance through the daily Gate C path.
+> - Canonical breadth intake (research only): [BREADTH_ARTIFACT_RUNBOOK.md](./BREADTH_ARTIFACT_RUNBOOK.md) · feasibility: [MARKET_BREADTH_SOURCE_FEASIBILITY.md](./MARKET_BREADTH_SOURCE_FEASIBILITY.md)
+> - Policy: [REFERENCE_DATE_AND_OPERATOR_POLICY.md](./REFERENCE_DATE_AND_OPERATOR_POLICY.md)
+
+Field-level quick reference for manually refreshing GhostFlow public-data artifacts. **Canonical workflow:** [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md). **Reference bump gates:** [REFERENCE_DATE_AND_OPERATOR_POLICY.md](./REFERENCE_DATE_AND_OPERATOR_POLICY.md) (v1.14 — bump `GHOSTFLOW_REFERENCE_AS_OF` only when `vol-regime` and `breadth` share target session **and** breadth source authorization is approved). **Canonical 13-signal inventory:** [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md). **No live fetches, no scraping, no cron, no API routes** — values are hand-edited into static JSON files committed to the repo **only when a source path is authorized**.
 
 **Related:** [REFERENCE_DATE_AND_OPERATOR_POLICY.md](./REFERENCE_DATE_AND_OPERATOR_POLICY.md) · [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md) — taxonomy, cadence map, validation matrix, guardrails · [DATA_ROADMAP.md](./DATA_ROADMAP.md) · [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md) · [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md)
 
@@ -28,7 +43,7 @@ Per-artifact deep dives: see linked runbooks at the bottom of this page.
 
 | Cadence | When | Artifacts | Reference date |
 |---------|------|-----------|----------------|
-| **Daily** | After US market close (~6:00 PM ET) | Volatility Regime (VIX) + Market Breadth Participation | Update [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) **after** both daily artifacts align to the same last trading day |
+| **Daily — Gate C (blocked)** | After US market close (~6:00 PM ET) | Volatility Regime (VIX) + Market Breadth Participation | **Blocked.** VIX adapter exists but remains unwired. Breadth production source is blocked. Gate C cannot execute. Do **not** bump [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) through the daily Gate C path. See [BREADTH_ARTIFACT_RUNBOOK.md](./BREADTH_ARTIFACT_RUNBOOK.md). |
 | **Daily** | After OCC session volume is published | Index Options Intensity Proxy (`options-activity-proxy`) | Display-only — updates [`optionsActivityProxy.v1.json`](../data/ghostflow/artifacts/optionsActivityProxy.v1.json) only; **not** scored; not 0DTE/GEX ([OPTIONS_ACTIVITY_MAPPING_DECISION.md](./OPTIONS_ACTIVITY_MAPPING_DECISION.md)) |
 | **Daily** | After Cboe SKEW CSV available (operator download) | Tail Skew Context (`tail-skew-context`) | Display-only — [`tailSkewContext.v1.json`](../data/ghostflow/artifacts/tailSkewContext.v1.json); verify with `npx tsx scripts/ghostflow/skew-source-spike.ts --skew-csv <local-path>`; **not** scored; card `asOf` follows [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) per [REFERENCE_DATE_AND_OPERATOR_POLICY.md](./REFERENCE_DATE_AND_OPERATOR_POLICY.md) — `latestSourceDate` is metadata only ([TAIL_SKEW_MAPPING_DECISION.md](./TAIL_SKEW_MAPPING_DECISION.md)) |
 | **Daily** | After FRED business-day yields update | Treasury Long-End Income Lens (`treasury-long-end-income-lens`) | `npm run ghostflow:fred-treasury-yields-spike` (or `--local-dir tmp/fred` / `--fred-api` if CSV blocked); align **common asOf** across DGS30, DFII30, DGS2, DGS5, DGS10, T10YIE; update [`treasuryLongEndIncomeLens.v1.json`](../data/ghostflow/artifacts/treasuryLongEndIncomeLens.v1.json); **not investment advice**; **not scored** |
@@ -39,7 +54,7 @@ Per-artifact deep dives: see linked runbooks at the bottom of this page.
 | **Monthly** | After new SSGA SPY US monthly fact sheet PDF | Index Concentration | PDF month-end `asOf`; PDF control date `publishedAt` |
 | **Quarterly** | After ICI Quarterly Retirement Market Data release | Retirement Asset Growth Proxy | Display-only card `retirement-asset-growth`; **not scored** (MOCK **58**); `mappingStatus` **not_final** |
 
-**Daily group:** VIX + Market Breadth + OCC Index Options Intensity (display-only) + Tail Skew Context (display-only) + `GHOSTFLOW_REFERENCE_AS_OF` (when running the full daily pass)
+**Daily group (current):** OCC Index Options Intensity (display-only) + Tail Skew Context (display-only) + optional Treasury FRED income lens. **Gate C (VIX + Market Breadth + reference bump): blocked** pending breadth source authorization.
 
 **Weekly group:** ETF Net Issuance + CFTC TFF Positioning Proxy (display-only; MOCK **62** score input unchanged; **v1.0c** not approved)
 
@@ -192,21 +207,17 @@ Each symbol writes `{SYMBOL}.csv` (`Date,Close`) plus `{SYMBOL}.marketstack.meta
 
 ---
 
-### 2. Market Breadth Participation (daily)
+### 2. Market Breadth Participation (daily) — PRODUCTION REFRESH BLOCKED
 
 | Item | Detail |
 |------|--------|
-| **Artifact file** | [`data/ghostflow/artifacts/marketBreadth.v1.json`](../../data/ghostflow/artifacts/marketBreadth.v1.json) |
-| **Primary source** | [StockCharts $SPXA50R](https://stockcharts.com/freecharts/symbolsummary.html?sym=$SPXA50R) — S&P 500 % above 50-day MA |
-| **Backup cross-check** | [Barchart $S5FI](https://www.barchart.com/stocks/quotes/$S5FI) → record in `optionalObservations.backupReadingPercent` |
-| **Fields to update** | `asOf`, `publishedAt`, `observations.sp500Above50DayMaPercent`, `dataQuality`, `source.note`, optional backup fields |
-| **Units** | Percent 0–100, **one decimal place** only (e.g. `56.8`) |
-| **`asOf` rule** | Last trading day of the breadth reading, ISO `YYYY-MM-DD` |
-| **`publishedAt` rule** | Same as `asOf` unless source clearly shows later publication |
-| **`dataQuality` rule** | `verified_manual` only if StockCharts extract is cross-checked against Barchart and directionally consistent (typically within ~1 pp); else `manual_unverified` |
-| **Cross-check rule** | Document primary reading, backup reading, and date in `source.note`. Do not blend vendors into `observations` without explaining it |
-| **Common mistakes** | Fake precision (>1 decimal); skipping cross-check; treating breadth as crash signal |
-| **Deep dive** | [BREADTH_ARTIFACT_RUNBOOK.md](./BREADTH_ARTIFACT_RUNBOOK.md) |
+| **Current policy** | **Blocked** after PR #133 — do not copy StockCharts/Barchart into production JSON; do not set `verified_manual` from unauthorized pages; do not bump reference via Gate C |
+| **Artifact file** | [`data/ghostflow/artifacts/marketBreadth.v1.json`](../../data/ghostflow/artifacts/marketBreadth.v1.json) — **do not edit** under current policy |
+| **Canonical intake** | [BREADTH_ARTIFACT_RUNBOOK.md](./BREADTH_ARTIFACT_RUNBOOK.md) — operator packet (research / intake design only) |
+| **Feasibility** | [MARKET_BREADTH_SOURCE_FEASIBILITY.md](./MARKET_BREADTH_SOURCE_FEASIBILITY.md) |
+| **Series definition** | `sp500_percent_above_50_day_ma` → `observations.sp500Above50DayMaPercent` (percent 0–100, **one decimal**) |
+| **Gate C** | Shares session with VIX; atomic candidate group; requires **source authorization** before production eligibility |
+| **Common mistakes** | Treating historical StockCharts/Barchart runbook steps as currently executable; using an operator packet as provider permission |
 
 ---
 
@@ -402,13 +413,11 @@ Each symbol writes `{SYMBOL}.csv` (`Date,Close`) plus `{SYMBOL}.marketstack.meta
 
 ## Daily refresh mini-checklist
 
-- [ ] Update CBOE VIX close in `volatilityRegime.v1.json` **(A — score-fed)**
-- [ ] Update StockCharts `$SPXA50R` in `marketBreadth.v1.json` **(A)**
-- [ ] Cross-check breadth against Barchart `$S5FI`; set `dataQuality` and document in `source.note`
-- [ ] Update OCC Index/Others in `optionsActivityProxy.v1.json` **(B — display-only)**
+- [ ] **Gate C / breadth:** **SKIP — blocked.** Do not update StockCharts `$SPXA50R` into `marketBreadth.v1.json`. Do not cross-check Barchart for production `verified_manual`. Do not bump `GHOSTFLOW_REFERENCE_AS_OF` through Gate C. See [BREADTH_ARTIFACT_RUNBOOK.md](./BREADTH_ARTIFACT_RUNBOOK.md).
+- [ ] **VIX production:** Do not run an unwired adapter path for production writes. Historical VIX artifact refresh remains a separate authorized CBOE path when explicitly executed per [ARTIFACT_RUNBOOK.md](./ARTIFACT_RUNBOOK.md) — still cannot complete Gate C without authorized breadth.
+- [ ] Update OCC Index/Others in `optionsActivityProxy.v1.json` **(B — display-only)** when refreshing display cards
 - [ ] Optional: update Treasury FRED income lens `treasuryLongEndIncomeLens.v1.json` **(C — Treasury lane)**
-- [ ] **Gate C (reference bump):** Update `GHOSTFLOW_REFERENCE_AS_OF` in [`lib/ghostflow/reference.ts`](../../lib/ghostflow/reference.ts) **only after** `vol-regime` and `breadth` both have `asOf` = target last US trading session — see [REFERENCE_DATE_AND_OPERATOR_POLICY.md](./REFERENCE_DATE_AND_OPERATOR_POLICY.md); if either daily score-fed artifact is missing or misaligned, **do not bump**
-- [ ] Run `npm run ghostflow:check`
+- [ ] Run `npm run ghostflow:check` if any artifacts changed
 - [ ] Run full validation suite before commit/PR (see below)
 
 ---
@@ -512,7 +521,7 @@ Include the relevant `asOf` / week ended / month ended dates in the commit body 
 ## Per-artifact runbooks (deep dives)
 
 - [ARTIFACT_RUNBOOK.md](./ARTIFACT_RUNBOOK.md) — CBOE VIX
-- [BREADTH_ARTIFACT_RUNBOOK.md](./BREADTH_ARTIFACT_RUNBOOK.md) — Market Breadth ($SPXA50R)
+- [BREADTH_ARTIFACT_RUNBOOK.md](./BREADTH_ARTIFACT_RUNBOOK.md) — Market Breadth operator packet (production refresh blocked)
 - [ETF_ARTIFACT_RUNBOOK.md](./ETF_ARTIFACT_RUNBOOK.md) — ETF Net Issuance
 - [ACTIVE_INDEX_ARTIFACT_RUNBOOK.md](./ACTIVE_INDEX_ARTIFACT_RUNBOOK.md) — Active vs Index Flow
 - [PASSIVE_SHARE_PROXY_ARTIFACT_RUNBOOK.md](./PASSIVE_SHARE_PROXY_ARTIFACT_RUNBOOK.md) — ICI Index Share Proxy
