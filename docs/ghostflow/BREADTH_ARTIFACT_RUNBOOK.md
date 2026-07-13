@@ -226,8 +226,8 @@ Production eligibility requires **all** of:
 4. Exact or approved semantic match
 5. Completed human review
 
-Bobby’s approval alone does **not** create provider rights.  
-Provider permission alone does **not** approve a GhostFlow methodology or source change.  
+Bobby’s approval alone does **not** create provider rights.
+Provider permission alone does **not** approve a GhostFlow methodology or source change.
 **Both** gates must be satisfied.
 
 Do **not** treat StockCharts or Barchart as approved sources in this runbook.
