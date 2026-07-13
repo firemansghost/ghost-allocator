@@ -1,6 +1,26 @@
 # HANDOFF
 
 ## Last Session Summary (2026-07-13)
+Starting `main` for this work: `c503042` (PR **#134** breadth operator packet merged). Implemented fixture-driven **CFTC TFF systematic Socrata adapter** (`cftc-tff-systematic-socrata` → `implemented` / `1.0.0`). Adapter normalizes official ES/NQ/RTY/VIX Futures Only observations only; basket and pressure mapping stay downstream; unwired from runtime/workflows; no production artifact write; MOCK systematic **62** unchanged. Breadth / Gate C remain blocked; no provider approved. Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`.
+
+## State of Work
+- CFTC systematic adapter: fixture-tested, registry implemented, production-unwired.
+- VIX adapter remains implemented and unwired.
+- Breadth operator-packet + source-authorization block remain in force; Gate C blocked.
+- Core app remains stable; education section remains live.
+
+## Priority for Next Session
+1) Implement Treasury CFTC adapter (reuse Socrata boundary) **or** FRED Treasury adapter (neither already claimed done)
+2) Do not wire systematic adapter into CLI/workflows/production writers yet
+3) Breadth: decide written permission vs licensed SKU (neither approved)
+
+## Open Questions
+- Prefer Treasury CFTC reuse next, or FRED Treasury first?
+- When should systematic display refresh become operator-driven vs remain research-only?
+
+---
+
+## Archive — Breadth operator packet (2026-07-13)
 PR **#133** is on `main` (`18ab040`). Completed docs-only **breadth operator-packet** specification and reconciled stale operator docs: [BREADTH_ARTIFACT_RUNBOOK.md](../ghostflow/BREADTH_ARTIFACT_RUNBOOK.md), [MANUAL_REFRESH_CHECKLIST.md](../ghostflow/MANUAL_REFRESH_CHECKLIST.md), [REFERENCE_DATE_AND_OPERATOR_POLICY.md](../ghostflow/REFERENCE_DATE_AND_OPERATOR_POLICY.md). Packet is intake-only; no provider approved; production breadth refresh and Gate C remain blocked. VIX adapter remains unwired. Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`.
 
 ## State of Work
