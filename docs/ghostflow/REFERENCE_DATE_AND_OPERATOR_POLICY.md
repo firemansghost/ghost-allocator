@@ -2,9 +2,33 @@
 
 **GhostFlow docs:** [README](./README.md) · [Current state](./GHOSTFLOW_CURRENT_STATE.md) · [Readiness audit](./CURRENT_DATA_READINESS_AUDIT.md) · [Roadmap](./DATA_ROADMAP.md) · [Operator discipline](./OPERATOR_REFRESH_DISCIPLINE.md) · [Manual checklist](./MANUAL_REFRESH_CHECKLIST.md)
 
-**Related:** [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) · [SCORE_REPRODUCTION_BASELINE.md](./SCORE_REPRODUCTION_BASELINE.md) · [MOCK_SCORE_NO_CHANGE_POLICY.md](./MOCK_SCORE_NO_CHANGE_POLICY.md) · [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md)
+**Related:** [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) · [SCORE_REPRODUCTION_BASELINE.md](./SCORE_REPRODUCTION_BASELINE.md) · [MOCK_SCORE_NO_CHANGE_POLICY.md](./MOCK_SCORE_NO_CHANGE_POLICY.md) · [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md) · [MARKET_BREADTH_SOURCE_FEASIBILITY.md](./MARKET_BREADTH_SOURCE_FEASIBILITY.md) · [BREADTH_ARTIFACT_RUNBOOK.md](./BREADTH_ARTIFACT_RUNBOOK.md)
 
 This memo is the **canonical operator policy** for when and how GhostFlow may advance its equity dashboard reference date during future refresh execution. It does **not** perform refresh, change artifacts, scores, or runtime.
+
+---
+
+## Current-policy overlay (after PR #133 / 2026-07-13)
+
+```text
+Current execution status after PR #133:
+- VIX source adapter implemented but unwired
+- breadth production source not authorized
+- Gate C execution blocked
+- GHOSTFLOW_REFERENCE_AS_OF remains 2026-07-01
+```
+
+| Item | Current executable posture |
+|------|----------------------------|
+| Daily Gate C refresh | **Blocked** |
+| Breadth StockCharts/Barchart production transcription | **Not approved** |
+| Operator packet | Intake design only — [BREADTH_ARTIFACT_RUNBOOK.md](./BREADTH_ARTIFACT_RUNBOOK.md) |
+| Same-session VIX + breadth rule | **Preserved** (unchanged mathematics) |
+| Additional Gate C prerequisite | Breadth **source authorization and approved-use evidence** required |
+
+**Both daily observations being numerically available is insufficient.** The breadth observation must come from an authorized source before the Gate C package is eligible for production review or a reference bump.
+
+Sections below retain the original v1.14 policy structure and historical baselines. Where they describe executing a daily breadth refresh, treat those steps as **non-executable under current policy** until authorization is approved and recorded.
 
 ---
 
@@ -70,8 +94,9 @@ The operator chooses the **target reference date** as the **last completed US eq
 |-------------|--------|
 | **`vol-regime`** | `asOf` must equal target date |
 | **`breadth`** | `asOf` must equal target date |
-| **Either missing, invalid, or misaligned** | **Do not** bump `GHOSTFLOW_REFERENCE_AS_OF` |
-| **Both pass** | May edit `GHOSTFLOW_REFERENCE_AS_OF` in **v1.15** (or later approved refresh) to target date |
+| **Breadth source authorization** | Authorized production use + retained evidence required ([BREADTH_ARTIFACT_RUNBOOK.md](./BREADTH_ARTIFACT_RUNBOOK.md)). Numerical availability alone is **not** enough. |
+| **Either missing, invalid, misaligned, or unauthorized** | **Do not** bump `GHOSTFLOW_REFERENCE_AS_OF` |
+| **All pass** | May edit `GHOSTFLOW_REFERENCE_AS_OF` in a future approved refresh to target date |
 
 ### What does not block the bump
 
@@ -87,14 +112,17 @@ The operator chooses the **target reference date** as the **last completed US eq
 
 ```
 Choose target (last completed US trading session)
-  → Refresh vol-regime to target asOf
-  → Refresh breadth to target asOf
+  → Confirm breadth source authorization + approved-use evidence
+  → If unauthorized: STOP — do NOT refresh Gate C / do NOT bump
+  → Refresh vol-regime to target asOf (authorized path only)
+  → Refresh breadth to target asOf (authorized path only)
   → If both asOf == target: bump GHOSTFLOW_REFERENCE_AS_OF
   → Else: do NOT bump; fix daily score-fed alignment first
   → Disclose stale display-only / lagging cadence artifacts
   → Run acceptance gates A–F
 ```
 
+Under current policy (PR #133 overlay): stop at the authorization check — Gate C execution is blocked.
 ---
 
 ## 5. Artifact cadence classes
@@ -118,15 +146,16 @@ Choose target (last completed US trading session)
 
 | Gate | Requirement |
 |------|-------------|
-| **A — Source/operator evidence** | Source URL or local file identified; source dates recorded in artifact `source.note`; **no** committed CSV/XLS/XLSX; spike outputs remain local/research |
+| **A — Source/operator evidence** | Source URL or local file identified; source dates recorded in artifact `source.note`; **source authorization and approved-use evidence** for Gate C daily package; **no** committed CSV/XLS/XLSX; spike outputs remain local/research |
 | **B — Artifact validity** | Production JSON updated only through approved runbooks; `npm run ghostflow:check` passes |
-| **C — Reference alignment** | Daily score-fed `vol-regime` and `breadth` both have `asOf` = target session; **`GHOSTFLOW_REFERENCE_AS_OF` changes only if Gate C passes** |
+| **C — Reference alignment** | Daily score-fed `vol-regime` and `breadth` both have `asOf` = target session **and** breadth source is authorized for GhostFlow production use; **`GHOSTFLOW_REFERENCE_AS_OF` changes only if Gate C passes** |
 | **D — Score reproduction** | Recompute Passive, Structural, Composite; delta vs prior baseline; attribute movement to changed score-fed inputs; confirm MOCK **62 / 58 / 55** unchanged |
 | **E — Disclosure** | Stale display-only, lagging monthly/quarterly, and MOCK caveats documented; no display-only card implies score contribution |
 | **F — Validation suite** | `npm run lint` · `npm run test:ghostflow` · `npm run build` · `npm run ghostflow:check` |
 
 **Gate C controls the reference bump.** Gates A, B, D, E, and F apply to every refresh commit; Gate C is the sole authority for editing [`reference.ts`](../../lib/ghostflow/reference.ts).
 
+Under the PR #133 overlay: Gate C is **not executable** until breadth source authorization is approved — same-session VIX + breadth alone is insufficient.
 Score reproduction methodology: [SCORE_REPRODUCTION_BASELINE.md](./SCORE_REPRODUCTION_BASELINE.md). Comparison anchor at v1.15: prior baseline **62 / 58 / 66** at reference **2026-05-22** unless a newer baseline is explicitly established.
 
 ---
@@ -203,21 +232,23 @@ Thresholds are defined in [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_F
 
 Execution is **v1.15** — not v1.14. Order:
 
-1. Confirm v1.14 policy read ([this memo](./REFERENCE_DATE_AND_OPERATOR_POLICY.md)).
+1. Confirm v1.14 policy read ([this memo](./REFERENCE_DATE_AND_OPERATOR_POLICY.md)) **and** the PR #133 current-policy overlay.
 2. Choose **target reference date** (last completed US equity trading session).
-3. Refresh daily score-fed: `vol-regime`, `breadth`.
-4. If both `asOf` align to target: bump `GHOSTFLOW_REFERENCE_AS_OF` in [`reference.ts`](../../lib/ghostflow/reference.ts).
-5. Refresh daily display-only: `options-activity-proxy`, `tail-skew-context` (card `asOf` per reference policy).
-6. Refresh weekly score-fed: `etf-flow`.
-7. Refresh weekly display-only: `systematic-flow`; Treasury CFTC if part of same operating pass.
-8. Refresh monthly score-fed: `passive-share`, `active-index-flow`, `concentration` (+ derived `modelZoneProximity`).
-9. Refresh quarterly / event / manual as sources permit: retirement, cap-weight, index inclusion, levered ETF.
-10. Refresh Treasury daily lane separately: `treasury-long-end-income-lens`.
-11. Run acceptance gates **A–F**.
-12. Publish score-impact report (PR body default).
+3. Confirm **breadth source authorization**. If not approved: **stop Gate C / do not bump reference** — operator-packet research may continue separately ([BREADTH_ARTIFACT_RUNBOOK.md](./BREADTH_ARTIFACT_RUNBOOK.md)).
+4. Refresh daily score-fed: `vol-regime`, `breadth` (authorized paths only).
+5. If both `asOf` align to target **and** breadth is authorized: bump `GHOSTFLOW_REFERENCE_AS_OF` in [`reference.ts`](../../lib/ghostflow/reference.ts).
+6. Refresh daily display-only: `options-activity-proxy`, `tail-skew-context` (card `asOf` per reference policy).
+7. Refresh weekly score-fed: `etf-flow`.
+8. Refresh weekly display-only: `systematic-flow`; Treasury CFTC if part of same operating pass.
+9. Refresh monthly score-fed: `passive-share`, `active-index-flow`, `concentration` (+ derived `modelZoneProximity`).
+10. Refresh quarterly / event / manual as sources permit: retirement, cap-weight, index inclusion, levered ETF.
+11. Refresh Treasury daily lane separately: `treasury-long-end-income-lens`.
+12. Run acceptance gates **A–F**.
+13. Publish score-impact report (PR body default).
 
 **Commit discipline:** one artifact family per commit when possible; never mix score wiring with refresh; never mix GhostFlow refresh with GhostRegime work.
 
+**Current overlay:** Steps 4–5 for Gate C are **non-executable** until breadth source authorization is approved. Display-only and non–Gate-C cadences may still proceed under their own authorized runbooks.
 ---
 
 ## 10. Non-goals (v1.14)

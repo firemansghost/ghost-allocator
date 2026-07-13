@@ -1,22 +1,16 @@
 # STATUS
 
 ## Current State (GhostFlow — 2026-07-13)
-PR **#132** merged the official CBOE VIX History CSV adapter on `main` (`83780ac`).
-GhostFlow Phase 1 foundation (PRs #128–#131) plus VIX adapter (#132) are in place:
-- production score baseline fixture
-- typed 15-artifact refresh registry
-- offline report model + fixture-driven planner
-- Gate C atomicity and provenance/timestamp validation
-- CBOE VIX adapter (`cboe-vix-history-csv` / `1.0.0`) **implemented**, fixture-tested, **unwired** (no CLI/workflow/candidate/artifact writer/runtime)
+PR **#133** merged the breadth-source feasibility decision on `main` (`18ab040`).
+PR **#132** previously merged the CBOE VIX CSV adapter (implemented, **unwired**).
 
-**Breadth source feasibility audit completed** (`docs/ghostflow/MARKET_BREADTH_SOURCE_FEASIBILITY.md`):
-- StockCharts `$SPXA50R` **HTML automation: RED / blocked** (Usage Limitations forbid programmatic/automated access without prior approval; page is JS-dependent)
-- **Recommended path:** design a typed **manual operator-packet** intake mechanism, but keep **production breadth refresh blocked** until source authorization is resolved
-- StockCharts **manual transcription is not production-approved** under this audit (operator research / workflow design only; PERMISSION_REQUIRED for publication or production refresh)
-- Do **not** implement `stockcharts-spxa50r-html`
+**Breadth operator-packet specification completed** ([BREADTH_ARTIFACT_RUNBOOK.md](../ghostflow/BREADTH_ARTIFACT_RUNBOOK.md)):
+- Typed manual intake packet + evidence checklist (research / intake design only)
+- Stale direct StockCharts/Barchart production-refresh instructions quarantined
+- Manual checklist and reference-date policy reconciled with the authorization block
+- Operator packet remains **intake-only** — does not approve a provider or authorize production refresh
 
-Gate C remains incomplete. Breadth production refresh remains blocked pending source authorization.
-No production refresh occurred.
+No breadth source approved. No production breadth refresh occurred. Gate C remains blocked. VIX adapter remains unwired.
 Production GhostFlow state remains unchanged:
 - `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
 - Composite / Passive / Structural: 60 / 53 / 67
@@ -25,9 +19,9 @@ Production GhostFlow state remains unchanged:
 - MOCK systematic / retirement / levered: 62 / 58 / 55
 
 ## Recommended next work
-1. Docs-only `marketBreadth` operator-packet intake design + evidence checklist (not for production use until source authorization)
-2. Resolve source authorization (written StockCharts permission or exact licensed provider SKU) — Bobby approval required before purchasing or requesting access; Bobby approval alone does not create data rights
-3. Do **not** start a Gate C production refresh or HTML scraper
+1. Decide whether to seek written provider permission **or** investigate an exact licensed provider SKU (neither path approved yet)
+2. Do **not** implement StockCharts HTML automation, scrapers, or a Gate C production runner
+3. Registry `sourceFormat` change only after Bobby product approval **and** provider authorization evidence
 
 Last updated: 2026-07-13
 
