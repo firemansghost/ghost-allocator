@@ -4,8 +4,15 @@
 
 import assert from 'assert';
 import { buildGhostFlowRefreshReport } from '../refresh/planner';
-import { GATE_C_CANDIDATE_GROUP_ID } from '../refresh/registry';
-import type { GhostFlowArtifactRefreshAttempt } from '../refresh/report';
+import {
+  GATE_C_CANDIDATE_GROUP_ID,
+  GHOSTFLOW_REFRESH_REGISTRY,
+} from '../refresh/registry';
+import type {
+  GhostFlowArtifactRefreshAttempt,
+  GhostFlowRefreshPlannerInput,
+} from '../refresh/report';
+import type { GhostFlowRefreshRegistryEntry } from '../refresh/types';
 import {
   PLANNER_GENERATED_AT,
   candidateAttempt,
@@ -562,7 +569,7 @@ function assertOk(
   assert.notStrictEqual(result.value.mode, 'production');
 }
 
-// Extra: not_attempted blocks artifact groups; Gate C manual without failure
+// Extra: not_attempted blocks artifact groups with planner-owned issue
 {
   const result = buildGhostFlowRefreshReport({
     generatedAt: PLANNER_GENERATED_AT,
@@ -572,6 +579,195 @@ function assertOk(
   assertOk(result);
   assert.strictEqual(result.value.candidateGroups[0]!.status, 'blocked');
   assert.strictEqual(result.value.overallStatus, 'blocked');
+  assert.ok(
+    result.value.candidateGroups[0]!.issues.some((i) => i.code === 'artifact_not_attempted')
+  );
+  assert.ok(result.value.issues.some((i) => i.code === 'artifact_not_attempted'));
+}
+
+// --- Hardening: adapter provenance ---
+
+{
+  const result = buildGhostFlowRefreshReport({
+    generatedAt: PLANNER_GENERATED_AT,
+    requestedArtifactIds: ['etfNetIssuance'],
+    attempts: [
+      candidateAttempt('etfNetIssuance', '2026-07-08', {
+        adapterId: 'cboe-vix-history-csv',
+      }),
+    ],
+  });
+  assertFailCode(result, 'candidate_adapter_id_mismatch');
+}
+
+// --- Hardening: timestamps and calendar dates ---
+
+{
+  const result = buildGhostFlowRefreshReport({
+    generatedAt: '2026-99-99T12:00:00Z',
+    requestedArtifactIds: ['etfNetIssuance'],
+    attempts: [noNewerAttempt('etfNetIssuance')],
+  });
+  assertFailCode(result, 'invalid_generated_at');
+}
+
+{
+  const result = buildGhostFlowRefreshReport({
+    generatedAt: PLANNER_GENERATED_AT,
+    requestedArtifactIds: ['etfNetIssuance'],
+    attempts: [candidateAttempt('etfNetIssuance', '2026-02-31')],
+  });
+  assertFailCode(result, 'invalid_candidate_observation_as_of');
+}
+
+{
+  const result = buildGhostFlowRefreshReport({
+    generatedAt: PLANNER_GENERATED_AT,
+    requestedArtifactIds: ['etfNetIssuance'],
+    attempts: [
+      candidateAttempt('etfNetIssuance', '2026-07-08', {
+        retrievedAt: 'yesterday',
+      }),
+    ],
+  });
+  assertFailCode(result, 'invalid_candidate_retrieved_at');
+}
+
+{
+  const result = buildGhostFlowRefreshReport({
+    generatedAt: PLANNER_GENERATED_AT,
+    requestedArtifactIds: ['etfNetIssuance'],
+    attempts: [noNewerAttempt('etfNetIssuance', { currentAsOf: '2026-13-01' })],
+  });
+  assertFailCode(result, 'invalid_current_observation_as_of');
+}
+
+// --- Hardening: SHA-256 ---
+
+{
+  const result = buildGhostFlowRefreshReport({
+    generatedAt: PLANNER_GENERATED_AT,
+    requestedArtifactIds: ['etfNetIssuance'],
+    attempts: [
+      candidateAttempt('etfNetIssuance', '2026-07-08', {
+        contentSha256: 'abc123',
+      }),
+    ],
+  });
+  assertFailCode(result, 'invalid_candidate_content_sha256');
+}
+
+{
+  const result = buildGhostFlowRefreshReport({
+    generatedAt: PLANNER_GENERATED_AT,
+    requestedArtifactIds: ['etfNetIssuance'],
+    attempts: [
+      candidateAttempt('etfNetIssuance', '2026-07-08', {
+        contentSha256: 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz',
+      }),
+    ],
+  });
+  assertFailCode(result, 'invalid_candidate_content_sha256');
+}
+
+// --- Hardening: attempt consistency ---
+
+{
+  const result = buildGhostFlowRefreshReport({
+    generatedAt: PLANNER_GENERATED_AT,
+    requestedArtifactIds: ['etfNetIssuance'],
+    attempts: [
+      candidateAttempt('etfNetIssuance', '2026-07-08', {
+        issues: [
+          {
+            stage: 'validate',
+            code: 'contradictory_block',
+            severity: 'block',
+            message: 'should not coexist with candidate',
+          },
+        ],
+      }),
+    ],
+  });
+  assertFailCode(result, 'attempt_status_block_issue_conflict');
+}
+
+{
+  const result = buildGhostFlowRefreshReport({
+    generatedAt: PLANNER_GENERATED_AT,
+    requestedArtifactIds: ['etfNetIssuance'],
+    attempts: [
+      noNewerAttempt('etfNetIssuance', {
+        issues: [
+          {
+            stage: 'validate',
+            code: 'contradictory_block',
+            severity: 'block',
+            message: 'should not coexist with no-newer',
+          },
+        ],
+      }),
+    ],
+  });
+  assertFailCode(result, 'attempt_status_block_issue_conflict');
+}
+
+{
+  const result = buildGhostFlowRefreshReport({
+    generatedAt: PLANNER_GENERATED_AT,
+    requestedArtifactIds: ['etfNetIssuance'],
+    attempts: [sourceFailedAttempt('etfNetIssuance', { issues: [] })],
+  });
+  assertFailCode(result, 'source_failed_missing_block_issue');
+}
+
+{
+  const result = buildGhostFlowRefreshReport({
+    generatedAt: PLANNER_GENERATED_AT,
+    requestedArtifactIds: ['leveredEtfRebalancePressure'],
+    attempts: [manualInputAttempt('leveredEtfRebalancePressure', { issues: [] })],
+  });
+  assertFailCode(result, 'manual_input_missing_issue');
+}
+
+// --- Hardening: empty selection ---
+
+{
+  const result = buildGhostFlowRefreshReport({
+    generatedAt: PLANNER_GENERATED_AT,
+    requestedArtifactIds: [],
+    attempts: [],
+  });
+  assertFailCode(result, 'no_artifacts_requested');
+}
+
+// --- Hardening: generic candidate-group selection closure ---
+
+{
+  const etf = GHOSTFLOW_REFRESH_REGISTRY.find((e) => e.artifactId === 'etfNetIssuance')!;
+  const conc = GHOSTFLOW_REFRESH_REGISTRY.find((e) => e.artifactId === 'indexConcentration')!;
+  const customRegistry: GhostFlowRefreshRegistryEntry[] = [
+    {
+      ...etf,
+      acceptanceUnit: 'candidate_group',
+      candidateGroupId: 'test_atomic_group',
+      referenceDateRole: 'lagging_allowed',
+    },
+    {
+      ...conc,
+      acceptanceUnit: 'candidate_group',
+      candidateGroupId: 'test_atomic_group',
+      referenceDateRole: 'lagging_allowed',
+    },
+  ];
+
+  const input: GhostFlowRefreshPlannerInput = {
+    generatedAt: PLANNER_GENERATED_AT,
+    requestedArtifactIds: ['etfNetIssuance'],
+    attempts: [candidateAttempt('etfNetIssuance', '2026-07-08')],
+  };
+  const result = buildGhostFlowRefreshReport(input, customRegistry);
+  assertFailCode(result, 'candidate_group_selection_incomplete');
 }
 
 console.log('ghostflow/refreshPlanner.test.ts: ok');

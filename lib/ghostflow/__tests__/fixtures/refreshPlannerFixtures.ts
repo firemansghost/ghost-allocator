@@ -18,9 +18,17 @@ import type {
 } from '../../refresh/report';
 import type { GhostFlowRefreshIssue } from '../../refresh/types';
 
-const registryPathById = new Map(
-  GHOSTFLOW_REFRESH_REGISTRY.map((e) => [e.artifactId, e.artifactPath] as const)
+const registryById = new Map(
+  GHOSTFLOW_REFRESH_REGISTRY.map((e) => [e.artifactId, e] as const)
 );
+
+function registryEntry(artifactId: GhostFlowRegisteredArtifactId) {
+  const entry = registryById.get(artifactId);
+  if (!entry) {
+    throw new Error(`Unknown artifactId for fixture: ${artifactId}`);
+  }
+  return entry;
+}
 
 export function currentArtifactSummary(
   artifactId: GhostFlowRegisteredArtifactId,
@@ -30,13 +38,10 @@ export function currentArtifactSummary(
     artifactPath?: string;
   }
 ): GhostFlowCurrentArtifactSummary {
-  const artifactPath = opts?.artifactPath ?? registryPathById.get(artifactId);
-  if (!artifactPath) {
-    throw new Error(`Unknown artifactId for fixture: ${artifactId}`);
-  }
+  const entry = registryEntry(artifactId);
   return {
     artifactId,
-    artifactPath,
+    artifactPath: opts?.artifactPath ?? entry.artifactPath,
     observationAsOf: opts?.observationAsOf,
     sourcePublishedAt: opts?.sourcePublishedAt,
   };
@@ -63,7 +68,6 @@ export function candidateSummary(opts: {
 const DEFAULT_CANDIDATE = {
   retrievedAt: '2026-07-09T12:00:00.000Z',
   contentSha256: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-  adapterId: 'test-adapter',
   parserVersion: '0.0.0-test',
 } as const;
 
@@ -72,6 +76,7 @@ export function candidateAttempt(
   observationAsOf: string,
   opts?: {
     currentAsOf?: string;
+    currentSourcePublishedAt?: string;
     sourcePublishedAt?: string;
     contentSha256?: string;
     adapterId?: string;
@@ -81,11 +86,13 @@ export function candidateAttempt(
     artifactPath?: string;
   }
 ): GhostFlowCandidateAvailableAttempt {
+  const entry = registryEntry(artifactId);
   return {
     artifactId,
     status: 'candidate_observation_available',
     current: currentArtifactSummary(artifactId, {
       observationAsOf: opts?.currentAsOf ?? '2026-07-01',
+      sourcePublishedAt: opts?.currentSourcePublishedAt,
       artifactPath: opts?.artifactPath,
     }),
     candidate: candidateSummary({
@@ -93,7 +100,7 @@ export function candidateAttempt(
       sourcePublishedAt: opts?.sourcePublishedAt,
       retrievedAt: opts?.retrievedAt ?? DEFAULT_CANDIDATE.retrievedAt,
       contentSha256: opts?.contentSha256 ?? DEFAULT_CANDIDATE.contentSha256,
-      adapterId: opts?.adapterId ?? DEFAULT_CANDIDATE.adapterId,
+      adapterId: opts?.adapterId ?? entry.adapter.adapterId,
       parserVersion: opts?.parserVersion ?? DEFAULT_CANDIDATE.parserVersion,
     }),
     issues: opts?.issues ?? [],
@@ -104,6 +111,7 @@ export function noNewerAttempt(
   artifactId: GhostFlowRegisteredArtifactId,
   opts?: {
     currentAsOf?: string;
+    currentSourcePublishedAt?: string;
     issues?: readonly GhostFlowRefreshIssue[];
     artifactPath?: string;
   }
@@ -113,6 +121,7 @@ export function noNewerAttempt(
     status: 'no_newer_observation',
     current: currentArtifactSummary(artifactId, {
       observationAsOf: opts?.currentAsOf ?? '2026-07-01',
+      sourcePublishedAt: opts?.currentSourcePublishedAt,
       artifactPath: opts?.artifactPath,
     }),
     issues: opts?.issues ?? [],

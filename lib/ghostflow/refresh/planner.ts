@@ -5,6 +5,7 @@
 
 import {
   GATE_C_ARTIFACT_IDS,
+  GATE_C_CANDIDATE_GROUP_ID,
   GHOSTFLOW_REFRESH_REGISTRY,
   type GhostFlowRegisteredArtifactId,
 } from './registry';
@@ -25,9 +26,10 @@ import type {
   GhostFlowStageResult,
 } from './types';
 
-const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
-const ISO_TIMESTAMP_RE =
+const ISO_DATE_SHAPE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const ISO_TIMESTAMP_SHAPE_RE =
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
+const SHA256_HEX_RE = /^[0-9a-fA-F]{64}$/;
 
 function blockIssue(code: string, message: string): GhostFlowRefreshIssue {
   return { stage: 'validate', code, severity: 'block', message };
@@ -35,6 +37,35 @@ function blockIssue(code: string, message: string): GhostFlowRefreshIssue {
 
 function reconcileIssue(code: string, message: string): GhostFlowRefreshIssue {
   return { stage: 'reconcile', code, severity: 'block', message };
+}
+
+/** Pure calendar-date check: YYYY-MM-DD shape and real UTC calendar day. */
+export function isValidCalendarDate(value: string): boolean {
+  if (!ISO_DATE_SHAPE_RE.test(value)) return false;
+  const [ys, ms, ds] = value.split('-');
+  const year = Number(ys);
+  const month = Number(ms);
+  const day = Number(ds);
+  if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) {
+    return false;
+  }
+  const utc = new Date(Date.UTC(year, month - 1, day));
+  return (
+    utc.getUTCFullYear() === year &&
+    utc.getUTCMonth() === month - 1 &&
+    utc.getUTCDate() === day
+  );
+}
+
+/** Pure ISO timestamp check: expected shape and finite Date.parse. */
+export function isValidIsoTimestamp(value: string): boolean {
+  if (!ISO_TIMESTAMP_SHAPE_RE.test(value)) return false;
+  const parsed = Date.parse(value);
+  return Number.isFinite(parsed);
+}
+
+export function isValidSha256Hex(value: string): boolean {
+  return SHA256_HEX_RE.test(value);
 }
 
 function isRegisteredArtifactId(
@@ -46,11 +77,12 @@ function isRegisteredArtifactId(
 
 function validatePlannerInput(
   input: GhostFlowRefreshPlannerInput,
+  registry: readonly GhostFlowRefreshRegistryEntry[],
   registryById: ReadonlyMap<string, GhostFlowRefreshRegistryEntry>
 ): GhostFlowRefreshIssue[] {
   const issues: GhostFlowRefreshIssue[] = [];
 
-  if (!ISO_TIMESTAMP_RE.test(input.generatedAt)) {
+  if (!isValidIsoTimestamp(input.generatedAt)) {
     issues.push(
       blockIssue(
         'invalid_generated_at',
@@ -60,6 +92,12 @@ function validatePlannerInput(
   }
 
   const requested = input.requestedArtifactIds;
+  if (requested.length === 0) {
+    issues.push(
+      blockIssue('no_artifacts_requested', 'Planner input must request at least one artifact')
+    );
+  }
+
   const seenRequested = new Set<string>();
   for (const id of requested) {
     if (seenRequested.has(id)) {
@@ -73,6 +111,7 @@ function validatePlannerInput(
     }
   }
 
+  // Gate C-specific closure (more specific code for the current daily pair).
   const gateCRequested = GATE_C_ARTIFACT_IDS.filter((id) => seenRequested.has(id));
   if (gateCRequested.length === 1) {
     issues.push(
@@ -81,6 +120,33 @@ function validatePlannerInput(
         `Gate C selection requires both ${GATE_C_ARTIFACT_IDS.join(' and ')}; only ${gateCRequested[0]} was requested`
       )
     );
+  }
+
+  // Generic candidate-group selection closure for any atomic group (skips Gate C
+  // after the specific check to avoid duplicate issues).
+  const checkedGroupIds = new Set<string>();
+  for (const id of requested) {
+    const entry = registryById.get(id);
+    if (!entry || entry.acceptanceUnit !== 'candidate_group') continue;
+    if (checkedGroupIds.has(entry.candidateGroupId)) continue;
+    checkedGroupIds.add(entry.candidateGroupId);
+
+    if (entry.candidateGroupId === GATE_C_CANDIDATE_GROUP_ID) {
+      continue;
+    }
+
+    const members = registry.filter((e) => e.candidateGroupId === entry.candidateGroupId);
+    const memberIds = members.map((m) => m.artifactId);
+    const missing = memberIds.filter((mid) => !seenRequested.has(mid));
+    if (missing.length > 0) {
+      const requestedMembers = memberIds.filter((mid) => seenRequested.has(mid));
+      issues.push(
+        blockIssue(
+          'candidate_group_selection_incomplete',
+          `Candidate group ${entry.candidateGroupId} selection incomplete; requested=[${requestedMembers.join(', ')}] missing=[${missing.join(', ')}]`
+        )
+      );
+    }
   }
 
   const attempts = input.attempts;
@@ -127,8 +193,66 @@ function validatePlannerInput(
       );
     }
 
+    if (
+      attempt.current.observationAsOf !== undefined &&
+      !isValidCalendarDate(attempt.current.observationAsOf)
+    ) {
+      issues.push(
+        blockIssue(
+          'invalid_current_observation_as_of',
+          `Attempt ${attempt.artifactId} current.observationAsOf must be a real YYYY-MM-DD calendar date`
+        )
+      );
+    }
+    if (
+      attempt.current.sourcePublishedAt !== undefined &&
+      !isValidCalendarDate(attempt.current.sourcePublishedAt)
+    ) {
+      issues.push(
+        blockIssue(
+          'invalid_current_source_published_at',
+          `Attempt ${attempt.artifactId} current.sourcePublishedAt must be a real YYYY-MM-DD calendar date`
+        )
+      );
+    }
+
+    const blockIssues = attempt.issues.filter((i) => i.severity === 'block');
+    const explanatoryIssues = attempt.issues.filter(
+      (i) => i.severity === 'block' || i.severity === 'review'
+    );
+
+    if (
+      (attempt.status === 'candidate_observation_available' ||
+        attempt.status === 'no_newer_observation') &&
+      blockIssues.length > 0
+    ) {
+      issues.push(
+        blockIssue(
+          'attempt_status_block_issue_conflict',
+          `Attempt ${attempt.artifactId} status ${attempt.status} cannot include block issue ${blockIssues[0]!.code}`
+        )
+      );
+    }
+
+    if (attempt.status === 'source_failed' && blockIssues.length === 0) {
+      issues.push(
+        blockIssue(
+          'source_failed_missing_block_issue',
+          `Attempt ${attempt.artifactId} status source_failed requires at least one severity:block issue`
+        )
+      );
+    }
+
+    if (attempt.status === 'manual_input_required' && explanatoryIssues.length === 0) {
+      issues.push(
+        blockIssue(
+          'manual_input_missing_issue',
+          `Attempt ${attempt.artifactId} status manual_input_required requires at least one review or block issue`
+        )
+      );
+    }
+
     if (attempt.status === 'candidate_observation_available') {
-      // Runtime guard: callers may bypass the discriminated union at the boundary.
       const candidate = (attempt as { candidate?: typeof attempt.candidate }).candidate;
       if (!candidate) {
         issues.push(
@@ -138,22 +262,30 @@ function validatePlannerInput(
           )
         );
       } else {
-        if (!ISO_DATE_RE.test(candidate.observationAsOf)) {
+        if (!isValidCalendarDate(candidate.observationAsOf)) {
           issues.push(
             blockIssue(
               'invalid_candidate_observation_as_of',
-              `Attempt ${attempt.artifactId} candidate.observationAsOf must be YYYY-MM-DD`
+              `Attempt ${attempt.artifactId} candidate.observationAsOf must be a real YYYY-MM-DD calendar date`
             )
           );
         }
         if (
           candidate.sourcePublishedAt !== undefined &&
-          !ISO_DATE_RE.test(candidate.sourcePublishedAt)
+          !isValidCalendarDate(candidate.sourcePublishedAt)
         ) {
           issues.push(
             blockIssue(
               'invalid_candidate_source_published_at',
-              `Attempt ${attempt.artifactId} candidate.sourcePublishedAt must be YYYY-MM-DD`
+              `Attempt ${attempt.artifactId} candidate.sourcePublishedAt must be a real YYYY-MM-DD calendar date`
+            )
+          );
+        }
+        if (!isValidIsoTimestamp(candidate.retrievedAt)) {
+          issues.push(
+            blockIssue(
+              'invalid_candidate_retrieved_at',
+              `Attempt ${attempt.artifactId} candidate.retrievedAt must be a valid ISO timestamp`
             )
           );
         }
@@ -164,12 +296,26 @@ function validatePlannerInput(
               `Attempt ${attempt.artifactId} candidate.contentSha256 must be nonempty`
             )
           );
+        } else if (!isValidSha256Hex(candidate.contentSha256)) {
+          issues.push(
+            blockIssue(
+              'invalid_candidate_content_sha256',
+              `Attempt ${attempt.artifactId} candidate.contentSha256 must be 64 hexadecimal characters`
+            )
+          );
         }
         if (!candidate.adapterId.trim()) {
           issues.push(
             blockIssue(
               'empty_candidate_adapter_id',
               `Attempt ${attempt.artifactId} candidate.adapterId must be nonempty`
+            )
+          );
+        } else if (entry && candidate.adapterId !== entry.adapter.adapterId) {
+          issues.push(
+            blockIssue(
+              'candidate_adapter_id_mismatch',
+              `Attempt ${attempt.artifactId} candidate.adapterId "${candidate.adapterId}" does not match registry adapterId "${entry.adapter.adapterId}"`
             )
           );
         }
@@ -225,12 +371,30 @@ function resolveArtifactGroupStatus(
 function resolveCandidateGroup(
   groupId: string,
   members: readonly GhostFlowRefreshRegistryEntry[],
-  attemptById: ReadonlyMap<GhostFlowRegisteredArtifactId, GhostFlowArtifactRefreshAttempt>
-): GhostFlowCandidateGroupReport {
-  const artifactIds = members.map((m) => m.artifactId as GhostFlowRegisteredArtifactId);
-  const attempts = artifactIds.map((id) => attemptById.get(id)!);
+  attemptById: ReadonlyMap<string, GhostFlowArtifactRefreshAttempt>
+): GhostFlowCandidateGroupReport | null {
+  if (members.length === 0) {
+    return null;
+  }
+
+  const primary = members[0];
+  if (!primary) {
+    return null;
+  }
+
+  const artifactIds: GhostFlowRegisteredArtifactId[] = [];
+  const attempts: GhostFlowArtifactRefreshAttempt[] = [];
+  for (const member of members) {
+    const attempt = attemptById.get(member.artifactId);
+    if (!attempt) {
+      return null;
+    }
+    artifactIds.push(member.artifactId as GhostFlowRegisteredArtifactId);
+    attempts.push(attempt);
+  }
+
   const lanes = [...new Set(members.map((m) => m.lane))];
-  const primaryLane = members[0]!.lane;
+  const primaryLane = primary.lane;
   const failureSeverities = [
     ...new Set(members.map((m) => m.failureSeverity)),
   ] as GhostFlowCandidateGroupReport['failureSeverities'];
@@ -238,16 +402,28 @@ function resolveCandidateGroup(
   const observationAsOfValues = attempts
     .filter(
       (a): a is Extract<GhostFlowArtifactRefreshAttempt, { status: 'candidate_observation_available' }> =>
-        a.status === 'candidate_observation_available'
+        a.status === 'candidate_observation_available' && a.candidate !== undefined
     )
     .map((a) => a.candidate.observationAsOf);
 
   const issues: GhostFlowRefreshIssue[] = [];
   let status: GhostFlowCandidateGroupStatus;
 
-  if (members[0]!.acceptanceUnit === 'artifact') {
-    status = resolveArtifactGroupStatus(attempts[0]!);
-    issues.push(...attempts[0]!.issues);
+  if (primary.acceptanceUnit === 'artifact') {
+    const attempt = attempts[0];
+    if (!attempt) {
+      return null;
+    }
+    status = resolveArtifactGroupStatus(attempt);
+    issues.push(...attempt.issues);
+    if (attempt.status === 'not_attempted') {
+      issues.push(
+        reconcileIssue(
+          'artifact_not_attempted',
+          `Artifact ${attempt.artifactId} was selected but not attempted`
+        )
+      );
+    }
   } else {
     // candidate_group (Gate C and any future multi-member groups)
     const statuses = new Set(attempts.map((a) => a.status));
@@ -304,7 +480,7 @@ function resolveCandidateGroup(
 
   return {
     candidateGroupId: groupId,
-    acceptanceUnit: members[0]!.acceptanceUnit,
+    acceptanceUnit: primary.acceptanceUnit,
     artifactIds,
     lanes,
     primaryLane,
@@ -368,7 +544,7 @@ export function buildGhostFlowRefreshReport(
     registry.map((entry) => [entry.artifactId, entry] as const)
   );
 
-  const validationIssues = validatePlannerInput(input, registryById);
+  const validationIssues = validatePlannerInput(input, registry, registryById);
   if (validationIssues.length > 0) {
     return { ok: false, issues: validationIssues };
   }
@@ -379,9 +555,23 @@ export function buildGhostFlowRefreshReport(
   );
 
   // Preserve registry order for selected groups and attempts.
-  const orderedAttempts = registry
-    .filter((entry) => requestedSet.has(entry.artifactId as GhostFlowRegisteredArtifactId))
-    .map((entry) => attemptById.get(entry.artifactId as GhostFlowRegisteredArtifactId)!);
+  const orderedAttempts: GhostFlowArtifactRefreshAttempt[] = [];
+  for (const entry of registry) {
+    if (!requestedSet.has(entry.artifactId as GhostFlowRegisteredArtifactId)) continue;
+    const attempt = attemptById.get(entry.artifactId as GhostFlowRegisteredArtifactId);
+    if (!attempt) {
+      return {
+        ok: false,
+        issues: [
+          blockIssue(
+            'missing_attempt',
+            `Requested artifact ${entry.artifactId} is missing an attempt`
+          ),
+        ],
+      };
+    }
+    orderedAttempts.push(attempt);
+  }
 
   const orderedRequestedIds = orderedAttempts.map((a) => a.artifactId);
 
@@ -399,17 +589,39 @@ export function buildGhostFlowRefreshReport(
     membersByGroup.get(entry.candidateGroupId)!.push(entry);
   }
 
-  // For candidate_group acceptance, include all registered members of a selected group.
-  // Gate C selection closure already ensures both members are requested when either is.
-  const candidateGroups: GhostFlowCandidateGroupReport[] = groupIdsInOrder.map((groupId) => {
-    const selectedMembers = membersByGroup.get(groupId)!;
+  const candidateGroups: GhostFlowCandidateGroupReport[] = [];
+  for (const groupId of groupIdsInOrder) {
+    const selectedMembers = membersByGroup.get(groupId);
+    if (!selectedMembers || selectedMembers.length === 0) {
+      return {
+        ok: false,
+        issues: [
+          blockIssue(
+            'candidate_group_resolution_failed',
+            `Unable to resolve candidate group ${groupId}`
+          ),
+        ],
+      };
+    }
     const acceptanceUnit = selectedMembers[0]!.acceptanceUnit;
     const members =
       acceptanceUnit === 'candidate_group'
         ? registry.filter((e) => e.candidateGroupId === groupId)
         : selectedMembers;
-    return resolveCandidateGroup(groupId, members, attemptById);
-  });
+    const group = resolveCandidateGroup(groupId, members, attemptById);
+    if (!group) {
+      return {
+        ok: false,
+        issues: [
+          blockIssue(
+            'candidate_group_resolution_failed',
+            `Unable to resolve candidate group ${groupId}`
+          ),
+        ],
+      };
+    }
+    candidateGroups.push(group);
+  }
 
   const { overallStatus, suggestedAction } = computeOverallStatus(candidateGroups);
 
