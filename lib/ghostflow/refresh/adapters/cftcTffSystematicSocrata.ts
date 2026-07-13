@@ -1,9 +1,9 @@
 /**
  * CFTC TFF systematic Socrata adapter — deterministic fetch / parse / normalize.
  * Read-only; no basket, pressure score, artifact writes, or score-input replacement.
+ * Source-family primitives live in cftcTffSocrataCore.ts.
  */
 
-import { createHash } from 'crypto';
 import { isValidCalendarDate, isValidIsoTimestamp } from '../dateValidation';
 import type {
   GhostFlowFetchContext,
@@ -16,6 +16,19 @@ import type {
   GhostFlowSourceAdapter,
   GhostFlowStageResult,
 } from '../types';
+import {
+  cftcTffCellAsTrimmedString,
+  cftcTffSha256Hex,
+  decodeCftcTffUtf8,
+  defaultCftcTffFetchClient,
+  isCftcTffJsonContentType,
+  isCftcTffPlainObject,
+  parseCftcTffIntegerCell,
+  parseCftcTffPercentCell,
+  parseCftcTffReportDateCell,
+  type CftcTffFetchClient,
+  type CftcTffFetchResponse,
+} from './cftcTffSocrataCore';
 import {
   CFTC_TFF_DATASET_ID,
   CFTC_TFF_DATASET_PAGE_LOCATOR,
@@ -49,6 +62,13 @@ export {
 } from './cftcTffSocrataMeta';
 
 export { buildCftcTffSystematicResourceQueryUrl } from './cftcTffSocrataSource';
+
+export {
+  defaultCftcTffFetchClient,
+  parseCftcTffReportDateCell,
+  type CftcTffFetchClient,
+  type CftcTffFetchResponse,
+} from './cftcTffSocrataCore';
 
 export interface CftcTffParsedRow {
   reportDate: string;
@@ -93,16 +113,6 @@ export interface CftcTffSystematicNormalizedFields {
   vixContext: CftcTffNormalizedContract;
 }
 
-export interface CftcTffFetchResponse {
-  ok: boolean;
-  status: number;
-  statusText?: string;
-  contentType?: string;
-  bytes: Uint8Array;
-}
-
-export type CftcTffFetchClient = (url: string) => Promise<CftcTffFetchResponse>;
-
 export interface CftcTffSystematicSocrataAdapterOptions {
   fetchClient?: CftcTffFetchClient;
 }
@@ -125,79 +135,6 @@ function fail(
   return { ok: false, issues: [blockIssue(stage, code, message)] };
 }
 
-function sha256Hex(bytes: Uint8Array): string {
-  return createHash('sha256').update(bytes).digest('hex');
-}
-
-function decodeUtf8(bytes: Uint8Array): GhostFlowStageResult<string> {
-  try {
-    const text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
-    return { ok: true, value: text, issues: [] };
-  } catch {
-    return fail(
-      'fetch',
-      'cftc_tff_fetch_invalid_utf8',
-      'CFTC TFF response is not valid UTF-8'
-    );
-  }
-}
-
-function isJsonContentType(contentType: string | undefined): boolean {
-  if (contentType === undefined || contentType.trim() === '') return true;
-  const primary = contentType.split(';')[0]!.trim().toLowerCase();
-  return primary === 'application/json' || primary === 'text/json';
-}
-
-/**
- * Convert observed Socrata report_date_as_yyyy_mm_dd to YYYY-MM-DD.
- * Accepts only the official probe representation: `YYYY-MM-DDT00:00:00.000`.
- * Does not use Date.parse, timezone conversion, or substring-only validation.
- */
-export function parseCftcTffReportDateCell(raw: unknown): string | null {
-  if (typeof raw !== 'string') return null;
-  const match = /^(\d{4}-\d{2}-\d{2})T00:00:00\.000$/.exec(raw.trim());
-  if (!match) return null;
-  const reportDate = match[1]!;
-  return isValidCalendarDate(reportDate) ? reportDate : null;
-}
-
-function cellAsTrimmedString(raw: unknown): string | null {
-  if (typeof raw === 'string') return raw.trim();
-  if (typeof raw === 'number' && Number.isFinite(raw)) return String(raw);
-  return null;
-}
-
-function parseIntegerCell(
-  raw: unknown,
-  opts: { allowNegative: boolean; requirePositive: boolean }
-): number | null {
-  const text = cellAsTrimmedString(raw);
-  if (text === null || text === '') return null;
-  if (opts.allowNegative) {
-    if (!/^-?\d+$/.test(text)) return null;
-  } else if (!/^\d+$/.test(text)) {
-    return null;
-  }
-  const n = Number(text);
-  if (!Number.isInteger(n) || !Number.isFinite(n)) return null;
-  if (opts.requirePositive && n <= 0) return null;
-  if (!opts.allowNegative && n < 0) return null;
-  return n;
-}
-
-function parsePercentCell(raw: unknown): number | null {
-  const text = cellAsTrimmedString(raw);
-  if (text === null || text === '') return null;
-  if (!/^-?\d+(\.\d+)?$/.test(text)) return null;
-  const n = Number(text);
-  if (!Number.isFinite(n) || n < 0 || n > 100) return null;
-  return n;
-}
-
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
 function toNormalizedContract(row: CftcTffParsedRow): CftcTffNormalizedContract {
   return {
     cftcContractMarketCode: row.cftcContractMarketCode,
@@ -216,26 +153,6 @@ function toNormalizedContract(row: CftcTffParsedRow): CftcTffNormalizedContract 
       pctOiShort: row.pctOiShort,
       pctOiSpread: row.pctOiSpread,
     },
-  };
-}
-
-export async function defaultCftcTffFetchClient(
-  url: string
-): Promise<CftcTffFetchResponse> {
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: {
-      accept: 'application/json',
-    },
-    cache: 'no-store',
-  });
-  const buffer = new Uint8Array(await response.arrayBuffer());
-  return {
-    ok: response.ok,
-    status: response.status,
-    statusText: response.statusText,
-    contentType: response.headers.get('content-type') ?? undefined,
-    bytes: buffer,
   };
 }
 
@@ -290,7 +207,7 @@ export function createCftcTffSystematicSocrataAdapter(
           'CFTC TFF fetch returned an empty body'
         );
       }
-      if (!isJsonContentType(response.contentType)) {
+      if (!isCftcTffJsonContentType(response.contentType)) {
         return fail(
           'fetch',
           'cftc_tff_fetch_invalid_content_type',
@@ -298,21 +215,25 @@ export function createCftcTffSystematicSocrataAdapter(
         );
       }
 
-      const decoded = decodeUtf8(response.bytes);
-      if (!decoded.ok) {
-        return decoded;
+      const decoded = decodeCftcTffUtf8(response.bytes);
+      if (decoded === null) {
+        return fail(
+          'fetch',
+          'cftc_tff_fetch_invalid_utf8',
+          'CFTC TFF response is not valid UTF-8'
+        );
       }
 
       return {
         ok: true,
         value: {
-          raw: decoded.value,
+          raw: decoded,
           sourceMetadata: {
             sourceId: CFTC_TFF_SOURCE_FAMILY_ID,
             sourceLocator,
             retrievedAt: context.nowIso,
             contentType: response.contentType,
-            contentSha256: sha256Hex(response.bytes),
+            contentSha256: cftcTffSha256Hex(response.bytes),
           },
         },
         issues: [],
@@ -350,7 +271,7 @@ export function createCftcTffSystematicSocrataAdapter(
 
       for (let i = 0; i < parsedJson.length; i++) {
         const record = parsedJson[i];
-        if (!isPlainObject(record)) {
+        if (!isCftcTffPlainObject(record)) {
           return fail(
             'parse',
             'cftc_tff_row_not_object',
@@ -377,7 +298,7 @@ export function createCftcTffSystematicSocrataAdapter(
           );
         }
 
-        const reportWeek = cellAsTrimmedString(record.yyyy_report_week_ww);
+        const reportWeek = cftcTffCellAsTrimmedString(record.yyyy_report_week_ww);
         if (!reportWeek) {
           return fail(
             'parse',
@@ -386,7 +307,7 @@ export function createCftcTffSystematicSocrataAdapter(
           );
         }
 
-        const contractMarketName = cellAsTrimmedString(record.contract_market_name);
+        const contractMarketName = cftcTffCellAsTrimmedString(record.contract_market_name);
         if (!contractMarketName) {
           return fail(
             'parse',
@@ -395,7 +316,7 @@ export function createCftcTffSystematicSocrataAdapter(
           );
         }
 
-        const codeRaw = cellAsTrimmedString(record.cftc_contract_market_code);
+        const codeRaw = cftcTffCellAsTrimmedString(record.cftc_contract_market_code);
         if (!codeRaw || !REGISTERED_CODE_SET.has(codeRaw)) {
           return fail(
             'parse',
@@ -405,7 +326,7 @@ export function createCftcTffSystematicSocrataAdapter(
         }
         const cftcContractMarketCode = codeRaw as CftcTffRegisteredContractCode;
 
-        const futOnly = cellAsTrimmedString(record.futonly_or_combined);
+        const futOnly = cftcTffCellAsTrimmedString(record.futonly_or_combined);
         if (futOnly !== CFTC_TFF_FUTONLY_VALUE) {
           return fail(
             'parse',
@@ -414,37 +335,43 @@ export function createCftcTffSystematicSocrataAdapter(
           );
         }
 
-        const openInterestAll = parseIntegerCell(record.open_interest_all, {
+        const openInterestAll = parseCftcTffIntegerCell(record.open_interest_all, {
           allowNegative: false,
           requirePositive: true,
         });
-        const leveragedFundsLong = parseIntegerCell(record.lev_money_positions_long, {
+        const leveragedFundsLong = parseCftcTffIntegerCell(record.lev_money_positions_long, {
           allowNegative: false,
           requirePositive: false,
         });
-        const leveragedFundsShort = parseIntegerCell(record.lev_money_positions_short, {
-          allowNegative: false,
-          requirePositive: false,
-        });
-        const leveragedFundsSpread = parseIntegerCell(record.lev_money_positions_spread, {
-          allowNegative: false,
-          requirePositive: false,
-        });
-        const changeLong = parseIntegerCell(record.change_in_lev_money_long, {
+        const leveragedFundsShort = parseCftcTffIntegerCell(
+          record.lev_money_positions_short,
+          {
+            allowNegative: false,
+            requirePositive: false,
+          }
+        );
+        const leveragedFundsSpread = parseCftcTffIntegerCell(
+          record.lev_money_positions_spread,
+          {
+            allowNegative: false,
+            requirePositive: false,
+          }
+        );
+        const changeLong = parseCftcTffIntegerCell(record.change_in_lev_money_long, {
           allowNegative: true,
           requirePositive: false,
         });
-        const changeShort = parseIntegerCell(record.change_in_lev_money_short, {
+        const changeShort = parseCftcTffIntegerCell(record.change_in_lev_money_short, {
           allowNegative: true,
           requirePositive: false,
         });
-        const changeSpread = parseIntegerCell(record.change_in_lev_money_spread, {
+        const changeSpread = parseCftcTffIntegerCell(record.change_in_lev_money_spread, {
           allowNegative: true,
           requirePositive: false,
         });
-        const pctOiLong = parsePercentCell(record.pct_of_oi_lev_money_long);
-        const pctOiShort = parsePercentCell(record.pct_of_oi_lev_money_short);
-        const pctOiSpread = parsePercentCell(record.pct_of_oi_lev_money_spread);
+        const pctOiLong = parseCftcTffPercentCell(record.pct_of_oi_lev_money_long);
+        const pctOiShort = parseCftcTffPercentCell(record.pct_of_oi_lev_money_short);
+        const pctOiSpread = parseCftcTffPercentCell(record.pct_of_oi_lev_money_spread);
 
         if (
           openInterestAll === null ||
