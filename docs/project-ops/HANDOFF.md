@@ -1,9 +1,10 @@
 # HANDOFF
 
 ## Last Session Summary (2026-07-13)
-Starting `main`: `70b66f7` (PR **#136** shared CFTC Socrata core merged). Implemented fixture-driven **CFTC TFF Treasury Socrata adapter** (`cftc-tff-treasury-socrata` → `implemented` / `1.0.0`) reusing the shared core. Four standard Treasury contracts are required core; two Ultra contracts remain optional context (missing optional → review issue). Adapter normalizes raw observations only; no net/gross/direction/basket/score. Unwired; no production write. Systematic unchanged/unwired; FRED Treasury remains `spike_available`. Breadth / Gate C blocked. Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`.
+Starting `main`: `12ad053` (PR **#137** CFTC Treasury adapter merged). Docs-only **Treasury long-end source feasibility / authorization audit** for `treasuryLongEndIncomeLens`: [TREASURY_LONG_END_SOURCE_FEASIBILITY.md](../ghostflow/TREASURY_LONG_END_SOURCE_FEASIBILITY.md). Verdict: do **not** promote `fredgraph.csv`; FRED API retention/history/notice/key model require clarification if FRED is kept; prefer **direct Board H.15** for required yields and omit optional T10YIE until product decides. FRED adapter implementation **paused**. No registry/artifact/score change; no source or methodology approved; DECISIONS untouched. CFTC systematic + Treasury adapters remain implemented/unwired. Breadth / Gate C blocked. Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`.
 
 ## State of Work
+- Long-end source policy audit complete; implementation blocked pending Bobby path approval.
 - Treasury CFTC adapter: fixture-tested, registry implemented, production-unwired.
 - Shared CFTC Socrata core + systematic adapter in place; systematic behavior unchanged.
 - VIX adapter remains implemented and unwired.
@@ -11,15 +12,18 @@ Starting `main`: `70b66f7` (PR **#136** shared CFTC Socrata core merged). Implem
 - Core app remains stable; education section remains live.
 
 ## Priority for Next Session
-1) Implement FRED Treasury yields adapter **or** design report-only operator runner for implemented display adapters (neither claimed done)
-2) Do not wire Treasury/systematic adapters into CLI/workflows/production writers yet
+1) After Bobby approves: implement fixture-driven **Board H.15** adapter for long-end yields (omit T10YIE pending product decision); append DECISIONS; do not ship FRED graph CSV / FRED API as production transport without clarification
+2) Do not wire Treasury/systematic/VIX adapters into CLI/workflows/production writers yet
 3) Breadth: decide written permission vs licensed SKU (neither approved)
 
 ## Open Questions
-- Prefer FRED Treasury next, or operator runner for display adapters?
-- Any Ultra-context operator presentation rules before a production refresh path?
+- Confirm Board H.15 path (audit recommendation) vs request FRED written clarification instead?
+- Omit breakeven, approve derived H.15 breakeven later, or keep FRED T10YIE under permission?
 
 ---
+
+## Archive — CFTC Treasury adapter (2026-07-13)
+Starting `main`: `70b66f7` (PR **#136** shared CFTC Socrata core merged). Implemented fixture-driven **CFTC TFF Treasury Socrata adapter** (`cftc-tff-treasury-socrata` → `implemented` / `1.0.0`) reusing the shared core. Four standard Treasury contracts are required core; two Ultra contracts remain optional context (missing optional → review issue). Adapter normalizes raw observations only; no net/gross/direction/basket/score. Unwired; no production write. Systematic unchanged/unwired; FRED Treasury remains `spike_available`. Breadth / Gate C blocked. Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`.
 
 ## Archive — Shared CFTC Socrata core (2026-07-13)
 Starting `main`: `96852dc` (PR **#135** CFTC systematic adapter merged). Extracted shared **CFTC TFF Socrata source core** (transport, cell parsers, hashing, generic deterministic query builder). Systematic adapter refactored to consume the core with **no behavior change** (ID / parser `1.0.0` / query URL / errors / normalized output preserved). Systematic remains unwired. Treasury CFTC remains `spike_available` and is the recommended next implementation. Breadth / Gate C blocked; no provider approved. Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`.

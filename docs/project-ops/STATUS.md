@@ -1,16 +1,24 @@
 # STATUS
 
 ## Current State (GhostFlow — 2026-07-13)
-PR **#136** merged the shared CFTC Socrata source core on `main` (`70b66f7`).
-PR **#135** previously merged the CFTC systematic adapter.
+PR **#137** merged the CFTC TFF Treasury adapter on `main` (`12ad053`).
+PR **#136** previously merged the shared CFTC Socrata core; PR **#135** the systematic adapter.
 
-**CFTC TFF Treasury adapter implemented** (fixture-driven, unwired):
-- Official TFF Futures Only (`gpe5-46if`) via shared Socrata core
-- Four standard Treasury contracts required as core; two Ultra contracts optional context
-- Adapter normalizes raw CFTC source observations only; derived metrics remain downstream
-- Treasury remains display-only / unscored; `mappingStatus` still `not_final` downstream
-- No production artifact refresh; adapter not wired to runtime or workflows
-- Systematic adapter unchanged and unwired; FRED Treasury remains `spike_available`
+**Treasury long-end source authorization audit (docs-only):**
+- Canonical memo: [TREASURY_LONG_END_SOURCE_FEASIBILITY.md](../ghostflow/TREASURY_LONG_END_SOURCE_FEASIBILITY.md)
+- Task-start `main` SHA for the audit: `12ad05350f0aeab24d62b809f271a9c1c59bf2ee`
+- FRED adapter implementation is **paused** pending source-policy resolution
+- `fredgraph.csv` must **not** be promoted without authorization
+- FRED API retention, notice, and key-model requirements require resolution **or** source migration
+- Direct Board of Governors **H.15** DDP is evaluated as the original-source alternative
+- **No** source path, retention policy, breakeven methodology, or registry change is approved by the audit
+- **No** production artifact refresh occurred
+
+**Implemented but unwired adapters (unchanged by audit):**
+- `cboe-vix-history-csv`
+- `cftc-tff-systematic-socrata`
+- `cftc-tff-treasury-socrata`
+- FRED Treasury long-end remains `spike_available` / unwired
 
 Production GhostFlow state remains unchanged:
 - `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
@@ -22,13 +30,25 @@ Production GhostFlow state remains unchanged:
 Breadth and Gate C remain blocked. VIX adapter remains unwired.
 
 ## Recommended next work
-1. Implement the FRED Treasury yields adapter **or** design a report-only operator runner for implemented display adapters (neither claimed approved/implemented here)
-2. Do **not** wire Treasury/systematic adapters into production refresh, CLI, or workflows yet
+1. After Bobby approves the audit recommendation: implement a **direct Board H.15** fixture-driven adapter for `treasuryLongEndIncomeLens` (omit T10YIE pending product decision) — see feasibility memo; do **not** implement FRED API/graph CSV as production transport without clarification
+2. Do **not** wire CFTC Treasury/systematic or VIX adapters into production refresh, CLI, or workflows yet
 3. Breadth: decide written provider permission **or** licensed SKU investigation (neither approved)
 
 Last updated: 2026-07-13
 
 ---
+
+## Archive — CFTC Treasury adapter (2026-07-13)
+PR **#136** merged the shared CFTC Socrata source core on `main` (`70b66f7`).
+PR **#135** previously merged the CFTC systematic adapter.
+
+**CFTC TFF Treasury adapter implemented** (fixture-driven, unwired):
+- Official TFF Futures Only (`gpe5-46if`) via shared Socrata core
+- Four standard Treasury contracts required as core; two Ultra contracts optional context
+- Adapter normalizes raw CFTC source observations only; derived metrics remain downstream
+- Treasury remains display-only / unscored; `mappingStatus` still `not_final` downstream
+- No production artifact refresh; adapter not wired to runtime or workflows
+- Systematic adapter unchanged and unwired; FRED Treasury remains `spike_available`
 
 ## Archive — Shared CFTC Socrata core (2026-07-13)
 PR **#135** merged the CFTC TFF systematic adapter on `main` (`96852dc`).
