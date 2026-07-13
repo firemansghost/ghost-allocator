@@ -1,24 +1,21 @@
 # STATUS
 
 ## Current State (GhostFlow — 2026-07-13)
-PR **#137** merged the CFTC TFF Treasury adapter on `main` (`12ad053`).
-PR **#136** previously merged the shared CFTC Socrata core; PR **#135** the systematic adapter.
+PR **#138** merged the Treasury long-end source feasibility audit on `main` (`9cf9fa4`).
 
-**Treasury long-end source authorization audit (docs-only):**
-- Canonical memo: [TREASURY_LONG_END_SOURCE_FEASIBILITY.md](../ghostflow/TREASURY_LONG_END_SOURCE_FEASIBILITY.md)
-- Task-start `main` SHA for the audit: `12ad05350f0aeab24d62b809f271a9c1c59bf2ee`
-- FRED adapter implementation is **paused** pending source-policy resolution
-- `fredgraph.csv` must **not** be promoted without authorization
-- FRED API retention, notice, and key-model requirements require resolution **or** source migration
-- Direct Board of Governors **H.15** DDP is evaluated as the original-source alternative
-- **No** source path, retention policy, breakeven methodology, or registry change is approved by the audit
-- **No** production artifact refresh occurred
+**Board H.15 Treasury long-end adapter implemented** (fixture-driven, unwired):
+- Canonical source migrated from FRED → Board of Governors H.15 DDP (`frb-h15-treasury-yields-csv` / `1.0.0`)
+- Required: 30Y nominal + 30Y inflation-indexed; optional: 2Y / 5Y / 10Y nominal on common date
+- **T10YIE omitted**; no derived breakeven
+- Display-only / unscored / `human_required`; no production artifact writer or workflow wiring
+- DECISIONS records Bobby’s 2026-07-13 source migration approval
+- No production artifact refresh; historical FRED provenance in committed JSON unchanged
 
-**Implemented but unwired adapters (unchanged by audit):**
+**Implemented but unwired adapters:**
 - `cboe-vix-history-csv`
 - `cftc-tff-systematic-socrata`
 - `cftc-tff-treasury-socrata`
-- FRED Treasury long-end remains `spike_available` / unwired
+- `frb-h15-treasury-yields-csv`
 
 Production GhostFlow state remains unchanged:
 - `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
@@ -27,16 +24,26 @@ Production GhostFlow state remains unchanged:
 - `publicSignalCount`: 13
 - MOCK systematic / retirement / levered: 62 / 58 / 55
 
-Breadth and Gate C remain blocked. VIX adapter remains unwired.
+Breadth and Gate C remain blocked. VIX / CFTC adapters remain unwired.
 
 ## Recommended next work
-1. After Bobby approves the audit recommendation: implement a **direct Board H.15** fixture-driven adapter for `treasuryLongEndIncomeLens` (omit T10YIE pending product decision) — see feasibility memo; do **not** implement FRED API/graph CSV as production transport without clarification
-2. Do **not** wire CFTC Treasury/systematic or VIX adapters into production refresh, CLI, or workflows yet
-3. Breadth: decide written provider permission **or** licensed SKU investigation (neither approved)
+1. Do **not** wire H.15 / CFTC / VIX adapters into production refresh, CLI, or workflows yet
+2. Breadth: decide written provider permission **or** licensed SKU investigation (neither approved)
+3. Optional later: operator runner / human-approved long-end refresh using H.15 (no silent FRED graph CSV)
 
 Last updated: 2026-07-13
 
 ---
+
+## Archive — Treasury long-end source audit (2026-07-13)
+PR **#137** merged the CFTC TFF Treasury adapter on `main` (`12ad053`).
+PR **#136** previously merged the shared CFTC Socrata core; PR **#135** the systematic adapter.
+
+**Treasury long-end source authorization audit (docs-only):**
+- Canonical memo: [TREASURY_LONG_END_SOURCE_FEASIBILITY.md](../ghostflow/TREASURY_LONG_END_SOURCE_FEASIBILITY.md)
+- Task-start `main` SHA for the audit: `12ad05350f0aeab24d62b809f271a9c1c59bf2ee`
+- Recommended direct Board H.15; FRED graph CSV not for production; FRED API retention issues
+- **No** source approved by the audit alone; no registry/artifact change in that PR
 
 ## Archive — CFTC Treasury adapter (2026-07-13)
 PR **#136** merged the shared CFTC Socrata source core on `main` (`70b66f7`).

@@ -24,6 +24,13 @@ import {
   CFTC_TFF_TREASURY_SOURCE_NAME,
 } from '../refresh/adapters/cftcTffTreasurySocrataMeta';
 import {
+  FRB_H15_ADAPTER_ID,
+  FRB_H15_PARSER_VERSION,
+  FRB_H15_SOURCE_FAMILY_ID,
+  FRB_H15_SOURCE_LOCATOR,
+  FRB_H15_SOURCE_NAME,
+} from '../refresh/adapters/frbH15TreasuryYieldsMeta';
+import {
   assertGhostFlowRefreshRegistryValid,
   GATE_C_ARTIFACT_IDS,
   GATE_C_CANDIDATE_GROUP_ID,
@@ -307,8 +314,7 @@ assert.strictEqual(byId.retirementFlowPressureProxy.automationReadiness, 'red');
 // Authentication classifications
 assert.deepStrictEqual(byId.volatilityRegime.authentication, { kind: 'none' });
 assert.deepStrictEqual(byId.treasuryLongEndIncomeLens.authentication, {
-  kind: 'optional_env',
-  envName: 'FRED_API_KEY',
+  kind: 'none',
 });
 assert.deepStrictEqual(byId.leveredEtfRebalancePressure.authentication, {
   kind: 'manual_operator',
@@ -320,7 +326,7 @@ assert.deepStrictEqual(byId.capWeightPremiumProxy.authentication, {
   kind: 'manual_operator',
 });
 
-// Adapter implementation-status rules — VIX + CFTC systematic + CFTC Treasury
+// Adapter implementation-status rules — VIX + CFTC systematic + CFTC Treasury + H.15
 for (const entry of GHOSTFLOW_REFRESH_REGISTRY) {
   if (entry.artifactId === 'volatilityRegime') {
     assert.strictEqual(entry.adapter.implementationStatus, 'implemented');
@@ -386,6 +392,24 @@ for (const entry of GHOSTFLOW_REFRESH_REGISTRY) {
     assert.strictEqual(entry.approvalPolicy, 'human_required');
     continue;
   }
+  if (entry.artifactId === 'treasuryLongEndIncomeLens') {
+    assert.strictEqual(entry.adapter.implementationStatus, 'implemented');
+    assert.strictEqual(entry.adapter.adapterId, FRB_H15_ADAPTER_ID);
+    if (entry.adapter.implementationStatus === 'implemented') {
+      assert.strictEqual(entry.adapter.parserVersion, FRB_H15_PARSER_VERSION);
+    }
+    assert.strictEqual(entry.canonicalSource.sourceFamilyId, FRB_H15_SOURCE_FAMILY_ID);
+    assert.strictEqual(entry.canonicalSource.sourceName, FRB_H15_SOURCE_NAME);
+    assert.strictEqual(entry.canonicalSource.sourceLocator, FRB_H15_SOURCE_LOCATOR);
+    assert.strictEqual(entry.lane, 'treasury_display');
+    assert.strictEqual(entry.automationReadiness, 'green');
+    assert.strictEqual(entry.failureSeverity, 'nonfatal_treasury');
+    assert.strictEqual(entry.referenceDateRole, 'lagging_allowed');
+    assert.deepStrictEqual(entry.authentication, { kind: 'none' });
+    assert.strictEqual(entry.approvalPolicy, 'human_required');
+    assert.strictEqual(entry.candidateGroupId, 'frb_h15_treasury_long_end');
+    continue;
+  }
   assert.ok(
     entry.adapter.implementationStatus === 'planned' ||
       entry.adapter.implementationStatus === 'spike_available'
@@ -395,7 +419,18 @@ for (const entry of GHOSTFLOW_REFRESH_REGISTRY) {
 
 assert.strictEqual(
   byId.treasuryLongEndIncomeLens.adapter.implementationStatus,
-  'spike_available'
+  'implemented'
+);
+if (byId.treasuryLongEndIncomeLens.adapter.implementationStatus === 'implemented') {
+  assert.strictEqual(byId.treasuryLongEndIncomeLens.adapter.parserVersion, '1.0.0');
+}
+assert.strictEqual(
+  byId.treasuryLongEndIncomeLens.canonicalSource.sourceFamilyId,
+  'frb_h15_treasury_yields'
+);
+assert.strictEqual(
+  byId.treasuryLongEndIncomeLens.adapter.adapterId,
+  'frb-h15-treasury-yields-csv'
 );
 
 assert.deepStrictEqual([...GATE_C_ARTIFACT_IDS].sort(), [
@@ -413,7 +448,6 @@ assert.deepStrictEqual(spikeIds, [
   'optionsActivityProxy',
   'retirementFlowPressureProxy',
   'tailSkewContext',
-  'treasuryLongEndIncomeLens',
 ]);
 
 const implementedIds = GHOSTFLOW_REFRESH_REGISTRY.filter(
@@ -424,6 +458,7 @@ const implementedIds = GHOSTFLOW_REFRESH_REGISTRY.filter(
 assert.deepStrictEqual(implementedIds, [
   'systematicFlowProxy',
   'treasuryFuturesPositioningProxy',
+  'treasuryLongEndIncomeLens',
   'volatilityRegime',
 ]);
 

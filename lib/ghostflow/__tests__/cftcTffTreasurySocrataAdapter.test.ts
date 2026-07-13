@@ -132,7 +132,7 @@ const treasuryEntry = GHOSTFLOW_REFRESH_REGISTRY.find(
 const systematicEntry = GHOSTFLOW_REFRESH_REGISTRY.find(
   (e) => e.artifactId === 'systematicFlowProxy'
 )!;
-const fredEntry = GHOSTFLOW_REFRESH_REGISTRY.find(
+const longEndEntry = GHOSTFLOW_REFRESH_REGISTRY.find(
   (e) => e.artifactId === 'treasuryLongEndIncomeLens'
 )!;
 const queryUrl = buildCftcTffTreasuryResourceQueryUrl();
@@ -161,7 +161,8 @@ assert.strictEqual(
 assert.strictEqual(CFTC_TFF_TREASURY_ARTIFACT_ID, 'treasuryFuturesPositioningProxy');
 assert.strictEqual(treasuryEntry.lane, 'treasury_display');
 assert.strictEqual(treasuryEntry.failureSeverity, 'nonfatal_treasury');
-assert.strictEqual(fredEntry.adapter.implementationStatus, 'spike_available');
+assert.strictEqual(longEndEntry.adapter.implementationStatus, 'implemented');
+assert.strictEqual(longEndEntry.adapter.adapterId, 'frb-h15-treasury-yields-csv');
 assert.strictEqual(systematicEntry.adapter.implementationStatus, 'implemented');
 if (systematicEntry.adapter.implementationStatus === 'implemented') {
   assert.strictEqual(systematicEntry.adapter.parserVersion, '1.0.0');
