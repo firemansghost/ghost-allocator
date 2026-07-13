@@ -1,26 +1,28 @@
 # HANDOFF
 
 ## Last Session Summary (2026-07-13)
-Starting `main`: `12ad053` (PR **#137** CFTC Treasury adapter merged). Docs-only **Treasury long-end source feasibility / authorization audit** for `treasuryLongEndIncomeLens`: [TREASURY_LONG_END_SOURCE_FEASIBILITY.md](../ghostflow/TREASURY_LONG_END_SOURCE_FEASIBILITY.md). Verdict: do **not** promote `fredgraph.csv`; FRED API retention/history/notice/key model require clarification if FRED is kept; prefer **direct Board H.15** for required yields and omit optional T10YIE until product decides. FRED adapter implementation **paused**. No registry/artifact/score change; no source or methodology approved; DECISIONS untouched. CFTC systematic + Treasury adapters remain implemented/unwired. Breadth / Gate C blocked. Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`.
+Starting `main`: `9cf9fa4` (PR **#138** Treasury long-end source audit merged). Implemented fixture-driven **Board H.15 Treasury yields adapter** (`frb-h15-treasury-yields-csv` → `implemented` / `1.0.0`) after Bobby approved migrating `treasuryLongEndIncomeLens` off FRED. Dual DDP packages: official TCM + `RIFLGFCY30_XII_N.B`. Required 30Y nom + 30Y real; optional 2/5/10Y; **T10YIE omitted** (no derived breakeven). Unwired; no production write. DECISIONS appended. CFTC systematic/Treasury + VIX remain unwired. Breadth / Gate C blocked. Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`.
 
 ## State of Work
-- Long-end source policy audit complete; implementation blocked pending Bobby path approval.
-- Treasury CFTC adapter: fixture-tested, registry implemented, production-unwired.
-- Shared CFTC Socrata core + systematic adapter in place; systematic behavior unchanged.
-- VIX adapter remains implemented and unwired.
+- Long-end H.15 adapter: fixture-tested, registry implemented, production-unwired.
+- Source decision recorded; FRED graph CSV / API not production transports for this artifact.
+- Treasury CFTC + systematic + VIX adapters remain implemented and unwired.
 - Breadth operator-packet + source-authorization block remain in force; Gate C blocked.
 - Core app remains stable; education section remains live.
 
 ## Priority for Next Session
-1) After Bobby approves: implement fixture-driven **Board H.15** adapter for long-end yields (omit T10YIE pending product decision); append DECISIONS; do not ship FRED graph CSV / FRED API as production transport without clarification
-2) Do not wire Treasury/systematic/VIX adapters into CLI/workflows/production writers yet
-3) Breadth: decide written permission vs licensed SKU (neither approved)
+1) Do not wire H.15 / CFTC / VIX adapters into CLI/workflows/production writers yet
+2) Breadth: decide written permission vs licensed SKU (neither approved)
+3) Optional: human-approved artifact refresh path using H.15 (separate from this adapter PR)
 
 ## Open Questions
-- Confirm Board H.15 path (audit recommendation) vs request FRED written clarification instead?
-- Omit breakeven, approve derived H.15 breakeven later, or keep FRED T10YIE under permission?
+- When should display adapters become operator-driven vs remain research/fixture-only?
+- Later breakeven posture: omit permanently, derived H.15, or FRED under written permission?
 
 ---
+
+## Archive — Treasury long-end source audit (2026-07-13)
+Starting `main`: `12ad053` (PR **#137** CFTC Treasury adapter merged). Docs-only **Treasury long-end source feasibility / authorization audit** for `treasuryLongEndIncomeLens`: [TREASURY_LONG_END_SOURCE_FEASIBILITY.md](../ghostflow/TREASURY_LONG_END_SOURCE_FEASIBILITY.md). Verdict: prefer direct Board H.15; do not promote `fredgraph.csv`; FRED API permission-required for retention/history. No registry/artifact/score change in that PR.
 
 ## Archive — CFTC Treasury adapter (2026-07-13)
 Starting `main`: `70b66f7` (PR **#136** shared CFTC Socrata core merged). Implemented fixture-driven **CFTC TFF Treasury Socrata adapter** (`cftc-tff-treasury-socrata` → `implemented` / `1.0.0`) reusing the shared core. Four standard Treasury contracts are required core; two Ultra contracts remain optional context (missing optional → review issue). Adapter normalizes raw observations only; no net/gross/direction/basket/score. Unwired; no production write. Systematic unchanged/unwired; FRED Treasury remains `spike_available`. Breadth / Gate C blocked. Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`.

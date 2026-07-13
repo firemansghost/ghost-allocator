@@ -1,5 +1,26 @@
 # DECISIONS
 
+## 2026-07-13 — Treasury Long-End Income Lens canonical source → Board H.15
+Choice:
+- Migrate `treasuryLongEndIncomeLens` canonical production source from FRED to the **Board of Governors H.15 Data Download Program**.
+- Use direct H.15 observations for **30-year nominal** (`RIFLGFCY30_N.B`) and **30-year inflation-indexed real** (`RIFLGFCY30_XII_N.B`) yields.
+- Include **2-year / 5-year / 10-year nominal** yields as optional context when present on the required common date.
+- **Omit `T10YIE`** for now. Do **not** derive or substitute a breakeven-inflation value without a separate product and methodology decision.
+- Adapter posture: fixture-driven, display-only, unscored, `human_required`, **unwired** from production workflows, and **incapable** of writing production artifacts.
+- Do **not** promote `fredgraph.csv` or the authenticated FRED API as the production transport for this artifact.
+- Research spike `scripts/ghostflow/fred-treasury-yields-spike.ts` remains research-only quarantine.
+
+Why:
+- [TREASURY_LONG_END_SOURCE_FEASIBILITY.md](../ghostflow/TREASURY_LONG_END_SOURCE_FEASIBILITY.md) found FRED graph CSV unauthorized for production automation and FRED API store/cache/archive terms in conflict with committed normalized artifacts and retained history without written clarification.
+- Underlying constant-maturity yields originate on Board H.15; Board website disclaimer treats Board-published information as public domain with citation.
+
+Consequences:
+- Registry source family / adapter ID move to `frb_h15_treasury_yields` / `frb-h15-treasury-yields-csv`.
+- Existing production artifact JSON may still record historical FRED provenance until a separate human-approved refresh; this decision does not refresh values, scores, MOCK inputs, or `GHOSTFLOW_REFERENCE_AS_OF`.
+- Breakeven context requires a later DECISIONS entry before Path A (FRED T10YIE) or Path B (derived H.15 spread).
+
+---
+
 ## 2026-03-24 — GhostRegime UI: axis & sleeve pressure vs regime-change Flip Watch
 Choice:
 - **Axis & sleeve pressure** (distance to 0 and to VAMS ±0.5 bands, direction vs **prior persisted trading row only**) is **separate** from **`flip_watch_status`** (regime-change confirmation). UI uses teal styling and copy under “Axis & sleeve pressure”; regime-change Flip Watch stays amber and unchanged.
