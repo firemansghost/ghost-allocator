@@ -83,9 +83,19 @@
 | `thirtyYearTipsRealYieldPct` | **Required** |
 | `twoYearYieldPct` / `fiveYearYieldPct` / `tenYearYieldPct` | **Optional** (null/absent allowed when absent) |
 | `tenYearBreakevenInflationPct` | **Optional** |
-| `curve2s30sPct` / `curve5s30sPct` / `curve10s30sPct` | **Downstream derived**; reconciled to short − 30Y when present |
+| `curve2s30sPct` / `curve5s30sPct` / `curve10s30sPct` | **Downstream derived**; reconciled as 30Y nominal yield minus 2Y / 5Y / 10Y nominal yield when the corresponding shorter-maturity observation is present |
 | `mappingStatus` | Must remain `not_final` |
 | Lane / scoring | Display-only Treasury Plumbing; unscored; outside equity `publicSignalCount` |
+
+Canonical curve-spread direction (existing validator contract — not a methodology change):
+
+```text
+curve2s30sPct = thirtyYearNominalYieldPct - twoYearYieldPct
+curve5s30sPct = thirtyYearNominalYieldPct - fiveYearYieldPct
+curve10s30sPct = thirtyYearNominalYieldPct - tenYearYieldPct
+```
+
+Existing 2026-07-01 production artifact example (not new market data): `4.97 - 4.17 = 0.80` (`curve2s30sPct`).
 
 ### 2.4 Current production provenance
 
