@@ -25,6 +25,13 @@ import {
   CFTC_TFF_SYSTEMATIC_ARTIFACT_ID,
   CFTC_TFF_SYSTEMATIC_PARSER_VERSION,
 } from './adapters/cftcTffSocrataMeta';
+import {
+  CFTC_TFF_TREASURY_ADAPTER_ID,
+  CFTC_TFF_TREASURY_ARTIFACT_ID,
+  CFTC_TFF_TREASURY_PARSER_VERSION,
+  CFTC_TFF_TREASURY_SOURCE_LOCATOR,
+  CFTC_TFF_TREASURY_SOURCE_NAME,
+} from './adapters/cftcTffTreasurySocrataMeta';
 
 export {
   GATE_C_ARTIFACT_IDS,
@@ -425,24 +432,22 @@ export const GHOSTFLOW_REFRESH_REGISTRY = [
 
   // --- Treasury display (2) ---
   {
-    artifactId: 'treasuryFuturesPositioningProxy',
+    artifactId: CFTC_TFF_TREASURY_ARTIFACT_ID,
     artifactPath: 'data/ghostflow/artifacts/treasuryFuturesPositioningProxy.v1.json',
     lane: 'treasury_display',
     cadence: 'weekly',
     candidateGroupId: 'cftc_tff_treasury_display',
     acceptanceUnit: 'artifact',
     canonicalSource: {
-      sourceFamilyId: 'cftc_tff_socrata',
-      sourceName:
-        'CFTC Public Reporting Environment — TFF Futures Only (Treasury)',
-      sourceLocator:
-        'https://publicreporting.cftc.gov/Commitments-of-Traders/TFF-Futures-Only/gpe5-46if/about_data',
+      sourceFamilyId: CFTC_TFF_SOURCE_FAMILY_ID,
+      sourceName: CFTC_TFF_TREASURY_SOURCE_NAME,
+      sourceLocator: CFTC_TFF_TREASURY_SOURCE_LOCATOR,
     },
     sourceFormat: 'json_api',
     adapter: {
-      adapterId: 'cftc-tff-treasury-socrata',
-      implementationStatus: 'spike_available',
-      spikeScriptPath: 'scripts/ghostflow/treasury-cftc-pre-spike.ts',
+      adapterId: CFTC_TFF_TREASURY_ADAPTER_ID,
+      implementationStatus: 'implemented',
+      parserVersion: CFTC_TFF_TREASURY_PARSER_VERSION,
     },
     freshnessPolicyId: 'weekly_calendar_v1',
     referenceDateRole: 'lagging_allowed',
