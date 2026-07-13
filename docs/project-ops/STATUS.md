@@ -1,16 +1,16 @@
 # STATUS
 
 ## Current State (GhostFlow — 2026-07-13)
-PR **#134** merged the breadth operator-packet specification on `main` (`c503042`).
-PR **#133** established the breadth-source authorization block; Gate C remains blocked; no provider approved.
+PR **#135** merged the CFTC TFF systematic adapter on `main` (`96852dc`).
+PR **#134** previously merged the breadth operator-packet specification; Gate C remains blocked; no provider approved.
 
-**CFTC TFF systematic adapter implemented** (fixture-driven, unwired):
-- Official CFTC Public Reporting Environment TFF Futures Only (`gpe5-46if`) fetch / parse / normalize
-- Normalizes registered ES / NQ / RTY / VIX contract observations only
-- Basket calculation and pressure mapping remain downstream
-- `systematicFlowProxy` remains display-only; MOCK systematic **62** unchanged
-- No production artifact refresh; adapter not wired to runtime or workflows
+**Shared CFTC Socrata source core extracted** (no behavior change):
+- Reusable transport/parsing/query primitives in `cftcTffSocrataCore.ts` / generic query builder
+- Systematic adapter consumes the shared core; ID/parser version `1.0.0` and behavior unchanged
+- Systematic adapter remains fixture-tested and **unwired**
+- Treasury CFTC (`cftc-tff-treasury-socrata`) remains `spike_available` (next implementation)
 
+No production refresh occurred. No production artifact changed.
 Production GhostFlow state remains unchanged:
 - `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
 - Composite / Passive / Structural: 60 / 53 / 67
@@ -21,13 +21,24 @@ Production GhostFlow state remains unchanged:
 Breadth and Gate C remain blocked. VIX adapter remains unwired.
 
 ## Recommended next work
-1. Implement the Treasury CFTC adapter by reusing the Socrata source boundary **or** implement the FRED Treasury adapter (neither claimed approved/implemented here)
-2. Do **not** wire systematic adapter into production refresh, CLI, or workflows yet
+1. Implement `cftc-tff-treasury-socrata` using the shared CFTC Socrata core
+2. Do **not** wire systematic (or future Treasury) adapters into production refresh, CLI, or workflows yet
 3. Breadth: decide written provider permission **or** licensed SKU investigation (neither approved)
 
 Last updated: 2026-07-13
 
 ---
+
+## Archive — CFTC systematic adapter (2026-07-13)
+PR **#134** merged the breadth operator-packet specification on `main` (`c503042`).
+PR **#133** established the breadth-source authorization block; Gate C remains blocked; no provider approved.
+
+**CFTC TFF systematic adapter implemented** (fixture-driven, unwired):
+- Official CFTC Public Reporting Environment TFF Futures Only (`gpe5-46if`) fetch / parse / normalize
+- Normalizes registered ES / NQ / RTY / VIX contract observations only
+- Basket calculation and pressure mapping remain downstream
+- `systematicFlowProxy` remains display-only; MOCK systematic **62** unchanged
+- No production artifact refresh; adapter not wired to runtime or workflows
 
 ## Archive — Breadth operator packet (2026-07-13)
 PR **#133** merged the breadth-source feasibility decision on `main` (`18ab040`).

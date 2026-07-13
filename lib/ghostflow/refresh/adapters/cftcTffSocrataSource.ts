@@ -30,13 +30,21 @@ export const CFTC_TFF_SYSTEMATIC_QUERY_LIMIT = 500 as const;
 
 export const CFTC_TFF_FUTONLY_VALUE = 'FutOnly' as const;
 
+export interface CftcTffResourceQuerySpec {
+  selectedFields: readonly string[];
+  contractCodes: readonly string[];
+  limit: number;
+}
+
 /**
- * Build the exact deterministic Socrata resource URL for the systematic adapter.
+ * Source-family deterministic Socrata resource URL.
  * Eligibility relative to nowIso / referenceAsOf is owned by normalize — not this query.
  */
-export function buildCftcTffSystematicResourceQueryUrl(): string {
-  const codeList = CFTC_TFF_REGISTERED_CONTRACT_CODES.map((c) => `'${c}'`).join(',');
-  const select = CFTC_TFF_SYSTEMATIC_SELECTED_FIELDS.join(',');
+export function buildCftcTffResourceQueryUrl(
+  spec: CftcTffResourceQuerySpec
+): string {
+  const codeList = spec.contractCodes.map((c) => `'${c}'`).join(',');
+  const select = spec.selectedFields.join(',');
   const where = [
     `futonly_or_combined = '${CFTC_TFF_FUTONLY_VALUE}'`,
     `cftc_contract_market_code in (${codeList})`,
@@ -48,6 +56,18 @@ export function buildCftcTffSystematicResourceQueryUrl(): string {
     `?$select=${encodeURIComponent(select)}` +
     `&$where=${encodeURIComponent(where)}` +
     `&$order=${encodeURIComponent(order)}` +
-    `&$limit=${CFTC_TFF_SYSTEMATIC_QUERY_LIMIT}`
+    `&$limit=${spec.limit}`
   );
+}
+
+/**
+ * Build the exact deterministic Socrata resource URL for the systematic adapter.
+ * Delegates to the shared builder; URL must remain byte-for-byte stable.
+ */
+export function buildCftcTffSystematicResourceQueryUrl(): string {
+  return buildCftcTffResourceQueryUrl({
+    selectedFields: CFTC_TFF_SYSTEMATIC_SELECTED_FIELDS,
+    contractCodes: CFTC_TFF_REGISTERED_CONTRACT_CODES,
+    limit: CFTC_TFF_SYSTEMATIC_QUERY_LIMIT,
+  });
 }

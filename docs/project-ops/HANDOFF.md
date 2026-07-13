@@ -1,6 +1,27 @@
 # HANDOFF
 
 ## Last Session Summary (2026-07-13)
+Starting `main`: `96852dc` (PR **#135** CFTC systematic adapter merged). Extracted shared **CFTC TFF Socrata source core** (transport, cell parsers, hashing, generic deterministic query builder). Systematic adapter refactored to consume the core with **no behavior change** (ID / parser `1.0.0` / query URL / errors / normalized output preserved). Systematic remains unwired. Treasury CFTC remains `spike_available` and is the recommended next implementation. Breadth / Gate C blocked; no provider approved. Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`.
+
+## State of Work
+- Shared CFTC Socrata core extracted; systematic adapter behavior unchanged.
+- CFTC systematic adapter: fixture-tested, registry implemented, production-unwired.
+- VIX adapter remains implemented and unwired.
+- Breadth operator-packet + source-authorization block remain in force; Gate C blocked.
+- Core app remains stable; education section remains live.
+
+## Priority for Next Session
+1) Implement `cftc-tff-treasury-socrata` using the shared CFTC Socrata core
+2) Do not wire systematic/Treasury adapters into CLI/workflows/production writers yet
+3) Breadth: decide written permission vs licensed SKU (neither approved)
+
+## Open Questions
+- Any Treasury-contract selection nuances before implementing the Treasury adapter?
+- When should systematic display refresh become operator-driven vs remain research-only?
+
+---
+
+## Archive — CFTC systematic adapter (2026-07-13)
 Starting `main` for this work: `c503042` (PR **#134** breadth operator packet merged). Implemented fixture-driven **CFTC TFF systematic Socrata adapter** (`cftc-tff-systematic-socrata` → `implemented` / `1.0.0`). Adapter normalizes official ES/NQ/RTY/VIX Futures Only observations only; basket and pressure mapping stay downstream; unwired from runtime/workflows; no production artifact write; MOCK systematic **62** unchanged. Breadth / Gate C remain blocked; no provider approved. Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`.
 
 ## State of Work

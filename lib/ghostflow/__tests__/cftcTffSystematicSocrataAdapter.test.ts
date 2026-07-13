@@ -9,10 +9,26 @@ import path from 'path';
 import {
   CFTC_TFF_SYSTEMATIC_SOCRATA_ADAPTER,
   createCftcTffSystematicSocrataAdapter,
+  defaultCftcTffFetchClient,
   parseCftcTffReportDateCell,
   type CftcTffFetchClient,
   type CftcTffFetchResponse,
 } from '../refresh/adapters/cftcTffSystematicSocrata';
+import {
+  cftcTffSha256Hex,
+  decodeCftcTffUtf8,
+  isCftcTffJsonContentType,
+  parseCftcTffIntegerCell,
+  parseCftcTffPercentCell,
+  parseCftcTffReportDateCell as parseCftcTffReportDateCellFromCore,
+} from '../refresh/adapters/cftcTffSocrataCore';
+import {
+  buildCftcTffResourceQueryUrl,
+  buildCftcTffSystematicResourceQueryUrl,
+  CFTC_TFF_FUTONLY_VALUE,
+  CFTC_TFF_SYSTEMATIC_QUERY_LIMIT,
+  CFTC_TFF_SYSTEMATIC_SELECTED_FIELDS,
+} from '../refresh/adapters/cftcTffSocrataSource';
 import {
   CFTC_TFF_DATASET_ID,
   CFTC_TFF_DATASET_PAGE_LOCATOR,
@@ -26,12 +42,6 @@ import {
   CFTC_TFF_SYSTEMATIC_PARSER_VERSION,
   CFTC_TFF_VIX_CONTEXT_CONTRACT_CODE,
 } from '../refresh/adapters/cftcTffSocrataMeta';
-import {
-  buildCftcTffSystematicResourceQueryUrl,
-  CFTC_TFF_FUTONLY_VALUE,
-  CFTC_TFF_SYSTEMATIC_QUERY_LIMIT,
-  CFTC_TFF_SYSTEMATIC_SELECTED_FIELDS,
-} from '../refresh/adapters/cftcTffSocrataSource';
 import { GHOSTFLOW_REFRESH_REGISTRY } from '../refresh/registry';
 import type { GhostFlowFetchedSource } from '../refresh/types';
 import {
@@ -192,6 +202,34 @@ assert.ok(!/token/i.test(queryUrl));
 assert.ok(!/2026-07-09/.test(queryUrl));
 assert.ok(!/now/i.test(queryUrl));
 
+/** Pre-refactor baseline (PR #135) — must remain byte-for-byte identical. */
+const BASELINE_SYSTEMATIC_QUERY_URL =
+  "https://publicreporting.cftc.gov/resource/gpe5-46if.json?$select=report_date_as_yyyy_mm_dd%2Cyyyy_report_week_ww%2Ccontract_market_name%2Ccftc_contract_market_code%2Cfutonly_or_combined%2Copen_interest_all%2Clev_money_positions_long%2Clev_money_positions_short%2Clev_money_positions_spread%2Cchange_in_lev_money_long%2Cchange_in_lev_money_short%2Cchange_in_lev_money_spread%2Cpct_of_oi_lev_money_long%2Cpct_of_oi_lev_money_short%2Cpct_of_oi_lev_money_spread&$where=futonly_or_combined%20%3D%20'FutOnly'%20AND%20cftc_contract_market_code%20in%20('13874A'%2C'209742'%2C'239742'%2C'1170E1')&$order=report_date_as_yyyy_mm_dd%20DESC%2Ccftc_contract_market_code%20ASC&$limit=500";
+
+assert.strictEqual(queryUrl, BASELINE_SYSTEMATIC_QUERY_URL);
+assert.strictEqual(
+  buildCftcTffSystematicResourceQueryUrl(),
+  buildCftcTffResourceQueryUrl({
+    selectedFields: CFTC_TFF_SYSTEMATIC_SELECTED_FIELDS,
+    contractCodes: CFTC_TFF_REGISTERED_CONTRACT_CODES,
+    limit: CFTC_TFF_SYSTEMATIC_QUERY_LIMIT,
+  })
+);
+assert.strictEqual(
+  buildCftcTffResourceQueryUrl({
+    selectedFields: CFTC_TFF_SYSTEMATIC_SELECTED_FIELDS,
+    contractCodes: CFTC_TFF_REGISTERED_CONTRACT_CODES,
+    limit: CFTC_TFF_SYSTEMATIC_QUERY_LIMIT,
+  }),
+  BASELINE_SYSTEMATIC_QUERY_URL
+);
+
+assert.strictEqual(typeof defaultCftcTffFetchClient, 'function');
+assert.strictEqual(
+  parseCftcTffReportDateCell,
+  parseCftcTffReportDateCellFromCore
+);
+
 // --- Report-date cell parsing (fail-closed on observed Socrata shape) ---
 
 assert.strictEqual(
@@ -218,6 +256,77 @@ for (const invalid of [
     null,
     `expected null for ${invalid}`
   );
+}
+
+// --- Shared core parsing / hashing invariants ---
+
+assert.strictEqual(
+  parseCftcTffIntegerCell('42', { allowNegative: false, requirePositive: true }),
+  42
+);
+assert.strictEqual(
+  parseCftcTffIntegerCell(7, { allowNegative: false, requirePositive: true }),
+  7
+);
+assert.strictEqual(
+  parseCftcTffIntegerCell('0', { allowNegative: false, requirePositive: false }),
+  0
+);
+assert.strictEqual(
+  parseCftcTffIntegerCell('-15', { allowNegative: true, requirePositive: false }),
+  -15
+);
+assert.strictEqual(
+  parseCftcTffIntegerCell('0', { allowNegative: false, requirePositive: true }),
+  null
+);
+assert.strictEqual(
+  parseCftcTffIntegerCell('-1', { allowNegative: false, requirePositive: false }),
+  null
+);
+assert.strictEqual(
+  parseCftcTffIntegerCell('1.5', { allowNegative: false, requirePositive: true }),
+  null
+);
+assert.strictEqual(
+  parseCftcTffIntegerCell('1e2', { allowNegative: false, requirePositive: true }),
+  null
+);
+assert.strictEqual(
+  parseCftcTffIntegerCell('1,000', { allowNegative: false, requirePositive: true }),
+  null
+);
+assert.strictEqual(
+  parseCftcTffIntegerCell('', { allowNegative: false, requirePositive: true }),
+  null
+);
+
+assert.strictEqual(parseCftcTffPercentCell('0'), 0);
+assert.strictEqual(parseCftcTffPercentCell('100'), 100);
+assert.strictEqual(parseCftcTffPercentCell('12.5'), 12.5);
+assert.strictEqual(parseCftcTffPercentCell(50), 50);
+assert.strictEqual(parseCftcTffPercentCell('-0.1'), null);
+assert.strictEqual(parseCftcTffPercentCell('100.1'), null);
+assert.strictEqual(parseCftcTffPercentCell('12%'), null);
+assert.strictEqual(parseCftcTffPercentCell('1e2'), null);
+assert.strictEqual(parseCftcTffPercentCell('10,0'), null);
+assert.strictEqual(parseCftcTffPercentCell(''), null);
+
+assert.strictEqual(isCftcTffJsonContentType(undefined), true);
+assert.strictEqual(isCftcTffJsonContentType(''), true);
+assert.strictEqual(isCftcTffJsonContentType('application/json'), true);
+assert.strictEqual(isCftcTffJsonContentType('application/json; charset=utf-8'), true);
+assert.strictEqual(isCftcTffJsonContentType('text/json'), true);
+assert.strictEqual(isCftcTffJsonContentType('text/html'), false);
+
+{
+  const sample = new TextEncoder().encode('{"ok":true}');
+  assert.strictEqual(
+    cftcTffSha256Hex(sample),
+    createHash('sha256').update(sample).digest('hex')
+  );
+  assert.strictEqual(decodeCftcTffUtf8(sample), '{"ok":true}');
+  assert.strictEqual(decodeCftcTffUtf8(new Uint8Array([0xff, 0xfe, 0xfd])), null);
 }
 
 async function fetched(
