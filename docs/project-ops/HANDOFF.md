@@ -6,7 +6,7 @@ Starting `main`: `51236fb96b15b73c5da095aa6b8dc7b3410148e0` (PR **#140** merged)
 **Findings:**
 - Live smoke (`npm run ghostflow:refresh-report`, `2026-08-25T22:22:19.375Z`): H.15 fails at TCM CSV row **67486** — blank value on `H15/H15/RIFLGFCY02_N.B` / `1962-01-02`
 - Classification: **B — parser omission** (blank cells = missing; not schema drift)
-- Custom TIPS-30 DDP package **depends on BYP** (removed week of **2026-11-09**); preformatted TCM **NOT SPECIFIED**
+- Custom TIPS-30 DDP package is **BYP-exposed** (custom-package mechanism; removal week of **2026-11-09**); continued arbitrary-package URL support after BYP removal not guaranteed; preformatted TCM **NOT SPECIFIED** post-November
 - Release SDMX/XML ZIP verified: all five contract series present at `https://www.federalreserve.gov/releases/h15/data/FRB_h15_xml.zip`
 - Memo: [H15_LIVE_SOURCE_AND_TRANSPORT_INVESTIGATION.md](../ghostflow/H15_LIVE_SOURCE_AND_TRANSPORT_INVESTIGATION.md)
 - **Recommended:** durable Path D (release XML); smallest next PR = parser **1.0.1** blank-as-missing CSV fix

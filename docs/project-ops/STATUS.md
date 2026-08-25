@@ -10,7 +10,7 @@ PR **#140** merged the manual **report-only operator runner** on `main`. Live sm
 - Live reproduction (`2026-08-25T22:22:19.375Z`): `treasuryLongEndIncomeLens` → `source_failed`, `h15_csv_invalid_value`, **TCM package**, parse stage, **row 67486**
 - Exact failure: series `H15/H15/RIFLGFCY02_N.B`, date `1962-01-02`, **blank** value cell (`""`); 3 columns; no quoting
 - Classification: **B — parser omission** (blank pre-inception cells are legitimate Board CSV missing representation; parser accepts `ND` only)
-- **DDP/BYP exposure:** preformatted TCM package **NOT SPECIFIED** for November removal; custom TIPS-30 package **YES** (BYP mechanism; removal week of **2026-11-09**)
+- **DDP/BYP exposure:** preformatted TCM package **NOT SPECIFIED** post-November; custom TIPS-30 package **BYP-exposed** (custom-package mechanism; continued arbitrary-package URL support after BYP removal not guaranteed)
 - **XML feasibility:** release ZIP `https://www.federalreserve.gov/releases/h15/data/FRB_h15_xml.zip` contains all five GhostFlow series; SDMX 1.0; `OBS_STATUS` missing semantics
 - **Recommended durable transport:** release-level SDMX/XML (Path D) before November BYP removal
 - **Smallest next implementation PR:** parser **1.0.1** blank-as-missing CSV fix (interim live unblock); XML migration as follow-up after Bobby review

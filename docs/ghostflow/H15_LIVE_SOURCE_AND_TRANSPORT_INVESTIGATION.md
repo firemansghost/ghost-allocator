@@ -17,7 +17,7 @@ Live operator smoke (`npm run ghostflow:refresh-report -- --artifact treasuryLon
 
 **Classification: B — Parser omission.** Blank value cells are a legitimate Board DDP CSV representation for unavailable pre-inception observations (3,760 such rows on the 2Y series alone). This is not schema drift, malformed source data, or a transport construction bug.
 
-**Transport durability:** The adapter’s **custom single-series TIPS-30 package** (`RIFLGFCY30_XII_N.B` via MD5-hashed `Output.aspx?type=package`) **relies on Build Your Package (BYP)**, scheduled for removal the week of **2026-11-09**. The **preformatted TCM package** is listed separately on the DDP choose page and is **not named** in the BYP removal announcement (**NOT SPECIFIED** for November removal; likely survives until broader DDP retirement).
+**Transport durability:** The adapter’s **custom single-series TIPS-30 package** (`RIFLGFCY30_XII_N.B` via MD5-hashed `Output.aspx?type=package`) is **BYP-exposed** — dependent on the custom-package mechanism scheduled for removal the week of **2026-11-09**. Continued support for the underlying arbitrary-package URL after BYP removal is not guaranteed, so GhostFlow should migrate away from that dependency before November 9. The preformatted TCM package remains separately listed and operational as of 2026-08-25. The Board’s July 16 announcement names BYP for November removal but does not guarantee the post-November lifetime of preformatted DDP packages (**NOT SPECIFIED**).
 
 **Durable recommendation:** Migrate all five GhostFlow series to the Board **release-level SDMX/XML ZIP** at `https://www.federalreserve.gov/releases/h15/data/FRB_h15_xml.zip`. It contains all required and optional series, uses explicit `OBS_STATUS` missing semantics, and is promoted on the release page as the post-BYP path.
 
@@ -140,15 +140,15 @@ Not A (parser defect against documented CSV spec — Board docs emphasize `ND` o
 
 ### A. Preformatted TCM package
 
-| Assessment | **NOT SPECIFIED** (likely **CONFIRMED SURVIVES** until broader DDP retirement) |
-|------------|----------------------------------------------------------------------------------|
-| Evidence | DDP page separates “Build your package” from “Select a preformatted data package”; announcement names BYP only. TCM link remains on choose page as of 2026-08-25. |
+| Assessment | **NOT SPECIFIED** |
+|------------|-------------------|
+| Evidence | The preformatted Treasury Constant Maturities package remains separately listed and operational as of 2026-08-25. The Board’s July 16 announcement names BYP for November removal but does not guarantee the post-November lifetime of preformatted DDP packages. DDP page separates “Build your package” from “Select a preformatted data package”; announcement names BYP only. |
 
 ### B. Custom TIPS-30 package (`RIFLGFCY30_XII_N.B`)
 
-| Assessment | **YES** — relies on BYP/custom-package mechanism |
-|------------|--------------------------------------------------|
-| Evidence | Adapter builds URL via `Output.aspx?type=package&series=<md5 of custom id list>` — same mechanism as BYP custom downloads, not the preformatted TCM link. Will break when BYP is removed unless Board preserves arbitrary MD5 package URLs (not stated). |
+| Assessment | **BYP-exposed** — dependent on custom-package mechanism |
+|------------|--------------------------------------------------------|
+| Evidence | Adapter builds URL via `Output.aspx?type=package&series=<md5 of custom id list>` — same mechanism as BYP custom downloads, not the preformatted TCM link. Continued support for the underlying arbitrary-package URL after BYP removal is not guaranteed, so GhostFlow should migrate away from that dependency before November 9. |
 
 **These facts are independent of the row-67486 failure** (TCM preformatted leg).
 
@@ -228,17 +228,17 @@ Same SDMX family; release ZIP is the Board-promoted post-BYP download on the rel
 | Dimension | Rating |
 |-----------|--------|
 | Technical feasibility | **Blocked** — live parse fails at row 67486 |
-| Source durability | **Poor** — TIPS leg breaks at BYP removal (~2026-11-09) |
+| Source durability | **Poor** — TIPS leg is BYP-exposed; continued arbitrary-package URL support after BYP removal not guaranteed (~2026-11-09) |
 | Semantic compatibility | **Good** — matches current contract when parse succeeds |
 | Implementation complexity | **Low** (no work) |
-| Operational risk | **High** — fail-closed now; scheduled transport loss |
+| Operational risk | **High** — fail-closed now; BYP-exposed transport; post-November support not guaranteed |
 
 ### Path B — Narrow CSV parser fix, keep dual transport
 
 | Dimension | Rating |
 |-----------|--------|
 | Technical feasibility | **Good** — simulated blank-as-missing completes parse; common date 2026-08-24 |
-| Source durability | **Poor** — TIPS custom package still BYP-dependent |
+| Source durability | **Poor** — TIPS custom package remains BYP-exposed; post-November support not guaranteed |
 | Semantic compatibility | **Good** — skipping blanks matches “no observation” intent |
 | Implementation complexity | **Low** — one function, fixture, tests |
 | Operational risk | **Medium** — unblocks smoke but November deadline remains |
@@ -248,7 +248,7 @@ Same SDMX family; release ZIP is the Board-promoted post-BYP download on the rel
 | Dimension | Rating |
 |-----------|--------|
 | Technical feasibility | **Good** |
-| Source durability | **Partial** — TCM survives uncertain period; XML leg durable |
+| Source durability | **Partial** — preformatted TCM post-November lifetime **NOT SPECIFIED**; XML leg Board-promoted |
 | Semantic compatibility | **Good** with reconciliation |
 | Implementation complexity | **Medium-high** — two formats, two hashes, atomic date reconciliation |
 | Operational risk | **Medium** — temporary complexity; two failure modes |
@@ -287,7 +287,7 @@ Same SDMX family; release ZIP is the Board-promoted post-BYP download on the rel
 
 **Immediate unblock (separate small PR):** Path B narrow fix at parser **1.0.1** so the existing CSV adapter and report-only runner can reach deterministic live smoke while XML migration is reviewed and implemented.
 
-Rationale: The live failure is a cheap CSV fix, but **CSV dual transport is not durable** because the TIPS leg requires BYP. The Board explicitly steers BYP users to release-level XML. One ZIP already contains all contract series with explicit missing semantics.
+Rationale: The live failure is a cheap CSV fix, but **CSV dual transport is not durable** because the TIPS leg is BYP-exposed and continued arbitrary-package URL support after BYP removal is not guaranteed. The Board explicitly steers BYP users to release-level XML. One ZIP already contains all contract series with explicit missing semantics.
 
 ---
 
