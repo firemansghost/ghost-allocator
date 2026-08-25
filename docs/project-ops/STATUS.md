@@ -1,11 +1,42 @@
 ﻿# STATUS
 
-## Current State (GhostFlow — 2026-08-25)
-PR **#139** merged the Board H.15 Treasury yields adapter on `main` (`0cf02b9`).
+## Current State (GhostFlow — 2026-08-25, H.15 investigation)
+Starting `main` for this work: `51236fb96b15b73c5da095aa6b8dc7b3410148e0` (PR **#140** merged).
 
-Starting `main` for this work: `0cf02b922baf0f5a6ade38f700dee886f307e4d7`.
+PR **#140** merged the manual **report-only operator runner** on `main`. Live smoke command: `npm run ghostflow:refresh-report`.
 
-PR **#140** branch implements manual **report-only operator runner** for:
+**H.15 live-source investigation completed (docs-only):**
+- Canonical memo: [H15_LIVE_SOURCE_AND_TRANSPORT_INVESTIGATION.md](../ghostflow/H15_LIVE_SOURCE_AND_TRANSPORT_INVESTIGATION.md)
+- Live reproduction (`2026-08-25T22:22:19.375Z`): `treasuryLongEndIncomeLens` → `source_failed`, `h15_csv_invalid_value`, **TCM package**, parse stage, **row 67486**
+- Exact failure: series `H15/H15/RIFLGFCY02_N.B`, date `1962-01-02`, **blank** value cell (`""`); 3 columns; no quoting
+- Classification: **B — parser omission** (blank pre-inception cells are legitimate Board CSV missing representation; parser accepts `ND` only)
+- **DDP/BYP exposure:** preformatted TCM package **NOT SPECIFIED** post-November; custom TIPS-30 package **BYP-exposed** (custom-package mechanism; continued arbitrary-package URL support after BYP removal not guaranteed)
+- **XML feasibility:** release ZIP `https://www.federalreserve.gov/releases/h15/data/FRB_h15_xml.zip` contains all five GhostFlow series; SDMX 1.0; `OBS_STATUS` missing semantics
+- **Recommended durable transport:** release-level SDMX/XML (Path D) before November BYP removal
+- **Smallest next implementation PR:** parser **1.0.1** blank-as-missing CSV fix (interim live unblock); XML migration as follow-up after Bobby review
+- **Production unchanged;** no adapter/registry/parser/transport approval in this investigation
+
+CFTC systematic + Treasury adapters returned `candidate_observation_available` (2026-08-18) in prior PR #140 smoke. H.15 remains blocked until parser/transport work is approved and implemented.
+
+Production GhostFlow state remains unchanged:
+- `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
+- Composite / Passive / Structural: 60 / 53 / 67
+- Band: Elevated Flow Pressure
+- `publicSignalCount`: 13
+- MOCK systematic / retirement / levered: 62 / 58 / 55
+
+VIX remains excluded because Gate C / `marketBreadth` remain blocked.
+
+## Recommended next work
+1. Bobby review of H.15 investigation memo; if approved, implement parser **1.0.1** blank-missing fix, then plan SDMX/XML adapter migration before **2026-11-09**
+2. After H.15 returns to healthy deterministic live smoke, design human-reviewed candidate generation for report-ready non-score-fed observations
+3. Breadth remains blocked pending provider authorization / licensed-source decision. Do not wire VIX or Gate C.
+
+Last updated: 2026-08-25
+
+---
+
+## Archive — Report-only operator runner (2026-08-25)
 - `systematicFlowProxy` (`cftc-tff-systematic-socrata`)
 - `treasuryFuturesPositioningProxy` (`cftc-tff-treasury-socrata`)
 - `treasuryLongEndIncomeLens` (`frb-h15-treasury-yields-csv`)
