@@ -1,6 +1,39 @@
 ﻿# HANDOFF
 
-## Last Session Summary (2026-08-25)
+## Last Session Summary (2026-08-25, H.15 investigation)
+Starting `main`: `51236fb96b15b73c5da095aa6b8dc7b3410148e0` (PR **#140** merged). Completed docs-only **H.15 live source and transport investigation** on branch `docs/ghostflow-h15-live-source-investigation`.
+
+**Findings:**
+- Live smoke (`npm run ghostflow:refresh-report`, `2026-08-25T22:22:19.375Z`): H.15 fails at TCM CSV row **67486** — blank value on `H15/H15/RIFLGFCY02_N.B` / `1962-01-02`
+- Classification: **B — parser omission** (blank cells = missing; not schema drift)
+- Custom TIPS-30 DDP package **depends on BYP** (removed week of **2026-11-09**); preformatted TCM **NOT SPECIFIED**
+- Release SDMX/XML ZIP verified: all five contract series present at `https://www.federalreserve.gov/releases/h15/data/FRB_h15_xml.zip`
+- Memo: [H15_LIVE_SOURCE_AND_TRANSPORT_INVESTIGATION.md](../ghostflow/H15_LIVE_SOURCE_AND_TRANSPORT_INVESTIGATION.md)
+- **Recommended:** durable Path D (release XML); smallest next PR = parser **1.0.1** blank-as-missing CSV fix
+- **No** adapter, registry, transport, or production changes in this investigation
+
+Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`. VIX / Gate C excluded; breadth remains blocked.
+
+## State of Work
+- Report-only operator runner merged (PR **#140**).
+- H.15 investigation complete; live parse still blocked until approved implementation.
+- CFTC adapters healthy in prior smoke; H.15 transport durability concern confirmed (BYP + blank CSV).
+- Breadth operator-packet + source-authorization block remain in force; Gate C blocked.
+- Core app remains stable; education section remains live.
+
+## Priority for Next Session
+1. Bobby review investigation memo; approve parser 1.0.1 fix and/or SDMX migration path
+2. Implement approved H.15 fix(es) before **2026-11-09** BYP removal
+3. Breadth authorization remains separate and blocked; do not wire VIX or Gate C
+
+## Open Questions
+- Approve interim CSV 1.0.1 fix only, or proceed directly to SDMX adapter?
+- Record transport migration in DECISIONS after review?
+- Any requirement to retain dual CSV for provenance comparison during XML cutover?
+
+---
+
+## Archive — Report-only operator runner (2026-08-25)
 Starting `main`: `0cf02b922baf0f5a6ade38f700dee886f307e4d7` (PR **#139** Board H.15 adapter merged). PR **#140** implements manual **report-only operator runner** (`npm run ghostflow:refresh-report`) for three non-score-fed adapters: systematic CFTC, Treasury CFTC, and Board H.15 long-end.
 
 Live smoke (2026-08-25T21:54:54.950Z):
