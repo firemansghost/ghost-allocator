@@ -1,11 +1,11 @@
 ﻿# STATUS
 
-## Current State (GhostFlow â€” 2026-08-25)
+## Current State (GhostFlow — 2026-08-25)
 PR **#139** merged the Board H.15 Treasury yields adapter on `main` (`0cf02b9`).
 
 Starting `main` for this work: `0cf02b922baf0f5a6ade38f700dee886f307e4d7`.
 
-**Manual report-only operator runner implemented** for:
+PR **#140** branch implements manual **report-only operator runner** for:
 - `systematicFlowProxy` (`cftc-tff-systematic-socrata`)
 - `treasuryFuturesPositioningProxy` (`cftc-tff-treasury-socrata`)
 - `treasuryLongEndIncomeLens` (`frb-h15-treasury-yields-csv`)
@@ -15,7 +15,18 @@ Runner behavior:
 - Fetches official sources through existing adapters
 - Builds the existing GhostFlow refresh report (`report_only`, human review required)
 - Writes nothing (no production, candidate, history, score, or reference changes)
-- Cannot generate candidates or change production
+- Requires human review; cannot generate candidates or change production
+
+**Live smoke (`npm run ghostflow:refresh-report`, 2026-08-25T21:54:54.950Z):**
+- `systematicFlowProxy`: `candidate_observation_available` (candidate observation date 2026-08-18)
+- `treasuryFuturesPositioningProxy`: `candidate_observation_available` (candidate observation date 2026-08-18)
+- `treasuryLongEndIncomeLens`: `source_failed` — `h15_csv_invalid_value` at source CSV row 67486
+- Overall report: `partial_with_blocks`; suggested action: `review_candidates_and_investigate_blocks`; exit code 2
+
+This is expected fail-closed runner behavior. The H.15 adapter defect is separate from runner correctness.
+
+**Source-risk note (Board DDP, announced 2026-07-16):**
+On [2026-07-16](https://www.federalreserve.gov/datadownload/Choose.aspx?rel=H15), the Federal Reserve Board announced that **Build Your Package (BYP)** is scheduled for removal during the week of **November 9, 2026**, in preparation for eventual retirement of the Data Download Program (DDP). Users are directed toward FRED or release-level XML downloads. The current H.15 adapter depends on (1) a preformatted Treasury Constant Maturities DDP package and (2) a custom single-series DDP package for `RIFLGFCY30_XII_N.B`. Source transport therefore requires re-evaluation before candidate-generation work proceeds. This announcement is not claimed to have caused the live parse failure above.
 
 VIX remains excluded because Gate C / `marketBreadth` remain blocked.
 
@@ -27,23 +38,23 @@ Production GhostFlow state remains unchanged:
 - MOCK systematic / retirement / levered: 62 / 58 / 55
 
 ## Recommended next work
-1. Design human-reviewed candidate generation for report-ready non-score-fed observations (not implemented)
-2. Breadth: decide written provider permission **or** licensed SKU investigation (neither approved)
-3. Do not wire VIX or Gate C until authorized breadth source exists
+1. Investigate the live Board H.15 adapter failure and re-evaluate the DDP transport in light of the July 16 DDP/BYP retirement announcement. Determine whether the safe path is a narrowly scoped parser correction or migration to the Board release-level XML/SDMX source. Do not change sources or methodology without explicit review.
+2. After H.15 returns to a healthy deterministic live smoke, design human-reviewed candidate generation for report-ready non-score-fed observations.
+3. Breadth remains blocked pending provider authorization / licensed-source decision. Do not wire VIX or Gate C.
 
 Last updated: 2026-08-25
 
 ---
 
-## Archive â€” Board H.15 Treasury adapter (2026-07-13)
+## Archive — Board H.15 Treasury adapter (2026-07-13)
 PR **#138** merged the Treasury long-end source feasibility audit on `main` (`9cf9fa4`).
 
 **Board H.15 Treasury long-end adapter implemented** (fixture-driven, unwired):
-- Canonical source migrated from FRED â†’ Board of Governors H.15 DDP (`frb-h15-treasury-yields-csv` / `1.0.0`)
+- Canonical source migrated from FRED → Board of Governors H.15 DDP (`frb-h15-treasury-yields-csv` / `1.0.0`)
 - Required: 30Y nominal + 30Y inflation-indexed; optional: 2Y / 5Y / 10Y nominal on common date
 - **T10YIE omitted**; no derived breakeven
 - Display-only / unscored / `human_required`; no production artifact writer or workflow wiring
-- DECISIONS records Bobbyâ€™s 2026-07-13 source migration approval
+- DECISIONS records Bobby's 2026-07-13 source migration approval
 - No production artifact refresh; historical FRED provenance in committed JSON unchanged
 
 **Implemented but unwired adapters:**
@@ -69,7 +80,8 @@ Breadth and Gate C remain blocked. VIX / CFTC adapters remain unwired.
 Last updated: 2026-07-13
 
 ---
-## Archive ΓÇö Treasury long-end source audit (2026-07-13)
+
+## Archive — Treasury long-end source audit (2026-07-13)
 PR **#137** merged the CFTC TFF Treasury adapter on `main` (`12ad053`).
 PR **#136** previously merged the shared CFTC Socrata core; PR **#135** the systematic adapter.
 
@@ -79,7 +91,7 @@ PR **#136** previously merged the shared CFTC Socrata core; PR **#135** the syst
 - Recommended direct Board H.15; FRED graph CSV not for production; FRED API retention issues
 - **No** source approved by the audit alone; no registry/artifact change in that PR
 
-## Archive ΓÇö CFTC Treasury adapter (2026-07-13)
+## Archive — CFTC Treasury adapter (2026-07-13)
 PR **#136** merged the shared CFTC Socrata source core on `main` (`70b66f7`).
 PR **#135** previously merged the CFTC systematic adapter.
 
@@ -91,7 +103,7 @@ PR **#135** previously merged the CFTC systematic adapter.
 - No production artifact refresh; adapter not wired to runtime or workflows
 - Systematic adapter unchanged and unwired; FRED Treasury remains `spike_available`
 
-## Archive ΓÇö Shared CFTC Socrata core (2026-07-13)
+## Archive — Shared CFTC Socrata core (2026-07-13)
 PR **#135** merged the CFTC TFF systematic adapter on `main` (`96852dc`).
 PR **#134** previously merged the breadth operator-packet specification; Gate C remains blocked; no provider approved.
 
@@ -101,7 +113,7 @@ PR **#134** previously merged the breadth operator-packet specification; Gate C 
 - Systematic adapter remains fixture-tested and **unwired**
 - Treasury CFTC (`cftc-tff-treasury-socrata`) was still `spike_available` at that point
 
-## Archive ΓÇö CFTC systematic adapter (2026-07-13)
+## Archive — CFTC systematic adapter (2026-07-13)
 PR **#134** merged the breadth operator-packet specification on `main` (`c503042`).
 PR **#133** established the breadth-source authorization block; Gate C remains blocked; no provider approved.
 
@@ -112,12 +124,12 @@ PR **#133** established the breadth-source authorization block; Gate C remains b
 - `systematicFlowProxy` remains display-only; MOCK systematic **62** unchanged
 - No production artifact refresh; adapter not wired to runtime or workflows
 
-## Archive ΓÇö Breadth operator packet (2026-07-13)
+## Archive — Breadth operator packet (2026-07-13)
 PR **#133** merged the breadth-source feasibility decision on `main` (`18ab040`).
 PR **#132** previously merged the CBOE VIX CSV adapter (implemented, **unwired**).
 Breadth operator-packet runbook completed; intake-only; no provider approved; Gate C blocked.
 
-## Archive ΓÇö Education / V1 snapshot (2026-01-21)
+## Archive — Education / V1 snapshot (2026-01-21)
 Ghost Allocator is stable and usable: onboarding + builder flow works, Schwab sleeve logic is clean (Gold and Commodities are always separate), and GhostRegime diagnostics are local-first and usable without production secrets. We are deliberately holding off on BTC parity mismatch investigation for now (watchlist item, not a blocker).
 
 Education section (V1.1) is now live:
@@ -138,14 +150,14 @@ Education section (V1.1) is now live:
 - Docs/checks exist and are Windows/PowerShell-friendly
 - Deployable (builds cleanly)
 
-### V1.1 (Education + trust) Γ£ô COMPLETE
-- /learn hub exists with a guided "Start here" path Γ£ô
-- /learn/457 basics page exists with sourced, conservative explanations Γ£ô
-- /learn/masterclass index exists with curated sequence + category browse + Substack link-outs Γ£ô
-- No UI churn beyond minimal nav/CTA additions needed to surface Learn Γ£ô
-- Masterclass data uses real titles/dates from archive (manual list, no parsing) Γ£ô
-- Validation guardrails for data integrity (dev-time) Γ£ô
-- Fallback links ("Find on Substack") ensure every item has working click path Γ£ô
+### V1.1 (Education + trust) ✓ COMPLETE
+- /learn hub exists with a guided "Start here" path ✓
+- /learn/457 basics page exists with sourced, conservative explanations ✓
+- /learn/masterclass index exists with curated sequence + category browse + Substack link-outs ✓
+- No UI churn beyond minimal nav/CTA additions needed to surface Learn ✓
+- Masterclass data uses real titles/dates from archive (manual list, no parsing) ✓
+- Validation guardrails for data integrity (dev-time) ✓
+- Fallback links ("Find on Substack") ensure every item has working click path ✓
 
 ## Blockers
 - None critical.

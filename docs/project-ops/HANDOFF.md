@@ -1,34 +1,69 @@
 ﻿# HANDOFF
 
 ## Last Session Summary (2026-08-25)
-Starting `main`: `0cf02b922baf0f5a6ade38f700dee886f307e4d7` (PR **#139** Board H.15 adapter merged). Implemented manual **report-only operator runner** (`npm run ghostflow:refresh-report`) for three non-score-fed adapters: systematic CFTC, Treasury CFTC, and Board H.15 long-end. Runner validates current production artifacts, executes existing fetch/parse/normalize adapters, compares observation dates, and feeds the existing offline refresh planner. Writes nothing. VIX / Gate C excluded; breadth remains blocked. Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`.
+Starting `main`: `0cf02b922baf0f5a6ade38f700dee886f307e4d7` (PR **#139** Board H.15 adapter merged). PR **#140** implements manual **report-only operator runner** (`npm run ghostflow:refresh-report`) for three non-score-fed adapters: systematic CFTC, Treasury CFTC, and Board H.15 long-end.
+
+Live smoke (2026-08-25T21:54:54.950Z):
+- CFTC systematic and Treasury sources returned newer candidate observation dates (2026-08-18)
+- H.15 long-end live execution failed closed: `source_failed` with `h15_csv_invalid_value` at source CSV row 67486
+- Overall report: `partial_with_blocks`; exit code 2
+- No production, candidate, or history write occurred
+- Runner behavior is correct; H.15 adapter/source investigation is the immediate next task
+
+**Federal Reserve DDP announcement (2026-07-16):**
+On [2026-07-16](https://www.federalreserve.gov/datadownload/Choose.aspx?rel=H15), the Board announced **Build Your Package (BYP)** removal planned for the week of **2026-11-09**, in preparation for eventual DDP retirement. Users are directed toward FRED or release-level XML downloads. The current H.15 adapter uses a custom DDP package for the required 30Y inflation-indexed series (`RIFLGFCY30_XII_N.B`), so source transport durability must be revisited. No replacement source is approved by this note.
+
+Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`. VIX / Gate C excluded; breadth remains blocked.
 
 ## State of Work
-- Manual operator report path is implemented for the explicit three-artifact allowlist.
-- H.15, CFTC systematic, and CFTC Treasury adapters remain production-unwired.
-- VIX adapter remains implemented and excluded from the operator runner.
+- Report-only operator runner is implemented on PR **#140**.
+- CFTC systematic and Treasury adapters returned newer candidate dates in live smoke.
+- H.15 adapter failed live parse at row 67486; transport durability concern added by July 16 DDP/BYP announcement.
+- No production/candidate/history write occurred; runner fail-closed behavior confirmed.
 - Breadth operator-packet + source-authorization block remain in force; Gate C blocked.
 - Core app remains stable; education section remains live.
 
 ## Priority for Next Session
-1. Design human-reviewed candidate generation for report-ready non-score-fed observations (not scheduled automation)
-2. Breadth: decide written permission vs licensed SKU (neither approved)
-3. Do not wire VIX, Gate C, or production writers without explicit approval
+1. H.15 live-source / parser / transport investigation (including DDP/BYP retirement implications)
+2. Candidate-generation design only after H.15 returns to a healthy deterministic live smoke
+3. Breadth authorization remains separate and blocked; do not wire VIX or Gate C
 
 ## Open Questions
-- What candidate-generation approval workflow should follow operator reports?
-- When should display adapters move from report-only to durable candidate artifacts?
-
+- What exact value/row shape triggered `h15_csv_invalid_value` at row 67486?
+- Is the defect a valid historical sentinel/format case or actual schema drift?
+- Can the existing CSV transport survive the November BYP removal?
+- Should the canonical Board transport move to release-level SDMX/XML?
 
 ---
 
-## Archive ΓÇö Treasury long-end source audit (2026-07-13)
+## Archive — Board H.15 adapter (2026-07-13)
+Starting `main`: `9cf9fa4` (PR **#138** Treasury long-end source audit merged). Implemented fixture-driven **Board H.15 Treasury yields adapter** (`frb-h15-treasury-yields-csv` → `implemented` / `1.0.0`) after Bobby approved migrating `treasuryLongEndIncomeLens` off FRED. Dual DDP packages: official TCM + `RIFLGFCY30_XII_N.B`. Required 30Y nom + 30Y real; optional 2/5/10Y; **T10YIE omitted** (no derived breakeven). Unwired; no production write. DECISIONS appended. CFTC systematic/Treasury + VIX remain unwired. Breadth / Gate C blocked. Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`.
+
+## State of Work
+- Long-end H.15 adapter: fixture-tested, registry implemented, production-unwired.
+- Source decision recorded; FRED graph CSV / API not production transports for this artifact.
+- Treasury CFTC + systematic + VIX adapters remain implemented and unwired.
+- Breadth operator-packet + source-authorization block remain in force; Gate C blocked.
+- Core app remains stable; education section remains live.
+
+## Priority for Next Session
+1) Do not wire H.15 / CFTC / VIX adapters into CLI/workflows/production writers yet
+2) Breadth: decide written permission vs licensed SKU (neither approved)
+3) Optional: human-approved artifact refresh path using H.15 (separate from this adapter PR)
+
+## Open Questions
+- When should display adapters become operator-driven vs remain research/fixture-only?
+- Later breakeven posture: omit permanently, derived H.15, or FRED under written permission?
+
+---
+
+## Archive — Treasury long-end source audit (2026-07-13)
 Starting `main`: `12ad053` (PR **#137** CFTC Treasury adapter merged). Docs-only **Treasury long-end source feasibility / authorization audit** for `treasuryLongEndIncomeLens`: [TREASURY_LONG_END_SOURCE_FEASIBILITY.md](../ghostflow/TREASURY_LONG_END_SOURCE_FEASIBILITY.md). Verdict: prefer direct Board H.15; do not promote `fredgraph.csv`; FRED API permission-required for retention/history. No registry/artifact/score change in that PR.
 
-## Archive ΓÇö CFTC Treasury adapter (2026-07-13)
-Starting `main`: `70b66f7` (PR **#136** shared CFTC Socrata core merged). Implemented fixture-driven **CFTC TFF Treasury Socrata adapter** (`cftc-tff-treasury-socrata` ΓåÆ `implemented` / `1.0.0`) reusing the shared core. Four standard Treasury contracts are required core; two Ultra contracts remain optional context (missing optional ΓåÆ review issue). Adapter normalizes raw observations only; no net/gross/direction/basket/score. Unwired; no production write. Systematic unchanged/unwired; FRED Treasury remains `spike_available`. Breadth / Gate C blocked. Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`.
+## Archive — CFTC Treasury adapter (2026-07-13)
+Starting `main`: `70b66f7` (PR **#136** shared CFTC Socrata core merged). Implemented fixture-driven **CFTC TFF Treasury Socrata adapter** (`cftc-tff-treasury-socrata` → `implemented` / `1.0.0`) reusing the shared core. Four standard Treasury contracts are required core; two Ultra contracts remain optional context (missing optional → review issue). Adapter normalizes raw observations only; no net/gross/direction/basket/score. Unwired; no production write. Systematic unchanged/unwired; FRED Treasury remains `spike_available`. Breadth / Gate C blocked. Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`.
 
-## Archive ΓÇö Shared CFTC Socrata core (2026-07-13)
+## Archive — Shared CFTC Socrata core (2026-07-13)
 Starting `main`: `96852dc` (PR **#135** CFTC systematic adapter merged). Extracted shared **CFTC TFF Socrata source core** (transport, cell parsers, hashing, generic deterministic query builder). Systematic adapter refactored to consume the core with **no behavior change** (ID / parser `1.0.0` / query URL / errors / normalized output preserved). Systematic remains unwired. Treasury CFTC remains `spike_available` and is the recommended next implementation. Breadth / Gate C blocked; no provider approved. Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`.
 
 ## State of Work
@@ -49,8 +84,8 @@ Starting `main`: `96852dc` (PR **#135** CFTC systematic adapter merged). Extract
 
 ---
 
-## Archive ΓÇö CFTC systematic adapter (2026-07-13)
-Starting `main` for this work: `c503042` (PR **#134** breadth operator packet merged). Implemented fixture-driven **CFTC TFF systematic Socrata adapter** (`cftc-tff-systematic-socrata` ΓåÆ `implemented` / `1.0.0`). Adapter normalizes official ES/NQ/RTY/VIX Futures Only observations only; basket and pressure mapping stay downstream; unwired from runtime/workflows; no production artifact write; MOCK systematic **62** unchanged. Breadth / Gate C remain blocked; no provider approved. Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`.
+## Archive — CFTC systematic adapter (2026-07-13)
+Starting `main` for this work: `c503042` (PR **#134** breadth operator packet merged). Implemented fixture-driven **CFTC TFF systematic Socrata adapter** (`cftc-tff-systematic-socrata` → `implemented` / `1.0.0`). Adapter normalizes official ES/NQ/RTY/VIX Futures Only observations only; basket and pressure mapping stay downstream; unwired from runtime/workflows; no production artifact write; MOCK systematic **62** unchanged. Breadth / Gate C remain blocked; no provider approved. Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`.
 
 ## State of Work
 - CFTC systematic adapter: fixture-tested, registry implemented, production-unwired.
@@ -69,7 +104,7 @@ Starting `main` for this work: `c503042` (PR **#134** breadth operator packet me
 
 ---
 
-## Archive ΓÇö Breadth operator packet (2026-07-13)
+## Archive — Breadth operator packet (2026-07-13)
 PR **#133** is on `main` (`18ab040`). Completed docs-only **breadth operator-packet** specification and reconciled stale operator docs: [BREADTH_ARTIFACT_RUNBOOK.md](../ghostflow/BREADTH_ARTIFACT_RUNBOOK.md), [MANUAL_REFRESH_CHECKLIST.md](../ghostflow/MANUAL_REFRESH_CHECKLIST.md), [REFERENCE_DATE_AND_OPERATOR_POLICY.md](../ghostflow/REFERENCE_DATE_AND_OPERATOR_POLICY.md). Packet is intake-only; no provider approved; production breadth refresh and Gate C remain blocked. VIX adapter remains unwired. Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`.
 
 ## State of Work
@@ -89,7 +124,7 @@ PR **#133** is on `main` (`18ab040`). Completed docs-only **breadth operator-pac
 
 ---
 
-## Archive ΓÇö Education session (2026-01-21)
+## Archive — Education session (2026-01-21)
 Added "457(b) in 5 Minutes" quick reference to education section:
 - Created reusable component (components/learn/457InFiveMinutes.tsx) with scannable format
 - Added prominent section to /learn/457 page (positioned after header, before longer content)
