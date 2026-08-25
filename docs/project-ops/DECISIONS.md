@@ -1,5 +1,28 @@
 # DECISIONS
 
+## 2026-08-25 — GhostFlow implemented display/Treasury adapters become operator-reportable
+Choice:
+- Permit a manual report-only operator runner for the explicitly approved implemented non-score-fed adapters:
+  - systematicFlowProxy
+  - treasuryFuturesPositioningProxy
+  - treasuryLongEndIncomeLens
+- The runner may fetch, parse, normalize, compare observation dates, and produce review reports.
+- The runner may not write production artifacts, generate durable candidates, update history, change scores, change GHOSTFLOW_REFERENCE_AS_OF, open PRs, or run from a workflow.
+- VIX remains excluded because Gate C remains atomic with marketBreadth.
+- Adding another artifact to the operator allowlist requires an explicit code change and review; registry status alone must not silently widen runner scope.
+
+Why:
+- The source adapters are now fixture-tested and implemented.
+- Operators need a controlled way to see whether official sources contain newer valid observations before candidate-generation automation exists.
+- Keeping reporting separate from writing preserves the human approval boundary and fail-closed behavior.
+
+Consequences:
+- Source observations can be inspected through one manual command.
+- Production remains unchanged until a separate candidate-generation and approval path is explicitly implemented.
+- Gate C and breadth remain blocked and untouched.
+
+---
+
 ## 2026-07-13 — Treasury Long-End Income Lens canonical source → Board H.15
 Choice:
 - Migrate `treasuryLongEndIncomeLens` canonical production source from FRED to the **Board of Governors H.15 Data Download Program**.

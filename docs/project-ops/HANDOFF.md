@@ -1,6 +1,42 @@
-# HANDOFF
+﻿# HANDOFF
 
-## Last Session Summary (2026-07-13)
+## Last Session Summary (2026-08-25)
+Starting `main`: `0cf02b922baf0f5a6ade38f700dee886f307e4d7` (PR **#139** Board H.15 adapter merged). PR **#140** implements manual **report-only operator runner** (`npm run ghostflow:refresh-report`) for three non-score-fed adapters: systematic CFTC, Treasury CFTC, and Board H.15 long-end.
+
+Live smoke (2026-08-25T21:54:54.950Z):
+- CFTC systematic and Treasury sources returned newer candidate observation dates (2026-08-18)
+- H.15 long-end live execution failed closed: `source_failed` with `h15_csv_invalid_value` at source CSV row 67486
+- Overall report: `partial_with_blocks`; exit code 2
+- No production, candidate, or history write occurred
+- Runner behavior is correct; H.15 adapter/source investigation is the immediate next task
+
+**Federal Reserve DDP announcement (2026-07-16):**
+On [2026-07-16](https://www.federalreserve.gov/datadownload/Choose.aspx?rel=H15), the Board announced **Build Your Package (BYP)** removal planned for the week of **2026-11-09**, in preparation for eventual DDP retirement. Users are directed toward FRED or release-level XML downloads. The current H.15 adapter uses a custom DDP package for the required 30Y inflation-indexed series (`RIFLGFCY30_XII_N.B`), so source transport durability must be revisited. No replacement source is approved by this note.
+
+Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`. VIX / Gate C excluded; breadth remains blocked.
+
+## State of Work
+- Report-only operator runner is implemented on PR **#140**.
+- CFTC systematic and Treasury adapters returned newer candidate dates in live smoke.
+- H.15 adapter failed live parse at row 67486; transport durability concern added by July 16 DDP/BYP announcement.
+- No production/candidate/history write occurred; runner fail-closed behavior confirmed.
+- Breadth operator-packet + source-authorization block remain in force; Gate C blocked.
+- Core app remains stable; education section remains live.
+
+## Priority for Next Session
+1. H.15 live-source / parser / transport investigation (including DDP/BYP retirement implications)
+2. Candidate-generation design only after H.15 returns to a healthy deterministic live smoke
+3. Breadth authorization remains separate and blocked; do not wire VIX or Gate C
+
+## Open Questions
+- What exact value/row shape triggered `h15_csv_invalid_value` at row 67486?
+- Is the defect a valid historical sentinel/format case or actual schema drift?
+- Can the existing CSV transport survive the November BYP removal?
+- Should the canonical Board transport move to release-level SDMX/XML?
+
+---
+
+## Archive — Board H.15 adapter (2026-07-13)
 Starting `main`: `9cf9fa4` (PR **#138** Treasury long-end source audit merged). Implemented fixture-driven **Board H.15 Treasury yields adapter** (`frb-h15-treasury-yields-csv` → `implemented` / `1.0.0`) after Bobby approved migrating `treasuryLongEndIncomeLens` off FRED. Dual DDP packages: official TCM + `RIFLGFCY30_XII_N.B`. Required 30Y nom + 30Y real; optional 2/5/10Y; **T10YIE omitted** (no derived breakeven). Unwired; no production write. DECISIONS appended. CFTC systematic/Treasury + VIX remain unwired. Breadth / Gate C blocked. Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`.
 
 ## State of Work

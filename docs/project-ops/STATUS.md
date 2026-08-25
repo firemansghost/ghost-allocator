@@ -1,6 +1,52 @@
-# STATUS
+﻿# STATUS
 
-## Current State (GhostFlow — 2026-07-13)
+## Current State (GhostFlow — 2026-08-25)
+PR **#139** merged the Board H.15 Treasury yields adapter on `main` (`0cf02b9`).
+
+Starting `main` for this work: `0cf02b922baf0f5a6ade38f700dee886f307e4d7`.
+
+PR **#140** branch implements manual **report-only operator runner** for:
+- `systematicFlowProxy` (`cftc-tff-systematic-socrata`)
+- `treasuryFuturesPositioningProxy` (`cftc-tff-treasury-socrata`)
+- `treasuryLongEndIncomeLens` (`frb-h15-treasury-yields-csv`)
+
+Runner behavior:
+- Reads current production artifacts only for validated date summaries
+- Fetches official sources through existing adapters
+- Builds the existing GhostFlow refresh report (`report_only`, human review required)
+- Writes nothing (no production, candidate, history, score, or reference changes)
+- Requires human review; cannot generate candidates or change production
+
+**Live smoke (`npm run ghostflow:refresh-report`, 2026-08-25T21:54:54.950Z):**
+- `systematicFlowProxy`: `candidate_observation_available` (candidate observation date 2026-08-18)
+- `treasuryFuturesPositioningProxy`: `candidate_observation_available` (candidate observation date 2026-08-18)
+- `treasuryLongEndIncomeLens`: `source_failed` — `h15_csv_invalid_value` at source CSV row 67486
+- Overall report: `partial_with_blocks`; suggested action: `review_candidates_and_investigate_blocks`; exit code 2
+
+This is expected fail-closed runner behavior. The H.15 adapter defect is separate from runner correctness.
+
+**Source-risk note (Board DDP, announced 2026-07-16):**
+On [2026-07-16](https://www.federalreserve.gov/datadownload/Choose.aspx?rel=H15), the Federal Reserve Board announced that **Build Your Package (BYP)** is scheduled for removal during the week of **November 9, 2026**, in preparation for eventual retirement of the Data Download Program (DDP). Users are directed toward FRED or release-level XML downloads. The current H.15 adapter depends on (1) a preformatted Treasury Constant Maturities DDP package and (2) a custom single-series DDP package for `RIFLGFCY30_XII_N.B`. Source transport therefore requires re-evaluation before candidate-generation work proceeds. This announcement is not claimed to have caused the live parse failure above.
+
+VIX remains excluded because Gate C / `marketBreadth` remain blocked.
+
+Production GhostFlow state remains unchanged:
+- `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
+- Composite / Passive / Structural: 60 / 53 / 67
+- Band: Elevated Flow Pressure
+- `publicSignalCount`: 13
+- MOCK systematic / retirement / levered: 62 / 58 / 55
+
+## Recommended next work
+1. Investigate the live Board H.15 adapter failure and re-evaluate the DDP transport in light of the July 16 DDP/BYP retirement announcement. Determine whether the safe path is a narrowly scoped parser correction or migration to the Board release-level XML/SDMX source. Do not change sources or methodology without explicit review.
+2. After H.15 returns to a healthy deterministic live smoke, design human-reviewed candidate generation for report-ready non-score-fed observations.
+3. Breadth remains blocked pending provider authorization / licensed-source decision. Do not wire VIX or Gate C.
+
+Last updated: 2026-08-25
+
+---
+
+## Archive — Board H.15 Treasury adapter (2026-07-13)
 PR **#138** merged the Treasury long-end source feasibility audit on `main` (`9cf9fa4`).
 
 **Board H.15 Treasury long-end adapter implemented** (fixture-driven, unwired):
@@ -8,7 +54,7 @@ PR **#138** merged the Treasury long-end source feasibility audit on `main` (`9c
 - Required: 30Y nominal + 30Y inflation-indexed; optional: 2Y / 5Y / 10Y nominal on common date
 - **T10YIE omitted**; no derived breakeven
 - Display-only / unscored / `human_required`; no production artifact writer or workflow wiring
-- DECISIONS records Bobby’s 2026-07-13 source migration approval
+- DECISIONS records Bobby's 2026-07-13 source migration approval
 - No production artifact refresh; historical FRED provenance in committed JSON unchanged
 
 **Implemented but unwired adapters:**
