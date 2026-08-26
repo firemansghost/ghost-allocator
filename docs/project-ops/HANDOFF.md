@@ -1,6 +1,34 @@
 ﻿# HANDOFF
 
-## Last Session Summary (2026-08-26, H.15 SDMX/XML transport implemented)
+## Last Session Summary (2026-08-26, candidate-generation design)
+Starting `main`: `ae6fbf14a25e5e898d0874358bed17b26ba28c50` (PRs **#140–#144** merged). Authored read-only candidate-generation design memo for operator-ready artifacts (`systematicFlowProxy`, `treasuryFuturesPositioningProxy`, `treasuryLongEndIncomeLens`). Defines review envelope contract, mapper pipeline, validator reuse, diff/idempotency, gitignored `tmp/ghostflow/candidates/` storage, CLI shape, promotion boundary, and implementation PR sequence. **No code, no production writes, no DECISIONS changes.** Report-only operator runner unchanged.
+
+Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`. VIX / Gate C excluded; breadth remains blocked.
+
+## State of Work
+- Report-only operator runner merged (PR **#140**).
+- H.15 investigation merged (PR **#141**).
+- CSV blank-as-missing parser **1.0.1** merged (PR **#142**).
+- H.15 SDMX transport decision (PR **#143**) and implementation/cutover (PR **#144**) merged to `main`.
+- Candidate-generation **design** complete; implementation not started.
+- Breadth / Gate C blocked; no VIX wiring.
+- Core app remains stable; education section remains live.
+
+## Priority for Next Session
+1. **PR A:** Candidate types + pure artifact mappers + fixture tests (per [CANDIDATE_GENERATION_DESIGN.md](../ghostflow/CANDIDATE_GENERATION_DESIGN.md))
+2. **PR B:** Generator + diff + `ghostflow:generate-candidate` CLI
+3. Promotion command requires separate DECISIONS approval before implementation
+4. Breadth authorization remains separate and blocked; do not wire VIX or Gate C
+
+## Open Questions
+- Long-end `seriesDefinition` / production `source` block migration for Board SDMX candidates?
+- Same-date source revision promotion policy?
+- `dataQuality` enum for automated vs manual verification label?
+- Promotion command authorization (DECISIONS entry)?
+
+---
+
+## Archive — H.15 SDMX/XML transport implemented (2026-08-26)
 Starting `main`: `3f63fdf27176dc5fabb4b15c8395200d10c9c931` (PRs **#140–#143**). Implemented and cut over `treasuryLongEndIncomeLens` active transport from dual Board H.15 DDP CSV to release-level SDMX/XML ZIP (`FRB_h15_xml.zip`). New adapter `frb-h15-treasury-yields-sdmx` parser **1.0.0**; registry + operator runner updated; CSV **1.0.1** retained without automatic fallback. ZIP via narrow in-memory local-header reader + `node:zlib`; XML via deterministic SDMX compact scanner — **no new dependencies**. Live CSV/XML parity OK at `2026-08-24`. Live smokes healthy (H.15-only + full runner, exit 0). DECISIONS unchanged (PR **#143** approval already recorded). Production artifacts, scores, MOCK, reference date, and candidate generation unchanged.
 
 Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`. VIX / Gate C excluded; breadth remains blocked.

@@ -1,6 +1,40 @@
 ﻿# STATUS
 
-## Current State (GhostFlow — 2026-08-26, H.15 SDMX/XML transport implemented)
+## Current State (GhostFlow — 2026-08-26, candidate-generation design)
+Starting `main` for this work: `ae6fbf14a25e5e898d0874358bed17b26ba28c50` (includes PRs **#140–#144** merged).
+
+**Candidate-generation architecture design complete (branch `docs/ghostflow-candidate-generation-design`):**
+- Design memo: [CANDIDATE_GENERATION_DESIGN.md](../ghostflow/CANDIDATE_GENERATION_DESIGN.md)
+- Scope: operator-ready artifacts only — `systematicFlowProxy`, `treasuryFuturesPositioningProxy`, `treasuryLongEndIncomeLens`
+- Proposes typed review envelope (metadata + validated `proposedArtifact`), gitignored output under `tmp/ghostflow/candidates/`, artifact-specific pure mappers, production validator reuse, deterministic diff/idempotency
+- **Does not authorize** production writes, automatic promotion, or candidate commits
+- Report-only operator runner (`ghostflow:refresh-report`) behavior unchanged
+
+**PR #144 merged to `main` (H.15 SDMX/XML transport):**
+- Active transport for `treasuryLongEndIncomeLens` → Board release-level SDMX/XML ZIP
+- Adapter `frb-h15-treasury-yields-sdmx` parser **1.0.0**; CSV **1.0.1** retained without runtime fallback
+- Final scanner hardening: dataset-bound parsing, self-closing obs tags, exact attribute matching
+
+Production GhostFlow state remains unchanged:
+- `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
+- Composite / Passive / Structural: 60 / 53 / 67
+- Band: Elevated Flow Pressure
+- `publicSignalCount`: 13
+- MOCK systematic / retirement / levered: 62 / 58 / 55
+
+VIX remains excluded because Gate C / `marketBreadth` remain blocked.
+
+## Recommended next work
+1. **PR A:** Implement candidate types + artifact mappers + tests (see design memo §20)
+2. **PR B:** Candidate generator + diff + `ghostflow:generate-candidate` CLI
+3. Promotion command (PR C) blocked pending separate DECISIONS approval
+4. Breadth remains blocked pending provider authorization / licensed-source decision. Do not wire VIX or Gate C.
+
+Last updated: 2026-08-26
+
+---
+
+## Archive — H.15 SDMX/XML transport implemented (2026-08-26)
 Starting `main` for this work: `3f63fdf27176dc5fabb4b15c8395200d10c9c931` (includes PRs **#140–#143**).
 
 **H.15 SDMX/XML transport cutover complete (branch `feat/ghostflow-h15-sdmx`):**
