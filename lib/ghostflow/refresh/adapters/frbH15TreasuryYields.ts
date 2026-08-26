@@ -12,6 +12,11 @@
 import { createHash } from 'crypto';
 import { parse as parseCsv } from 'csv-parse/sync';
 import { isValidCalendarDate, isValidIsoTimestamp } from '../dateValidation';
+import {
+  normalizeFrbH15TreasuryYields,
+  type FrbH15NormalizeObservationRow,
+  type FrbH15TreasuryNormalizedFields,
+} from './frbH15TreasuryYieldsNormalize';
 import type {
   GhostFlowFetchContext,
   GhostFlowFetchedSource,
@@ -62,21 +67,12 @@ const REGISTERED_SET = new Set<string>([
   ...FRB_H15_OPTIONAL_SERIES_UNIQUE_IDS,
 ]);
 
-export interface FrbH15ObservationRow {
-  seriesUniqueId: FrbH15RegisteredSeriesUniqueId;
-  observationAsOf: string;
-  valuePct: number;
+export interface FrbH15ObservationRow extends FrbH15NormalizeObservationRow {
   sourcePackage: 'tcm' | 'tips30';
   sourceLine: number;
 }
 
-export interface FrbH15TreasuryNormalizedFields {
-  thirtyYearNominalYieldPct: number;
-  thirtyYearTipsRealYieldPct: number;
-  twoYearYieldPct?: number;
-  fiveYearYieldPct?: number;
-  tenYearYieldPct?: number;
-}
+export type { FrbH15TreasuryNormalizedFields } from './frbH15TreasuryYieldsNormalize';
 
 export interface FrbH15FetchedPackages {
   treasuryConstantMaturitiesCsv: string;
@@ -329,17 +325,6 @@ function parseSeriesListPackage(
   return { ok: true, value: rows, issues: [] };
 }
 
-const FIELD_BY_SERIES: Record<
-  FrbH15RegisteredSeriesUniqueId,
-  keyof FrbH15TreasuryNormalizedFields
-> = {
-  'H15/H15/RIFLGFCY30_N.B': 'thirtyYearNominalYieldPct',
-  'H15/H15/RIFLGFCY30_XII_N.B': 'thirtyYearTipsRealYieldPct',
-  'H15/H15/RIFLGFCY02_N.B': 'twoYearYieldPct',
-  'H15/H15/RIFLGFCY05_N.B': 'fiveYearYieldPct',
-  'H15/H15/RIFLGFCY10_N.B': 'tenYearYieldPct',
-};
-
 export function createFrbH15TreasuryYieldsAdapter(
   options: FrbH15TreasuryYieldsAdapterOptions = {}
 ): GhostFlowSourceAdapter<
@@ -487,154 +472,14 @@ export function createFrbH15TreasuryYieldsAdapter(
       source: GhostFlowParsedSource<readonly FrbH15ObservationRow[]>,
       context: GhostFlowNormalizeContext
     ): GhostFlowStageResult<GhostFlowNormalizedObservation<FrbH15TreasuryNormalizedFields>> {
-      if (!isValidIsoTimestamp(context.nowIso)) {
-        return fail(
-          'normalize',
-          'h15_normalize_invalid_now',
-          'Normalize context.nowIso must be a valid ISO timestamp'
-        );
-      }
-
-      const nowDate = new Date(context.nowIso).toISOString().slice(0, 10);
-      if (!isValidCalendarDate(nowDate)) {
-        return fail(
-          'normalize',
-          'h15_normalize_invalid_now',
-          'Normalize context.nowIso must contain a valid UTC calendar date'
-        );
-      }
-
-      let ceiling = nowDate;
-      if (context.referenceAsOf !== undefined) {
-        if (!isValidCalendarDate(context.referenceAsOf)) {
-          return fail(
-            'normalize',
-            'h15_normalize_invalid_reference_ceiling',
-            'Normalize context.referenceAsOf must be a real YYYY-MM-DD calendar date'
-          );
-        }
-        ceiling =
-          context.referenceAsOf < nowDate ? context.referenceAsOf : nowDate;
-      }
-
-      for (const row of source.parsed) {
-        if (row.observationAsOf > nowDate) {
-          return fail(
-            'normalize',
-            'h15_normalize_future_observation',
-            `Board H.15 observation ${row.observationAsOf} is after nowIso UTC date ${nowDate}`
-          );
-        }
-      }
-
-      const bySeriesDate = new Map<string, number>();
-      for (const row of source.parsed) {
-        if (row.observationAsOf > ceiling) continue;
-        bySeriesDate.set(`${row.seriesUniqueId}|${row.observationAsOf}`, row.valuePct);
-      }
-
-      const requiredDates: string[][] = FRB_H15_REQUIRED_SERIES_UNIQUE_IDS.map((id) => {
-        const dates: string[] = [];
-        for (const key of bySeriesDate.keys()) {
-          if (key.startsWith(`${id}|`)) {
-            dates.push(key.slice(id.length + 1));
-          }
-        }
-        return dates;
+      return normalizeFrbH15TreasuryYields({
+        parsed: source.parsed,
+        sourceMetadata: source.sourceMetadata,
+        context,
+        artifactId: FRB_H15_ARTIFACT_ID,
+        adapterId: FRB_H15_ADAPTER_ID,
+        parserVersion: FRB_H15_PARSER_VERSION,
       });
-
-      if (requiredDates.some((d) => d.length === 0)) {
-        return fail(
-          'normalize',
-          'h15_normalize_no_eligible_observation',
-          `No Board H.15 required-series observation on or before ceiling ${ceiling}`
-        );
-      }
-
-      const common = new Set(requiredDates[0]!);
-      for (let i = 1; i < requiredDates.length; i++) {
-        const next = new Set(requiredDates[i]!);
-        for (const d of [...common]) {
-          if (!next.has(d)) common.delete(d);
-        }
-      }
-
-      if (common.size === 0) {
-        return fail(
-          'normalize',
-          'h15_normalize_no_common_date',
-          'No common Board H.15 observation date across required series'
-        );
-      }
-
-      let asOf: string | null = null;
-      for (const d of common) {
-        if (asOf === null || d > asOf) asOf = d;
-      }
-      if (!asOf) {
-        return fail(
-          'normalize',
-          'h15_normalize_no_common_date',
-          'No common Board H.15 observation date across required series'
-        );
-      }
-
-      const thirtyYearNominalYieldPct = bySeriesDate.get(
-        `H15/H15/RIFLGFCY30_N.B|${asOf}`
-      );
-      const thirtyYearTipsRealYieldPct = bySeriesDate.get(
-        `H15/H15/RIFLGFCY30_XII_N.B|${asOf}`
-      );
-      if (
-        thirtyYearNominalYieldPct === undefined ||
-        thirtyYearTipsRealYieldPct === undefined
-      ) {
-        return fail(
-          'normalize',
-          'h15_normalize_incomplete_required',
-          `Required Board H.15 yields incomplete on ${asOf}`
-        );
-      }
-
-      const fields: FrbH15TreasuryNormalizedFields = {
-        thirtyYearNominalYieldPct,
-        thirtyYearTipsRealYieldPct,
-      };
-
-      for (const id of FRB_H15_OPTIONAL_SERIES_UNIQUE_IDS) {
-        const v = bySeriesDate.get(`${id}|${asOf}`);
-        if (v === undefined) continue;
-        const field = FIELD_BY_SERIES[id as FrbH15OptionalSeriesUniqueId];
-        fields[field] = v;
-      }
-
-      // Defensive: adapter must never emit breakeven (methodology not approved).
-      if ('tenYearBreakevenInflationPct' in (fields as object)) {
-        return fail(
-          'normalize',
-          'h15_normalize_breakeven_forbidden',
-          'Board H.15 adapter must not emit tenYearBreakevenInflationPct'
-        );
-      }
-
-      return {
-        ok: true,
-        value: {
-          artifactId: FRB_H15_ARTIFACT_ID,
-          observationAsOf: asOf,
-          fields,
-          provenance: {
-            sourceId: source.sourceMetadata.sourceId,
-            sourceLocator: source.sourceMetadata.sourceLocator,
-            retrievedAt: source.sourceMetadata.retrievedAt,
-            observationAsOf: asOf,
-            contentSha256: source.sourceMetadata.contentSha256,
-            adapterId: FRB_H15_ADAPTER_ID,
-            parserVersion: FRB_H15_PARSER_VERSION,
-          },
-        },
-        issues: [],
-      };
     },
   };
 }

@@ -33,13 +33,13 @@ import {
   CFTC_TFF_TREASURY_SOURCE_NAME,
 } from './adapters/cftcTffTreasurySocrataMeta';
 import {
-  FRB_H15_ADAPTER_ID,
-  FRB_H15_ARTIFACT_ID,
-  FRB_H15_PARSER_VERSION,
-  FRB_H15_SOURCE_FAMILY_ID,
-  FRB_H15_SOURCE_LOCATOR,
-  FRB_H15_SOURCE_NAME,
-} from './adapters/frbH15TreasuryYieldsMeta';
+  FRB_H15_SDMX_ADAPTER_ID,
+  FRB_H15_SDMX_ARTIFACT_ID,
+  FRB_H15_SDMX_PARSER_VERSION,
+  FRB_H15_SDMX_SOURCE_FAMILY_ID,
+  FRB_H15_SDMX_SOURCE_LOCATOR,
+  FRB_H15_SDMX_SOURCE_NAME,
+} from './adapters/frbH15TreasuryYieldsSdmxMeta';
 
 export {
   GATE_C_ARTIFACT_IDS,
@@ -466,22 +466,22 @@ export const GHOSTFLOW_REFRESH_REGISTRY = [
     historyPolicy: 'accepted_normalized_observation',
   },
   {
-    artifactId: FRB_H15_ARTIFACT_ID,
+    artifactId: FRB_H15_SDMX_ARTIFACT_ID,
     artifactPath: 'data/ghostflow/artifacts/treasuryLongEndIncomeLens.v1.json',
     lane: 'treasury_display',
     cadence: 'daily_trading',
     candidateGroupId: 'frb_h15_treasury_long_end',
     acceptanceUnit: 'artifact',
     canonicalSource: {
-      sourceFamilyId: FRB_H15_SOURCE_FAMILY_ID,
-      sourceName: FRB_H15_SOURCE_NAME,
-      sourceLocator: FRB_H15_SOURCE_LOCATOR,
+      sourceFamilyId: FRB_H15_SDMX_SOURCE_FAMILY_ID,
+      sourceName: FRB_H15_SDMX_SOURCE_NAME,
+      sourceLocator: FRB_H15_SDMX_SOURCE_LOCATOR,
     },
-    sourceFormat: 'csv',
+    sourceFormat: 'xml',
     adapter: {
-      adapterId: FRB_H15_ADAPTER_ID,
+      adapterId: FRB_H15_SDMX_ADAPTER_ID,
       implementationStatus: 'implemented',
-      parserVersion: FRB_H15_PARSER_VERSION,
+      parserVersion: FRB_H15_SDMX_PARSER_VERSION,
     },
     freshnessPolicyId: 'daily_trading_v1',
     referenceDateRole: 'lagging_allowed',

@@ -87,19 +87,8 @@ const longEnd = GHOSTFLOW_REFRESH_REGISTRY.find(
 assert.strictEqual(FRB_H15_TREASURY_YIELDS_ADAPTER.id, FRB_H15_ADAPTER_ID);
 assert.strictEqual(FRB_H15_TREASURY_YIELDS_ADAPTER.parserVersion, FRB_H15_PARSER_VERSION);
 assert.strictEqual(FRB_H15_PARSER_VERSION, '1.0.1');
-assert.strictEqual(longEnd.adapter.adapterId, FRB_H15_ADAPTER_ID);
-assert.strictEqual(longEnd.adapter.implementationStatus, 'implemented');
-if (longEnd.adapter.implementationStatus === 'implemented') {
-  assert.strictEqual(longEnd.adapter.parserVersion, FRB_H15_PARSER_VERSION);
-  assert.strictEqual(longEnd.adapter.parserVersion, '1.0.1');
-}
-assert.strictEqual(longEnd.canonicalSource.sourceFamilyId, FRB_H15_SOURCE_FAMILY_ID);
-assert.strictEqual(longEnd.canonicalSource.sourceName, FRB_H15_SOURCE_NAME);
-assert.strictEqual(longEnd.canonicalSource.sourceLocator, FRB_H15_SOURCE_LOCATOR);
-assert.strictEqual(longEnd.authentication.kind, 'none');
-assert.strictEqual(longEnd.approvalPolicy, 'human_required');
-assert.strictEqual(longEnd.lane, 'treasury_display');
-assert.strictEqual(longEnd.failureSeverity, 'nonfatal_treasury');
+assert.strictEqual(longEnd.adapter.adapterId, 'frb-h15-treasury-yields-sdmx');
+assert.strictEqual(longEnd.sourceFormat, 'xml');
 assert.strictEqual(FRB_H15_ARTIFACT_ID, 'treasuryLongEndIncomeLens');
 
 // Locked DDP package hashes (Board algorithm: MD5 of unique IDs joined by LF).

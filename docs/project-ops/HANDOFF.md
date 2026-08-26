@@ -1,6 +1,29 @@
 ﻿# HANDOFF
 
-## Last Session Summary (2026-08-26, H.15 SDMX/XML transport decision)
+## Last Session Summary (2026-08-26, H.15 SDMX/XML transport implemented)
+Starting `main`: `3f63fdf27176dc5fabb4b15c8395200d10c9c931` (PRs **#140–#143**). Implemented and cut over `treasuryLongEndIncomeLens` active transport from dual Board H.15 DDP CSV to release-level SDMX/XML ZIP (`FRB_h15_xml.zip`). New adapter `frb-h15-treasury-yields-sdmx` parser **1.0.0**; registry + operator runner updated; CSV **1.0.1** retained without automatic fallback. ZIP via narrow in-memory local-header reader + `node:zlib`; XML via deterministic SDMX compact scanner — **no new dependencies**. Live CSV/XML parity OK at `2026-08-24`. Live smokes healthy (H.15-only + full runner, exit 0). DECISIONS unchanged (PR **#143** approval already recorded). Production artifacts, scores, MOCK, reference date, and candidate generation unchanged.
+
+Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`. VIX / Gate C excluded; breadth remains blocked.
+
+## State of Work
+- Report-only operator runner merged (PR **#140**).
+- H.15 investigation merged (PR **#141**).
+- CSV blank-as-missing parser **1.0.1** merged (PR **#142**); CSV adapter retained but inactive at runtime.
+- H.15 SDMX/XML transport approved (PR **#143**) and **implemented** on `feat/ghostflow-h15-sdmx`.
+- Breadth / Gate C blocked; no VIX wiring.
+- Core app remains stable; education section remains live.
+
+## Priority for Next Session
+1. Human-reviewed candidate-generation design for operator-ready artifacts
+2. Breadth authorization remains separate and blocked; do not wire VIX or Gate C
+
+## Open Questions
+- Candidate-generation acceptance workflow and production writer boundaries?
+- Breadth licensed-source path still blocked pending authorization?
+
+---
+
+## Archive — H.15 SDMX/XML transport decision (2026-08-26)
 Current `main` includes PR **#142** (`38333e0`): Board H.15 CSV parser **1.0.1** blank-as-missing repair is active and live smoke was healthy. Bobby approved migrating `treasuryLongEndIncomeLens` transport from dual Board H.15 DDP CSV to the release-level SDMX/XML ZIP at `https://www.federalreserve.gov/releases/h15/data/FRB_h15_xml.zip`. Decision recorded in `docs/project-ops/DECISIONS.md`. Product contract unchanged (required 30Y nom + 30Y real; optional 2/5/10Y; no T10YIE; no derived breakeven; display-only / unscored / human_required; no production writer or workflow in the migration). **SDMX/XML adapter not yet implemented** — dual CSV remains the interim active transport until cutover.
 
 Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`. VIX / Gate C excluded; breadth remains blocked.
@@ -25,7 +48,6 @@ Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 
 - Retain dual CSV briefly for provenance comparison during XML cutover, or hard-cut after smoke?
 
 ---
-
 ## Archive — H.15 blank-missing parser 1.0.1 (2026-08-25)
 Starting `main`: `f833e7aef8d6c489f5e489a2c90c19ef3a3af31e` (PR **#141** investigation merged). Implemented narrow Board H.15 CSV parser fix: blank / whitespace-only yield cells → missing (same path as `ND`); `parserVersion` **1.0.1**. Dual DDP CSV transport, series contract, and source identity unchanged. No XML/SDMX migration. No production/candidate/history writes. DECISIONS unchanged in that PR.
 
