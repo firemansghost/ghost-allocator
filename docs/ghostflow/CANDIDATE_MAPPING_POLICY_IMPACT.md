@@ -56,7 +56,7 @@ Shared type note: `GhostFlowArtifactDataQuality` exists at file top but artifact
 | Check | Current | PR A |
 |-------|---------|------|
 | **A. `publishedAt`** | Required ISO date; cannot precede `asOf` | Required for `verified_manual` / `manual_unverified`; optional (absent or valid ISO) for `verified_automated`; if present, cannot precede `asOf` |
-| **B. `dataQuality`** | `verified_manual` \| `manual_unverified` | add `verified_automated` |
+| **B. `dataQuality`** | **TypeScript type** allows only `verified_manual` \| `manual_unverified`, but **runtime validator does not enforce that union**. Unsupported runtime values are **silently coerced** to `manual_unverified` via artifact construction logic (`raw.dataQuality === 'verified_manual' \|\| raw.dataQuality === 'manual_unverified' ? raw.dataQuality : 'manual_unverified'`). Does **not** fail closed. | Accept exactly `verified_manual`, `manual_unverified`, and `verified_automated`. **Reject** any other populated value and **missing** `dataQuality`. **Remove** the silent `manual_unverified` fallback. Validated artifact must preserve the explicitly supplied valid value. Fail closed on invalid or absent `dataQuality`. |
 | **C. `seriesDefinition`** | Locked to equity basket literal | unchanged |
 | **D. `source`** | `source.name` required | unchanged |
 | **E. Source-specific** | CFTC MVP contract codes, basket reconciliation | unchanged |
@@ -172,6 +172,8 @@ Implementation: refactor `validateTreasuryLongEndIncomeLensArtifact` into `valid
 3. Update `dataQualityLabel()` in `treasuryPlumbingDisplay.ts` for user-visible Treasury cards.
 4. **Do not** globally refactor unrelated artifacts or `GhostFlowArtifactDataQuality` unless a compile error forces it (none expected).
 
+**Validator asymmetry (audit correction):** `treasuryFuturesPositioningProxy` and `treasuryLongEndIncomeLens` **already reject** unsupported `dataQuality` at runtime (`dataQuality must be verified_manual or manual_unverified`). **`systematicFlowProxy` is the exception** — it silently normalizes unknown values to `manual_unverified` and requires a small fail-closed validator hardening in PR A. Scope remains narrowly limited to `systematicFlowProxy`; do not alter unrelated artifact validators.
+
 Systematic flow display (equity card) may need a parallel label helper if it surfaces `dataQuality` — audit during PR A (`systematicFlowDisplay.ts` if applicable).
 
 ---
@@ -278,7 +280,7 @@ Field rename in mapper: normalized observations map 1:1 to `SystematicFlowProxyC
 | File | Change |
 |------|--------|
 | `lib/ghostflow/artifacts/types.ts` | Narrow type updates for three artifacts |
-| `lib/ghostflow/artifacts/systematicFlowProxy.ts` | Validator + optional static mapper metadata |
+| `lib/ghostflow/artifacts/systematicFlowProxy.ts` | Validator hardening (`dataQuality` fail-closed; remove silent fallback) + optional static mapper metadata |
 | `lib/ghostflow/artifacts/treasuryFuturesPositioningProxy.ts` | Validator + static contract-role map for mapper |
 | `lib/ghostflow/artifacts/treasuryLongEndIncomeLens.ts` | Transitional validator, Board constants, legacy + Board branches |
 | `lib/ghostflow/treasuryPlumbingDisplay.ts` | `dataQualityLabel`, Board/FRED display branches |
@@ -297,7 +299,7 @@ Field rename in mapper: normalized observations map 1:1 to `SystematicFlowProxyC
 
 | File | PR A tests |
 |------|-------------|
-| `lib/ghostflow/__tests__/systematicFlowProxy.test.ts` | `verified_automated`; absent/present/invalid `publishedAt` |
+| `lib/ghostflow/__tests__/systematicFlowProxy.test.ts` | **`dataQuality`:** `verified_manual` accepted; `manual_unverified` accepted; `verified_automated` accepted; unknown value rejected; missing `dataQuality` rejected; invalid value **not** silently converted to `manual_unverified`. **`publishedAt`:** absent/present/invalid |
 | `lib/ghostflow/__tests__/treasuryFuturesPositioningProxy.test.ts` | same |
 | `lib/ghostflow/__tests__/treasuryLongEndIncomeLens.test.ts` | legacy FRED still validates; Board-native validates; Board+T10YIE fails; Board+breakeven fails; hybrid fails; Board series/roles |
 | `lib/ghostflow/__tests__/treasuryPlumbingDisplay.test.ts` | Board display branch; `verified_automated` label |
@@ -329,12 +331,13 @@ SCHEMA PR FIRST would add latency without reducing risk given narrow typing stra
 
 1. Three pure mappers: normalized + provenance → production-mode artifact; pass existing validators (with authorized extensions).
 2. `verified_automated` accepted only on the three artifacts; others unchanged.
-3. `publishedAt` omitted when `sourcePublishedAt` absent; present only when defensible; invalid ISO rejected.
-4. Long-End: legacy FRED production JSON still validates; Board-native fixture validates; hybrids and forbidden fields fail closed.
-5. Board-native Long-End uses `frb_h15_treasury_long_end_income_lens_v1` and five-series source block; no breakeven.
-6. Display branches do not show false FRED attribution for Board-native artifacts.
-7. No production JSON writes; no generator/CLI; no promotion path.
-8. All existing GhostFlow checks green.
+3. **Systematic runtime validation must fail closed on unsupported or missing `dataQuality`; the existing fallback-to-`manual_unverified` behavior is removed.**
+4. `publishedAt` omitted when `sourcePublishedAt` absent; present only when defensible; invalid ISO rejected.
+5. Long-End: legacy FRED production JSON still validates; Board-native fixture validates; hybrids and forbidden fields fail closed.
+6. Board-native Long-End uses `frb_h15_treasury_long_end_income_lens_v1` and five-series source block; no breakeven.
+7. Display branches do not show false FRED attribution for Board-native artifacts.
+8. No production JSON writes; no generator/CLI; no promotion path.
+9. All existing GhostFlow checks green.
 
 ---
 
