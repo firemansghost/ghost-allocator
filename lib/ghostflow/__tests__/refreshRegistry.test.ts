@@ -422,7 +422,11 @@ assert.strictEqual(
   'implemented'
 );
 if (byId.treasuryLongEndIncomeLens.adapter.implementationStatus === 'implemented') {
-  assert.strictEqual(byId.treasuryLongEndIncomeLens.adapter.parserVersion, '1.0.0');
+  assert.strictEqual(
+    byId.treasuryLongEndIncomeLens.adapter.parserVersion,
+    FRB_H15_PARSER_VERSION
+  );
+  assert.strictEqual(byId.treasuryLongEndIncomeLens.adapter.parserVersion, '1.0.1');
 }
 assert.strictEqual(
   byId.treasuryLongEndIncomeLens.canonicalSource.sourceFamilyId,

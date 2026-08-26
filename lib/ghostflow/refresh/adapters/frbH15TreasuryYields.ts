@@ -210,7 +210,8 @@ function parseObservationDate(cell: string): string | null {
 
 function parseYieldCell(cell: string): 'nd' | number | null {
   const trimmed = cell.trim();
-  if (!trimmed) return null;
+  // Blank / whitespace-only cells are Board DDP missing observations (pre-inception).
+  if (!trimmed) return 'nd';
   if (trimmed.toUpperCase() === FRB_H15_MISSING_VALUE) return 'nd';
   if (!/^-?\d+(\.\d+)?$/.test(trimmed)) return null;
   const n = Number(trimmed);

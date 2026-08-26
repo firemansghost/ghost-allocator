@@ -1,17 +1,19 @@
 ﻿# STATUS
 
 ## Current State (GhostFlow — 2026-08-26, H.15 SDMX/XML transport approved)
-Starting `main` for this work: `f833e7aef8d6c489f5e489a2c90c19ef3a3af31e` (PR **#141** investigation merged).
+Starting `main` for this work: `38333e0224fa4112cae4bb149cbec8c16f6b502f` (PR **#142** blank-as-missing parser **1.0.1** merged).
 
 **Bobby approved H.15 transport migration (recorded in DECISIONS):**
 - Canonical transport for `treasuryLongEndIncomeLens` → Board release-level SDMX/XML ZIP
   `https://www.federalreserve.gov/releases/h15/data/FRB_h15_xml.zip`
 - Product contract preserved: required 30Y nominal + 30Y inflation-indexed real; optional 2Y/5Y/10Y; **no T10YIE**; **no derived breakeven**; display-only / unscored / `human_required`; no production writer or workflow in the migration itself
-- Source family remains Board H.15; dual-DDP CSV remains interim until the SDMX/XML adapter is implemented and cut over
+- Source family remains Board H.15; **dual-DDP CSV remains the active interim transport** until the SDMX/XML adapter is implemented and cut over
 - Investigation memo: [H15_LIVE_SOURCE_AND_TRANSPORT_INVESTIGATION.md](../ghostflow/H15_LIVE_SOURCE_AND_TRANSPORT_INVESTIGATION.md)
 - **SDMX/XML adapter not yet implemented** in this decision-record PR
 
-Note: PR **#142** (CSV blank-as-missing parser 1.0.1) may still be open separately; it does not implement XML.
+**PR #142 on `main` (parser 1.0.1):**
+- Blank / whitespace-only DDP observation cells share the existing `ND` missing path
+- Live H.15 CSV smoke after repair was healthy: H.15-only `candidate_observation_available` (`2026-08-24`); full runner all three artifacts ready for review; exit 0
 
 Production GhostFlow state remains unchanged:
 - `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
@@ -23,12 +25,45 @@ Production GhostFlow state remains unchanged:
 VIX remains excluded because Gate C / `marketBreadth` remain blocked.
 
 ## Recommended next work
-1. Implement the Board release-level H.15 SDMX/XML adapter for `treasuryLongEndIncomeLens` (new adapter ID / parser version; registry cutover; fixture + live smoke)
-2. Land / merge the interim CSV blank-as-missing 1.0.1 fix (PR **#142**) if not already on `main`
-3. Only after SDMX/XML cutover is healthy, resume human-reviewed candidate-generation design
-4. Breadth remains blocked pending provider authorization / licensed-source decision. Do not wire VIX or Gate C.
+1. Implement the Board release-level H.15 SDMX/XML adapter for `treasuryLongEndIncomeLens` (new adapter ID / parser version; registry/operator cutover; fixture + live smoke)
+2. Only after SDMX/XML cutover is healthy, resume human-reviewed candidate-generation design
+3. Breadth remains blocked pending provider authorization / licensed-source decision. Do not wire VIX or Gate C.
 
 Last updated: 2026-08-26
+
+---
+
+## Archive — H.15 blank-missing parser 1.0.1 (2026-08-25)
+Starting `main` for this work: `f833e7aef8d6c489f5e489a2c90c19ef3a3af31e` (PR **#141** investigation merged). PR **#142** merged to `main` as `38333e0`.
+
+**Board H.15 CSV parser 1.0.1 blank-as-missing repair:**
+- Blank / whitespace-only DDP observation cells now share the existing `ND` missing path
+- Live failure class (TCM row 67486 / `RIFLGFCY02_N.B` / `1962-01-02` empty value) repaired
+- `FRB_H15_PARSER_VERSION`: `1.0.0` → `1.0.1`
+- Adapter ID / source family / locator / package hashes / dual CSV transport **unchanged**
+- Fixture regression: `FIXTURE_H15_TCM_BLANK_PREINCEPTION`
+- Registry inherits parser version via metadata constant (no semantic registry change)
+- **No** SDMX/XML migration in that PR; Path D remained a separate decision/implementation
+
+**Live smoke (report-only, no writes):**
+- H.15-only (`2026-08-26T00:08:24.514Z`): `candidate_observation_available` (candidate observation date `2026-08-24`); overall `ready_for_review`; suggested `review_candidates`; exit 0. Prior `h15_csv_invalid_value` / row 67486 gone.
+- Full runner (`2026-08-26T00:08:41.683Z`): all three artifacts `candidate_observation_available` (systematic + Treasury CFTC `2026-08-18`; H.15 `2026-08-24`); overall `ready_for_review`; suggested `review_candidates`; exit 0.
+
+Production GhostFlow state remains unchanged:
+- `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
+- Composite / Passive / Structural: 60 / 53 / 67
+- Band: Elevated Flow Pressure
+- `publicSignalCount`: 13
+- MOCK systematic / retirement / levered: 62 / 58 / 55
+
+VIX remains excluded because Gate C / `marketBreadth` remain blocked.
+
+## Recommended next work
+1. Design and approve the durable Board release-level SDMX/XML transport migration for `treasuryLongEndIncomeLens` before **2026-11-09** BYP removal
+2. Only after transport migration planning is locked, resume human-reviewed candidate-generation design
+3. Breadth remains blocked pending provider authorization / licensed-source decision. Do not wire VIX or Gate C.
+
+Last updated: 2026-08-25
 
 ---
 
