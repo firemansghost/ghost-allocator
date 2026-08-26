@@ -65,6 +65,33 @@ export function buildFrbH15SdmxFixtureXml(input: {
   return `${input.header ?? SDMX_HEADER}${blocks.join('\n')}\n${input.footer ?? SDMX_FOOTER}`;
 }
 
+function seriesBlockWithRawObs(seriesName: string, obsLines: string[]): string {
+  return [
+    `    <kf:Series SERIES_NAME="${seriesName}">`,
+    ...obsLines.map((line) => `      ${line}`),
+    '    </kf:Series>',
+  ].join('\n');
+}
+
+export function buildFrbH15SdmxRawXml(input: {
+  dataSetBody: string;
+  outsideDataSet?: string;
+  header?: string;
+  footer?: string;
+}): string {
+  const header =
+    input.header ??
+    '<?xml version="1.0" encoding="UTF-8"?>\n' +
+      '<message:MessageGroup xmlns:message="http://www.SDMX.org/resources/SDMXML/schemas/v1_0/message">\n' +
+      '<message:Header/>\n' +
+      '<frb:DataSet>\n';
+  if (input.outsideDataSet) {
+    return `${header}${input.dataSetBody}\n</frb:DataSet>\n${input.outsideDataSet}\n</message:MessageGroup>\n`;
+  }
+  const footer = input.footer ?? '</frb:DataSet>\n</message:MessageGroup>\n';
+  return `${header}${input.dataSetBody}\n${footer}`;
+}
+
 export { SDMX_HEADER, SDMX_FOOTER };
 
 function requiredSeriesBlocks(
@@ -481,6 +508,89 @@ export const FIXTURE_H15_SDMX_A_MINUS9999_XML = buildFrbH15SdmxFixtureXml({
   series: requiredSeriesBlocks({
     'RIFLGFCY30_N.B': [{ timePeriod: '2026-07-01', obsStatus: 'A', obsValue: '-9999' }],
   }),
+});
+
+/** Required target series appear after frb:DataSet close; only optionals remain inside. */
+export const FIXTURE_H15_SDMX_REQUIRED_OUTSIDE_DATASET_XML = buildFrbH15SdmxRawXml({
+  dataSetBody: [
+    seriesBlock('RIFLGFCY02_N.B', [{ timePeriod: '2026-07-01', obsStatus: 'A', obsValue: '4.17' }]),
+    seriesBlock('RIFLGFCY05_N.B', [{ timePeriod: '2026-07-01', obsStatus: 'A', obsValue: '4.24' }]),
+    seriesBlock('RIFLGFCY10_N.B', [{ timePeriod: '2026-07-01', obsStatus: 'A', obsValue: '4.48' }]),
+  ].join('\n'),
+  outsideDataSet: [
+    seriesBlock('RIFLGFCY30_N.B', [{ timePeriod: '2026-07-01', obsStatus: 'A', obsValue: '4.97' }]),
+    seriesBlock('RIFLGFCY30_XII_N.B', [{ timePeriod: '2026-07-01', obsStatus: 'A', obsValue: '2.78' }]),
+  ].join('\n'),
+});
+
+export const FIXTURE_H15_SDMX_NON_SELF_CLOSING_OBS_XML = buildFrbH15SdmxRawXml({
+  dataSetBody: [
+    seriesBlockWithRawObs('RIFLGFCY30_N.B', [
+      '<frb:Obs OBS_STATUS="A" TIME_PERIOD="2026-07-01" OBS_VALUE="4.97"></frb:Obs>',
+    ]),
+    ...requiredSeriesBlocks()
+      .filter((s) => s.name !== 'RIFLGFCY30_N.B')
+      .map((s) => seriesBlock(s.name, s.observations)),
+  ].join('\n'),
+});
+
+// Hand-built: non-self-closing observation with nested /> must fail closed.
+export const FIXTURE_H15_SDMX_MALFORMED_NESTED_OBS_XML = buildFrbH15SdmxRawXml({
+  dataSetBody: [
+    seriesBlockWithRawObs('RIFLGFCY30_N.B', [
+      '<frb:Obs OBS_STATUS="A" TIME_PERIOD="2026-07-01" OBS_VALUE="4.97">',
+      '  <x />',
+      '</frb:Obs>',
+    ]),
+    seriesBlock('RIFLGFCY30_XII_N.B', [{ timePeriod: '2026-07-01', obsStatus: 'A', obsValue: '2.78' }]),
+    seriesBlock('RIFLGFCY02_N.B', [{ timePeriod: '2026-07-01', obsStatus: 'A', obsValue: '4.17' }]),
+    seriesBlock('RIFLGFCY05_N.B', [{ timePeriod: '2026-07-01', obsStatus: 'A', obsValue: '4.24' }]),
+    seriesBlock('RIFLGFCY10_N.B', [{ timePeriod: '2026-07-01', obsStatus: 'A', obsValue: '4.48' }]),
+  ].join('\n'),
+});
+
+export const FIXTURE_H15_SDMX_XOBS_STATUS_XML = buildFrbH15SdmxRawXml({
+  dataSetBody: [
+    seriesBlockWithRawObs('RIFLGFCY30_N.B', [
+      '<frb:Obs XOBS_STATUS="A" OBS_VALUE="4.97" TIME_PERIOD="2026-07-01" />',
+    ]),
+    ...requiredSeriesBlocks()
+      .filter((s) => s.name !== 'RIFLGFCY30_N.B')
+      .map((s) => seriesBlock(s.name, s.observations)),
+  ].join('\n'),
+});
+
+export const FIXTURE_H15_SDMX_XTIME_PERIOD_XML = buildFrbH15SdmxRawXml({
+  dataSetBody: [
+    seriesBlockWithRawObs('RIFLGFCY30_N.B', [
+      '<frb:Obs OBS_STATUS="A" XTIME_PERIOD="2026-07-01" OBS_VALUE="4.97" />',
+    ]),
+    ...requiredSeriesBlocks()
+      .filter((s) => s.name !== 'RIFLGFCY30_N.B')
+      .map((s) => seriesBlock(s.name, s.observations)),
+  ].join('\n'),
+});
+
+export const FIXTURE_H15_SDMX_XOBS_VALUE_XML = buildFrbH15SdmxRawXml({
+  dataSetBody: [
+    seriesBlockWithRawObs('RIFLGFCY30_N.B', [
+      '<frb:Obs OBS_STATUS="A" TIME_PERIOD="2026-07-01" XOBS_VALUE="4.97" />',
+    ]),
+    ...requiredSeriesBlocks()
+      .filter((s) => s.name !== 'RIFLGFCY30_N.B')
+      .map((s) => seriesBlock(s.name, s.observations)),
+  ].join('\n'),
+});
+
+export const FIXTURE_H15_SDMX_DUPLICATE_OBS_STATUS_XML = buildFrbH15SdmxRawXml({
+  dataSetBody: [
+    seriesBlockWithRawObs('RIFLGFCY30_N.B', [
+      '<frb:Obs OBS_STATUS="A" OBS_STATUS="ND" OBS_VALUE="4.97" TIME_PERIOD="2026-07-01" />',
+    ]),
+    ...requiredSeriesBlocks()
+      .filter((s) => s.name !== 'RIFLGFCY30_N.B')
+      .map((s) => seriesBlock(s.name, s.observations)),
+  ].join('\n'),
 });
 
 export const FIXTURE_H15_SDMX_STORED_ZIP = buildMinimalZip([

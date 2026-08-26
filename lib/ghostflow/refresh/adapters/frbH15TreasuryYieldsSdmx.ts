@@ -134,14 +134,72 @@ function decodeUtf8(bytes: Uint8Array): GhostFlowStageResult<string> {
   }
 }
 
-function readXmlAttribute(tag: string, attributeName: string): string | null {
-  const marker = `${attributeName}="`;
-  const start = tag.indexOf(marker);
-  if (start < 0) return null;
-  const valueStart = start + marker.length;
-  const valueEnd = tag.indexOf('"', valueStart);
-  if (valueEnd < 0) return null;
-  return tag.slice(valueStart, valueEnd);
+function readXmlAttribute(
+  tag: string,
+  attributeName: string
+): { ok: true; value: string } | { ok: false; code: 'missing' | 'duplicate' | 'malformed' } {
+  const needle = `${attributeName}="`;
+  let found: string | null = null;
+  let pos = 0;
+
+  while (pos < tag.length) {
+    const idx = tag.indexOf(needle, pos);
+    if (idx < 0) break;
+
+    const before = idx > 0 ? tag[idx - 1]! : '';
+    if (before !== ' ' && before !== '\t' && before !== '\n' && before !== '\r') {
+      pos = idx + 1;
+      continue;
+    }
+
+    if (found !== null) {
+      return { ok: false, code: 'duplicate' };
+    }
+
+    const valueStart = idx + needle.length;
+    const valueEnd = tag.indexOf('"', valueStart);
+    if (valueEnd < 0) {
+      return { ok: false, code: 'malformed' };
+    }
+
+    found = tag.slice(valueStart, valueEnd);
+    pos = valueEnd + 1;
+  }
+
+  if (found === null) {
+    return { ok: false, code: 'missing' };
+  }
+
+  return { ok: true, value: found };
+}
+
+function readRequiredXmlAttribute(
+  tag: string,
+  attributeName: string,
+  seriesName: FrbH15SdmxRegisteredSeriesName,
+  label: string
+): GhostFlowStageResult<string> {
+  const attr = readXmlAttribute(tag, attributeName);
+  if (attr.ok) return { ok: true, value: attr.value, issues: [] };
+  if (attr.code === 'duplicate') {
+    return fail(
+      'parse',
+      'h15_sdmx_invalid_observation',
+      `Board H.15 SDMX ${label} for ${seriesName} has duplicate ${attributeName}`
+    );
+  }
+  if (attr.code === 'malformed') {
+    return fail(
+      'parse',
+      'h15_sdmx_invalid_observation',
+      `Board H.15 SDMX ${label} for ${seriesName} has malformed ${attributeName}`
+    );
+  }
+  return fail(
+    'parse',
+    'h15_sdmx_invalid_observation',
+    `Board H.15 SDMX ${label} for ${seriesName} is missing ${attributeName}`
+  );
 }
 
 function parseObservationDate(value: string): string | null {
@@ -158,9 +216,72 @@ function parseStrictNumeric(value: string): number | null {
 }
 
 function seriesNameFromSeriesTag(tag: string): string | null {
-  const name = readXmlAttribute(tag, 'SERIES_NAME');
-  if (!name || !REGISTERED_SET.has(name)) return null;
+  const nameAttr = readXmlAttribute(tag, 'SERIES_NAME');
+  if (!nameAttr.ok) return null;
+  const name = nameAttr.value;
+  if (!REGISTERED_SET.has(name)) return null;
   return name;
+}
+
+function sliceDataSetContent(xmlText: string): GhostFlowStageResult<string> {
+  const dataSetOpen = xmlText.indexOf('<frb:DataSet');
+  if (dataSetOpen < 0) {
+    return fail(
+      'parse',
+      'h15_sdmx_invalid_structure',
+      'Board H.15 XML is missing frb:DataSet'
+    );
+  }
+
+  const openTagEnd = xmlText.indexOf('>', dataSetOpen);
+  if (openTagEnd < 0) {
+    return fail(
+      'parse',
+      'h15_sdmx_invalid_structure',
+      'Board H.15 XML frb:DataSet opening tag is malformed'
+    );
+  }
+
+  const dataSetClose = xmlText.lastIndexOf('</frb:DataSet>');
+  if (dataSetClose < 0 || dataSetClose <= openTagEnd) {
+    return fail(
+      'parse',
+      'h15_sdmx_invalid_structure',
+      'Board H.15 XML is missing frb:DataSet close'
+    );
+  }
+
+  return {
+    ok: true,
+    value: xmlText.slice(openTagEnd + 1, dataSetClose),
+    issues: [],
+  };
+}
+
+function sliceSelfClosingObsTag(
+  block: string,
+  obsStart: number,
+  seriesName: FrbH15SdmxRegisteredSeriesName
+): GhostFlowStageResult<string> {
+  const tagEnd = block.indexOf('>', obsStart);
+  if (tagEnd < 0) {
+    return fail(
+      'parse',
+      'h15_sdmx_invalid_observation',
+      `Board H.15 SDMX observation for ${seriesName} is malformed`
+    );
+  }
+
+  const obsTag = block.slice(obsStart, tagEnd + 1);
+  if (!obsTag.endsWith('/>')) {
+    return fail(
+      'parse',
+      'h15_sdmx_invalid_observation',
+      `Board H.15 SDMX observation for ${seriesName} must be self-closing`
+    );
+  }
+
+  return { ok: true, value: obsTag, issues: [] };
 }
 
 function validateSdmxStructure(xmlText: string): GhostFlowStageResult<undefined> {
@@ -216,29 +337,28 @@ function parseObsTag(
   tag: string,
   seriesName: FrbH15SdmxRegisteredSeriesName
 ): GhostFlowStageResult<FrbH15ParsedObs> {
-  const obsStatus = readXmlAttribute(tag, 'OBS_STATUS');
-  if (!obsStatus) {
-    return fail(
-      'parse',
-      'h15_sdmx_invalid_observation',
-      `Board H.15 SDMX observation for ${seriesName} is missing OBS_STATUS`
-    );
-  }
+  const obsStatusResult = readRequiredXmlAttribute(
+    tag,
+    'OBS_STATUS',
+    seriesName,
+    'observation'
+  );
+  if (!obsStatusResult.ok) return obsStatusResult;
+  const obsStatus = obsStatusResult.value;
 
-  const timePeriod = readXmlAttribute(tag, 'TIME_PERIOD');
-  if (!timePeriod) {
-    return fail(
-      'parse',
-      'h15_sdmx_invalid_observation',
-      `Board H.15 SDMX observation for ${seriesName} is missing TIME_PERIOD`
-    );
-  }
-  const observationAsOf = parseObservationDate(timePeriod);
+  const timePeriodResult = readRequiredXmlAttribute(
+    tag,
+    'TIME_PERIOD',
+    seriesName,
+    'observation'
+  );
+  if (!timePeriodResult.ok) return timePeriodResult;
+  const observationAsOf = parseObservationDate(timePeriodResult.value);
   if (!observationAsOf) {
     return fail(
       'parse',
       'h15_sdmx_invalid_date',
-      `Board H.15 SDMX observation for ${seriesName} has invalid TIME_PERIOD ${timePeriod}`
+      `Board H.15 SDMX observation for ${seriesName} has invalid TIME_PERIOD ${timePeriodResult.value}`
     );
   }
 
@@ -253,21 +373,15 @@ function parseObsTag(
     );
   }
 
-  const obsValueRaw = readXmlAttribute(tag, 'OBS_VALUE');
-  if (obsValueRaw === null) {
-    return fail(
-      'parse',
-      'h15_sdmx_invalid_observation',
-      `Board H.15 SDMX observation for ${seriesName} is missing OBS_VALUE`
-    );
-  }
+  const obsValueResult = readRequiredXmlAttribute(tag, 'OBS_VALUE', seriesName, 'observation');
+  if (!obsValueResult.ok) return obsValueResult;
 
-  const parsedValue = parseStrictNumeric(obsValueRaw);
+  const parsedValue = parseStrictNumeric(obsValueResult.value);
   if (parsedValue === null || parsedValue === -9999) {
     return fail(
       'parse',
       'h15_sdmx_invalid_value',
-      `Board H.15 SDMX observation for ${seriesName} on ${observationAsOf} has invalid OBS_VALUE ${obsValueRaw}`
+      `Board H.15 SDMX observation for ${seriesName} on ${observationAsOf} has invalid OBS_VALUE ${obsValueResult.value}`
     );
   }
 
@@ -298,20 +412,24 @@ export function parseFrbH15SdmxXml(
   const structure = validateSdmxStructure(xmlText);
   if (!structure.ok) return structure;
 
+  const dataSet = sliceDataSetContent(xmlText);
+  if (!dataSet.ok) return dataSet;
+
+  const dataSetContent = dataSet.value;
   const rows: FrbH15SdmxObservationRow[] = [];
   const seenSeries = new Map<string, number>();
   const seenObservation = new Set<string>();
 
   let cursor = 0;
-  while (cursor < xmlText.length) {
-    const seriesStart = xmlText.indexOf('<kf:Series', cursor);
+  while (cursor < dataSetContent.length) {
+    const seriesStart = dataSetContent.indexOf('<kf:Series', cursor);
     if (seriesStart < 0) break;
 
-    const seriesTagEnd = xmlText.indexOf('>', seriesStart);
+    const seriesTagEnd = dataSetContent.indexOf('>', seriesStart);
     if (seriesTagEnd < 0) {
       return fail('parse', 'h15_sdmx_invalid_structure', 'Board H.15 XML series tag is malformed');
     }
-    const seriesTag = xmlText.slice(seriesStart, seriesTagEnd + 1);
+    const seriesTag = dataSetContent.slice(seriesStart, seriesTagEnd + 1);
     const seriesNameRaw = seriesNameFromSeriesTag(seriesTag);
     if (!seriesNameRaw || !REGISTERED_SET.has(seriesNameRaw)) {
       cursor = seriesTagEnd + 1;
@@ -319,7 +437,7 @@ export function parseFrbH15SdmxXml(
     }
 
     const seriesName = seriesNameRaw as FrbH15SdmxRegisteredSeriesName;
-    const blockEnd = xmlText.indexOf('</kf:Series>', seriesTagEnd);
+    const blockEnd = dataSetContent.indexOf('</kf:Series>', seriesTagEnd);
     if (blockEnd < 0) {
       return fail(
         'parse',
@@ -337,21 +455,16 @@ export function parseFrbH15SdmxXml(
       );
     }
 
-    const block = xmlText.slice(seriesTagEnd + 1, blockEnd);
+    const block = dataSetContent.slice(seriesTagEnd + 1, blockEnd);
     let obsCursor = 0;
     while (obsCursor < block.length) {
       const obsStart = block.indexOf('<frb:Obs', obsCursor);
       if (obsStart < 0) break;
-      const obsEnd = block.indexOf('/>', obsStart);
-      if (obsEnd < 0) {
-        return fail(
-          'parse',
-          'h15_sdmx_invalid_observation',
-          `Board H.15 SDMX observation for ${seriesName} is malformed`
-        );
-      }
-      const obsTag = block.slice(obsStart, obsEnd + 2);
-      const parsedObs = parseObsTag(obsTag, seriesName);
+
+      const obsTagResult = sliceSelfClosingObsTag(block, obsStart, seriesName);
+      if (!obsTagResult.ok) return obsTagResult;
+
+      const parsedObs = parseObsTag(obsTagResult.value, seriesName);
       if (!parsedObs.ok) return parsedObs;
 
       const seriesUniqueId = frbH15SdmxSeriesNameToUniqueId(seriesName);
@@ -372,7 +485,8 @@ export function parseFrbH15SdmxXml(
       if (parsedObs.value.kind === 'available') {
         rows.push(parsedObs.value.row);
       }
-      obsCursor = obsEnd + 2;
+
+      obsCursor = obsStart + obsTagResult.value.length;
     }
 
     cursor = blockEnd + '</kf:Series>'.length;

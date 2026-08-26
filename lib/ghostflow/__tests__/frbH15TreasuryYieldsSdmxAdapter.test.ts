@@ -43,14 +43,21 @@ import {
   FIXTURE_H15_SDMX_DUPLICATE_AA_XML,
   FIXTURE_H15_SDMX_DUPLICATE_ND_A_XML,
   FIXTURE_H15_SDMX_DUPLICATE_ND_ND_XML,
+  FIXTURE_H15_SDMX_DUPLICATE_OBS_STATUS_XML,
   FIXTURE_H15_SDMX_ENCRYPTED_FLAG_ZIP,
+  FIXTURE_H15_SDMX_MALFORMED_NESTED_OBS_XML,
   FIXTURE_H15_SDMX_MISSING_DATASET_CLOSE_XML,
   FIXTURE_H15_SDMX_MISSING_MESSAGEGROUP_CLOSE_XML,
   FIXTURE_H15_SDMX_MISSING_STATUS_INVALID_DATE_XML,
+  FIXTURE_H15_SDMX_NON_SELF_CLOSING_OBS_XML,
   FIXTURE_H15_SDMX_NO_NAMESPACE_XML,
   FIXTURE_H15_SDMX_OVERSIZE_DECLARED_ZIP,
+  FIXTURE_H15_SDMX_REQUIRED_OUTSIDE_DATASET_XML,
   FIXTURE_H15_SDMX_STORED_ZIP,
   FIXTURE_H15_SDMX_UNEXPECTED_TRAILING_ZIP,
+  FIXTURE_H15_SDMX_XOBS_STATUS_XML,
+  FIXTURE_H15_SDMX_XOBS_VALUE_XML,
+  FIXTURE_H15_SDMX_XTIME_PERIOD_XML,
   FIXTURE_H15_SDMX_ZIP64_SIZE_ZIP,
   FIXTURE_H15_SDMX_VALID_XML,
   FIXTURE_H15_SDMX_VALID_ZIP,
@@ -405,6 +412,55 @@ async function fetched(bytes: Uint8Array): Promise<GhostFlowFetchedSource<Uint8A
 
   {
     assertFailCode(parseFrbH15SdmxXml(FIXTURE_H15_SDMX_A_MINUS9999_XML), 'h15_sdmx_invalid_value');
+  }
+
+  {
+    assertFailCode(
+      parseFrbH15SdmxXml(FIXTURE_H15_SDMX_REQUIRED_OUTSIDE_DATASET_XML),
+      'h15_sdmx_missing_required_series'
+    );
+  }
+
+  {
+    const outsideObs = parseFrbH15SdmxXml(FIXTURE_H15_SDMX_REQUIRED_OUTSIDE_DATASET_XML);
+    assert.strictEqual(outsideObs.ok, false);
+    if (outsideObs.ok) throw new Error('unreachable');
+    assert.ok(
+      !('value' in outsideObs && Array.isArray((outsideObs as { value: unknown }).value))
+    );
+  }
+
+  {
+    assertFailCode(
+      parseFrbH15SdmxXml(FIXTURE_H15_SDMX_NON_SELF_CLOSING_OBS_XML),
+      'h15_sdmx_invalid_observation'
+    );
+  }
+
+  {
+    assertFailCode(
+      parseFrbH15SdmxXml(FIXTURE_H15_SDMX_MALFORMED_NESTED_OBS_XML),
+      'h15_sdmx_invalid_observation'
+    );
+  }
+
+  {
+    assertFailCode(parseFrbH15SdmxXml(FIXTURE_H15_SDMX_XOBS_STATUS_XML), 'h15_sdmx_invalid_observation');
+  }
+
+  {
+    assertFailCode(parseFrbH15SdmxXml(FIXTURE_H15_SDMX_XTIME_PERIOD_XML), 'h15_sdmx_invalid_observation');
+  }
+
+  {
+    assertFailCode(parseFrbH15SdmxXml(FIXTURE_H15_SDMX_XOBS_VALUE_XML), 'h15_sdmx_invalid_observation');
+  }
+
+  {
+    assertFailCode(
+      parseFrbH15SdmxXml(FIXTURE_H15_SDMX_DUPLICATE_OBS_STATUS_XML),
+      'h15_sdmx_invalid_observation'
+    );
   }
 
   {
