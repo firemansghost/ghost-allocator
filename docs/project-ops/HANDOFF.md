@@ -1,6 +1,45 @@
 ﻿# HANDOFF
 
-## Last Session Summary (2026-08-26, H.15 SDMX/XML transport implemented)
+## Last Session Summary (2026-08-26, candidate-generation design — contract correction)
+Starting `main`: `ae6fbf14a25e5e898d0874358bed17b26ba28c50` (PRs **#140–#144** merged). Corrected PR **#145** design memo: idempotency (identity + payload, not envelope bytes), same-date revision scope (mapped-payload only; production lacks accepted source hash), mapping-policy decision gate before PR A (Long-End blockers, `dataQuality`, `publishedAt`). **No code, no production writes, no DECISIONS changes.**
+
+Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`. VIX / Gate C excluded; breadth remains blocked.
+
+## State of Work
+- Report-only operator runner merged (PR **#140**).
+- H.15 investigation merged (PR **#141**).
+- CSV blank-as-missing parser **1.0.1** merged (PR **#142**).
+- H.15 SDMX transport decision (PR **#143**) and implementation/cutover (PR **#144**) merged to `main`.
+- Candidate-generation **architecture design** on PR **#145**; implementation **blocked on mapping-policy decisions**.
+- Breadth / Gate C blocked; no VIX wiring.
+- Core app remains stable; education section remains live.
+
+## Priority for Next Session
+1. **Resolve candidate production-mapping policy decisions** (Long-End `seriesDefinition` / Board source block, `dataQuality`, `publishedAt`) — DECISIONS update after Bobby approval
+2. **PR A** — types + authorized validator/schema updates + pure mappers + tests (only after decision gate)
+3. **PR B** — generator + diff + idempotent writer + CLI
+4. Promotion (PR C) requires separate DECISIONS approval
+5. Breadth authorization remains separate and blocked; do not wire VIX or Gate C
+
+## Open Questions
+- Approve proposed Long-End `seriesDefinition`: `frb_h15_treasury_long_end_income_lens_v1`?
+- Board H.15 production `source` block + validator/display-copy changes?
+- `dataQuality`: `verified_automated` vs retain existing enum?
+- CFTC + H.15 automated `publishedAt` mapping policy?
+- Same-date mapped-payload promotion policy (does not block generator)?
+- Promotion command authorization (DECISIONS entry)?
+
+---
+
+## Archive — Candidate-generation design initial draft (2026-08-26)
+Starting `main`: `ae6fbf14a25e5e898d0874358bed17b26ba28c50` (PRs **#140–#144** merged). Authored read-only candidate-generation design memo for operator-ready artifacts. Initial draft proposed PR A immediately after merge; superseded by mapping-policy gate in contract correction pass.
+
+## Priority for Next Session (superseded)
+1. ~~PR A immediately after #145~~ → mapping-policy decisions first
+
+---
+
+## Archive — H.15 SDMX/XML transport implemented (2026-08-26)
 Starting `main`: `3f63fdf27176dc5fabb4b15c8395200d10c9c931` (PRs **#140–#143**). Implemented and cut over `treasuryLongEndIncomeLens` active transport from dual Board H.15 DDP CSV to release-level SDMX/XML ZIP (`FRB_h15_xml.zip`). New adapter `frb-h15-treasury-yields-sdmx` parser **1.0.0**; registry + operator runner updated; CSV **1.0.1** retained without automatic fallback. ZIP via narrow in-memory local-header reader + `node:zlib`; XML via deterministic SDMX compact scanner — **no new dependencies**. Live CSV/XML parity OK at `2026-08-24`. Live smokes healthy (H.15-only + full runner, exit 0). DECISIONS unchanged (PR **#143** approval already recorded). Production artifacts, scores, MOCK, reference date, and candidate generation unchanged.
 
 Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`. VIX / Gate C excluded; breadth remains blocked.

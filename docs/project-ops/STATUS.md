@@ -1,6 +1,41 @@
 ﻿# STATUS
 
-## Current State (GhostFlow — 2026-08-26, H.15 SDMX/XML transport implemented)
+## Current State (GhostFlow — 2026-08-26, candidate-generation design)
+Starting `main` for this work: `ae6fbf14a25e5e898d0874358bed17b26ba28c50` (includes PRs **#140–#144** merged).
+
+**Candidate-generation architecture design (PR #145, branch `docs/ghostflow-candidate-generation-design`):**
+- Design memo: [CANDIDATE_GENERATION_DESIGN.md](../ghostflow/CANDIDATE_GENERATION_DESIGN.md)
+- Scope: operator-ready artifacts only — `systematicFlowProxy`, `treasuryFuturesPositioningProxy`, `treasuryLongEndIncomeLens`
+- Architecture approved: typed review envelope, pure mappers, validator reuse, gitignored `tmp/ghostflow/candidates/`, explicit CLI, no automatic promotion
+- **Contract corrections:** idempotency reconciles identity + payload (not whole-envelope bytes); same-date revision limited to mapped-payload diff (production lacks accepted source hash); mapping-policy decision gate **blocks PR A**
+- **Does not authorize** production writes, automatic promotion, or candidate commits
+- Report-only operator runner unchanged
+
+**PR #144 merged to `main` (H.15 SDMX/XML transport):**
+- Active transport for `treasuryLongEndIncomeLens` → Board release-level SDMX/XML ZIP
+- Adapter `frb-h15-treasury-yields-sdmx` parser **1.0.0**; CSV **1.0.1** retained without runtime fallback
+
+Production GhostFlow state remains unchanged:
+- `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
+- Composite / Passive / Structural: 60 / 53 / 67
+- Band: Elevated Flow Pressure
+- `publicSignalCount`: 13
+- MOCK systematic / retirement / levered: 62 / 58 / 55
+
+VIX remains excluded because Gate C / `marketBreadth` remain blocked.
+
+## Recommended next work
+1. **Resolve candidate production-mapping policy decisions** before PR A (Long-End `seriesDefinition` / Board source block, `dataQuality`, `publishedAt`) — record in DECISIONS after Bobby approval
+2. **PR A** — types + authorized validator/schema updates + pure mappers + tests (only after decision gate)
+3. **PR B** — generator + diff + idempotent writer + CLI
+4. Promotion (PR C) blocked pending separate DECISIONS approval
+5. Breadth remains blocked. Do not wire VIX or Gate C.
+
+Last updated: 2026-08-26
+
+---
+
+## Archive — H.15 SDMX/XML transport implemented (2026-08-26)
 Starting `main` for this work: `3f63fdf27176dc5fabb4b15c8395200d10c9c931` (includes PRs **#140–#143**).
 
 **H.15 SDMX/XML transport cutover complete (branch `feat/ghostflow-h15-sdmx`):**
