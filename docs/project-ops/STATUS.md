@@ -4,7 +4,7 @@
 Starting `main` for this work: `f833e7aef8d6c489f5e489a2c90c19ef3a3af31e` (PR **#141** investigation merged).
 
 **Bobby approved H.15 transport migration (recorded in DECISIONS):**
-- Canonical transport for `treasuryLongEndIncomeLens` → Board release-level SDMX/XML ZIP  
+- Canonical transport for `treasuryLongEndIncomeLens` → Board release-level SDMX/XML ZIP
   `https://www.federalreserve.gov/releases/h15/data/FRB_h15_xml.zip`
 - Product contract preserved: required 30Y nominal + 30Y inflation-indexed real; optional 2Y/5Y/10Y; **no T10YIE**; **no derived breakeven**; display-only / unscored / `human_required`; no production writer or workflow in the migration itself
 - Source family remains Board H.15; dual-DDP CSV remains interim until the SDMX/XML adapter is implemented and cut over
