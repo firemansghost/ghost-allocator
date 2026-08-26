@@ -37,6 +37,21 @@ import {
   FIXTURE_H15_SDMX_NO_COMMON_XML,
   FIXTURE_H15_SDMX_OPTIONAL_GAP_XML,
   FIXTURE_H15_SDMX_UNKNOWN_STATUS_XML,
+  FIXTURE_H15_SDMX_A_MINUS9999_XML,
+  FIXTURE_H15_SDMX_CRC_MISMATCH_ZIP,
+  FIXTURE_H15_SDMX_DATA_DESCRIPTOR_FLAG_ZIP,
+  FIXTURE_H15_SDMX_DUPLICATE_AA_XML,
+  FIXTURE_H15_SDMX_DUPLICATE_ND_A_XML,
+  FIXTURE_H15_SDMX_DUPLICATE_ND_ND_XML,
+  FIXTURE_H15_SDMX_ENCRYPTED_FLAG_ZIP,
+  FIXTURE_H15_SDMX_MISSING_DATASET_CLOSE_XML,
+  FIXTURE_H15_SDMX_MISSING_MESSAGEGROUP_CLOSE_XML,
+  FIXTURE_H15_SDMX_MISSING_STATUS_INVALID_DATE_XML,
+  FIXTURE_H15_SDMX_NO_NAMESPACE_XML,
+  FIXTURE_H15_SDMX_OVERSIZE_DECLARED_ZIP,
+  FIXTURE_H15_SDMX_STORED_ZIP,
+  FIXTURE_H15_SDMX_UNEXPECTED_TRAILING_ZIP,
+  FIXTURE_H15_SDMX_ZIP64_SIZE_ZIP,
   FIXTURE_H15_SDMX_VALID_XML,
   FIXTURE_H15_SDMX_VALID_ZIP,
   FIXTURE_H15_SDMX_VALID_ZIP_SHA256,
@@ -349,6 +364,96 @@ async function fetched(bytes: Uint8Array): Promise<GhostFlowFetchedSource<Uint8A
       fixtureZipSha256(source.raw),
       first.ok ? first.value.provenance.contentSha256 : 'unreachable'
     );
+  }
+
+  {
+    assertFailCode(parseFrbH15SdmxXml(FIXTURE_H15_SDMX_NO_NAMESPACE_XML), 'h15_sdmx_invalid_structure');
+  }
+
+  {
+    assertFailCode(
+      parseFrbH15SdmxXml(FIXTURE_H15_SDMX_MISSING_DATASET_CLOSE_XML),
+      'h15_sdmx_invalid_structure'
+    );
+  }
+
+  {
+    assertFailCode(
+      parseFrbH15SdmxXml(FIXTURE_H15_SDMX_MISSING_MESSAGEGROUP_CLOSE_XML),
+      'h15_sdmx_invalid_structure'
+    );
+  }
+
+  {
+    assertFailCode(
+      parseFrbH15SdmxXml(FIXTURE_H15_SDMX_MISSING_STATUS_INVALID_DATE_XML),
+      'h15_sdmx_invalid_date'
+    );
+  }
+
+  {
+    assertFailCode(parseFrbH15SdmxXml(FIXTURE_H15_SDMX_DUPLICATE_AA_XML), 'h15_sdmx_duplicate_observation');
+  }
+
+  {
+    assertFailCode(parseFrbH15SdmxXml(FIXTURE_H15_SDMX_DUPLICATE_ND_ND_XML), 'h15_sdmx_duplicate_observation');
+  }
+
+  {
+    assertFailCode(parseFrbH15SdmxXml(FIXTURE_H15_SDMX_DUPLICATE_ND_A_XML), 'h15_sdmx_duplicate_observation');
+  }
+
+  {
+    assertFailCode(parseFrbH15SdmxXml(FIXTURE_H15_SDMX_A_MINUS9999_XML), 'h15_sdmx_invalid_value');
+  }
+
+  {
+    const crc = extractFrbH15ZipMember(FIXTURE_H15_SDMX_CRC_MISMATCH_ZIP);
+    assert.strictEqual(crc.ok, false);
+    if (crc.ok) throw new Error('unreachable');
+    assert.strictEqual(crc.code, 'h15_zip_crc_mismatch');
+  }
+
+  {
+    const encrypted = extractFrbH15ZipMember(FIXTURE_H15_SDMX_ENCRYPTED_FLAG_ZIP);
+    assert.strictEqual(encrypted.ok, false);
+    if (encrypted.ok) throw new Error('unreachable');
+    assert.strictEqual(encrypted.code, 'h15_zip_unsupported_flags');
+  }
+
+  {
+    const dataDescriptor = extractFrbH15ZipMember(FIXTURE_H15_SDMX_DATA_DESCRIPTOR_FLAG_ZIP);
+    assert.strictEqual(dataDescriptor.ok, false);
+    if (dataDescriptor.ok) throw new Error('unreachable');
+    assert.strictEqual(dataDescriptor.code, 'h15_zip_unsupported_flags');
+  }
+
+  {
+    const zip64 = extractFrbH15ZipMember(FIXTURE_H15_SDMX_ZIP64_SIZE_ZIP);
+    assert.strictEqual(zip64.ok, false);
+    if (zip64.ok) throw new Error('unreachable');
+    assert.strictEqual(zip64.code, 'h15_zip_unsupported_zip64');
+  }
+
+  {
+    const oversize = extractFrbH15ZipMember(FIXTURE_H15_SDMX_OVERSIZE_DECLARED_ZIP);
+    assert.strictEqual(oversize.ok, false);
+    if (oversize.ok) throw new Error('unreachable');
+    assert.strictEqual(oversize.code, 'h15_zip_member_too_large');
+  }
+
+  {
+    const trailing = extractFrbH15ZipMember(FIXTURE_H15_SDMX_UNEXPECTED_TRAILING_ZIP);
+    assert.strictEqual(trailing.ok, false);
+    if (trailing.ok) throw new Error('unreachable');
+    assert.strictEqual(trailing.code, 'h15_zip_malformed');
+  }
+
+  {
+    const stored = extractFrbH15ZipMember(FIXTURE_H15_SDMX_STORED_ZIP);
+    assert.strictEqual(stored.ok, true);
+    if (!stored.ok) throw new Error('unreachable');
+    assert.ok(new TextDecoder().decode(stored.bytes).includes('RIFLGFCY30_N.B'));
   }
 
   console.log('ghostflow/frbH15TreasuryYieldsSdmxAdapter.test.ts: ok');

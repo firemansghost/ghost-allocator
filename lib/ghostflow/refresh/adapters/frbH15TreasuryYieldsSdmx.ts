@@ -59,6 +59,13 @@ const REQUIRED_SET = new Set<string>(FRB_H15_SDMX_REQUIRED_SERIES_NAMES);
 const REGISTERED_SET = new Set<string>(FRB_H15_SDMX_REGISTERED_SERIES_NAMES);
 const MISSING_OBS_STATUSES = new Set(['ND', 'NA', 'NC']);
 
+const SDMX_MESSAGE_NAMESPACE =
+  'http://www.SDMX.org/resources/SDMXML/schemas/v1_0/message' as const;
+
+type FrbH15ParsedObs =
+  | { kind: 'missing'; observationAsOf: string }
+  | { kind: 'available'; row: FrbH15SdmxObservationRow };
+
 export interface FrbH15SdmxObservationRow extends FrbH15NormalizeObservationRow {
   seriesName: FrbH15SdmxRegisteredSeriesName;
   obsStatus: 'A';
@@ -156,27 +163,65 @@ function seriesNameFromSeriesTag(tag: string): string | null {
   return name;
 }
 
+function validateSdmxStructure(xmlText: string): GhostFlowStageResult<undefined> {
+  if (!xmlText.includes(SDMX_MESSAGE_NAMESPACE)) {
+    return fail(
+      'parse',
+      'h15_sdmx_invalid_structure',
+      'Board H.15 XML is missing the SDMX 1.0 message namespace'
+    );
+  }
+
+  const messageGroupOpen = xmlText.indexOf('<message:MessageGroup');
+  const messageGroupClose = xmlText.lastIndexOf('</message:MessageGroup>');
+  const dataSetOpen = xmlText.indexOf('<frb:DataSet');
+  const dataSetClose = xmlText.lastIndexOf('</frb:DataSet>');
+  const seriesMarker = xmlText.indexOf('<kf:Series');
+  const obsMarker = xmlText.indexOf('<frb:Obs');
+
+  if (
+    messageGroupOpen < 0 ||
+    dataSetOpen < 0 ||
+    dataSetClose < 0 ||
+    messageGroupClose < 0 ||
+    seriesMarker < 0 ||
+    obsMarker < 0
+  ) {
+    return fail(
+      'parse',
+      'h15_sdmx_invalid_structure',
+      'Board H.15 XML does not contain the expected SDMX compact structure'
+    );
+  }
+
+  const ordered =
+    messageGroupOpen < dataSetOpen &&
+    dataSetOpen < seriesMarker &&
+    seriesMarker < obsMarker &&
+    obsMarker < dataSetClose &&
+    dataSetClose < messageGroupClose;
+
+  if (!ordered) {
+    return fail(
+      'parse',
+      'h15_sdmx_invalid_structure',
+      'Board H.15 XML has malformed SDMX element ordering'
+    );
+  }
+
+  return { ok: true, value: undefined, issues: [] };
+}
+
 function parseObsTag(
   tag: string,
   seriesName: FrbH15SdmxRegisteredSeriesName
-): GhostFlowStageResult<FrbH15SdmxObservationRow | 'missing'> {
+): GhostFlowStageResult<FrbH15ParsedObs> {
   const obsStatus = readXmlAttribute(tag, 'OBS_STATUS');
   if (!obsStatus) {
     return fail(
       'parse',
       'h15_sdmx_invalid_observation',
       `Board H.15 SDMX observation for ${seriesName} is missing OBS_STATUS`
-    );
-  }
-
-  if (MISSING_OBS_STATUSES.has(obsStatus)) {
-    return { ok: true, value: 'missing', issues: [] };
-  }
-  if (obsStatus !== 'A') {
-    return fail(
-      'parse',
-      'h15_sdmx_unknown_obs_status',
-      `Board H.15 SDMX observation for ${seriesName} has unknown OBS_STATUS ${obsStatus}`
     );
   }
 
@@ -197,6 +242,17 @@ function parseObsTag(
     );
   }
 
+  if (MISSING_OBS_STATUSES.has(obsStatus)) {
+    return { ok: true, value: { kind: 'missing', observationAsOf }, issues: [] };
+  }
+  if (obsStatus !== 'A') {
+    return fail(
+      'parse',
+      'h15_sdmx_unknown_obs_status',
+      `Board H.15 SDMX observation for ${seriesName} has unknown OBS_STATUS ${obsStatus}`
+    );
+  }
+
   const obsValueRaw = readXmlAttribute(tag, 'OBS_VALUE');
   if (obsValueRaw === null) {
     return fail(
@@ -207,7 +263,7 @@ function parseObsTag(
   }
 
   const parsedValue = parseStrictNumeric(obsValueRaw);
-  if (parsedValue === null) {
+  if (parsedValue === null || parsedValue === -9999) {
     return fail(
       'parse',
       'h15_sdmx_invalid_value',
@@ -215,20 +271,18 @@ function parseObsTag(
     );
   }
 
-  // Defensive: Board may emit -9999 with missing semantics in other transports; never emit as yield.
-  if (parsedValue === -9999) {
-    return { ok: true, value: 'missing', issues: [] };
-  }
-
   const seriesUniqueId = frbH15SdmxSeriesNameToUniqueId(seriesName);
   return {
     ok: true,
     value: {
-      seriesName,
-      seriesUniqueId,
-      observationAsOf,
-      valuePct: parsedValue,
-      obsStatus: 'A',
+      kind: 'available',
+      row: {
+        seriesName,
+        seriesUniqueId,
+        observationAsOf,
+        valuePct: parsedValue,
+        obsStatus: 'A',
+      },
     },
     issues: [],
   };
@@ -241,17 +295,8 @@ export function parseFrbH15SdmxXml(
     return fail('parse', 'h15_xml_empty', 'Board H.15 XML is empty');
   }
 
-  if (
-    !xmlText.includes('http://www.SDMX.org/resources/SDMXML/schemas/v1_0/message') &&
-    !xmlText.includes('<kf:Series') &&
-    !xmlText.includes('<frb:Obs')
-  ) {
-    return fail(
-      'parse',
-      'h15_sdmx_invalid_structure',
-      'Board H.15 XML does not contain expected SDMX compact markers'
-    );
-  }
+  const structure = validateSdmxStructure(xmlText);
+  if (!structure.ok) return structure;
 
   const rows: FrbH15SdmxObservationRow[] = [];
   const seenSeries = new Map<string, number>();
@@ -308,17 +353,24 @@ export function parseFrbH15SdmxXml(
       const obsTag = block.slice(obsStart, obsEnd + 2);
       const parsedObs = parseObsTag(obsTag, seriesName);
       if (!parsedObs.ok) return parsedObs;
-      if (parsedObs.value !== 'missing') {
-        const key = `${parsedObs.value.seriesUniqueId}|${parsedObs.value.observationAsOf}`;
-        if (seenObservation.has(key)) {
-          return fail(
-            'parse',
-            'h15_sdmx_duplicate_observation',
-            `Board H.15 SDMX has duplicate observation for ${seriesName} on ${parsedObs.value.observationAsOf}`
-          );
-        }
-        seenObservation.add(key);
-        rows.push(parsedObs.value);
+
+      const seriesUniqueId = frbH15SdmxSeriesNameToUniqueId(seriesName);
+      const observationAsOf =
+        parsedObs.value.kind === 'available'
+          ? parsedObs.value.row.observationAsOf
+          : parsedObs.value.observationAsOf;
+      const key = `${seriesUniqueId}|${observationAsOf}`;
+      if (seenObservation.has(key)) {
+        return fail(
+          'parse',
+          'h15_sdmx_duplicate_observation',
+          `Board H.15 SDMX has duplicate observation for ${seriesName} on ${observationAsOf}`
+        );
+      }
+      seenObservation.add(key);
+
+      if (parsedObs.value.kind === 'available') {
+        rows.push(parsedObs.value.row);
       }
       obsCursor = obsEnd + 2;
     }

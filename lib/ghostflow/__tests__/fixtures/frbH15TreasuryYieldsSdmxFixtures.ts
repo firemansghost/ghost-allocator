@@ -5,7 +5,11 @@
 import { createHash } from 'crypto';
 import { deflateRawSync } from 'zlib';
 import { FRB_H15_SDMX_SOURCE_LOCATOR } from '../../refresh/adapters/frbH15TreasuryYieldsSdmxMeta';
-import { FRB_H15_ZIP_DATA_MEMBER } from '../../refresh/adapters/frbH15ZipMember';
+import {
+  crc32Pkzip,
+  FRB_H15_ZIP_DATA_MEMBER,
+  FRB_H15_ZIP_MAX_UNCOMPRESSED_BYTES,
+} from '../../refresh/adapters/frbH15ZipMember';
 
 export { ADAPTER_TEST_NOW_ISO } from './frbH15TreasuryYieldsFixtures';
 
@@ -13,9 +17,9 @@ const SDMX_HEADER =
   '<?xml version="1.0" encoding="UTF-8"?>\n' +
   '<message:MessageGroup xmlns:message="http://www.SDMX.org/resources/SDMXML/schemas/v1_0/message">\n' +
   '<message:Header/>\n' +
-  '<message:DataSet>\n';
+  '<frb:DataSet>\n';
 
-const SDMX_FOOTER = '</message:DataSet>\n</message:MessageGroup>\n';
+const SDMX_FOOTER = '</frb:DataSet>\n</message:MessageGroup>\n';
 
 type SeriesObs = Array<{
   timePeriod: string;
@@ -42,6 +46,8 @@ export function buildFrbH15SdmxFixtureXml(input: {
   series: Array<{ name: string; observations: SeriesObs }>;
   unrelatedSeries?: Array<{ name: string; observations: SeriesObs }>;
   duplicateSeriesName?: string;
+  header?: string;
+  footer?: string;
 }): string {
   const blocks = input.series.map((s) => seriesBlock(s.name, s.observations));
   if (input.unrelatedSeries) {
@@ -56,23 +62,41 @@ export function buildFrbH15SdmxFixtureXml(input: {
       ])
     );
   }
-  return `${SDMX_HEADER}${blocks.join('\n')}\n${SDMX_FOOTER}`;
+  return `${input.header ?? SDMX_HEADER}${blocks.join('\n')}\n${input.footer ?? SDMX_FOOTER}`;
 }
 
-function crc32(buf: Buffer): number {
-  let crc = 0xffffffff;
-  for (let i = 0; i < buf.length; i++) {
-    crc ^= buf[i]!;
-    for (let j = 0; j < 8; j++) {
-      crc = (crc >>> 1) ^ (crc & 1 ? 0xedb88320 : 0);
-    }
-  }
-  return (crc ^ 0xffffffff) >>> 0;
+export { SDMX_HEADER, SDMX_FOOTER };
+
+function requiredSeriesBlocks(
+  observationsBySeries?: Partial<Record<string, SeriesObs>>
+): Array<{ name: string; observations: SeriesObs }> {
+  const defaults: Record<string, SeriesObs> = {
+    'RIFLGFCY30_N.B': [{ timePeriod: '2026-07-01', obsStatus: 'A', obsValue: '4.97' }],
+    'RIFLGFCY30_XII_N.B': [{ timePeriod: '2026-07-01', obsStatus: 'A', obsValue: '2.78' }],
+    'RIFLGFCY02_N.B': [{ timePeriod: '2026-07-01', obsStatus: 'A', obsValue: '4.17' }],
+    'RIFLGFCY05_N.B': [{ timePeriod: '2026-07-01', obsStatus: 'A', obsValue: '4.24' }],
+    'RIFLGFCY10_N.B': [{ timePeriod: '2026-07-01', obsStatus: 'A', obsValue: '4.48' }],
+  };
+  return Object.entries(defaults).map(([name, fallback]) => ({
+    name,
+    observations: observationsBySeries?.[name] ?? fallback,
+  }));
 }
+
+export type MinimalZipEntryOptions = {
+  name: string;
+  content: Uint8Array | string;
+  deflate?: boolean;
+  flags?: number;
+  crc32Override?: number;
+  compressedSizeOverride?: number;
+  uncompressedSizeOverride?: number;
+};
 
 /** Build a minimal ZIP archive in memory (stored or DEFLATE raw). */
 export function buildMinimalZip(
-  entries: Array<{ name: string; content: Uint8Array | string; deflate?: boolean }>
+  entries: Array<MinimalZipEntryOptions>,
+  trailingBytes?: Uint8Array
 ): Uint8Array {
   const chunks: Buffer[] = [];
   for (const entry of entries) {
@@ -87,17 +111,20 @@ export function buildMinimalZip(
     const header = Buffer.alloc(30 + nameBuf.length);
     header.writeUInt32LE(0x04034b50, 0);
     header.writeUInt16LE(20, 4);
-    header.writeUInt16LE(0, 6);
+    header.writeUInt16LE(entry.flags ?? 0, 6);
     header.writeUInt16LE(method, 8);
     header.writeUInt16LE(0, 10);
     header.writeUInt16LE(0, 12);
-    header.writeUInt32LE(crc32(payload), 14);
-    header.writeUInt32LE(compressed.length, 18);
-    header.writeUInt32LE(payload.length, 22);
+    header.writeUInt32LE(entry.crc32Override ?? crc32Pkzip(payload), 14);
+    header.writeUInt32LE(entry.compressedSizeOverride ?? compressed.length, 18);
+    header.writeUInt32LE(entry.uncompressedSizeOverride ?? payload.length, 22);
     header.writeUInt16LE(nameBuf.length, 26);
     header.writeUInt16LE(0, 28);
     nameBuf.copy(header, 30);
     chunks.push(header, compressed);
+  }
+  if (trailingBytes) {
+    chunks.push(Buffer.from(trailingBytes));
   }
   return Uint8Array.from(Buffer.concat(chunks));
 }
@@ -400,6 +427,115 @@ export const FIXTURE_H15_SDMX_MISSING_MEMBER_ZIP = buildMinimalZip([
 ]);
 
 export const FIXTURE_H15_SDMX_MALFORMED_ZIP = Uint8Array.from([0x50, 0x4b, 0x03, 0x04, 0x00]);
+
+export const FIXTURE_H15_SDMX_NO_NAMESPACE_XML = buildFrbH15SdmxFixtureXml({
+  series: requiredSeriesBlocks(),
+  header:
+    '<?xml version="1.0" encoding="UTF-8"?>\n<message:MessageGroup>\n<message:Header/>\n<frb:DataSet>\n',
+});
+
+export const FIXTURE_H15_SDMX_MISSING_DATASET_CLOSE_XML = buildFrbH15SdmxFixtureXml({
+  series: requiredSeriesBlocks(),
+  footer: '',
+});
+
+export const FIXTURE_H15_SDMX_MISSING_MESSAGEGROUP_CLOSE_XML = buildFrbH15SdmxFixtureXml({
+  series: requiredSeriesBlocks(),
+  footer: '</frb:DataSet>\n',
+});
+
+export const FIXTURE_H15_SDMX_MISSING_STATUS_INVALID_DATE_XML = buildFrbH15SdmxFixtureXml({
+  series: requiredSeriesBlocks({
+    'RIFLGFCY02_N.B': [{ timePeriod: 'banana', obsStatus: 'ND' }],
+  }),
+});
+
+export const FIXTURE_H15_SDMX_DUPLICATE_AA_XML = buildFrbH15SdmxFixtureXml({
+  series: requiredSeriesBlocks({
+    'RIFLGFCY30_N.B': [
+      { timePeriod: '2026-07-01', obsStatus: 'A', obsValue: '4.97' },
+      { timePeriod: '2026-07-01', obsStatus: 'A', obsValue: '4.98' },
+    ],
+  }),
+});
+
+export const FIXTURE_H15_SDMX_DUPLICATE_ND_ND_XML = buildFrbH15SdmxFixtureXml({
+  series: requiredSeriesBlocks({
+    'RIFLGFCY02_N.B': [
+      { timePeriod: '2026-07-01', obsStatus: 'ND' },
+      { timePeriod: '2026-07-01', obsStatus: 'ND' },
+    ],
+  }),
+});
+
+export const FIXTURE_H15_SDMX_DUPLICATE_ND_A_XML = buildFrbH15SdmxFixtureXml({
+  series: requiredSeriesBlocks({
+    'RIFLGFCY02_N.B': [
+      { timePeriod: '2026-07-01', obsStatus: 'ND' },
+      { timePeriod: '2026-07-01', obsStatus: 'A', obsValue: '4.17' },
+    ],
+  }),
+});
+
+export const FIXTURE_H15_SDMX_A_MINUS9999_XML = buildFrbH15SdmxFixtureXml({
+  series: requiredSeriesBlocks({
+    'RIFLGFCY30_N.B': [{ timePeriod: '2026-07-01', obsStatus: 'A', obsValue: '-9999' }],
+  }),
+});
+
+export const FIXTURE_H15_SDMX_STORED_ZIP = buildMinimalZip([
+  { name: FRB_H15_ZIP_DATA_MEMBER, content: FIXTURE_H15_SDMX_VALID_XML, deflate: false },
+]);
+
+export const FIXTURE_H15_SDMX_CRC_MISMATCH_ZIP = buildMinimalZip([
+  {
+    name: FRB_H15_ZIP_DATA_MEMBER,
+    content: FIXTURE_H15_SDMX_VALID_XML,
+    deflate: true,
+    crc32Override: 0xdeadbeef,
+  },
+]);
+
+export const FIXTURE_H15_SDMX_ENCRYPTED_FLAG_ZIP = buildMinimalZip([
+  {
+    name: FRB_H15_ZIP_DATA_MEMBER,
+    content: FIXTURE_H15_SDMX_VALID_XML,
+    deflate: true,
+    flags: 0x0001,
+  },
+]);
+
+export const FIXTURE_H15_SDMX_DATA_DESCRIPTOR_FLAG_ZIP = buildMinimalZip([
+  {
+    name: FRB_H15_ZIP_DATA_MEMBER,
+    content: FIXTURE_H15_SDMX_VALID_XML,
+    deflate: true,
+    flags: 0x0008,
+  },
+]);
+
+export const FIXTURE_H15_SDMX_ZIP64_SIZE_ZIP = buildMinimalZip([
+  {
+    name: FRB_H15_ZIP_DATA_MEMBER,
+    content: FIXTURE_H15_SDMX_VALID_XML,
+    deflate: true,
+    uncompressedSizeOverride: 0xffffffff,
+  },
+]);
+
+export const FIXTURE_H15_SDMX_OVERSIZE_DECLARED_ZIP = buildMinimalZip([
+  {
+    name: FRB_H15_ZIP_DATA_MEMBER,
+    content: FIXTURE_H15_SDMX_VALID_XML,
+    deflate: true,
+    uncompressedSizeOverride: FRB_H15_ZIP_MAX_UNCOMPRESSED_BYTES + 1,
+  },
+]);
+
+export const FIXTURE_H15_SDMX_UNEXPECTED_TRAILING_ZIP = buildMinimalZip(
+  [{ name: FRB_H15_ZIP_DATA_MEMBER, content: FIXTURE_H15_SDMX_VALID_XML, deflate: true }],
+  Uint8Array.from([0xef, 0xbe, 0xad, 0xde])
+);
 
 export function fixtureZipSha256(bytes: Uint8Array): string {
   return createHash('sha256').update(bytes).digest('hex');
