@@ -22,13 +22,19 @@ import type {
 } from '@/lib/ghostflow/artifacts/types';
 import type { CftcTffTreasuryNormalizedContract } from '../adapters/cftcTffTreasurySocrata';
 import type { CftcTffTreasuryNormalizedFields } from '../adapters/cftcTffTreasurySocrata';
-import { CFTC_TFF_TREASURY_ARTIFACT_ID } from '../adapters/cftcTffTreasurySocrataMeta';
+import { buildCftcTffTreasuryResourceQueryUrl } from '../adapters/cftcTffSocrataSource';
+import { CFTC_TFF_SOURCE_FAMILY_ID } from '../adapters/cftcTffSocrataMeta';
+import {
+  CFTC_TFF_TREASURY_ADAPTER_ID,
+  CFTC_TFF_TREASURY_ARTIFACT_ID,
+  CFTC_TFF_TREASURY_PARSER_VERSION,
+} from '../adapters/cftcTffTreasurySocrataMeta';
 import type {
   GhostFlowCandidateMapper,
   GhostFlowCandidateMapperInput,
   GhostFlowStageResult,
 } from '../types';
-import { mapperFail } from './mapperCommon';
+import { mapperFail, reconcileCandidateMapperProvenance } from './mapperCommon';
 
 function roundPct1(value: number | null): number {
   if (value === null || !Number.isFinite(value)) return 0;
@@ -88,29 +94,27 @@ export function mapTreasuryFuturesContractRow(
 export function mapTreasuryFuturesPositioningProxyCandidate(
   input: GhostFlowCandidateMapperInput<CftcTffTreasuryNormalizedFields>
 ): GhostFlowStageResult<TreasuryFuturesPositioningArtifactV1> {
-  const { normalized, registryEntry } = input;
+  const { normalized } = input;
 
-  if (registryEntry.artifactId !== CFTC_TFF_TREASURY_ARTIFACT_ID) {
+  const provenance = reconcileCandidateMapperProvenance(input, {
+    expectedArtifactId: CFTC_TFF_TREASURY_ARTIFACT_ID,
+    expectedSourceFamilyId: CFTC_TFF_SOURCE_FAMILY_ID,
+    expectedAdapterId: CFTC_TFF_TREASURY_ADAPTER_ID,
+    expectedParserVersion: CFTC_TFF_TREASURY_PARSER_VERSION,
+    expectedSourceLocator: buildCftcTffTreasuryResourceQueryUrl(),
+  });
+  if (!provenance.ok) {
+    return provenance;
+  }
+
+  if (normalized.fields.datasetId !== TFF_FUTURES_ONLY_DATASET_ID) {
     return mapperFail(
-      'candidate_mapper_registry_mismatch',
-      `Registry entry artifactId must be ${CFTC_TFF_TREASURY_ARTIFACT_ID}`
+      'candidate_mapper_invalid_provenance',
+      `Normalized fields.datasetId must be ${TFF_FUTURES_ONLY_DATASET_ID}`
     );
   }
 
-  if (normalized.artifactId !== 'treasuryFuturesPositioningProxy') {
-    return mapperFail(
-      'candidate_mapper_artifact_mismatch',
-      'Normalized observation artifactId must be treasuryFuturesPositioningProxy'
-    );
-  }
-
-  const asOf = normalized.observationAsOf ?? normalized.provenance.observationAsOf;
-  if (!asOf) {
-    return mapperFail(
-      'candidate_mapper_missing_observation_date',
-      'Normalized observation must include observationAsOf'
-    );
-  }
+  const asOf = provenance.observationAsOf;
 
   const contracts: TreasuryFuturesContractRowV1[] = [];
   for (const core of normalized.fields.coreContracts) {

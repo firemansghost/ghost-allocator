@@ -15,13 +15,19 @@ import type {
   TreasuryLongEndIncomeLensObservationsV1,
 } from '@/lib/ghostflow/artifacts/types';
 import type { FrbH15TreasuryNormalizedFields } from '../adapters/frbH15TreasuryYieldsNormalize';
-import { FRB_H15_ARTIFACT_ID } from '../adapters/frbH15TreasuryYieldsMeta';
+import {
+  FRB_H15_SDMX_ADAPTER_ID,
+  FRB_H15_SDMX_ARTIFACT_ID,
+  FRB_H15_SDMX_PARSER_VERSION,
+  FRB_H15_SDMX_SOURCE_FAMILY_ID,
+  FRB_H15_SDMX_SOURCE_LOCATOR,
+} from '../adapters/frbH15TreasuryYieldsSdmxMeta';
 import type {
   GhostFlowCandidateMapper,
   GhostFlowCandidateMapperInput,
   GhostFlowStageResult,
 } from '../types';
-import { mapperFail } from './mapperCommon';
+import { mapperFail, reconcileCandidateMapperProvenance } from './mapperCommon';
 
 function buildBoardObservations(
   fields: FrbH15TreasuryNormalizedFields
@@ -62,29 +68,20 @@ function buildBoardObservations(
 export function mapTreasuryLongEndIncomeLensCandidate(
   input: GhostFlowCandidateMapperInput<FrbH15TreasuryNormalizedFields>
 ): GhostFlowStageResult<TreasuryLongEndIncomeLensArtifactV1> {
-  const { normalized, registryEntry } = input;
+  const { normalized } = input;
 
-  if (registryEntry.artifactId !== FRB_H15_ARTIFACT_ID) {
-    return mapperFail(
-      'candidate_mapper_registry_mismatch',
-      `Registry entry artifactId must be ${FRB_H15_ARTIFACT_ID}`
-    );
+  const provenance = reconcileCandidateMapperProvenance(input, {
+    expectedArtifactId: FRB_H15_SDMX_ARTIFACT_ID,
+    expectedSourceFamilyId: FRB_H15_SDMX_SOURCE_FAMILY_ID,
+    expectedAdapterId: FRB_H15_SDMX_ADAPTER_ID,
+    expectedParserVersion: FRB_H15_SDMX_PARSER_VERSION,
+    expectedSourceLocator: FRB_H15_SDMX_SOURCE_LOCATOR,
+  });
+  if (!provenance.ok) {
+    return provenance;
   }
 
-  if (normalized.artifactId !== 'treasuryLongEndIncomeLens') {
-    return mapperFail(
-      'candidate_mapper_artifact_mismatch',
-      'Normalized observation artifactId must be treasuryLongEndIncomeLens'
-    );
-  }
-
-  const asOf = normalized.observationAsOf ?? normalized.provenance.observationAsOf;
-  if (!asOf) {
-    return mapperFail(
-      'candidate_mapper_missing_observation_date',
-      'Normalized observation must include observationAsOf'
-    );
-  }
+  const asOf = provenance.observationAsOf;
 
   const proposed: TreasuryLongEndIncomeLensArtifactV1 = {
     artifactVersion: '1',

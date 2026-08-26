@@ -466,8 +466,8 @@ function validateBoardNativeLongEndBranch(
     const name = raw.source.name;
     if (typeof name !== 'string' || !name.trim()) {
       errors.push('source.name is required.');
-    } else if (/FRED/i.test(name)) {
-      errors.push('source.name must not attribute FRED for Board-native artifacts.');
+    } else if (name !== TREASURY_LONG_END_BOARD_SOURCE_NAME) {
+      errors.push(`source.name must be "${TREASURY_LONG_END_BOARD_SOURCE_NAME}".`);
     }
     const url = raw.source.url;
     if (typeof url !== 'string' || !url.trim()) {
@@ -477,6 +477,12 @@ function validateBoardNativeLongEndBranch(
     }
     if (typeof raw.source.note !== 'string' || !raw.source.note.trim()) {
       errors.push('source.note is required.');
+    } else if (
+      /FRED/i.test(raw.source.note) ||
+      /fred\.stlouisfed\.org/i.test(raw.source.note) ||
+      /\bFRED API\b/i.test(raw.source.note)
+    ) {
+      errors.push('source.note must not attribute FRED or FRED API for Board-native artifacts.');
     }
 
     if (!Array.isArray(raw.source.series)) {
@@ -518,6 +524,8 @@ function validateBoardNativeLongEndBranch(
         }
         if (typeof entry.url !== 'string' || !entry.url.trim()) {
           errors.push(`${prefix}.url is required.`);
+        } else if (entry.url !== TREASURY_LONG_END_BOARD_RELEASE_URL) {
+          errors.push(`${prefix}.url must be "${TREASURY_LONG_END_BOARD_RELEASE_URL}".`);
         }
       }
       for (const required of TREASURY_LONG_END_BOARD_SOURCE_SERIES) {

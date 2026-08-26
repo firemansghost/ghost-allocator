@@ -14,13 +14,19 @@ import type {
 } from '@/lib/ghostflow/artifacts/types';
 import type { CftcTffNormalizedContract } from '../adapters/cftcTffSystematicSocrata';
 import type { CftcTffSystematicNormalizedFields } from '../adapters/cftcTffSystematicSocrata';
-import { CFTC_TFF_SYSTEMATIC_ARTIFACT_ID } from '../adapters/cftcTffSocrataMeta';
+import { buildCftcTffSystematicResourceQueryUrl } from '../adapters/cftcTffSocrataSource';
+import {
+  CFTC_TFF_SOURCE_FAMILY_ID,
+  CFTC_TFF_SYSTEMATIC_ADAPTER_ID,
+  CFTC_TFF_SYSTEMATIC_ARTIFACT_ID,
+  CFTC_TFF_SYSTEMATIC_PARSER_VERSION,
+} from '../adapters/cftcTffSocrataMeta';
 import type {
   GhostFlowCandidateMapper,
   GhostFlowCandidateMapperInput,
   GhostFlowStageResult,
 } from '../types';
-import { mapperFail } from './mapperCommon';
+import { mapperFail, reconcileCandidateMapperProvenance } from './mapperCommon';
 
 function mapScoreContract(contract: CftcTffNormalizedContract): SystematicFlowProxyScoreContract {
   return {
@@ -43,29 +49,27 @@ function mapVixContext(contract: CftcTffNormalizedContract): SystematicFlowProxy
 export function mapSystematicFlowProxyCandidate(
   input: GhostFlowCandidateMapperInput<CftcTffSystematicNormalizedFields>
 ): GhostFlowStageResult<SystematicFlowProxyArtifactV1> {
-  const { normalized, registryEntry } = input;
+  const { normalized } = input;
 
-  if (registryEntry.artifactId !== CFTC_TFF_SYSTEMATIC_ARTIFACT_ID) {
+  const provenance = reconcileCandidateMapperProvenance(input, {
+    expectedArtifactId: CFTC_TFF_SYSTEMATIC_ARTIFACT_ID,
+    expectedSourceFamilyId: CFTC_TFF_SOURCE_FAMILY_ID,
+    expectedAdapterId: CFTC_TFF_SYSTEMATIC_ADAPTER_ID,
+    expectedParserVersion: CFTC_TFF_SYSTEMATIC_PARSER_VERSION,
+    expectedSourceLocator: buildCftcTffSystematicResourceQueryUrl(),
+  });
+  if (!provenance.ok) {
+    return provenance;
+  }
+
+  if (normalized.fields.datasetId !== TFF_FUTURES_ONLY_DATASET_ID) {
     return mapperFail(
-      'candidate_mapper_registry_mismatch',
-      `Registry entry artifactId must be ${CFTC_TFF_SYSTEMATIC_ARTIFACT_ID}`
+      'candidate_mapper_invalid_provenance',
+      `Normalized fields.datasetId must be ${TFF_FUTURES_ONLY_DATASET_ID}`
     );
   }
 
-  if (normalized.artifactId !== 'systematicFlowProxy') {
-    return mapperFail(
-      'candidate_mapper_artifact_mismatch',
-      'Normalized observation artifactId must be systematicFlowProxy'
-    );
-  }
-
-  const asOf = normalized.observationAsOf ?? normalized.provenance.observationAsOf;
-  if (!asOf) {
-    return mapperFail(
-      'candidate_mapper_missing_observation_date',
-      'Normalized observation must include observationAsOf'
-    );
-  }
+  const asOf = provenance.observationAsOf;
 
   const scoreContracts = normalized.fields.scoreContracts.map(mapScoreContract);
   const vixContext = mapVixContext(normalized.fields.vixContext);

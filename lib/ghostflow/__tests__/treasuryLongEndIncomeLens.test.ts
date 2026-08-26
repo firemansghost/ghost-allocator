@@ -338,4 +338,29 @@ const boardManualQuality = buildBoardNativeFixture();
 boardManualQuality.dataQuality = 'verified_manual';
 assert.ok(!validateTreasuryLongEndIncomeLensArtifact(boardManualQuality, { mode: 'production' }).ok);
 
+const boardReutersName = buildBoardNativeFixture();
+(boardReutersName.source as { name: string }).name = 'Reuters';
+assert.ok(!validateTreasuryLongEndIncomeLensArtifact(boardReutersName, { mode: 'production' }).ok);
+
+const boardFredName = buildBoardNativeFixture();
+(boardFredName.source as { name: string }).name = 'FRED Treasury Yields';
+assert.ok(!validateTreasuryLongEndIncomeLensArtifact(boardFredName, { mode: 'production' }).ok);
+
+const boardFredSeriesUrl = buildBoardNativeFixture();
+(boardFredSeriesUrl.source as { series: { url: string }[] }).series[0]!.url =
+  'https://fred.stlouisfed.org/series/DGS30';
+assert.ok(!validateTreasuryLongEndIncomeLensArtifact(boardFredSeriesUrl, { mode: 'production' }).ok);
+
+const boardThirdPartySeriesUrl = buildBoardNativeFixture();
+(boardThirdPartySeriesUrl.source as { series: { url: string }[] }).series[0]!.url =
+  'https://example.test/yields';
+assert.ok(!validateTreasuryLongEndIncomeLensArtifact(boardThirdPartySeriesUrl, { mode: 'production' }).ok);
+
+const boardFredNote = buildBoardNativeFixture();
+(boardFredNote.source as { note: string }).note =
+  'Derived from FRED API Treasury constant maturity series.';
+assert.ok(!validateTreasuryLongEndIncomeLensArtifact(boardFredNote, { mode: 'production' }).ok);
+
+assert.ok(validateTreasuryLongEndIncomeLensArtifact(buildBoardNativeFixture(), { mode: 'production' }).ok);
+
 console.log('ghostflow/treasuryLongEndIncomeLens.test.ts: ok');

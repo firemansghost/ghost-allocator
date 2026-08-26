@@ -3,35 +3,44 @@ import type { CftcTffSystematicNormalizedFields } from '@/lib/ghostflow/refresh/
 import type { CftcTffTreasuryNormalizedFields } from '@/lib/ghostflow/refresh/adapters/cftcTffTreasurySocrata';
 import type { FrbH15TreasuryNormalizedFields } from '@/lib/ghostflow/refresh/adapters/frbH15TreasuryYieldsNormalize';
 import {
+  buildCftcTffSystematicResourceQueryUrl,
+  buildCftcTffTreasuryResourceQueryUrl,
+} from '@/lib/ghostflow/refresh/adapters/cftcTffSocrataSource';
+import {
   CFTC_TFF_DATASET_ID,
   CFTC_TFF_SOURCE_FAMILY_ID,
+  CFTC_TFF_SYSTEMATIC_ADAPTER_ID,
+  CFTC_TFF_SYSTEMATIC_PARSER_VERSION,
 } from '@/lib/ghostflow/refresh/adapters/cftcTffSocrataMeta';
-import { CFTC_TFF_SYSTEMATIC_ADAPTER_ID } from '@/lib/ghostflow/refresh/adapters/cftcTffSocrataMeta';
-import { CFTC_TFF_SYSTEMATIC_PARSER_VERSION } from '@/lib/ghostflow/refresh/adapters/cftcTffSocrataMeta';
-import { CFTC_TFF_TREASURY_ADAPTER_ID } from '@/lib/ghostflow/refresh/adapters/cftcTffTreasurySocrataMeta';
-import { CFTC_TFF_TREASURY_PARSER_VERSION } from '@/lib/ghostflow/refresh/adapters/cftcTffTreasurySocrataMeta';
-import { FRB_H15_ADAPTER_ID, FRB_H15_PARSER_VERSION } from '@/lib/ghostflow/refresh/adapters/frbH15TreasuryYieldsMeta';
+import {
+  CFTC_TFF_TREASURY_ADAPTER_ID,
+  CFTC_TFF_TREASURY_PARSER_VERSION,
+} from '@/lib/ghostflow/refresh/adapters/cftcTffTreasurySocrataMeta';
+import {
+  FRB_H15_SDMX_ADAPTER_ID,
+  FRB_H15_SDMX_PARSER_VERSION,
+  FRB_H15_SDMX_SOURCE_FAMILY_ID,
+  FRB_H15_SDMX_SOURCE_LOCATOR,
+} from '@/lib/ghostflow/refresh/adapters/frbH15TreasuryYieldsSdmxMeta';
 import type { GhostFlowNormalizedObservation } from '@/lib/ghostflow/refresh/types';
 
-const PROVENANCE_STUB = {
-  sourceId: 'test-source',
-  sourceLocator: 'https://example.test/source',
-  retrievedAt: '2026-07-09T15:30:00.000Z',
-  contentSha256: 'abc123',
-  adapterId: 'test-adapter',
-  parserVersion: '1.0.0',
-} as const;
+/** Realistic 64-char SHA-256 hex digest for offline fixtures. */
+export const FIXTURE_CONTENT_SHA256 =
+  '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef' as const;
+
+export const FIXTURE_RETRIEVED_AT = '2026-07-09T15:30:00.000Z' as const;
 
 export function fixtureSystematicNormalized(
   opts?: { sourcePublishedAt?: string }
 ): GhostFlowNormalizedObservation<CftcTffSystematicNormalizedFields> {
+  const observationAsOf = '2026-05-19';
   const ex = exampleSystematic as {
     scoreContracts: CftcTffSystematicNormalizedFields['scoreContracts'];
     vixContext: CftcTffSystematicNormalizedFields['vixContext'];
   };
   return {
     artifactId: 'systematicFlowProxy',
-    observationAsOf: '2026-05-19',
+    observationAsOf,
     fields: {
       datasetId: CFTC_TFF_DATASET_ID,
       scoreContracts: ex.scoreContracts.map((c) => ({
@@ -46,11 +55,13 @@ export function fixtureSystematicNormalized(
       },
     },
     provenance: {
-      ...PROVENANCE_STUB,
       sourceId: CFTC_TFF_SOURCE_FAMILY_ID,
+      sourceLocator: buildCftcTffSystematicResourceQueryUrl(),
+      retrievedAt: FIXTURE_RETRIEVED_AT,
+      contentSha256: FIXTURE_CONTENT_SHA256,
       adapterId: CFTC_TFF_SYSTEMATIC_ADAPTER_ID,
       parserVersion: CFTC_TFF_SYSTEMATIC_PARSER_VERSION,
-      observationAsOf: '2026-05-19',
+      observationAsOf,
       ...(opts?.sourcePublishedAt ? { sourcePublishedAt: opts.sourcePublishedAt } : {}),
     },
   };
@@ -121,8 +132,10 @@ export function fixtureTreasuryNormalized(
       ],
     },
     provenance: {
-      ...PROVENANCE_STUB,
       sourceId: CFTC_TFF_SOURCE_FAMILY_ID,
+      sourceLocator: buildCftcTffTreasuryResourceQueryUrl(),
+      retrievedAt: FIXTURE_RETRIEVED_AT,
+      contentSha256: FIXTURE_CONTENT_SHA256,
       adapterId: CFTC_TFF_TREASURY_ADAPTER_ID,
       parserVersion: CFTC_TFF_TREASURY_PARSER_VERSION,
       observationAsOf: reportDate,
@@ -134,9 +147,10 @@ export function fixtureTreasuryNormalized(
 export function fixtureH15Normalized(
   opts?: { sourcePublishedAt?: string }
 ): GhostFlowNormalizedObservation<FrbH15TreasuryNormalizedFields> {
+  const observationAsOf = '2026-08-24';
   return {
     artifactId: 'treasuryLongEndIncomeLens',
-    observationAsOf: '2026-08-24',
+    observationAsOf,
     fields: {
       thirtyYearNominalYieldPct: 4.97,
       thirtyYearTipsRealYieldPct: 2.78,
@@ -145,11 +159,13 @@ export function fixtureH15Normalized(
       tenYearYieldPct: 4.48,
     },
     provenance: {
-      ...PROVENANCE_STUB,
-      sourceId: 'frb_h15_treasury_yields',
-      adapterId: FRB_H15_ADAPTER_ID,
-      parserVersion: FRB_H15_PARSER_VERSION,
-      observationAsOf: '2026-08-24',
+      sourceId: FRB_H15_SDMX_SOURCE_FAMILY_ID,
+      sourceLocator: FRB_H15_SDMX_SOURCE_LOCATOR,
+      retrievedAt: FIXTURE_RETRIEVED_AT,
+      contentSha256: FIXTURE_CONTENT_SHA256,
+      adapterId: FRB_H15_SDMX_ADAPTER_ID,
+      parserVersion: FRB_H15_SDMX_PARSER_VERSION,
+      observationAsOf,
       ...(opts?.sourcePublishedAt ? { sourcePublishedAt: opts.sourcePublishedAt } : {}),
     },
   };

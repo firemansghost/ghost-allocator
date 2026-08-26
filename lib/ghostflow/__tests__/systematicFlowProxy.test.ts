@@ -13,6 +13,7 @@ import {
   resolveBasketDirection,
   validateSystematicFlowProxyArtifact,
   evaluateSystematicFlowProxyArtifactFreshness,
+  systematicFlowProxySnapshotDataQuality,
 } from '../artifacts/systematicFlowProxy';
 import { GHOSTFLOW_REFERENCE_AS_OF } from '../reference';
 import productionArtifact from '@/data/ghostflow/artifacts/systematicFlowProxy.v1.json';
@@ -200,5 +201,12 @@ if (automatedFreshResult.ok) {
   );
   assert.strictEqual(freshAutomated.ageDays, 6);
 }
+
+assert.strictEqual(systematicFlowProxySnapshotDataQuality('verified_manual'), 'verified_manual');
+assert.strictEqual(
+  systematicFlowProxySnapshotDataQuality('manual_unverified'),
+  'manual_unverified'
+);
+assert.strictEqual(systematicFlowProxySnapshotDataQuality('verified_automated'), undefined);
 
 console.log('ghostflow/systematicFlowProxy.test.ts: ok');
