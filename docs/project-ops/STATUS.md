@@ -1,6 +1,42 @@
 ﻿# STATUS
 
-## Current State (GhostFlow — 2026-08-26, H.15 SDMX/XML transport approved)
+## Current State (GhostFlow — 2026-08-26, H.15 SDMX/XML transport implemented)
+Starting `main` for this work: `3f63fdf27176dc5fabb4b15c8395200d10c9c931` (includes PRs **#140–#143**).
+
+**H.15 SDMX/XML transport cutover complete (branch `feat/ghostflow-h15-sdmx`):**
+- Active transport for `treasuryLongEndIncomeLens` → Board release-level SDMX/XML ZIP
+  `https://www.federalreserve.gov/releases/h15/data/FRB_h15_xml.zip`
+- New adapter: `frb-h15-treasury-yields-sdmx` parser **1.0.0**; registry + operator runner cut over
+- Product contract unchanged: required 30Y nominal + 30Y inflation-indexed real; optional 2Y/5Y/10Y; **no T10YIE**; **no derived breakeven**; display-only / unscored / `human_required`
+- Source family remains `frb_h15_treasury_yields`
+- **CSV adapter `frb-h15-treasury-yields-csv` parser 1.0.1 retained** for manual parity/rollback inspection; **no automatic runtime fallback**
+- ZIP strategy: narrow in-memory local-header reader + `node:zlib` raw DEFLATE (no new dependency)
+- XML strategy: deterministic SDMX compact series/observation scanner (no new dependency)
+- Live CSV/XML normalized parity verified at ceiling `2026-08-24` (all five series aligned)
+- PR **#143** transport decision already in DECISIONS — not duplicated
+
+**Live smoke (report-only, no writes):**
+- H.15-only (`2026-08-26T19:57:55.764Z`): `candidate_observation_available` (candidate `2026-08-24`); overall `ready_for_review`; suggested `review_candidates`; exit 0; adapter `frb-h15-treasury-yields-sdmx`
+- Full runner (`2026-08-26T19:58:07.000Z`): all three artifacts `candidate_observation_available` (CFTC `2026-08-18`; H.15 `2026-08-24`); overall `ready_for_review`; suggested `review_candidates`; exit 0
+
+Production GhostFlow state remains unchanged:
+- `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
+- Composite / Passive / Structural: 60 / 53 / 67
+- Band: Elevated Flow Pressure
+- `publicSignalCount`: 13
+- MOCK systematic / retirement / levered: 62 / 58 / 55
+
+VIX remains excluded because Gate C / `marketBreadth` remain blocked.
+
+## Recommended next work
+1. Human-reviewed candidate-generation design for operator-ready artifacts (including H.15 long-end)
+2. Breadth remains blocked pending provider authorization / licensed-source decision. Do not wire VIX or Gate C.
+
+Last updated: 2026-08-26
+
+---
+
+## Archive — H.15 SDMX/XML transport approved (2026-08-26)
 Starting `main` for this work: `38333e0224fa4112cae4bb149cbec8c16f6b502f` (PR **#142** blank-as-missing parser **1.0.1** merged).
 
 **Bobby approved H.15 transport migration (recorded in DECISIONS):**
@@ -9,7 +45,7 @@ Starting `main` for this work: `38333e0224fa4112cae4bb149cbec8c16f6b502f` (PR **
 - Product contract preserved: required 30Y nominal + 30Y inflation-indexed real; optional 2Y/5Y/10Y; **no T10YIE**; **no derived breakeven**; display-only / unscored / `human_required`; no production writer or workflow in the migration itself
 - Source family remains Board H.15; **dual-DDP CSV remains the active interim transport** until the SDMX/XML adapter is implemented and cut over
 - Investigation memo: [H15_LIVE_SOURCE_AND_TRANSPORT_INVESTIGATION.md](../ghostflow/H15_LIVE_SOURCE_AND_TRANSPORT_INVESTIGATION.md)
-- **SDMX/XML adapter not yet implemented** in this decision-record PR
+- **SDMX/XML adapter not yet implemented** in that decision-record PR
 
 **PR #142 on `main` (parser 1.0.1):**
 - Blank / whitespace-only DDP observation cells share the existing `ND` missing path
@@ -32,7 +68,6 @@ VIX remains excluded because Gate C / `marketBreadth` remain blocked.
 Last updated: 2026-08-26
 
 ---
-
 ## Archive — H.15 blank-missing parser 1.0.1 (2026-08-25)
 Starting `main` for this work: `f833e7aef8d6c489f5e489a2c90c19ef3a3af31e` (PR **#141** investigation merged). PR **#142** merged to `main` as `38333e0`.
 

@@ -14,6 +14,7 @@ export type GhostFlowAutomationReadiness = 'green' | 'yellow' | 'red';
 
 export type GhostFlowSourceFormat =
   | 'csv'
+  | 'xml'
   | 'json_api'
   | 'html'
   | 'pdf'

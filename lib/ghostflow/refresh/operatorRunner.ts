@@ -5,7 +5,7 @@
 
 import { CFTC_TFF_SYSTEMATIC_SOCRATA_ADAPTER } from './adapters/cftcTffSystematicSocrata';
 import { CFTC_TFF_TREASURY_SOCRATA_ADAPTER } from './adapters/cftcTffTreasurySocrata';
-import { FRB_H15_TREASURY_YIELDS_ADAPTER } from './adapters/frbH15TreasuryYields';
+import { FRB_H15_TREASURY_YIELDS_SDMX_ADAPTER } from './adapters/frbH15TreasuryYieldsSdmx';
 import { isValidCalendarDate, isValidIsoTimestamp } from './dateValidation';
 import { summarizeCurrentGhostFlowArtifact } from './currentArtifactSummary';
 import { buildGhostFlowRefreshReport } from './planner';
@@ -49,7 +49,7 @@ export type GhostFlowOperatorAdapterMap = Record<
 export const DEFAULT_GHOSTFLOW_OPERATOR_ADAPTER_MAP: GhostFlowOperatorAdapterMap = {
   systematicFlowProxy: CFTC_TFF_SYSTEMATIC_SOCRATA_ADAPTER,
   treasuryFuturesPositioningProxy: CFTC_TFF_TREASURY_SOCRATA_ADAPTER,
-  treasuryLongEndIncomeLens: FRB_H15_TREASURY_YIELDS_ADAPTER,
+  treasuryLongEndIncomeLens: FRB_H15_TREASURY_YIELDS_SDMX_ADAPTER,
 };
 
 export type GhostFlowOperatorReportInput = {

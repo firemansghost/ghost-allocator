@@ -24,12 +24,12 @@ import {
   CFTC_TFF_TREASURY_SOURCE_NAME,
 } from '../refresh/adapters/cftcTffTreasurySocrataMeta';
 import {
-  FRB_H15_ADAPTER_ID,
-  FRB_H15_PARSER_VERSION,
-  FRB_H15_SOURCE_FAMILY_ID,
-  FRB_H15_SOURCE_LOCATOR,
-  FRB_H15_SOURCE_NAME,
-} from '../refresh/adapters/frbH15TreasuryYieldsMeta';
+  FRB_H15_SDMX_ADAPTER_ID,
+  FRB_H15_SDMX_PARSER_VERSION,
+  FRB_H15_SDMX_SOURCE_FAMILY_ID,
+  FRB_H15_SDMX_SOURCE_LOCATOR,
+  FRB_H15_SDMX_SOURCE_NAME,
+} from '../refresh/adapters/frbH15TreasuryYieldsSdmxMeta';
 import {
   assertGhostFlowRefreshRegistryValid,
   GATE_C_ARTIFACT_IDS,
@@ -394,13 +394,14 @@ for (const entry of GHOSTFLOW_REFRESH_REGISTRY) {
   }
   if (entry.artifactId === 'treasuryLongEndIncomeLens') {
     assert.strictEqual(entry.adapter.implementationStatus, 'implemented');
-    assert.strictEqual(entry.adapter.adapterId, FRB_H15_ADAPTER_ID);
+    assert.strictEqual(entry.adapter.adapterId, FRB_H15_SDMX_ADAPTER_ID);
     if (entry.adapter.implementationStatus === 'implemented') {
-      assert.strictEqual(entry.adapter.parserVersion, FRB_H15_PARSER_VERSION);
+      assert.strictEqual(entry.adapter.parserVersion, FRB_H15_SDMX_PARSER_VERSION);
     }
-    assert.strictEqual(entry.canonicalSource.sourceFamilyId, FRB_H15_SOURCE_FAMILY_ID);
-    assert.strictEqual(entry.canonicalSource.sourceName, FRB_H15_SOURCE_NAME);
-    assert.strictEqual(entry.canonicalSource.sourceLocator, FRB_H15_SOURCE_LOCATOR);
+    assert.strictEqual(entry.canonicalSource.sourceFamilyId, FRB_H15_SDMX_SOURCE_FAMILY_ID);
+    assert.strictEqual(entry.canonicalSource.sourceName, FRB_H15_SDMX_SOURCE_NAME);
+    assert.strictEqual(entry.canonicalSource.sourceLocator, FRB_H15_SDMX_SOURCE_LOCATOR);
+    assert.strictEqual(entry.sourceFormat, 'xml');
     assert.strictEqual(entry.lane, 'treasury_display');
     assert.strictEqual(entry.automationReadiness, 'green');
     assert.strictEqual(entry.failureSeverity, 'nonfatal_treasury');
@@ -424,9 +425,9 @@ assert.strictEqual(
 if (byId.treasuryLongEndIncomeLens.adapter.implementationStatus === 'implemented') {
   assert.strictEqual(
     byId.treasuryLongEndIncomeLens.adapter.parserVersion,
-    FRB_H15_PARSER_VERSION
+    FRB_H15_SDMX_PARSER_VERSION
   );
-  assert.strictEqual(byId.treasuryLongEndIncomeLens.adapter.parserVersion, '1.0.1');
+  assert.strictEqual(byId.treasuryLongEndIncomeLens.adapter.parserVersion, '1.0.0');
 }
 assert.strictEqual(
   byId.treasuryLongEndIncomeLens.canonicalSource.sourceFamilyId,
@@ -434,7 +435,12 @@ assert.strictEqual(
 );
 assert.strictEqual(
   byId.treasuryLongEndIncomeLens.adapter.adapterId,
-  'frb-h15-treasury-yields-csv'
+  'frb-h15-treasury-yields-sdmx'
+);
+assert.strictEqual(byId.treasuryLongEndIncomeLens.sourceFormat, 'xml');
+assert.strictEqual(
+  byId.treasuryLongEndIncomeLens.canonicalSource.sourceLocator,
+  'https://www.federalreserve.gov/releases/h15/data/FRB_h15_xml.zip'
 );
 
 assert.deepStrictEqual([...GATE_C_ARTIFACT_IDS].sort(), [
