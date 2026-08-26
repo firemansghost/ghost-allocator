@@ -1,7 +1,7 @@
 ﻿# HANDOFF
 
-## Last Session Summary (2026-08-26, candidate-generation design)
-Starting `main`: `ae6fbf14a25e5e898d0874358bed17b26ba28c50` (PRs **#140–#144** merged). Authored read-only candidate-generation design memo for operator-ready artifacts (`systematicFlowProxy`, `treasuryFuturesPositioningProxy`, `treasuryLongEndIncomeLens`). Defines review envelope contract, mapper pipeline, validator reuse, diff/idempotency, gitignored `tmp/ghostflow/candidates/` storage, CLI shape, promotion boundary, and implementation PR sequence. **No code, no production writes, no DECISIONS changes.** Report-only operator runner unchanged.
+## Last Session Summary (2026-08-26, candidate-generation design — contract correction)
+Starting `main`: `ae6fbf14a25e5e898d0874358bed17b26ba28c50` (PRs **#140–#144** merged). Corrected PR **#145** design memo: idempotency (identity + payload, not envelope bytes), same-date revision scope (mapped-payload only; production lacks accepted source hash), mapping-policy decision gate before PR A (Long-End blockers, `dataQuality`, `publishedAt`). **No code, no production writes, no DECISIONS changes.**
 
 Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`. VIX / Gate C excluded; breadth remains blocked.
 
@@ -10,21 +10,32 @@ Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 
 - H.15 investigation merged (PR **#141**).
 - CSV blank-as-missing parser **1.0.1** merged (PR **#142**).
 - H.15 SDMX transport decision (PR **#143**) and implementation/cutover (PR **#144**) merged to `main`.
-- Candidate-generation **design** complete; implementation not started.
+- Candidate-generation **architecture design** on PR **#145**; implementation **blocked on mapping-policy decisions**.
 - Breadth / Gate C blocked; no VIX wiring.
 - Core app remains stable; education section remains live.
 
 ## Priority for Next Session
-1. **PR A:** Candidate types + pure artifact mappers + fixture tests (per [CANDIDATE_GENERATION_DESIGN.md](../ghostflow/CANDIDATE_GENERATION_DESIGN.md))
-2. **PR B:** Generator + diff + `ghostflow:generate-candidate` CLI
-3. Promotion command requires separate DECISIONS approval before implementation
-4. Breadth authorization remains separate and blocked; do not wire VIX or Gate C
+1. **Resolve candidate production-mapping policy decisions** (Long-End `seriesDefinition` / Board source block, `dataQuality`, `publishedAt`) — DECISIONS update after Bobby approval
+2. **PR A** — types + authorized validator/schema updates + pure mappers + tests (only after decision gate)
+3. **PR B** — generator + diff + idempotent writer + CLI
+4. Promotion (PR C) requires separate DECISIONS approval
+5. Breadth authorization remains separate and blocked; do not wire VIX or Gate C
 
 ## Open Questions
-- Long-end `seriesDefinition` / production `source` block migration for Board SDMX candidates?
-- Same-date source revision promotion policy?
-- `dataQuality` enum for automated vs manual verification label?
+- Approve proposed Long-End `seriesDefinition`: `frb_h15_treasury_long_end_income_lens_v1`?
+- Board H.15 production `source` block + validator/display-copy changes?
+- `dataQuality`: `verified_automated` vs retain existing enum?
+- CFTC + H.15 automated `publishedAt` mapping policy?
+- Same-date mapped-payload promotion policy (does not block generator)?
 - Promotion command authorization (DECISIONS entry)?
+
+---
+
+## Archive — Candidate-generation design initial draft (2026-08-26)
+Starting `main`: `ae6fbf14a25e5e898d0874358bed17b26ba28c50` (PRs **#140–#144** merged). Authored read-only candidate-generation design memo for operator-ready artifacts. Initial draft proposed PR A immediately after merge; superseded by mapping-policy gate in contract correction pass.
+
+## Priority for Next Session (superseded)
+1. ~~PR A immediately after #145~~ → mapping-policy decisions first
 
 ---
 

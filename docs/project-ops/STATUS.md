@@ -3,17 +3,17 @@
 ## Current State (GhostFlow — 2026-08-26, candidate-generation design)
 Starting `main` for this work: `ae6fbf14a25e5e898d0874358bed17b26ba28c50` (includes PRs **#140–#144** merged).
 
-**Candidate-generation architecture design complete (branch `docs/ghostflow-candidate-generation-design`):**
+**Candidate-generation architecture design (PR #145, branch `docs/ghostflow-candidate-generation-design`):**
 - Design memo: [CANDIDATE_GENERATION_DESIGN.md](../ghostflow/CANDIDATE_GENERATION_DESIGN.md)
 - Scope: operator-ready artifacts only — `systematicFlowProxy`, `treasuryFuturesPositioningProxy`, `treasuryLongEndIncomeLens`
-- Proposes typed review envelope (metadata + validated `proposedArtifact`), gitignored output under `tmp/ghostflow/candidates/`, artifact-specific pure mappers, production validator reuse, deterministic diff/idempotency
+- Architecture approved: typed review envelope, pure mappers, validator reuse, gitignored `tmp/ghostflow/candidates/`, explicit CLI, no automatic promotion
+- **Contract corrections:** idempotency reconciles identity + payload (not whole-envelope bytes); same-date revision limited to mapped-payload diff (production lacks accepted source hash); mapping-policy decision gate **blocks PR A**
 - **Does not authorize** production writes, automatic promotion, or candidate commits
-- Report-only operator runner (`ghostflow:refresh-report`) behavior unchanged
+- Report-only operator runner unchanged
 
 **PR #144 merged to `main` (H.15 SDMX/XML transport):**
 - Active transport for `treasuryLongEndIncomeLens` → Board release-level SDMX/XML ZIP
 - Adapter `frb-h15-treasury-yields-sdmx` parser **1.0.0**; CSV **1.0.1** retained without runtime fallback
-- Final scanner hardening: dataset-bound parsing, self-closing obs tags, exact attribute matching
 
 Production GhostFlow state remains unchanged:
 - `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
@@ -25,10 +25,11 @@ Production GhostFlow state remains unchanged:
 VIX remains excluded because Gate C / `marketBreadth` remain blocked.
 
 ## Recommended next work
-1. **PR A:** Implement candidate types + artifact mappers + tests (see design memo §20)
-2. **PR B:** Candidate generator + diff + `ghostflow:generate-candidate` CLI
-3. Promotion command (PR C) blocked pending separate DECISIONS approval
-4. Breadth remains blocked pending provider authorization / licensed-source decision. Do not wire VIX or Gate C.
+1. **Resolve candidate production-mapping policy decisions** before PR A (Long-End `seriesDefinition` / Board source block, `dataQuality`, `publishedAt`) — record in DECISIONS after Bobby approval
+2. **PR A** — types + authorized validator/schema updates + pure mappers + tests (only after decision gate)
+3. **PR B** — generator + diff + idempotent writer + CLI
+4. Promotion (PR C) blocked pending separate DECISIONS approval
+5. Breadth remains blocked. Do not wire VIX or Gate C.
 
 Last updated: 2026-08-26
 

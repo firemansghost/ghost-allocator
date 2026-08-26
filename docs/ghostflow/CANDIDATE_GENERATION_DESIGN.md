@@ -19,10 +19,17 @@ fetch → parse → normalize → [candidate generator] → review envelope on d
               (separate, later, human-approved) promotion → production `.v1.json`
 ```
 
-**Recommendation:** **GO** — implement in two coding PRs after this memo merges:
+**Recommendation:** **GO** — architecture approved; **implementation waits on a mapping-policy decision gate** (§21–§22).
 
-1. **PR A** — Pure candidate types, artifact-specific mappers, mapper tests (no I/O, no CLI).
-2. **PR B** — Candidate generator, deterministic diff, gitignored filesystem writer, `ghostflow:generate-candidate` CLI.
+**Sequence after PR #145 merges:**
+
+1. **PR #145** — This architecture design (docs only).
+2. **Mapping-policy decision gate** — Bobby approves production-mapping semantics; record in `DECISIONS.md`.
+3. **PR A** — Pure types, authorized schema/validator updates, artifact mappers + tests (no I/O).
+4. **PR B** — Generator, canonical hashing, diff, idempotent filesystem writer, CLI.
+5. **PR C** — Promotion — **blocked** separately until DECISIONS authorization.
+
+PR A **must not guess** production semantics (`seriesDefinition`, `source` block, `dataQuality`, `publishedAt`). See §7–§8, §22.
 
 **Promotion (PR C)** remains blocked until Bobby approves a separate DECISIONS entry.
 
@@ -92,16 +99,16 @@ Separate **machine promotion payload** from **human review metadata**.
 | `candidateVersion` | Envelope schema version (start `'1'`) |
 | `artifactId` | Registry artifact id |
 | `artifactSchemaVersion` | Production artifact version (currently `'1'`) |
-| `status` | `GhostFlowCandidateStatus` (see §11, §12) |
+| `status` | `GhostFlowCandidateStatus` (see §12, §13) |
 | `generatedAt` | ISO timestamp of generation run (**not** part of identity hash) |
 | `generationMode` | `'operator_fetch'` initially |
 | `humanReviewRequired` | Always `true` |
 | `currentProduction` | Date-only summary + content fingerprint of current prod |
-| `candidateIdentity` | Stable idempotency key (§6) |
-| `normalizedObservation` | Full `GhostFlowNormalizedObservation` input (§7) |
-| `proposedArtifact` | Exact production JSON candidate (§8) |
+| `candidateIdentity` | Stable idempotency key (§5) |
+| `normalizedObservation` | Full `GhostFlowNormalizedObservation` input (§6) |
+| `proposedArtifact` | Exact production JSON candidate (§9) |
 | `validation` | Production validator outcome |
-| `diff` | Deterministic current vs proposed (§9) |
+| `diff` | Deterministic current vs proposed (§10) |
 | `issues` | Fail-closed issue list |
 
 ### 4.2 What production promotion receives
@@ -121,6 +128,8 @@ Promotion consumes **only** `proposedArtifact` (after re-validation), not the en
 
 ### 5.1 Identity key (`GhostFlowCandidateIdentity`)
 
+Candidate identity is based on **deterministic candidate/source/payload semantics**, not run metadata.
+
 Deterministic hash input (canonical JSON, sorted keys, fixed field order in mapper output):
 
 ```
@@ -132,24 +141,37 @@ artifactId
 + promotionPayloadSha256  // SHA-256 of canonical proposedArtifact JSON
 ```
 
-**`generatedAt` is excluded** from identity so repeated runs with identical source data produce the same identity.
+**Not identity-defining** (may vary across repeated runs with the same logical candidate):
 
-### 5.2 Filename (§10)
+- `generatedAt` (envelope run timestamp)
+- `retrievedAt` (fetch time in embedded `normalizedObservation.provenance`)
+- Any other envelope run metadata
+
+The embedded `normalizedObservation` may therefore contain a different `retrievedAt` on each fetch while `candidateIdentity.identitySha256` remains unchanged. **Do not hash the entire envelope.**
+
+### 5.2 Filename
 
 ```
 <artifactId>.<observationAsOf>.<identityPrefix>.candidate.json
 ```
 
-- `identityPrefix` = first 12 hex chars of `promotionPayloadSha256` (or full identity hash prefix).
-- **Do not** embed `generatedAt` in filename — avoids duplicate files for identical data.
+- `identityPrefix` = first 12 hex chars of `identitySha256` (locator hint only).
+- **Do not** embed `generatedAt` in filename.
+- **Filename prefix is only a locator** — on collision or idempotent re-run, the generator **always reads the existing file** and verifies the **full** `candidateIdentity.identitySha256` and `promotionPayloadSha256` reconciliation before acting.
 
-### 5.3 Collision behavior
+### 5.3 Idempotent re-run and collision behavior
+
+When the target filename already exists, read and verify the stored envelope:
 
 | Case | Behavior |
 |------|----------|
-| Same identity, byte-identical envelope | Exit **0**, status `candidate_already_exists` (idempotent no-op) |
-| Same identity, different bytes | Exit **6** `candidate_identity_collision` — fail closed; human must investigate |
-| Different identity, same observation date | Allowed (e.g. source revision — §12) |
+| **A. Same full identity** — stored envelope has the same `candidateIdentity.identitySha256`, the same `promotionPayloadSha256`, and an internally valid identity↔payload relationship | Exit **0**, status `candidate_already_exists`. **Do not rewrite** the file. Preserve the stored envelope’s original `generatedAt`. Newly fetched `retrievedAt` (or other run metadata) alone is **not** a collision. |
+| **B. Filename occupied, full identity differs** | Exit **6**, status `candidate_identity_collision` — fail closed. |
+| **C. Stored envelope claims an identity but `proposedArtifact` hash does not reconcile with `promotionPayloadSha256`** | Exit **6**, status `candidate_identity_collision` / invalid stored candidate — fail closed. |
+
+**Whole-envelope byte identity is not required** and must not be assumed. Only identity tuple + promotion payload hash must reconcile.
+
+Different identity, same observation date: allowed (e.g. mapped-payload revision — §13).
 
 ---
 
@@ -181,13 +203,16 @@ GhostFlowCandidateMapper<TFields, TArtifact>
   map(input: GhostFlowCandidateMapperInput<TFields>): GhostFlowStageResult<TArtifact>
 ```
 
+**PR A gate:** Mappers may be implemented only for semantics explicitly authorized by the mapping-policy decision gate (§21–§22). Until then, mapper contracts are specified here but **must not be coded with guessed values**.
+
 ### 7.1 `systematicFlowProxy`
 
 | | |
 |-|-|
-| **Input** | `CftcTffSystematicNormalizedFields` + provenance dates |
+| **Input** | `CftcTffSystematicNormalizedFields` + provenance |
 | **Output** | `SystematicFlowProxyArtifactV1` (production mode) |
-| **Invariants** | Compute `basket` from score contracts using existing artifact helpers; `datasetId` = `gpe5-46if`; `dataQuality: 'verified_manual'` for automated path; `asOf` = observation date; `publishedAt` from provenance or CFTC release rule; no score wiring |
+| **Invariants** | Compute `basket` from score contracts using existing artifact helpers; `datasetId` = `gpe5-46if`; `asOf` = observation date; no score wiring |
+| **Blocked until decided** | `dataQuality` enum value (§22); `publishedAt` mapping (§8) |
 | **Validator** | `validateSystematicFlowProxyArtifact` |
 
 ### 7.2 `treasuryFuturesPositioningProxy`
@@ -197,24 +222,81 @@ GhostFlowCandidateMapper<TFields, TArtifact>
 | **Input** | `CftcTffTreasuryNormalizedFields` + provenance |
 | **Output** | `TreasuryFuturesPositioningArtifactV1` |
 | **Invariants** | `mappingStatus: 'not_final'`; no forbidden score keys; basket observations from core contracts; preserve caveats template |
+| **Blocked until decided** | `dataQuality` enum value (§22); `publishedAt` mapping (§8) |
 | **Validator** | `validateTreasuryFuturesPositioningProxyArtifact(raw, { mode: 'production' })` |
 
-### 7.3 `treasuryLongEndIncomeLens`
+### 7.3 `treasuryLongEndIncomeLens` — **PR A blockers**
+
+Current committed production / validator still encode:
+
+- `seriesDefinition`: `fred_treasury_long_end_income_lens_v1`
+- `source` block: FRED-oriented metadata
+- `observations.tenYearBreakevenInflationPct` (T10YIE / breakeven)
+
+Approved **active source contract** (PR **#144**, DECISIONS) is now:
+
+- Board H.15 (`frb_h15_treasury_yields`)
+- Required: 30Y nominal + 30Y real
+- Optional: 2Y / 5Y / 10Y
+- **No T10YIE**, **no breakeven**
+
+**Before PR A, Bobby must approve:**
+
+| # | Decision |
+|---|----------|
+| A | Final Board-native `seriesDefinition` — **proposed (awaiting approval):** `frb_h15_treasury_long_end_income_lens_v1` (transport-neutral; do not embed `sdmx` in the semantic id unless evidence requires it) |
+| B | Production Board H.15 `source` block contract + any required validator / display-copy truth changes |
+| C | Whether validator/types must change to drop breakeven from automated candidate path (required by product contract) |
+
+Do **not** recommend retaining the FRED-named `seriesDefinition` merely for validator continuity.
 
 | | |
 |-|-|
 | **Input** | `FrbH15TreasuryNormalizedFields` + provenance |
-| **Output** | `TreasuryLongEndIncomeLensArtifactV1` |
-| **Invariants** | **No `T10YIE` / breakeven**; compute curve spreads via `computeCurveSpread`; `mappingStatus: 'not_final'`; Board H.15 source block (not FRED); optional context yields only when present in normalized fields |
-| **Validator** | `validateTreasuryLongEndIncomeLensArtifact(raw, { mode: 'production' })` |
-
-**Open product note:** Current committed production artifact still references FRED source metadata and includes `tenYearBreakevenInflationPct`. New Board SDMX candidates **must omit breakeven** per DECISIONS. Whether `seriesDefinition` string changes from `fred_treasury_long_end_income_lens_v1` requires Bobby approval (§21).
+| **Output** | `TreasuryLongEndIncomeLensArtifactV1` per approved mapping policy |
+| **Invariants (product-locked)** | No T10YIE / breakeven; compute curve spreads via `computeCurveSpread`; `mappingStatus: 'not_final'`; optional context yields only when present in normalized fields |
+| **Blocked until decided** | `seriesDefinition`, `source` block, `dataQuality`, `publishedAt` |
+| **Validator** | `validateTreasuryLongEndIncomeLensArtifact(raw, { mode: 'production' })` — may require schema updates authorized by mapping decision |
 
 Mappers live in `lib/ghostflow/refresh/candidateMappers/` (proposed) behind `GHOSTFLOW_CANDIDATE_MAPPER_REGISTRY` — no giant switch in the generator.
 
 ---
 
-## 8. Existing validator reuse
+## 8. Production field mapping policies (open decisions — block PR A)
+
+### 8.1 `publishedAt`
+
+Production artifacts require `publishedAt`. CFTC adapters provide durable provenance including `retrievedAt` and `contentSha256` but **do not fabricate** `sourcePublishedAt`. Board H.15 normalized provenance may likewise lack a source publication date suitable for the production artifact field.
+
+**Do not authorize PR A to invent:**
+
+- report date + N days heuristics
+- `retrievedAt` as `publishedAt`
+- generic “Friday release” rules
+- holiday-adjusted release logic
+
+without an explicit approved contract.
+
+**Mapper rule:** If the approved mapping policy does not define `publishedAt` for an artifact/lane, the mapper **must fail closed** (`mapper_failed` / block issue) rather than emit a semantically uncertain date.
+
+**Open decision:** “Production `publishedAt` mapping policy for automated CFTC and Board H.15 candidates.” Document options and evidence in DECISIONS; do not resolve here unless Bobby has explicitly approved one.
+
+### 8.2 `dataQuality`
+
+Current production validators and artifacts use manual-era vocabulary (`verified_manual`, `manual_unverified`). Automated source-validated candidates must **not** silently inherit `verified_manual`.
+
+**Before PR A, Bobby must choose:**
+
+| Option | Meaning |
+|--------|---------|
+| **A.** Introduce `verified_automated` | New enum value + validator updates (preferred architecture recommendation, **not** approved) |
+| **B.** Retain existing enum | With explicitly documented semantics for machine-generated, validator-passed candidates |
+
+PR A **must not** label machine-generated candidates `verified_manual` without an approved policy.
+
+---
+
+## 9. Existing validator reuse
 
 Pipeline (fail-closed):
 
@@ -233,7 +315,7 @@ Treasury artifacts: preserve `mappingStatus: 'not_final'` and forbidden score ke
 
 ---
 
-## 9. Diff contract
+## 10. Diff contract
 
 `GhostFlowCandidateDiff` — factual data review only; no investment language.
 
@@ -245,8 +327,8 @@ Treasury artifacts: preserve `mappingStatus: 'not_final'` and forbidden score ke
 | `fieldAdditions` | Keys present in candidate, absent in current |
 | `fieldRemovals` | Keys present in current, absent in candidate |
 | `fieldChanges` | `{ path, currentValue, candidateValue }[]` — leaf-level, JSON-path notation |
-| `provenanceChanges` | Subset diff on durable provenance fields |
-| `promotionPayloadChanged` | boolean (hash comparison) |
+| `candidateSourceProvenance` | Snapshot of **candidate-side** durable provenance from `normalizedObservation` (informational; not compared to production — production has no accepted source hash baseline) |
+| `promotionPayloadChanged` | boolean — SHA-256 of canonical mapped production JSON vs current production fingerprint |
 
 Implementation: deep structural diff on **mapped production artifacts** (post-mapper), not on normalized fields alone — humans review what would ship.
 
@@ -254,7 +336,7 @@ Implementation: deep structural diff on **mapped production artifacts** (post-ma
 
 ---
 
-## 10. Storage / naming
+## 11. Storage / naming
 
 **Recommended path:** `tmp/ghostflow/candidates/` (default, overridable via `--out-dir` constrained to repo `tmp/` subtree).
 
@@ -270,14 +352,14 @@ Add explicit `.gitignore` comment optional; `tmp/` already gitignored.
 
 ---
 
-## 11. Newer-observation behavior
+## 12. Newer-observation behavior
 
 Align with operator runner date comparison (`candidateDate > currentDate`):
 
 | Condition | Candidate generation |
 |-----------|---------------------|
 | `candidateAsOf > currentAsOf` | Generate if mapper + validator pass → status `ready_for_review` |
-| `candidateAsOf === currentAsOf` | See §12 (revision) |
+| `candidateAsOf === currentAsOf` | See §13 (revision) |
 | `candidateAsOf < currentAsOf` | **No candidate** → status `no_newer_observation`, exit **2** |
 | Normalize future vs `nowIso` | Fail at normalize (adapter already enforces) → exit **4** |
 | Fetch/parse/normalize failure | No candidate → exit **4** |
@@ -287,24 +369,44 @@ Align with operator runner date comparison (`candidateDate > currentDate`):
 
 ---
 
-## 12. Same-date revision behavior
+## 13. Same-date revision behavior
 
-When `candidateAsOf === currentAsOf`, **do not silently ignore**. Classify:
+When `candidateAsOf === currentAsOf`, **do not silently ignore**. The generator compares **mapped production payloads** (current committed artifact vs newly proposed artifact). It does **not** compare candidate source bytes against an accepted provenance baseline stored in production — because **current production artifacts do not persist** accepted normalized provenance such as `contentSha256`, `adapterId`, or `parserVersion`.
 
-| Revision kind | Detection | Status | Candidate file? |
-|---------------|-----------|--------|-----------------|
-| Source byte revision | `contentSha256` changed, values same | `revision_review_required` | Yes — envelope written |
-| Parser migration | `parserVersion` changed | `revision_review_required` | Yes |
-| Normalized value revision | Field values differ | `revision_review_required` | Yes |
-| Identical | Hash + values match | `no_change` | No |
+### 13.1 Currently detectable (without production provenance extension)
 
-**None auto-promote.** Operator runner today returns `no_newer_observation` for same/older dates — **generator is stricter** and surfaces revisions the report currently collapses.
+| Condition | Detection | Status | Candidate file? |
+|-----------|-----------|--------|-----------------|
+| Same `asOf`, proposed production payload differs | `promotionPayloadSha256` ≠ current production fingerprint | `revision_review_required` | Yes — envelope written (exit **3**) |
+| Same `asOf`, proposed production payload identical | Hashes match | `no_change` | No (exit **2**) |
 
-**Product decision flagged:** Whether same-date value revisions should ever promote without a DECISIONS entry (e.g. Board restatements) — default **human required**.
+Mapped-payload revisions (including those caused by parser migration or upstream source-byte changes that **did** change mapped output) surface as `revision_review_required`. **None auto-promote.**
+
+### 13.2 Currently NOT detectable
+
+| Condition | Why |
+|-----------|-----|
+| Same `asOf` + upstream source bytes changed + **mapped production payload remained identical** | No accepted source-content hash stored in current production to compare against |
+
+Do **not** infer byte-only revisions from `source.note` prose or other non-durable production fields.
+
+### 13.3 Future accepted-provenance baseline (not authorized here)
+
+Byte-only revision classification becomes possible only after a future accepted-provenance record exists, such as:
+
+- promotion receipt metadata
+- accepted normalized history store
+- production artifact provenance extension
+
+**None is authorized by this design.** Do not add one in PR A/B.
+
+**Product decision (does not block PR A/B):** Whether same-date mapped-payload revisions should ever promote without a DECISIONS entry — default **human required** (§22.2).
+
+Operator runner today returns `no_newer_observation` for same/older dates — **generator is stricter** for same-date **mapped-payload** changes the report collapses.
 
 ---
 
-## 13. CLI design (not implemented)
+## 14. CLI design (not implemented)
 
 **New command** (do not overload `ghostflow:refresh-report`):
 
@@ -336,7 +438,7 @@ Stdout: JSON summary mirroring envelope `status`, `candidateIdentity`, output pa
 
 ---
 
-## 14. Failure / exit model (fail-closed)
+## 15. Failure / exit model (fail-closed)
 
 | Failure | Candidate written? | Exit |
 |---------|-------------------|------|
@@ -355,7 +457,7 @@ Stdout: JSON summary mirroring envelope `status`, `candidateIdentity`, output pa
 
 ---
 
-## 15. Promotion boundary (design only)
+## 16. Promotion boundary (design only)
 
 Future command (separate approval):
 
@@ -377,7 +479,7 @@ Gates:
 
 ---
 
-## 16. History boundary
+## 17. History boundary
 
 Registry `historyPolicy: 'accepted_normalized_observation'` applies to **accepted** observations, not raw downloads.
 
@@ -392,7 +494,7 @@ Treasury/systematic proxies **do not** embed `historySummary` today (unlike tail
 
 ---
 
-## 17. Human-review workflow (recommended)
+## 18. Human-review workflow (recommended)
 
 1. `npm run ghostflow:refresh-report` — scan statuses (unchanged).
 2. `npm run ghostflow:generate-candidate -- --artifact <id>` — materialize envelope(s).
@@ -407,7 +509,7 @@ Treasury/systematic proxies **do not** embed `historySummary` today (unlike tail
 
 ---
 
-## 18. Security / source hygiene
+## 19. Security / source hygiene
 
 - Persist only normalized fields + durable provenance + mapped production JSON.
 - Never write raw API/ZIP/XML responses to candidate directory.
@@ -417,10 +519,11 @@ Treasury/systematic proxies **do not** embed `historySummary` today (unlike tail
 
 ---
 
-## 19. Proposed TypeScript contracts
+## 20. Proposed TypeScript contracts
 
 *(Design-only — not yet in `lib/`)*
 
+**Identity vs envelope:** `GhostFlowCandidateIdentity` does **not** include `generatedAt` or `retrievedAt`. The envelope embeds run metadata and the full `normalizedObservation` (which includes `retrievedAt`). Repeated runs with the same identity may produce **different envelope bytes** — that is expected. **Do not hash the entire envelope.** Idempotency reconciles identity + promotion payload only (§5.3).
 ```typescript
 export const GHOSTFLOW_CANDIDATE_ENVELOPE_VERSION = '1' as const;
 
@@ -445,7 +548,7 @@ export interface GhostFlowCandidateIdentity {
   adapterId: string;
   parserVersion: string;
   promotionPayloadSha256: string;
-  /** SHA-256 of canonical identity tuple; hex */
+  /** SHA-256 of canonical identity tuple; hex. Excludes generatedAt, retrievedAt, and all run metadata. */
   identitySha256: string;
 }
 
@@ -468,7 +571,8 @@ export interface GhostFlowCandidateDiff {
   fieldAdditions: readonly string[];
   fieldRemovals: readonly string[];
   fieldChanges: readonly GhostFlowCandidateFieldChange[];
-  provenanceChanges: readonly GhostFlowCandidateFieldChange[];
+  /** Candidate-side provenance snapshot; not a production baseline comparison */
+  candidateSourceProvenance: GhostFlowDurableProvenance;
   promotionPayloadChanged: boolean;
 }
 
@@ -511,30 +615,42 @@ export interface GhostFlowCandidateMapper<TFields, TArtifact> {
 
 ---
 
-## 20. Implementation PR sequence
+## 21. Implementation PR sequence
 
-| PR | Scope | Deliverables |
-|----|-------|--------------|
-| **A** | Mappers + types in `lib/` | Interfaces above; three pure mappers; fixture tests from normalized observations; validator pass tests |
-| **B** | Generator + CLI | `generateGhostFlowCandidate()`; diff engine; filesystem writer; `ghostflow:generate-candidate` script; integration tests with mocked fetch |
-| **C** | Promotion | **Blocked** — requires DECISIONS + explicit approval |
+| Step | Scope | Deliverables |
+|------|-------|--------------|
+| **#145** | Architecture design | This memo (docs only) |
+| **Decision gate** | Mapping policy | Bobby approves production-mapping semantics; `DECISIONS.md` update |
+| **PR A** | Types + mappers | Candidate types; **schema/validator updates explicitly authorized by mapping decision**; pure artifact mappers; mapper fixture tests; **no I/O** |
+| **PR B** | Generator + CLI | `generateGhostFlowCandidate()`; canonical hashing; diff; idempotent filesystem writer (§5.3); `ghostflow:generate-candidate`; integration tests |
+| **PR C** | Promotion | **Blocked** — separate DECISIONS authorization |
 
-PR A can land without changing operator runner behavior.
+**PR A must not start until the decision gate closes.** Mappers must not guess `seriesDefinition`, `source` block, `dataQuality`, or `publishedAt`.
 
----
+**Alternative:** If mapping-policy validator/schema changes are large, land them as a dedicated PR **between the decision gate and PR A** rather than hiding schema work inside mapper commits.
 
-## 21. Open decisions (require Bobby approval)
-
-1. **`treasuryLongEndIncomeLens` `seriesDefinition` string** — keep `fred_treasury_long_end_income_lens_v1` for validator continuity vs migrate to Board-native id.
-2. **Production `source` block migration** — FRED-shaped production artifact vs Board H.15 source metadata in promoted JSON (transport is Board; display copy may need coordinated UI/doc update).
-3. **Same-date Board restatement policy** — when `asOf` unchanged but yields revised, is promotion allowed without version bump?
-4. **`dataQuality` enum** for automated candidates — introduce `verified_automated` vs retain `verified_manual` with provenance note.
-5. **Promotion command authorization** — separate DECISIONS entry before PR C.
-6. **History writes** — whether promotion appends to gitignored research history or embedded summaries.
+PR A/B do not change operator runner behavior.
 
 ---
 
-## 22. Falsifiers
+## 22. Open decisions (require Bobby approval)
+
+### 22.1 Block PR A (mapping-policy gate)
+
+1. **Long-End Board-native `seriesDefinition`** — proposed (awaiting approval): `frb_h15_treasury_long_end_income_lens_v1`. Do not retain FRED-named id for validator continuity alone.
+2. **Long-End Board H.15 production `source` block** — contract + any required validator / display-copy truth changes (current production is FRED-oriented; active contract is Board H.15, no T10YIE).
+3. **`dataQuality` vocabulary** for automated validated candidates — `verified_automated` (preferred recommendation, not approved) vs retain existing enum with documented semantics (§8.2).
+4. **Production `publishedAt` mapping policy** for automated CFTC and Board H.15 candidates (§8.1). Mappers fail closed until defined.
+
+### 22.2 Do not block PR A/B; block later promotion / policy
+
+5. **Same-date restatement promotion policy** — when `asOf` unchanged but mapped payload differs, is promotion allowed without version bump? (Generator may still emit `revision_review_required` envelopes for review.)
+6. **Promotion command authorization** — separate DECISIONS entry before PR C.
+7. **History / accepted-provenance write timing** — promotion receipt, accepted normalized history, or production provenance extension (enables byte-only revision detection later).
+
+---
+
+## 23. Falsifiers
 
 This design is **wrong** if:
 
