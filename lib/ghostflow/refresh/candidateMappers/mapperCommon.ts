@@ -3,6 +3,7 @@ import type {
   GhostFlowRefreshIssue,
   GhostFlowStageResult,
 } from '../types';
+import { isValidCalendarDate, isValidIsoTimestamp } from '../dateValidation';
 
 export function mapperBlockIssue(
   code: string,
@@ -19,7 +20,6 @@ export function provenanceFail(code: string, message: string): CandidateMapperPr
   return { ok: false, issues: [mapperBlockIssue(code, message)] };
 }
 
-const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const SHA256_HEX_RE = /^[a-f0-9]{64}$/i;
 
 export interface CandidateMapperProvenanceExpectations {
@@ -35,22 +35,6 @@ export type CandidateMapperProvenanceOk = { ok: true; observationAsOf: string };
 export type CandidateMapperProvenanceResult =
   | CandidateMapperProvenanceOk
   | { ok: false; issues: GhostFlowRefreshIssue[] };
-
-function isValidIsoDate(value: string): boolean {
-  if (!ISO_DATE_RE.test(value)) return false;
-  const [y, m, d] = value.split('-').map(Number);
-  const date = new Date(Date.UTC(y!, m! - 1, d));
-  return (
-    date.getUTCFullYear() === y &&
-    date.getUTCMonth() === m! - 1 &&
-    date.getUTCDate() === d
-  );
-}
-
-function isValidIsoTimestamp(value: string): boolean {
-  const ms = Date.parse(value);
-  return Number.isFinite(ms);
-}
 
 export function reconcileCandidateMapperProvenance<TFields>(
   input: GhostFlowCandidateMapperInput<TFields>,
@@ -172,14 +156,14 @@ export function reconcileCandidateMapperProvenance<TFields>(
     );
   }
 
-  if (!isValidIsoDate(normalized.observationAsOf)) {
+  if (!isValidCalendarDate(normalized.observationAsOf)) {
     return provenanceFail(
       'candidate_mapper_invalid_provenance',
       'Normalized observationAsOf must be a valid YYYY-MM-DD date'
     );
   }
 
-  if (!isValidIsoDate(provenance.observationAsOf)) {
+  if (!isValidCalendarDate(provenance.observationAsOf)) {
     return provenanceFail(
       'candidate_mapper_invalid_provenance',
       'Provenance observationAsOf must be a valid YYYY-MM-DD date'

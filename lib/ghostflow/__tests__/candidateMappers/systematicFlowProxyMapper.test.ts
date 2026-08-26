@@ -88,6 +88,25 @@ if (badRegistryEntry.adapter.implementationStatus === 'implemented') {
 }
 failCode(mapWith(normalized, badRegistryEntry), 'candidate_mapper_adapter_mismatch');
 
+for (const badRetrievedAt of [
+  '2026-08-26',
+  '2026-08-26T22:00:23',
+  'August 26, 2026',
+  '2026-02-30T22:00:23Z',
+]) {
+  const looseTimestamp = fixtureSystematicNormalized();
+  looseTimestamp.provenance.retrievedAt = badRetrievedAt;
+  failCode(mapWith(looseTimestamp), 'candidate_mapper_invalid_provenance');
+}
+
+const zTimestamp = fixtureSystematicNormalized();
+zTimestamp.provenance.retrievedAt = '2026-08-26T22:00:23Z';
+assert.strictEqual(mapWith(zTimestamp).ok, true);
+
+const offsetTimestamp = fixtureSystematicNormalized();
+offsetTimestamp.provenance.retrievedAt = '2026-08-26T17:00:23-05:00';
+assert.strictEqual(mapWith(offsetTimestamp).ok, true);
+
 assert.strictEqual(
   normalized.provenance.sourceLocator,
   buildCftcTffSystematicResourceQueryUrl()
