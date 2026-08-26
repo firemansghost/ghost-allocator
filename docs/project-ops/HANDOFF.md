@@ -1,6 +1,33 @@
 ﻿# HANDOFF
 
-## Last Session Summary (2026-08-25, H.15 investigation)
+## Last Session Summary (2026-08-25, H.15 blank-missing 1.0.1)
+Starting `main`: `f833e7aef8d6c489f5e489a2c90c19ef3a3af31e` (PR **#141** investigation merged). Implemented narrow Board H.15 CSV parser fix: blank / whitespace-only yield cells → missing (same path as `ND`); `parserVersion` **1.0.1**. Dual DDP CSV transport, series contract, and source identity unchanged. No XML/SDMX migration. No production/candidate/history writes. DECISIONS unchanged.
+
+Live smoke outcomes:
+- H.15-only (`2026-08-26T00:08:24.514Z`): `candidate_observation_available` (candidate `2026-08-24`); overall `ready_for_review`; `review_candidates`; exit 0; prior row-67486 failure gone
+- Full runner (`2026-08-26T00:08:41.683Z`): systematic + Treasury CFTC + H.15 all `candidate_observation_available` (CFTC `2026-08-18`, H.15 `2026-08-24`); overall `ready_for_review`; `review_candidates`; exit 0; no writes
+
+Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`. VIX / Gate C excluded; breadth remains blocked.
+
+## State of Work
+- Report-only operator runner merged (PR **#140**).
+- H.15 investigation merged (PR **#141**); blank-as-missing parser repair implemented on this branch.
+- Custom TIPS-30 leg remains BYP-exposed; durable Path D XML migration still required before **2026-11-09**.
+- Breadth operator-packet + source-authorization block remain in force; Gate C blocked.
+- Core app remains stable; education section remains live.
+
+## Priority for Next Session
+1. Design and approve durable Board release-level SDMX/XML transport migration for `treasuryLongEndIncomeLens`
+2. Only after transport migration planning is locked, resume human-reviewed candidate-generation design
+3. Breadth authorization remains separate and blocked; do not wire VIX or Gate C
+
+## Open Questions
+- Record XML/SDMX transport migration in DECISIONS after Bobby review?
+- Retain dual CSV briefly for provenance comparison during XML cutover?
+
+---
+
+## Archive — H.15 live-source investigation (2026-08-25)
 Starting `main`: `51236fb96b15b73c5da095aa6b8dc7b3410148e0` (PR **#140** merged). Completed docs-only **H.15 live source and transport investigation** on branch `docs/ghostflow-h15-live-source-investigation`.
 
 **Findings:**

@@ -160,3 +160,42 @@ export const FIXTURE_H15_TCM_BAD_VALUE = [
   seriesMeta('H15/H15/RIFLGFCY30_N.B', 'RIFLGFCY30_N.B', '30-year'),
   'H15/H15/RIFLGFCY30_N.B,2026-07-01,abc',
 ].join('\n');
+
+/**
+ * Live-failure shape: blank / whitespace-only pre-inception 2Y cells (row 67486 class),
+ * plus ND and a blank on the selected asOf so optional 2Y stays absent.
+ * Required + optional 5Y/10Y remain numeric on 2026-07-01.
+ */
+export const FIXTURE_H15_TCM_BLANK_PREINCEPTION = [
+  seriesMeta(
+    'H15/H15/RIFLGFCY02_N.B',
+    'RIFLGFCY02_N.B',
+    'Market yield on U.S. Treasury securities at 2-year constant maturity, quoted on investment basis'
+  ),
+  // Empty third column (live Board shape at pre-inception).
+  'H15/H15/RIFLGFCY02_N.B,1962-01-02,',
+  // Whitespace-only third column (trim → missing).
+  'H15/H15/RIFLGFCY02_N.B,1962-01-03,   ',
+  seriesObs('H15/H15/RIFLGFCY02_N.B', [
+    ['2026-06-30', 'ND'],
+    ['2026-07-01', ''],
+  ]),
+  seriesMeta(
+    'H15/H15/RIFLGFCY05_N.B',
+    'RIFLGFCY05_N.B',
+    'Market yield on U.S. Treasury securities at 5-year constant maturity, quoted on investment basis'
+  ),
+  seriesObs('H15/H15/RIFLGFCY05_N.B', [['2026-07-01', '4.24']]),
+  seriesMeta(
+    'H15/H15/RIFLGFCY10_N.B',
+    'RIFLGFCY10_N.B',
+    'Market yield on U.S. Treasury securities at 10-year constant maturity, quoted on investment basis'
+  ),
+  seriesObs('H15/H15/RIFLGFCY10_N.B', [['2026-07-01', '4.48']]),
+  seriesMeta(
+    'H15/H15/RIFLGFCY30_N.B',
+    'RIFLGFCY30_N.B',
+    'Market yield on U.S. Treasury securities at 30-year constant maturity, quoted on investment basis'
+  ),
+  seriesObs('H15/H15/RIFLGFCY30_N.B', [['2026-07-01', '4.97']]),
+].join('\n');
