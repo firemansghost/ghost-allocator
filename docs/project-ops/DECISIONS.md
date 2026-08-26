@@ -1,5 +1,35 @@
 # DECISIONS
 
+## 2026-08-26 — Treasury Long-End H.15 transport → Board release-level SDMX/XML
+Choice:
+- Migrate `treasuryLongEndIncomeLens` **transport** from the current dual Board H.15 DDP CSV packages (preformatted Treasury Constant Maturities + custom single-series TIPS-30 package) to the Federal Reserve Board **release-level H.15 SDMX/XML ZIP**:
+  - `https://www.federalreserve.gov/releases/h15/data/FRB_h15_xml.zip`
+- Preserve the existing Treasury Long-End **product contract**:
+  - Required: 30Y nominal (`RIFLGFCY30_N.B`) and 30Y inflation-indexed real (`RIFLGFCY30_XII_N.B`)
+  - Optional context: 2Y / 5Y / 10Y nominal when present on the required common date
+  - **No `T10YIE`**
+  - **No derived breakeven**
+  - Display-only, unscored, `human_required`
+  - No production artifact writer and no workflow automation in the transport migration itself
+- Source family remains Board H.15 (`frb_h15_treasury_yields`); this decision changes **transport / adapter / sourceFormat / sourceLocator**, not the underlying Board observation series or Long-End methodology.
+- Implementation must use a new SDMX/XML adapter identity and parser version (do not silently reinterpret the CSV adapter as XML).
+- Dual-DDP CSV remains interim until the SDMX/XML adapter is implemented, fixture-tested, registry-cut over, and human-reviewed live smoke is healthy.
+- This decision does **not** authorize candidate generation, production artifact refresh, score/MOCK/`GHOSTFLOW_REFERENCE_AS_OF` changes, VIX, breadth, or Gate C work.
+
+Why:
+- [H15_LIVE_SOURCE_AND_TRANSPORT_INVESTIGATION.md](../ghostflow/H15_LIVE_SOURCE_AND_TRANSPORT_INVESTIGATION.md) verified all five GhostFlow series in the release ZIP and classified release-level SDMX/XML as the durable Path D transport.
+- Board announcement (2026-07-16): Build Your Package (BYP) removal during the week of **2026-11-09**; the custom TIPS-30 DDP leg is BYP-exposed and post-removal arbitrary-package URL support is not guaranteed.
+- Board directs BYP users toward FRED or release-level XML; GhostFlow stays on direct Board H.15 (not FRED) while exiting BYP dependence.
+- Preformatted TCM post-November lifetime remains **NOT SPECIFIED**; a single release ZIP avoids dual-package reconciliation and BYP exposure.
+
+Consequences:
+- Next implementation PR may add the SDMX/XML adapter, update registry `adapterId` / `sourceFormat` / `sourceLocator`, and retire the dual-CSV path after cutover validation.
+- Product semantics (required/optional series, no T10YIE, no breakeven, display-only / unscored / human-reviewed / unwired) stay locked unless a later DECISIONS entry changes them.
+- Provenance should hash the exact downloaded ZIP bytes as the durable content digest (per investigation recommendation).
+- Production artifacts, scores, MOCK inputs, `publicSignalCount`, and `GHOSTFLOW_REFERENCE_AS_OF` remain unchanged until a separate human-approved refresh path exists.
+
+---
+
 ## 2026-08-25 — GhostFlow implemented display/Treasury adapters become operator-reportable
 Choice:
 - Permit a manual report-only operator runner for the explicitly approved implemented non-score-fed adapters:

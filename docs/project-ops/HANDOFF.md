@@ -1,6 +1,30 @@
 ﻿# HANDOFF
 
-## Last Session Summary (2026-08-25, H.15 investigation)
+## Last Session Summary (2026-08-26, H.15 SDMX/XML transport decision)
+Starting `main`: `f833e7aef8d6c489f5e489a2c90c19ef3a3af31e` (PR **#141** merged). Bobby approved migrating `treasuryLongEndIncomeLens` transport from dual Board H.15 DDP CSV to the release-level SDMX/XML ZIP at `https://www.federalreserve.gov/releases/h15/data/FRB_h15_xml.zip`. Decision recorded in `docs/project-ops/DECISIONS.md`. Product contract unchanged (required 30Y nom + 30Y real; optional 2/5/10Y; no T10YIE; no derived breakeven; display-only / unscored / human_required; no production writer or workflow in the migration). **Adapter not implemented in this PR** — dual CSV remains interim until cutover.
+
+Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`. VIX / Gate C excluded; breadth remains blocked.
+
+## State of Work
+- H.15 SDMX/XML transport migration is **approved** in DECISIONS; implementation is the next coding task.
+- PR **#142** (CSV blank-as-missing 1.0.1) may still be open separately.
+- Report-only operator runner remains available (PR **#140**).
+- Breadth / Gate C blocked; no VIX wiring.
+- Core app remains stable; education section remains live.
+
+## Priority for Next Session
+1. Implement Board release-level H.15 SDMX/XML adapter + registry cutover for `treasuryLongEndIncomeLens`
+2. Land interim CSV blank-as-missing 1.0.1 (PR **#142**) if not already on `main`
+3. Only after healthy SDMX/XML live smoke, resume human-reviewed candidate-generation design
+4. Breadth authorization remains separate and blocked; do not wire VIX or Gate C
+
+## Open Questions
+- Retain dual CSV briefly for provenance comparison during XML cutover, or hard-cut after smoke?
+- Exact new `adapterId` / `sourceFormat` naming (`frb-h15-treasury-yields-sdmx` vs similar)?
+
+---
+
+## Archive — H.15 live-source investigation (2026-08-25)
 Starting `main`: `51236fb96b15b73c5da095aa6b8dc7b3410148e0` (PR **#140** merged). Completed docs-only **H.15 live source and transport investigation** on branch `docs/ghostflow-h15-live-source-investigation`.
 
 **Findings:**

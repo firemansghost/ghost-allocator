@@ -1,6 +1,38 @@
 ﻿# STATUS
 
-## Current State (GhostFlow — 2026-08-25, H.15 investigation)
+## Current State (GhostFlow — 2026-08-26, H.15 SDMX/XML transport approved)
+Starting `main` for this work: `f833e7aef8d6c489f5e489a2c90c19ef3a3af31e` (PR **#141** investigation merged).
+
+**Bobby approved H.15 transport migration (recorded in DECISIONS):**
+- Canonical transport for `treasuryLongEndIncomeLens` → Board release-level SDMX/XML ZIP  
+  `https://www.federalreserve.gov/releases/h15/data/FRB_h15_xml.zip`
+- Product contract preserved: required 30Y nominal + 30Y inflation-indexed real; optional 2Y/5Y/10Y; **no T10YIE**; **no derived breakeven**; display-only / unscored / `human_required`; no production writer or workflow in the migration itself
+- Source family remains Board H.15; dual-DDP CSV remains interim until the SDMX/XML adapter is implemented and cut over
+- Investigation memo: [H15_LIVE_SOURCE_AND_TRANSPORT_INVESTIGATION.md](../ghostflow/H15_LIVE_SOURCE_AND_TRANSPORT_INVESTIGATION.md)
+- **SDMX/XML adapter not yet implemented** in this decision-record PR
+
+Note: PR **#142** (CSV blank-as-missing parser 1.0.1) may still be open separately; it does not implement XML.
+
+Production GhostFlow state remains unchanged:
+- `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
+- Composite / Passive / Structural: 60 / 53 / 67
+- Band: Elevated Flow Pressure
+- `publicSignalCount`: 13
+- MOCK systematic / retirement / levered: 62 / 58 / 55
+
+VIX remains excluded because Gate C / `marketBreadth` remain blocked.
+
+## Recommended next work
+1. Implement the Board release-level H.15 SDMX/XML adapter for `treasuryLongEndIncomeLens` (new adapter ID / parser version; registry cutover; fixture + live smoke)
+2. Land / merge the interim CSV blank-as-missing 1.0.1 fix (PR **#142**) if not already on `main`
+3. Only after SDMX/XML cutover is healthy, resume human-reviewed candidate-generation design
+4. Breadth remains blocked pending provider authorization / licensed-source decision. Do not wire VIX or Gate C.
+
+Last updated: 2026-08-26
+
+---
+
+## Archive — H.15 live-source investigation (2026-08-25)
 Starting `main` for this work: `51236fb96b15b73c5da095aa6b8dc7b3410148e0` (PR **#140** merged).
 
 PR **#140** merged the manual **report-only operator runner** on `main`. Live smoke command: `npm run ghostflow:refresh-report`.
