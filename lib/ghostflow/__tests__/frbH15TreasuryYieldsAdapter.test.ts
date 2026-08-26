@@ -30,6 +30,7 @@ import type { GhostFlowFetchedSource } from '../refresh/types';
 import {
   ADAPTER_TEST_NOW_ISO,
   FIXTURE_H15_TCM_BAD_VALUE,
+  FIXTURE_H15_TCM_BLANK_PREINCEPTION,
   FIXTURE_H15_TCM_FUTURE,
   FIXTURE_H15_TCM_INVALID_DATE,
   FIXTURE_H15_TCM_NO_COMMON,
@@ -85,10 +86,12 @@ const longEnd = GHOSTFLOW_REFRESH_REGISTRY.find(
 
 assert.strictEqual(FRB_H15_TREASURY_YIELDS_ADAPTER.id, FRB_H15_ADAPTER_ID);
 assert.strictEqual(FRB_H15_TREASURY_YIELDS_ADAPTER.parserVersion, FRB_H15_PARSER_VERSION);
+assert.strictEqual(FRB_H15_PARSER_VERSION, '1.0.1');
 assert.strictEqual(longEnd.adapter.adapterId, FRB_H15_ADAPTER_ID);
 assert.strictEqual(longEnd.adapter.implementationStatus, 'implemented');
 if (longEnd.adapter.implementationStatus === 'implemented') {
   assert.strictEqual(longEnd.adapter.parserVersion, FRB_H15_PARSER_VERSION);
+  assert.strictEqual(longEnd.adapter.parserVersion, '1.0.1');
 }
 assert.strictEqual(longEnd.canonicalSource.sourceFamilyId, FRB_H15_SOURCE_FAMILY_ID);
 assert.strictEqual(longEnd.canonicalSource.sourceName, FRB_H15_SOURCE_NAME);
@@ -226,6 +229,73 @@ async function fetched(
       adapter.parse(source, { nowIso: ADAPTER_TEST_NOW_ISO }),
       'h15_csv_invalid_value'
     );
+  }
+
+  {
+    // Blank / whitespace-only pre-inception cells are missing (live row-67486 class).
+    assert.ok(
+      FIXTURE_H15_TCM_BLANK_PREINCEPTION.includes('H15/H15/RIFLGFCY02_N.B,1962-01-02,'),
+      'fixture must include empty third-column live failure shape'
+    );
+    assert.ok(
+      FIXTURE_H15_TCM_BLANK_PREINCEPTION.includes('H15/H15/RIFLGFCY02_N.B,1962-01-03,'),
+      'fixture must include whitespace-only third-column row'
+    );
+    const adapter = createFrbH15TreasuryYieldsAdapter();
+    const source = await fetched(
+      FIXTURE_H15_TCM_BLANK_PREINCEPTION,
+      FIXTURE_H15_TIPS30_MATCHING
+    );
+    assert.strictEqual(source.sourceMetadata.sourceId, FRB_H15_SOURCE_FAMILY_ID);
+    assert.strictEqual(source.sourceMetadata.sourceLocator, FRB_H15_SOURCE_LOCATOR);
+    const parsed = adapter.parse(source, { nowIso: ADAPTER_TEST_NOW_ISO });
+    assert.strictEqual(parsed.ok, true);
+    if (!parsed.ok) throw new Error('unreachable');
+    const twoYearRows = parsed.value.parsed.filter(
+      (r) => r.seriesUniqueId === 'H15/H15/RIFLGFCY02_N.B'
+    );
+    assert.strictEqual(twoYearRows.length, 0);
+    assert.ok(
+      !parsed.value.parsed.some(
+        (r) =>
+          r.seriesUniqueId === 'H15/H15/RIFLGFCY02_N.B' &&
+          (r.observationAsOf === '1962-01-02' ||
+            r.observationAsOf === '1962-01-03' ||
+            r.observationAsOf === '2026-06-30' ||
+            r.observationAsOf === '2026-07-01')
+      )
+    );
+    assert.ok(
+      parsed.value.parsed.some(
+        (r) =>
+          r.seriesUniqueId === 'H15/H15/RIFLGFCY30_N.B' && r.observationAsOf === '2026-07-01'
+      )
+    );
+    assert.ok(
+      parsed.value.parsed.some(
+        (r) =>
+          r.seriesUniqueId === 'H15/H15/RIFLGFCY30_XII_N.B' &&
+          r.observationAsOf === '2026-07-01'
+      )
+    );
+    const normalized = adapter.normalize(parsed.value, {
+      nowIso: ADAPTER_TEST_NOW_ISO,
+      referenceAsOf: '2026-07-01',
+    });
+    assert.strictEqual(normalized.ok, true);
+    if (!normalized.ok) throw new Error('unreachable');
+    assert.strictEqual(normalized.value.observationAsOf, '2026-07-01');
+    assert.strictEqual(normalized.value.fields.thirtyYearNominalYieldPct, 4.97);
+    assert.strictEqual(normalized.value.fields.thirtyYearTipsRealYieldPct, 2.78);
+    assert.strictEqual(normalized.value.fields.twoYearYieldPct, undefined);
+    assert.strictEqual(normalized.value.fields.fiveYearYieldPct, 4.24);
+    assert.strictEqual(normalized.value.fields.tenYearYieldPct, 4.48);
+    assert.ok(!('tenYearBreakevenInflationPct' in normalized.value.fields));
+    assert.ok(!('t10yie' in normalized.value.fields));
+    assert.strictEqual(normalized.value.provenance.adapterId, FRB_H15_ADAPTER_ID);
+    assert.strictEqual(normalized.value.provenance.parserVersion, '1.0.1');
+    assert.strictEqual(normalized.value.provenance.sourceId, FRB_H15_SOURCE_FAMILY_ID);
+    assert.strictEqual(normalized.value.provenance.sourceLocator, FRB_H15_SOURCE_LOCATOR);
   }
 
   {

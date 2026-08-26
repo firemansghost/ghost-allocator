@@ -1,6 +1,41 @@
 ﻿# STATUS
 
-## Current State (GhostFlow — 2026-08-25, H.15 investigation)
+## Current State (GhostFlow — 2026-08-25, H.15 blank-missing parser 1.0.1)
+Starting `main` for this work: `f833e7aef8d6c489f5e489a2c90c19ef3a3af31e` (PR **#141** investigation merged).
+
+**Board H.15 CSV parser 1.0.1 blank-as-missing repair:**
+- Blank / whitespace-only DDP observation cells now share the existing `ND` missing path
+- Live failure class (TCM row 67486 / `RIFLGFCY02_N.B` / `1962-01-02` empty value) repaired
+- `FRB_H15_PARSER_VERSION`: `1.0.0` → `1.0.1`
+- Adapter ID / source family / locator / package hashes / dual CSV transport **unchanged**
+- Fixture regression: `FIXTURE_H15_TCM_BLANK_PREINCEPTION`
+- Registry inherits parser version via metadata constant (no semantic registry change)
+- **No** SDMX/XML migration; durable Path D recommendation from investigation remains separate
+- **No** production / candidate / history writes; DECISIONS unchanged
+
+**Live smoke (report-only, no writes):**
+- H.15-only (`2026-08-26T00:08:24.514Z`): `candidate_observation_available` (candidate observation date `2026-08-24`); overall `ready_for_review`; suggested `review_candidates`; exit 0. Prior `h15_csv_invalid_value` / row 67486 gone.
+- Full runner (`2026-08-26T00:08:41.683Z`): all three artifacts `candidate_observation_available` (systematic + Treasury CFTC `2026-08-18`; H.15 `2026-08-24`); overall `ready_for_review`; suggested `review_candidates`; exit 0.
+
+Production GhostFlow state remains unchanged:
+- `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
+- Composite / Passive / Structural: 60 / 53 / 67
+- Band: Elevated Flow Pressure
+- `publicSignalCount`: 13
+- MOCK systematic / retirement / levered: 62 / 58 / 55
+
+VIX remains excluded because Gate C / `marketBreadth` remain blocked.
+
+## Recommended next work
+1. Design and approve the durable Board release-level SDMX/XML transport migration for `treasuryLongEndIncomeLens` before **2026-11-09** BYP removal
+2. Only after transport migration planning is locked, resume human-reviewed candidate-generation design
+3. Breadth remains blocked pending provider authorization / licensed-source decision. Do not wire VIX or Gate C.
+
+Last updated: 2026-08-25
+
+---
+
+## Archive — H.15 live-source investigation (2026-08-25)
 Starting `main` for this work: `51236fb96b15b73c5da095aa6b8dc7b3410148e0` (PR **#140** merged).
 
 PR **#140** merged the manual **report-only operator runner** on `main`. Live smoke command: `npm run ghostflow:refresh-report`.

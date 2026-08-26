@@ -14,7 +14,7 @@ export const FRB_H15_SOURCE_LOCATOR =
 
 export const FRB_H15_ADAPTER_ID = 'frb-h15-treasury-yields-csv' as const;
 
-export const FRB_H15_PARSER_VERSION = '1.0.0' as const;
+export const FRB_H15_PARSER_VERSION = '1.0.1' as const;
 
 export const FRB_H15_ARTIFACT_ID = 'treasuryLongEndIncomeLens' as const;
 

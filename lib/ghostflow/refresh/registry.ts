@@ -32,6 +32,14 @@ import {
   CFTC_TFF_TREASURY_SOURCE_LOCATOR,
   CFTC_TFF_TREASURY_SOURCE_NAME,
 } from './adapters/cftcTffTreasurySocrataMeta';
+import {
+  FRB_H15_ADAPTER_ID,
+  FRB_H15_ARTIFACT_ID,
+  FRB_H15_PARSER_VERSION,
+  FRB_H15_SOURCE_FAMILY_ID,
+  FRB_H15_SOURCE_LOCATOR,
+  FRB_H15_SOURCE_NAME,
+} from './adapters/frbH15TreasuryYieldsMeta';
 
 export {
   GATE_C_ARTIFACT_IDS,
@@ -458,23 +466,22 @@ export const GHOSTFLOW_REFRESH_REGISTRY = [
     historyPolicy: 'accepted_normalized_observation',
   },
   {
-    artifactId: 'treasuryLongEndIncomeLens',
+    artifactId: FRB_H15_ARTIFACT_ID,
     artifactPath: 'data/ghostflow/artifacts/treasuryLongEndIncomeLens.v1.json',
     lane: 'treasury_display',
     cadence: 'daily_trading',
     candidateGroupId: 'frb_h15_treasury_long_end',
     acceptanceUnit: 'artifact',
     canonicalSource: {
-      sourceFamilyId: 'frb_h15_treasury_yields',
-      sourceName:
-        'Board of Governors H.15 — Treasury constant maturity (nominal + inflation-indexed)',
-      sourceLocator: 'https://www.federalreserve.gov/datadownload/Choose.aspx?rel=H15',
+      sourceFamilyId: FRB_H15_SOURCE_FAMILY_ID,
+      sourceName: FRB_H15_SOURCE_NAME,
+      sourceLocator: FRB_H15_SOURCE_LOCATOR,
     },
     sourceFormat: 'csv',
     adapter: {
-      adapterId: 'frb-h15-treasury-yields-csv',
+      adapterId: FRB_H15_ADAPTER_ID,
       implementationStatus: 'implemented',
-      parserVersion: '1.0.0',
+      parserVersion: FRB_H15_PARSER_VERSION,
     },
     freshnessPolicyId: 'daily_trading_v1',
     referenceDateRole: 'lagging_allowed',
