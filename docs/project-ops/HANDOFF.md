@@ -1,39 +1,38 @@
 ﻿# HANDOFF
 
-## Last Session Summary (2026-08-26, candidate mapping policy + impact inventory)
-Starting `main`: `76bf115759083963279c703a760d483afe129194` (PRs **#140–#145** merged). Bobby approved candidate production-mapping policies; recorded in DECISIONS; completed read-only impact inventory in [CANDIDATE_MAPPING_POLICY_IMPACT.md](../ghostflow/CANDIDATE_MAPPING_POLICY_IMPACT.md). **No code, no production writes, no mappers/generator/promotion.**
+## Last Session Summary (2026-08-26, PR A candidate mappers)
+Starting `main`: `2dd7c086d8c659e2823ca36928ce7eef91c625b1` (PRs **#140–#146** merged). Implemented approved candidate production-mapping policy on branch `feat/ghostflow-candidate-mappers`: narrow type changes, fail-closed validators (including Long-End legacy FRED / Board-native transitional validation), Treasury display truth branching, three pure candidate mappers + registry, and offline tests. **No production JSON writes, no candidate generator/CLI, no promotion.**
 
-Approved policies: Board-native Long-End `frb_h15_treasury_long_end_income_lens_v1`; five-series Board H.15 source contract; transitional legacy FRED validation; `verified_automated`; optional `publishedAt` only when defensible `sourcePublishedAt`. **Next: PR A as ONE PR** (types + validators + pure mappers + tests).
+Implemented: `verified_automated` for three operator-ready artifacts; `publishedAt` optional only when defensible `sourcePublishedAt` or automated quality; systematic invalid `dataQuality` coercion removed; Board-native Long-End with five-series H.15 contract (no T10YIE/breakeven); legacy FRED production artifact still validates unchanged.
 
 Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`. VIX / Gate C excluded; breadth remains blocked.
 
 ## State of Work
 - Report-only operator runner merged (PR **#140**).
-- H.15 investigation merged (PR **#141**).
-- CSV blank-as-missing parser **1.0.1** merged (PR **#142**).
-- H.15 SDMX transport decision (PR **#143**) and implementation/cutover (PR **#144**) merged.
+- H.15 SDMX transport merged (PR **#143–#144**).
 - Candidate-generation architecture design merged (PR **#145**).
-- **Mapping-policy decision gate closed** — impact inventory complete; PR A unblocked.
+- Candidate mapping policy approved + impact inventory merged (PR **#146**).
+- **PR A candidate mappers implemented** on `feat/ghostflow-candidate-mappers` (pending merge).
+- Generator / CLI / candidate writer / promotion **not implemented**.
 - Breadth / Gate C blocked; no VIX wiring.
 - Core app remains stable; education section remains live.
 
 ## Priority for Next Session
-1. **PR A** — narrow type/validator updates + pure candidate mappers + tests (ONE PR per impact memo)
-2. **PR B** — generator + diff + idempotent writer + CLI
-3. Promotion (PR C) requires separate DECISIONS approval
-4. Breadth authorization remains separate and blocked; do not wire VIX or Gate C
+1. **PR B** — generator + diff + idempotent writer + CLI
+2. Promotion (PR C) requires separate DECISIONS approval
+3. Breadth authorization remains separate and blocked; do not wire VIX or Gate C
 
 ## Open Questions
 - Promotion command authorization (DECISIONS entry)?
-- Same-date mapped-payload promotion policy (does not block PR A/B)?
+- Same-date mapped-payload promotion policy (does not block PR B)?
 - When to promote Long-End production artifact from FRED → Board (human decision)?
 - Optional future: adapter emission of defensible CFTC/Board `sourcePublishedAt`?
 - Breadth licensed-source path still blocked pending authorization?
 
 ---
 
-## Archive — Candidate-generation design contract correction (2026-08-26)
-Starting `main`: `ae6fbf14a25e5e898d0874358bed17b26ba28c50` (PRs **#140–#144** merged). Corrected PR **#145** design memo: idempotency (identity + payload, not envelope bytes), same-date revision scope (mapped-payload only; production lacks accepted source hash), mapping-policy decision gate before PR A (Long-End blockers, `dataQuality`, `publishedAt`). **No code, no production writes, no DECISIONS changes.**
+## Archive — Candidate mapping policy + impact inventory (2026-08-26)
+Starting `main`: `76bf115759083963279c703a760d483afe129194` (PRs **#140–#145** merged). Bobby approved candidate production-mapping policies; recorded in DECISIONS; completed read-only impact inventory in [CANDIDATE_MAPPING_POLICY_IMPACT.md](../ghostflow/CANDIDATE_MAPPING_POLICY_IMPACT.md). **No code, no production writes, no mappers/generator/promotion.**
 
 Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`. VIX / Gate C excluded; breadth remains blocked.
 

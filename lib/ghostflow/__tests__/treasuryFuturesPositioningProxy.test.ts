@@ -211,4 +211,32 @@ assert.ok(netPct !== null && Math.abs(netPct - (-30.7)) <= 0.2);
 const grossPct = computeBasketGrossPctOi(aggRows);
 assert.ok(grossPct !== null && Math.abs(grossPct - 44.2) <= 0.2);
 
+const tfAutomated = cloneExample();
+tfAutomated.dataQuality = 'verified_automated';
+delete tfAutomated.publishedAt;
+assert.ok(validateTreasuryFuturesPositioningProxyArtifact(tfAutomated, { mode: 'example' }).ok);
+
+const tfUnknownQuality = cloneExample();
+tfUnknownQuality.dataQuality = 'bogus';
+assert.ok(!validateTreasuryFuturesPositioningProxyArtifact(tfUnknownQuality, { mode: 'example' }).ok);
+
+const tfMissingQuality = cloneExample();
+delete tfMissingQuality.dataQuality;
+assert.ok(!validateTreasuryFuturesPositioningProxyArtifact(tfMissingQuality, { mode: 'example' }).ok);
+
+const tfManualNoPublished = cloneExample();
+tfManualNoPublished.dataQuality = 'verified_manual';
+delete tfManualNoPublished.publishedAt;
+assert.ok(!validateTreasuryFuturesPositioningProxyArtifact(tfManualNoPublished, { mode: 'production' }).ok);
+
+const tfAutomatedPublished = cloneExample();
+tfAutomatedPublished.dataQuality = 'verified_automated';
+tfAutomatedPublished.publishedAt = '2026-05-28';
+assert.ok(validateTreasuryFuturesPositioningProxyArtifact(tfAutomatedPublished, { mode: 'example' }).ok);
+
+const tfBadPublished = cloneExample();
+tfBadPublished.dataQuality = 'verified_automated';
+tfBadPublished.publishedAt = '2026-05-10';
+assert.ok(!validateTreasuryFuturesPositioningProxyArtifact(tfBadPublished, { mode: 'example' }).ok);
+
 console.log('ghostflow/treasuryFuturesPositioningProxy.test.ts: ok');

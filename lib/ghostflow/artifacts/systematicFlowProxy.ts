@@ -8,6 +8,7 @@ import { calendarDaysAfter } from '@/lib/ghostflow/artifactFreshness';
 import { GHOSTFLOW_REFERENCE_AS_OF } from '@/lib/ghostflow/reference';
 import type {
   ArtifactFreshnessResult,
+  GhostFlowArtifactDataQuality,
   GhostFlowArtifactFreshnessStatus,
   SystematicFlowProxyArtifactV1,
   SystematicFlowProxyBasket,
@@ -55,6 +56,67 @@ export const SYSTEMATIC_FLOW_DISPLAY_SIGNAL_NAME =
 
 export const SYSTEMATIC_FLOW_DISPLAY_CARD_CAVEAT =
   'Display-only CFTC TFF positioning proxy; not included in the Research Composite.';
+
+export const SYSTEMATIC_FLOW_PROXY_SOURCE_NAME =
+  'CFTC Public Reporting Environment — TFF Futures Only' as const;
+
+export const SYSTEMATIC_FLOW_PROXY_SOURCE_URL =
+  'https://publicreporting.cftc.gov/Commitments-of-Traders/TFF-Futures-Only/gpe5-46if/about_data' as const;
+
+export const SYSTEMATIC_FLOW_PROXY_SOURCE_NOTE =
+  'Automated candidate from CFTC PRE dataset gpe5-46if (TFF Futures Only). Display-only equity card; not wired into GhostFlow Research Composite score.' as const;
+
+type SystematicFlowDataQuality = SystematicFlowProxyArtifactV1['dataQuality'];
+
+function parseSystematicDataQuality(
+  raw: unknown,
+  errors: string[]
+): SystematicFlowDataQuality | null {
+  if (raw === undefined || raw === null) {
+    errors.push('dataQuality is required.');
+    return null;
+  }
+  if (
+    raw !== 'verified_manual' &&
+    raw !== 'manual_unverified' &&
+    raw !== 'verified_automated'
+  ) {
+    errors.push('dataQuality must be verified_manual, manual_unverified, or verified_automated.');
+    return null;
+  }
+  return raw;
+}
+
+function parseSystematicPublishedAt(
+  rawPublishedAt: unknown,
+  asOf: string | undefined,
+  dataQuality: SystematicFlowDataQuality | null,
+  errors: string[]
+): string | undefined {
+  if (!dataQuality) return undefined;
+  const automated = dataQuality === 'verified_automated';
+  if (rawPublishedAt === undefined || rawPublishedAt === null) {
+    if (!automated) {
+      errors.push('publishedAt must be ISO YYYY-MM-DD.');
+    }
+    return undefined;
+  }
+  if (typeof rawPublishedAt !== 'string' || !parseIsoDate(rawPublishedAt)) {
+    errors.push('publishedAt must be ISO YYYY-MM-DD.');
+    return undefined;
+  }
+  if (typeof asOf === 'string' && parseIsoDate(asOf) && compareIso(rawPublishedAt, asOf) < 0) {
+    errors.push('publishedAt cannot be before asOf.');
+  }
+  return rawPublishedAt;
+}
+
+/** Snapshot layer accepts manual qualities only; automated candidates omit dataQuality on signals. */
+export function systematicFlowProxySnapshotDataQuality(
+  dataQuality: SystematicFlowProxyArtifactV1['dataQuality']
+): GhostFlowArtifactDataQuality | undefined {
+  return dataQuality === 'verified_automated' ? undefined : dataQuality;
+}
 
 export function formatBasketDirectionLabel(
   direction: SystematicFlowProxyBasketDirection
@@ -432,15 +494,12 @@ export function validateSystematicFlowProxyArtifact(
   }
 
   const asOf = raw.asOf;
-  const publishedAt = raw.publishedAt;
+  const dataQuality = parseSystematicDataQuality(raw.dataQuality, errors);
+  const asOfStr = typeof asOf === 'string' ? asOf : undefined;
   if (typeof asOf !== 'string' || !parseIsoDate(asOf)) {
     errors.push('asOf must be ISO YYYY-MM-DD.');
   }
-  if (typeof publishedAt !== 'string' || !parseIsoDate(publishedAt)) {
-    errors.push('publishedAt must be ISO YYYY-MM-DD.');
-  } else if (typeof asOf === 'string' && parseIsoDate(asOf) && compareIso(publishedAt, asOf) < 0) {
-    errors.push('publishedAt cannot be before asOf.');
-  }
+  const publishedAt = parseSystematicPublishedAt(raw.publishedAt, asOfStr, dataQuality, errors);
 
   if (!isPlainObject(raw.source) || typeof raw.source.name !== 'string' || !raw.source.name.trim()) {
     errors.push('source.name is required.');
@@ -528,19 +587,20 @@ export function validateSystematicFlowProxyArtifact(
     return { ok: false, errors };
   }
 
+  if (!dataQuality) {
+    return { ok: false, errors };
+  }
+
   const artifact: SystematicFlowProxyArtifactV1 = {
     artifactVersion: '1',
     signalId: SYSTEMATIC_FLOW_PROXY_SIGNAL_ID,
     designOnly: raw.designOnly === true ? true : undefined,
     asOf: asOf as string,
-    publishedAt: publishedAt as string,
+    ...(publishedAt !== undefined ? { publishedAt } : {}),
     source: raw.source as SystematicFlowProxyArtifactV1['source'],
     seriesDefinition: 'cftc_tff_futures_only_leveraged_funds_equity_basket',
     updateFrequency: 'weekly',
-    dataQuality:
-      raw.dataQuality === 'verified_manual' || raw.dataQuality === 'manual_unverified'
-        ? raw.dataQuality
-        : 'manual_unverified',
+    dataQuality,
     datasetId: TFF_FUTURES_ONLY_DATASET_ID,
     scoreContracts,
     vixContext,

@@ -12,6 +12,15 @@ import {
   buildTreasuryPlumbingDisplay,
   buildTreasuryPlumbingDisplayFromValidations,
 } from '../treasuryPlumbingDisplay';
+import { validateTreasuryLongEndIncomeLensArtifact } from '../artifacts/treasuryLongEndIncomeLens';
+import {
+  TREASURY_LONG_END_BOARD_CAVEATS,
+  TREASURY_LONG_END_BOARD_RELEASE_URL,
+  TREASURY_LONG_END_BOARD_SERIES_DEFINITION,
+  TREASURY_LONG_END_BOARD_SOURCE_NAME,
+  TREASURY_LONG_END_BOARD_SOURCE_NOTE,
+  TREASURY_LONG_END_BOARD_SOURCE_SERIES,
+} from '../artifacts/treasuryLongEndIncomeLens';
 import { PRODUCTION_SCORE_BASELINE } from './fixtures/productionScoreBaseline';
 
 const SCORE_FIELD_PATTERN = /mappedPressureScore|pressureScore|candidatePressureScore/;
@@ -79,5 +88,57 @@ const { raw, meta } = buildGhostFlowSnapshot();
 assert.strictEqual(meta.publicSignalCount, PRODUCTION_SCORE_BASELINE.publicSignalCount);
 assert.ok(!raw.signals.some((s) => s.id === 'treasury-futures-positioning-proxy'));
 assert.ok(!raw.signals.some((s) => s.id === 'treasury-long-end-income-lens'));
+
+const boardFixture = {
+  artifactVersion: '1',
+  signalId: 'treasury-long-end-income-lens',
+  asOf: '2026-08-24',
+  source: {
+    name: TREASURY_LONG_END_BOARD_SOURCE_NAME,
+    url: TREASURY_LONG_END_BOARD_RELEASE_URL,
+    note: TREASURY_LONG_END_BOARD_SOURCE_NOTE,
+    series: TREASURY_LONG_END_BOARD_SOURCE_SERIES.map((spec) => ({
+      id: spec.id,
+      label: spec.label,
+      url: TREASURY_LONG_END_BOARD_RELEASE_URL,
+      role: spec.role,
+    })),
+  },
+  observationType: 'treasury_long_end_income_snapshot',
+  seriesDefinition: TREASURY_LONG_END_BOARD_SERIES_DEFINITION,
+  updateFrequency: 'daily',
+  dataQuality: 'verified_automated',
+  mappingStatus: 'not_final',
+  caveats: [...TREASURY_LONG_END_BOARD_CAVEATS],
+  observations: {
+    thirtyYearNominalYieldPct: 4.97,
+    thirtyYearTipsRealYieldPct: 2.78,
+    twoYearYieldPct: 4.17,
+    fiveYearYieldPct: 4.24,
+    tenYearYieldPct: 4.48,
+    curve2s30sPct: 0.8,
+    curve5s30sPct: 0.73,
+    curve10s30sPct: 0.49,
+    nominalYieldPercentile: null,
+    realYieldPercentile: null,
+    mappingStatus: 'not_final',
+  },
+};
+
+const boardValidation = validateTreasuryLongEndIncomeLensArtifact(boardFixture, {
+  mode: 'production',
+});
+assert.ok(boardValidation.ok, boardValidation.ok ? '' : boardValidation.errors.join('; '));
+
+const boardCard = buildTreasuryLongEndDisplayCard(boardValidation);
+assert.ok(boardCard.statusLabel.includes('Board H.15'));
+assert.ok(!boardCard.explanation.includes('FRED'));
+assert.ok(!boardCard.explanation.toLowerCase().includes('breakeven'));
+assert.ok(!boardCard.detailRows.some((r) => r.label === '10Y breakeven'));
+assert.ok(boardCard.detailRows.some((r) => r.label === 'Data quality' && r.value === 'Verified automated'));
+assert.strictEqual(boardCard.publishedAt, undefined);
+
+assert.ok(incomeCard.statusLabel.includes('FRED'));
+assert.ok(incomeCard.explanation.includes('FRED'));
 
 console.log('ghostflow/treasuryPlumbingDisplay.test.ts: ok');

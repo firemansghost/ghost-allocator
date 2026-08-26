@@ -10,12 +10,56 @@ import {
   formatYieldPct,
   loadTreasuryLongEndIncomeLensArtifact,
   reconcileCurveSpread,
+  TREASURY_LONG_END_BOARD_RELEASE_URL,
+  TREASURY_LONG_END_BOARD_SERIES_DEFINITION,
+  TREASURY_LONG_END_BOARD_SOURCE_NAME,
+  TREASURY_LONG_END_BOARD_SOURCE_NOTE,
+  TREASURY_LONG_END_BOARD_SOURCE_SERIES,
+  TREASURY_LONG_END_BOARD_CAVEATS,
   validatePercentRate,
   validateTreasuryLongEndIncomeLensArtifact,
 } from '@/lib/ghostflow/artifacts/treasuryLongEndIncomeLens';
 
 function cloneExample(): Record<string, unknown> {
   return JSON.parse(JSON.stringify(exampleJson)) as Record<string, unknown>;
+}
+
+function buildBoardNativeFixture(): Record<string, unknown> {
+  return {
+    artifactVersion: '1',
+    signalId: 'treasury-long-end-income-lens',
+    asOf: '2026-08-24',
+    source: {
+      name: TREASURY_LONG_END_BOARD_SOURCE_NAME,
+      url: TREASURY_LONG_END_BOARD_RELEASE_URL,
+      note: TREASURY_LONG_END_BOARD_SOURCE_NOTE,
+      series: TREASURY_LONG_END_BOARD_SOURCE_SERIES.map((spec) => ({
+        id: spec.id,
+        label: spec.label,
+        url: TREASURY_LONG_END_BOARD_RELEASE_URL,
+        role: spec.role,
+      })),
+    },
+    observationType: 'treasury_long_end_income_snapshot',
+    seriesDefinition: TREASURY_LONG_END_BOARD_SERIES_DEFINITION,
+    updateFrequency: 'daily',
+    dataQuality: 'verified_automated',
+    mappingStatus: 'not_final',
+    caveats: [...TREASURY_LONG_END_BOARD_CAVEATS],
+    observations: {
+      thirtyYearNominalYieldPct: 4.97,
+      thirtyYearTipsRealYieldPct: 2.78,
+      twoYearYieldPct: 4.17,
+      fiveYearYieldPct: 4.24,
+      tenYearYieldPct: 4.48,
+      curve2s30sPct: 0.8,
+      curve5s30sPct: 0.73,
+      curve10s30sPct: 0.49,
+      nominalYieldPercentile: null,
+      realYieldPercentile: null,
+      mappingStatus: 'not_final',
+    },
+  };
 }
 
 // --- production artifact validates ---
@@ -206,5 +250,92 @@ assert.ok(!reconcileCurveSpread(0.54, 1.0));
 assert.equal(validatePercentRate(-0.5, 'test'), null);
 assert.equal(validatePercentRate(150, 'test')?.includes('100'), true);
 assert.equal(formatYieldPct(4.72, 2), '4.72%');
+
+// --- Board-native branch ---
+const boardOk = validateTreasuryLongEndIncomeLensArtifact(buildBoardNativeFixture(), {
+  mode: 'production',
+});
+assert.ok(boardOk.ok, boardOk.ok ? '' : boardOk.errors.join('; '));
+
+const boardNoPublished = buildBoardNativeFixture();
+delete boardNoPublished.publishedAt;
+assert.ok(validateTreasuryLongEndIncomeLensArtifact(boardNoPublished, { mode: 'production' }).ok);
+
+const boardWithPublished = buildBoardNativeFixture();
+boardWithPublished.publishedAt = '2026-08-24';
+assert.ok(validateTreasuryLongEndIncomeLensArtifact(boardWithPublished, { mode: 'production' }).ok);
+
+const boardBadPublished = buildBoardNativeFixture();
+boardBadPublished.publishedAt = '2026-08-20';
+assert.ok(!validateTreasuryLongEndIncomeLensArtifact(boardBadPublished, { mode: 'production' }).ok);
+
+const fredAutomated = cloneExample();
+fredAutomated.dataQuality = 'verified_automated';
+assert.ok(!validateTreasuryLongEndIncomeLensArtifact(fredAutomated, { mode: 'example' }).ok);
+
+const boardT10yie = buildBoardNativeFixture();
+(boardT10yie.source as { series: Array<{ id: string }> }).series.push({
+  id: 'T10YIE',
+  label: 'bad',
+  url: TREASURY_LONG_END_BOARD_RELEASE_URL,
+  role: 'context',
+});
+assert.ok(!validateTreasuryLongEndIncomeLensArtifact(boardT10yie, { mode: 'production' }).ok);
+
+const boardBreakeven = buildBoardNativeFixture();
+(boardBreakeven.observations as Record<string, unknown>).tenYearBreakevenInflationPct = 2.1;
+assert.ok(!validateTreasuryLongEndIncomeLensArtifact(boardBreakeven, { mode: 'production' }).ok);
+
+const boardDgs = buildBoardNativeFixture();
+(boardDgs.source as { series: Array<{ id: string }> }).series[0]!.id = 'DGS30';
+assert.ok(!validateTreasuryLongEndIncomeLensArtifact(boardDgs, { mode: 'production' }).ok);
+
+const boardPrefix = buildBoardNativeFixture();
+(boardPrefix.source as { series: Array<{ id: string }> }).series[0]!.id = 'H15/H15/RIFLGFCY30_N.B';
+assert.ok(!validateTreasuryLongEndIncomeLensArtifact(boardPrefix, { mode: 'production' }).ok);
+
+const boardFredUrl = buildBoardNativeFixture();
+(boardFredUrl.source as { url: string }).url = 'https://fred.stlouisfed.org/';
+assert.ok(!validateTreasuryLongEndIncomeLensArtifact(boardFredUrl, { mode: 'production' }).ok);
+
+const boardWrongRole = buildBoardNativeFixture();
+(boardWrongRole.source as { series: Array<{ role: string }> }).series[0]!.role = 'context';
+assert.ok(!validateTreasuryLongEndIncomeLensArtifact(boardWrongRole, { mode: 'production' }).ok);
+
+const boardMissingNom = buildBoardNativeFixture();
+delete (boardMissingNom.observations as Record<string, unknown>).thirtyYearNominalYieldPct;
+assert.ok(!validateTreasuryLongEndIncomeLensArtifact(boardMissingNom, { mode: 'production' }).ok);
+
+const boardMissingReal = buildBoardNativeFixture();
+delete (boardMissingReal.observations as Record<string, unknown>).thirtyYearTipsRealYieldPct;
+assert.ok(!validateTreasuryLongEndIncomeLensArtifact(boardMissingReal, { mode: 'production' }).ok);
+
+const boardDuplicate = buildBoardNativeFixture();
+const series = (boardDuplicate.source as { series: unknown[] }).series;
+series.push(JSON.parse(JSON.stringify(series[0])));
+assert.ok(!validateTreasuryLongEndIncomeLensArtifact(boardDuplicate, { mode: 'production' }).ok);
+
+const boardExtra = buildBoardNativeFixture();
+(boardExtra.source as { series: unknown[] }).series.push({
+  id: 'RIFLGFCY01_N.B',
+  label: 'extra',
+  url: TREASURY_LONG_END_BOARD_RELEASE_URL,
+  role: 'context',
+});
+assert.ok(!validateTreasuryLongEndIncomeLensArtifact(boardExtra, { mode: 'production' }).ok);
+
+const fredWithBoardSource = cloneExample();
+(fredWithBoardSource.source as { series: unknown[] }).series = (
+  buildBoardNativeFixture().source as { series: unknown[] }
+).series;
+assert.ok(!validateTreasuryLongEndIncomeLensArtifact(fredWithBoardSource, { mode: 'example' }).ok);
+
+const boardWithFredSource = buildBoardNativeFixture();
+boardWithFredSource.source = (productionJson as { source: unknown }).source;
+assert.ok(!validateTreasuryLongEndIncomeLensArtifact(boardWithFredSource, { mode: 'production' }).ok);
+
+const boardManualQuality = buildBoardNativeFixture();
+boardManualQuality.dataQuality = 'verified_manual';
+assert.ok(!validateTreasuryLongEndIncomeLensArtifact(boardManualQuality, { mode: 'production' }).ok);
 
 console.log('ghostflow/treasuryLongEndIncomeLens.test.ts: ok');
