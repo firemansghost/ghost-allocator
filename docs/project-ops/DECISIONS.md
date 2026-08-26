@@ -1,5 +1,34 @@
 # DECISIONS
 
+## 2026-08-26 — GhostFlow candidate production-mapping policy
+Choice:
+- **Long-End `seriesDefinition`:** New Board H.15 candidates for `treasuryLongEndIncomeLens` use `frb_h15_treasury_long_end_income_lens_v1`. Do not retain `fred_treasury_long_end_income_lens_v1` merely for validator continuity. The semantic series definition describes the Board H.15 **product contract**, not its transport encoding. Do not put `sdmx` into the semantic identifier.
+- **Long-End Board H.15 production source contract (new candidates):**
+  - Required primary: `RIFLGFCY30_N.B`, `RIFLGFCY30_XII_N.B`
+  - Optional context: `RIFLGFCY02_N.B`, `RIFLGFCY05_N.B`, `RIFLGFCY10_N.B`
+  - Forbidden in new Board-native candidates: `T10YIE`, `tenYearBreakevenInflationPct`, derived breakeven
+  - Canonical release source URL: `https://www.federalreserve.gov/releases/h15/data/FRB_h15_xml.zip`
+  - The existing committed FRED production artifact remains valid during the transition until a future human-approved candidate is promoted.
+  - Production validation may temporarily support **both** (1) legacy FRED production shape and (2) new Board-native production shape, but must enforce internal consistency per branch. No FRED/Board hybrid artifacts. A Board-native artifact must not contain FRED-only series metadata, `T10YIE`, or breakeven observation fields. A legacy artifact must continue validating until actually replaced through the future promotion workflow.
+- **`dataQuality`:** Introduce `verified_automated` for deterministic source-adapter-produced candidates that pass the applicable production validator. Do not label automated candidates `verified_manual`. Existing values (`verified_manual`, `manual_unverified`) remain valid for existing/manual artifacts. Prefer the narrowest type/validator changes for the three candidate-enabled artifacts: `systematicFlowProxy`, `treasuryFuturesPositioningProxy`, `treasuryLongEndIncomeLens`.
+- **`publishedAt`:** For those three artifacts, `publishedAt` is **optional** for automated candidate production shapes. Mapper rule: if normalized durable provenance contains a defensible `sourcePublishedAt`, map it to production `publishedAt`; if absent, omit `publishedAt`. Do **not** substitute `retrievedAt`, generation time, report date + N days, generic Friday-after-Tuesday logic, inferred holiday calendars, or guessed release dates. No mapper may fabricate `publishedAt`. Freshness behavior must fall back to artifact `asOf` or another already-defined deterministic anchor when `publishedAt` is omitted (no freshness semantic change in the decision-record PR).
+- **Authorization boundary:** This decision authorizes **future** type changes, validator changes, source-contract truth changes, display-copy truth changes where required, and pure candidate mapper implementation. It does **not** authorize candidate generator implementation, filesystem candidate writer, production artifact writes, production artifact promotion, history writes, automatic PR creation, workflows, scores, MOCK values, `publicSignalCount`, reference-date changes, VIX / breadth / Gate C changes. Promotion remains separately blocked.
+- **No production JSON changes** are authorized by this decision-record PR.
+
+Why:
+- [CANDIDATE_GENERATION_DESIGN.md](../ghostflow/CANDIDATE_GENERATION_DESIGN.md) blocked PR A on mapping-policy decisions (Long-End `seriesDefinition` / Board source block, `dataQuality`, `publishedAt`).
+- Board H.15 transport and product contract are already decided (PR **#143–#144**); candidate mappers must emit Board-native **production semantics**, not FRED legacy identifiers, while preserving fail-closed validation of the committed FRED production artifact until promotion.
+- CFTC and H.15 adapters do not currently emit defensible `sourcePublishedAt`; omitting `publishedAt` is honest and freshness can anchor on `asOf`.
+- `verified_automated` distinguishes adapter-validated candidates from manual curation without mislabeling automation as `verified_manual`.
+
+Consequences:
+- Impact inventory: [CANDIDATE_MAPPING_POLICY_IMPACT.md](../ghostflow/CANDIDATE_MAPPING_POLICY_IMPACT.md).
+- Next coding PR (**PR A**): narrow type/validator updates + pure mappers + tests — **ONE PR** recommended (no separate schema PR required).
+- Display copy for Board-native Long-End may branch on `seriesDefinition` in PR A; legacy FRED production display remains until promotion replaces the artifact.
+- Generator (PR B) and promotion (PR C) remain blocked pending separate work and DECISIONS entries.
+
+---
+
 ## 2026-08-26 — Treasury Long-End H.15 transport → Board release-level SDMX/XML
 Choice:
 - Migrate `treasuryLongEndIncomeLens` **transport** from the current dual Board H.15 DDP CSV packages (preformatted Treasury Constant Maturities + custom single-series TIPS-30 package) to the Federal Reserve Board **release-level H.15 SDMX/XML ZIP**:
