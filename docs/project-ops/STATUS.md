@@ -1,23 +1,21 @@
 ﻿# STATUS
 
-## Current State (GhostFlow — 2026-08-26, PR A candidate mappers)
-Starting `main` for this work: `2dd7c086d8c659e2823ca36928ce7eef91c625b1` (includes PRs **#140–#146** merged).
+## Current State (GhostFlow — 2026-08-26, PR B candidate generator)
+Starting `main` for this work: `ee018350a8d76737027473a62e6196ce986a7f24` (includes PRs **#140–#147** merged).
 
-**PR A — candidate production-mapping policy implemented (branch `feat/ghostflow-candidate-mappers`):**
-- Narrow type changes for three operator-ready artifacts: `publishedAt` optional; `verified_automated` added to `dataQuality`
-- Fail-closed validators: systematic invalid `dataQuality` no longer coerced; Treasury Futures + Long-End transitional validation
-- Long-End: legacy FRED branch preserved; Board-native branch (`frb_h15_treasury_long_end_income_lens_v1`) with five-series contract, no T10YIE/breakeven
-- Pure candidate mappers + registry for systematic, Treasury Futures, and Board-native Long-End
-- Treasury Plumbing display truth branches on `seriesDefinition`; `verified_automated` label added
-- **Does not include:** candidate generator, CLI, candidate envelope writer, promotion, or production JSON writes
+**PR B — candidate generator + review envelope implemented (branch `feat/ghostflow-candidate-generator`):**
+- Builds on merged PR **#147** candidate mappers + provenance guards
+- Typed candidate envelope (`candidateVersion: 1`) with deterministic identity and canonical production-payload hashing
+- Factual current-vs-candidate structural diff (no investment interpretation)
+- `generateGhostFlowCandidate` programmatic API + `ghostflow:generate-candidate` single-artifact CLI
+- Collision-safe idempotent writer under gitignored `tmp/ghostflow/candidates/` only
+- Full normalized durable provenance embedded verbatim; no raw source persistence
+- Live smoke (2026-08-26): all three artifacts `ready_for_review`; Long-End idempotency `candidate_already_exists` exit 0
+- **Does not include:** production artifact writes, promotion, accepted-history writes, automatic PR creation, or `--artifact all`
 
-**Candidate mapping policy (PR #146, merged):**
-- DECISIONS entry: *2026-08-26 — GhostFlow candidate production-mapping policy*
-- Impact memo: [CANDIDATE_MAPPING_POLICY_IMPACT.md](../ghostflow/CANDIDATE_MAPPING_POLICY_IMPACT.md)
-
-**Candidate-generation architecture (PR #145, merged):**
-- Design memo: [CANDIDATE_GENERATION_DESIGN.md](../ghostflow/CANDIDATE_GENERATION_DESIGN.md)
-- Report-only operator runner unchanged
+**PR #147 merged (candidate mappers + provenance hardening):**
+- Pure candidate mappers + registry for systematic, Treasury Futures, and Board-native Long-End (SDMX-only)
+- Fail-closed mapper provenance reconciliation; strict timestamp validation
 
 Production GhostFlow state remains unchanged:
 - `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
@@ -29,16 +27,16 @@ Production GhostFlow state remains unchanged:
 VIX remains excluded because Gate C / `marketBreadth` remain blocked.
 
 ## Recommended next work
-1. **PR B** — generator + diff + idempotent writer + CLI
-2. Promotion (PR C) blocked pending separate DECISIONS approval
+1. **Promotion policy / PR C authorization gate** — separate DECISIONS approval required before any production promotion
+2. Same-date promotion policy remains blocked pending human decision
 3. Breadth remains blocked. Do not wire VIX or Gate C.
 
 Last updated: 2026-08-26
 
 ---
 
-## Archive — Candidate mapping policy approved (2026-08-26)
-Starting `main` for this work: `76bf115759083963279c703a760d483afe129194` (includes PRs **#140–#145** merged).
+## Archive — PR A candidate mappers (2026-08-26)
+Starting `main` for this work: `2dd7c086d8c659e2823ca36928ce7eef91c625b1` (includes PRs **#140–#146** merged).
 
 **Candidate-generation architecture design (PR #145, branch `docs/ghostflow-candidate-generation-design`):**
 - Design memo: [CANDIDATE_GENERATION_DESIGN.md](../ghostflow/CANDIDATE_GENERATION_DESIGN.md)
