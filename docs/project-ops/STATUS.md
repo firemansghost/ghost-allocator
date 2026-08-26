@@ -1,23 +1,23 @@
 ﻿# STATUS
 
-## Current State (GhostFlow — 2026-08-26, candidate mapping policy)
-Starting `main` for this work: `76bf115759083963279c703a760d483afe129194` (includes PRs **#140–#145** merged).
+## Current State (GhostFlow — 2026-08-26, PR A candidate mappers)
+Starting `main` for this work: `2dd7c086d8c659e2823ca36928ce7eef91c625b1` (includes PRs **#140–#146** merged).
 
-**Candidate mapping policy approved + impact inventory (this branch):**
+**PR A — candidate production-mapping policy implemented (branch `feat/ghostflow-candidate-mappers`):**
+- Narrow type changes for three operator-ready artifacts: `publishedAt` optional; `verified_automated` added to `dataQuality`
+- Fail-closed validators: systematic invalid `dataQuality` no longer coerced; Treasury Futures + Long-End transitional validation
+- Long-End: legacy FRED branch preserved; Board-native branch (`frb_h15_treasury_long_end_income_lens_v1`) with five-series contract, no T10YIE/breakeven
+- Pure candidate mappers + registry for systematic, Treasury Futures, and Board-native Long-End
+- Treasury Plumbing display truth branches on `seriesDefinition`; `verified_automated` label added
+- **Does not include:** candidate generator, CLI, candidate envelope writer, promotion, or production JSON writes
+
+**Candidate mapping policy (PR #146, merged):**
 - DECISIONS entry: *2026-08-26 — GhostFlow candidate production-mapping policy*
 - Impact memo: [CANDIDATE_MAPPING_POLICY_IMPACT.md](../ghostflow/CANDIDATE_MAPPING_POLICY_IMPACT.md)
-- Approved: Board-native Long-End `seriesDefinition` (`frb_h15_treasury_long_end_income_lens_v1`), five-series Board source contract, transitional legacy FRED validation, `verified_automated`, optional `publishedAt` unless defensible `sourcePublishedAt`
-- **Next implementation:** PR A — **ONE PR** (types + validators + pure mappers + tests); no separate schema PR required
-- **Does not authorize** production writes, generator/CLI, or promotion
 
 **Candidate-generation architecture (PR #145, merged):**
 - Design memo: [CANDIDATE_GENERATION_DESIGN.md](../ghostflow/CANDIDATE_GENERATION_DESIGN.md)
-- Mapping-policy gate **closed** — PR A unblocked pending implementation PR
 - Report-only operator runner unchanged
-
-**PR #144 merged (H.15 SDMX/XML transport):**
-- Active transport for `treasuryLongEndIncomeLens` → Board release-level SDMX/XML ZIP
-- Adapter `frb-h15-treasury-yields-sdmx` parser **1.0.0**; CSV **1.0.1** retained without runtime fallback
 
 Production GhostFlow state remains unchanged:
 - `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
@@ -29,17 +29,16 @@ Production GhostFlow state remains unchanged:
 VIX remains excluded because Gate C / `marketBreadth` remain blocked.
 
 ## Recommended next work
-1. **PR A** — narrow type/validator updates + pure candidate mappers + tests (per impact memo)
-2. **PR B** — generator + diff + idempotent writer + CLI
-3. Promotion (PR C) blocked pending separate DECISIONS approval
-4. Breadth remains blocked. Do not wire VIX or Gate C.
+1. **PR B** — generator + diff + idempotent writer + CLI
+2. Promotion (PR C) blocked pending separate DECISIONS approval
+3. Breadth remains blocked. Do not wire VIX or Gate C.
 
 Last updated: 2026-08-26
 
 ---
 
-## Archive — Candidate-generation design (2026-08-26)
-Starting `main` for this work: `ae6fbf14a25e5e898d0874358bed17b26ba28c50` (includes PRs **#140–#144** merged).
+## Archive — Candidate mapping policy approved (2026-08-26)
+Starting `main` for this work: `76bf115759083963279c703a760d483afe129194` (includes PRs **#140–#145** merged).
 
 **Candidate-generation architecture design (PR #145, branch `docs/ghostflow-candidate-generation-design`):**
 - Design memo: [CANDIDATE_GENERATION_DESIGN.md](../ghostflow/CANDIDATE_GENERATION_DESIGN.md)

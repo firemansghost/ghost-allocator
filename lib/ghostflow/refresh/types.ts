@@ -273,3 +273,13 @@ export type GhostFlowRefreshRegistryEntry =
 export const GATE_C_CANDIDATE_GROUP_ID = 'gate_c_daily_session' as const;
 
 export const GATE_C_ARTIFACT_IDS = ['volatilityRegime', 'marketBreadth'] as const;
+
+export interface GhostFlowCandidateMapperInput<TFields> {
+  normalized: GhostFlowNormalizedObservation<TFields>;
+  registryEntry: GhostFlowRefreshRegistryEntry;
+}
+
+export interface GhostFlowCandidateMapper<TFields, TArtifact> {
+  artifactId: string;
+  map(input: GhostFlowCandidateMapperInput<TFields>): GhostFlowStageResult<TArtifact>;
+}

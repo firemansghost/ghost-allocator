@@ -13,6 +13,7 @@ import {
   resolveBasketDirection,
   validateSystematicFlowProxyArtifact,
   evaluateSystematicFlowProxyArtifactFreshness,
+  systematicFlowProxySnapshotDataQuality,
 } from '../artifacts/systematicFlowProxy';
 import { GHOSTFLOW_REFERENCE_AS_OF } from '../reference';
 import productionArtifact from '@/data/ghostflow/artifacts/systematicFlowProxy.v1.json';
@@ -137,5 +138,75 @@ assert.strictEqual(prodFresh.status, 'fresh');
 
 const loaded = loadSystematicFlowProxyArtifact();
 assert.ok(loaded.ok, loaded.ok ? '' : loaded.errors.join('; '));
+
+// --- dataQuality fail-closed ---
+const manualOk = cloneExample();
+manualOk.dataQuality = 'verified_manual';
+assert.ok(validateSystematicFlowProxyArtifact(manualOk).ok);
+
+const unverifiedOk = cloneExample();
+unverifiedOk.dataQuality = 'manual_unverified';
+assert.ok(validateSystematicFlowProxyArtifact(unverifiedOk).ok);
+
+const automatedOk = cloneExample();
+automatedOk.dataQuality = 'verified_automated';
+delete (automatedOk as { publishedAt?: string }).publishedAt;
+assert.ok(validateSystematicFlowProxyArtifact(automatedOk).ok);
+
+const unknownQuality = cloneExample();
+unknownQuality.dataQuality = 'bogus' as 'verified_manual';
+const unknownQualityResult = validateSystematicFlowProxyArtifact(unknownQuality);
+assert.ok(!unknownQualityResult.ok);
+assert.ok(unknownQualityResult.errors.some((e) => e.includes('dataQuality')));
+
+const missingQuality = cloneExample();
+delete (missingQuality as { dataQuality?: string }).dataQuality;
+const missingQualityResult = validateSystematicFlowProxyArtifact(missingQuality);
+assert.ok(!missingQualityResult.ok);
+
+const coercedCheck = cloneExample();
+coercedCheck.dataQuality = 'bogus' as 'verified_manual';
+const coercedResult = validateSystematicFlowProxyArtifact(coercedCheck);
+assert.ok(!coercedResult.ok || coercedResult.artifact.dataQuality !== 'manual_unverified');
+
+const automatedPublished = cloneExample();
+automatedPublished.dataQuality = 'verified_automated';
+automatedPublished.publishedAt = '2026-05-23';
+assert.ok(validateSystematicFlowProxyArtifact(automatedPublished).ok);
+
+const automatedBadPublished = cloneExample();
+automatedBadPublished.dataQuality = 'verified_automated';
+automatedBadPublished.publishedAt = 'bad';
+assert.ok(!validateSystematicFlowProxyArtifact(automatedBadPublished).ok);
+
+const automatedEarlyPublished = cloneExample();
+automatedEarlyPublished.dataQuality = 'verified_automated';
+automatedEarlyPublished.publishedAt = '2026-05-10';
+assert.ok(!validateSystematicFlowProxyArtifact(automatedEarlyPublished).ok);
+
+const manualNoPublished = cloneExample();
+manualNoPublished.dataQuality = 'verified_manual';
+delete (manualNoPublished as { publishedAt?: string }).publishedAt;
+assert.ok(!validateSystematicFlowProxyArtifact(manualNoPublished).ok);
+
+const automatedFresh = cloneExample();
+automatedFresh.dataQuality = 'verified_automated';
+delete (automatedFresh as { publishedAt?: string }).publishedAt;
+const automatedFreshResult = validateSystematicFlowProxyArtifact(automatedFresh);
+assert.ok(automatedFreshResult.ok);
+if (automatedFreshResult.ok) {
+  const freshAutomated = evaluateSystematicFlowProxyArtifactFreshness(
+    automatedFreshResult.artifact,
+    FIXTURE_SYSTEMATIC_FLOW_REFERENCE_AS_OF
+  );
+  assert.strictEqual(freshAutomated.ageDays, 6);
+}
+
+assert.strictEqual(systematicFlowProxySnapshotDataQuality('verified_manual'), 'verified_manual');
+assert.strictEqual(
+  systematicFlowProxySnapshotDataQuality('manual_unverified'),
+  'manual_unverified'
+);
+assert.strictEqual(systematicFlowProxySnapshotDataQuality('verified_automated'), undefined);
 
 console.log('ghostflow/systematicFlowProxy.test.ts: ok');

@@ -295,11 +295,11 @@ export interface SystematicFlowProxyArtifactV1 {
   signalId: 'systematic-flow-proxy';
   designOnly?: boolean;
   asOf: string;
-  publishedAt: string;
+  publishedAt?: string;
   source: ArtifactSource;
   seriesDefinition: SystematicFlowProxySeriesDefinition;
   updateFrequency: 'weekly';
-  dataQuality: 'verified_manual' | 'manual_unverified';
+  dataQuality: 'verified_manual' | 'manual_unverified' | 'verified_automated';
   datasetId: string;
   scoreContracts: SystematicFlowProxyScoreContract[];
   vixContext?: SystematicFlowProxyVixContext;
@@ -846,12 +846,12 @@ export interface TreasuryFuturesPositioningArtifactV1 {
   signalId: 'treasury-futures-positioning-proxy';
   designOnly?: true;
   asOf: string;
-  publishedAt: string;
+  publishedAt?: string;
   source: ArtifactSource;
   observationType: 'cftc_tff_treasury_futures_positioning_snapshot';
   seriesDefinition: 'cftc_tff_futures_only_treasury_leveraged_funds_basket_v1';
   updateFrequency: 'weekly';
-  dataQuality: 'verified_manual' | 'manual_unverified';
+  dataQuality: 'verified_manual' | 'manual_unverified' | 'verified_automated';
   datasetId: string;
   mappingStatus: TreasuryFuturesMappingStatus;
   caveats: string[];
@@ -873,8 +873,12 @@ export type TreasuryFuturesPositioningValidation =
   | TreasuryFuturesPositioningValidationResult
   | TreasuryFuturesPositioningValidationError;
 
-/** FRED Treasury long-end income lens — v1.7c design only. */
+/** Treasury long-end income lens — legacy FRED or Board H.15 product contracts. */
 export type TreasuryLongEndMappingStatus = 'not_final';
+
+export type TreasuryLongEndIncomeLensSeriesDefinition =
+  | 'fred_treasury_long_end_income_lens_v1'
+  | 'frb_h15_treasury_long_end_income_lens_v1';
 
 export type TreasuryLongEndSourceSeriesRole = 'primary' | 'context';
 
@@ -918,12 +922,12 @@ export interface TreasuryLongEndIncomeLensArtifactV1 {
   signalId: 'treasury-long-end-income-lens';
   designOnly?: true;
   asOf: string;
-  publishedAt: string;
+  publishedAt?: string;
   source: TreasuryLongEndIncomeLensSourceV1;
   observationType: 'treasury_long_end_income_snapshot';
-  seriesDefinition: 'fred_treasury_long_end_income_lens_v1';
+  seriesDefinition: TreasuryLongEndIncomeLensSeriesDefinition;
   updateFrequency: 'daily';
-  dataQuality: 'verified_manual' | 'manual_unverified';
+  dataQuality: 'verified_manual' | 'manual_unverified' | 'verified_automated';
   mappingStatus: TreasuryLongEndMappingStatus;
   caveats: string[];
   observations: TreasuryLongEndIncomeLensObservationsV1;

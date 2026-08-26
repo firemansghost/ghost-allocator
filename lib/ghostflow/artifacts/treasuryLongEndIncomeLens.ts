@@ -7,7 +7,9 @@
 import treasuryLongEndIncomeLensArtifactJson from '@/data/ghostflow/artifacts/treasuryLongEndIncomeLens.v1.json';
 import type {
   TreasuryLongEndIncomeLensArtifactV1,
+  TreasuryLongEndIncomeLensSeriesDefinition,
   TreasuryLongEndIncomeLensValidation,
+  TreasuryLongEndSourceSeriesRole,
 } from './types';
 
 export const TREASURY_LONG_END_EXAMPLE_ARTIFACT_PATH =
@@ -25,10 +27,63 @@ export const TREASURY_LONG_END_OBSERVATION_TYPE =
 export const TREASURY_LONG_END_SERIES_DEFINITION =
   'fred_treasury_long_end_income_lens_v1' as const;
 
+export const TREASURY_LONG_END_BOARD_SERIES_DEFINITION =
+  'frb_h15_treasury_long_end_income_lens_v1' as const;
+
+export const TREASURY_LONG_END_BOARD_RELEASE_URL =
+  'https://www.federalreserve.gov/releases/h15/data/FRB_h15_xml.zip' as const;
+
+export const TREASURY_LONG_END_BOARD_SOURCE_NAME =
+  'Board of Governors of the Federal Reserve System — H.15 Selected Interest Rates' as const;
+
+export interface TreasuryLongEndBoardSourceSeriesSpec {
+  id: string;
+  label: string;
+  role: TreasuryLongEndSourceSeriesRole;
+}
+
+export const TREASURY_LONG_END_BOARD_PRIMARY_SERIES: readonly TreasuryLongEndBoardSourceSeriesSpec[] =
+  [
+    {
+      id: 'RIFLGFCY30_N.B',
+      label: '30-Year Treasury Constant Maturity Rate (nominal)',
+      role: 'primary',
+    },
+    {
+      id: 'RIFLGFCY30_XII_N.B',
+      label: '30-Year Treasury Inflation-Indexed Constant Maturity Rate (real)',
+      role: 'primary',
+    },
+  ] as const;
+
+export const TREASURY_LONG_END_BOARD_CONTEXT_SERIES: readonly TreasuryLongEndBoardSourceSeriesSpec[] =
+  [
+    { id: 'RIFLGFCY02_N.B', label: '2-Year Treasury Constant Maturity Rate', role: 'context' },
+    { id: 'RIFLGFCY05_N.B', label: '5-Year Treasury Constant Maturity Rate', role: 'context' },
+    { id: 'RIFLGFCY10_N.B', label: '10-Year Treasury Constant Maturity Rate', role: 'context' },
+  ] as const;
+
+export const TREASURY_LONG_END_BOARD_SOURCE_SERIES: readonly TreasuryLongEndBoardSourceSeriesSpec[] =
+  [...TREASURY_LONG_END_BOARD_PRIMARY_SERIES, ...TREASURY_LONG_END_BOARD_CONTEXT_SERIES];
+
+export const TREASURY_LONG_END_BOARD_SOURCE_NOTE =
+  'Automated candidate from Board H.15 release-level constant-maturity yields (nominal + inflation-indexed). Display-only Treasury Plumbing card; not scored; mappingStatus not_final.' as const;
+
+export const TREASURY_LONG_END_BOARD_CAVEATS = [
+  'Not investment advice and not a recommendation to buy or sell Treasury securities or bond funds.',
+  'Not a duration allocation signal — yield levels alone do not prove income neglect or investor behavior.',
+  'Nominal and real yields can move for different macro reasons; duration risk remains.',
+  'Display-only Treasury Plumbing card (separate lane, v1.7e); outside equity publicSignalCount; not merged into buildSnapshot or Research Composite.',
+  'Board H.15 snapshot; mappingStatus not_final; no scored pressure mapping.',
+] as const;
+
 export const TREASURY_LONG_END_DISPLAY_SIGNAL_NAME = 'Long-End Income Lens' as const;
 
 export const TREASURY_LONG_END_DISPLAY_CARD_CAVEAT =
   'Display-only FRED long-end Treasury income lens; not investment advice, not a bond-buy or duration signal; not in the Research Composite.';
+
+export const TREASURY_LONG_END_DISPLAY_CARD_CAVEAT_BOARD =
+  'Display-only Board H.15 long-end Treasury income lens; not investment advice, not a bond-buy or duration signal; not in the Research Composite.';
 
 /** Relative tolerance for curve spread reconciliation (percentage points). */
 export const PCT_RECONCILIATION_TOLERANCE = 0.05;
@@ -216,6 +271,279 @@ function parsePercentileField(
   }
 }
 
+type TreasuryLongEndDataQuality = TreasuryLongEndIncomeLensArtifactV1['dataQuality'];
+
+function parseLongEndDataQuality(
+  raw: unknown,
+  allowed: readonly TreasuryLongEndDataQuality[],
+  errors: string[]
+): TreasuryLongEndDataQuality | null {
+  if (raw === undefined || raw === null) {
+    errors.push('dataQuality is required.');
+    return null;
+  }
+  if (!(allowed as readonly string[]).includes(raw as string)) {
+    errors.push(`dataQuality must be ${allowed.join(' or ')}.`);
+    return null;
+  }
+  return raw as TreasuryLongEndDataQuality;
+}
+
+function parseLongEndPublishedAt(
+  rawPublishedAt: unknown,
+  asOf: string | undefined,
+  required: boolean,
+  errors: string[]
+): string | undefined {
+  if (rawPublishedAt === undefined || rawPublishedAt === null) {
+    if (required) {
+      errors.push('publishedAt must be ISO YYYY-MM-DD.');
+    }
+    return undefined;
+  }
+  if (typeof rawPublishedAt !== 'string' || !parseIsoDate(rawPublishedAt)) {
+    errors.push('publishedAt must be ISO YYYY-MM-DD.');
+    return undefined;
+  }
+  if (typeof asOf === 'string' && parseIsoDate(asOf) && compareIso(rawPublishedAt, asOf) < 0) {
+    errors.push('publishedAt cannot be before asOf.');
+  }
+  return rawPublishedAt;
+}
+
+function validateLongEndSourceStructure(raw: Record<string, unknown>, errors: string[]): void {
+  if (!isPlainObject(raw.source)) {
+    errors.push('source must be an object.');
+    return;
+  }
+  if (typeof raw.source.name !== 'string' || !raw.source.name.trim()) {
+    errors.push('source.name is required.');
+  }
+  if (typeof raw.source.url !== 'string' || !raw.source.url.trim()) {
+    errors.push('source.url is required.');
+  } else if (!/^https?:\/\//i.test(raw.source.url)) {
+    errors.push('source.url must be an http(s) URL.');
+  }
+  if (typeof raw.source.note !== 'string' || !raw.source.note.trim()) {
+    errors.push('source.note is required.');
+  }
+  if (!Array.isArray(raw.source.series) || raw.source.series.length === 0) {
+    errors.push('source.series must be a non-empty array.');
+    return;
+  }
+  for (let i = 0; i < raw.source.series.length; i++) {
+    const entry = raw.source.series[i];
+    const prefix = `source.series[${i}]`;
+    if (!isPlainObject(entry)) {
+      errors.push(`${prefix} must be an object.`);
+      continue;
+    }
+    if (typeof entry.id !== 'string' || !entry.id.trim()) {
+      errors.push(`${prefix}.id is required.`);
+    }
+    if (typeof entry.label !== 'string' || !entry.label.trim()) {
+      errors.push(`${prefix}.label is required.`);
+    }
+    if (typeof entry.url !== 'string' || !entry.url.trim()) {
+      errors.push(`${prefix}.url is required.`);
+    } else if (!/^https?:\/\//i.test(entry.url)) {
+      errors.push(`${prefix}.url must be an http(s) URL.`);
+    }
+    if (
+      typeof entry.role !== 'string' ||
+      !(VALID_SOURCE_ROLES as readonly string[]).includes(entry.role)
+    ) {
+      errors.push(`${prefix}.role must be primary or context.`);
+    }
+  }
+}
+
+function validateLongEndObservationsCommon(
+  obs: Record<string, unknown>,
+  errors: string[],
+  options: { allowBreakeven: boolean }
+): number | undefined {
+  if (obs.mappingStatus !== 'not_final') {
+    errors.push('observations.mappingStatus must be "not_final".');
+  }
+
+  const thirtyYear = requireRateField(obs, 'thirtyYearNominalYieldPct', errors, true);
+  requireRateField(obs, 'thirtyYearTipsRealYieldPct', errors, true);
+
+  if (options.allowBreakeven) {
+    requireRateField(obs, 'tenYearBreakevenInflationPct', errors, false);
+  } else if (
+    obs.tenYearBreakevenInflationPct !== undefined &&
+    obs.tenYearBreakevenInflationPct !== null
+  ) {
+    errors.push('observations.tenYearBreakevenInflationPct is forbidden for Board-native artifacts.');
+  }
+
+  requireRateField(obs, 'twoYearYieldPct', errors, false);
+  requireRateField(obs, 'fiveYearYieldPct', errors, false);
+  requireRateField(obs, 'tenYearYieldPct', errors, false);
+  requireRateField(obs, 'curve2s30sPct', errors, false);
+  requireRateField(obs, 'curve5s30sPct', errors, false);
+  requireRateField(obs, 'curve10s30sPct', errors, false);
+
+  parsePercentileField(obs, 'nominalYieldPercentile', errors);
+  parsePercentileField(obs, 'realYieldPercentile', errors);
+
+  reconcileCurveField(obs, 'curve2s30sPct', 'twoYearYieldPct', thirtyYear, errors);
+  reconcileCurveField(obs, 'curve5s30sPct', 'fiveYearYieldPct', thirtyYear, errors);
+  reconcileCurveField(obs, 'curve10s30sPct', 'tenYearYieldPct', thirtyYear, errors);
+
+  return thirtyYear;
+}
+
+function isForbiddenBoardSeriesId(id: string): boolean {
+  if (id === 'T10YIE') return true;
+  if (id.startsWith('DGS')) return true;
+  if (id.startsWith('DFII')) return true;
+  if (id.startsWith('H15/')) return true;
+  return false;
+}
+
+function validateLegacyFredLongEndBranch(
+  raw: Record<string, unknown>,
+  mode: TreasuryLongEndValidationMode,
+  errors: string[]
+): void {
+  if (raw.dataQuality === 'verified_automated') {
+    errors.push('dataQuality verified_automated is not allowed for legacy FRED seriesDefinition.');
+  }
+  parseLongEndDataQuality(raw.dataQuality, ['verified_manual', 'manual_unverified'], errors);
+
+  const asOfStr = typeof raw.asOf === 'string' ? raw.asOf : undefined;
+  parseLongEndPublishedAt(raw.publishedAt, asOfStr, true, errors);
+
+  validateLongEndSourceStructure(raw, errors);
+
+  if (isPlainObject(raw.source) && Array.isArray(raw.source.series)) {
+    for (let i = 0; i < raw.source.series.length; i++) {
+      const entry = raw.source.series[i];
+      if (!isPlainObject(entry) || typeof entry.id !== 'string') continue;
+      if (entry.id.startsWith('RIFLGFCY') || entry.id.startsWith('H15/')) {
+        errors.push(
+          `source.series[${i}].id ${entry.id} is not valid for legacy FRED seriesDefinition.`
+        );
+      }
+    }
+    if (
+      typeof raw.source.url === 'string' &&
+      raw.source.url === TREASURY_LONG_END_BOARD_RELEASE_URL
+    ) {
+      errors.push('source.url must not use Board H.15 release URL on legacy FRED seriesDefinition.');
+    }
+  }
+
+  if (!isPlainObject(raw.observations)) {
+    errors.push('observations must be an object.');
+    return;
+  }
+
+  validateLongEndObservationsCommon(raw.observations, errors, { allowBreakeven: true });
+}
+
+function validateBoardNativeLongEndBranch(
+  raw: Record<string, unknown>,
+  mode: TreasuryLongEndValidationMode,
+  errors: string[]
+): void {
+  if (mode !== 'production') {
+    errors.push('Board-native seriesDefinition requires mode: production.');
+  }
+  if (raw.dataQuality !== 'verified_automated') {
+    errors.push('dataQuality must be verified_automated for Board-native artifacts.');
+  }
+
+  const asOfStr = typeof raw.asOf === 'string' ? raw.asOf : undefined;
+  parseLongEndPublishedAt(raw.publishedAt, asOfStr, false, errors);
+
+  if (!isPlainObject(raw.source)) {
+    errors.push('source must be an object.');
+  } else {
+    const name = raw.source.name;
+    if (typeof name !== 'string' || !name.trim()) {
+      errors.push('source.name is required.');
+    } else if (name !== TREASURY_LONG_END_BOARD_SOURCE_NAME) {
+      errors.push(`source.name must be "${TREASURY_LONG_END_BOARD_SOURCE_NAME}".`);
+    }
+    const url = raw.source.url;
+    if (typeof url !== 'string' || !url.trim()) {
+      errors.push('source.url is required.');
+    } else if (url !== TREASURY_LONG_END_BOARD_RELEASE_URL) {
+      errors.push(`source.url must be "${TREASURY_LONG_END_BOARD_RELEASE_URL}".`);
+    }
+    if (typeof raw.source.note !== 'string' || !raw.source.note.trim()) {
+      errors.push('source.note is required.');
+    } else if (
+      /FRED/i.test(raw.source.note) ||
+      /fred\.stlouisfed\.org/i.test(raw.source.note) ||
+      /\bFRED API\b/i.test(raw.source.note)
+    ) {
+      errors.push('source.note must not attribute FRED or FRED API for Board-native artifacts.');
+    }
+
+    if (!Array.isArray(raw.source.series)) {
+      errors.push('source.series must be an array.');
+    } else {
+      if (raw.source.series.length !== TREASURY_LONG_END_BOARD_SOURCE_SERIES.length) {
+        errors.push(
+          `source.series must contain exactly ${TREASURY_LONG_END_BOARD_SOURCE_SERIES.length} Board H.15 series.`
+        );
+      }
+      const seenIds = new Set<string>();
+      for (let i = 0; i < raw.source.series.length; i++) {
+        const entry = raw.source.series[i];
+        const prefix = `source.series[${i}]`;
+        if (!isPlainObject(entry)) {
+          errors.push(`${prefix} must be an object.`);
+          continue;
+        }
+        const id = entry.id;
+        if (typeof id !== 'string' || !id.trim()) {
+          errors.push(`${prefix}.id is required.`);
+          continue;
+        }
+        if (seenIds.has(id)) {
+          errors.push(`Duplicate source.series id ${id}.`);
+        }
+        seenIds.add(id);
+        if (isForbiddenBoardSeriesId(id)) {
+          errors.push(`${prefix}.id ${id} is forbidden for Board-native artifacts.`);
+        }
+        const expected = TREASURY_LONG_END_BOARD_SOURCE_SERIES.find((s) => s.id === id);
+        if (!expected) {
+          errors.push(`${prefix}.id ${id} is not an approved Board H.15 series.`);
+        } else if (entry.role !== expected.role) {
+          errors.push(`${prefix}.role must be "${expected.role}" for ${id}.`);
+        }
+        if (typeof entry.label !== 'string' || !entry.label.trim()) {
+          errors.push(`${prefix}.label is required.`);
+        }
+        if (typeof entry.url !== 'string' || !entry.url.trim()) {
+          errors.push(`${prefix}.url is required.`);
+        } else if (entry.url !== TREASURY_LONG_END_BOARD_RELEASE_URL) {
+          errors.push(`${prefix}.url must be "${TREASURY_LONG_END_BOARD_RELEASE_URL}".`);
+        }
+      }
+      for (const required of TREASURY_LONG_END_BOARD_SOURCE_SERIES) {
+        if (!seenIds.has(required.id)) {
+          errors.push(`source.series must include required Board series ${required.id}.`);
+        }
+      }
+    }
+  }
+
+  if (!isPlainObject(raw.observations)) {
+    errors.push('observations must be an object.');
+    return;
+  }
+
+  validateLongEndObservationsCommon(raw.observations, errors, { allowBreakeven: false });
+}
+
 export function validateTreasuryLongEndIncomeLensArtifact(
   raw: unknown,
   options?: TreasuryLongEndValidateOptions
@@ -246,103 +574,40 @@ export function validateTreasuryLongEndIncomeLensArtifact(
   if (raw.observationType !== TREASURY_LONG_END_OBSERVATION_TYPE) {
     errors.push(`observationType must be "${TREASURY_LONG_END_OBSERVATION_TYPE}".`);
   }
-  if (raw.seriesDefinition !== TREASURY_LONG_END_SERIES_DEFINITION) {
-    errors.push(`seriesDefinition must be "${TREASURY_LONG_END_SERIES_DEFINITION}".`);
+
+  const seriesDefinition = raw.seriesDefinition;
+  const allowedDefinitions: TreasuryLongEndIncomeLensSeriesDefinition[] = [
+    TREASURY_LONG_END_SERIES_DEFINITION,
+    TREASURY_LONG_END_BOARD_SERIES_DEFINITION,
+  ];
+  if (
+    typeof seriesDefinition !== 'string' ||
+    !(allowedDefinitions as readonly string[]).includes(seriesDefinition)
+  ) {
+    errors.push(
+      `seriesDefinition must be "${TREASURY_LONG_END_SERIES_DEFINITION}" or "${TREASURY_LONG_END_BOARD_SERIES_DEFINITION}".`
+    );
   }
-  if (raw.dataQuality !== 'verified_manual' && raw.dataQuality !== 'manual_unverified') {
-    errors.push('dataQuality must be verified_manual or manual_unverified.');
-  }
+
   if (raw.mappingStatus !== 'not_final') {
     errors.push('mappingStatus must be "not_final".');
   }
 
-  const asOf = raw.asOf;
-  const publishedAt = raw.publishedAt;
-  if (typeof asOf !== 'string' || !parseIsoDate(asOf)) {
+  if (typeof raw.asOf !== 'string' || !parseIsoDate(raw.asOf)) {
     errors.push('asOf must be ISO YYYY-MM-DD.');
-  }
-  if (typeof publishedAt !== 'string' || !parseIsoDate(publishedAt)) {
-    errors.push('publishedAt must be ISO YYYY-MM-DD.');
-  } else if (typeof asOf === 'string' && parseIsoDate(asOf) && compareIso(publishedAt, asOf) < 0) {
-    errors.push('publishedAt cannot be before asOf.');
-  }
-
-  if (!isPlainObject(raw.source)) {
-    errors.push('source must be an object.');
-  } else {
-    if (typeof raw.source.name !== 'string' || !raw.source.name.trim()) {
-      errors.push('source.name is required.');
-    }
-    if (typeof raw.source.url !== 'string' || !raw.source.url.trim()) {
-      errors.push('source.url is required.');
-    } else if (!/^https?:\/\//i.test(raw.source.url)) {
-      errors.push('source.url must be an http(s) URL.');
-    }
-    if (typeof raw.source.note !== 'string' || !raw.source.note.trim()) {
-      errors.push('source.note is required.');
-    }
-    if (!Array.isArray(raw.source.series) || raw.source.series.length === 0) {
-      errors.push('source.series must be a non-empty array.');
-    } else {
-      for (let i = 0; i < raw.source.series.length; i++) {
-        const entry = raw.source.series[i];
-        const prefix = `source.series[${i}]`;
-        if (!isPlainObject(entry)) {
-          errors.push(`${prefix} must be an object.`);
-          continue;
-        }
-        if (typeof entry.id !== 'string' || !entry.id.trim()) {
-          errors.push(`${prefix}.id is required.`);
-        }
-        if (typeof entry.label !== 'string' || !entry.label.trim()) {
-          errors.push(`${prefix}.label is required.`);
-        }
-        if (typeof entry.url !== 'string' || !entry.url.trim()) {
-          errors.push(`${prefix}.url is required.`);
-        } else if (!/^https?:\/\//i.test(entry.url)) {
-          errors.push(`${prefix}.url must be an http(s) URL.`);
-        }
-        if (
-          typeof entry.role !== 'string' ||
-          !(VALID_SOURCE_ROLES as readonly string[]).includes(entry.role)
-        ) {
-          errors.push(`${prefix}.role must be primary or context.`);
-        }
-      }
-    }
   }
 
   if (!Array.isArray(raw.caveats) || raw.caveats.length === 0) {
     errors.push('caveats must be a non-empty array.');
   }
 
-  if (!isPlainObject(raw.observations)) {
-    errors.push('observations must be an object.');
-    return { ok: false, errors };
+  if (errors.length === 0 && typeof seriesDefinition === 'string') {
+    if (seriesDefinition === TREASURY_LONG_END_SERIES_DEFINITION) {
+      validateLegacyFredLongEndBranch(raw, mode, errors);
+    } else if (seriesDefinition === TREASURY_LONG_END_BOARD_SERIES_DEFINITION) {
+      validateBoardNativeLongEndBranch(raw, mode, errors);
+    }
   }
-
-  const obs = raw.observations;
-  if (obs.mappingStatus !== 'not_final') {
-    errors.push('observations.mappingStatus must be "not_final".');
-  }
-
-  const thirtyYear = requireRateField(obs, 'thirtyYearNominalYieldPct', errors, true);
-  requireRateField(obs, 'thirtyYearTipsRealYieldPct', errors, true);
-
-  requireRateField(obs, 'tenYearBreakevenInflationPct', errors, false);
-  requireRateField(obs, 'twoYearYieldPct', errors, false);
-  requireRateField(obs, 'fiveYearYieldPct', errors, false);
-  requireRateField(obs, 'tenYearYieldPct', errors, false);
-  requireRateField(obs, 'curve2s30sPct', errors, false);
-  requireRateField(obs, 'curve5s30sPct', errors, false);
-  requireRateField(obs, 'curve10s30sPct', errors, false);
-
-  parsePercentileField(obs, 'nominalYieldPercentile', errors);
-  parsePercentileField(obs, 'realYieldPercentile', errors);
-
-  reconcileCurveField(obs, 'curve2s30sPct', 'twoYearYieldPct', thirtyYear, errors);
-  reconcileCurveField(obs, 'curve5s30sPct', 'fiveYearYieldPct', thirtyYear, errors);
-  reconcileCurveField(obs, 'curve10s30sPct', 'tenYearYieldPct', thirtyYear, errors);
 
   if (raw.optionalObservations !== undefined) {
     if (!isPlainObject(raw.optionalObservations)) {

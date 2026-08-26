@@ -85,11 +85,17 @@ function dataQualityLabel(q: string | undefined): string {
       return 'Verified manual';
     case 'manual_unverified':
       return 'Manual (unverified)';
+    case 'verified_automated':
+      return 'Verified automated';
     case 'mock_fallback':
       return 'Mock fallback';
     default:
       return '—';
   }
+}
+
+function isBoardNativeLongEnd(artifact: TreasuryLongEndIncomeLensArtifactV1): boolean {
+  return artifact.seriesDefinition === 'frb_h15_treasury_long_end_income_lens_v1';
 }
 
 export function formatTreasuryBasketDirectionLabel(direction: TreasuryFuturesDirection): string {
@@ -153,6 +159,14 @@ function buildFuturesExplanation(artifact: TreasuryFuturesPositioningArtifactV1)
 
 function buildIncomeExplanation(artifact: TreasuryLongEndIncomeLensArtifactV1): string {
   const o = artifact.observations;
+  if (isBoardNativeLongEnd(artifact)) {
+    return (
+      `Board H.15 long-end Treasury snapshot: 30Y nominal ${formatYieldPct(o.thirtyYearNominalYieldPct)}, ` +
+      `30Y TIPS real ${formatYieldPct(o.thirtyYearTipsRealYieldPct)}. ` +
+      `Curve spreads 2s30s ${formatCurveSpreadPp(o.curve2s30sPct)}, 5s30s ${formatCurveSpreadPp(o.curve5s30sPct)}, ` +
+      `10s30s ${formatCurveSpreadPp(o.curve10s30sPct)}. Display-only context; not scored.`
+    );
+  }
   return (
     `FRED long-end Treasury snapshot: 30Y nominal ${formatYieldPct(o.thirtyYearNominalYieldPct)}, ` +
     `30Y TIPS real ${formatYieldPct(o.thirtyYearTipsRealYieldPct)}, ` +
@@ -244,6 +258,7 @@ export function buildTreasuryLongEndDisplayCard(
 
   const artifact = validation.artifact;
   const o = artifact.observations;
+  const boardNative = isBoardNativeLongEnd(artifact);
 
   const detailRows: TreasuryPlumbingDetailRow[] = [
     { label: '30Y nominal', value: formatYieldPct(o.thirtyYearNominalYieldPct) },
@@ -251,10 +266,19 @@ export function buildTreasuryLongEndDisplayCard(
     { label: '2s30s', value: formatCurveSpreadPp(o.curve2s30sPct) },
     { label: '5s30s', value: formatCurveSpreadPp(o.curve5s30sPct) },
     { label: '10s30s', value: formatCurveSpreadPp(o.curve10s30sPct) },
-    { label: '10Y breakeven', value: formatOptionalYield(o.tenYearBreakevenInflationPct) },
-    { label: 'As of', value: artifact.asOf },
-    { label: 'Data quality', value: dataQualityLabel(artifact.dataQuality) },
   ];
+
+  if (!boardNative) {
+    detailRows.push({
+      label: '10Y breakeven',
+      value: formatOptionalYield(o.tenYearBreakevenInflationPct),
+    });
+  }
+
+  detailRows.push(
+    { label: 'As of', value: artifact.asOf },
+    { label: 'Data quality', value: dataQualityLabel(artifact.dataQuality) }
+  );
 
   if (artifact.publishedAt) {
     detailRows.splice(detailRows.length - 1, 0, {
@@ -265,6 +289,9 @@ export function buildTreasuryLongEndDisplayCard(
 
   return {
     ...base,
+    statusLabel: boardNative
+      ? 'Verified Board H.15 · Daily · Not scored'
+      : 'Verified FRED · Daily · Not scored',
     primaryValue: formatTreasuryLongEndPrimaryValue(o),
     explanation: buildIncomeExplanation(artifact),
     status: 'ok',

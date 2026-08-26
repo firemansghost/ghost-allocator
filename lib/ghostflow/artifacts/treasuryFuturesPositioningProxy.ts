@@ -45,6 +45,96 @@ export const TREASURY_FUTURES_DISPLAY_SIGNAL_NAME =
 export const TREASURY_FUTURES_DISPLAY_CARD_CAVEAT =
   'Display-only CFTC TFF Treasury futures positioning proxy; not cash-futures basis, repo, or CTD; not in the Research Composite.';
 
+export const TREASURY_FUTURES_SOURCE_NAME =
+  'CFTC Public Reporting Environment — TFF Futures Only (Treasury)' as const;
+
+export const TREASURY_FUTURES_SOURCE_URL =
+  'https://publicreporting.cftc.gov/Commitments-of-Traders/TFF-Futures-Only/gpe5-46if/about_data' as const;
+
+export const TREASURY_FUTURES_SOURCE_NOTE =
+  'Automated candidate from CFTC PRE dataset gpe5-46if (TFF Futures Only). Public leveraged-funds Treasury futures positioning proxy only — not the full cash-futures basis trade, repo specialness, CTD behavior, or financing terms. Not scored; mappingStatus not_final.' as const;
+
+export const TREASURY_FUTURES_PRODUCTION_CAVEATS = [
+  'Public CFTC leveraged-funds Treasury futures positioning proxy only.',
+  'Does not measure the full Treasury basis trade, cash-futures basis, repo specialness, CTD behavior, or financing terms.',
+  'Leveraged Funds are a regulatory bucket, not a basis-trade desk label.',
+  'Display-only Treasury Plumbing card (separate lane, v1.7e); outside equity publicSignalCount; not merged into buildSnapshot or Research Composite.',
+  'Basis-trade stress framing is narrative context only — not measured directly.',
+] as const;
+
+export interface TreasuryFuturesContractProductSpec {
+  tenor: TreasuryFuturesContractRowV1['tenor'];
+  role: TreasuryFuturesContractRole;
+  includeInBasket: boolean;
+  usedInAggregate: boolean;
+}
+
+export const TREASURY_FUTURES_CONTRACT_PRODUCT_MAP: Readonly<
+  Record<string, TreasuryFuturesContractProductSpec>
+> = {
+  '042601': { tenor: '2Y', role: 'core', includeInBasket: true, usedInAggregate: true },
+  '044601': { tenor: '5Y', role: 'core', includeInBasket: true, usedInAggregate: true },
+  '043602': { tenor: '10Y', role: 'core', includeInBasket: true, usedInAggregate: true },
+  '020601': { tenor: '30Y', role: 'core', includeInBasket: true, usedInAggregate: true },
+  '043607': {
+    tenor: 'ultra_10Y',
+    role: 'optional_context',
+    includeInBasket: false,
+    usedInAggregate: false,
+  },
+  '020604': {
+    tenor: 'ultra_30Y',
+    role: 'optional_context',
+    includeInBasket: false,
+    usedInAggregate: false,
+  },
+};
+
+type TreasuryFuturesDataQuality = TreasuryFuturesPositioningArtifactV1['dataQuality'];
+
+function parseTreasuryFuturesDataQuality(
+  raw: unknown,
+  errors: string[]
+): TreasuryFuturesDataQuality | null {
+  if (raw === undefined || raw === null) {
+    errors.push('dataQuality is required.');
+    return null;
+  }
+  if (
+    raw !== 'verified_manual' &&
+    raw !== 'manual_unverified' &&
+    raw !== 'verified_automated'
+  ) {
+    errors.push('dataQuality must be verified_manual, manual_unverified, or verified_automated.');
+    return null;
+  }
+  return raw;
+}
+
+function parseTreasuryFuturesPublishedAt(
+  rawPublishedAt: unknown,
+  asOf: string | undefined,
+  dataQuality: TreasuryFuturesDataQuality | null,
+  errors: string[]
+): string | undefined {
+  if (!dataQuality) return undefined;
+  const automated = dataQuality === 'verified_automated';
+  if (rawPublishedAt === undefined || rawPublishedAt === null) {
+    if (!automated) {
+      errors.push('publishedAt must be ISO YYYY-MM-DD.');
+    }
+    return undefined;
+  }
+  if (typeof rawPublishedAt !== 'string' || !parseIsoDate(rawPublishedAt)) {
+    errors.push('publishedAt must be ISO YYYY-MM-DD.');
+    return undefined;
+  }
+  if (typeof asOf === 'string' && parseIsoDate(asOf) && compareIso(rawPublishedAt, asOf) < 0) {
+    errors.push('publishedAt cannot be before asOf.');
+  }
+  return rawPublishedAt;
+}
+
 const FORBIDDEN_SCORE_KEYS = [
   'mappedPressureScore',
   'candidatePressureScore',
@@ -428,23 +518,17 @@ export function validateTreasuryFuturesPositioningProxyArtifact(
   if (raw.datasetId !== TFF_FUTURES_ONLY_DATASET_ID) {
     errors.push(`datasetId must be "${TFF_FUTURES_ONLY_DATASET_ID}".`);
   }
-  if (raw.dataQuality !== 'verified_manual' && raw.dataQuality !== 'manual_unverified') {
-    errors.push('dataQuality must be verified_manual or manual_unverified.');
-  }
+  const dataQuality = parseTreasuryFuturesDataQuality(raw.dataQuality, errors);
   if (raw.mappingStatus !== 'not_final') {
     errors.push('mappingStatus must be "not_final".');
   }
 
   const asOf = raw.asOf;
-  const publishedAt = raw.publishedAt;
+  const asOfStr = typeof asOf === 'string' ? asOf : undefined;
   if (typeof asOf !== 'string' || !parseIsoDate(asOf)) {
     errors.push('asOf must be ISO YYYY-MM-DD.');
   }
-  if (typeof publishedAt !== 'string' || !parseIsoDate(publishedAt)) {
-    errors.push('publishedAt must be ISO YYYY-MM-DD.');
-  } else if (typeof asOf === 'string' && parseIsoDate(asOf) && compareIso(publishedAt, asOf) < 0) {
-    errors.push('publishedAt cannot be before asOf.');
-  }
+  parseTreasuryFuturesPublishedAt(raw.publishedAt, asOfStr, dataQuality, errors);
 
   if (!isPlainObject(raw.source)) {
     errors.push('source must be an object.');
