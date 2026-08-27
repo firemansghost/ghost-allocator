@@ -1,6 +1,45 @@
 ﻿# HANDOFF
 
-## Last Session Summary (2026-08-27, three-family promotion milestone)
+## Last Session Summary (2026-08-27, Phase 1 promotion receipt policy)
+`main` baseline for this checkpoint: `e4dc0e9f043bcdd3d8987ab4f135c2780a2a92d6` (PRs **#140–#157**). Three automated candidate families remain production-live. **Next architecture milestone selected:** Phase 1 **verified promotion receipt** — policy/design authorized; implementation **not** done. Receipt is transition evidence (post-apply sidecar), **not** approval. Existing `--apply` stays one production write; future receipt command is separately retryable, deterministic (no wall-clock fields), Git-tracked in the same human data PR, prospective-only (no backfill). Same-date promotion, automation, Systematic v1.0c, breadth/Gate C/VIX remain blocked.
+
+Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`. VIX / Gate C excluded; breadth remains blocked.
+
+## State of Work
+- Report-only operator runner merged (PR **#140**).
+- H.15 SDMX transport merged (PR **#143–#144**).
+- Candidate-generation architecture / mapping / mappers / generator / policy merged (PRs **#145–#149**).
+- PR C1 promotion dry-run merged (PR **#150**).
+- PR C2 promotion writer merged (PR **#151**).
+- First production promotion merged (PR **#152**) — Long-End Board-native.
+- Post-Long-End docs checkpoint merged (PR **#153**).
+- Second production promotion merged (PR **#154**) — Treasury Futures automated.
+- Post-Treasury Futures docs checkpoint merged (PR **#155**).
+- Third production promotion merged (PR **#156**) — Systematic automated; three-family milestone complete.
+- Three-family docs checkpoint merged (PR **#157**).
+- **Phase 1 promotion receipt policy/design** authorized (this checkpoint); coding not started.
+- Same-date promotion blocked; automatic promotion blocked.
+- Systematic score wiring / v1.0c blocked.
+- Breadth / Gate C blocked; no VIX wiring.
+- Core app remains stable; education section remains live.
+
+## Priority for Next Session
+1. Implement Phase 1 receipt per [PROMOTION_RECEIPT_PHASE1_DESIGN.md](../ghostflow/PROMOTION_RECEIPT_PHASE1_DESIGN.md) (R1 then R2) — do not change `--apply` single-write semantics
+2. Same-date / `revision_review_required` promotion policy remains blocked
+3. Automatic promotion / automatic candidate PR creation / workflow automation remain blocked
+4. Systematic score wiring / v1.0c remains blocked
+5. Breadth authorization remains separate and blocked; do not wire VIX or Gate C
+6. Do not invent historical receipt backfill for #152 / #154 / #156
+
+## Open Questions
+- Same-date mapped-payload promotion policy? (still blocked; needs prospective receipts first for future design)
+- Optional future: adapter emission of defensible CFTC/Board `sourcePublishedAt`?
+- Systematic score wiring / v1.0c product approval (still blocked)?
+- Breadth licensed-source path still blocked pending authorization?
+
+---
+
+## Archive — three-family promotion milestone (2026-08-27)
 `main` is `fdcf74d6d1ba7d9b42c3d4d23049bb1856548d38` (PRs **#140–#156** merged). All three current automated candidate families are now production-live via the human-reviewed promotion workflow:
 - Long-End Board H.15: `asOf` **2026-08-25** (PR **#152**)
 - Treasury Futures CFTC: `asOf` **2026-08-18** (PR **#154**)
