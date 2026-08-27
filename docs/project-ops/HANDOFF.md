@@ -1,9 +1,7 @@
 ﻿# HANDOFF
 
-## Last Session Summary (2026-08-26, PR A candidate mappers)
-Starting `main`: `2dd7c086d8c659e2823ca36928ce7eef91c625b1` (PRs **#140–#146** merged). Implemented approved candidate production-mapping policy on branch `feat/ghostflow-candidate-mappers`: narrow type changes, fail-closed validators (including Long-End legacy FRED / Board-native transitional validation), Treasury display truth branching, three pure candidate mappers + registry, and offline tests. **No production JSON writes, no candidate generator/CLI, no promotion.**
-
-Implemented: `verified_automated` for three operator-ready artifacts; `publishedAt` optional only when defensible `sourcePublishedAt` or automated quality; systematic invalid `dataQuality` coercion removed; Board-native Long-End with five-series H.15 contract (no T10YIE/breakeven); legacy FRED production artifact still validates unchanged.
+## Last Session Summary (2026-08-26, PR B candidate generator)
+Starting `main`: `ee018350a8d76737027473a62e6196ce986a7f24` (PRs **#140–#147** merged). Implemented candidate generator + review envelope on branch `feat/ghostflow-candidate-generator`: canonical JSON hashing, deterministic candidate identity, current production fingerprinting, factual structural diff, fetch→parse→normalize→mapper pipeline, collision-safe idempotent writer, and single-artifact CLI. Live smoke all three artifacts `ready_for_review`; Long-End rerun `candidate_already_exists`. **No production JSON writes, no promotion.**
 
 Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`. VIX / Gate C excluded; breadth remains blocked.
 
@@ -12,27 +10,29 @@ Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 
 - H.15 SDMX transport merged (PR **#143–#144**).
 - Candidate-generation architecture design merged (PR **#145**).
 - Candidate mapping policy approved + impact inventory merged (PR **#146**).
-- **PR A candidate mappers implemented** on `feat/ghostflow-candidate-mappers` (pending merge).
-- Generator / CLI / candidate writer / promotion **not implemented**.
+- PR A candidate mappers + provenance hardening merged (PR **#147**).
+- **PR B candidate generator implemented** on `feat/ghostflow-candidate-generator` (pending merge).
+- Promotion / PR C **not implemented** — blocked pending separate DECISIONS approval.
+- Same-date promotion policy still blocked.
 - Breadth / Gate C blocked; no VIX wiring.
 - Core app remains stable; education section remains live.
 
 ## Priority for Next Session
-1. **PR B** — generator + diff + idempotent writer + CLI
-2. Promotion (PR C) requires separate DECISIONS approval
+1. **Promotion policy / PR C authorization gate** — DECISIONS entry + human approval before production writes
+2. Same-date mapped-payload promotion policy decision (does not block review of PR B)
 3. Breadth authorization remains separate and blocked; do not wire VIX or Gate C
 
 ## Open Questions
 - Promotion command authorization (DECISIONS entry)?
-- Same-date mapped-payload promotion policy (does not block PR B)?
+- Same-date mapped-payload promotion policy?
 - When to promote Long-End production artifact from FRED → Board (human decision)?
 - Optional future: adapter emission of defensible CFTC/Board `sourcePublishedAt`?
 - Breadth licensed-source path still blocked pending authorization?
 
 ---
 
-## Archive — Candidate mapping policy + impact inventory (2026-08-26)
-Starting `main`: `76bf115759083963279c703a760d483afe129194` (PRs **#140–#145** merged). Bobby approved candidate production-mapping policies; recorded in DECISIONS; completed read-only impact inventory in [CANDIDATE_MAPPING_POLICY_IMPACT.md](../ghostflow/CANDIDATE_MAPPING_POLICY_IMPACT.md). **No code, no production writes, no mappers/generator/promotion.**
+## Archive — PR A candidate mappers (2026-08-26)
+Starting `main`: `2dd7c086d8c659e2823ca36928ce7eef91c625b1` (PRs **#140–#146** merged). Implemented approved candidate production-mapping policy on branch `feat/ghostflow-candidate-mappers`: narrow type changes, fail-closed validators (including Long-End legacy FRED / Board-native transitional validation), Treasury display truth branching, three pure candidate mappers + registry, and offline tests. **No production JSON writes, no candidate generator/CLI, no promotion.**
 
 Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`. VIX / Gate C excluded; breadth remains blocked.
 
