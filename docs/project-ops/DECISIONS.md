@@ -1,5 +1,37 @@
 # DECISIONS
 
+## 2026-08-26 — GhostFlow candidate promotion policy
+Choice:
+- **Eligible candidate status:** Initial promotion supports **only** `ready_for_review`. Do **not** promote `revision_review_required`. Same-date mapped-payload revisions remain blocked pending a later explicit policy decision. Do not reinterpret `revision_review_required` as `ready_for_review`.
+- **Explicit envelope selection:** Promotion requires an explicit candidate-envelope path (`--envelope <path>`). No latest-candidate lookup, artifact-only selection, automatic directory scanning, or auto-selection by date/hash prefix. The human-reviewed envelope path is the selected promotion unit.
+- **Dry-run default:** Promotion is dry-run by default. Writes require explicit `--apply`. Without `--apply`, the command performs all validation and reconciliation but writes nothing. No interactive confirmation prompt. CLI remains deterministic/non-interactive.
+- **Envelope revalidation:** Before promotion, independently verify the selected envelope (parse; supported `candidateVersion` / `artifactSchemaVersion` / `generationMode`; `humanReviewRequired === true`; `status === ready_for_review`; candidate-enabled artifact ID; internal identity/provenance reconciliation; identity hash and prefix; proposedArtifact hash). Reuse PR **#148** integrity helpers where appropriate. Do not trust TypeScript typing alone.
+- **Remap under current code:** Promotion must re-run the **current** PR A candidate mapper using `envelope.normalizedObservation` + the current `GHOSTFLOW_REFRESH_REGISTRY` entry. The newly mapped production artifact must pass current mapper provenance gates, pass the current production validator, and canonical-hash exactly to the envelope `proposedArtifact` promotion hash. If current code/registry/mapping semantics no longer produce the reviewed payload: **fail closed**; regenerate a new candidate. No silent promotion of envelopes generated under stale mapping semantics. No compatibility migrations inside promotion.
+- **No network during promotion:** Promotion must not fetch CFTC, fetch Board H.15, run adapters against live sources, or update normalized observations. Promotion operates only on the explicitly reviewed envelope. Fresh data requires regenerating the candidate first.
+- **Current-production optimistic lock:** Before any production write, resolve the production artifact path from `GHOSTFLOW_REFRESH_REGISTRY`, load and production-validate current production, canonically fingerprint it, and require reconciliation with `envelope.currentProduction` (`artifactId`, `artifactPath`, `observationAsOf`, `promotionPayloadSha256` at minimum). If current production changed after candidate generation: fail closed as stale. Do not overwrite newer production with an older reviewed candidate. Do not trust the envelope to choose its production destination — the registry owns the destination path.
+- **Newer-date required:** Initial promotion requires candidate `observationAsOf` **>** current production `observationAsOf`. Equal and older dates are blocked. No same-date promotion in initial PR C. Status is evidence, not authority — enforce the date gate independently.
+- **Exact production payload:** Promotion writes only the exact current-mapper / current-validator-approved proposed production artifact whose canonical hash matches the reviewed envelope. No field edits, publication-date regeneration, observation derivation, score changes, provenance additions, or history fields during promotion.
+- **Production write scope:** Promotion may write exactly **one** registry-owned production artifact (`data/ghostflow/artifacts/<approved artifact>.v1.json`) for the selected candidate-enabled artifact. No `GHOSTFLOW_REFERENCE_AS_OF`, score, MOCK, `publicSignalCount`, or other-artifact changes. One candidate promotion is one artifact write.
+- **Fail-closed atomic write:** Use a fail-closed replacement strategy (validated candidate bytes → temporary sibling → validate/read/hash temp → fail-safe replace of registry target → read-back + production validator + canonical hash equality). No partial production file. No persistent backup clutter. No silent overwrite on validation failure.
+- **No history / accepted provenance yet:** Initial PR C writes **no** accepted normalized history, promotion receipt, source-content hash history, provenance database, or audit artifact outside the production JSON. Byte-only same-date revision detection therefore remains unavailable — intentional.
+- **No Git automation:** Promotion command performs no git checkout/branch/add/commit/push, no PR creation, no GitHub API mutation, no workflow dispatch. Human workflow remains: generate → inspect → dry-run → `--apply` → validate → inspect git diff → human-reviewed production-artifact PR.
+- **PR C implements mechanism only:** PR C must **not** promote currently generated local candidate envelopes. After PR C merges, actual production refreshes occur in separate human-reviewed data PRs (prefer one coherent artifact refresh per PR).
+- **Still blocked:** `revision_review_required` promotion; same-date production replacement policy; accepted-history / provenance receipts; automatic promotion; automatic candidate PR creation; workflow promotion; VIX; `marketBreadth` / Gate C; any scoring / reference / MOCK / `publicSignalCount` changes.
+
+Why:
+- PR **#148** delivered local candidate generation; production promotion requires an explicit, fail-closed human gate before any registry-owned artifact write.
+- Remap + optimistic lock + newer-date gate prevent promoting stale mapping semantics or overwriting production that moved after review.
+- Dry-run default and explicit `--apply` keep the first production-writer capability inspectable without interactive prompts.
+- Deferring history/provenance and same-date revision keeps PR C narrowly scoped to one artifact write.
+
+Consequences:
+- Impact inventory: [PROMOTION_POLICY_IMPACT.md](../ghostflow/PROMOTION_POLICY_IMPACT.md).
+- Next coding work: implement promotion mechanism per that memo (**C1 dry-run/validation**, then **C2 `--apply` writer** recommended).
+- This decision authorizes **future** promotion-mechanism implementation only. It does **not** authorize promoting current local candidates, changing production JSON in the mechanism PR, history writes, Git automation, workflows, scores, MOCK values, `publicSignalCount`, reference-date changes, VIX, breadth, or Gate C.
+- Older design-memo language that treated `revision_review_required` as promotable or used `--dry-run` as the write flag is superseded by this decision for initial PR C.
+
+---
+
 ## 2026-08-26 — GhostFlow candidate production-mapping policy
 Choice:
 - **Long-End `seriesDefinition`:** New Board H.15 candidates for `treasuryLongEndIncomeLens` use `frb_h15_treasury_long_end_income_lens_v1`. Do not retain `fred_treasury_long_end_income_lens_v1` merely for validator continuity. The semantic series definition describes the Board H.15 **product contract**, not its transport encoding. Do not put `sdmx` into the semantic identifier.

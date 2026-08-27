@@ -1,6 +1,43 @@
 ﻿# STATUS
 
-## Current State (GhostFlow — 2026-08-26, PR B candidate generator)
+## Current State (GhostFlow — 2026-08-26, promotion policy + PR C impact)
+Starting `main` for this work: `70d8ade488a70c1f92015a8454864314d90db1d5` (includes PRs **#140–#148** merged).
+
+**Promotion policy approved + impact audit (branch `docs/ghostflow-promotion-policy`):**
+- DECISIONS entry: *2026-08-26 — GhostFlow candidate promotion policy*
+- Impact memo: [PROMOTION_POLICY_IMPACT.md](../ghostflow/PROMOTION_POLICY_IMPACT.md)
+- Eligible: `ready_for_review` only; `revision_review_required` blocked
+- Explicit `--envelope`; dry-run default; `--apply` required for write
+- Current mapper replay + current-production optimistic lock + newer-date gate
+- Registry-owned destination; no network; no history; no Git automation
+- Recommended next implementation: **C1 dry-run/validation**, then **C2 `--apply` writer**
+- **Does not authorize or perform any production artifact write**; no candidate promoted
+
+**PR #148 merged (candidate generator):**
+- Local review envelopes under gitignored `tmp/ghostflow/candidates/`
+- Canonical identity/hash, factual diff, collision-safe idempotent writer, single-artifact CLI
+
+Production GhostFlow state remains unchanged:
+- `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
+- Composite / Passive / Structural: 60 / 53 / 67
+- Band: Elevated Flow Pressure
+- `publicSignalCount`: 13
+- MOCK systematic / retirement / levered: 62 / 58 / 55
+
+VIX remains excluded because Gate C / `marketBreadth` remain blocked.
+
+## Recommended next work
+1. **PR C1** — promotion validation + dry-run plan + CLI (no production writes)
+2. **PR C2** — `--apply` fail-closed production writer + post-write verification
+3. Separate human-reviewed data PRs for any actual artifact refresh after mechanism merges
+4. Same-date promotion policy remains blocked
+5. Breadth remains blocked. Do not wire VIX or Gate C.
+
+Last updated: 2026-08-26
+
+---
+
+## Archive — PR B candidate generator (2026-08-26)
 Starting `main` for this work: `ee018350a8d76737027473a62e6196ce986a7f24` (includes PRs **#140–#147** merged).
 
 **PR B — candidate generator + review envelope implemented (branch `feat/ghostflow-candidate-generator`):**
