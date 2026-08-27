@@ -31,6 +31,19 @@ function fixtureH15NewerThanProduction(): ReturnType<typeof fixtureH15Normalized
   return normalized;
 }
 
+function fixtureSystematicNewerThanProduction(): ReturnType<typeof fixtureSystematicNormalized> {
+  const current = loadProduction('systematicFlowProxy.v1.json') as { asOf: string };
+  const newerAsOf = nextCalendarDay(current.asOf);
+  const normalized = fixtureSystematicNormalized();
+  normalized.observationAsOf = newerAsOf;
+  normalized.provenance.observationAsOf = newerAsOf;
+  for (const contract of normalized.fields.scoreContracts) {
+    contract.observations.reportDate = newerAsOf;
+  }
+  normalized.fields.vixContext.observations.reportDate = newerAsOf;
+  return normalized;
+}
+
 async function runSystematic(
   normalized: ReturnType<typeof fixtureSystematicNormalized>,
   mapper?: GhostFlowCandidateMapper<unknown, unknown>
@@ -101,13 +114,7 @@ function stubAdapter(failingStage: 'fetch' | 'parse' | 'normalize'): GhostFlowOp
 }
 
 async function main(): Promise<void> {
-  const newerNormalized = fixtureSystematicNormalized();
-  newerNormalized.observationAsOf = '2026-08-18';
-  newerNormalized.provenance.observationAsOf = '2026-08-18';
-  for (const contract of newerNormalized.fields.scoreContracts) {
-    contract.observations.reportDate = '2026-08-18';
-  }
-  newerNormalized.fields.vixContext.observations.reportDate = '2026-08-18';
+  const newerNormalized = fixtureSystematicNewerThanProduction();
   const newer = await runSystematic(newerNormalized);
   assert.strictEqual(newer.ok, true);
   if (!newer.ok) throw new Error('unreachable');

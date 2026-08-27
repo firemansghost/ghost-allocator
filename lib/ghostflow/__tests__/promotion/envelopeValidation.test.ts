@@ -12,23 +12,33 @@ function loadProduction(name: string): unknown {
   ) as unknown;
 }
 
+function nextCalendarDay(asOf: string): string {
+  const date = new Date(`${asOf}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + 1);
+  return date.toISOString().slice(0, 10);
+}
+
 async function buildReadyEnvelope(): Promise<GhostFlowCandidateEnvelope> {
+  const production = loadProduction('systematicFlowProxy.v1.json') as { asOf: string };
+  const newerAsOf = nextCalendarDay(production.asOf);
   const normalized = fixtureSystematicNormalized();
-  normalized.observationAsOf = '2026-08-18';
-  normalized.provenance.observationAsOf = '2026-08-18';
+  normalized.observationAsOf = newerAsOf;
+  normalized.provenance.observationAsOf = newerAsOf;
   for (const contract of normalized.fields.scoreContracts) {
-    contract.observations.reportDate = '2026-08-18';
+    contract.observations.reportDate = newerAsOf;
   }
-  normalized.fields.vixContext.observations.reportDate = '2026-08-18';
+  normalized.fields.vixContext.observations.reportDate = newerAsOf;
 
   const generated = await generateGhostFlowCandidate({
     artifactId: 'systematicFlowProxy',
     nowIso: '2026-08-26T22:00:00.000Z',
-    currentProductionRaw: loadProduction('systematicFlowProxy.v1.json'),
+    currentProductionRaw: production,
     injectNormalized: normalized,
   });
   assert.strictEqual(generated.ok, true);
   if (!generated.ok || !generated.envelope) throw new Error('unreachable');
+  assert.strictEqual(generated.status, 'ready_for_review');
+  assert.strictEqual(generated.exitCode, 0);
   return generated.envelope;
 }
 
