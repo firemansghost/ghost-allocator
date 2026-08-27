@@ -15,6 +15,7 @@ import type {
 import { validateCurrentProductionArtifact, validateProposedProductionArtifact } from './artifactValidation';
 import { buildCandidateDiff } from './diff';
 import { buildCandidateIdentity } from './identity';
+import { isValidCalendarDate, isValidIsoTimestamp } from '../dateValidation';
 import type {
   GhostFlowCandidateArtifactId,
   GhostFlowCandidateEnvelope,
@@ -93,6 +94,19 @@ export async function generateGhostFlowCandidate(
   input: GhostFlowCandidateGeneratorInput
 ): Promise<GhostFlowCandidateGeneratorResult> {
   const { artifactId, nowIso, referenceAsOf, currentProductionRaw } = input;
+
+  if (!isValidIsoTimestamp(nowIso)) {
+    return failure('validation_failed', 5, artifactId, [
+      blockIssue('candidate_invalid_now_iso', `Invalid nowIso timestamp: ${nowIso}`),
+    ]);
+  }
+
+  if (referenceAsOf !== undefined && !isValidCalendarDate(referenceAsOf)) {
+    return failure('validation_failed', 5, artifactId, [
+      blockIssue('candidate_invalid_reference_as_of', `Invalid referenceAsOf calendar date: ${referenceAsOf}`),
+    ]);
+  }
+
   const registryEntry = REGISTRY_BY_ID.get(artifactId);
   if (!registryEntry) {
     return failure('current_production_invalid', 5, artifactId, [

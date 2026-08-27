@@ -9,7 +9,15 @@ function fail(message: string): GhostFlowStageResult<never> {
   return { ok: false, issues: [blockIssue('candidate_canonical_json_invalid', message)] };
 }
 
-function canonicalizeValue(value: unknown): GhostFlowStageResult<unknown> {
+function isPlainObject(value: object): boolean {
+  if (value instanceof Date || value instanceof Map || value instanceof Set) {
+    return false;
+  }
+  const proto = Object.getPrototypeOf(value);
+  return proto === Object.prototype || proto === null;
+}
+
+function canonicalizeValue(value: unknown, stack: WeakSet<object>): GhostFlowStageResult<unknown> {
   if (value === null) {
     return { ok: true, value: null, issues: [] };
   }
@@ -31,40 +39,70 @@ function canonicalizeValue(value: unknown): GhostFlowStageResult<unknown> {
   }
 
   if (Array.isArray(value)) {
-    const items: unknown[] = [];
-    for (let i = 0; i < value.length; i += 1) {
-      const item = canonicalizeValue(value[i]);
-      if (!item.ok) {
-        return item;
-      }
-      items.push(item.value);
+    if (stack.has(value)) {
+      return fail('Cyclic structures are not supported in canonical JSON');
     }
-    return { ok: true, value: items, issues: [] };
+    stack.add(value);
+    try {
+      const items: unknown[] = [];
+      for (let i = 0; i < value.length; i += 1) {
+        const item = canonicalizeValue(value[i], stack);
+        if (!item.ok) {
+          return item;
+        }
+        items.push(item.value);
+      }
+      return { ok: true, value: items, issues: [] };
+    } finally {
+      stack.delete(value);
+    }
   }
 
   if (valueType === 'object') {
-    const record = value as Record<string, unknown>;
-    const keys = Object.keys(record).sort();
-    const canonical: Record<string, unknown> = {};
-    for (const key of keys) {
-      const fieldValue = record[key];
-      if (fieldValue === undefined) {
-        continue;
-      }
-      const canonicalField = canonicalizeValue(fieldValue);
-      if (!canonicalField.ok) {
-        return canonicalField;
-      }
-      canonical[key] = canonicalField.value;
+    const objectValue = value as object;
+    if (objectValue instanceof Date) {
+      return fail('Date objects are not supported in canonical JSON');
     }
-    return { ok: true, value: canonical, issues: [] };
+    if (objectValue instanceof Map) {
+      return fail('Map objects are not supported in canonical JSON');
+    }
+    if (objectValue instanceof Set) {
+      return fail('Set objects are not supported in canonical JSON');
+    }
+    if (!isPlainObject(objectValue)) {
+      return fail('Non-plain objects are not supported in canonical JSON');
+    }
+
+    if (stack.has(objectValue)) {
+      return fail('Cyclic structures are not supported in canonical JSON');
+    }
+    stack.add(objectValue);
+    try {
+      const record = objectValue as Record<string, unknown>;
+      const keys = Object.keys(record).sort();
+      const canonical: Record<string, unknown> = {};
+      for (const key of keys) {
+        const fieldValue = record[key];
+        if (fieldValue === undefined) {
+          continue;
+        }
+        const canonicalField = canonicalizeValue(fieldValue, stack);
+        if (!canonicalField.ok) {
+          return canonicalField;
+        }
+        canonical[key] = canonicalField.value;
+      }
+      return { ok: true, value: canonical, issues: [] };
+    } finally {
+      stack.delete(objectValue);
+    }
   }
 
   return fail(`Unsupported value type for canonical JSON: ${valueType}`);
 }
 
 export function canonicalJsonStringify(value: unknown): GhostFlowStageResult<string> {
-  const canonical = canonicalizeValue(value);
+  const canonical = canonicalizeValue(value, new WeakSet<object>());
   if (!canonical.ok) {
     return canonical;
   }

@@ -73,10 +73,7 @@ export interface GhostFlowCandidateEnvelope {
   candidateVersion: typeof GHOSTFLOW_CANDIDATE_ENVELOPE_VERSION;
   artifactId: GhostFlowCandidateArtifactId;
   artifactSchemaVersion: '1';
-  status: Extract<
-    GhostFlowCandidateStatus,
-    'ready_for_review' | 'revision_review_required' | 'candidate_already_exists'
-  >;
+  status: Extract<GhostFlowCandidateStatus, 'ready_for_review' | 'revision_review_required'>;
   generatedAt: string;
   generationMode: GhostFlowCandidateGenerationMode;
   humanReviewRequired: true;

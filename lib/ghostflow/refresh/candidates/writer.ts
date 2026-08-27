@@ -1,9 +1,8 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join, resolve, sep } from 'node:path';
-import type { GhostFlowRefreshIssue, GhostFlowStageResult } from '../types';
-import { sha256HexFromCanonicalJson } from './canonicalJson';
-import { candidateEnvelopeFilename } from './identity';
+import type { GhostFlowNormalizedObservation, GhostFlowRefreshIssue, GhostFlowStageResult } from '../types';
 import { validateProposedProductionArtifact } from './artifactValidation';
+import { buildCandidateIdentity, candidateEnvelopeFilename } from './identity';
 import type {
   GhostFlowCandidateEnvelope,
   GhostFlowCandidateGenerationSummary,
@@ -67,7 +66,9 @@ function parseStoredEnvelope(raw: string): GhostFlowStageResult<GhostFlowCandida
       typeof parsed !== 'object' ||
       !parsed.candidateIdentity ||
       typeof parsed.candidateIdentity.identitySha256 !== 'string' ||
-      typeof parsed.proposedArtifact !== 'object'
+      typeof parsed.proposedArtifact !== 'object' ||
+      !parsed.normalizedObservation ||
+      typeof parsed.normalizedObservation.provenance !== 'object'
     ) {
       return {
         ok: false,
@@ -81,6 +82,145 @@ function parseStoredEnvelope(raw: string): GhostFlowStageResult<GhostFlowCandida
       issues: [blockIssue('candidate_stored_envelope_invalid', 'Stored candidate envelope is not valid JSON')],
     };
   }
+}
+
+export function reconcileStoredCandidateEnvelope(
+  storedEnvelope: GhostFlowCandidateEnvelope
+): GhostFlowStageResult<true> {
+  const { artifactId, normalizedObservation, candidateIdentity, proposedArtifact } = storedEnvelope;
+  const provenance = normalizedObservation.provenance;
+
+  if (normalizedObservation.artifactId !== artifactId) {
+    return {
+      ok: false,
+      issues: [
+        blockIssue(
+          'candidate_stored_envelope_invalid',
+          'Stored normalizedObservation.artifactId must match envelope artifactId'
+        ),
+      ],
+    };
+  }
+
+  if (candidateIdentity.artifactId !== artifactId) {
+    return {
+      ok: false,
+      issues: [
+        blockIssue(
+          'candidate_stored_envelope_invalid',
+          'Stored candidateIdentity.artifactId must match envelope artifactId'
+        ),
+      ],
+    };
+  }
+
+  if (candidateIdentity.observationAsOf !== normalizedObservation.observationAsOf) {
+    return {
+      ok: false,
+      issues: [
+        blockIssue(
+          'candidate_stored_envelope_invalid',
+          'Stored candidateIdentity.observationAsOf must match normalizedObservation.observationAsOf'
+        ),
+      ],
+    };
+  }
+
+  if (candidateIdentity.contentSha256 !== provenance.contentSha256) {
+    return {
+      ok: false,
+      issues: [
+        blockIssue(
+          'candidate_stored_envelope_invalid',
+          'Stored candidateIdentity.contentSha256 must match normalized provenance contentSha256'
+        ),
+      ],
+    };
+  }
+
+  if (candidateIdentity.adapterId !== provenance.adapterId) {
+    return {
+      ok: false,
+      issues: [
+        blockIssue(
+          'candidate_stored_envelope_invalid',
+          'Stored candidateIdentity.adapterId must match normalized provenance adapterId'
+        ),
+      ],
+    };
+  }
+
+  if (candidateIdentity.parserVersion !== provenance.parserVersion) {
+    return {
+      ok: false,
+      issues: [
+        blockIssue(
+          'candidate_stored_envelope_invalid',
+          'Stored candidateIdentity.parserVersion must match normalized provenance parserVersion'
+        ),
+      ],
+    };
+  }
+
+  if (candidateIdentity.identityPrefix !== candidateIdentity.identitySha256.slice(0, 12)) {
+    return {
+      ok: false,
+      issues: [
+        blockIssue(
+          'candidate_stored_envelope_invalid',
+          'Stored candidateIdentity.identityPrefix must equal identitySha256.slice(0, 12)'
+        ),
+      ],
+    };
+  }
+
+  const storedValidated = validateProposedProductionArtifact(artifactId, proposedArtifact);
+  if (!storedValidated.ok) {
+    return storedValidated;
+  }
+
+  if (storedValidated.value.promotionPayloadSha256 !== candidateIdentity.promotionPayloadSha256) {
+    return {
+      ok: false,
+      issues: [
+        blockIssue(
+          'candidate_stored_payload_hash_mismatch',
+          'Stored proposedArtifact does not reconcile with candidateIdentity.promotionPayloadSha256'
+        ),
+      ],
+    };
+  }
+
+  const rebuiltIdentity = buildCandidateIdentity({
+    artifactId,
+    normalized: normalizedObservation as GhostFlowNormalizedObservation<unknown>,
+    promotionPayloadSha256: storedValidated.value.promotionPayloadSha256,
+  });
+  if (!rebuiltIdentity.ok) {
+    return {
+      ok: false,
+      issues: [
+        blockIssue(
+          'candidate_stored_envelope_invalid',
+          rebuiltIdentity.message
+        ),
+      ],
+    };
+  }
+
+  if (rebuiltIdentity.identity.identitySha256 !== candidateIdentity.identitySha256) {
+    return {
+      ok: false,
+      issues: [
+        blockIssue(
+          'candidate_stored_identity_mismatch',
+          'Stored candidateIdentity.identitySha256 does not recompute from stored normalized provenance'
+        ),
+      ],
+    };
+  }
+
+  return { ok: true, value: true, issues: [] };
 }
 
 async function reconcileExistingCandidateFile(
@@ -107,35 +247,24 @@ async function reconcileExistingCandidateFile(
     };
   }
 
-  const storedEnvelope = stored.value;
-  const storedValidated = validateProposedProductionArtifact(
-    storedEnvelope.artifactId,
-    storedEnvelope.proposedArtifact
-  );
-  if (!storedValidated.ok) {
+  const internal = reconcileStoredCandidateEnvelope(stored.value);
+  if (!internal.ok) {
     return {
       status: 'candidate_identity_collision',
       exitCode: 6,
-      issues: storedValidated.issues,
+      outputPath: targetPath,
+      issues: internal.issues,
     };
   }
 
-  const storedIdentity = storedEnvelope.candidateIdentity;
+  const storedIdentity = stored.value.candidateIdentity;
   const incomingIdentity = incoming.candidateIdentity;
 
   const identityMatches =
     storedIdentity.identitySha256 === incomingIdentity.identitySha256 &&
-    storedIdentity.promotionPayloadSha256 === incomingIdentity.promotionPayloadSha256 &&
-    storedIdentity.contentSha256 === incomingIdentity.contentSha256 &&
-    storedIdentity.adapterId === incomingIdentity.adapterId &&
-    storedIdentity.parserVersion === incomingIdentity.parserVersion &&
-    storedIdentity.observationAsOf === incomingIdentity.observationAsOf &&
-    storedIdentity.artifactId === incomingIdentity.artifactId;
+    storedIdentity.promotionPayloadSha256 === incomingIdentity.promotionPayloadSha256;
 
-  const payloadMatches =
-    storedValidated.value.promotionPayloadSha256 === incomingIdentity.promotionPayloadSha256;
-
-  if (identityMatches && payloadMatches) {
+  if (identityMatches) {
     return {
       status: 'candidate_already_exists',
       exitCode: 0,
@@ -209,31 +338,18 @@ export function mergeWriteSummary(
   if (!write) {
     return generation;
   }
+
+  const writeIssueCodes = write.issues.map((issue) => issue.code);
+  const mergedIssueCodes =
+    writeIssueCodes.length > 0
+      ? [...(generation.issueCodes ?? []), ...writeIssueCodes]
+      : generation.issueCodes ?? [];
+
   return {
     ...generation,
     status: write.status,
     exitCode: write.exitCode,
     outputPath: write.outputPath,
+    issueCodes: mergedIssueCodes.length > 0 ? mergedIssueCodes : undefined,
   };
-}
-
-export async function verifyStoredCandidatePayload(
-  envelope: GhostFlowCandidateEnvelope
-): Promise<GhostFlowStageResult<true>> {
-  const hash = sha256HexFromCanonicalJson(envelope.proposedArtifact);
-  if (!hash.ok) {
-    return hash;
-  }
-  if (hash.value !== envelope.candidateIdentity.promotionPayloadSha256) {
-    return {
-      ok: false,
-      issues: [
-        blockIssue(
-          'candidate_stored_payload_hash_mismatch',
-          'Stored proposedArtifact does not reconcile with promotionPayloadSha256'
-        ),
-      ],
-    };
-  }
-  return { ok: true, value: true, issues: [] };
 }
