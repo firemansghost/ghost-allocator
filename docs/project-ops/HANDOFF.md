@@ -1,6 +1,40 @@
 ﻿# HANDOFF
 
-## Last Session Summary (2026-08-26, promotion policy + PR C impact)
+## Last Session Summary (2026-08-26, promotion C1 dry-run)
+Starting `main`: `cb7f45697831ba1d31e0a813ce90a1acb44f7ed9` (PRs **#140–#149** merged). Implemented promotion C1 on `feat/ghostflow-promotion-dry-run`: envelope eligibility validation, integrity reuse, current mapper replay, production optimistic lock, newer-date gate, `PromotionPlan`, and dry-run CLI. **`--apply` rejected; no production write capability; no candidate promoted.**
+
+Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`. VIX / Gate C excluded; breadth remains blocked.
+
+## State of Work
+- Report-only operator runner merged (PR **#140**).
+- H.15 SDMX transport merged (PR **#143–#144**).
+- Candidate-generation architecture design merged (PR **#145**).
+- Candidate mapping policy approved + impact inventory merged (PR **#146**).
+- PR A candidate mappers + provenance hardening merged (PR **#147**).
+- PR B candidate generator + integrity hardening merged (PR **#148**).
+- Promotion policy + impact inventory merged (PR **#149**).
+- **PR C1 promotion dry-run** on `feat/ghostflow-promotion-dry-run` (pending merge).
+- **PR C2 writer not implemented**; `--apply` unavailable.
+- Same-date promotion blocked; history/provenance writes blocked; automatic promotion blocked.
+- Breadth / Gate C blocked; no VIX wiring.
+- Core app remains stable; education section remains live.
+
+## Priority for Next Session
+1. **PR C2** — `--apply` fail-closed production writer + post-write verification
+2. After C2 merges: separate human-reviewed data PRs for any actual artifact refresh
+3. Same-date / `revision_review_required` promotion policy remains blocked
+4. Breadth authorization remains separate and blocked; do not wire VIX or Gate C
+
+## Open Questions
+- Same-date mapped-payload promotion policy?
+- Accepted-history / provenance receipt timing?
+- When to promote Long-End production artifact from FRED → Board (human data PR after mechanism)?
+- Optional future: adapter emission of defensible CFTC/Board `sourcePublishedAt`?
+- Breadth licensed-source path still blocked pending authorization?
+
+---
+
+## Archive — promotion policy + PR C impact (2026-08-26)
 Starting `main`: `70d8ade488a70c1f92015a8454864314d90db1d5` (PRs **#140–#148** merged). Recorded Bobby’s approved candidate-promotion policy in DECISIONS and completed read-only PR C impact inventory in [PROMOTION_POLICY_IMPACT.md](../ghostflow/PROMOTION_POLICY_IMPACT.md). **No code, no production writes, no candidate promoted.**
 
 Policy highlights: `ready_for_review` only; explicit `--envelope`; dry-run default / `--apply` write; current mapper replay; current-production optimistic lock; newer-date gate; registry-owned destination; no network; no history; no Git automation. Recommended implementation split: **C1 dry-run**, then **C2 writer**.

@@ -1,6 +1,43 @@
 ﻿# STATUS
 
-## Current State (GhostFlow — 2026-08-26, promotion policy + PR C impact)
+## Current State (GhostFlow — 2026-08-26, promotion C1 dry-run)
+Starting `main` for this work: `cb7f45697831ba1d31e0a813ce90a1acb44f7ed9` (includes PRs **#140–#149** merged).
+
+**PR C1 — promotion dry-run validation/plan implemented (branch `feat/ghostflow-promotion-dry-run`):**
+- Builds on merged PR **#149** promotion policy + impact inventory
+- Extracted pure `reconcileStoredCandidateEnvelope` to `candidates/envelopeIntegrity.ts`
+- Promotion envelope eligibility validation (`ready_for_review` only)
+- Current mapper replay + reviewed payload hash lock
+- Current-production optimistic lock (+ `sourcePublishedAt` when recorded)
+- Strict newer-date gate; explicit safe `--envelope` path under `tmp/ghostflow/`
+- `PromotionPlan` + `ghostflow:promote-candidate` dry-run CLI
+- **`--apply` intentionally unavailable** (rejected); **no production write capability**
+- **Does not include:** production writer, history, receipts, Git automation, or candidate promotion
+
+**PR #149 merged (promotion policy):**
+- DECISIONS entry + [PROMOTION_POLICY_IMPACT.md](../ghostflow/PROMOTION_POLICY_IMPACT.md)
+
+Production GhostFlow state remains unchanged:
+- `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
+- Composite / Passive / Structural: 60 / 53 / 67
+- Band: Elevated Flow Pressure
+- `publicSignalCount`: 13
+- MOCK systematic / retirement / levered: 62 / 58 / 55
+
+VIX remains excluded because Gate C / `marketBreadth` remain blocked.
+
+## Recommended next work
+1. **PR C2** — `--apply` fail-closed production writer + post-write verification
+2. Separate human-reviewed data PRs for any actual artifact refresh after mechanism merges
+3. Same-date promotion policy remains blocked
+4. History/provenance writes remain blocked; automatic promotion blocked
+5. Breadth remains blocked. Do not wire VIX or Gate C.
+
+Last updated: 2026-08-26
+
+---
+
+## Archive — promotion policy + PR C impact (2026-08-26)
 Starting `main` for this work: `70d8ade488a70c1f92015a8454864314d90db1d5` (includes PRs **#140–#148** merged).
 
 **Promotion policy approved + impact audit (branch `docs/ghostflow-promotion-policy`):**
