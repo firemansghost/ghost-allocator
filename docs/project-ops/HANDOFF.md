@@ -1,6 +1,41 @@
 ﻿# HANDOFF
 
-## Last Session Summary (2026-08-26, PR B candidate generator)
+## Last Session Summary (2026-08-26, promotion policy + PR C impact)
+Starting `main`: `70d8ade488a70c1f92015a8454864314d90db1d5` (PRs **#140–#148** merged). Recorded Bobby’s approved candidate-promotion policy in DECISIONS and completed read-only PR C impact inventory in [PROMOTION_POLICY_IMPACT.md](../ghostflow/PROMOTION_POLICY_IMPACT.md). **No code, no production writes, no candidate promoted.**
+
+Policy highlights: `ready_for_review` only; explicit `--envelope`; dry-run default / `--apply` write; current mapper replay; current-production optimistic lock; newer-date gate; registry-owned destination; no network; no history; no Git automation. Recommended implementation split: **C1 dry-run**, then **C2 writer**.
+
+Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`. VIX / Gate C excluded; breadth remains blocked.
+
+## State of Work
+- Report-only operator runner merged (PR **#140**).
+- H.15 SDMX transport merged (PR **#143–#144**).
+- Candidate-generation architecture design merged (PR **#145**).
+- Candidate mapping policy approved + impact inventory merged (PR **#146**).
+- PR A candidate mappers + provenance hardening merged (PR **#147**).
+- PR B candidate generator + integrity hardening merged (PR **#148**).
+- **Promotion policy approved + impact audit** on `docs/ghostflow-promotion-policy` (pending merge).
+- Promotion mechanism **not implemented**; same-date promotion blocked; history/provenance writes blocked; automatic promotion blocked.
+- Breadth / Gate C blocked; no VIX wiring.
+- Core app remains stable; education section remains live.
+
+## Priority for Next Session
+1. **PR C1** — promotion validation + dry-run plan + CLI (no production writes)
+2. **PR C2** — `--apply` fail-closed production writer + post-write verification
+3. After mechanism merges: separate human-reviewed data PRs for any actual artifact refresh
+4. Same-date / `revision_review_required` promotion policy remains blocked
+5. Breadth authorization remains separate and blocked; do not wire VIX or Gate C
+
+## Open Questions
+- Same-date mapped-payload promotion policy?
+- Accepted-history / provenance receipt timing?
+- When to promote Long-End production artifact from FRED → Board (human data PR after mechanism)?
+- Optional future: adapter emission of defensible CFTC/Board `sourcePublishedAt`?
+- Breadth licensed-source path still blocked pending authorization?
+
+---
+
+## Archive — PR B candidate generator (2026-08-26)
 Starting `main`: `ee018350a8d76737027473a62e6196ce986a7f24` (PRs **#140–#147** merged). Implemented candidate generator + review envelope on branch `feat/ghostflow-candidate-generator`: canonical JSON hashing, deterministic candidate identity, current production fingerprinting, factual structural diff, fetch→parse→normalize→mapper pipeline, collision-safe idempotent writer, and single-artifact CLI. Live smoke all three artifacts `ready_for_review`; Long-End rerun `candidate_already_exists`. **No production JSON writes, no promotion.**
 
 Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`. VIX / Gate C excluded; breadth remains blocked.
