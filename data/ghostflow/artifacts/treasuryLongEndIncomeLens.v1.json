@@ -1,80 +1,67 @@
 {
   "artifactVersion": "1",
   "signalId": "treasury-long-end-income-lens",
-  "asOf": "2026-07-01",
-  "publishedAt": "2026-07-06",
+  "asOf": "2026-08-25",
   "source": {
-    "name": "FRED — U.S. Treasury constant maturity, TIPS, and breakeven inflation (verified extract)",
-    "url": "https://fred.stlouisfed.org/",
-    "note": "Production artifact (v1.7d.1). Values from official FRED API (api.stlouisfed.org, method fred_api) via ghostflow:fred-treasury-yields-spike on 2026-07-06; observation_start 2020-01-01; live FRED graph CSV timed out and official FRED API fallback succeeded. Common asOf 2026-07-01 — latest common business date where all six series had numeric observations on or before GHOSTFLOW_REFERENCE_AS_OF (2026-07-01). No forward-fill. Series: DGS30, DFII30, DGS2, DGS5, DGS10, T10YIE. Not investment advice; not scored; mappingStatus not_final.",
+    "name": "Board of Governors of the Federal Reserve System — H.15 Selected Interest Rates",
+    "url": "https://www.federalreserve.gov/releases/h15/data/FRB_h15_xml.zip",
+    "note": "Automated candidate from Board H.15 release-level constant-maturity yields (nominal + inflation-indexed). Display-only Treasury Plumbing card; not scored; mappingStatus not_final.",
     "series": [
       {
-        "id": "DGS30",
-        "label": "Market Yield on U.S. Treasury Securities at 30-Year Constant Maturity",
-        "url": "https://fred.stlouisfed.org/series/DGS30",
+        "id": "RIFLGFCY30_N.B",
+        "label": "30-Year Treasury Constant Maturity Rate (nominal)",
+        "url": "https://www.federalreserve.gov/releases/h15/data/FRB_h15_xml.zip",
         "role": "primary"
       },
       {
-        "id": "DFII30",
-        "label": "Market Yield on U.S. Treasury Inflation-Indexed Securities at 30-Year Maturity",
-        "url": "https://fred.stlouisfed.org/series/DFII30",
+        "id": "RIFLGFCY30_XII_N.B",
+        "label": "30-Year Treasury Inflation-Indexed Constant Maturity Rate (real)",
+        "url": "https://www.federalreserve.gov/releases/h15/data/FRB_h15_xml.zip",
         "role": "primary"
       },
       {
-        "id": "DGS2",
-        "label": "Market Yield on U.S. Treasury Securities at 2-Year Constant Maturity",
-        "url": "https://fred.stlouisfed.org/series/DGS2",
+        "id": "RIFLGFCY02_N.B",
+        "label": "2-Year Treasury Constant Maturity Rate",
+        "url": "https://www.federalreserve.gov/releases/h15/data/FRB_h15_xml.zip",
         "role": "context"
       },
       {
-        "id": "DGS5",
-        "label": "Market Yield on U.S. Treasury Securities at 5-Year Constant Maturity",
-        "url": "https://fred.stlouisfed.org/series/DGS5",
+        "id": "RIFLGFCY05_N.B",
+        "label": "5-Year Treasury Constant Maturity Rate",
+        "url": "https://www.federalreserve.gov/releases/h15/data/FRB_h15_xml.zip",
         "role": "context"
       },
       {
-        "id": "DGS10",
-        "label": "Market Yield on U.S. Treasury Securities at 10-Year Constant Maturity",
-        "url": "https://fred.stlouisfed.org/series/DGS10",
-        "role": "context"
-      },
-      {
-        "id": "T10YIE",
-        "label": "10-Year Breakeven Inflation Rate",
-        "url": "https://fred.stlouisfed.org/series/T10YIE",
+        "id": "RIFLGFCY10_N.B",
+        "label": "10-Year Treasury Constant Maturity Rate",
+        "url": "https://www.federalreserve.gov/releases/h15/data/FRB_h15_xml.zip",
         "role": "context"
       }
     ]
   },
   "observationType": "treasury_long_end_income_snapshot",
-  "seriesDefinition": "fred_treasury_long_end_income_lens_v1",
+  "seriesDefinition": "frb_h15_treasury_long_end_income_lens_v1",
   "updateFrequency": "daily",
-  "dataQuality": "verified_manual",
+  "dataQuality": "verified_automated",
   "mappingStatus": "not_final",
   "caveats": [
     "Not investment advice and not a recommendation to buy or sell Treasury securities or bond funds.",
     "Not a duration allocation signal — yield levels alone do not prove income neglect or investor behavior.",
     "Nominal and real yields can move for different macro reasons; duration risk remains.",
     "Display-only Treasury Plumbing card (separate lane, v1.7e); outside equity publicSignalCount; not merged into buildSnapshot or Research Composite.",
-    "Public/manual FRED snapshot; mappingStatus not_final; no scored pressure mapping."
+    "Board H.15 snapshot; mappingStatus not_final; no scored pressure mapping."
   ],
   "observations": {
-    "thirtyYearNominalYieldPct": 4.97,
-    "thirtyYearTipsRealYieldPct": 2.78,
-    "tenYearBreakevenInflationPct": 2.23,
-    "twoYearYieldPct": 4.17,
-    "fiveYearYieldPct": 4.24,
-    "tenYearYieldPct": 4.48,
-    "curve2s30sPct": 0.8,
-    "curve5s30sPct": 0.73,
-    "curve10s30sPct": 0.49,
+    "thirtyYearNominalYieldPct": 5.17,
+    "thirtyYearTipsRealYieldPct": 2.92,
+    "mappingStatus": "not_final",
     "nominalYieldPercentile": null,
     "realYieldPercentile": null,
-    "mappingStatus": "not_final"
-  },
-  "optionalObservations": {
-    "longDurationTreasuryEtfFlowMillionsUsd": null,
-    "longDurationTreasuryEtfAumMillionsUsd": null,
-    "termPremiumPct": null
+    "twoYearYieldPct": 4.17,
+    "curve2s30sPct": 1,
+    "fiveYearYieldPct": 4.35,
+    "curve5s30sPct": 0.8200000000000003,
+    "tenYearYieldPct": 4.64,
+    "curve10s30sPct": 0.5300000000000002
   }
 }
