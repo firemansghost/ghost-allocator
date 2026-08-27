@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 
 const WRITE_PRIMITIVES = [
   'writeFile',
@@ -32,6 +32,7 @@ function listTsFiles(dir: string): string[] {
 }
 
 function main(): void {
+  const writerPath = join(process.cwd(), 'lib/ghostflow/refresh/promotion/writer.ts');
   const files = [
     ...listTsFiles(join(process.cwd(), 'lib/ghostflow/refresh/promotion')),
     join(process.cwd(), 'scripts/ghostflow/promote-candidate.ts'),
@@ -39,29 +40,46 @@ function main(): void {
 
   for (const file of files) {
     const source = readFileSync(file, 'utf8');
+    const isWriter = file === writerPath;
 
-    for (const primitive of WRITE_PRIMITIVES) {
-      const re = new RegExp(`\\b${primitive}\\b`);
-      assert.ok(!re.test(source), `${file} must not reference write-capable fs primitive ${primitive}`);
+    if (!isWriter) {
+      for (const primitive of WRITE_PRIMITIVES) {
+        const re = new RegExp(`\\b${primitive}\\b`);
+        assert.ok(
+          !re.test(source),
+          `${file} must not reference write-capable fs primitive ${primitive}`
+        );
+      }
+      if (source.includes('node:fs')) {
+        assert.ok(
+          /import\s*\{\s*readFile\s*\}\s*from\s*['"]node:fs\/promises['"]/.test(source),
+          `${file}: only readFile from node:fs/promises is allowed`
+        );
+      }
+    } else {
+      assert.ok(source.includes('writeFile'), 'writer.ts must use writeFile');
+      assert.ok(source.includes('rename'), 'writer.ts must use rename');
+      assert.ok(source.includes('unlink'), 'writer.ts may use unlink for temp cleanup only');
+      assert.ok(
+        !source.includes('unlink(resolvedDestination)') &&
+          !source.includes('unlinkFn(resolvedDestination)') &&
+          !/unlink(?:Fn)?\(\s*destination/i.test(source),
+        'writer.ts must never unlink the production destination'
+      );
+      assert.ok(!source.includes('mkdir'), 'writer.ts must not create directories');
+      assert.ok(!source.includes('rmSync'), 'writer.ts must not use rmSync');
     }
 
     assert.ok(
       !source.includes('DEFAULT_GHOSTFLOW_OPERATOR_ADAPTER_MAP'),
-      `${file} must not import DEFAULT_GHOSTFLOW_OPERATOR_ADAPTER_MAP`
+      `${basename(file)} must not import DEFAULT_GHOSTFLOW_OPERATOR_ADAPTER_MAP`
     );
     assert.ok(
       !/from ['"][^'"]*operatorRunner['"]/.test(source),
-      `${file} must not import operatorRunner`
+      `${basename(file)} must not import operatorRunner`
     );
-    assert.ok(!source.includes('node:http'), `${file} must not import node:http`);
-    assert.ok(!source.includes('node:https'), `${file} must not import node:https`);
-
-    if (source.includes('node:fs')) {
-      assert.ok(
-        /import\s*\{\s*readFile\s*\}\s*from\s*['"]node:fs\/promises['"]/.test(source),
-        `${file}: only readFile from node:fs/promises is allowed`
-      );
-    }
+    assert.ok(!source.includes('node:http'), `${basename(file)} must not import node:http`);
+    assert.ok(!source.includes('node:https'), `${basename(file)} must not import node:https`);
   }
 
   console.log('ghostflow/promotion/architecture.test.ts: ok');

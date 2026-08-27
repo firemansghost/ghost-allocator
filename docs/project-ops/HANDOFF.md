@@ -1,6 +1,37 @@
 ﻿# HANDOFF
 
-## Last Session Summary (2026-08-26, promotion C1 dry-run)
+## Last Session Summary (2026-08-27, promotion C2 writer)
+Starting `main`: `e5db69db5ddae54a933372ee5a96e29f75d13ecd` (PRs **#140–#150** merged). Implemented promotion C2 on `feat/ghostflow-promotion-writer`: explicit `--apply`, public envelope-path-only apply API, temp-sibling prevalidation, commit-point optimistic re-lock, rename-over-existing fail-closed write, mandatory post-write verification. **No live candidate promoted; actual repo production JSON unchanged.**
+
+Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`. VIX / Gate C excluded; breadth remains blocked.
+
+## State of Work
+- Report-only operator runner merged (PR **#140**).
+- H.15 SDMX transport merged (PR **#143–#144**).
+- Candidate-generation architecture / mapping / mappers / generator / policy merged (PRs **#145–#149**).
+- PR C1 promotion dry-run merged (PR **#150**).
+- **PR C2 promotion writer** on `feat/ghostflow-promotion-writer` (pending merge).
+- Next: separately review/promote actual candidates (dry-run → `--apply` → human data PR).
+- Same-date promotion blocked; history/provenance writes blocked; automatic promotion blocked.
+- Breadth / Gate C blocked; no VIX wiring.
+- Core app remains stable; education section remains live.
+
+## Priority for Next Session
+1. Review live candidates and promote via separate human-reviewed production-artifact PR(s)
+2. Same-date / `revision_review_required` promotion policy remains blocked
+3. History/provenance receipt timing remains blocked
+4. Breadth authorization remains separate and blocked; do not wire VIX or Gate C
+
+## Open Questions
+- Same-date mapped-payload promotion policy?
+- Accepted-history / provenance receipt timing?
+- When to promote Long-End production artifact from FRED → Board (human data PR)?
+- Optional future: adapter emission of defensible CFTC/Board `sourcePublishedAt`?
+- Breadth licensed-source path still blocked pending authorization?
+
+---
+
+## Archive — promotion C1 dry-run (2026-08-26)
 Starting `main`: `cb7f45697831ba1d31e0a813ce90a1acb44f7ed9` (PRs **#140–#149** merged). Implemented promotion C1 on `feat/ghostflow-promotion-dry-run`: envelope eligibility validation, integrity reuse, current mapper replay, production optimistic lock, newer-date gate, `PromotionPlan`, and dry-run CLI. **`--apply` rejected; no production write capability; no candidate promoted.**
 
 Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`. VIX / Gate C excluded; breadth remains blocked.

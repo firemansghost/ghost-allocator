@@ -2,6 +2,7 @@ import { isAbsolute, normalize, resolve, sep } from 'node:path';
 
 export type GhostFlowPromoteCandidateCliOptions = {
   envelopePath: string;
+  apply: boolean;
 };
 
 export type GhostFlowPromoteCandidateCliParseResult =
@@ -72,16 +73,29 @@ export function parsePromoteCandidateCliArgs(
   repoRoot: string
 ): GhostFlowPromoteCandidateCliParseResult {
   let envelopePath: string | undefined;
+  let apply = false;
 
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
 
     if (arg === '--apply') {
-      return {
-        ok: false,
-        error: '--apply is not available in promotion C1 (dry-run only)',
-        code: 'promotion_apply_not_available',
-      };
+      const next = argv[i + 1];
+      if (next !== undefined && !next.startsWith('--')) {
+        return {
+          ok: false,
+          error: '--apply takes no value',
+          code: 'promotion_cli_argument_rejected',
+        };
+      }
+      if (apply) {
+        return {
+          ok: false,
+          error: 'Duplicate --apply is not allowed',
+          code: 'promotion_cli_argument_rejected',
+        };
+      }
+      apply = true;
+      continue;
     }
 
     if (REJECTED_FLAGS.has(arg)) {
@@ -135,14 +149,16 @@ export function parsePromoteCandidateCliArgs(
 
   return {
     ok: true,
-    value: { envelopePath: resolved.absolutePath },
+    value: { envelopePath: resolved.absolutePath, apply },
   };
 }
 
 export function promoteCandidateCliUsage(): string {
-  return `Usage: npm run ghostflow:promote-candidate -- --envelope <path>
+  return `Usage:
+  npm run ghostflow:promote-candidate -- --envelope <path>
+  npm run ghostflow:promote-candidate -- --envelope <path> --apply
 
-C1 dry-run only. --apply is not available yet.
+Dry-run is the default. --apply writes exactly one registry-owned production artifact.
 Envelope path must resolve beneath <repo>/tmp/ghostflow/ and end with .candidate.json.
 `;
 }
