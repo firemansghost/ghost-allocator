@@ -1,6 +1,43 @@
 ﻿# HANDOFF
 
-## Last Session Summary (2026-08-27, first production promotion)
+## Last Session Summary (2026-08-27, second production promotion)
+`main` is `d17ec98dab241b83ddf615b117b1be10804578da` (PRs **#140–#154** merged). Long-End Board-native production remains live (PR **#152**). PR **#154** completed the second actual production promotion: `treasuryFuturesPositioningProxy` is now automated CFTC PRE TFF production (`asOf` **2026-08-18**, dataset `gpe5-46if`, `verified_automated`, no fabricated `publishedAt`, four core basket contracts, Ultra optional only, basket lev net **-32.4% OI**). Both promotions used reviewed envelope → dry-run → explicit `--apply` → validation → human PR → merge. Writer remains human-triggered; no history/receipts/automation. Scores / reference / `publicSignalCount` unchanged. Next: independently review `systematicFlowProxy` only — audit stale presentation/test assumptions before any apply. Systematic is not approved; Systematic score wiring / v1.0c remains blocked.
+
+Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`. VIX / Gate C excluded; breadth remains blocked.
+
+## State of Work
+- Report-only operator runner merged (PR **#140**).
+- H.15 SDMX transport merged (PR **#143–#144**).
+- Candidate-generation architecture / mapping / mappers / generator / policy merged (PRs **#145–#149**).
+- PR C1 promotion dry-run merged (PR **#150**).
+- PR C2 promotion writer merged (PR **#151**).
+- First production promotion merged (PR **#152**) — Long-End Board-native.
+- Post-Long-End docs checkpoint merged (PR **#153**).
+- **Second production promotion merged (PR #154)** — Treasury Futures automated.
+- Same-date promotion blocked; history/provenance writes blocked; automatic promotion blocked.
+- Breadth / Gate C blocked; no VIX wiring.
+- Core app remains stable; education section remains live.
+
+## Priority for Next Session
+1. Independently review `systematicFlowProxy` before any additional `--apply` (not approved). Required audit points:
+   - display-only / no Research Composite score merge
+   - current `Weekly (manual artifact)` presentation metadata
+   - `verified_automated` snapshot `dataQuality` handling
+   - production-coupled tests pinned to old market values / metadata
+2. Same-date / `revision_review_required` promotion policy remains blocked
+3. History/provenance receipt timing remains blocked
+4. Systematic score wiring / v1.0c remains blocked
+5. Breadth authorization remains separate and blocked; do not wire VIX or Gate C
+
+## Open Questions
+- Same-date mapped-payload promotion policy?
+- Accepted-history / provenance receipt timing?
+- Optional future: adapter emission of defensible CFTC/Board `sourcePublishedAt`?
+- Breadth licensed-source path still blocked pending authorization?
+
+---
+
+## Archive — first production promotion / Long-End (2026-08-27)
 `main` is `32eb660734e01b5a77980d54c8bcbca0565eecff` (PRs **#140–#152** merged). PR **#151** delivered the promotion writer; PR **#152** completed the first actual production promotion: `treasuryLongEndIncomeLens` is now Board-native production (`asOf` **2026-08-25**, H.15 SDMX, `frb_h15_treasury_long_end_income_lens_v1`, `verified_automated`, no T10YIE/breakeven, no fabricated `publishedAt`). First end-to-end cycle succeeded: candidate → human review → dry-run → explicit `--apply` → validation → data PR → merge. Writer remains operational but human-triggered (explicit envelope / dry-run default / explicit `--apply`). No history/receipts/automation. Scores / reference / `publicSignalCount` unchanged. Next: independently review the next candidate before any additional apply.
 
 Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`. VIX / Gate C excluded; breadth remains blocked.

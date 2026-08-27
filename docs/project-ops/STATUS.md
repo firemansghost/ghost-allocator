@@ -1,6 +1,54 @@
 ﻿# STATUS
 
-## Current State (GhostFlow — 2026-08-27, first production promotion)
+## Current State (GhostFlow — 2026-08-27, second production promotion)
+Starting `main` for this work: `d17ec98dab241b83ddf615b117b1be10804578da` (includes PRs **#140–#154** merged).
+
+**PR #154 merged — second actual GhostFlow production promotion (Treasury Futures):**
+- Promoted reviewed `treasuryFuturesPositioningProxy` candidate for `asOf` **2026-08-18**
+- Production Treasury Futures artifact now:
+  - CFTC PRE TFF Futures Only (`gpe5-46if`)
+  - `dataQuality`: `verified_automated`
+  - **no** fabricated `publishedAt`
+  - four core Treasury contracts in basket (`042601`, `044601`, `043602`, `020601`)
+  - two Ultra contracts optional / context only (`043607`, `020604`)
+  - basket leveraged-funds net positioning **-32.4% OI** (`net_short`)
+- Stale Treasury Plumbing hard-coded `34.6` market-value assertion converted to a semantic
+  current-production `formatTreasuryFuturesPrimaryValue()` check
+- Treasury Futures remains **display-only / unscored**
+
+**Two real promotion cycles completed:**
+1. Treasury Long-End (PR **#152**) — Board H.15 SDMX, `asOf` 2026-08-25
+2. Treasury Futures (PR **#154**) — CFTC TFF automated, `asOf` 2026-08-18
+
+Both used: reviewed envelope → dry-run → explicit `--apply` → validation → human data PR → merge.
+Promotion writer remains human-triggered; no automatic promotion.
+
+Production GhostFlow score/reference baseline remains unchanged:
+- `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
+- Composite / Passive / Structural: 60 / 53 / 67
+- Band: Elevated Flow Pressure
+- `publicSignalCount`: 13
+- MOCK systematic / retirement / levered: 62 / 58 / 55
+
+VIX remains excluded because Gate C / `marketBreadth` remain blocked.
+
+## Recommended next work
+1. Independently review `systematicFlowProxy` only (not approved yet). That review must specifically inspect:
+   - display-only / no Research Composite score merge
+   - current `Weekly (manual artifact)` presentation metadata
+   - `verified_automated` snapshot `dataQuality` handling
+   - production-coupled tests currently pinned to old market values / metadata
+   Do not decide or repair those issues in this docs checkpoint.
+2. Same-date / `revision_review_required` promotion policy remains blocked
+3. History/provenance writes remain blocked; automatic promotion blocked
+4. Systematic score wiring / v1.0c remains blocked
+5. Breadth remains blocked. Do not wire VIX or Gate C.
+
+Last updated: 2026-08-27
+
+---
+
+## Archive — first production promotion / Long-End (2026-08-27)
 Starting `main` for this work: `32eb660734e01b5a77980d54c8bcbca0565eecff` (includes PRs **#140–#152** merged).
 
 **PR #152 merged — first actual GhostFlow production promotion:**
