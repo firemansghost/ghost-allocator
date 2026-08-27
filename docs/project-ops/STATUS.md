@@ -1,6 +1,55 @@
 ﻿# STATUS
 
-## Current State (GhostFlow — 2026-08-27, Phase 1 promotion receipt policy)
+## Current State (GhostFlow — 2026-08-27, Phase 1 promotion receipts complete)
+Starting `main` for this work: `f04c456fe1ae48d9dc9b90ac232fc4e678cfd737` (includes PRs **#140–#160** merged).
+
+**Phase 1 verified promotion receipts — IMPLEMENTED**
+- PR **#158**: policy/design authorization (DECISIONS + [PROMOTION_RECEIPT_PHASE1_DESIGN.md](../ghostflow/PROMOTION_RECEIPT_PHASE1_DESIGN.md))
+- PR **#159 / R1**: receipt v1 contract; deterministic receipt planner; post-apply equality reconciliation; mapper replay; prior/promoted fingerprints; receipt path safety; **no** filesystem writer
+- PR **#160 / R2**: explicit receipt CLI; dry-run default; explicit `--write`; current production loaded from registry-owned destination; exclusive `wx` receipt creation; identical retry idempotent; differing existing receipt fails closed; post-write byte verification; receipt operation **never** writes production; `--apply` remains unchanged / single production write
+
+Receipt command (dry-run default):
+```text
+npm run ghostflow:record-promotion-receipt -- --envelope <exact-path>
+npm run ghostflow:record-promotion-receipt -- --envelope <exact-path> --write
+```
+
+**Terminology and boundaries:**
+- Promotion receipt = **verified transition evidence** after successful local `--apply`
+- Receipt itself is **NOT** approval; Git merge remains the human acceptance boundary
+- Receipts are **prospective** — no automatic backfill of PRs **#152 / #154 / #156**
+- No receipt JSON was added merely to complete the mechanism; first real receipt will accompany the next legitimate newer-date promotion
+
+**Current operator workflow:**
+candidate generation → human candidate inspection → promotion dry-run → explicit `--apply` → production post-write verification → receipt dry-run → explicit receipt `--write` → validation / git diff → human-reviewed PR containing production JSON + receipt → merge
+
+**Three-family production baseline (unchanged):**
+1. `treasuryLongEndIncomeLens` — Board H.15 SDMX, `asOf` **2026-08-25**, `verified_automated`
+2. `treasuryFuturesPositioningProxy` — CFTC TFF, `asOf` **2026-08-18**, `verified_automated`
+3. `systematicFlowProxy` — CFTC TFF equity, `asOf` **2026-08-18**, Mapping-A display **79**, Research Composite MOCK **62**
+
+Production GhostFlow score/reference baseline remains unchanged:
+- `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
+- Composite / Passive / Structural: 60 / 53 / 67
+- Band: Elevated Flow Pressure
+- `publicSignalCount`: 13
+- MOCK systematic / retirement / levered: 62 / 58 / 55
+
+VIX remains excluded because Gate C / `marketBreadth` remain blocked.
+
+## Recommended next work
+1. Use the complete receipt path on the **next legitimate newer-date production promotion** — do **not** manufacture a promotion merely to create a receipt
+2. Do **not** unlock same-date / `revision_review_required` merely because receipt infrastructure now exists (Phase 1 is prospective; current three production states lack historical receipts)
+3. Automatic promotion / automatic candidate PR creation / workflow automation remain blocked
+4. Systematic score wiring / v1.0c remains blocked
+5. Breadth / Gate C remains blocked; do not wire VIX
+6. Historical receipt backfill remains blocked
+
+Last updated: 2026-08-27
+
+---
+
+## Archive — Phase 1 promotion receipt policy (2026-08-27)
 Starting `main` for this work: `e4dc0e9f043bcdd3d8987ab4f135c2780a2a92d6` (includes PRs **#140–#157** merged).
 
 **Selected next architecture milestone: Phase 1 verified promotion receipt**
@@ -18,7 +67,7 @@ Starting `main` for this work: `e4dc0e9f043bcdd3d8987ab4f135c2780a2a92d6` (inclu
 2. `treasuryFuturesPositioningProxy` — CFTC TFF, `asOf` 2026-08-18, `verified_automated`
 3. `systematicFlowProxy` — CFTC TFF equity, `asOf` 2026-08-18, Mapping-A display **79**, Research Composite MOCK **62**
 
-Promotion pipeline remains:
+Promotion pipeline at that checkpoint:
 candidate generation → human inspection → exact-envelope dry-run → explicit `--apply` → (future) explicit receipt command → validation → human-reviewed PR → merge.
 
 Production GhostFlow score/reference baseline remains unchanged:
