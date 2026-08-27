@@ -9,12 +9,13 @@
 
 import { randomUUID } from 'node:crypto';
 import { readFile, rename, unlink, writeFile } from 'node:fs/promises';
-import { basename, dirname, join, resolve } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { validateCurrentProductionArtifact, validateProposedProductionArtifact } from '../candidates/artifactValidation';
 import { GHOSTFLOW_CANDIDATE_ARTIFACT_IDS } from '../candidates/types';
 import { GHOSTFLOW_REFRESH_REGISTRY } from '../registry';
 import type { GhostFlowRefreshIssue } from '../types';
 import { dryRunGhostFlowCandidatePromotion } from './plan';
+import { resolvePromotionRegistryDestination } from './pathSafety';
 import type {
   GhostFlowPromotionApplyFailure,
   GhostFlowPromotionApplyResult,
@@ -145,7 +146,21 @@ export async function writeValidatedPromotionPlan(
     );
   }
 
-  const resolvedDestination = resolve(input.repoRoot, registryEntry.artifactPath);
+  const destination = resolvePromotionRegistryDestination({
+    repoRoot: input.repoRoot,
+    artifactPath: registryEntry.artifactPath,
+  });
+  if (!destination.ok) {
+    return applyFailure(
+      'promotion_write_failed',
+      1,
+      destination.issues,
+      { artifactId: plan.artifactId, destinationPath: registryEntry.artifactPath },
+      plan
+    );
+  }
+
+  const resolvedDestination = destination.value.absolutePath;
   if (plan.destinationAbsolutePath !== resolvedDestination) {
     return applyFailure(
       'promotion_write_failed',

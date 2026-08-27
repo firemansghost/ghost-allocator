@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { basename, join } from 'node:path';
+import { GHOSTFLOW_CANDIDATE_ARTIFACT_IDS } from '@/lib/ghostflow/refresh/candidates/types';
+import { GHOSTFLOW_REFRESH_REGISTRY } from '@/lib/ghostflow/refresh/registry';
+import { resolvePromotionRegistryDestination } from '@/lib/ghostflow/refresh/promotion/pathSafety';
 
 const WRITE_PRIMITIVES = [
   'writeFile',
@@ -33,6 +36,7 @@ function listTsFiles(dir: string): string[] {
 
 function main(): void {
   const writerPath = join(process.cwd(), 'lib/ghostflow/refresh/promotion/writer.ts');
+  const pathSafetyPath = join(process.cwd(), 'lib/ghostflow/refresh/promotion/pathSafety.ts');
   const files = [
     ...listTsFiles(join(process.cwd(), 'lib/ghostflow/refresh/promotion')),
     join(process.cwd(), 'scripts/ghostflow/promote-candidate.ts'),
@@ -41,6 +45,7 @@ function main(): void {
   for (const file of files) {
     const source = readFileSync(file, 'utf8');
     const isWriter = file === writerPath;
+    const isPathSafety = file === pathSafetyPath;
 
     if (!isWriter) {
       for (const primitive of WRITE_PRIMITIVES) {
@@ -50,7 +55,7 @@ function main(): void {
           `${file} must not reference write-capable fs primitive ${primitive}`
         );
       }
-      if (source.includes('node:fs')) {
+      if (source.includes('node:fs') && !isPathSafety) {
         assert.ok(
           /import\s*\{\s*readFile\s*\}\s*from\s*['"]node:fs\/promises['"]/.test(source),
           `${file}: only readFile from node:fs/promises is allowed`
@@ -68,6 +73,10 @@ function main(): void {
       );
       assert.ok(!source.includes('mkdir'), 'writer.ts must not create directories');
       assert.ok(!source.includes('rmSync'), 'writer.ts must not use rmSync');
+      assert.ok(
+        source.includes('resolvePromotionRegistryDestination'),
+        'writer.ts must enforce authorized destination containment'
+      );
     }
 
     assert.ok(
@@ -80,6 +89,18 @@ function main(): void {
     );
     assert.ok(!source.includes('node:http'), `${basename(file)} must not import node:http`);
     assert.ok(!source.includes('node:https'), `${basename(file)} must not import node:https`);
+  }
+
+  // Supplemental registry drift guard — runtime containment remains authoritative.
+  const repoRoot = process.cwd();
+  for (const artifactId of GHOSTFLOW_CANDIDATE_ARTIFACT_IDS) {
+    const entry = GHOSTFLOW_REFRESH_REGISTRY.find((item) => item.artifactId === artifactId);
+    assert.ok(entry, `registry entry missing for ${artifactId}`);
+    const resolved = resolvePromotionRegistryDestination({
+      repoRoot,
+      artifactPath: entry!.artifactPath,
+    });
+    assert.strictEqual(resolved.ok, true, `${artifactId} registry path must be promotion-safe`);
   }
 
   console.log('ghostflow/promotion/architecture.test.ts: ok');

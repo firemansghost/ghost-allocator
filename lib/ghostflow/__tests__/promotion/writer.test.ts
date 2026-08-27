@@ -1,12 +1,13 @@
 import assert from 'node:assert/strict';
 import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { generateGhostFlowCandidate } from '@/lib/ghostflow/refresh/candidates/generator';
 import { sha256HexFromCanonicalJson } from '@/lib/ghostflow/refresh/candidates/canonicalJson';
 import { validateProposedProductionArtifact } from '@/lib/ghostflow/refresh/candidates/artifactValidation';
 import type { GhostFlowCandidateEnvelope } from '@/lib/ghostflow/refresh/candidates/types';
 import { dryRunGhostFlowCandidatePromotion } from '@/lib/ghostflow/refresh/promotion/plan';
+import { resolvePromotionRegistryDestination } from '@/lib/ghostflow/refresh/promotion/pathSafety';
 import {
   applyGhostFlowCandidatePromotion,
   writeValidatedPromotionPlan,
@@ -23,6 +24,58 @@ function loadTracked(name: string): unknown {
   return JSON.parse(
     readFileSync(join(process.cwd(), 'data/ghostflow/artifacts', name), 'utf8')
   ) as unknown;
+}
+
+function assertPathSafety(): void {
+  const repoRoot = process.cwd();
+
+  for (const relative of [
+    join('data', 'ghostflow', 'artifacts', 'systematicFlowProxy.v1.json'),
+    join('data', 'ghostflow', 'artifacts', 'treasuryFuturesPositioningProxy.v1.json'),
+    join('data', 'ghostflow', 'artifacts', 'treasuryLongEndIncomeLens.v1.json'),
+  ]) {
+    const ok = resolvePromotionRegistryDestination({ repoRoot, artifactPath: relative });
+    assert.strictEqual(ok.ok, true, relative);
+  }
+
+  const traversal = resolvePromotionRegistryDestination({
+    repoRoot,
+    artifactPath: join('data', 'ghostflow', 'artifacts', '..', '..', '..', 'outside.json'),
+  });
+  assert.strictEqual(traversal.ok, false);
+  if (!traversal.ok) {
+    assert.ok(traversal.issues.some((issue) => issue.code === 'promotion_destination_unsafe'));
+  }
+
+  const externalRelative = resolvePromotionRegistryDestination({
+    repoRoot,
+    artifactPath: join('..', 'outside.json'),
+  });
+  assert.strictEqual(externalRelative.ok, false);
+
+  const historySibling = resolvePromotionRegistryDestination({
+    repoRoot,
+    artifactPath: join('data', 'ghostflow', 'history', 'foo.json'),
+  });
+  assert.strictEqual(historySibling.ok, false);
+
+  const docsPath = resolvePromotionRegistryDestination({
+    repoRoot,
+    artifactPath: join('docs', 'foo.json'),
+  });
+  assert.strictEqual(docsPath.ok, false);
+
+  const absoluteExternal = resolvePromotionRegistryDestination({
+    repoRoot,
+    artifactPath: resolve(repoRoot, '..', 'outside-absolute.json'),
+  });
+  assert.strictEqual(absoluteExternal.ok, false);
+
+  const rootAsFile = resolvePromotionRegistryDestination({
+    repoRoot,
+    artifactPath: join('data', 'ghostflow', 'artifacts'),
+  });
+  assert.strictEqual(rootAsFile.ok, false);
 }
 
 async function buildReadySystematicEnvelope(): Promise<GhostFlowCandidateEnvelope> {
@@ -89,6 +142,8 @@ async function setupTempRepo(root: string): Promise<{
 }
 
 async function main(): Promise<void> {
+  assertPathSafety();
+
   const repoRoot = process.cwd();
   const tempRoot = join(repoRoot, 'tmp', 'ghostflow', `promotion-writer-${Date.now()}`);
   await mkdir(tempRoot, { recursive: true });
