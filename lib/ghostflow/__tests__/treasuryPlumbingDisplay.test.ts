@@ -11,6 +11,7 @@ import {
   buildTreasuryLongEndDisplayCard,
   buildTreasuryPlumbingDisplay,
   buildTreasuryPlumbingDisplayFromValidations,
+  formatTreasuryFuturesPrimaryValue,
   formatTreasuryLongEndPrimaryValue,
 } from '../treasuryPlumbingDisplay';
 import { validateTreasuryLongEndIncomeLensArtifact } from '../artifacts/treasuryLongEndIncomeLens';
@@ -55,16 +56,22 @@ const incomeCard = display.cards.find((c) => c.id === 'treasury-long-end-income-
 assert.strictEqual(futuresCard.status, 'ok');
 assert.strictEqual(incomeCard.status, 'ok');
 
-assert.ok(futuresCard.primaryValue.includes('34.6'));
-assert.ok(futuresCard.primaryValue.toLowerCase().includes('net short'));
-
 assertNoScoreFieldsInJson(display);
 
 const futuresProd = loadTreasuryFuturesPositioningProxyArtifact();
 const incomeProd = loadTreasuryLongEndIncomeLensArtifact();
 assert.ok(futuresProd.ok);
 assert.ok(incomeProd.ok);
+if (!futuresProd.ok) throw new Error('unreachable');
 if (!incomeProd.ok) throw new Error('unreachable');
+
+assert.strictEqual(
+  futuresCard.primaryValue,
+  formatTreasuryFuturesPrimaryValue(futuresProd.artifact.observations)
+);
+assert.ok(futuresCard.primaryValue.toLowerCase().includes('net short'));
+assert.strictEqual(futuresCard.dataQuality, 'verified_automated');
+assert.strictEqual(futuresCard.publishedAt, undefined);
 
 assert.strictEqual(
   incomeCard.primaryValue,
