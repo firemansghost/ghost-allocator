@@ -71,10 +71,24 @@ assert.ok(loaderOk.ok);
 
 assert.equal((productionJson as { designOnly?: boolean }).designOnly, undefined);
 assert.equal(productionOk.artifact.observations.mappingStatus, 'not_final');
-assert.ok(productionOk.artifact.source.series.length >= 6);
+assert.equal(productionOk.artifact.seriesDefinition, TREASURY_LONG_END_BOARD_SERIES_DEFINITION);
+assert.equal(productionOk.artifact.dataQuality, 'verified_automated');
+assert.equal(productionOk.artifact.source.name, TREASURY_LONG_END_BOARD_SOURCE_NAME);
+assert.equal(productionOk.artifact.source.url, TREASURY_LONG_END_BOARD_RELEASE_URL);
+assert.equal(productionOk.artifact.publishedAt, undefined);
+assert.equal((productionJson as { optionalObservations?: unknown }).optionalObservations, undefined);
+assert.equal(
+  (productionOk.artifact.observations as { tenYearBreakevenInflationPct?: unknown })
+    .tenYearBreakevenInflationPct,
+  undefined
+);
+
+const expectedBoardIds = TREASURY_LONG_END_BOARD_SOURCE_SERIES.map((spec) => spec.id);
 const prodIds = productionOk.artifact.source.series.map((s) => s.id);
+assert.equal(prodIds.length, 5);
+assert.deepEqual(prodIds, expectedBoardIds);
 for (const id of ['DGS30', 'DFII30', 'DGS2', 'DGS5', 'DGS10', 'T10YIE']) {
-  assert.ok(prodIds.includes(id), `missing series ${id}`);
+  assert.ok(!prodIds.includes(id), `unexpected legacy FRED series ${id}`);
 }
 assert.equal(productionOk.artifact.observations.nominalYieldPercentile, null);
 assert.equal(productionOk.artifact.observations.realYieldPercentile, null);
@@ -331,7 +345,7 @@ const fredWithBoardSource = cloneExample();
 assert.ok(!validateTreasuryLongEndIncomeLensArtifact(fredWithBoardSource, { mode: 'example' }).ok);
 
 const boardWithFredSource = buildBoardNativeFixture();
-boardWithFredSource.source = (productionJson as { source: unknown }).source;
+boardWithFredSource.source = (exampleJson as { source: unknown }).source;
 assert.ok(!validateTreasuryLongEndIncomeLensArtifact(boardWithFredSource, { mode: 'production' }).ok);
 
 const boardManualQuality = buildBoardNativeFixture();

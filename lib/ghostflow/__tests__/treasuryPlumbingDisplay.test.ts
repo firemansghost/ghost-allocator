@@ -11,6 +11,7 @@ import {
   buildTreasuryLongEndDisplayCard,
   buildTreasuryPlumbingDisplay,
   buildTreasuryPlumbingDisplayFromValidations,
+  formatTreasuryLongEndPrimaryValue,
 } from '../treasuryPlumbingDisplay';
 import { validateTreasuryLongEndIncomeLensArtifact } from '../artifacts/treasuryLongEndIncomeLens';
 import {
@@ -57,16 +58,29 @@ assert.strictEqual(incomeCard.status, 'ok');
 assert.ok(futuresCard.primaryValue.includes('34.6'));
 assert.ok(futuresCard.primaryValue.toLowerCase().includes('net short'));
 
-assert.ok(incomeCard.primaryValue.includes('4.97'));
-assert.ok(incomeCard.primaryValue.includes('2.78'));
-assert.ok(incomeCard.primaryValue.includes('0.49'));
-
 assertNoScoreFieldsInJson(display);
 
 const futuresProd = loadTreasuryFuturesPositioningProxyArtifact();
 const incomeProd = loadTreasuryLongEndIncomeLensArtifact();
 assert.ok(futuresProd.ok);
 assert.ok(incomeProd.ok);
+if (!incomeProd.ok) throw new Error('unreachable');
+
+assert.strictEqual(
+  incomeCard.primaryValue,
+  formatTreasuryLongEndPrimaryValue(incomeProd.artifact.observations)
+);
+assert.ok(incomeCard.statusLabel.includes('Board H.15'));
+assert.ok(!incomeCard.statusLabel.includes('FRED'));
+assert.ok(incomeCard.explanation.includes('Board H.15'));
+assert.ok(!incomeCard.explanation.includes('FRED'));
+assert.ok(!incomeCard.explanation.toLowerCase().includes('breakeven'));
+assert.ok(!incomeCard.detailRows.some((r) => r.label === '10Y breakeven'));
+assert.ok(
+  incomeCard.detailRows.some((r) => r.label === 'Data quality' && r.value === 'Verified automated')
+);
+assert.strictEqual(incomeCard.publishedAt, undefined);
+assert.strictEqual(incomeCard.sourceUrl, TREASURY_LONG_END_BOARD_RELEASE_URL);
 
 const invalidFutures = buildTreasuryFuturesDisplayCard({
   ok: false,
@@ -137,8 +151,5 @@ assert.ok(!boardCard.explanation.toLowerCase().includes('breakeven'));
 assert.ok(!boardCard.detailRows.some((r) => r.label === '10Y breakeven'));
 assert.ok(boardCard.detailRows.some((r) => r.label === 'Data quality' && r.value === 'Verified automated'));
 assert.strictEqual(boardCard.publishedAt, undefined);
-
-assert.ok(incomeCard.statusLabel.includes('FRED'));
-assert.ok(incomeCard.explanation.includes('FRED'));
 
 console.log('ghostflow/treasuryPlumbingDisplay.test.ts: ok');

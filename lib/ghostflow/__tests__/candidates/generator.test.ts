@@ -16,6 +16,21 @@ function loadProduction(name: string): unknown {
   ) as unknown;
 }
 
+function nextCalendarDay(asOf: string): string {
+  const date = new Date(`${asOf}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + 1);
+  return date.toISOString().slice(0, 10);
+}
+
+function fixtureH15NewerThanProduction(): ReturnType<typeof fixtureH15Normalized> {
+  const current = loadProduction('treasuryLongEndIncomeLens.v1.json') as { asOf: string };
+  const newerAsOf = nextCalendarDay(current.asOf);
+  const normalized = fixtureH15Normalized();
+  normalized.observationAsOf = newerAsOf;
+  normalized.provenance.observationAsOf = newerAsOf;
+  return normalized;
+}
+
 async function runSystematic(
   normalized: ReturnType<typeof fixtureSystematicNormalized>,
   mapper?: GhostFlowCandidateMapper<unknown, unknown>
@@ -157,7 +172,7 @@ async function main(): Promise<void> {
     artifactId: 'treasuryLongEndIncomeLens',
     nowIso: '2026-08-26T22:00:00.000Z',
     currentProductionRaw: loadProduction('treasuryLongEndIncomeLens.v1.json'),
-    injectNormalized: fixtureH15Normalized(),
+    injectNormalized: fixtureH15NewerThanProduction(),
     mapper: {
       artifactId: 'treasuryLongEndIncomeLens',
       map: () => ({
@@ -173,14 +188,21 @@ async function main(): Promise<void> {
     artifactId: 'treasuryLongEndIncomeLens',
     nowIso: '2026-08-26T22:00:00.000Z',
     currentProductionRaw: loadProduction('treasuryLongEndIncomeLens.v1.json'),
-    injectNormalized: fixtureH15Normalized(),
+    injectNormalized: fixtureH15NewerThanProduction(),
   });
   assert.strictEqual(h15.ok, true);
-  if (!h15.ok) throw new Error('unreachable');
-  assert.strictEqual(
-    (h15.envelope!.proposedArtifact as { seriesDefinition?: string }).seriesDefinition,
-    'frb_h15_treasury_long_end_income_lens_v1'
-  );
+  assert.strictEqual(h15.status, 'ready_for_review');
+  assert.strictEqual(h15.exitCode, 0);
+  assert.ok(h15.envelope);
+  if (!h15.ok || !h15.envelope) throw new Error('unreachable');
+  const proposed = h15.envelope.proposedArtifact as {
+    seriesDefinition?: string;
+    dataQuality?: string;
+    observations?: { tenYearBreakevenInflationPct?: unknown };
+  };
+  assert.strictEqual(proposed.seriesDefinition, 'frb_h15_treasury_long_end_income_lens_v1');
+  assert.strictEqual(proposed.dataQuality, 'verified_automated');
+  assert.equal(proposed.observations?.tenYearBreakevenInflationPct, undefined);
 
   const invalidNow = await generateGhostFlowCandidate({
     artifactId: 'systematicFlowProxy',
