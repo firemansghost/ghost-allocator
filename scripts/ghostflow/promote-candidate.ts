@@ -1,14 +1,14 @@
 /**
- * GhostFlow candidate promotion CLI — C1 dry-run only.
- * Validates and plans promotion; never writes production artifacts.
- * --apply is intentionally unavailable until C2.
+ * GhostFlow candidate promotion CLI.
+ * Dry-run by default; explicit --apply writes one registry-owned production artifact.
  */
 
-import { dryRunGhostFlowCandidatePromotion } from '../../lib/ghostflow/refresh/promotion/plan';
 import {
   parsePromoteCandidateCliArgs,
   promoteCandidateCliUsage,
 } from '../../lib/ghostflow/refresh/promotion/cliArgs';
+import { dryRunGhostFlowCandidatePromotion } from '../../lib/ghostflow/refresh/promotion/plan';
+import { applyGhostFlowCandidatePromotion } from '../../lib/ghostflow/refresh/promotion/writer';
 
 async function main(): Promise<void> {
   const repoRoot = process.cwd();
@@ -16,10 +16,7 @@ async function main(): Promise<void> {
   if (!parsed.ok) {
     console.log(
       JSON.stringify({
-        status:
-          parsed.code === 'promotion_apply_not_available'
-            ? 'promotion_apply_not_available'
-            : 'promotion_envelope_invalid',
+        status: 'promotion_envelope_invalid',
         apply: false,
         exitCode: 1,
         issueCodes: [parsed.code],
@@ -31,11 +28,19 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
+  if (parsed.value.apply) {
+    const result = await applyGhostFlowCandidatePromotion({
+      repoRoot,
+      envelopePath: parsed.value.envelopePath,
+    });
+    console.log(JSON.stringify(result.summary));
+    process.exit(result.exitCode);
+  }
+
   const result = await dryRunGhostFlowCandidatePromotion({
     repoRoot,
     envelopePath: parsed.value.envelopePath,
   });
-
   console.log(JSON.stringify(result.summary));
   process.exit(result.exitCode);
 }

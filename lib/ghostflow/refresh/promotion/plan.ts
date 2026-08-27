@@ -35,7 +35,7 @@ function blockIssue(code: string, message: string): GhostFlowRefreshIssue {
 }
 
 function failure(
-  status: Exclude<GhostFlowPromotionStatus, 'promotion_dry_run_ok'>,
+  status: Exclude<GhostFlowPromotionStatus, 'promotion_dry_run_ok' | 'promotion_applied'>,
   exitCode: number,
   issues: GhostFlowRefreshIssue[],
   partial?: Partial<GhostFlowPromotionSummary>
@@ -68,7 +68,7 @@ export type GhostFlowPromotionPlanResult =
   | { ok: true; plan: GhostFlowPromotionPlan; issues: GhostFlowRefreshIssue[] }
   | {
       ok: false;
-      status: Exclude<GhostFlowPromotionStatus, 'promotion_dry_run_ok'>;
+      status: Exclude<GhostFlowPromotionStatus, 'promotion_dry_run_ok' | 'promotion_applied'>;
       exitCode: number;
       issues: GhostFlowRefreshIssue[];
     };
@@ -343,7 +343,7 @@ export async function dryRunGhostFlowCandidatePromotion(input: {
   const validated = validateCandidateEnvelopeForPromotion(parsed);
   if (!validated.ok) {
     const first = validated.issues[0];
-    const status: Exclude<GhostFlowPromotionStatus, 'promotion_dry_run_ok'> =
+    const status: Exclude<GhostFlowPromotionStatus, 'promotion_dry_run_ok' | 'promotion_applied'> =
       first?.code === 'promotion_candidate_status_ineligible'
         ? 'promotion_ineligible'
         : 'promotion_envelope_invalid';

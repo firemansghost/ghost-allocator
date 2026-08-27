@@ -1,6 +1,41 @@
 ﻿# STATUS
 
-## Current State (GhostFlow — 2026-08-26, promotion C1 dry-run)
+## Current State (GhostFlow — 2026-08-27, promotion C2 writer)
+Starting `main` for this work: `e5db69db5ddae54a933372ee5a96e29f75d13ecd` (includes PRs **#140–#150** merged).
+
+**PR C2 — explicit `--apply` production writer implemented (branch `feat/ghostflow-promotion-writer`):**
+- Builds on merged PR **#150** C1 dry-run validation/plan
+- Public `applyGhostFlowCandidatePromotion({ repoRoot, envelopePath })` only — no plan/mapper/currentProduction injection
+- Reuses full C1 validation path; writer revalidates proposed artifact
+- Unique temp sibling (`wx`) + temp prevalidation + commit-point optimistic re-lock
+- Rename-over-existing fail-closed (no unlink-destination fallback); mandatory post-write readback
+- Post-write failure → exit 6; no guaranteed rollback
+- **Mechanism PR does not promote any live candidate**; actual repo production JSON unchanged
+- **Does not include:** history, receipts, Git automation, same-date promotion, network fetch
+
+**PR #150 merged (C1 dry-run):**
+- Envelope eligibility, mapper replay, production lock, newer-date gate, dry-run CLI
+
+Production GhostFlow state remains unchanged:
+- `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
+- Composite / Passive / Structural: 60 / 53 / 67
+- Band: Elevated Flow Pressure
+- `publicSignalCount`: 13
+- MOCK systematic / retirement / levered: 62 / 58 / 55
+
+VIX remains excluded because Gate C / `marketBreadth` remain blocked.
+
+## Recommended next work
+1. Separately review/promote actual artifact candidate(s) via dry-run → `--apply` → human production-artifact PR (one artifact preferred)
+2. Same-date promotion policy remains blocked
+3. History/provenance writes remain blocked; automatic promotion blocked
+4. Breadth remains blocked. Do not wire VIX or Gate C.
+
+Last updated: 2026-08-27
+
+---
+
+## Archive — promotion C1 dry-run (2026-08-26)
 Starting `main` for this work: `cb7f45697831ba1d31e0a813ce90a1acb44f7ed9` (includes PRs **#140–#149** merged).
 
 **PR C1 — promotion dry-run validation/plan implemented (branch `feat/ghostflow-promotion-dry-run`):**

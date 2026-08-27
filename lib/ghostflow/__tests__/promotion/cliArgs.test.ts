@@ -15,6 +15,9 @@ function main(): void {
     repoRoot
   );
   assert.strictEqual(relativeOk.ok, true);
+  if (relativeOk.ok) {
+    assert.strictEqual(relativeOk.value.apply, false);
+  }
 
   const absoluteInside = resolve(
     repoRoot,
@@ -25,6 +28,39 @@ function main(): void {
   );
   const absoluteOk = parsePromoteCandidateCliArgs(['--envelope', absoluteInside], repoRoot);
   assert.strictEqual(absoluteOk.ok, true);
+  if (absoluteOk.ok) {
+    assert.strictEqual(absoluteOk.value.apply, false);
+  }
+
+  const applyOk = parsePromoteCandidateCliArgs(
+    ['--envelope', join('tmp', 'ghostflow', 'a.candidate.json'), '--apply'],
+    repoRoot
+  );
+  assert.strictEqual(applyOk.ok, true);
+  if (applyOk.ok) {
+    assert.strictEqual(applyOk.value.apply, true);
+  }
+
+  const applyFirst = parsePromoteCandidateCliArgs(
+    ['--apply', '--envelope', join('tmp', 'ghostflow', 'a.candidate.json')],
+    repoRoot
+  );
+  assert.strictEqual(applyFirst.ok, true);
+  if (applyFirst.ok) {
+    assert.strictEqual(applyFirst.value.apply, true);
+  }
+
+  const duplicateApply = parsePromoteCandidateCliArgs(
+    ['--envelope', join('tmp', 'ghostflow', 'a.candidate.json'), '--apply', '--apply'],
+    repoRoot
+  );
+  assert.strictEqual(duplicateApply.ok, false);
+
+  const applyWithValue = parsePromoteCandidateCliArgs(
+    ['--envelope', join('tmp', 'ghostflow', 'a.candidate.json'), '--apply', 'true'],
+    repoRoot
+  );
+  assert.strictEqual(applyWithValue.ok, false);
 
   const external = parsePromoteCandidateCliArgs(
     ['--envelope', 'C:\\Windows\\Temp\\evil.candidate.json'],
@@ -48,15 +84,6 @@ function main(): void {
     repoRoot
   );
   assert.strictEqual(duplicate.ok, false);
-
-  const apply = parsePromoteCandidateCliArgs(
-    ['--envelope', join('tmp', 'ghostflow', 'a.candidate.json'), '--apply'],
-    repoRoot
-  );
-  assert.strictEqual(apply.ok, false);
-  if (!apply.ok) {
-    assert.strictEqual(apply.code, 'promotion_apply_not_available');
-  }
 
   for (const flag of [
     '--artifact',
