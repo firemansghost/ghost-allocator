@@ -1,6 +1,48 @@
 ﻿# STATUS
 
-## Current State (GhostFlow — 2026-08-27, three-family promotion milestone)
+## Current State (GhostFlow — 2026-08-27, Phase 1 promotion receipt policy)
+Starting `main` for this work: `e4dc0e9f043bcdd3d8987ab4f135c2780a2a92d6` (includes PRs **#140–#157** merged).
+
+**Selected next architecture milestone: Phase 1 verified promotion receipt**
+- Policy + design authorized (DECISIONS + [PROMOTION_RECEIPT_PHASE1_DESIGN.md](../ghostflow/PROMOTION_RECEIPT_PHASE1_DESIGN.md))
+- **Implementation not yet done** — no receipt JSON, no CLI, no runtime writer in this checkpoint
+- Receipt is a **separate post-apply sidecar**, not approval authority
+- Existing `--apply` remains **exactly one** registry-owned production artifact write
+- Future receipt command is independently retryable (dry-run default; explicit `--write`)
+- Prospective only — **no** historical backfill of PRs #152 / #154 / #156
+- Same-date / `revision_review_required` promotion remains blocked
+- Automatic promotion / candidate PRs / workflow automation remain blocked
+
+**Three-family production baseline (unchanged):**
+1. `treasuryLongEndIncomeLens` — Board H.15 SDMX, `asOf` 2026-08-25, `verified_automated`
+2. `treasuryFuturesPositioningProxy` — CFTC TFF, `asOf` 2026-08-18, `verified_automated`
+3. `systematicFlowProxy` — CFTC TFF equity, `asOf` 2026-08-18, Mapping-A display **79**, Research Composite MOCK **62**
+
+Promotion pipeline remains:
+candidate generation → human inspection → exact-envelope dry-run → explicit `--apply` → (future) explicit receipt command → validation → human-reviewed PR → merge.
+
+Production GhostFlow score/reference baseline remains unchanged:
+- `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
+- Composite / Passive / Structural: 60 / 53 / 67
+- Band: Elevated Flow Pressure
+- `publicSignalCount`: 13
+- MOCK systematic / retirement / levered: 62 / 58 / 55
+
+VIX remains excluded because Gate C / `marketBreadth` remain blocked.
+
+## Recommended next work
+1. Implement Phase 1 receipt mechanism per design (R1 types/builder/path safety, then R2 CLI/writer) — separate coding PR(s)
+2. Same-date / `revision_review_required` promotion remains blocked
+3. Automatic promotion / automatic candidate PR creation / workflow automation remain blocked
+4. Systematic score wiring / v1.0c remains blocked
+5. Breadth / Gate C remains blocked; do not wire VIX
+6. Do **not** automatically nominate another production artifact solely because receipts are designed
+
+Last updated: 2026-08-27
+
+---
+
+## Archive — three-family promotion milestone (2026-08-27)
 Starting `main` for this work: `fdcf74d6d1ba7d9b42c3d4d23049bb1856548d38` (includes PRs **#140–#156** merged).
 
 **PR #156 merged — third actual GhostFlow production promotion (Systematic Flow Proxy):**

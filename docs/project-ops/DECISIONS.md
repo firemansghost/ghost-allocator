@@ -1,5 +1,31 @@
 # DECISIONS
 
+## 2026-08-27 — GhostFlow Phase 1 promotion receipt policy
+Choice:
+- **Selected next architecture milestone:** Phase 1 **verified promotion receipt** (Git-tracked sidecar). Policy and design are authorized now; **implementation is not included** in this decision-record PR and requires later coding PR(s).
+- **Terminology:** Call the artifact a **promotion receipt** or **verified promotion receipt**. Do **not** call the local receipt “accepted provenance,” “accepted history,” or a “human approval record.” The receipt proves that a reviewed candidate is consistent with the **verified current production state** after a successful local `--apply`. It does **not** prove organizational acceptance. **Human-reviewed Git merge** of the production JSON + receipt remains the acceptance boundary.
+- **`--apply` remains single-write:** `ghostflow:promote-candidate -- --apply` continues to replace exactly **one** registry-owned production artifact and must **not** also write a receipt. Rationale: if production rename succeeds and a subsequent receipt write fails, `--apply` would enter a partial-success state; the old envelope then correctly becomes stale against newly promoted production, so re-running `--apply` is **not** a valid receipt-recovery path.
+- **Separate post-apply receipt command:** Future CLI (proposed: `npm run ghostflow:record-promotion-receipt -- --envelope <exact path>` with optional `--write`; dry-run/validation default unless write is explicit) records the receipt. Requirements: explicit envelope path only; no latest/scan/artifact-only selectors; no network; no production write; no Git operations; deterministic/non-interactive; independently retryable after receipt-write failure.
+- **Post-apply reconciliation (not newer-date gate):** Receipt command must integrity-validate the envelope (`ready_for_review`), replay the **current** mapper, require mapped hash = envelope `promotionPayloadSha256`, require **current** production hash and `observationAsOf` exactly equal the candidate promotion hash/`asOf`, reconcile `sourcePublishedAt` when present, and record `envelope.currentProduction` as prior fingerprint. It must **not** require `candidateAsOf > currentAsOf` (expected equality after successful apply).
+- **Deterministic receipt bytes:** Phase 1 receipts must be deterministically derived from reviewed envelope + prior fingerprint + verified promoted production. **No** wall-clock `appliedAt` / `recordedAt` fields in receipt bytes. Git commit/PR/merge history supplies temporal context.
+- **Path / idempotency:** Contained under `data/ghostflow/promotion-receipts/<artifactId>/<observationAsOf>.<identityPrefix>.receipt.json`. Missing → write; identical exists → idempotent success; different exists → **fail closed** (no overwrite, no auto-rename).
+- **Prospective only:** No automatic historical backfill of the three already-merged promotions. Do not fabricate missing `contentSha256` / adapter / parser from production JSON alone. Future backfill requires a separate decision with independently sufficient evidence (e.g. original envelopes).
+- **Unchanged gates:** Same-date / `revision_review_required` promotion remains blocked; normal promotion still requires newer `asOf`; no automatic promotion, candidate PRs, workflow automation, Systematic v1.0c, breadth/Gate C, or VIX score wiring.
+- **No production schema change** to carry receipt provenance inside artifact JSON.
+
+Why:
+- After three successful human promotion cycles, the largest reversible audit gap is loss of reviewed envelope provenance (especially source `contentSha256`) once `tmp/` envelopes are discarded and production JSON is overwritten.
+- Separating receipt write from `--apply` preserves the proven single-write promotion semantics and gives an independently retryable recovery path.
+- Deterministic, Git-tracked sidecars keep human approval external while creating durable transition evidence for future same-date policy design (still blocked until receipts exist prospectively).
+
+Consequences:
+- Design memo: [PROMOTION_RECEIPT_PHASE1_DESIGN.md](../ghostflow/PROMOTION_RECEIPT_PHASE1_DESIGN.md).
+- Next coding work: implement receipt types/builder/path safety (R1) then explicit receipt CLI/writer (R2) per that memo — **not** in this PR.
+- This decision **supersedes** the 2026-08-26 promotion-policy line that deferred all “history / accepted provenance / promotion receipt” writes only insofar as it now **authorizes future Phase 1 promotion-receipt implementation**. It does **not** authorize full accepted-normalized observation history stores, backfill, same-date promotion, or automation.
+- Until an artifact has a durable Phase 1 receipt establishing accepted source provenance for a promote cycle, future same-date revision policy cannot rely on receipt history for that artifact.
+
+---
+
 ## 2026-08-26 — GhostFlow candidate promotion policy
 Choice:
 - **Eligible candidate status:** Initial promotion supports **only** `ready_for_review`. Do **not** promote `revision_review_required`. Same-date mapped-payload revisions remain blocked pending a later explicit policy decision. Do not reinterpret `revision_review_required` as `ready_for_review`.
@@ -29,6 +55,7 @@ Consequences:
 - Next coding work: implement promotion mechanism per that memo (**C1 dry-run/validation**, then **C2 `--apply` writer** recommended).
 - This decision authorizes **future** promotion-mechanism implementation only. It does **not** authorize promoting current local candidates, changing production JSON in the mechanism PR, history writes, Git automation, workflows, scores, MOCK values, `publicSignalCount`, reference-date changes, VIX, breadth, or Gate C.
 - Older design-memo language that treated `revision_review_required` as promotable or used `--dry-run` as the write flag is superseded by this decision for initial PR C.
+- **Update (2026-08-27):** Phase 1 **promotion receipt** sidecars are separately authorized for **future** implementation by the decision *2026-08-27 — GhostFlow Phase 1 promotion receipt policy*. That later decision does **not** reopen same-date promotion, automation, or full observation-history stores.
 
 ---
 
