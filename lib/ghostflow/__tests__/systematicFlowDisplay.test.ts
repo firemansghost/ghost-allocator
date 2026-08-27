@@ -7,6 +7,7 @@ import { buildGhostFlowSnapshot } from '../buildSnapshot';
 import {
   SYSTEMATIC_FLOW_DISPLAY_SIGNAL_NAME,
   formatSystematicFlowDisplayValue,
+  loadSystematicFlowProxyArtifact,
 } from '../artifacts/systematicFlowProxy';
 import {
   groupSignalsByPresentation,
@@ -14,16 +15,14 @@ import {
   signalCardDisplayName,
 } from '../signalPresentation';
 import { ghostFlowBandLabel, scoreGhostFlowSnapshot } from '../scoring';
-import loadProduction from '@/data/ghostflow/artifacts/systematicFlowProxy.v1.json';
-import type { SystematicFlowProxyArtifactV1 } from '../artifacts/types';
 import { PRODUCTION_SCORE_BASELINE } from './fixtures/productionScoreBaseline';
 
-const production = loadProduction as SystematicFlowProxyArtifactV1;
+const loaded = loadSystematicFlowProxyArtifact();
+assert.ok(loaded.ok, loaded.ok ? '' : loaded.errors.join('; '));
+const production = loaded.artifact;
+const expectedDisplay = formatSystematicFlowDisplayValue(production.basket);
 
-assert.strictEqual(
-  formatSystematicFlowDisplayValue(production.basket),
-  'Net short 19.4% OI · pressure 97'
-);
+assert.strictEqual(formatSystematicFlowDisplayValue(production.basket), expectedDisplay);
 
 const { raw, meta } = buildGhostFlowSnapshot();
 const scored = scoreGhostFlowSnapshot(raw);
@@ -31,11 +30,10 @@ const systematic = raw.signals.find((s) => s.id === 'systematic-flow');
 
 assert.ok(systematic, 'systematic-flow signal must exist');
 assert.strictEqual(systematic!.dataStatus, 'public_proxy');
-assert.strictEqual(systematic!.numericValue, 97);
+assert.strictEqual(systematic!.numericValue, production.basket.basketScore);
 assert.strictEqual(systematic!.name, SYSTEMATIC_FLOW_DISPLAY_SIGNAL_NAME);
+assert.strictEqual(systematic!.value, expectedDisplay);
 assert.ok(systematic!.value.includes('Net short'));
-assert.ok(systematic!.value.includes('19.4% OI'));
-assert.ok(systematic!.value.includes('pressure 97'));
 assert.ok(
   systematic!.cardCaveat?.includes('Display-only CFTC TFF positioning proxy') &&
     systematic!.cardCaveat?.includes('not included in the Research Composite')

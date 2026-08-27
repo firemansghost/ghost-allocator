@@ -14,6 +14,10 @@ import {
   validateSystematicFlowProxyArtifact,
   evaluateSystematicFlowProxyArtifactFreshness,
   systematicFlowProxySnapshotDataQuality,
+  SYSTEMATIC_FLOW_PROXY_SOURCE_NAME,
+  SYSTEMATIC_FLOW_PROXY_SOURCE_NOTE,
+  SYSTEMATIC_FLOW_PROXY_SOURCE_URL,
+  TFF_FUTURES_ONLY_DATASET_ID,
 } from '../artifacts/systematicFlowProxy';
 import { GHOSTFLOW_REFERENCE_AS_OF } from '../reference';
 import productionArtifact from '@/data/ghostflow/artifacts/systematicFlowProxy.v1.json';
@@ -119,19 +123,20 @@ const reportWeekResult = validateSystematicFlowProxyArtifact(badReportWeek);
 assert.ok(!reportWeekResult.ok);
 assert.ok(reportWeekResult.errors.some((e) => e.includes('reportWeek')));
 
-// --- Production artifact validates ---
+// --- Production artifact validates (contract, not market locks) ---
 const production = productionArtifact as SystematicFlowProxyArtifactV1;
 const prodValid = validateSystematicFlowProxyArtifact(production, GHOSTFLOW_REFERENCE_AS_OF);
 assert.ok(prodValid.ok, prodValid.ok ? '' : prodValid.errors.join('; '));
 assert.strictEqual(production.designOnly, undefined);
-assert.ok(
-  production.source.note?.includes('display-only') &&
-    production.source.note?.includes('systematic-flow') &&
-    production.source.note?.includes('MOCK 62')
-);
-assert.strictEqual(production.publishedAt, '2026-07-03');
-assert.strictEqual(production.basket.basketNetPctOi, -19.4);
-assert.strictEqual(production.basket.basketScore, 97);
+assert.strictEqual(production.dataQuality, 'verified_automated');
+assert.strictEqual(production.publishedAt, undefined);
+assert.strictEqual(production.datasetId, TFF_FUTURES_ONLY_DATASET_ID);
+assert.strictEqual(production.source.name, SYSTEMATIC_FLOW_PROXY_SOURCE_NAME);
+assert.strictEqual(production.source.url, SYSTEMATIC_FLOW_PROXY_SOURCE_URL);
+assert.strictEqual(production.source.note, SYSTEMATIC_FLOW_PROXY_SOURCE_NOTE);
+
+const recomputedProductionBasket = computeBasketMetrics(production.scoreContracts);
+assert.deepStrictEqual(production.basket, recomputedProductionBasket);
 
 const prodFresh = evaluateSystematicFlowProxyArtifactFreshness(production, GHOSTFLOW_REFERENCE_AS_OF);
 assert.strictEqual(prodFresh.status, 'fresh');
