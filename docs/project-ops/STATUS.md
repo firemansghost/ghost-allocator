@@ -1,6 +1,67 @@
 ﻿# STATUS
 
-## Current State (GhostFlow — 2026-08-27, second production promotion)
+## Current State (GhostFlow — 2026-08-27, three-family promotion milestone)
+Starting `main` for this work: `fdcf74d6d1ba7d9b42c3d4d23049bb1856548d38` (includes PRs **#140–#156** merged).
+
+**PR #156 merged — third actual GhostFlow production promotion (Systematic Flow Proxy):**
+- Promoted reviewed `systematicFlowProxy` candidate for `asOf` **2026-08-18**
+- Production Systematic artifact now:
+  - CFTC PRE TFF Futures Only (`gpe5-46if`)
+  - `dataQuality`: `verified_automated`
+  - **no** fabricated `publishedAt`
+  - ES / NQ / RTY remain the artifact basket contracts (`13874A`, `209742`, `239742`)
+  - VIX remains context-only / `usedInScore: false` (`1170E1`)
+  - `basketNetPctOi`: **-15.8**
+  - Mapping-A `basketScore` / display pressure: **79**
+- Systematic remains **DISPLAY ONLY / unscored**
+- **Critical score boundary:** Research Composite still uses `systematicStrategyPressure = MOCK 62`
+- No Systematic public passive input has been promoted
+
+**Three completed automated production promotions (all current supported candidate families):**
+1. `treasuryLongEndIncomeLens` (PR **#152**) — Board H.15 SDMX, `asOf` 2026-08-25, `verified_automated`
+2. `treasuryFuturesPositioningProxy` (PR **#154**) — CFTC TFF Treasury, `asOf` 2026-08-18, `verified_automated`
+3. `systematicFlowProxy` (PR **#156**) — CFTC TFF equity, `asOf` 2026-08-18, `verified_automated`, Mapping-A display **79** / Research Composite MOCK **62**
+
+The promotion mechanism has now been exercised successfully across **all three** currently supported automated candidate families.
+
+Each used: candidate generation → human inspection → exact-envelope dry-run → explicit `--apply` → validation → human-reviewed PR → merge.
+Promotion writer remains human-triggered; no automatic promotion.
+
+**PR #156 test-hardening (Systematic):**
+- Production market values no longer pinned in Systematic display/artifact tests
+- Candidate generator/writer “newer” tests are production-relative
+- Promotion envelope/plan/writer “newer” tests are production-relative
+- Same-date same-payload remains `no_change`
+- Same-date changed-payload remains `revision_review_required`
+- Promotion safety guards were not weakened
+
+Production GhostFlow score/reference baseline remains unchanged:
+- `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
+- Composite / Passive / Structural: 60 / 53 / 67
+- Band: Elevated Flow Pressure
+- `publicSignalCount`: 13
+- MOCK systematic / retirement / levered: 62 / 58 / 55
+
+VIX remains excluded because Gate C / `marketBreadth` remain blocked.
+
+## Recommended next work
+Do **not** automatically nominate another production artifact. Remaining items are separate product/policy gates:
+1. Systematic score wiring / v1.0c remains blocked
+2. Same-date / `revision_review_required` promotion policy remains blocked
+3. Accepted-history / provenance receipts remain blocked
+4. Automatic promotion remains blocked
+5. Automatic candidate PR creation remains blocked
+6. Workflow automation remains blocked
+7. Breadth / Gate C remains blocked; do not wire VIX
+
+Current promotion pipeline remains:
+candidate generation → human inspection → exact-envelope dry-run → explicit `--apply` → validation → human-reviewed PR → merge.
+
+Last updated: 2026-08-27
+
+---
+
+## Archive — second production promotion / Treasury Futures (2026-08-27)
 Starting `main` for this work: `d17ec98dab241b83ddf615b117b1be10804578da` (includes PRs **#140–#154** merged).
 
 **PR #154 merged — second actual GhostFlow production promotion (Treasury Futures):**
