@@ -17,7 +17,7 @@ import { resolvePromotionReceiptDestination } from './receiptPathSafety';
 import type {
   GhostFlowPromotionReceiptPlan,
   GhostFlowPromotionReceiptPlanResult,
-  GhostFlowPromotionReceiptStatus,
+  GhostFlowPromotionReceiptPlanStatus,
   GhostFlowPromotionReceiptV1,
 } from './receiptTypes';
 import { serializeGhostFlowPromotionReceipt } from './receiptTypes';
@@ -35,7 +35,7 @@ function blockIssue(code: string, message: string): GhostFlowRefreshIssue {
 }
 
 function failure(
-  status: Exclude<GhostFlowPromotionReceiptStatus, 'promotion_receipt_plan_ok'>,
+  status: Exclude<GhostFlowPromotionReceiptPlanStatus, 'promotion_receipt_plan_ok'>,
   exitCode: number,
   issues: GhostFlowRefreshIssue[]
 ): GhostFlowPromotionReceiptPlanResult {
