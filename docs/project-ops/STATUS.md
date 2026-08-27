@@ -1,6 +1,50 @@
 ﻿# STATUS
 
-## Current State (GhostFlow — 2026-08-27, promotion C2 writer)
+## Current State (GhostFlow — 2026-08-27, first production promotion)
+Starting `main` for this work: `32eb660734e01b5a77980d54c8bcbca0565eecff` (includes PRs **#140–#152** merged).
+
+**PR #152 merged — first actual GhostFlow production promotion:**
+- Promoted reviewed `treasuryLongEndIncomeLens` candidate identity
+  `97ffb565f373626c9e88295d018e8d2f74d1e63dbd8647cd11c866cfd399e62a`
+- Production Long-End artifact now:
+  - `asOf`: **2026-08-25**
+  - Board H.15 SDMX source transport
+  - `seriesDefinition`: `frb_h15_treasury_long_end_income_lens_v1`
+  - `dataQuality`: `verified_automated`
+  - **no** T10YIE / breakeven
+  - **no** fabricated `publishedAt`
+- First end-to-end candidate promotion cycle completed successfully:
+  candidate → human review → dry-run → explicit `--apply` → validation → data PR → merge
+- Three stale production-coupled tests aligned to the Board-native contract in the same PR
+- Long-End remains **display-only / unscored** (not in composite / Passive / Structural / `publicSignalCount`)
+
+**PR #151 merged (C2 promotion writer):**
+- Explicit `--apply` fail-closed writer; dry-run default; public envelope-path-only apply API
+- Destination containment under `data/ghostflow/artifacts/`; commit-point re-lock; post-write verification
+- Writer remains human-triggered; no automatic promotion
+
+Production GhostFlow score/reference baseline remains unchanged:
+- `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
+- Composite / Passive / Structural: 60 / 53 / 67
+- Band: Elevated Flow Pressure
+- `publicSignalCount`: 13
+- MOCK systematic / retirement / levered: 62 / 58 / 55
+
+VIX remains excluded because Gate C / `marketBreadth` remain blocked.
+
+## Recommended next work
+1. Independently review remaining live candidates (not approved yet):
+   1. `treasuryFuturesPositioningProxy`
+   2. `systematicFlowProxy`
+2. Same-date promotion policy remains blocked
+3. History/provenance writes remain blocked; automatic promotion blocked
+4. Breadth remains blocked. Do not wire VIX or Gate C.
+
+Last updated: 2026-08-27
+
+---
+
+## Archive — promotion C2 writer (2026-08-27)
 Starting `main` for this work: `e5db69db5ddae54a933372ee5a96e29f75d13ecd` (includes PRs **#140–#150** merged).
 
 **PR C2 — explicit `--apply` production writer implemented (branch `feat/ghostflow-promotion-writer`):**
@@ -10,13 +54,13 @@ Starting `main` for this work: `e5db69db5ddae54a933372ee5a96e29f75d13ecd` (inclu
 - Unique temp sibling (`wx`) + temp prevalidation + commit-point optimistic re-lock
 - Rename-over-existing fail-closed (no unlink-destination fallback); mandatory post-write readback
 - Post-write failure → exit 6; no guaranteed rollback
-- **Mechanism PR does not promote any live candidate**; actual repo production JSON unchanged
+- **Mechanism PR does not promote any live candidate**; actual repo production JSON unchanged at that time
 - **Does not include:** history, receipts, Git automation, same-date promotion, network fetch
 
 **PR #150 merged (C1 dry-run):**
 - Envelope eligibility, mapper replay, production lock, newer-date gate, dry-run CLI
 
-Production GhostFlow state remains unchanged:
+Production GhostFlow state remains unchanged at C2 merge:
 - `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
 - Composite / Passive / Structural: 60 / 53 / 67
 - Band: Elevated Flow Pressure

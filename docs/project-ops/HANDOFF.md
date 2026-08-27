@@ -1,7 +1,7 @@
 ﻿# HANDOFF
 
-## Last Session Summary (2026-08-27, promotion C2 writer)
-Starting `main`: `e5db69db5ddae54a933372ee5a96e29f75d13ecd` (PRs **#140–#150** merged). Implemented promotion C2 on `feat/ghostflow-promotion-writer`: explicit `--apply`, public envelope-path-only apply API, temp-sibling prevalidation, commit-point optimistic re-lock, rename-over-existing fail-closed write, mandatory post-write verification. **No live candidate promoted; actual repo production JSON unchanged.**
+## Last Session Summary (2026-08-27, first production promotion)
+`main` is `32eb660734e01b5a77980d54c8bcbca0565eecff` (PRs **#140–#152** merged). PR **#151** delivered the promotion writer; PR **#152** completed the first actual production promotion: `treasuryLongEndIncomeLens` is now Board-native production (`asOf` **2026-08-25**, H.15 SDMX, `frb_h15_treasury_long_end_income_lens_v1`, `verified_automated`, no T10YIE/breakeven, no fabricated `publishedAt`). First end-to-end cycle succeeded: candidate → human review → dry-run → explicit `--apply` → validation → data PR → merge. Writer remains operational but human-triggered (explicit envelope / dry-run default / explicit `--apply`). No history/receipts/automation. Scores / reference / `publicSignalCount` unchanged. Next: independently review the next candidate before any additional apply.
 
 Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`. VIX / Gate C excluded; breadth remains blocked.
 
@@ -10,7 +10,39 @@ Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 
 - H.15 SDMX transport merged (PR **#143–#144**).
 - Candidate-generation architecture / mapping / mappers / generator / policy merged (PRs **#145–#149**).
 - PR C1 promotion dry-run merged (PR **#150**).
-- **PR C2 promotion writer** on `feat/ghostflow-promotion-writer` (pending merge).
+- PR C2 promotion writer merged (PR **#151**).
+- **First production promotion merged (PR #152)** — Long-End Board-native.
+- Same-date promotion blocked; history/provenance writes blocked; automatic promotion blocked.
+- Breadth / Gate C blocked; no VIX wiring.
+- Core app remains stable; education section remains live.
+
+## Priority for Next Session
+1. Independently review remaining live candidates before any additional `--apply` (not approved yet):
+   1. `treasuryFuturesPositioningProxy`
+   2. `systematicFlowProxy`
+2. Same-date / `revision_review_required` promotion policy remains blocked
+3. History/provenance receipt timing remains blocked
+4. Breadth authorization remains separate and blocked; do not wire VIX or Gate C
+
+## Open Questions
+- Same-date mapped-payload promotion policy?
+- Accepted-history / provenance receipt timing?
+- Optional future: adapter emission of defensible CFTC/Board `sourcePublishedAt`?
+- Breadth licensed-source path still blocked pending authorization?
+
+---
+
+## Archive — promotion C2 writer (2026-08-27)
+Starting `main`: `e5db69db5ddae54a933372ee5a96e29f75d13ecd` (PRs **#140–#150** merged). Implemented promotion C2 on `feat/ghostflow-promotion-writer`: explicit `--apply`, public envelope-path-only apply API, temp-sibling prevalidation, commit-point optimistic re-lock, rename-over-existing fail-closed write, mandatory post-write verification. **No live candidate promoted at that time; actual repo production JSON unchanged until PR #152.**
+
+Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`. VIX / Gate C excluded; breadth remains blocked.
+
+## State of Work
+- Report-only operator runner merged (PR **#140**).
+- H.15 SDMX transport merged (PR **#143–#144**).
+- Candidate-generation architecture / mapping / mappers / generator / policy merged (PRs **#145–#149**).
+- PR C1 promotion dry-run merged (PR **#150**).
+- **PR C2 promotion writer** on `feat/ghostflow-promotion-writer` (pending merge at that checkpoint).
 - Next: separately review/promote actual candidates (dry-run → `--apply` → human data PR).
 - Same-date promotion blocked; history/provenance writes blocked; automatic promotion blocked.
 - Breadth / Gate C blocked; no VIX wiring.
