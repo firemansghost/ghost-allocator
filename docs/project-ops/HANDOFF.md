@@ -1,7 +1,59 @@
 ﻿# HANDOFF
 
-## Last Session Summary (2026-08-27, Phase 1 promotion receipts complete)
-`main` baseline: `f04c456fe1ae48d9dc9b90ac232fc4e678cfd737` (PRs **#140–#160** merged). Phase 1 **verified promotion receipts are complete**: PR **#158** policy/design; PR **#159** R1 pure core; PR **#160** R2 writer/CLI. Receipt workflow is live for future promotions. `--apply` still writes one production artifact only; receipt writer writes receipt sidecar only; receipt failures retry receipt command only. Receipt is transition evidence, **not** approval; Git merge remains acceptance boundary. Prospective only — no historical backfill; no same-date unlock; no automation. Scores/reference unchanged.
+## Last Session Summary (2026-08-30, first three-family receipt-backed refresh complete)
+`main` baseline: `c3310b489b7d145b67d5ca1bf842dd021f97c373` (PRs **#140–#164** merged). Phase 1 receipts are implemented **and** the first full prospective three-family receipt-backed production refresh is complete. All three candidate-enabled families now have at least one prospective receipt:
+- Long-End `treasuryLongEndIncomeLens` — `asOf` **2026-08-27** (PR **#162**) + receipt
+- Treasury Futures `treasuryFuturesPositioningProxy` — `asOf` **2026-08-25** (PR **#163**) + receipt
+- Systematic `systematicFlowProxy` — `asOf` **2026-08-25**, Mapping-A display **83** (PR **#164**) + receipt
+Research Composite Systematic remains **MOCK 62**. Scores/reference/`publicSignalCount` unchanged. Receipt = verified transition evidence, **not** approval; Git merge remains acceptance boundary. Same-date / `revision_review_required` / automation remain blocked. **Next work is ordinary source monitoring, not new architecture.**
+
+Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`. VIX / Gate C excluded; breadth remains blocked.
+
+## State of Work
+- Report-only operator runner merged (PR **#140**).
+- H.15 SDMX transport merged (PR **#143–#144**).
+- Candidate-generation architecture / mapping / mappers / generator / policy merged (PRs **#145–#149**).
+- PR C1 promotion dry-run merged (PR **#150**).
+- PR C2 promotion writer merged (PR **#151**).
+- First production promotion merged (PR **#152**) — Long-End Board-native.
+- Post-Long-End docs checkpoint merged (PR **#153**).
+- Second production promotion merged (PR **#154**) — Treasury Futures automated.
+- Post-Treasury Futures docs checkpoint merged (PR **#155**).
+- Third production promotion merged (PR **#156**) — Systematic automated; three-family milestone complete.
+- Three-family docs checkpoint merged (PR **#157**).
+- Phase 1 promotion receipt policy/design authorized (PR **#158**).
+- Phase 1 receipt R1 pure core merged (PR **#159**).
+- Phase 1 receipt R2 writer/CLI merged (PR **#160**).
+- Receipt docs/completion checkpoint merged (PR **#161**).
+- First prospective receipt-backed Long-End refresh merged (PR **#162**) — `2026-08-27`.
+- First prospective receipt-backed Treasury Futures refresh merged (PR **#163**) — `2026-08-25`.
+- First prospective receipt-backed Systematic refresh merged (PR **#164**) — `2026-08-25` / display **83**.
+- Receipt command: `npm run ghostflow:record-promotion-receipt -- --envelope <exact-path>` (dry-run); `--write` for sidecar.
+- Same-date promotion blocked; automatic promotion blocked.
+- Systematic score wiring / v1.0c blocked.
+- Breadth / Gate C blocked; no VIX wiring.
+- Core app remains stable; education section remains live.
+
+## Priority for Next Session
+1. **Ordinary source monitoring** — wait for newer official observations; do not start another architecture project merely because this cycle completed
+2. When ready: `npm run ghostflow:refresh-report` → generate/review/promote/receipt/PR per family if newer valid data exists
+3. Do **not** manufacture updates; do **not** promote same-date changes
+4. Same-date / `revision_review_required` promotion remains blocked (receipt history does not unlock this)
+5. Automatic promotion / automatic candidate PR creation / workflow automation remain blocked
+6. Systematic score wiring / v1.0c remains blocked
+7. Breadth authorization remains separate and blocked; do not wire VIX or Gate C
+8. Historical receipt backfill remains blocked
+
+## Open Questions
+- Same-date mapped-payload promotion policy? (still blocked; beginning of durable prospective receipt history exists, but still needs a **separate** explicit product/policy decision)
+- Optional future: adapter emission of defensible CFTC/Board `sourcePublishedAt`?
+- Systematic score wiring / v1.0c product approval (still blocked)?
+- Breadth licensed-source path still blocked pending authorization?
+
+---
+
+## Archive — Phase 1 promotion receipts complete (2026-08-27)
+`main` baseline: `f04c456fe1ae48d9dc9b90ac232fc4e678cfd737` (PRs **#140–#160** merged). Phase 1 **verified promotion receipts are complete**: PR **#158** policy/design; PR **#159** R1 pure core; PR **#160** R2 writer/CLI. Receipt workflow is live for future promotions. `--apply` still writes one production artifact only; receipt writer writes receipt sidecar only; receipt failures retry receipt command only. Receipt is transition evidence, **not** approval; Git merge remains acceptance boundary. Prospective only — no historical backfill; no same-date unlock; no automation. Scores/reference unchanged. **Receipt mechanism completed but not yet exercised on a live three-family refresh.**
 
 Reference `2026-07-01`; scores `60 / 53 / 67`; `publicSignalCount` 13; MOCK `62 / 58 / 55`. VIX / Gate C excluded; breadth remains blocked.
 

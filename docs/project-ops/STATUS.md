@@ -1,6 +1,69 @@
 ﻿# STATUS
 
-## Current State (GhostFlow — 2026-08-27, Phase 1 promotion receipts complete)
+## Current State (GhostFlow — 2026-08-30, first three-family receipt-backed refresh complete)
+Starting `main` for this work: `c3310b489b7d145b67d5ca1bf842dd021f97c373` (includes PRs **#140–#164** merged).
+
+**First full prospective receipt-backed production refresh — COMPLETE**
+
+Phase 1 receipt workflow has now been exercised successfully on **all three** candidate-enabled artifact families. Each family was promoted in its **own** human-reviewed data + receipt PR:
+
+| Family | PR | Production asOf | Source | Receipt |
+|--------|----|-----------------|--------|---------|
+| `treasuryLongEndIncomeLens` | **#162** | **2026-08-27** | Board H.15 | `data/ghostflow/promotion-receipts/treasuryLongEndIncomeLens/2026-08-27.48c8c7fedbd5.receipt.json` |
+| `treasuryFuturesPositioningProxy` | **#163** | **2026-08-25** | CFTC TFF Treasury | `data/ghostflow/promotion-receipts/treasuryFuturesPositioningProxy/2026-08-25.afee7f54f0c3.receipt.json` |
+| `systematicFlowProxy` | **#164** | **2026-08-25** | CFTC TFF equity | `data/ghostflow/promotion-receipts/systematicFlowProxy/2026-08-25.cc8cf20f742f.receipt.json` |
+
+**Current three-family production:**
+1. `treasuryLongEndIncomeLens` — Board H.15, `asOf` **2026-08-27**, receipt above
+2. `treasuryFuturesPositioningProxy` — CFTC TFF Treasury, `asOf` **2026-08-25**, basket net % OI **-28.9**, direction **net_short**, receipt above
+3. `systematicFlowProxy` — CFTC TFF equity, `asOf` **2026-08-25**, basket net % OI **-16.5**, Mapping-A display pressure **83**, receipt above
+
+**CRITICAL score boundary:**
+- Systematic Mapping-A **83** is **DISPLAY ONLY**
+- Research Composite `systematicStrategyPressure` remains **MOCK 62**
+- No score wiring; Systematic v1.0c remains blocked; Breadth / Gate C / VIX scoring remain blocked
+
+Production GhostFlow score/reference baseline remains unchanged:
+- `GHOSTFLOW_REFERENCE_AS_OF`: 2026-07-01
+- Composite / Passive / Structural: 60 / 53 / 67
+- Band: Elevated Flow Pressure
+- `publicSignalCount`: 13
+- MOCK systematic / retirement / levered: 62 / 58 / 55
+
+**Proven production workflow (now exercised end-to-end with receipts):**
+report-only source check → candidate generation → human inspection → exact candidate promotion dry-run → explicit `--apply` → production post-write verification → receipt dry-run → explicit receipt `--write` → validation → human-reviewed data + receipt PR → merge
+
+**Receipt terminology (unchanged):**
+- Promotion receipt = **verified transition evidence** after successful local `--apply`
+- Receipt is **NOT** approval authority, automated acceptance, or score authorization
+- Git merge remains the human acceptance boundary
+
+**Same-date / revision boundary (unchanged — no new policy):**
+- Same-date changed payload remains blocked
+- `revision_review_required` remains blocked
+- Prospective receipt history does **not** itself authorize same-date revision promotion
+- A separate explicit product/policy decision is still required before any same-date revision mechanism may be implemented
+
+**Automation boundary (unchanged):**
+- Automated promotion / automatic candidate PR creation / automated receipt write / workflow-driven production mutation remain blocked
+- Process remains human-gated; report-only source checking may remain read-only
+
+## Recommended next work
+1. **Ordinary source monitoring** — do **not** start another architecture project merely because this cycle completed
+2. Wait for newer official source observations, then `npm run ghostflow:refresh-report`
+3. If newer valid data exists: generate candidates → review individually → promote individually → write receipts → merge human-reviewed PRs
+4. Do **not** manufacture updates; do **not** promote same-date changes
+5. Same-date / `revision_review_required` promotion remains blocked
+6. Automatic promotion / automatic candidate PR creation / workflow automation remain blocked
+7. Systematic score wiring / v1.0c remains blocked
+8. Breadth / Gate C remains blocked; do not wire VIX
+9. Historical receipt backfill remains blocked
+
+Last updated: 2026-08-30
+
+---
+
+## Archive — Phase 1 promotion receipts complete (2026-08-27)
 Starting `main` for this work: `f04c456fe1ae48d9dc9b90ac232fc4e678cfd737` (includes PRs **#140–#160** merged).
 
 **Phase 1 verified promotion receipts — IMPLEMENTED**
@@ -23,7 +86,7 @@ npm run ghostflow:record-promotion-receipt -- --envelope <exact-path> --write
 **Current operator workflow:**
 candidate generation → human candidate inspection → promotion dry-run → explicit `--apply` → production post-write verification → receipt dry-run → explicit receipt `--write` → validation / git diff → human-reviewed PR containing production JSON + receipt → merge
 
-**Three-family production baseline (unchanged):**
+**Three-family production baseline (pre–receipt-backed refresh):**
 1. `treasuryLongEndIncomeLens` — Board H.15 SDMX, `asOf` **2026-08-25**, `verified_automated`
 2. `treasuryFuturesPositioningProxy` — CFTC TFF, `asOf` **2026-08-18**, `verified_automated`
 3. `systematicFlowProxy` — CFTC TFF equity, `asOf` **2026-08-18**, Mapping-A display **79**, Research Composite MOCK **62**
