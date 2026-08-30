@@ -1,0 +1,26 @@
+{
+  "receiptVersion": "1",
+  "artifactId": "treasuryLongEndIncomeLens",
+  "candidateIdentitySha256": "48c8c7fedbd5202a31e75f4b5c952d23b29b604cb07b5c6e871195d3e4089d25",
+  "candidateIdentityPrefix": "48c8c7fedbd5",
+  "candidateObservationAsOf": "2026-08-27",
+  "candidatePromotionPayloadSha256": "706e4d7bd60aa2059325a6f88c9a5007d20a8a0e5ef9cd9feffdbbee7605a3b9",
+  "sourceProvenance": {
+    "sourceId": "frb_h15_treasury_yields",
+    "sourceLocator": "https://www.federalreserve.gov/releases/h15/data/FRB_h15_xml.zip",
+    "contentSha256": "6d5b1b795ae7d2fd2a0e423b7306751d61fe994ebea8a61a23b28c88a40c1a39",
+    "adapterId": "frb-h15-treasury-yields-sdmx",
+    "parserVersion": "1.0.0"
+  },
+  "priorProduction": {
+    "artifactPath": "data/ghostflow/artifacts/treasuryLongEndIncomeLens.v1.json",
+    "observationAsOf": "2026-08-25",
+    "promotionPayloadSha256": "cabfc106bce4805db62e9249c5aa615836dac95a1cd015d5bbe389bd3b35fa94"
+  },
+  "promotedProduction": {
+    "artifactPath": "data/ghostflow/artifacts/treasuryLongEndIncomeLens.v1.json",
+    "observationAsOf": "2026-08-27",
+    "promotionPayloadSha256": "706e4d7bd60aa2059325a6f88c9a5007d20a8a0e5ef9cd9feffdbbee7605a3b9"
+  },
+  "validatorId": "validateTreasuryLongEndIncomeLensArtifact"
+}
