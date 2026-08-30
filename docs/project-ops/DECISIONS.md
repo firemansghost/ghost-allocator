@@ -1,5 +1,33 @@
 # DECISIONS
 
+## 2026-08-30 — GhostRegime remediation sequencing
+Choice:
+- GhostRegime will be **improved in place**, not rebuilt. The four-regime concept, fail-closed posture, persisted-state architecture, provider fallback strategy, and VAMS concept remain unless later forensic evidence supports a targeted change.
+- Correctness, semantics, operational containment, tests, and UI truthfulness come **before** investment-universe or allocation redesign.
+- Full-risk baseline **60/30/10** remains unchanged during remediation. INFLATION gold 15% is existing policy and is not reopened by this decision. Independent allocation research is deferred to R7; any production redesign is R8 and requires a separate Bobby product decision.
+- First substantive phase is **R0** — read-only forensic characterization / historical replay. No production model changes in R0.
+- Methodology changes remain separately gated: no inflation-sign production change before R0 review; no real Flip Watch confirmation implementation without a separate decision; no satellite score expansion; no VAMS formula/threshold change; no regime threshold change; no new sleeve; no GhostFlow / Builder / Model Portfolio work mixed into GhostRegime remediation.
+- Canonical record: [AUDIT_2026-08-30.md](../ghostregime/AUDIT_2026-08-30.md). Roadmap R0→R8 in that document is the approved sequence, not blanket authorization to implement every item immediately.
+
+Why:
+- Operational architecture has valuable working safeguards (persist gate, last-known-good, scheduled freshness preflight, Yahoo ETF fallback, Marketstack ALLOW fail-closed).
+- The August 30 audit found important correctness, product-truth, operations, and test-coverage issues, but no evidence requiring wholesale replacement.
+- Changing portfolio policy while model semantics are unresolved would contaminate comparison and replay work.
+- Durable sequencing prevents unrelated changes (signs, Flip Watch, satellites, providers, UI, allocations) from being mixed together.
+
+Consequences:
+- The audit document is the roadmap and reference for future GhostRegime threads.
+- No inflation-sign correction yet.
+- No Flip Watch methodology change yet (telemetry vs real confirmation remains an open product gate).
+- No VAMS change.
+- No allocation change.
+- No satellite score expansion.
+- R0 comes next.
+- Allocation research is deferred to R7.
+- This decision does **not** create additional DECISIONS entries for unresolved questions (Flip Watch Option A vs B, satellite complete-vs-remove, exact sign-correction treatment). Those wait for R0 evidence and later explicit choices.
+
+---
+
 ## 2026-08-27 — GhostFlow Phase 1 promotion receipt policy
 Choice:
 - **Selected next architecture milestone:** Phase 1 **verified promotion receipt** (Git-tracked sidecar). Policy and design are authorized now; **implementation is not included** in this decision-record PR and requires later coding PR(s).

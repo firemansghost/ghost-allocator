@@ -1,5 +1,34 @@
 ﻿# HANDOFF
 
+## Last Session Summary (2026-08-30, GhostRegime audit checkpoint)
+`main` baseline: `519092ea1a7de384df4b74d833a8c937f6210f9a`. Production was READY on that commit. Persisted GhostRegime snapshot was computed under `d9473b02a5eb28df313378dd800c3473200f74c8` with no GhostRegime code changes since. **Verdict: IMPROVE IN PLACE** — do not rebuild. Canonical record: [AUDIT_2026-08-30.md](../ghostregime/AUDIT_2026-08-30.md).
+
+Core findings (details in the audit; do not treat this list as a fix list):
+- Inflation core sums PDBC/TIP (positive = Inflation) with TLT/UUP (positive = Disinflation). Internal sign inconsistency. Observed 2026-08-28 live regime would not necessarily change from a one-day correction because satellite was `+1`. Historical impact unknown.
+- Flip Watch is telemetry/status, not a transition gate (`shouldApplyFlip()` unused; allocations apply immediately; live `PENDING_CONFIRMATION` with INFLATION targets already active). `daysSinceLastFlip` is not durable flip history.
+- Stress override can force RISK OFF without recomputing `riskAxis` — characterization item, not a proven historical failure.
+- Satellites: commodity basket is the live production satellite; others are stubs. Satellite decided the observed inflation axis (`core 0 / sat +1 / final +1`).
+- Public `/api/ghostregime/today` reads can fetch providers; scheduled refresh can skip fetch. `debug=1` is not secret-protected. Error path can fetch again. Marketstack remains ALLOW-gated; anonymous traffic could reach paid fallback during an emergency ALLOW window.
+- UI truth issues: “Hold now,” `% of Max`, headline rounding, BTC half-size shown as “off,” coverage = non-neutral not availability, neutral receipts stored as a side, vocabulary overload.
+- Tests are fragmented; `npm test` is not the full GhostRegime suite.
+- 60/30/10 full-risk baseline is an intentional policy assumption influenced by Darius Dale / 42 Macro. GhostRegime has not independently established optimality. **Out of scope for R0–R6 unless Bobby reopens it.**
+
+Approved roadmap: docs checkpoint (this) → **R0 forensic replay** → R1 `test:ghostregime` → R2 operational containment → R3 inflation-sign (only after R0 + Bobby approval) → R4 Flip Watch product gate (A telemetry vs B real confirmation; undecided) → R5 satellite cleanup → R6 UI truth → R7 allocation research → R8 redesign only if R7 + separate product decision.
+
+**Immediate next step: R0 — read-only forensic GhostRegime model-impact audit.** Do not begin methodology, provider, UI, allocation, or GhostFlow work in that thread unless Bobby explicitly expands scope.
+
+Gates: no inflation-sign production change before R0 review; no real Flip Watch confirmation without a separate decision; no satellite score expansion; no VAMS / regime-threshold / sleeve changes; no Builder / Model Portfolio / GhostFlow mixing; no score/model change hidden inside a UI or provider PR.
+
+GhostFlow three-family receipt-backed refresh remains complete and separate (summary below). Ordinary GhostFlow source monitoring is not displaced by this GhostRegime checkpoint.
+
+## Priority for Next Session (GhostRegime)
+1. **R0** — read-only historical replay / characterization per [AUDIT_2026-08-30.md](../ghostregime/AUDIT_2026-08-30.md)
+2. Do not correct inflation signs, Flip Watch, satellites, providers, UI, tests, or allocations in R0
+3. Keep 60/30/10 and VAMS thresholds unchanged
+4. GhostFlow: ordinary source monitoring only (do not start a new architecture project)
+
+---
+
 ## Last Session Summary (2026-08-30, first three-family receipt-backed refresh complete)
 `main` baseline: `c3310b489b7d145b67d5ca1bf842dd021f97c373` (PRs **#140–#164** merged). Phase 1 receipts are implemented **and** the first full prospective three-family receipt-backed production refresh is complete. All three candidate-enabled families now have at least one prospective receipt:
 - Long-End `treasuryLongEndIncomeLens` — `asOf` **2026-08-27** (PR **#162**) + receipt
