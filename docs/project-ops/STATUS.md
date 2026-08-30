@@ -1,5 +1,32 @@
 ﻿# STATUS
 
+## Current State (GhostRegime — 2026-08-30 audit checkpoint)
+Starting `main` for this checkpoint: `519092ea1a7de384df4b74d833a8c937f6210f9a` (same SHA as the independently verified August 30 audit baseline). Production was READY and built from that commit. Persisted GhostRegime snapshot had been computed under `d9473b02a5eb28df313378dd800c3473200f74c8`; no GhostRegime code/workflow changes exist between that compute commit and current `main`.
+
+**GhostRegime audit complete — IMPROVE IN PLACE**
+
+Canonical record: [AUDIT_2026-08-30.md](../ghostregime/AUDIT_2026-08-30.md)
+
+- Verdict: improve in place. Do **not** rebuild GhostRegime. Keep the four-regime concept, fail-closed posture, persisted-state architecture, provider fallbacks, and VAMS concept.
+- Production / current `main` was healthy at audit time (observed 2026-08-28 snapshot: INFLATION, RISK OFF, health OK, not stale).
+- Significant correctness, semantics, operations, UI-truth, and test-coverage findings are recorded. None authorize production changes yet.
+- Roadmap approved: R0 forensic replay → R1 tests → R2 operational containment → gated R3–R6 → deferred R7–R8 allocation research.
+- Immediate next substantive work: **R0 — read-only forensic model-impact audit**. No production GhostRegime changes yet.
+- Full-risk baseline **60/30/10** is held constant. INFLATION gold 15% is existing policy, not reopened.
+- Methodology/product gates remain explicit: no inflation-sign change before R0 review; no Flip Watch confirmation implementation without a separate decision; no satellite score expansion; no VAMS / regime-threshold / sleeve / Builder / GhostFlow mixing.
+
+This workstream is independent of GhostFlow source monitoring below. Do not mix GhostRegime remediation into GhostFlow PRs or the reverse.
+
+## Recommended next work (GhostRegime)
+1. **R0** — read-only historical replay / characterization of inflation-sign semantics and related interactions (see audit)
+2. Do **not** correct TLT/UUP signs, Flip Watch, satellites, providers, UI, or allocations before R0 is reviewed
+3. Do **not** change 60/30/10 or VAMS formulas/thresholds
+4. GhostFlow ordinary source monitoring remains a separate workstream (below)
+
+Last updated: 2026-08-30
+
+---
+
 ## Current State (GhostFlow — 2026-08-30, first three-family receipt-backed refresh complete)
 Starting `main` for this work: `c3310b489b7d145b67d5ca1bf842dd021f97c373` (includes PRs **#140–#164** merged).
 
