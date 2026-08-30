@@ -1,0 +1,26 @@
+{
+  "receiptVersion": "1",
+  "artifactId": "systematicFlowProxy",
+  "candidateIdentitySha256": "cc8cf20f742f5eb43232f87c68e49eb552f9519f2ca80918d0fe423e717ac97d",
+  "candidateIdentityPrefix": "cc8cf20f742f",
+  "candidateObservationAsOf": "2026-08-25",
+  "candidatePromotionPayloadSha256": "85acc95e2bbbb5003d5158b0c361fc6f08a7266583b2108a567291909b0e5892",
+  "sourceProvenance": {
+    "sourceId": "cftc_tff_socrata",
+    "sourceLocator": "https://publicreporting.cftc.gov/resource/gpe5-46if.json?$select=report_date_as_yyyy_mm_dd%2Cyyyy_report_week_ww%2Ccontract_market_name%2Ccftc_contract_market_code%2Cfutonly_or_combined%2Copen_interest_all%2Clev_money_positions_long%2Clev_money_positions_short%2Clev_money_positions_spread%2Cchange_in_lev_money_long%2Cchange_in_lev_money_short%2Cchange_in_lev_money_spread%2Cpct_of_oi_lev_money_long%2Cpct_of_oi_lev_money_short%2Cpct_of_oi_lev_money_spread&$where=futonly_or_combined%20%3D%20'FutOnly'%20AND%20cftc_contract_market_code%20in%20('13874A'%2C'209742'%2C'239742'%2C'1170E1')&$order=report_date_as_yyyy_mm_dd%20DESC%2Ccftc_contract_market_code%20ASC&$limit=500",
+    "contentSha256": "64d949f34a152051cde2706afa2197b928200fe5fcc8dba46c6a6bf2e6503908",
+    "adapterId": "cftc-tff-systematic-socrata",
+    "parserVersion": "1.0.0"
+  },
+  "priorProduction": {
+    "artifactPath": "data/ghostflow/artifacts/systematicFlowProxy.v1.json",
+    "observationAsOf": "2026-08-18",
+    "promotionPayloadSha256": "9890d8bf35052f36be8b82a0a45fb7af88cd97bc76433164d3e29e27702b1101"
+  },
+  "promotedProduction": {
+    "artifactPath": "data/ghostflow/artifacts/systematicFlowProxy.v1.json",
+    "observationAsOf": "2026-08-25",
+    "promotionPayloadSha256": "85acc95e2bbbb5003d5158b0c361fc6f08a7266583b2108a567291909b0e5892"
+  },
+  "validatorId": "validateSystematicFlowProxyArtifact"
+}
