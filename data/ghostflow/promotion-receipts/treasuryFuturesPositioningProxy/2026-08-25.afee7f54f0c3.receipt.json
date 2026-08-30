@@ -1,0 +1,26 @@
+{
+  "receiptVersion": "1",
+  "artifactId": "treasuryFuturesPositioningProxy",
+  "candidateIdentitySha256": "afee7f54f0c3e062d6e629873847a9c762c6f42e7977486a38db3a6134e5d7e0",
+  "candidateIdentityPrefix": "afee7f54f0c3",
+  "candidateObservationAsOf": "2026-08-25",
+  "candidatePromotionPayloadSha256": "46f5037cdc87c23c5ae9221fecb37167473eafe3acc6b1db99151daf1c8be68e",
+  "sourceProvenance": {
+    "sourceId": "cftc_tff_socrata",
+    "sourceLocator": "https://publicreporting.cftc.gov/resource/gpe5-46if.json?$select=report_date_as_yyyy_mm_dd%2Cyyyy_report_week_ww%2Ccontract_market_name%2Ccftc_contract_market_code%2Ccommodity_name%2Cmarket_and_exchange_names%2Cfutonly_or_combined%2Copen_interest_all%2Clev_money_positions_long%2Clev_money_positions_short%2Clev_money_positions_spread%2Cchange_in_lev_money_long%2Cchange_in_lev_money_short%2Cchange_in_lev_money_spread%2Cpct_of_oi_lev_money_long%2Cpct_of_oi_lev_money_short%2Cpct_of_oi_lev_money_spread%2Casset_mgr_positions_long%2Casset_mgr_positions_short%2Casset_mgr_positions_spread%2Cchange_in_asset_mgr_long%2Cchange_in_asset_mgr_short%2Cchange_in_asset_mgr_spread%2Cpct_of_oi_asset_mgr_long%2Cpct_of_oi_asset_mgr_short%2Cpct_of_oi_asset_mgr_spread&$where=futonly_or_combined%20%3D%20'FutOnly'%20AND%20cftc_contract_market_code%20in%20('042601'%2C'044601'%2C'043602'%2C'020601'%2C'043607'%2C'020604')&$order=report_date_as_yyyy_mm_dd%20DESC%2Ccftc_contract_market_code%20ASC&$limit=500",
+    "contentSha256": "e44bc3ec3644a933cfec40b6ba53f5606bae96c2b514d66ffb2d5a413072ad77",
+    "adapterId": "cftc-tff-treasury-socrata",
+    "parserVersion": "1.0.0"
+  },
+  "priorProduction": {
+    "artifactPath": "data/ghostflow/artifacts/treasuryFuturesPositioningProxy.v1.json",
+    "observationAsOf": "2026-08-18",
+    "promotionPayloadSha256": "0f2dfbe03b0168da7332ae3654be3973c22f6011bd2c48c3aca09c51308964cd"
+  },
+  "promotedProduction": {
+    "artifactPath": "data/ghostflow/artifacts/treasuryFuturesPositioningProxy.v1.json",
+    "observationAsOf": "2026-08-25",
+    "promotionPayloadSha256": "46f5037cdc87c23c5ae9221fecb37167473eafe3acc6b1db99151daf1c8be68e"
+  },
+  "validatorId": "validateTreasuryFuturesPositioningProxyArtifact"
+}
