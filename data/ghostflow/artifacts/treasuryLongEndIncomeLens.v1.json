@@ -1,7 +1,7 @@
 {
   "artifactVersion": "1",
   "signalId": "treasury-long-end-income-lens",
-  "asOf": "2026-08-25",
+  "asOf": "2026-08-27",
   "source": {
     "name": "Board of Governors of the Federal Reserve System — H.15 Selected Interest Rates",
     "url": "https://www.federalreserve.gov/releases/h15/data/FRB_h15_xml.zip",
@@ -52,16 +52,16 @@
     "Board H.15 snapshot; mappingStatus not_final; no scored pressure mapping."
   ],
   "observations": {
-    "thirtyYearNominalYieldPct": 5.17,
+    "thirtyYearNominalYieldPct": 5.19,
     "thirtyYearTipsRealYieldPct": 2.92,
     "mappingStatus": "not_final",
     "nominalYieldPercentile": null,
     "realYieldPercentile": null,
-    "twoYearYieldPct": 4.17,
-    "curve2s30sPct": 1,
-    "fiveYearYieldPct": 4.35,
-    "curve5s30sPct": 0.8200000000000003,
-    "tenYearYieldPct": 4.64,
-    "curve10s30sPct": 0.5300000000000002
+    "twoYearYieldPct": 4.2,
+    "curve2s30sPct": 0.9900000000000002,
+    "fiveYearYieldPct": 4.38,
+    "curve5s30sPct": 0.8100000000000005,
+    "tenYearYieldPct": 4.67,
+    "curve10s30sPct": 0.5200000000000005
   }
 }
