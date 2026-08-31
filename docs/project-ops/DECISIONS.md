@@ -1,5 +1,35 @@
 # DECISIONS
 
+## 2026-08-31 — GhostRegime R5B removes duplicate PDBC TR21 satellite role
+Choice:
+- Bobby explicitly authorized **R5B**.
+- **P1 retained**: PDBC TR63 remains the core inflation vote at ±2%.
+- **P2 removed**: PDBC TR21 Commodity Nowcast is no longer an active score-fed satellite in production v1.0.4. The satellite catalog and R5A Commodity diagnostic adapter remain for characterization / provenance; they are not production-scored.
+- **P3 retained**: PDBC TR21 remains the zero-score inflation tie-break (`TIEBREAK_RULE = GTE_ZERO`). Horizon, sign rule, proxy behavior, and stale/fail-closed handling are unchanged.
+- Ordinary persisted receipts must include truthful `infl_tiebreak` provenance whenever P3 actually runs. Receipt generation must not depend on debug mode. Authorized DBC proxy must be identified as DBC.
+- Repository default `MODEL_VERSION` becomes `ghostregime-v1.0.4`. Persistence already prefixes Blob keys with `MODEL_VERSION`, so v1.0.4 is a new namespace. The old `ghostregime-v1.0.3` namespace is left untouched. Do not copy historical latest across versions.
+- R4 Flip Watch logic is unchanged. R6 UI formulas are unchanged. VAMS is unchanged. Allocation formulas are unchanged. 60/30/10 is unchanged. Provider routing is unchanged. GhostFlow is unchanged.
+- Remaining satellite sources (Cleveland, Truflation, ISM, NFIB, real Freight) remain stubs. Do not fake a P2 replacement.
+
+Why:
+- PDBC TR21 was used twice: as the only live satellite vote (P2) and as the inflation tie-break (P3). The unique P2 effect was self-tie reinforcement — P2 created a core+sat zero that P3 then resolved with the same TR21 sign.
+- PDBC is a broad commodity-futures ETF, not an inflation nowcast and not Energy+Metals-only. The duplicate role was not independently informative.
+
+Evidence (reconstructed current-code window 2017-08-03 through 2026-08-28, n = 2,280; not a performance claim):
+- P2 unique inflation-axis / regime effect = **113** dates.
+- **71** GOLDILOCKS ↔ REFLATION label-only differences; **42** allocation-changing INFLATION ↔ DEFLATION differences.
+- Maximum gold-target effect **15** percentage points; stocks/BTC target effect **0**.
+- Unique effect was self-tie reinforcement (113 / 223 M0 P3 uses).
+- P2 removal recommendation survived external-reference, time-stability, threshold, Flip Watch, and UI-collateral review.
+
+Consequences:
+- Production `infl_sat_score = 0` under the current default provider until a separately authorized real satellite exists.
+- P3 becomes the resolver for core-zero dates; ordinary `infl_tiebreak` receipts close the previously debug-gated provenance gap.
+- Future production deploy of v1.0.4 starts from an empty Blob namespace and may report `NOT_READY` until an authorized first refresh. That rollout is a separate operator event.
+- R6 displayed values may move because **input receipts** changed. R6 formulas were not changed.
+
+---
+
 ## 2026-08-31 — GhostRegime R5A satellite correctness/provenance containment authorized
 Choice:
 - Bobby explicitly authorized **R5A only** — behavior-neutral satellite correctness / provenance containment.

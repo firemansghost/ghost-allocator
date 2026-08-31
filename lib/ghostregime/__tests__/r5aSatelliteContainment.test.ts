@@ -1,8 +1,9 @@
 /**
  * R5A STABLE INVARIANTS — satellite fallback containment and provenance
  *
- * Behavior-neutral: scores, regimes, and allocations must not change on the
- * reconstructed comparison window. R5B Commodity/PDBC model is not authorized.
+ * Fallback/provenance containment remains intact after R5B. Catalog
+ * SATELLITE_CONFIGS still includes Commodity for diagnostics. Production
+ * v1.0.4 scoring uses ACTIVE_SATELLITE_CONFIGS (see r5bPdbcRole.test.ts).
  */
 
 import { describe, it } from 'node:test';

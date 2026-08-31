@@ -50,7 +50,21 @@ Deferred R6 product-truth (characterized, not desired invariants):
 - VAMS half-size is never described as “off” in product copy
 - rounded headline totals remain coherent
 
-R3 C1 inflation-sign normalization is now a **stable current invariant** (`r3InflationSemantics.test.ts`). R4 Flip Watch telemetry truth is now a **stable current invariant** (`r4FlipWatch.test.ts`). R5A satellite correctness / provenance containment is now a **stable current invariant** (`r5aSatelliteContainment.test.ts`). R5B Commodity/PDBC model remains gated. Remaining `r5Satellites.characterization.test.ts` cases document unresolved R5B behavior; they are not desired invariants. R6 remains characterized, not authorized.
+R3 C1 inflation-sign normalization is now a **stable current invariant** (`r3InflationSemantics.test.ts`). R4 Flip Watch telemetry truth is now a **stable current invariant** (`r4FlipWatch.test.ts`). R5A satellite correctness / provenance containment is now a **stable current invariant** (`r5aSatelliteContainment.test.ts`). R5B PDBC role split is now a **stable current invariant** (`r5bPdbcRole.test.ts`). Remaining `r5Satellites.characterization.test.ts` cases document legacy M0 / catalog Commodity scoring; they are not production v1.0.4 invariants. R6 remains characterized, not authorized.
+
+### R5B PDBC roles (now current invariant)
+
+Covered by `r5bPdbcRole.test.ts`:
+
+- Repository default `MODEL_VERSION` is `ghostregime-v1.0.4` when `NEXT_PUBLIC_GHOSTREGIME_MODEL_VERSION` is unset
+- P1: PDBC TR63 core vote still uses ±2% (`>= +2%` → +1 Inflation, `<= -2%` → −1 Disinflation, otherwise 0)
+- P2: Commodity Nowcast / PDBC TR21 is catalog-only. An observation that would have voted +1 still produces `infl_sat_score = 0` and no `satellite_commodity_nowcast_basket_(energy+metals)` active receipt
+- P3: when core + sat == 0, sign of PDBC TR21 with `TIEBREAK_RULE = GTE_ZERO` (exact 0 → +1 Inflation)
+- Ordinary non-debug compute emits `infl_tiebreak` iff P3 ran; vote/direction match the P3 result; note identifies source + `GTE_ZERO`
+- Authorized DBC proxy is identified on the ordinary receipt instead of native PDBC
+- No `infl_tiebreak` receipt when pre-tiebreak total is nonzero
+- R5A fallback containment remains intact (Freight cannot consume Commodity/PDBC; Truflation cannot consume Commodity by typo repair)
+- Live-like 2026-08-28 inflation path: core 0, TR21 positive, sat 0, P3 used, infl +1 Inflation, ordinary `infl_tiebreak`, no Commodity receipt
 
 ### R5A satellite containment (now current invariant)
 
@@ -59,11 +73,11 @@ Covered by `r5aSatelliteContainment.test.ts`:
 - Invalid semantic fallbacks are rejected (axis, cadence, signal family/horizon, threshold keys and values, vote mapping, weight, TTL, decay)
 - Freight cannot inherit Commodity / PDBC TR21
 - Truflation cannot acquire Commodity by a typo-only alias; a matching name would still be semantically rejected
-- Receipts identify the actual source; Commodity runtime provenance is PDBC TR21
+- Receipts identify the actual source; Commodity diagnostic provenance remains PDBC TR21
 - PDBC-derived Commodity is as-of safe (no future PDBC row may influence a historical as-of)
-- Score / regime / allocation parity is preserved vs pre-R5A S0 on the reconstructed 2,280-date window
-- Default production provider still resolves only the PDBC Commodity proxy; Cleveland / Truflation / ISM / NFIB / Freight remain stubs
-- R5B remains characterization / deferred — do not promote PDBC TR21 Commodity-as-satellite into a permanent desired invariant
+- Score / regime / allocation parity vs pre-R5A S0 was preserved on the reconstructed 2,280-date window (R5A closeout)
+- Default provider still implements only the PDBC Commodity diagnostic adapter; Cleveland / Truflation / ISM / NFIB / Freight remain stubs
+- Catalog `SATELLITE_CONFIGS` still includes Commodity; production scoring uses `ACTIVE_SATELLITE_CONFIGS`
 
 ### R3 inflation vote semantics (now current invariant)
 
@@ -76,8 +90,7 @@ Covered by `r3InflationSemantics.test.ts` (auto-discovered) plus TLT/UUP cases i
 - UUP TR_63 ≥ +1% → Disinflation vote −1; UUP TR_63 ≤ −1% → Inflation vote +1
 - Threshold magnitudes unchanged (TLT/UUP ±1%, PDBC ±2%, TIP/IEF ±0.5%)
 - Aggregate: TLT −1 + UUP 0 → core −1; TLT +1 + UUP +1 → core +2; TLT −1 + UUP +1 → core 0
-- Live-like 2026-08-28 vote pattern remains core 0 + satellite +1 → final +1 inflationary
-- Repository default `MODEL_VERSION` is `ghostregime-v1.0.3` when `NEXT_PUBLIC_GHOSTREGIME_MODEL_VERSION` is unset
+- Live-like 2026-08-28 C1 core vote pattern remains core 0 (PDBC +1, TIP/IEF −1, TLT +1, UUP −1). Former P2 satellite +1 on that day is historical; production v1.0.4 uses P3 (`r5bPdbcRole.test.ts`)
 - Neutral vote-0 receipt direction remains an R6 characterization, not an R3 invariant
 
 ## Invariants

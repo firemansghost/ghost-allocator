@@ -216,30 +216,29 @@ satellite_combine_rules:
   apply_to_axis: "inflation"
   final_inflation_score: "infl_total_score = infl_core_score + infl_sat_score_capped"
   tie_breaker_after_satellites: "if infl_total_score == 0 use sign(TR_21(PDBC)) with >=0 inflationary else disinflationary"
+  ordinary_p3_receipt: "whenever the inflation tie-break actually runs, emit infl_tiebreak on the ordinary (non-debug) row"
 ```
 
-### Runtime satellite layer (R5A)
+The YAML above is the **catalog**. Production v1.0.4 scoring uses `ACTIVE_SATELLITE_CONFIGS`, which is that catalog minus Commodity Nowcast Basket (Energy+Metals).
 
-Production is **not** a true seven-satellite system. Thresholds, weights, TTL, decay, cap, and the PDBC TR21 inflation tie-break above are unchanged.
+### Runtime satellite layer (R5A + R5B)
 
-**LIVE today**
-- Commodity Nowcast Basket is a **PDBC TR21-derived proxy**. Runtime receipts must disclose that provenance (`Commodity proxy (PDBC TR21)` or equivalent). This does **not** decide whether PDBC TR21 belongs in the model (R5B).
+Production is **not** a true seven-satellite system. The satellite framework remains; the active score-fed set is smaller.
 
-**NOT IMPLEMENTED (stubs; no live fetch, no new credentials)**
-- Cleveland Fed Inflation Nowcast YoY
-- Truflation YoY
-- ISM Manufacturing Prices Paid
-- ISM Services Prices Paid
-- NFIB Price Plans
-- real Freight / BDI / Freightos
+**PDBC roles in `ghostregime-v1.0.4`**
+- **P1 KEEP** — PDBC TR63 remains the core inflation vote. Thresholds unchanged: ≥ +2% → +1 Inflation, ≤ −2% → −1 Disinflation, otherwise 0.
+- **P2 REMOVE** — PDBC TR21 Commodity Nowcast is **not** an active score-fed satellite. It stays in `SATELLITE_CONFIGS` for historical characterization, R5A provenance tests, and research diagnostics. Production must not request it as an active score-fed satellite, add its vote to `infl_sat_score`, or emit it as an active satellite receipt.
+- **P3 KEEP** — When `infl_core_score + infl_sat_score == 0`, use sign of PDBC TR21 (`TIEBREAK_RULE = GTE_ZERO`: ≥ 0 → Inflation +1, < 0 → Disinflation −1). Horizon, proxy handling, and stale/fail-closed behavior are unchanged. Whenever P3 actually runs, the ordinary persisted row includes a truthful `infl_tiebreak` receipt (not debug-gated). If the market-data path used authorized DBC, the receipt identifies DBC rather than native PDBC.
 
-**Fallback containment**
+**Default active satellite provider reality**
+- After P2 removal, no current default satellite feed contributes to `infl_sat_score`. Cleveland / Truflation / ISM / NFIB / real Freight remain stubs. Ordinary runtime `infl_sat_score = 0` until a separately authorized real satellite source is implemented. Do not fake a replacement.
+
+**R5A fallback containment (unchanged)**
 - Resolution is **one-hop**. Fallback chains are not walked recursively.
 - A fallback may be used only when primary and fallback configs are semantically compatible: same axis, source cadence/`source_type`, signal family (including return horizon), threshold keys **and** values, vote mapping, vote weight, TTL, and half-life.
 - Invalid source aliases are rejected. Freight cannot inherit Commodity/PDBC (weekly TR63 ±10% vs daily-derived TR21 ±2%). Truflation cannot acquire Commodity by repairing the fallback string; even a matching name is semantically incompatible (δ7d YoY pp vs TR21).
 - ISM Services ↔ NFIB and NFIB ↔ ISM Manufacturing are rejected (level thresholds differ). ISM Manufacturing ↔ ISM Services and Cleveland ↔ Truflation remain eligible only because current configs match on the compatibility fields above; both pairs are still stubs.
-
-R5B (whether PDBC TR21 belongs as the Commodity satellite, and the three existing PDBC roles) remains deferred.
+- If Commodity is resolved as a diagnostic, receipts still disclose PDBC TR21 provenance (`Commodity proxy (PDBC TR21)`). That lane is not production-scored in v1.0.4.
 
 ## Flip Watch
 
@@ -269,8 +268,10 @@ Strong threshold remains `STRONG_FLIP_SCORE_THRESHOLD = 2` for transition-streng
 
 **Environment Variables**:
 - `BLOB_READ_WRITE_TOKEN` (required)
-- `NEXT_PUBLIC_GHOSTREGIME_MODEL_VERSION="ghostregime-v1.0.1"` (default)
+- `NEXT_PUBLIC_GHOSTREGIME_MODEL_VERSION` (optional override; repository default is `ghostregime-v1.0.4`)
 - `NEXT_PUBLIC_GHOSTREGIME_CUTOVER_DATE_UTC="2025-11-28"`
+
+v1.0.4 uses a new Blob namespace via the existing `MODEL_VERSION/` prefix (`ghostregime-v1.0.4/...`). The old `ghostregime-v1.0.3` namespace is left untouched. Do not copy historical latest across versions. After a future production deploy, public GhostRegime may correctly report `NOT_READY` until an authorized first refresh seeds v1.0.4.
 
 **Persistence Rules**:
 - Only persist rows when `stale=false`

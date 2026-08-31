@@ -25,9 +25,10 @@ import { computeOptionBVotes, classifyRegime, mapToRiskRegime, applyStressOverri
 import {
   processSatellites,
   resolveSatelliteData,
-  SATELLITE_CONFIGS,
+  ACTIVE_SATELLITE_CONFIGS,
   DefaultSatelliteDataProvider,
   satelliteReceiptPresentation,
+  type SatelliteConfig,
 } from './satellites';
 import { computeAllVamsStates, computeVamsScore } from './vams';
 import { computeAllocations } from './allocations';
@@ -123,22 +124,22 @@ export async function computeGhostRegime(
   const riskAxis: RiskAxis = riskScore > 0 ? 'RiskOn' : 'RiskOff';
   const inflAxis: InflAxis = inflCoreScore > 0 ? 'Inflation' : 'Disinflation';
 
-  // Process satellites and combine with core inflation score
-  const inflSatScore = processSatellites(satelliteData, SATELLITE_CONFIGS, asofDate);
+  // Process active score-fed satellites only (R5B: P2 Commodity/PDBC TR21 is catalog-only)
+  const inflSatScore = processSatellites(satelliteData, ACTIVE_SATELLITE_CONFIGS, asofDate);
   const inflTotalScorePreTiebreak = inflCoreScore + inflSatScore;
   
   // Tie-breaker for inflation: if infl_total_score_pre_tiebreak == 0, use sign of TR_21(PDBC)
   let inflTotalScore = inflTotalScorePreTiebreak;
   let inflTiebreakerUsed = false;
   let inflTiebreakDetail: any = undefined;
+  let inflTiebreakReceipt: SignalReceipt | undefined;
   
   if (inflTotalScorePreTiebreak === 0) {
-    // Tie-breaker: use sign of TR_21(PDBC)
-    // If PDBC is proxied to DBC, use DBC data but label as PDBC
+    // Tie-breaker: use sign of TR_21(PDBC). Horizon, GTE_ZERO, and fail-closed unchanged.
     const pdbcData = getDataForSymbol(marketData, MARKET_SYMBOLS.PDBC);
     const filteredPdbcData = asofDate ? pdbcData.filter(d => d.date <= asofDate) : pdbcData;
     
-    // Determine which series was actually used (PDBC or DBC proxy)
+    // Truthful series: native PDBC, or DBC when that authorized proxy was used
     const pdbcProxy = proxyUsed?.[MARKET_SYMBOLS.PDBC];
     const seriesUsed = pdbcProxy || MARKET_SYMBOLS.PDBC;
     
@@ -165,6 +166,14 @@ export async function computeGhostRegime(
         const isInflationary = TIEBREAK_RULE === 'GT_ZERO' ? pdbcTR21 > 0 : pdbcTR21 >= 0;
         inflTotalScore = isInflationary ? 1 : -1;
         inflTiebreakerUsed = true;
+
+        inflTiebreakReceipt = {
+          key: 'infl_tiebreak',
+          label: `Inflation tie-breaker (${seriesUsed} TR21)`,
+          vote: inflTotalScore,
+          direction: inflTotalScore > 0 ? 'Inflation' : 'Disinflation',
+          note: `Tie-breaker applied; source: ${seriesUsed} TR21; rule: ${TIEBREAK_RULE}`,
+        };
         
         if (includeDebug && votes.debug_votes) {
           inflTiebreakDetail = {
@@ -253,22 +262,12 @@ export async function computeGhostRegime(
   const inflationReceipts: SignalReceipt[] = votes.inflation_receipts ? [...votes.inflation_receipts] : [];
   
   // Add satellite receipts to inflation
-  const satelliteReceipts = buildSatelliteReceipts(satelliteData, SATELLITE_CONFIGS, asofDate);
+  const satelliteReceipts = buildSatelliteReceipts(satelliteData, ACTIVE_SATELLITE_CONFIGS, asofDate);
   inflationReceipts.push(...satelliteReceipts);
   
-  // Add inflation tie-breaker receipt if used
-  if (inflTiebreakerUsed && votes.debug_votes?.inflation?.tiebreak) {
-    const tiebreak = votes.debug_votes.inflation.tiebreak;
-    if (tiebreak.reason === 'score_zero' && tiebreak.input_sign !== undefined) {
-      const seriesLabel = (tiebreak as any).series_used || 'PDBC';
-      inflationReceipts.push({
-        key: 'infl_tiebreak',
-        label: `Inflation tie-breaker (${seriesLabel} TR_21)`,
-        vote: tiebreak.input_sign,
-        direction: tiebreak.input_sign > 0 ? 'Inflation' : 'Disinflation',
-        note: 'Tie-breaker applied',
-      });
-    }
+  // Ordinary P3 provenance: emit whenever the tie-break actually ran (not debug-gated)
+  if (inflTiebreakerUsed && inflTiebreakReceipt) {
+    inflationReceipts.push(inflTiebreakReceipt);
   }
 
   // Build row
@@ -328,7 +327,7 @@ export async function computeGhostRegime(
  */
 function buildSatelliteReceipts(
   satelliteData: SatelliteData[],
-  satelliteConfigs: typeof SATELLITE_CONFIGS,
+  satelliteConfigs: SatelliteConfig[],
   asofDate: Date
 ): SignalReceipt[] {
   const receipts: SignalReceipt[] = [];
@@ -688,7 +687,7 @@ export async function getGhostRegimeToday(
     satelliteProvider.setMarketData(marketData);
     const satelliteData: SatelliteData[] = [];
 
-    for (const config of SATELLITE_CONFIGS) {
+    for (const config of ACTIVE_SATELLITE_CONFIGS) {
       const data = await resolveSatelliteData(config, satelliteProvider, marketData, asofDate);
       if (data) {
         satelliteData.push(data);
