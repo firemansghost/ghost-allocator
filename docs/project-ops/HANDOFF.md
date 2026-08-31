@@ -1,5 +1,44 @@
 ﻿# HANDOFF
 
+## Last Session Summary (2026-08-30, GhostRegime R0 forensic complete)
+R0 baseline: `019aa383d595c1f775885d1db270c985f8f993d5`. No tracked R0 analysis changes. Canonical record: [R0_FORENSIC_AUDIT_2026-08-30.md](../ghostregime/R0_FORENSIC_AUDIT_2026-08-30.md). Parent audit: [AUDIT_2026-08-30.md](../ghostregime/AUDIT_2026-08-30.md).
+
+**Evidence classification warning:** reconstructed 2017–2025 C0/C1 results are **current-code replay**, not historical production behavior. Seed-era C1 cannot be called production impact.
+
+Main numerical results:
+- Seed overlap: **769 / 1,990 = 38.6%** regime match.
+- Post-cutover persisted: **130 / 133 = 97.7%** regime match (Yahoo/CBOE vintage caveat; 2026-08-28 miss is risk-axis, not C1).
+- Current-code C1: **471 / 2,280 = 20.7%** regime changes; 118 episodes; longest 25 days; median 2 days.
+- **295 / 471** GOLDILOCKS ↔ REFLATION (same 60/30/10); **176 / 471** INFLATION ↔ DEFLATION (gold 15% ↔ 30%). VAMS actuals differ **168 / 2,280** days; max sleeve delta gold/cash 15 pp, stocks/BTC 0 pp. Not a backtest.
+- Persisted-receipt C1: **9 / 125** regime changes; **8 / 9** target-equivalent; **1** target change on **2026-02-27**. Live 2026-08-28 stays `core 0 / sat +1 / final +1`.
+- Satellites: sat decides axis/regime on **166** reconstructed days; PDBC TR63+TR21 both active **1,298** (same direction **1,040**).
+- Stress: **78** reconstructed triggers; **0** reconstructed or persisted RiskOn / RISK-OFF clashes.
+- Flip Watch: **13** persisted PENDING; **12 / 13** already new regime/targets; `daysSinceLastFlip` replay **−3313 to 0**.
+
+High-confidence findings: improve-in-place still justified; TLT/UUP signs inconsistent; live one-day C1 is a no-op; Flip Watch is telemetry; commodity satellite is material; no stored stress-axis incident; 60/30/10 stays frozen.
+
+Roadmap remains intact. **Next step: R1 — canonical GhostRegime test foundation.**
+
+R1 boundary: build `test:ghostregime` and characterization seams. Do **not** install failing tests for R2 desired behaviors, and do **not** encode those current defects as permanent invariants. R2 targets (no public-GET provider fetch; anonymous debug cannot reach paid fallback; error path performs no duplicate fetch) become authoritative in R2. Neutral receipt labels and coverage semantics are R6 product-truth items, not current R1 invariants.
+
+Explicit later gates (unchanged):
+- **R3** — inflation-sign / model-version policy; Bobby approval required
+- **R4** — Flip Watch telemetry vs real confirmation; undecided
+- **R5** — satellite cleanup / PDBC dual-horizon / fallback names; not a removal decision
+- **R7** — allocation research; **R8** only if evidence + separate product decision
+
+Do not modify `DECISIONS.md` for R0. The 2026-08-30 remediation-sequencing decision remains controlling.
+
+GhostFlow three-family receipt-backed refresh remains complete and separate (summary below). Ordinary GhostFlow source monitoring is not displaced by this GhostRegime checkpoint.
+
+## Priority for Next Session (GhostRegime)
+1. **R1** — canonical complete GhostRegime test command and characterization foundation
+2. Do not implement R2/R3/R4/R5/R6, and do not change 60/30/10 or VAMS
+3. Keep R2 operational targets and R6 UI-truth defects as characterization / deferred tests, not fake current invariants
+4. GhostFlow: ordinary source monitoring only (do not start a new architecture project)
+
+---
+
 ## Last Session Summary (2026-08-30, GhostRegime audit checkpoint)
 `main` baseline: `519092ea1a7de384df4b74d833a8c937f6210f9a`. Production was READY on that commit. Persisted GhostRegime snapshot was computed under `d9473b02a5eb28df313378dd800c3473200f74c8` with no GhostRegime code changes since. **Verdict: IMPROVE IN PLACE** — do not rebuild. Canonical record: [AUDIT_2026-08-30.md](../ghostregime/AUDIT_2026-08-30.md).
 
