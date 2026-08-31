@@ -3,7 +3,7 @@
  * Main orchestration for replay and computed modes
  */
 
-import { formatISO, parseISO, isBefore, differenceInDays } from 'date-fns';
+import { formatISO, parseISO, isBefore } from 'date-fns';
 import type {
   GhostRegimeRow,
   GhostRegimeServeMetadata,
@@ -30,7 +30,7 @@ import {
 } from './satellites';
 import { computeAllVamsStates, computeVamsScore } from './vams';
 import { computeAllocations } from './allocations';
-import { detectFlipWatch } from './flipWatch';
+import { detectFlipWatch, priorUniqueTradingRegime } from './flipWatch';
 import { getStorageAdapter } from './persistence';
 import {
   getDataForSymbol,
@@ -237,14 +237,13 @@ export async function computeGhostRegime(
   // Compute allocations
   const allocations = computeAllocations(regime, vamsStates);
 
-  // Detect flip watch
-  const daysSinceLastFlip = previousRegime ? differenceInDays(asofDate, new Date()) : 0; // Simplified
+  // Flip Watch is transition telemetry only — after regime, VAMS, and allocations.
+  // It does not delay, gate, or alter the classified regime or allocations.
   const flipWatchStatus = detectFlipWatch(
     regime,
     previousRegime,
     riskScore,
-    inflTotalScore,
-    daysSinceLastFlip
+    inflTotalScore
   );
 
   // Build signal receipts (metadata only, for transparency/education)
@@ -694,8 +693,12 @@ export async function getGhostRegimeToday(
       }
     }
 
-    // Get previous regime for flip watch
-    const previousRegime = latest?.regime || null;
+    // Prior unique persisted trading snapshot (not blindly latest.regime).
+    // History lookup is compute-path only — ordinary public GET never reaches here.
+    const asofDateStr = formatISO(asofDate, { representation: 'date' });
+    const history = await storage.readHistory();
+    const historyForFlip = latest != null ? [...history, latest] : history;
+    const previousRegime = priorUniqueTradingRegime(historyForFlip, asofDateStr);
 
     // Pass debug flag and proxy info via runDateUtc extension
     const runDateWithDebug = runDateUtc ? Object.assign(new Date(runDateUtc), {

@@ -1,5 +1,31 @@
 ﻿# STATUS
 
+## Current State (GhostRegime — 2026-08-31 R4 Flip Watch telemetry truth)
+R4 baseline: `5dc578eddccaf6ab060eb470ba50c39a6ec27ced` (`main` after PR **#171**). Bobby **explicitly authorized R4 Option A**.
+
+**AUTHORIZED / IMPLEMENTED LOCALLY — PR review pending**
+
+- Flip Watch is transition telemetry. It does not delay, gate, hold, or alter regime, risk regime, allocation targets, VAMS, actual sleeve weights, cash, or persistence.
+- New compute emits `NONE` / `REGIME_CHANGE` / `STRONG_FLIP`. Legacy `BREWING` / `PENDING_CONFIRMATION` remain readable.
+- Prior unique persisted trading snapshot drives comparison. Wall-clock confirmation arithmetic is gone. `shouldApplyFlip()` / `CONFIRMATION_DAYS` / `daysPending` removed as dead gate logic.
+- No model-version bump: still `ghostregime-v1.0.3`. No allocation, VAMS, satellite, provider, or 60/30/10 changes.
+- Canonical suite includes `r4FlipWatch.test.ts` as a stable invariant.
+- Not live. Do not claim production until merge/deployment.
+
+Decision: [DECISIONS.md](./DECISIONS.md) entry **2026-08-31 — GhostRegime Flip Watch remains telemetry (R4 Option A)**.
+
+This workstream is independent of GhostFlow source monitoring below.
+
+## Recommended next work (GhostRegime)
+1. **R4 PR review / merge** (this branch is local-only until pushed)
+2. **R5 — satellite cleanup** is next after R4, but **R5 is NOT authorized**
+3. Do **not** change 60/30/10 or VAMS formulas/thresholds
+4. GhostFlow ordinary source monitoring remains a separate workstream (below)
+
+Last updated: 2026-08-31
+
+---
+
 ## Current State (GhostRegime — 2026-08-31 R3 C1 live rollout)
 R3 merge: PR **#170** → `c19ccdcad4934d635fd39dc3d8b2708dc0e03ce0` (`main`). Production deployment was verified on that exact merge commit.
 

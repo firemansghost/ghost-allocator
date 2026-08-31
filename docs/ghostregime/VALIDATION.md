@@ -27,7 +27,7 @@ Live/network/secret-dependent verification is **not** part of `test:ghostregime`
 | Class | Meaning |
 |-------|---------|
 | **Stable invariants** | Should remain true after later phases (`r1Invariants.test.ts` plus existing allocation/regime math). |
-| **Current-behavior characterization** | Documents what the code does today; expected to change in a named later phase (`r4*.characterization.test.ts`, `r5*.characterization.test.ts`, `r6*.characterization.test.ts`). |
+| **Current-behavior characterization** | Documents what the code does today; expected to change in a named later phase (`r5*.characterization.test.ts`, `r6*.characterization.test.ts`). |
 | **Deferred desired behavior** | Not installed as passing R1 invariants. Become authoritative when the corresponding fix lands. |
 
 ### R2 operational containment (now current invariants)
@@ -50,7 +50,7 @@ Deferred R6 product-truth (characterized, not desired invariants):
 - VAMS half-size is never described as “off” in product copy
 - rounded headline totals remain coherent
 
-R3 C1 inflation-sign normalization is now a **stable current invariant** (`r3InflationSemantics.test.ts`). R4/R5 remain gated. Characterization tests lock current Flip Watch / satellite / UI-truth behavior so later diffs are obvious. They do not authorize those production changes.
+R3 C1 inflation-sign normalization is now a **stable current invariant** (`r3InflationSemantics.test.ts`). R4 Flip Watch telemetry truth is now a **stable current invariant** (`r4FlipWatch.test.ts`). R5 remains gated. Characterization tests lock current satellite / UI-truth behavior so later diffs are obvious. They do not authorize those production changes.
 
 ### R3 inflation vote semantics (now current invariant)
 
@@ -79,13 +79,21 @@ Covered by `r3InflationSemantics.test.ts` (auto-discovered) plus TLT/UUP cases i
 - RiskOn + non-positive inflation → GOLDILOCKS; RiskOn + positive inflation → REFLATION; RiskOff + positive inflation → INFLATION; RiskOff + non-positive inflation → DEFLATION (current zero behavior) — **stable invariant**
 - Risk regime mapping: GOLDILOCKS/REFLATION → RISK ON; INFLATION/DEFLATION → RISK OFF
 
-### Flip Watch
-Current production behavior is **telemetry/status**, not a persistence gate. `shouldApplyFlip()` exists and is tested in isolation; R0 found the engine does not use it to delay regime or allocations.
+### Flip Watch (R4 Option A — stable invariant)
 
-- Ordinary regime change can return `PENDING_CONFIRMATION` — **R4 characterization**
-- Negative `daysSinceLastFlip` satisfies the current `<= confirmationDays` condition — **R4 characterization**
-- `STRONG_FLIP` when `max(|risk|,|infl|) >= 2` — **R4 characterization**
-- PLAN / older VALIDATION copy that claimed a 2-day confirmation **persistence guard** is **stale** relative to production. Whether to keep telemetry or implement real confirmation is the R4 product gate. Do not treat confirmation as currently enforced.
+Covered by `r4FlipWatch.test.ts`:
+
+- Flip Watch is transition telemetry. It does not delay, gate, hold, or alter regime, allocations, VAMS, or persistence of an otherwise valid row.
+- No wall-clock confirmation clock (`differenceInDays(asofDate, new Date())` is gone). `detectFlipWatch` has no calendar-day parameter.
+- First row / no prior unique persisted trading snapshot → `NONE`
+- Current regime equals prior unique persisted trading regime → `NONE`
+- Ordinary transition (`regime differs` and `max(|risk|, |infl|) < 2`) → `REGIME_CHANGE`
+- Strong transition (`regime differs` and `max(|risk|, |infl|) >= 2`) → `STRONG_FLIP`
+- Strong scores without a regime change → `NONE`
+- Same-date refresh uses the prior unique **earlier** trading date (current as-of is ignored)
+- New compute emits only `NONE` / `REGIME_CHANGE` / `STRONG_FLIP`
+- Legacy persisted `BREWING` / `PENDING_CONFIRMATION` remain readable as legacy display copy, not as “waiting”
+- Ordinary public `GET /api/ghostregime/today` remains persisted-only (R2). Flip Watch history lookup belongs on compute-capable paths only.
 
 ### Stress Override
 - Stress override helper triggers only when both conditions met:

@@ -1,5 +1,20 @@
 ﻿# HANDOFF
 
+## Last Session Summary (2026-08-31, GhostRegime R4 Flip Watch telemetry truth)
+Bobby **explicitly authorized R4 Option A** (keep telemetry, fix truth/logic). Baseline `main` `5dc578eddccaf6ab060eb470ba50c39a6ec27ced` (PR **#171**). Implemented locally on `fix/ghostregime-r4-telemetry-truth`. **AUTHORIZED / IMPLEMENTED LOCALLY — PR review pending.** Not live.
+
+Flip Watch now compares the current final regime to the prior unique persisted trading snapshot and emits `NONE` / `REGIME_CHANGE` / `STRONG_FLIP`. It does not delay regime or allocations. Wall-clock `daysSinceLastFlip` and unused `shouldApplyFlip()` are gone. Legacy `BREWING` / `PENDING_CONFIRMATION` remain readable. Model version stays `ghostregime-v1.0.3`. Allocations / VAMS / satellites / 60/30/10 / R2 public-read containment unchanged.
+
+**Next: R5 — satellite cleanup.** R5 is **NOT authorized**.
+
+## Priority for Next Session (GhostRegime)
+1. R4 PR review / merge if Bobby wants it published
+2. **R5 — satellite cleanup** only if Bobby explicitly authorizes it
+3. Do not implement R5/R6, and do not change 60/30/10 or VAMS
+4. GhostFlow remains separate
+
+---
+
 ## Last Session Summary (2026-08-31, GhostRegime R3 C1 live rollout)
 GhostRegime R3 C1 is fully live. PR **#170** merged as `c19ccdcad4934d635fd39dc3d8b2708dc0e03ce0`. Production deployment was verified on that merge commit.
 

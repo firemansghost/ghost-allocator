@@ -9,11 +9,26 @@ export const WHY_REGIME_TITLE = 'Why this regime today?';
 
 export const FLIPWATCH_TITLE_PREFIX = 'Flip Watch:';
 
-export const FLIPWATCH_NONE_HINT = 'Flip Watch is off — no one-day head fake detected.';
+export const FLIPWATCH_NONE_HINT = 'No regime change versus the prior trading snapshot.';
 
 export const FLIPWATCH_EXPLANATION_LINES = [
-  "This is the model saying: 'cool story — show me tomorrow too.'",
-  'It reduces whipsaw by waiting for confirmation.',
+  'Flip Watch flags regime transitions.',
+  'The current regime and allocations are already active.',
+];
+
+export const FLIPWATCH_REGIME_CHANGE_LINES = [
+  'Regime changed since the prior trading snapshot.',
+  'This is telemetry — the new regime and allocations are already active.',
+];
+
+export const FLIPWATCH_STRONG_FLIP_LINES = [
+  'Strong regime change since the prior trading snapshot.',
+  'The new regime and allocations are already active.',
+];
+
+export const FLIPWATCH_LEGACY_LINES = [
+  'Older snapshot using the pre-R4 Flip Watch label.',
+  'That status did not delay the regime or allocations.',
 ];
 
 export const SO_WHAT_LINES = {
@@ -84,7 +99,9 @@ export const REGIME_CONFIDENCE_TOOLTIP = 'Heuristic from signal agreement + cove
 export const PRIMARY_DRIVER_PREFIX = 'Primary driver:';
 export const PRIMARY_DRIVER_TOOLTIP = 'Which axis (Risk or Inflation) has the stronger signal today.';
 export const FLIPWATCH_PILL_TOOLTIP =
-  'Regime confirmation: waits for an extra day before treating a regime change as real. Different from Pressure Watch (distance to signal flips).';
+  'Flip Watch flags regime transitions. The current regime and allocations are already active. Different from Pressure Watch (distance to signal flips).';
+export const FLIPWATCH_LEGACY_PILL_TOOLTIP =
+  'Older snapshot using the pre-R4 Flip Watch label. That status did not delay the regime or allocations.';
 export const ACTIONABLE_READ_PREFIX = 'Actionable read:';
 export const CROWDED_LABEL = 'Crowded';
 export const CROWDED_TOOLTIP = 'Signals are piling onto one side. Could be clarity… or everyone running through the same door.';
@@ -178,7 +195,7 @@ export const COPY_SUMMARY_BUTTON = 'Copy summary';
 export const COPY_SUMMARY_COPIED = 'Copied';
 export const BACK_TO_LATEST_LINK = 'Back to latest';
 
-// Pressure Watch (movement vs thresholds; distinct from flip_watch_status regime confirmation)
+// Pressure Watch (movement vs thresholds; distinct from flip_watch_status regime transition telemetry)
 export const PRESSURE_WATCH_TITLE = 'Pressure Watch';
 export const PRESSURE_WATCH_SUBTITLE = 'Pressure vs balance, at a glance';
 export const PRESSURE_WATCH_TOOLTIP =
@@ -217,8 +234,12 @@ export const PRESSURE_WATCH_COL_SCORE = 'Signal score';
 export const PRESSURE_WATCH_COL_DIST = 'Distance to band';
 export const PRESSURE_WATCH_COL_PRIOR = 'vs prior snapshot';
 
-/** Advanced / classification: regime flip confirmation (flip_watch_status), not Pressure Watch */
-export const REGIME_CONFIRMATION_STATUS_LABEL = 'Regime confirmation';
+/** Advanced / classification: Flip Watch regime transition (flip_watch_status), not Pressure Watch */
+export const REGIME_TRANSITION_STATUS_LABEL = 'Regime transition';
 /** Chip in Regime Summary when flip_watch_status is active */
-export const REGIME_CONFIRMATION_CHIP_PREFIX = 'Regime confirmation:';
+export const REGIME_TRANSITION_CHIP_PREFIX = 'Regime transition:';
+/** @deprecated R4: use REGIME_TRANSITION_STATUS_LABEL */
+export const REGIME_CONFIRMATION_STATUS_LABEL = REGIME_TRANSITION_STATUS_LABEL;
+/** @deprecated R4: use REGIME_TRANSITION_CHIP_PREFIX */
+export const REGIME_CONFIRMATION_CHIP_PREFIX = REGIME_TRANSITION_CHIP_PREFIX;
 

@@ -56,7 +56,8 @@ import {
   computeRegimeConvictionIndex,
   computeRegimeConfidenceLabel,
   computePrimaryDriver,
-  formatRegimeConfirmationDisplay,
+  formatRegimeTransitionDisplay,
+  flipWatchPillTooltip,
   computeAxisNetVote,
   buildActionableReadLine,
   computeAxisStatDeltas,
@@ -107,7 +108,6 @@ import {
   REGIME_CONFIDENCE_TOOLTIP,
   PRIMARY_DRIVER_PREFIX,
   PRIMARY_DRIVER_TOOLTIP,
-  FLIPWATCH_PILL_TOOLTIP,
   ACTIONABLE_READ_PREFIX,
   CROWDED_LABEL,
   CROWDED_TOOLTIP,
@@ -140,8 +140,8 @@ import {
   PRESSURE_WATCH_IF_STEP_TOOLTIP,
   PRESSURE_WATCH_ADVANCED_ONE_STEP_LABEL,
   PRESSURE_WATCH_PRIOR_UNAVAILABLE,
-  REGIME_CONFIRMATION_CHIP_PREFIX,
-  REGIME_CONFIRMATION_STATUS_LABEL,
+  REGIME_TRANSITION_CHIP_PREFIX,
+  REGIME_TRANSITION_STATUS_LABEL,
   COMPARE_LINK_LABEL,
   COMPARE_DISABLED_TOOLTIP,
   COMPARE_PREV_SNAPSHOT_TOOLTIP,
@@ -634,7 +634,7 @@ export function GhostRegimeClient({
       riskAgreement.pct,
       inflAgreement.pct
     );
-    const regimeConfirmationLabel = formatRegimeConfirmationDisplay(data.flip_watch_status);
+    const regimeConfirmationLabel = formatRegimeTransitionDisplay(data.flip_watch_status);
     const hasFlipWatch = Boolean(data.flip_watch_status && data.flip_watch_status !== 'NONE');
     const movementPressure = computeRegimeMovementPressure(data, prevRow);
 
@@ -1657,9 +1657,9 @@ export function GhostRegimeClient({
                   </div>
                 )}
                 {dashboardMetrics.hasFlipWatch && dashboardMetrics.regimeConfirmationLabel && (
-                  <Tooltip content={FLIPWATCH_PILL_TOOLTIP}>
+                  <Tooltip content={flipWatchPillTooltip(data.flip_watch_status)}>
                     <span className="inline-flex px-2 py-0.5 rounded-md border border-amber-400/15 bg-amber-400/[0.05] text-amber-200/70 text-[11px]">
-                      {REGIME_CONFIRMATION_CHIP_PREFIX} {dashboardMetrics.regimeConfirmationLabel}
+                      {REGIME_TRANSITION_CHIP_PREFIX} {dashboardMetrics.regimeConfirmationLabel}
                     </span>
                   </Tooltip>
                 )}
@@ -2006,8 +2006,10 @@ export function GhostRegimeClient({
               </p>
             </div>
             <div>
-              <p className="text-xs text-zinc-400 uppercase tracking-wide">{REGIME_CONFIRMATION_STATUS_LABEL}</p>
-              <p className="text-sm font-medium text-zinc-200">{data.flip_watch_status}</p>
+              <p className="text-xs text-zinc-400 uppercase tracking-wide">{REGIME_TRANSITION_STATUS_LABEL}</p>
+              <p className="text-sm font-medium text-zinc-200">
+                {formatRegimeTransitionDisplay(data.flip_watch_status) ?? data.flip_watch_status ?? 'NONE'}
+              </p>
             </div>
             {data.core_proxy_used && Object.keys(data.core_proxy_used).length > 0 && (
               <div className="space-y-1 rounded-md border border-amber-400/30 bg-amber-400/10 p-2">
