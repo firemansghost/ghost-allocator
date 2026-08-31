@@ -21,9 +21,9 @@ function createMockData(symbol: string, closes: number[]): MarketDataPoint[] {
 }
 
 describe('TLT Vote Logic', () => {
-  it('TLT negative TR_63 should vote Inflation (-1)', () => {
-    // TLT with TR_63 = -0.0333 (negative) should vote Inflation (-1)
-    // Spec: TR_63 <= -0.01 → Inflation (-1)
+  it('TLT negative TR_63 should vote Inflation (+1)', () => {
+    // TLT with TR_63 = -0.0333 (negative) should vote Inflation (+1)
+    // Spec: TR_63 <= -0.01 → Inflation (+1)
     const tltData = createMockData(MARKET_SYMBOLS.TLT, [
       100, 100.5, 100.3, 99.8, 99.5, 99.2, 98.9, 98.6, 98.3, 98.0, // First 10
       ...Array(53).fill(0).map((_, i) => 97.0 - i * 0.01), // Remaining 53 to get TR_63
@@ -56,13 +56,13 @@ describe('TLT Vote Logic', () => {
     // Check TLT vote in debug output
     assert(result.debug_votes, 'Debug votes should be included');
     assert(result.debug_votes.inflation.tlt, 'TLT vote should be present');
-    assert.strictEqual(result.debug_votes.inflation.tlt.vote, -1, 'TLT should vote Inflation (-1) for negative TR');
+    assert.strictEqual(result.debug_votes.inflation.tlt.vote, 1, 'TLT should vote Inflation (+1) for negative TR');
     assert(result.debug_votes.inflation.tlt.threshold_hit?.includes('Inflation'), 'Threshold should indicate Inflation');
   });
 
-  it('TLT positive TR_63 >= +0.01 should vote Disinflation (+1)', () => {
-    // TLT with TR_63 >= +0.01 should vote Disinflation (+1)
-    // Spec: TR_63 >= +0.01 → Disinflation (+1)
+  it('TLT positive TR_63 >= +0.01 should vote Disinflation (-1)', () => {
+    // TLT with TR_63 >= +0.01 should vote Disinflation (-1)
+    // Spec: TR_63 >= +0.01 → Disinflation (-1)
     const tltData = createMockData(MARKET_SYMBOLS.TLT, [
       100, 100.2, 100.4, 100.6, 100.8, 101.0, 101.2, 101.4, 101.6, 101.8, // First 10
       ...Array(53).fill(0).map((_, i) => 102.0 + i * 0.02), // Remaining 53 to get TR_63 >= 0.01
@@ -83,15 +83,15 @@ describe('TLT Vote Logic', () => {
     const result = computeOptionBVotes(marketData, undefined, true);
     
     assert(result.debug_votes?.inflation.tlt, 'TLT vote should be present');
-    assert.strictEqual(result.debug_votes.inflation.tlt.vote, 1, 'TLT should vote Disinflation (+1) for TR >= +0.01');
+    assert.strictEqual(result.debug_votes.inflation.tlt.vote, -1, 'TLT should vote Disinflation (-1) for TR >= +0.01');
     assert(result.debug_votes.inflation.tlt.threshold_hit?.includes('Disinflation'), 'Threshold should indicate Disinflation');
   });
 });
 
 describe('UUP Vote Logic', () => {
-  it('UUP positive TR_63 >= +0.01 should vote Disinflation (+1)', () => {
-    // UUP with TR_63 = +0.0302 (positive) should vote Disinflation (+1)
-    // Spec: TR_63 >= +0.01 → Disinflation (+1)
+  it('UUP positive TR_63 >= +0.01 should vote Disinflation (-1)', () => {
+    // UUP with TR_63 = +0.0302 (positive) should vote Disinflation (-1)
+    // Spec: TR_63 >= +0.01 → Disinflation (-1)
     const uupData = createMockData(MARKET_SYMBOLS.UUP, [
       100, 100.1, 100.2, 100.3, 100.4, 100.5, 100.6, 100.7, 100.8, 100.9, // First 10
       ...Array(53).fill(0).map((_, i) => 101.0 + i * 0.05), // Remaining 53 to get TR_63 >= 0.01
@@ -112,13 +112,13 @@ describe('UUP Vote Logic', () => {
     const result = computeOptionBVotes(marketData, undefined, true);
     
     assert(result.debug_votes?.inflation.uup, 'UUP vote should be present');
-    assert.strictEqual(result.debug_votes.inflation.uup.vote, 1, 'UUP should vote Disinflation (+1) for TR >= +0.01');
+    assert.strictEqual(result.debug_votes.inflation.uup.vote, -1, 'UUP should vote Disinflation (-1) for TR >= +0.01');
     assert(result.debug_votes.inflation.uup.threshold_hit?.includes('Disinflation'), 'Threshold should indicate Disinflation');
   });
 
-  it('UUP negative TR_63 <= -0.01 should vote Inflation (-1)', () => {
-    // UUP with TR_63 <= -0.01 should vote Inflation (-1)
-    // Spec: TR_63 <= -0.01 → Inflation (-1)
+  it('UUP negative TR_63 <= -0.01 should vote Inflation (+1)', () => {
+    // UUP with TR_63 <= -0.01 should vote Inflation (+1)
+    // Spec: TR_63 <= -0.01 → Inflation (+1)
     const uupData = createMockData(MARKET_SYMBOLS.UUP, [
       100, 99.9, 99.8, 99.7, 99.6, 99.5, 99.4, 99.3, 99.2, 99.1, // First 10
       ...Array(53).fill(0).map((_, i) => 99.0 - i * 0.02), // Remaining 53 to get TR_63 <= -0.01
@@ -139,7 +139,7 @@ describe('UUP Vote Logic', () => {
     const result = computeOptionBVotes(marketData, undefined, true);
     
     assert(result.debug_votes?.inflation.uup, 'UUP vote should be present');
-    assert.strictEqual(result.debug_votes.inflation.uup.vote, -1, 'UUP should vote Inflation (-1) for TR <= -0.01');
+    assert.strictEqual(result.debug_votes.inflation.uup.vote, 1, 'UUP should vote Inflation (+1) for TR <= -0.01');
     assert(result.debug_votes.inflation.uup.threshold_hit?.includes('Inflation'), 'Threshold should indicate Inflation');
   });
 });

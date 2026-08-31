@@ -1,5 +1,19 @@
 ﻿# HANDOFF
 
+## Last Session Summary (2026-08-30, GhostRegime R3 C1 inflation semantics)
+R3 baseline: `b8b1bf6d71f5f661a91403560b728222916e9b0e`. Bobby **explicitly authorized R3 C1**. Implementation PR: **#170**. Inflation core uses one scalar convention (+1 inflationary / −1 disinflationary). TLT/UUP numeric signs are implemented; economic interpretation and thresholds are unchanged. PDBC/TIP, satellites, Flip Watch, VAMS, allocations, 60/30/10, provider routing, and R2 persisted-only public reads are unchanged. No historical backfill.
+
+R3 implementation is complete; live activation remains pending controlled rollout. Repository default is `ghostregime-v1.0.3`. As of the PR **#170** review, live public `/api/ghostregime/today` reported `engine_version = ghostregime-v1` and `row_engine_version = ghostregime-v1` — an effective stale override older than the R3 default. The exact Vercel env value was not read from a file. Correct or remove `NEXT_PUBLIC_GHOSTREGIME_MODEL_VERSION` before the R3 force refresh, then verify the live effective version.
+
+**Next: R3 controlled production rollout.** R4 remains separately gated and is **not** authorized.
+
+## Priority for Next Session (GhostRegime)
+1. **R3 controlled production rollout** — do not begin R4
+2. Do not implement R4/R5/R6, and do not change 60/30/10 or VAMS
+3. GhostFlow: ordinary source monitoring only
+
+---
+
 ## Last Session Summary (2026-08-30, GhostRegime R2 operational containment)
 R2 baseline: `49c622cbf81d86357d80b2ec25cfb97d66db71e9`. Ordinary public `/today` is persisted-only (no provider fetch). `debug` / `force` / `refresh=scheduled` remain compute-capable and share `GHOSTREGIME_CRON_SECRET`. Failed compute does not re-fetch for diagnostics. Provider routing and Marketstack guard unchanged.
 

@@ -287,6 +287,7 @@ curl https://ghost-allocator.vercel.app/api/ghostregime/health
 | `STOOQ_API_KEY` | Stooq CSV download API key (required when Stooq serves the captcha/API-key gate instead of CSV for `/q/d/l/`). Append to requests server-side; do not expose as `NEXT_PUBLIC_*`. |
 | `MARKETSTACK_ACCESS_KEY` | Optional paid Marketstack fallback for core ETF symbols when Stooq fails. Required in Vercel Production for the live API used by the daily workflow. GitHub Actions secrets alone do not provide this env var to the deployed Vercel function. After adding/changing this env var, redeploy Production. |
 | `NEXT_PUBLIC_GHOSTREGIME_CUTOVER_DATE_UTC` | (Optional) Cutover date for seed vs persistence; default `2025-11-28T00:00:00Z`. |
+| `NEXT_PUBLIC_GHOSTREGIME_MODEL_VERSION` | (Optional) Overrides the repository default model version (`ghostregime-v1.0.3` in source). If production is pinned to an older value, a new deploy will **not** show the repository default until this env var is updated. Do not assume the live effective version equals the repo default. |
 
 Seed presence is not an env var: the app expects the seed file at `data/ghostregime/seed/ghostregime_replay_history.csv` in the repo. If missing or empty, today/explain/history return 503 NOT_SEEDED and the daily workflow skips.
 
@@ -375,8 +376,23 @@ curl -H "x-ghostregime-cron: YOUR_SECRET" \
 
 **If history or latest appears corrupted**:
 1. Check Blob storage directly (Vercel Dashboard)
-2. Verify model version matches (`ghostregime-v1.0.2`)
+2. Verify the **effective** model version (repository default `ghostregime-v1.0.3`, unless `NEXT_PUBLIC_GHOSTREGIME_MODEL_VERSION` overrides it)
 3. If needed, bump model version to start fresh (in `lib/ghostregime/config.ts`)
+
+### R3 post-deployment rollout (C1 inflation semantics)
+
+R2 made ordinary public `/today` persisted-only. Scheduled-refresh preflight does **not** invalidate a fresh row solely because `row_engine_version` differs from current `MODEL_VERSION`. R3 therefore does **not** activate on the next ordinary public read.
+
+After the R3 merge is deployed (do not run this from a local implementation branch):
+
+1. Deploy the merged R3 commit to production
+2. Verify the effective deployed `MODEL_VERSION` (check for an env override of `NEXT_PUBLIC_GHOSTREGIME_MODEL_VERSION`)
+3. Perform **one** authenticated force refresh (`?force=1` with `GHOSTREGIME_CRON_SECRET`)
+4. Verify the persisted row was computed under the new model version (`row_engine_version`)
+5. Verify public `/api/ghostregime/today` serves that persisted row
+6. Verify `/api/ghostregime/health` is healthy
+
+Do not force-refresh before the new deployment is live. Do not rely on the next scheduled refresh to pick up C1.
 
 ## Quick Reference
 

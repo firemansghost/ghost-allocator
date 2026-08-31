@@ -34,6 +34,8 @@ GhostRegime v1 is a market regime classifier + allocation system that operates i
 
 ### Inflation Axis Core Votes (4 votes)
 
+Inflation core uses one scalar convention: **+1 = inflationary**, **−1 = disinflationary**.
+
 1. **PDBC TR_63**:
    - ≥ +0.02 → Inflation (+1)
    - ≤ −0.02 → Disinflation (-1)
@@ -47,14 +49,16 @@ GhostRegime v1 is a market regime classifier + allocation system that operates i
    - (TIP ETF from Stooq, IEF from Stooq)
 
 3. **TLT TR_63**:
-   - ≥ +0.01 → Disinflation (+1)
-   - ≤ −0.01 → Inflation (-1)
+   - ≥ +0.01 → Disinflation (−1)
+   - ≤ −0.01 → Inflation (+1)
    - else 0
+   - Economic reading unchanged: rising TLT is disinflationary; falling TLT is inflationary.
 
 4. **UUP TR_63**:
-   - ≥ +0.01 → Disinflation (+1)
-   - ≤ −0.01 → Inflation (-1)
+   - ≥ +0.01 → Disinflation (−1)
+   - ≤ −0.01 → Inflation (+1)
    - else 0
+   - Economic reading unchanged: rising UUP is disinflationary; falling UUP is inflationary.
 
 **Tie-breaker**: If infl_total_score_pre_tiebreak (core + satellites) == 0, use sign of TR_21(PDBC):
 - Compute TR_21 from close-to-close returns on PDBC (or DBC proxy if PDBC unavailable)

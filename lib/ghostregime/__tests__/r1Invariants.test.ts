@@ -113,8 +113,9 @@ describe('R0 live-like inflation fixture', () => {
     assert.strictEqual(classifyRegime(1, finalInfl), 'REFLATION');
   });
 
-  it('test-local C1 that leaves core at 0 still ends at +1 with satellite', () => {
-    // Live 2026-08-28 votes: TLT −1, UUP +1. Analytical C1 only, not production.
+  it('C0→C1 relationship that leaves core at 0 still ends at +1 with satellite', () => {
+    // Live 2026-08-28 C0 votes: TLT −1, UUP +1. Formula relates old C0 to authorized C1.
+    // Production implements C1 signs directly; this is forensic math, not a production path.
     const tltVote = -1;
     const uupVote = 1;
     const c0Core = 0;
@@ -125,8 +126,8 @@ describe('R0 live-like inflation fixture', () => {
   });
 });
 
-describe('C1 characterization math (R0 analytical fixture, not production methodology)', () => {
-  it('C1_core = C0_core − 2×(tltVote + uupVote)', () => {
+describe('C0↔C1 relationship (R0 forensic math; production implements C1 signs directly)', () => {
+  it('C1_core = C0_core − 2×(oldTltVote + oldUupVote)', () => {
     const cases = [
       { c0: 2, tlt: 1, uup: 1, expected: -2 },
       { c0: 0, tlt: -1, uup: 1, expected: 0 },

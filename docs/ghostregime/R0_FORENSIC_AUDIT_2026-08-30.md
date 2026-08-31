@@ -6,6 +6,8 @@ This document preserves the completed **R0 read-only forensic model-impact audit
 
 This is a documentation-only record. It does **not** authorize production model, provider, workflow, UI, allocation, satellite, Flip Watch, VAMS, or test implementation. It does **not** authorize R3. It does **not** begin R1.
 
+**Status note (not a rewrite):** R3 later authorized C1 as prospective production methodology (`ghostregime-v1.0.3` repository default). This document remains the historical R0 evidence of C0 vs C1 and must continue to describe C0 as observed and C1 as the then-counterfactual.
+
 How to read this document — every quantitative claim belongs to one of these classes:
 
 | Class | Meaning |

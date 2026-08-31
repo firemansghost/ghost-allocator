@@ -226,11 +226,14 @@ export default function MethodologyPage() {
               </div>
               <div>
                 <strong className="text-zinc-300">Inflation axis signals:</strong>
+                <p className="mt-1">
+                  Inflation core uses a common sign convention: +1 = inflationary, −1 = disinflationary.
+                </p>
                 <ul className="mt-1 space-y-1 pl-4 list-disc">
                   <li>Commodities (PDBC trend)</li>
                   <li>Rates (TIP/IEF ratio)</li>
-                  <li>Dollar (UUP trend)</li>
-                  <li>Duration (TLT trend)</li>
+                  <li>Dollar (UUP trend): rising UUP → disinflationary → −1; falling UUP → inflationary → +1</li>
+                  <li>Duration (TLT trend): rising TLT → disinflationary → −1; falling TLT → inflationary → +1</li>
                 </ul>
               </div>
             </div>
