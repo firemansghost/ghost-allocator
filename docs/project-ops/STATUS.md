@@ -1,5 +1,31 @@
 ﻿# STATUS
 
+## Current State (GhostRegime — 2026-08-30 R1 test foundation)
+R1 baseline: `0d8f4c90126ee8185da770f103c9a658c63d7ad4` (`main` after PR **#167**). Tests and test infrastructure only. No production GhostRegime formulas, providers, APIs, UI, VAMS, or allocations changed.
+
+**R1 complete — canonical suite is `npm run test:ghostregime`**
+
+- Runner: `scripts/ghostregime/run-tests.ts` walks `lib/ghostregime/__tests__/` and `lib/ghostregime/parity/__tests__/` for `*.test.ts` (sorted; Windows-safe; no shell glob). **28 files** on this baseline.
+- `npm test` = `test:ghostregime` then unchanged `test:ghostflow`.
+- `verify:ghostregime` = build → lint → `test:ghostregime` (one authoritative test list).
+- New tests: `r1Invariants.test.ts` (stable); `r3InflationSemantics.characterization.test.ts`; `r4FlipWatch.characterization.test.ts` (includes stress helper); `r5Satellites.characterization.test.ts`; `r6UiTruth.characterization.test.ts`.
+- Exclusions: live/network/secret calls; public-GET / anonymous-debug / error-path fetch (R2, no clean seam); copy/legend static checks; opt-in `RUN_PARITY_TESTS=1` workbook rows.
+- Next work: **R2 — operational containment**. R3/R4/R5 remain gated. **60/30/10** still frozen.
+
+Canonical evidence: [R0_FORENSIC_AUDIT_2026-08-30.md](../ghostregime/R0_FORENSIC_AUDIT_2026-08-30.md). Test truth: [VALIDATION.md](../ghostregime/VALIDATION.md).
+
+This workstream is independent of GhostFlow source monitoring below.
+
+## Recommended next work (GhostRegime)
+1. **R2** — operational containment (public-read fetch, debug protection, error-path double fetch)
+2. Do **not** begin R3–R8 unless Bobby expands scope
+3. Do **not** change 60/30/10 or VAMS formulas/thresholds
+4. GhostFlow ordinary source monitoring remains a separate workstream (below)
+
+Last updated: 2026-08-30
+
+---
+
 ## Current State (GhostRegime — 2026-08-30 R0 forensic complete)
 R0 baseline: `019aa383d595c1f775885d1db270c985f8f993d5` (unchanged `main` after PR **#166**). No tracked GhostRegime code, tests, providers, workflows, or data were changed during R0.
 
