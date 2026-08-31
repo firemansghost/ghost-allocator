@@ -1,7 +1,8 @@
 /**
- * R5 CHARACTERIZATION — expected to change if R5 later redesigns satellites
+ * R5 CHARACTERIZATION — unresolved Commodity / PDBC model behavior (R5B)
  *
- * Diagnostic only. This is not a proposal to remove satellites.
+ * Diagnostic only. R5A corrected the false Freight alias; do not treat remaining
+ * PDBC TR21 Commodity-as-satellite behavior as a desired invariant. That is R5B.
  */
 
 import { describe, it } from 'node:test';
@@ -10,6 +11,7 @@ import {
   SATELLITE_CONFIGS,
   processSatellites,
   resolveSatelliteData,
+  isFallbackSemanticallyCompatible,
   type SatelliteDataProvider,
 } from '../satellites';
 
@@ -25,7 +27,7 @@ function config(series: string) {
   return found;
 }
 
-describe('R5 CHARACTERIZATION — current satellite config and commodity vote', () => {
+describe('R5 CHARACTERIZATION — current commodity vote (R5B model, unchanged)', () => {
   it('commodity satellite votes +1 when TR_21 is at/above its inflation threshold', () => {
     const score = processSatellites(
       [
@@ -58,7 +60,7 @@ describe('R5 CHARACTERIZATION — current satellite config and commodity vote', 
     assert.strictEqual(score, 1);
   });
 
-  it('Freight vote stays 0 at live-like TR21 ≈ 4.7% (Freight threshold 10%)', () => {
+  it('Freight vote stays 0 at live-like TR21 ≈ 4.7% if a Freight-labeled row were processed (threshold 10%)', () => {
     const score = processSatellites(
       [
         {
@@ -75,21 +77,22 @@ describe('R5 CHARACTERIZATION — current satellite config and commodity vote', 
   });
 });
 
-describe('R5 CHARACTERIZATION — fallback name semantics', () => {
-  it('Freight fallback name matches the commodity series (can inherit commodity TR21)', () => {
+describe('R5 CHARACTERIZATION — fallback name strings (not repaired in R5A)', () => {
+  it('Freight fallback name still points at the commodity series (alias is config debt; R5A rejects it)', () => {
     const freight = config(FREIGHT);
     assert.strictEqual(freight.fallback, COMMODITY);
     assert.ok(SATELLITE_CONFIGS.some((c) => c.series === freight.fallback));
+    assert.strictEqual(isFallbackSemanticallyCompatible(freight, config(COMMODITY)), false);
   });
 
-  it('Truflation fallback name does not match the commodity series (intended fallback fails to resolve)', () => {
+  it('Truflation fallback name does not match the commodity series (string is not repaired)', () => {
     const tru = config(TRUFLATION);
     assert.strictEqual(tru.fallback, 'Commodity Nowcast Basket');
     assert.ok(!SATELLITE_CONFIGS.some((c) => c.series === tru.fallback));
   });
 });
 
-describe('R5 CHARACTERIZATION — resolveSatelliteData fallback behavior', () => {
+describe('R5 CHARACTERIZATION — resolveSatelliteData after R5A containment', () => {
   const commodityOnly: SatelliteDataProvider = {
     async getLatestObservation(series: string) {
       if (series === COMMODITY) {
@@ -99,11 +102,9 @@ describe('R5 CHARACTERIZATION — resolveSatelliteData fallback behavior', () =>
     },
   };
 
-  it('Freight keeps Freight series name while consuming the commodity observation', async () => {
+  it('Freight does not consume the commodity observation (false alias rejected)', async () => {
     const row = await resolveSatelliteData(config(FREIGHT), commodityOnly, [], TODAY);
-    assert.ok(row);
-    assert.strictEqual(row.series, FREIGHT);
-    assert.strictEqual(row.value, 0.047);
+    assert.strictEqual(row, null);
   });
 
   it('Truflation does not resolve via the mismatched commodity fallback name', async () => {

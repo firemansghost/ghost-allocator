@@ -38,10 +38,19 @@ export interface MarketDataPoint {
 }
 
 export interface SatelliteData {
+  /** Requested / configured lane (processSatellites matches on this). */
   series: string;
   value: number;
   observationDate: Date;
   age_days: number;
+  /** Config series that actually supplied the observation (primary or one-hop fallback). */
+  resolvedSeries?: string;
+  /** Underlying instrument or provider identity (e.g. PDBC). */
+  underlyingSource?: string;
+  /** Underlying signal horizon where relevant (e.g. TR_21). */
+  underlyingHorizon?: string;
+  /** True when the observation came from a semantically compatible one-hop fallback. */
+  fallbackUsed?: boolean;
 }
 
 export interface AllocationOutput {

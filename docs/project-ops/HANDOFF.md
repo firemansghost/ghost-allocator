@@ -1,5 +1,23 @@
 ﻿# HANDOFF
 
+## Last Session Summary (2026-08-31 — GhostRegime R5A satellite containment)
+Bobby **explicitly authorized R5A only**. Implemented locally on `fix/ghostregime-r5a-satellite-containment`. **R5A AUTHORIZED / IMPLEMENTED LOCALLY — PR review pending.** Not live.
+
+R5A is behavior-neutral satellite correctness / provenance containment: semantic fallback guard (one-hop), truthful Commodity = PDBC TR21 receipts, as-of-safe PDBC Commodity calculation. No `MODEL_VERSION` bump. No forced refresh. No new satellite sources. Historical Blob rows untouched.
+
+**R5B — Commodity/PDBC model decision is NOT authorized.** Do not remove the PDBC TR21 Commodity satellite. Do not change satellite score math, thresholds, weights, TTL, decay, cap, or tie-break.
+
+**Next: review / deploy / verify R5A.** Do not automatically begin R5B.
+
+## Priority for Next Session (GhostRegime)
+1. Review / deploy / verify R5A if the local commit is accepted
+2. R5B remains gated and is **NOT authorized**
+3. R6 remains gated
+4. 60/30/10 and VAMS remain frozen
+5. GhostFlow remains separate
+
+---
+
 ## Last Session Summary (2026-08-31 — GhostRegime R4 live)
 R4 Option A is complete, merged, deployed, and independently verified. PR **#172** merged as `80a09a7ef52f686d086697641da447737c3f6580`. Production is READY on that exact commit.
 

@@ -29,11 +29,133 @@ export interface SatelliteConfig {
   fallback: string;
 }
 
+export interface SatelliteObservation {
+  value: number;
+  observationDate: Date;
+  underlyingSource?: string;
+  underlyingHorizon?: string;
+}
+
 export interface SatelliteDataProvider {
-  getLatestObservation(series: string): Promise<{
-    value: number;
-    observationDate: Date;
-  } | null>;
+  getLatestObservation(series: string, asOfDate?: Date): Promise<SatelliteObservation | null>;
+}
+
+export const COMMODITY_NOWCAST_SERIES = 'Commodity Nowcast Basket (Energy+Metals)';
+export const COMMODITY_PDBC_RECEIPT_LABEL = 'Commodity proxy (PDBC TR21)';
+
+const THRESHOLD_KEYS = [
+  'inflation_vote_gte_pp',
+  'disinflation_vote_lte_pp',
+  'inflation_vote_gte',
+  'disinflation_vote_lte',
+] as const;
+
+/**
+ * Signal-family identity for fallback compatibility.
+ * Return horizons stay distinct (tr_21 ≠ tr_63). Cleveland/Truflation both map
+ * to delta-7d YoY percentage-point units when cadence/thresholds otherwise match.
+ */
+export function satelliteSignalFamily(signalDefinition: string): string {
+  const trMatch = signalDefinition.match(/tr_(\d+)/);
+  if (trMatch) {
+    return `tr_${trMatch[1]}`;
+  }
+  if (signalDefinition.includes('level_index')) {
+    return 'level_index';
+  }
+  if (signalDefinition.includes('delta_') && signalDefinition.includes('_pp')) {
+    const horizon = signalDefinition.includes('7d') ? '7d' : 'unknown';
+    return `delta_${horizon}_yoy_pp`;
+  }
+  return signalDefinition;
+}
+
+function thresholdsEqual(
+  a: SatelliteConfig['thresholds'],
+  b: SatelliteConfig['thresholds']
+): boolean {
+  for (const key of THRESHOLD_KEYS) {
+    if (a[key] !== b[key]) return false;
+  }
+  return true;
+}
+
+function voteMappingEqual(
+  a: SatelliteConfig['vote_mapping'],
+  b: SatelliteConfig['vote_mapping']
+): boolean {
+  return a['+1'] === b['+1'] && a['0'] === b['0'] && a['-1'] === b['-1'];
+}
+
+/**
+ * Conservative one-hop fallback compatibility.
+ * Prefer false-negative containment: ambiguous aliases are rejected.
+ */
+export function isFallbackSemanticallyCompatible(
+  primary: SatelliteConfig,
+  fallback: SatelliteConfig
+): boolean {
+  if (primary.axis !== fallback.axis) return false;
+  if (primary.source_type !== fallback.source_type) return false;
+  if (satelliteSignalFamily(primary.signal_definition) !== satelliteSignalFamily(fallback.signal_definition)) {
+    return false;
+  }
+  if (!thresholdsEqual(primary.thresholds, fallback.thresholds)) return false;
+  if (!voteMappingEqual(primary.vote_mapping, fallback.vote_mapping)) return false;
+  if (primary.vote_weight !== fallback.vote_weight) return false;
+  if (primary.ttl_days !== fallback.ttl_days) return false;
+  if (primary.half_life_days !== fallback.half_life_days) return false;
+  return true;
+}
+
+function formatUnderlyingSource(data: {
+  underlyingSource?: string;
+  underlyingHorizon?: string;
+  resolvedSeries?: string;
+  fallbackUsed?: boolean;
+}): string | undefined {
+  if (data.underlyingSource === 'PDBC' && (data.underlyingHorizon === 'TR_21' || data.underlyingHorizon === 'tr_21')) {
+    return 'PDBC TR21';
+  }
+  if (data.underlyingSource && data.underlyingHorizon) {
+    return `${data.underlyingSource} ${data.underlyingHorizon.replace(/^TR_/, 'TR').replace('_', '')}`;
+  }
+  if (data.underlyingSource) return data.underlyingSource;
+  if (data.fallbackUsed && data.resolvedSeries) return data.resolvedSeries;
+  return undefined;
+}
+
+/**
+ * Receipt label/note for persisted provenance. Scoring is unchanged.
+ * Historical Blob rows are not rewritten; this applies to newly computed rows.
+ */
+export function satelliteReceiptPresentation(
+  config: SatelliteConfig,
+  data: SatelliteData
+): { label: string; note: string } {
+  const decayFactor = Math.pow(0.5, data.age_days / config.half_life_days);
+  const source = formatUnderlyingSource(data);
+  const isCommodityLane = config.series === COMMODITY_NOWCAST_SERIES;
+  const isPdbcTr21 =
+    data.underlyingSource === 'PDBC' &&
+    (data.underlyingHorizon === 'TR_21' || data.underlyingHorizon === 'tr_21');
+
+  let label = config.series;
+  if (isCommodityLane && isPdbcTr21) {
+    label = COMMODITY_PDBC_RECEIPT_LABEL;
+  } else if (data.fallbackUsed && data.resolvedSeries && data.resolvedSeries !== config.series) {
+    label = `${config.series} (via ${data.resolvedSeries})`;
+  }
+
+  const parts = [`Age: ${data.age_days}d, decay: ${(decayFactor * 100).toFixed(1)}%`];
+  if (source) {
+    parts.push(`source: ${source}`);
+  }
+  if (data.fallbackUsed && data.resolvedSeries) {
+    parts.push(`fallback used: ${data.resolvedSeries}`);
+  }
+
+  return { label, note: parts.join('; ') };
 }
 
 /**
@@ -158,34 +280,30 @@ export class DefaultSatelliteDataProvider implements SatelliteDataProvider {
     this.marketData = data;
   }
 
-  async getLatestObservation(series: string): Promise<{
-    value: number;
-    observationDate: Date;
-  } | null> {
-    // Escape hatch: Commodity Nowcast Basket is always available
-    if (series === 'Commodity Nowcast Basket (Energy+Metals)') {
-      return this.getCommodityBasketValue();
+  async getLatestObservation(series: string, asOfDate?: Date): Promise<SatelliteObservation | null> {
+    // Live derived source only: PDBC TR21 Commodity proxy.
+    // Cleveland / Truflation / ISM / NFIB / real Freight remain unimplemented stubs.
+    if (series === COMMODITY_NOWCAST_SERIES) {
+      return this.getCommodityBasketValue(asOfDate);
     }
 
-    // Other series are stubs for now
-    // In production, these would fetch from real sources
     return null;
   }
 
-  private getCommodityBasketValue(): {
-    value: number;
-    observationDate: Date;
-  } | null {
-    // Derive from PDBC (commodity ETF) TR_21
+  private getCommodityBasketValue(asOfDate?: Date): SatelliteObservation | null {
+    // Derive from PDBC (commodity ETF) TR_21, using only observations on or before as-of.
     const pdbcData = getDataForSymbol(this.marketData, MARKET_SYMBOLS.PDBC);
-    if (pdbcData.length < TR_21) return null;
+    const filtered = asOfDate ? pdbcData.filter((d) => d.date <= asOfDate) : pdbcData;
+    if (filtered.length < TR_21) return null;
 
-    const tr = calculateTR(pdbcData, TR_21);
-    const latestDate = pdbcData[pdbcData.length - 1].date;
+    const tr = calculateTR(filtered, TR_21, asOfDate);
+    const latestDate = filtered[filtered.length - 1].date;
 
     return {
       value: tr,
       observationDate: latestDate,
+      underlyingSource: 'PDBC',
+      underlyingHorizon: 'TR_21',
     };
   }
 }
@@ -259,7 +377,8 @@ export function processSatellites(
 }
 
 /**
- * Resolve satellite data with fallback chain
+ * Resolve satellite data with one-hop semantically compatible fallback.
+ * Do not recurse. Do not alias incompatible lanes.
  */
 export async function resolveSatelliteData(
   config: SatelliteConfig,
@@ -267,20 +386,25 @@ export async function resolveSatelliteData(
   marketData: any[],
   today: Date
 ): Promise<SatelliteData | null> {
-  // Try primary series
-  let observation = await provider.getLatestObservation(config.series);
+  void marketData;
 
-  // If not available, try fallback chain
+  let observation = await provider.getLatestObservation(config.series, today);
+  let fallbackUsed = false;
+  let resolvedSeries = config.series;
+
   if (!observation && config.fallback !== 'None') {
     const fallbackConfig = SATELLITE_CONFIGS.find((c) => c.series === config.fallback);
-    if (fallbackConfig) {
-      observation = await provider.getLatestObservation(fallbackConfig.series);
+    if (fallbackConfig && isFallbackSemanticallyCompatible(config, fallbackConfig)) {
+      observation = await provider.getLatestObservation(fallbackConfig.series, today);
+      if (observation) {
+        fallbackUsed = true;
+        resolvedSeries = fallbackConfig.series;
+      }
     }
   }
 
   if (!observation) return null;
 
-  // Calculate age in days
   const ageMs = today.getTime() - observation.observationDate.getTime();
   const ageDays = Math.floor(ageMs / (1000 * 60 * 60 * 24));
 
@@ -289,6 +413,10 @@ export async function resolveSatelliteData(
     value: observation.value,
     observationDate: observation.observationDate,
     age_days: ageDays,
+    resolvedSeries,
+    underlyingSource: observation.underlyingSource,
+    underlyingHorizon: observation.underlyingHorizon,
+    fallbackUsed,
   };
 }
 

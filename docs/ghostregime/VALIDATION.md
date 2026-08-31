@@ -50,7 +50,20 @@ Deferred R6 product-truth (characterized, not desired invariants):
 - VAMS half-size is never described as “off” in product copy
 - rounded headline totals remain coherent
 
-R3 C1 inflation-sign normalization is now a **stable current invariant** (`r3InflationSemantics.test.ts`). R4 Flip Watch telemetry truth is now a **stable current invariant** (`r4FlipWatch.test.ts`). R5 remains gated. Characterization tests lock current satellite / UI-truth behavior so later diffs are obvious. They do not authorize those production changes.
+R3 C1 inflation-sign normalization is now a **stable current invariant** (`r3InflationSemantics.test.ts`). R4 Flip Watch telemetry truth is now a **stable current invariant** (`r4FlipWatch.test.ts`). R5A satellite correctness / provenance containment is now a **stable current invariant** (`r5aSatelliteContainment.test.ts`). R5B Commodity/PDBC model remains gated. Remaining `r5Satellites.characterization.test.ts` cases document unresolved R5B behavior; they are not desired invariants. R6 remains characterized, not authorized.
+
+### R5A satellite containment (now current invariant)
+
+Covered by `r5aSatelliteContainment.test.ts`:
+
+- Invalid semantic fallbacks are rejected (axis, cadence, signal family/horizon, threshold keys and values, vote mapping, weight, TTL, decay)
+- Freight cannot inherit Commodity / PDBC TR21
+- Truflation cannot acquire Commodity by a typo-only alias; a matching name would still be semantically rejected
+- Receipts identify the actual source; Commodity runtime provenance is PDBC TR21
+- PDBC-derived Commodity is as-of safe (no future PDBC row may influence a historical as-of)
+- Score / regime / allocation parity is preserved vs pre-R5A S0 on the reconstructed 2,280-date window
+- Default production provider still resolves only the PDBC Commodity proxy; Cleveland / Truflation / ISM / NFIB / Freight remain stubs
+- R5B remains characterization / deferred — do not promote PDBC TR21 Commodity-as-satellite into a permanent desired invariant
 
 ### R3 inflation vote semantics (now current invariant)
 

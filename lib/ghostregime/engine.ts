@@ -27,6 +27,7 @@ import {
   resolveSatelliteData,
   SATELLITE_CONFIGS,
   DefaultSatelliteDataProvider,
+  satelliteReceiptPresentation,
 } from './satellites';
 import { computeAllVamsStates, computeVamsScore } from './vams';
 import { computeAllocations } from './allocations';
@@ -380,12 +381,13 @@ function buildSatelliteReceipts(
 
     // Only include if non-zero
     if (effectiveVote !== 0) {
+      const presentation = satelliteReceiptPresentation(config, data);
       receipts.push({
         key: `satellite_${config.series.replace(/\s+/g, '_').toLowerCase()}`,
-        label: config.series,
+        label: presentation.label,
         vote: effectiveVote, // Fractional vote (after decay)
         direction: effectiveVote > 0 ? 'Inflation' : 'Disinflation',
-        note: `Age: ${data.age_days}d, decay: ${(decayFactor * 100).toFixed(1)}%`,
+        note: presentation.note,
       });
     }
   }
