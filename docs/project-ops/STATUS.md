@@ -1,5 +1,34 @@
 ﻿# STATUS
 
+## Current State (GhostRegime — 2026-08-31 R4 Flip Watch live)
+R4 merge: PR **#172** → `80a09a7ef52f686d086697641da447737c3f6580` (`main`). Production deployment was verified on that exact merge commit.
+
+**R4 OPTION A LIVE — Flip Watch is truthful transition telemetry**
+
+- Production: READY, target production, commit `80a09a7…`.
+- Model remains `ghostregime-v1.0.3`. No model-version bump and no new Blob namespace.
+- Existing persisted row was intentionally preserved. R4 did not force-recompute or rewrite the current snapshot.
+- Independently verified `/today` (HTTP 200): `regime = INFLATION`, `data_source = persisted`, `engine_version = ghostregime-v1.0.3`, `build_commit = 80a09a7…`.
+- Persisted-row provenance: `date = 2026-08-28`, `row_build_commit = c19ccdc…` (prior valid R3 snapshot), `row_engine_version = ghostregime-v1.0.3`, `flip_watch_status = NONE`.
+- `/health`: HTTP 200, `ok true`, `status OK`, `latest_date 2026-08-28`, `age_days 3`, `max_age_days 4`, `is_fresh true`, `engine_version ghostregime-v1.0.3`, `build_commit 80a09a7…`.
+- Live methodology verified: Flip Watch is transition telemetry versus the prior unique persisted trading snapshot; it does not delay the regime or allocations. Strong transition is `max(|risk score|, |inflation score|) >= 2`; the new regime and allocations are already active.
+- No forced refresh. The next ordinary scheduled compute will produce the first post-R4 Flip Watch telemetry status if a regime transition exists.
+- Allocations, VAMS, satellites, providers, and **60/30/10** unchanged.
+
+Decision already recorded: [DECISIONS.md](./DECISIONS.md) entry **2026-08-31 — GhostRegime Flip Watch remains telemetry (R4 Option A)**. This checkpoint records rollout facts, not a new decision.
+
+This workstream is independent of GhostFlow source monitoring below.
+
+## Recommended next work (GhostRegime)
+1. **R5 — satellite cleanup forensic audit** (read-only). **R5 implementation is NOT authorized.**
+2. Do **not** begin R5 implementation or R6 unless Bobby expands scope
+3. Do **not** change 60/30/10 or VAMS formulas/thresholds
+4. GhostFlow ordinary source monitoring remains a separate workstream (below)
+
+Last updated: 2026-08-31
+
+---
+
 ## Current State (GhostRegime — 2026-08-31 R4 Flip Watch telemetry truth)
 R4 baseline: `5dc578eddccaf6ab060eb470ba50c39a6ec27ced` (`main` after PR **#171**). Bobby **explicitly authorized R4 Option A**.
 
