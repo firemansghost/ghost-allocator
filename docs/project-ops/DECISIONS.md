@@ -1,5 +1,29 @@
 # DECISIONS
 
+## 2026-08-31 — GhostRegime R5A satellite correctness/provenance containment authorized
+Choice:
+- Bobby explicitly authorized **R5A only** — behavior-neutral satellite correctness / provenance containment.
+- False source aliasing is correctness debt, not a model feature. A fallback observation may not masquerade as a semantically different lane.
+- R5A must be score / regime / allocation neutral on the defensible reconstructed comparison window.
+- PDBC TR21 as the live Commodity satellite remains unchanged pending **R5B**. R5A does not decide whether that proxy belongs in the model.
+- No `MODEL_VERSION` bump. Repository default remains `ghostregime-v1.0.3`. No new Blob namespace. No forced refresh. Historical Blob rows are not rewritten.
+- No new real satellite sources, credentials, or provider routing. Cleveland / Truflation / ISM / NFIB / real Freight remain stubs.
+- R6 remains separate and is **not** authorized by this decision.
+
+Why:
+- Production is not a true seven-satellite system. The only live derived source is Commodity, which is PDBC TR21.
+- Freight could consume that same PDBC TR21 observation while keeping Freight identity and Freight thresholds. Persisted history contains false Freight receipts from that alias.
+- Repairing Truflation’s fallback string would be semantically unsafe (PDBC TR21 scored as Truflation δ7d YoY pp).
+- Reconstructed S1 (genuine Commodity only, no Freight alias) produced zero score / axis / regime / allocation differences vs S0 on 2,280 dates. Receipt/provenance impact is real; the `[-1,+1]` cap hid duplicate Freight score impact.
+
+Consequences:
+- Fallback resolution is one-hop and requires semantic compatibility. Invalid aliases are rejected.
+- New compute receipts disclose actual source (Commodity proxy (PDBC TR21)). Historical rows stay as written.
+- PDBC-derived Commodity calculation is as-of safe.
+- R5B — Commodity/PDBC model decision — remains separately gated and is **not** authorized.
+
+---
+
 ## 2026-08-31 — GhostRegime Flip Watch remains telemetry (R4 Option A)
 Choice:
 - Bobby explicitly authorized **R4 Option A — KEEP TELEMETRY, FIX TRUTH/LOGIC**.

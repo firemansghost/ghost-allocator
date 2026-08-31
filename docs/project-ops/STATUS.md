@@ -1,5 +1,32 @@
 ﻿# STATUS
 
+## Current State (GhostRegime — 2026-08-31 R5A satellite containment)
+**R5A AUTHORIZED / IMPLEMENTED LOCALLY — PR review pending.** Not live.
+
+Bobby explicitly authorized R5A only: behavior-neutral satellite correctness / provenance containment. R5B is **NOT authorized**.
+
+- Invalid semantic fallbacks are rejected. Freight cannot inherit Commodity/PDBC. Truflation cannot acquire Commodity by a typo-only alias.
+- Commodity runtime provenance is PDBC TR21. New receipts must not present a fetched independent Energy+Metals basket. Historical Blob rows are not rewritten.
+- PDBC-derived Commodity calculation is as-of safe.
+- Model remains `ghostregime-v1.0.3`. No model-version bump, no new Blob namespace, no forced refresh, no new satellite sources.
+- Score / regime / allocation parity vs pre-R5A S0 is required on the reconstructed 2,280-date window before this is treated as merge-ready.
+- Next after R5A is review / deploy / verify R5A — **not** automatic R5B implementation.
+
+Decision already recorded: [DECISIONS.md](./DECISIONS.md) entry **2026-08-31 — GhostRegime R5A satellite correctness/provenance containment authorized**.
+
+This workstream is independent of GhostFlow source monitoring below.
+
+## Recommended next work (GhostRegime)
+1. Review / deploy / verify R5A (not live until that happens)
+2. **R5B — Commodity/PDBC model decision remains NOT authorized**
+3. Do **not** begin R6 unless Bobby expands scope
+4. Do **not** change 60/30/10 or VAMS formulas/thresholds
+5. GhostFlow ordinary source monitoring remains a separate workstream (below)
+
+Last updated: 2026-08-31
+
+---
+
 ## Current State (GhostRegime — 2026-08-31 R4 Flip Watch live)
 R4 merge: PR **#172** → `80a09a7ef52f686d086697641da447737c3f6580` (`main`). Production deployment was verified on that exact merge commit.
 

@@ -218,6 +218,29 @@ satellite_combine_rules:
   tie_breaker_after_satellites: "if infl_total_score == 0 use sign(TR_21(PDBC)) with >=0 inflationary else disinflationary"
 ```
 
+### Runtime satellite layer (R5A)
+
+Production is **not** a true seven-satellite system. Thresholds, weights, TTL, decay, cap, and the PDBC TR21 inflation tie-break above are unchanged.
+
+**LIVE today**
+- Commodity Nowcast Basket is a **PDBC TR21-derived proxy**. Runtime receipts must disclose that provenance (`Commodity proxy (PDBC TR21)` or equivalent). This does **not** decide whether PDBC TR21 belongs in the model (R5B).
+
+**NOT IMPLEMENTED (stubs; no live fetch, no new credentials)**
+- Cleveland Fed Inflation Nowcast YoY
+- Truflation YoY
+- ISM Manufacturing Prices Paid
+- ISM Services Prices Paid
+- NFIB Price Plans
+- real Freight / BDI / Freightos
+
+**Fallback containment**
+- Resolution is **one-hop**. Fallback chains are not walked recursively.
+- A fallback may be used only when primary and fallback configs are semantically compatible: same axis, source cadence/`source_type`, signal family (including return horizon), threshold keys **and** values, vote mapping, vote weight, TTL, and half-life.
+- Invalid source aliases are rejected. Freight cannot inherit Commodity/PDBC (weekly TR63 ±10% vs daily-derived TR21 ±2%). Truflation cannot acquire Commodity by repairing the fallback string; even a matching name is semantically incompatible (δ7d YoY pp vs TR21).
+- ISM Services ↔ NFIB and NFIB ↔ ISM Manufacturing are rejected (level thresholds differ). ISM Manufacturing ↔ ISM Services and Cleveland ↔ Truflation remain eligible only because current configs match on the compatibility fields above; both pairs are still stubs.
+
+R5B (whether PDBC TR21 belongs as the Commodity satellite, and the three existing PDBC roles) remains deferred.
+
 ## Flip Watch
 
 Flip Watch is **transition telemetry**. It does not confirm, delay, suppress, or approve regime changes. The classified regime and allocations apply immediately.
