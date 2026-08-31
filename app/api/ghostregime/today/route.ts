@@ -37,14 +37,14 @@ export async function GET(request: Request) {
     );
   }
 
-  const needsCronSecret = force || scheduledRefresh;
+  const needsCronSecret = debug || force || scheduledRefresh;
   if (needsCronSecret) {
     const cronSecret = process.env.GHOSTREGIME_CRON_SECRET;
     if (!cronSecret) {
       return NextResponse.json(
         {
           error: 'UNAUTHORIZED',
-          message: 'force/scheduled refresh requires GHOSTREGIME_CRON_SECRET to be configured',
+          message: 'debug, force, and scheduled refresh require GHOSTREGIME_CRON_SECRET to be configured',
         },
         { status: 401 }
       );
@@ -58,7 +58,7 @@ export async function GET(request: Request) {
       return NextResponse.json(
         {
           error: 'UNAUTHORIZED',
-          message: 'force/scheduled refresh requires valid cron secret',
+          message: 'debug, force, and scheduled refresh require a valid cron secret',
         },
         { status: 401 }
       );

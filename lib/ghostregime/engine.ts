@@ -424,6 +424,36 @@ export async function getGhostRegimeToday(
   const storage = getStorageAdapter();
   const latest = await storage.readLatest();
 
+  // R2: ordinary public read is persisted-state only — never a refresh trigger
+  if (!includeDebug && !force && !scheduledRefresh) {
+    if (latest) {
+      return attachServeMetadata(
+        {
+          ...latest,
+          run_date_utc: formatISO(runDateUtc, { representation: 'date' }),
+          data_source: 'persisted',
+          engine_version: MODEL_VERSION,
+          build_commit:
+            process.env.VERCEL_GIT_COMMIT_SHA || process.env.NEXT_PUBLIC_BUILD_COMMIT || 'unknown',
+        },
+        {
+          runDateUtc,
+          force: false,
+          refresh_outcome: 'served_persisted_snapshot',
+          persisted_snapshot_preserved: true,
+        }
+      );
+    }
+    const notReadyError = new Error('GHOSTREGIME_NOT_READY') as Error & {
+      diagnostics?: Record<string, unknown>;
+    };
+    notReadyError.diagnostics = {
+      stale_reason: 'NO_PERSISTED_SNAPSHOT',
+      asof_date_attempted: null,
+    };
+    throw notReadyError;
+  }
+
   // Scheduled cron: skip market fetch when persisted latest passes health-aligned preflight
   if (scheduledRefresh && !includeDebug && !force) {
     const preflight = evaluateScheduledRefreshPreflight(latest, runDateUtc);
@@ -461,6 +491,14 @@ export async function getGhostRegimeToday(
     MARKET_SYMBOLS.VIX,
   ];
 
+  // First compute-attempt context for the outer catch — never refetch just to rebuild diagnostics
+  let firstFetchStart: Date | undefined;
+  let firstFetchEnd: Date | undefined;
+  let firstMarketData: MarketDataPoint[] | undefined;
+  let firstProviderDiagnostics: ProviderDiagnostics | undefined;
+  let firstAsofDate: Date | null | undefined;
+  let firstDiagnostics: ReturnType<typeof checkCoreSymbolStatus> | undefined;
+
   // Compute for today
   try {
     // Fetch market data - need at least 400 trading days for VAMS (TR_252 + vol_63)
@@ -468,6 +506,8 @@ export async function getGhostRegimeToday(
     const endDate = new Date();
     const startDate = new Date(endDate);
     startDate.setDate(startDate.getDate() - GHOSTREGIME_MARKET_FETCH_CALENDAR_DAYS);
+    firstFetchStart = startDate;
+    firstFetchEnd = endDate;
 
     const allSymbols = Object.values(MARKET_SYMBOLS);
     const marketData = await defaultMarketDataProvider.getHistoricalPrices(
@@ -475,9 +515,11 @@ export async function getGhostRegimeToday(
       startDate,
       endDate
     );
+    firstMarketData = marketData;
 
     // Get provider diagnostics (resolved IDs, errors)
     const providerDiagnostics = defaultMarketDataProvider.getDiagnostics();
+    firstProviderDiagnostics = providerDiagnostics;
 
     if (marketData.length === 0) {
       // Return stale data if available, or 503
@@ -534,9 +576,11 @@ export async function getGhostRegimeToday(
 
     // Compute asof_date as minimum of last available dates across core instruments
     const asofDate = computeAsofDate(marketData, coreSymbols);
+    firstAsofDate = asofDate;
     
     // Check core symbol status and build diagnostics
     const diagnostics = checkCoreSymbolStatus(marketData, asofDate, providerDiagnostics);
+    firstDiagnostics = diagnostics;
     
     // VAMS history check is now handled in checkCoreSymbolStatus (requires ≥400 obs)
     
@@ -795,55 +839,44 @@ export async function getGhostRegimeToday(
     });
   } catch (error) {
     console.error('Error computing GhostRegime:', error);
-    
-    // Return stale data if available with diagnostics
+
+    // R2: reuse first-attempt state only — do not call getHistoricalPrices again
     if (latest) {
-      let diagnostics: ReturnType<typeof checkCoreSymbolStatus> | null = null;
+      const providerDiagnostics =
+        firstProviderDiagnostics ?? defaultMarketDataProvider.getDiagnostics();
+      let diagnostics = firstDiagnostics ?? null;
       let obsPayload: Record<string, unknown> = {};
-      let pdCatch: ProviderDiagnostics | undefined;
-      try {
-        const endDate = new Date();
-        const startDate = new Date(endDate);
-        startDate.setDate(startDate.getDate() - GHOSTREGIME_MARKET_FETCH_CALENDAR_DAYS);
-        const allSymbols = Object.values(MARKET_SYMBOLS);
-        const marketData = await defaultMarketDataProvider.getHistoricalPrices(
-          allSymbols,
-          startDate,
-          endDate
-        );
-        const providerDiagnostics = defaultMarketDataProvider.getDiagnostics();
-        pdCatch = providerDiagnostics;
-        if (marketData.length > 0) {
-          const asofDate = computeAsofDate(marketData, coreSymbols);
-          diagnostics = checkCoreSymbolStatus(marketData, asofDate, providerDiagnostics);
-          const payloadReason =
-            !asofDate
+
+      if (firstMarketData && firstFetchStart && firstFetchEnd) {
+        const asofDate =
+          firstAsofDate !== undefined
+            ? firstAsofDate
+            : firstMarketData.length > 0
+              ? computeAsofDate(firstMarketData, coreSymbols)
+              : null;
+        if (!diagnostics) {
+          diagnostics = checkCoreSymbolStatus(
+            firstMarketData,
+            asofDate ?? null,
+            providerDiagnostics
+          );
+        }
+        const payloadReason =
+          firstMarketData.length === 0
+            ? 'MARKET_DATA_UNAVAILABLE'
+            : !asofDate
               ? 'MISSING_CORE_SERIES'
               : diagnostics && !diagnostics.allOk
                 ? 'INSUFFICIENT_HISTORY'
                 : 'DIAGNOSTICS_SNAPSHOT';
-          obsPayload = buildStaleObservationPayload(
-            diagnostics,
-            providerDiagnostics,
-            asofDate,
-            startDate,
-            endDate,
-            payloadReason
-          );
-        } else {
-          diagnostics = checkCoreSymbolStatus(marketData, null, providerDiagnostics);
-          obsPayload = buildStaleObservationPayload(
-            diagnostics,
-            providerDiagnostics,
-            null,
-            startDate,
-            endDate,
-            'MARKET_DATA_UNAVAILABLE'
-          );
-        }
-      } catch {
-        // Diagnostics failed — return top-level stale fields only
-        pdCatch = defaultMarketDataProvider.getDiagnostics();
+        obsPayload = buildStaleObservationPayload(
+          diagnostics,
+          providerDiagnostics,
+          asofDate ?? null,
+          firstFetchStart,
+          firstFetchEnd,
+          payloadReason
+        );
       }
 
       const errMsg = error instanceof Error ? error.message : 'FETCH_ERROR';
@@ -861,10 +894,11 @@ export async function getGhostRegimeToday(
         {
           runDateUtc,
           force,
+          scheduled: scheduledRefresh,
           refresh_outcome: 'error_carry_forward_with_diagnostics',
           persisted_snapshot_preserved: true,
           stale_reason: errMsg,
-          providerDiagnostics: pdCatch,
+          providerDiagnostics,
         }
       );
     }

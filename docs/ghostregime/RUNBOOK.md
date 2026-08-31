@@ -103,32 +103,52 @@ curl -H "x-ghostregime-cron: YOUR_SECRET" \
 ## Endpoints Reference
 
 ### `/api/ghostregime/today`
-**Normal usage** (read-only):
+
+**Public read** (persisted-state only; no refresh):
 ```bash
 curl https://ghost-allocator.vercel.app/api/ghostregime/today
 ```
-- Returns persisted latest row
+- Serves persisted latest only
+- Does **not** call market providers
+- Does **not** persist
 - `data_source: "persisted"`
+- `serve_metadata.refresh_attempt: "read"`
 - No authentication required
+- If no persisted latest exists: `503 GHOSTREGIME_NOT_READY` (`stale_reason: NO_PERSISTED_SNAPSHOT`) — still no provider fetch
 
-**Force refresh** (requires secret):
+**Scheduled refresh** (requires GhostRegime cron secret):
+```bash
+curl -H "x-ghostregime-cron: YOUR_SECRET" \
+  "https://ghost-allocator.vercel.app/api/ghostregime/today?refresh=scheduled"
+```
+- May skip provider fetch when existing preflight says the snapshot is fresh
+- Otherwise computes and persists under existing rules
+- Query `cron_secret=` is still accepted; prefer the header
+
+**Force refresh** (requires GhostRegime cron secret):
 ```bash
 curl -H "x-ghostregime-cron: YOUR_SECRET" \
   "https://ghost-allocator.vercel.app/api/ghostregime/today?force=1&cb=$(date +%s)"
 ```
 - Recomputes fresh from market data
-- Persists if `stale=false`
+- Persists if `stale=false` and the persist gate accepts the row
 - `data_source: "computed_forced"` (persisted) vs `"computed_forced_unpersisted"` (compute succeeded but blob write was skipped — see `serve_metadata.persist_rejected_reason`)
 - Returns `401` if secret missing/invalid
 
-**Debug mode** (no persistence):
+**Debug mode** (requires GhostRegime cron secret; no persistence):
 ```bash
-curl "https://ghost-allocator.vercel.app/api/ghostregime/today?debug=1"
+curl -H "x-ghostregime-cron: YOUR_SECRET" \
+  "https://ghost-allocator.vercel.app/api/ghostregime/today?debug=1"
 ```
-- Recomputes fresh with debug breakdown
+- Recomputes with debug breakdown
 - `data_source: "computed_debug"`
-- Includes `debug_votes` object
+- Includes `debug_votes` when compute succeeds
 - Never persists
+- Anonymous `?debug=1` / `true` / `yes` returns `401` before the engine/provider path
+
+Compute-capable modes (`debug`, `force`, `refresh=scheduled`) share the existing `GHOSTREGIME_CRON_SECRET` boundary (`x-ghostregime-cron` header or `cron_secret` query). Do not put real secrets in docs or logs.
+
+A failed compute uses first-attempt diagnostics only. The engine does **not** call `getHistoricalPrices()` a second time just to rebuild error diagnostics. The normal Stooq → Yahoo → Marketstack chain inside one fetch is unchanged.
 
 ### `/api/ghostregime/health`
 **Health check**:
@@ -166,7 +186,7 @@ curl https://ghost-allocator.vercel.app/api/ghostregime/health
 
 ### Workflow Fails with 401 Unauthorized
 
-**Symptom**: `❌ API error: UNAUTHORIZED - force mode requires valid cron secret`
+**Symptom**: `❌ API error: UNAUTHORIZED` — debug, force, or scheduled refresh without a valid cron secret
 
 **Cause**: `GHOSTREGIME_CRON_SECRET` not set or incorrect in GitHub Actions secrets
 
@@ -304,8 +324,9 @@ curl https://ghost-allocator.vercel.app/api/ghostregime/health | jq '.latest.dat
 ### Debug Regime Calculation
 
 ```bash
-# Get debug breakdown
-curl "https://ghost-allocator.vercel.app/api/ghostregime/today?debug=1" | jq '.debug_votes'
+# Get debug breakdown (requires GhostRegime cron secret)
+curl -H "x-ghostregime-cron: YOUR_SECRET" \
+  "https://ghost-allocator.vercel.app/api/ghostregime/today?debug=1" | jq '.debug_votes'
 ```
 
 ## Monitoring
@@ -370,9 +391,10 @@ curl -H "x-ghostregime-cron: SECRET" \
 curl https://ghost-allocator.vercel.app/api/ghostregime/health
 ```
 
-**Debug mode**:
+**Debug mode** (authenticated):
 ```bash
-curl "https://ghost-allocator.vercel.app/api/ghostregime/today?debug=1"
+curl -H "x-ghostregime-cron: SECRET" \
+  "https://ghost-allocator.vercel.app/api/ghostregime/today?debug=1"
 ```
 
 **Normal read**:

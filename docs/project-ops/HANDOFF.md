@@ -1,5 +1,19 @@
 ﻿# HANDOFF
 
+## Last Session Summary (2026-08-30, GhostRegime R2 operational containment)
+R2 baseline: `49c622cbf81d86357d80b2ec25cfb97d66db71e9`. Ordinary public `/today` is persisted-only (no provider fetch). `debug` / `force` / `refresh=scheduled` remain compute-capable and share `GHOSTREGIME_CRON_SECRET`. Failed compute does not re-fetch for diagnostics. Provider routing and Marketstack guard unchanged.
+
+Canonical suite: **29 files** via `npm run test:ghostregime`. New: `r2OperationalContainment.test.ts`.
+
+R3 is **not** authorized by R2. R4/R5/R6 untouched. 60/30/10 frozen. Decision recorded in `DECISIONS.md` (read/compute separation). **Next: R3 — inflation semantics product gate.** Do not start R3 in this thread.
+
+## Priority for Next Session (GhostRegime)
+1. **R3** only if Bobby explicitly authorizes inflation-sign / model-version policy
+2. Do not implement R4/R5/R6, and do not change 60/30/10 or VAMS
+3. GhostFlow: ordinary source monitoring only
+
+---
+
 ## Last Session Summary (2026-08-30, GhostRegime R1 test foundation)
 R1 baseline: `0d8f4c90126ee8185da770f103c9a658c63d7ad4`. Canonical command: `npm run test:ghostregime` (`scripts/ghostregime/run-tests.ts`, **28 files**). `npm test` now runs the complete GhostRegime deterministic suite plus existing GhostFlow. `verify:ghostregime` is build + lint + that same suite.
 
