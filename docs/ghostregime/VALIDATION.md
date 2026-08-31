@@ -30,13 +30,18 @@ Live/network/secret-dependent verification is **not** part of `test:ghostregime`
 | **Current-behavior characterization** | Documents what the code does today; expected to change in a named later phase (`r3*.characterization.test.ts`, `r4*.characterization.test.ts`, `r5*.characterization.test.ts`, `r6*.characterization.test.ts`). |
 | **Deferred desired behavior** | Not installed as passing R1 invariants. Become authoritative when the corresponding fix lands. |
 
-Deferred R2 targets (no R1 failing tests; no production change):
+### R2 operational containment (now current invariants)
 
-- normal public GET performs no provider fetch
-- anonymous debug cannot reach paid fallback
-- error path performs no duplicate provider fetch
+Covered by `r2OperationalContainment.test.ts` (auto-discovered by the canonical runner):
 
-Existing `scheduledRefreshEngine.test.ts` characterizes **scheduled** preflight skip only. Public-read / debug / error-path fetch tests need engine/API seams and wait for R2.
+- ordinary public `getGhostRegimeToday(false, false, false)` with persisted latest: `getHistoricalPrices` count = 0, `data_source = persisted`
+- ordinary public read with no latest: `GHOSTREGIME_NOT_READY` / `NO_PERSISTED_SNAPSHOT`, fetch count = 0, no file created
+- force-mode compute error: first-attempt fetch only (orchestration count = 1), last-known-good stale carry-forward
+- anonymous `?debug=1` / `true` / `yes`: HTTP 401, fetch count = 0
+- debug with no configured cron secret: HTTP 401
+- authorized `debug=1` + `x-ghostregime-cron`: reaches compute, does not persist
+
+Scheduled preflight skip remains in `scheduledRefreshEngine.test.ts`. Provider routing / Marketstack guard tests remain unchanged.
 
 Deferred R6 product-truth (characterized, not desired invariants):
 

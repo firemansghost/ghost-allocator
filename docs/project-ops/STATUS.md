@@ -1,5 +1,31 @@
 ﻿# STATUS
 
+## Current State (GhostRegime — 2026-08-30 R2 operational containment)
+R2 baseline: `49c622cbf81d86357d80b2ec25cfb97d66db71e9` (`main` after PR **#168**). Narrow operations fix only.
+
+**R2 complete — public read persisted-only; debug authenticated; no error-path second fetch**
+
+- Ordinary public `/api/ghostregime/today` serves persisted latest with **zero** `getHistoricalPrices()` calls. Missing latest → `503 GHOSTREGIME_NOT_READY` / `NO_PERSISTED_SNAPSHOT`, still no fetch.
+- `debug=1` now requires the existing GhostRegime cron secret (same header/query as force/scheduled). Anonymous debug is 401 before the engine.
+- Outer engine catch reuses first-attempt diagnostics; orchestration-level fetch count on a failed compute is **1**, not 2.
+- Marketstack guard and Stooq → Yahoo → Marketstack routing are unchanged.
+- Canonical suite: **29 files** (`r2OperationalContainment.test.ts` auto-discovered).
+- Next work: **R3 — inflation semantics, explicit product gate**. R2 completion does **not** authorize R3. R4/R5/R6 untouched. **60/30/10** still frozen.
+
+Decision: [DECISIONS.md](./DECISIONS.md) entry **2026-08-30 — GhostRegime read/compute separation (R2)**.
+
+This workstream is independent of GhostFlow source monitoring below.
+
+## Recommended next work (GhostRegime)
+1. **R3** — inflation semantics product gate (do not implement until Bobby authorizes)
+2. Do **not** begin R4–R8 unless Bobby expands scope
+3. Do **not** change 60/30/10 or VAMS formulas/thresholds
+4. GhostFlow ordinary source monitoring remains a separate workstream (below)
+
+Last updated: 2026-08-30
+
+---
+
 ## Current State (GhostRegime — 2026-08-30 R1 test foundation)
 R1 baseline: `0d8f4c90126ee8185da770f103c9a658c63d7ad4` (`main` after PR **#167**). Tests and test infrastructure only. No production GhostRegime formulas, providers, APIs, UI, VAMS, or allocations changed.
 

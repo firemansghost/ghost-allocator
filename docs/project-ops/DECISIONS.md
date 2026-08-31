@@ -1,5 +1,26 @@
 # DECISIONS
 
+## 2026-08-30 — GhostRegime read/compute separation (R2)
+Choice:
+- Ordinary public `GET /api/ghostregime/today` is a persisted-state reader. It does not call market providers, does not persist, and fail-closes with `GHOSTREGIME_NOT_READY` when no persisted latest exists.
+- `force=1`, `refresh=scheduled`, and `debug=1` remain compute-capable privileged modes.
+- Debug uses the existing GhostRegime cron-secret authorization boundary (`GHOSTREGIME_CRON_SECRET` via `x-ghostregime-cron` or `cron_secret`). Anonymous debug is 401 before the engine/provider path.
+- Error carry-forward uses first-attempt diagnostics only. The engine does not perform a second orchestration-level `getHistoricalPrices()` call to rebuild error messages.
+- Provider routing and the Marketstack ALLOW guard are unchanged. This decision does not alter regime math, VAMS, allocations, Flip Watch, or satellites.
+
+Why:
+- Public reads were entering the Stooq → Yahoo → Marketstack chain even when only persisted state was needed.
+- Unauthenticated `debug=1` could reach the same compute path, including paid fallback when the existing guard allowed it.
+- The outer compute catch re-fetched markets after a failure, duplicating traffic and describing a second attempt.
+
+Consequences:
+- Refreshing belongs to authenticated scheduled/force/debug paths.
+- Ordinary public GET cannot spend provider quota or paid fallback.
+- R3 inflation semantics, R4 Flip Watch, R5 satellites, and R6 UI truth remain separately gated.
+- 60/30/10 remains frozen.
+
+---
+
 ## 2026-08-30 — GhostRegime remediation sequencing
 Choice:
 - GhostRegime will be **improved in place**, not rebuilt. The four-regime concept, fail-closed posture, persisted-state architecture, provider fallback strategy, and VAMS concept remain unless later forensic evidence supports a targeted change.
