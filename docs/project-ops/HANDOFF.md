@@ -1,5 +1,21 @@
 ﻿# HANDOFF
 
+## Last Session Summary (2026-08-31 — GhostRegime R4 live)
+R4 Option A is complete, merged, deployed, and independently verified. PR **#172** merged as `80a09a7ef52f686d086697641da447737c3f6580`. Production is READY on that exact commit.
+
+Flip Watch is now truthful transition telemetry. It does not delay regime or allocations. Model version stays `ghostregime-v1.0.3`; no Blob namespace reset. The current persisted row remains the prior valid R3 snapshot by design (`date 2026-08-28`, `row_build_commit c19ccdc…`, `flip_watch_status NONE`). No forced refresh. Public `/today` HTTP 200 persisted INFLATION; `/health` OK and fresh. Live methodology matches the telemetry contract. The next ordinary scheduled refresh will naturally exercise post-R4 Flip Watch status if a regime transition exists. Allocations / VAMS / satellites / providers / 60/30/10 unchanged.
+
+**Next: R5 — satellite cleanup forensic audit.** R5 implementation is **NOT authorized**.
+
+## Priority for Next Session (GhostRegime)
+1. **R5 satellite cleanup — READ-ONLY AUDIT FIRST**
+2. Do not implement R5 without Bobby authorization
+3. R6 remains gated
+4. 60/30/10 and VAMS remain frozen
+5. GhostFlow remains separate
+
+---
+
 ## Last Session Summary (2026-08-31, GhostRegime R4 Flip Watch telemetry truth)
 Bobby **explicitly authorized R4 Option A** (keep telemetry, fix truth/logic). Baseline `main` `5dc578eddccaf6ab060eb470ba50c39a6ec27ced` (PR **#171**). Implemented locally on `fix/ghostregime-r4-telemetry-truth`. **AUTHORIZED / IMPLEMENTED LOCALLY — PR review pending.** Not live.
 
