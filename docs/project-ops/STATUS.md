@@ -1,5 +1,33 @@
 ﻿# STATUS
 
+## Current State (GhostRegime — 2026-08-30 R0 forensic complete)
+R0 baseline: `019aa383d595c1f775885d1db270c985f8f993d5` (unchanged `main` after PR **#166**). No tracked GhostRegime code, tests, providers, workflows, or data were changed during R0.
+
+**R0 complete — evidence recorded, roadmap unchanged**
+
+Canonical record: [R0_FORENSIC_AUDIT_2026-08-30.md](../ghostregime/R0_FORENSIC_AUDIT_2026-08-30.md)
+
+- Seed-era parity is **38.6%** (769 / 1,990). Seed-era C1 is **not** historical production impact. Post-cutover C0 regime match is **97.7%** (130 / 133), with a Yahoo/CBOE reconstruction caveat.
+- Current-code C1 changes regime on **471 / 2,280** days (20.7%). **295 / 471** are target-equivalent GOLDILOCKS ↔ REFLATION; **176 / 471** change gold **15% ↔ 30%**. Not a performance backtest.
+- Best production-adjacent evidence: **9 / 125** receipt dates change regime; **1** target-changing date (`2026-02-27`, DEFLATION → INFLATION, gold 30% → 15%). Live `2026-08-28` inflation axis stays `core 0 / sat +1 / final +1` under one-day C1.
+- Commodity satellite influence is material (decides 166 reconstructed days; decided the live inflation axis). S1 was diagnostic only.
+- Flip Watch is telemetry (`shouldApplyFlip()` unused; 12 / 13 PENDING rows already show the new regime/targets). F1 was not run. R4 remains an open product gate.
+- Roadmap unchanged: R1 tests → R2 containment → gated R3–R6 → deferred R7–R8.
+- Next work: **R1 — canonical GhostRegime test foundation**. Do not implement R3/R4/R5. Do not encode R2 desired behaviors as current passing invariants.
+- Full-risk baseline **60/30/10** remains frozen.
+
+This workstream is independent of GhostFlow source monitoring below. Do not mix GhostRegime remediation into GhostFlow PRs or the reverse.
+
+## Recommended next work (GhostRegime)
+1. **R1** — canonical complete `test:ghostregime` plus characterization foundation (see R0 §12)
+2. Do **not** begin R2–R8 implementation in the R1 thread unless Bobby expands scope
+3. Do **not** change 60/30/10 or VAMS formulas/thresholds
+4. GhostFlow ordinary source monitoring remains a separate workstream (below)
+
+Last updated: 2026-08-30
+
+---
+
 ## Current State (GhostRegime — 2026-08-30 audit checkpoint)
 Starting `main` for this checkpoint: `519092ea1a7de384df4b74d833a8c937f6210f9a` (same SHA as the independently verified August 30 audit baseline). Production was READY and built from that commit. Persisted GhostRegime snapshot had been computed under `d9473b02a5eb28df313378dd800c3473200f74c8`; no GhostRegime code/workflow changes exist between that compute commit and current `main`.
 
