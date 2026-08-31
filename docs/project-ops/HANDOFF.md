@@ -1,5 +1,23 @@
 ﻿# HANDOFF
 
+## Last Session Summary (2026-08-31, GhostRegime R3 C1 live rollout)
+GhostRegime R3 C1 is fully live. PR **#170** merged as `c19ccdcad4934d635fd39dc3d8b2708dc0e03ce0`. Production deployment was verified on that merge commit.
+
+Stale Vercel `NEXT_PUBLIC_GHOSTREGIME_MODEL_VERSION = ghostregime-v1` was removed and production was redeployed. Effective live version is `ghostregime-v1.0.3`. The versioned Blob namespace initially had no latest — expected namespacing, not data loss. Old `ghostregime-v1` history was not deleted. No historical rewrite or backfill.
+
+Manual force run [33393949114](https://github.com/firemansghost/ghost-allocator/actions/runs/33393949114) succeeded (`computed_and_persisted`). Current row: `date 2026-08-28`, `regime INFLATION`, `row_engine_version` / `engine_version = ghostregime-v1.0.3`, `row_build_commit` / `build_commit = c19ccdc…`, `data_source = persisted`. Live C1 receipts: PDBC +1, TIP/IEF −1, TLT +1 Inflation, UUP −1 Disinflation, satellite +1; core 0 / sat +1 / final +1. `/health` OK and fresh. Yahoo handled the Stooq browser challenge; Marketstack was not used. Observation: new namespace `flip_watch_status = NONE` (R4, not this closeout). Allocations / VAMS / satellites / 60/30/10 unchanged.
+
+**Next: R4 — Flip Watch product gate.** Decide policy before code. R4 is **not** authorized for implementation.
+
+## Priority for Next Session (GhostRegime)
+1. **R4 Flip Watch product gate** — decide policy before code
+2. Do not implement R4 until Bobby explicitly authorizes the chosen behavior
+3. R5/R6 remain gated
+4. Do not change 60/30/10 or VAMS
+5. GhostFlow remains separate
+
+---
+
 ## Last Session Summary (2026-08-30, GhostRegime R3 C1 inflation semantics)
 R3 baseline: `b8b1bf6d71f5f661a91403560b728222916e9b0e`. Bobby **explicitly authorized R3 C1**. Implementation PR: **#170**. Inflation core uses one scalar convention (+1 inflationary / −1 disinflationary). TLT/UUP numeric signs are implemented; economic interpretation and thresholds are unchanged. PDBC/TIP, satellites, Flip Watch, VAMS, allocations, 60/30/10, provider routing, and R2 persisted-only public reads are unchanged. No historical backfill.
 
