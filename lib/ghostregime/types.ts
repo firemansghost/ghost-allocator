@@ -208,7 +208,7 @@ export interface GhostRegimeRow {
   serve_metadata?: GhostRegimeServeMetadata;
   debug_votes?: DebugVotes; // Vote breakdown (only included when debug=1)
   debug_enabled?: boolean; // True when debug mode was used
-  engine_version?: string; // Model version (e.g., ghostregime-v1.0.2) - served-time (current deploy)
+  engine_version?: string; // Model version (e.g., ghostregime-v1.0.3) - served-time (current deploy)
   build_commit?: string; // Git commit hash or build identifier - served-time (current deploy)
   data_source?: 'persisted' | 'computed' | 'computed_debug' | 'computed_forced' | 'computed_forced_unpersisted' | 'computed_autofix' | 'persisted_outdated'; // How this row was obtained (serve-time field, not persisted)
   force_enabled?: boolean; // True when force=1 was used

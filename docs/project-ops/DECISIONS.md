@@ -1,5 +1,31 @@
 # DECISIONS
 
+## 2026-08-30 — GhostRegime inflation vote sign convention (R3 C1)
+Choice:
+- Inflation core uses one scalar convention: **+1 = inflationary**, **−1 = disinflationary**.
+- PDBC and TIP/IEF numeric signs, thresholds, and economic labels are unchanged.
+- TLT and UUP economic interpretation and thresholds are unchanged (rising strongly → Disinflation; falling strongly → Inflation).
+- TLT/UUP numeric votes are normalized to the common convention: rising TLT/UUP → **−1**; falling TLT/UUP → **+1**.
+- Prospective only. Historical rows, seed, and persisted receipts are not rewritten. They remain evidence of the model version that created them.
+- Repository default `MODEL_VERSION` becomes `ghostregime-v1.0.3`. `NEXT_PUBLIC_GHOSTREGIME_MODEL_VERSION` may still override that default at deploy time; live effective version must be verified after rollout.
+
+Why:
+- C0 mixed two opposite semantic conventions into one scalar: PDBC/TIP treated +1 as Inflation, while TLT/UUP treated +1 as Disinflation and still added that +1 to the same score.
+- R0 measured the impact before this authorization. The long-window counts are **reconstructed current-code**, not historical production behavior.
+
+Evidence (from R0; reconstructed vs persisted distinguished):
+- Reconstructed current-code: **471 / 2,280** regime labels changed; **168 / 2,280** VAMS-adjusted allocations differed.
+- Production-adjacent persisted receipts: **9 / 125** regime labels changed; **8** target-equivalent; **1** target-changing date (`2026-02-27`).
+- Live-like 2026-08-28 remained inflationary under C1 (`core 0 / sat +1 / final +1`).
+
+Consequences:
+- Prospective model correction only; no history rewrite or seed regeneration.
+- Model-version boundary required. Because R2 public reads are persisted-only, rollout needs one authenticated force refresh after the new deployment is live.
+- Thresholds, risk votes, inflation/risk tie-breaks, satellites, Flip Watch, VAMS, allocations, and 60/30/10 are unchanged.
+- R4 Flip Watch, R5 satellites, and R6 UI truth remain separately gated.
+
+---
+
 ## 2026-08-30 — GhostRegime read/compute separation (R2)
 Choice:
 - Ordinary public `GET /api/ghostregime/today` is a persisted-state reader. It does not call market providers, does not persist, and fail-closes with `GHOSTREGIME_NOT_READY` when no persisted latest exists.

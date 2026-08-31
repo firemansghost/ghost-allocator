@@ -304,19 +304,19 @@ export function computeOptionBVotes(
   }
 
   // Inflation axis vote 3: TLT TR_63
-  // Spec: TR_63 >= +0.01 → Disinflation (+1), TR_63 <= -0.01 → Inflation (-1)
+  // Spec: TR_63 >= +0.01 → Disinflation (-1), TR_63 <= -0.01 → Inflation (+1)
   let tltTR = 0;
   let tltVote = 0;
   let tltThreshold = '';
   if (filteredTltData.length >= TR_63) {
     tltTR = calculateTR(filteredTltData, TR_63, asofDate);
     if (tltTR >= VOTE_THRESHOLDS.TLT_DISINFLATION_THRESHOLD) {
-      inflScore += 1; // Disinflation vote (+1)
-      tltVote = 1;
+      inflScore -= 1; // Disinflation vote (-1)
+      tltVote = -1;
       tltThreshold = `>= ${VOTE_THRESHOLDS.TLT_DISINFLATION_THRESHOLD} (Disinflation)`;
     } else if (tltTR <= VOTE_THRESHOLDS.TLT_INFLATION_THRESHOLD) {
-      inflScore -= 1; // Inflation vote (-1)
-      tltVote = -1;
+      inflScore += 1; // Inflation vote (+1)
+      tltVote = 1;
       tltThreshold = `<= ${VOTE_THRESHOLDS.TLT_INFLATION_THRESHOLD} (Inflation)`;
     }
   }
@@ -326,19 +326,19 @@ export function computeOptionBVotes(
   }
 
   // Inflation axis vote 4: UUP TR_63
-  // Spec: TR_63 >= +0.01 → Disinflation (+1), TR_63 <= -0.01 → Inflation (-1)
+  // Spec: TR_63 >= +0.01 → Disinflation (-1), TR_63 <= -0.01 → Inflation (+1)
   let uupTR = 0;
   let uupVote = 0;
   let uupThreshold = '';
   if (filteredUupData.length >= TR_63) {
     uupTR = calculateTR(filteredUupData, TR_63, asofDate);
     if (uupTR >= VOTE_THRESHOLDS.UUP_DISINFLATION_THRESHOLD) {
-      inflScore += 1; // Disinflation vote (+1)
-      uupVote = 1;
+      inflScore -= 1; // Disinflation vote (-1)
+      uupVote = -1;
       uupThreshold = `>= ${VOTE_THRESHOLDS.UUP_DISINFLATION_THRESHOLD} (Disinflation)`;
     } else if (uupTR <= VOTE_THRESHOLDS.UUP_INFLATION_THRESHOLD) {
-      inflScore -= 1; // Inflation vote (-1)
-      uupVote = -1;
+      inflScore += 1; // Inflation vote (+1)
+      uupVote = 1;
       uupThreshold = `<= ${VOTE_THRESHOLDS.UUP_INFLATION_THRESHOLD} (Inflation)`;
     }
   }
@@ -429,7 +429,7 @@ export function computeOptionBVotes(
       key: 'tlt',
       label: 'TLT',
       vote: inflationReceiptsData.tlt.vote,
-      direction: inflationReceiptsData.tlt.vote > 0 ? 'Disinflation' : 'Inflation', // TLT: +1 = Disinflation, -1 = Inflation
+      direction: inflationReceiptsData.tlt.vote > 0 ? 'Inflation' : 'Disinflation',
       note: inflationReceiptsData.tlt.threshold_hit && inflationReceiptsData.tlt.threshold_hit !== 'none' ? inflationReceiptsData.tlt.threshold_hit : undefined,
     });
   }
@@ -438,7 +438,7 @@ export function computeOptionBVotes(
       key: 'uup',
       label: 'Dollar',
       vote: inflationReceiptsData.uup.vote,
-      direction: inflationReceiptsData.uup.vote > 0 ? 'Disinflation' : 'Inflation', // UUP: +1 = Disinflation, -1 = Inflation
+      direction: inflationReceiptsData.uup.vote > 0 ? 'Inflation' : 'Disinflation',
       note: inflationReceiptsData.uup.threshold_hit && inflationReceiptsData.uup.threshold_hit !== 'none' ? inflationReceiptsData.uup.threshold_hit : undefined,
     });
   }

@@ -27,7 +27,7 @@ Live/network/secret-dependent verification is **not** part of `test:ghostregime`
 | Class | Meaning |
 |-------|---------|
 | **Stable invariants** | Should remain true after later phases (`r1Invariants.test.ts` plus existing allocation/regime math). |
-| **Current-behavior characterization** | Documents what the code does today; expected to change in a named later phase (`r3*.characterization.test.ts`, `r4*.characterization.test.ts`, `r5*.characterization.test.ts`, `r6*.characterization.test.ts`). |
+| **Current-behavior characterization** | Documents what the code does today; expected to change in a named later phase (`r4*.characterization.test.ts`, `r5*.characterization.test.ts`, `r6*.characterization.test.ts`). |
 | **Deferred desired behavior** | Not installed as passing R1 invariants. Become authoritative when the corresponding fix lands. |
 
 ### R2 operational containment (now current invariants)
@@ -50,7 +50,22 @@ Deferred R6 product-truth (characterized, not desired invariants):
 - VAMS half-size is never described as “off” in product copy
 - rounded headline totals remain coherent
 
-R3/R4/R5 remain gated. Characterization tests lock current C0/Flip Watch/satellite behavior so later diffs are obvious. They do not authorize production changes.
+R3 C1 inflation-sign normalization is now a **stable current invariant** (`r3InflationSemantics.test.ts`). R4/R5 remain gated. Characterization tests lock current Flip Watch / satellite / UI-truth behavior so later diffs are obvious. They do not authorize those production changes.
+
+### R3 inflation vote semantics (now current invariant)
+
+Covered by `r3InflationSemantics.test.ts` (auto-discovered) plus TLT/UUP cases in `regimeCore.test.ts`:
+
+- Inflation core uses one scalar convention: **+1 = inflationary**, **−1 = disinflationary**
+- PDBC rising above threshold → vote +1, direction Inflation
+- TIP/IEF inflationary ratio → vote +1, direction Inflation
+- TLT TR_63 ≥ +1% → Disinflation vote −1; TLT TR_63 ≤ −1% → Inflation vote +1
+- UUP TR_63 ≥ +1% → Disinflation vote −1; UUP TR_63 ≤ −1% → Inflation vote +1
+- Threshold magnitudes unchanged (TLT/UUP ±1%, PDBC ±2%, TIP/IEF ±0.5%)
+- Aggregate: TLT −1 + UUP 0 → core −1; TLT +1 + UUP +1 → core +2; TLT −1 + UUP +1 → core 0
+- Live-like 2026-08-28 vote pattern remains core 0 + satellite +1 → final +1 inflationary
+- Repository default `MODEL_VERSION` is `ghostregime-v1.0.3` when `NEXT_PUBLIC_GHOSTREGIME_MODEL_VERSION` is unset
+- Neutral vote-0 receipt direction remains an R6 characterization, not an R3 invariant
 
 ## Invariants
 
