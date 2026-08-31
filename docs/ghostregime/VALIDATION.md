@@ -1,28 +1,78 @@
 # GhostRegime Validation & Acceptance Tests
 
+## Canonical deterministic suite (R1)
+
+Authoritative command:
+
+```text
+npm run test:ghostregime
+```
+
+Implementation: `scripts/ghostregime/run-tests.ts`. It walks `lib/ghostregime/__tests__/` and `lib/ghostregime/parity/__tests__/` for `*.test.ts` in sorted order (no shell glob). That directory walk is the single list of the complete deterministic GhostRegime unit suite.
+
+Project-level `npm test` runs `test:ghostregime` then the existing `test:ghostflow` suite (GhostFlow semantics unchanged).
+
+`npm run verify:ghostregime` is operational verification, not a second test list:
+
+```text
+verify:ghostregime → build → lint → test:ghostregime
+```
+
+Copy/legend static checks (`check:ghostregime-copy`, `check:ghostregime-legend`, `verify:reference-clean`) and opt-in reference replay (`RUN_PARITY_TESTS=1` rows inside `kissAlloc.test.ts`) stay outside the meaning of “canonical unit suite.” `kissAlloc.test.ts` itself is discovered; its local allocation math always runs; workbook snapshot/backtest cases skip unless `RUN_PARITY_TESTS=1` and local reference files exist.
+
+Live/network/secret-dependent verification is **not** part of `test:ghostregime`. Do not treat production `/today`, paid Marketstack, or blob writes as unit coverage.
+
+### Test classes (do not collapse)
+
+| Class | Meaning |
+|-------|---------|
+| **Stable invariants** | Should remain true after later phases (`r1Invariants.test.ts` plus existing allocation/regime math). |
+| **Current-behavior characterization** | Documents what the code does today; expected to change in a named later phase (`r3*.characterization.test.ts`, `r4*.characterization.test.ts`, `r5*.characterization.test.ts`, `r6*.characterization.test.ts`). |
+| **Deferred desired behavior** | Not installed as passing R1 invariants. Become authoritative when the corresponding fix lands. |
+
+Deferred R2 targets (no R1 failing tests; no production change):
+
+- normal public GET performs no provider fetch
+- anonymous debug cannot reach paid fallback
+- error path performs no duplicate provider fetch
+
+Existing `scheduledRefreshEngine.test.ts` characterizes **scheduled** preflight skip only. Public-read / debug / error-path fetch tests need engine/API seams and wait for R2.
+
+Deferred R6 product-truth (characterized, not desired invariants):
+
+- neutral receipts render Neutral
+- coverage means data availability
+- VAMS half-size is never described as “off” in product copy
+- rounded headline totals remain coherent
+
+R3/R4/R5 remain gated. Characterization tests lock current C0/Flip Watch/satellite behavior so later diffs are obvious. They do not authorize production changes.
+
 ## Invariants
 
 ### Allocation Math
-- ✅ Allocations always sum to 1 within 1e-6 tolerance
-- ✅ Scales always in {1, 0.5, 0}
-- ✅ Cash is clamped to [0, 1]
+- Allocations always sum to 1 within 1e-6 tolerance — **stable invariant** (canonical suite)
+- Scales always in {1, 0.5, 0} — **stable invariant**
+- Cash is clamped to [0, 1] — current engine behavior
 
 ### Regime Classification
-- ✅ No more than one regime flip per day
-- ✅ Regime values are valid enum: GOLDILOCKS, REFLATION, INFLATION, DEFLATION
-- ✅ Risk regime matches regime mapping rules
+- Regime values are the four-regime enum: GOLDILOCKS, REFLATION, INFLATION, DEFLATION
+- RiskOn + non-positive inflation → GOLDILOCKS; RiskOn + positive inflation → REFLATION; RiskOff + positive inflation → INFLATION; RiskOff + non-positive inflation → DEFLATION (current zero behavior) — **stable invariant**
+- Risk regime mapping: GOLDILOCKS/REFLATION → RISK ON; INFLATION/DEFLATION → RISK OFF
 
 ### Flip Watch
-- ✅ Flip watch triggers correctly on day 1/2 pending flips
-- ✅ Flip watch triggers correctly during chop zone
-- ✅ Strong flip (abs(score) >= 2) allows immediate flip
-- ✅ Persistence guard enforces 2-day confirmation for non-strong flips
+Current production behavior is **telemetry/status**, not a persistence gate. `shouldApplyFlip()` exists and is tested in isolation; R0 found the engine does not use it to delay regime or allocations.
+
+- Ordinary regime change can return `PENDING_CONFIRMATION` — **R4 characterization**
+- Negative `daysSinceLastFlip` satisfies the current `<= confirmationDays` condition — **R4 characterization**
+- `STRONG_FLIP` when `max(|risk|,|infl|) >= 2` — **R4 characterization**
+- PLAN / older VALIDATION copy that claimed a 2-day confirmation **persistence guard** is **stale** relative to production. Whether to keep telemetry or implement real confirmation is the R4 product gate. Do not treat confirmation as currently enforced.
 
 ### Stress Override
-- ✅ Stress override triggers only when both conditions met:
+- Stress override helper triggers only when both conditions met:
   - VIX > 30
   - TR_63(HYG/IEF) <= -0.02
-- ✅ Stress override forces RiskOff regardless of current risk regime
+- Helper forces RISK OFF from RISK ON when triggered — **characterization** of the exported function
+- `risk_axis` is not recomputed by this helper. R0 found no stored axis/label clash; keep as a test concern, not a proven production incident.
 
 ### VAMS
 - ✅ VAMS states are -2, 0, or 2

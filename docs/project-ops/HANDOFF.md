@@ -1,5 +1,25 @@
 ﻿# HANDOFF
 
+## Last Session Summary (2026-08-30, GhostRegime R1 test foundation)
+R1 baseline: `0d8f4c90126ee8185da770f103c9a658c63d7ad4`. Canonical command: `npm run test:ghostregime` (`scripts/ghostregime/run-tests.ts`, **28 files**). `npm test` now runs the complete GhostRegime deterministic suite plus existing GhostFlow. `verify:ghostregime` is build + lint + that same suite.
+
+New / R1-owned tests:
+- **Stable:** `r1Invariants.test.ts` — classifyRegime zero behavior; 60/30/10 and INFLATION 15% / DEFLATION 30% gold policy; allocation sum; VAMS scales 0/0.5/1; live-like core 0 + sat +1; local C1 math; seed output-history-only header check.
+- **R3 characterization:** current PDBC/TIP Inflation vs TLT/UUP Disinflation labels while TLT/UUP +1 still add to the scalar.
+- **R4 characterization:** `detectFlipWatch` PENDING / negative days / STRONG / BREWING; `shouldApplyFlip` in isolation (not an engine-use proof); stress helper RISK ON → RISK OFF.
+- **R5 characterization:** commodity vote; Freight fallback name match; Truflation fallback-name mismatch; Freight keeps Freight semantics on commodity value.
+- **R6 characterization:** vote-0 receipts are a side not Neutral; coverage = non-neutral count; `formatScaleLabel` helper only.
+- **R2:** no new test. Public GET / anonymous debug / error-path double-fetch deferred (no clean seam without production changes). Scheduled no-fetch remains in existing `scheduledRefreshEngine.test.ts`.
+
+R3/R4/R5 still gated. 60/30/10 still frozen. No `DECISIONS.md` entry (test-runner choice only). **Next: R2 — operational containment.** Do not start R2 in this thread.
+
+## Priority for Next Session (GhostRegime)
+1. **R2** — operational containment
+2. Do not implement R3/R4/R5/R6, and do not change 60/30/10 or VAMS
+3. GhostFlow: ordinary source monitoring only
+
+---
+
 ## Last Session Summary (2026-08-30, GhostRegime R0 forensic complete)
 R0 baseline: `019aa383d595c1f775885d1db270c985f8f993d5`. No tracked R0 analysis changes. Canonical record: [R0_FORENSIC_AUDIT_2026-08-30.md](../ghostregime/R0_FORENSIC_AUDIT_2026-08-30.md). Parent audit: [AUDIT_2026-08-30.md](../ghostregime/AUDIT_2026-08-30.md).
 
