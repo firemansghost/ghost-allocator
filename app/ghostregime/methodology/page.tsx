@@ -334,12 +334,12 @@ export default function MethodologyPage() {
         <h2 className="text-lg font-semibold text-zinc-50 mb-3">Flip Watch</h2>
         <div className="space-y-3 text-sm text-zinc-300 leading-relaxed">
           <p>
-            Flip Watch prevents whipsaw and one-day head fakes. Sometimes the model sees a regime change signal, but it requires
-            confirmation unless the signal is very strong. It&apos;s basically: &quot;cool story bro, show me tomorrow too.&quot;
+            Flip Watch is transition telemetry. It compares the current final regime with the prior unique persisted trading
+            snapshot. It does not delay the regime or allocations.
           </p>
           <p>
-            This means you might see a regime &quot;brewing&quot; or &quot;pending confirmation&quot; status before it flips.
-            The model waits for persistence before committing to a new regime.
+            A strong transition means max(|risk score|, |inflation score|) &gt;= 2. That is intensity telemetry only — the new
+            regime and allocations are already active.
           </p>
         </div>
         </GlassCard>

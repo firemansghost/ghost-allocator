@@ -75,9 +75,8 @@ export const STRESS_OVERRIDE = {
   HYG_IEF_RATIO_THRESHOLD: -0.02,
 };
 
-// Flip watch persistence guard
+// Flip Watch transition-strength telemetry (not a confirmation gate)
 export const FLIP_WATCH = {
-  CONFIRMATION_DAYS: 2,
   STRONG_FLIP_SCORE_THRESHOLD: 2,
 };
 

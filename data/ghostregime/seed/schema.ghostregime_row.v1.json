@@ -90,7 +90,7 @@
     },
     "flip_watch_status": {
       "type": "string",
-      "enum": ["NONE", "BREWING", "PENDING_CONFIRMATION", "STRONG_FLIP"]
+      "enum": ["NONE", "REGIME_CHANGE", "STRONG_FLIP", "BREWING", "PENDING_CONFIRMATION"]
     },
     "source": {
       "type": "string",

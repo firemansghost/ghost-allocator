@@ -1,5 +1,33 @@
 # DECISIONS
 
+## 2026-08-31 — GhostRegime Flip Watch remains telemetry (R4 Option A)
+Choice:
+- Bobby explicitly authorized **R4 Option A — KEEP TELEMETRY, FIX TRUTH/LOGIC**.
+- Flip Watch remains transition telemetry. It does not confirm, delay, suppress, or approve regime changes.
+- The classified regime and allocations apply immediately. There is no confirmation gate.
+- New compute emits only `NONE` / `REGIME_CHANGE` / `STRONG_FLIP`.
+- Comparison is against the prior unique persisted trading snapshot (`row.date < current as-of`), not blindly `latest.regime` and not wall-clock `new Date()`.
+- `STRONG_FLIP_SCORE_THRESHOLD = 2` remains intensity telemetry only, not an approval bypass.
+- Legacy persisted `BREWING` / `PENDING_CONFIRMATION` remain readable. New compute does not emit them. Historical rows and seed CSV are not rewritten.
+- No model-version bump. Repository default remains `ghostregime-v1.0.3`. `row_build_commit` provides rollout provenance.
+- 60/30/10, VAMS, satellites, R5, and R6 are unchanged.
+
+Why:
+- Production already applied the new regime and allocations immediately. `shouldApplyFlip()` was unused.
+- Old user-facing waiting / confirmation / whipsaw-prevention claims were false.
+- R4 audit reconstructed current-code F1A (2,280 dates): one-extra-close gating would have delayed more durable flips than head fakes prevented. That evidence supports telemetry, not a new hard state machine. Those figures are not a performance claim.
+
+Evidence (from R4 audit; reconstructed vs persisted distinguished):
+- Reconstructed current-code F1A: head fakes prevented 30 vs durable flips delayed 49; allocation fakes prevented 19 vs allocation flips delayed 26.
+- Production-adjacent persisted evidence: 133 unique dates, 22 regime changes, 13 PENDING rows; 12 / 13 PENDING rows already used the new regime / targets.
+
+Consequences:
+- Public copy, methodology, PLAN, VALIDATION, types, and UI now describe Flip Watch as telemetry.
+- Ordinary public `GET /api/ghostregime/today` remains persisted-only (R2). Flip Watch history lookup is compute-path only.
+- R5 satellite cleanup remains separately gated and is **not** authorized by this decision.
+
+---
+
 ## 2026-08-30 — GhostRegime inflation vote sign convention (R3 C1)
 Choice:
 - Inflation core uses one scalar convention: **+1 = inflationary**, **−1 = disinflationary**.

@@ -220,15 +220,18 @@ satellite_combine_rules:
 
 ## Flip Watch
 
-**Persistence Guard**:
-- 2-day confirmation unless strong margin
-- Strong margin: immediate flip allowed when `abs(score) >= 2` (risk axis score OR inflation total score)
+Flip Watch is **transition telemetry**. It does not confirm, delay, suppress, or approve regime changes. The classified regime and allocations apply immediately.
 
-**Flip Watch Statuses**:
-- `NONE`: No pending flip
-- `BREWING`: Score changed but < 2-day threshold
-- `PENDING_CONFIRMATION`: Day 1-2 of pending flip
-- `STRONG_FLIP`: `abs(score) >= 2` → immediate flip allowed
+**Comparison**: current final regime vs the **prior unique persisted trading snapshot** (`row.date < current as-of`; same-date rows are ignored). Empty history / first row in a model namespace → `NONE`. No wall-clock confirmation arithmetic.
+
+**New compute emits only**:
+- `NONE`: no prior unique persisted trading snapshot, or today's final regime equals that prior snapshot's regime
+- `REGIME_CHANGE`: today's final regime differs **and** `max(|risk_score|, |infl_score|) < 2`. The new regime and allocations are already active.
+- `STRONG_FLIP`: today's final regime differs **and** `max(|risk_score|, |infl_score|) >= 2`. Intensity telemetry only — not an approval bypass, because there is no gate.
+
+**Legacy persisted rows may contain** `BREWING` / `PENDING_CONFIRMATION`. Those remain readable. New R4 compute must not emit them.
+
+Strong threshold remains `STRONG_FLIP_SCORE_THRESHOLD = 2` for transition-strength telemetry only.
 
 ## Stress Override
 

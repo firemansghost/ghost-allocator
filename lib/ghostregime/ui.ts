@@ -7,6 +7,15 @@
 
 import { ALLOCATION_TARGETS } from './config';
 import type { GhostRegimeRow, RegimeType, SignalReceipt } from './types';
+import { isLegacyFlipWatchStatus } from './flipWatch';
+import {
+  FLIPWATCH_LEGACY_LINES,
+  FLIPWATCH_LEGACY_PILL_TOOLTIP,
+  FLIPWATCH_PILL_TOOLTIP,
+  FLIPWATCH_REGIME_CHANGE_LINES,
+  FLIPWATCH_STRONG_FLIP_LINES,
+  FLIPWATCH_TITLE_PREFIX,
+} from './ghostregimePageCopy';
 
 /**
  * Max targets for display (full baseline 60/30/10).
@@ -634,23 +643,39 @@ export function summarizeGhostRegimeChangeDetailed(
 }
 
 /**
- * Get Flip Watch copy for display
+ * Get Flip Watch copy for display. Telemetry only — never implies a wait/gate.
  */
 export function getFlipWatchCopy(flipWatchStatus: string): {
   title: string;
   lines: string[];
 } | null {
-  if (flipWatchStatus === 'NONE') {
-    return null; // Handled separately
+  if (!flipWatchStatus || flipWatchStatus === 'NONE') {
+    return null;
   }
 
-  const title = `Flip Watch: ${flipWatchStatus}`;
-  const lines = [
-    "This is the model saying: 'cool story — show me tomorrow too.'",
-    'It reduces whipsaw by waiting for confirmation.',
-  ];
+  if (isLegacyFlipWatchStatus(flipWatchStatus)) {
+    return { title: 'Flip Watch: Legacy transition status', lines: [...FLIPWATCH_LEGACY_LINES] };
+  }
 
-  return { title, lines };
+  if (flipWatchStatus === 'STRONG_FLIP') {
+    return { title: `${FLIPWATCH_TITLE_PREFIX} Strong flip`, lines: [...FLIPWATCH_STRONG_FLIP_LINES] };
+  }
+
+  if (flipWatchStatus === 'REGIME_CHANGE') {
+    return { title: `${FLIPWATCH_TITLE_PREFIX} Regime change`, lines: [...FLIPWATCH_REGIME_CHANGE_LINES] };
+  }
+
+  return {
+    title: `${FLIPWATCH_TITLE_PREFIX} ${flipWatchStatus}`,
+    lines: [...FLIPWATCH_REGIME_CHANGE_LINES],
+  };
+}
+
+export function flipWatchPillTooltip(status: string | null | undefined): string {
+  if (isLegacyFlipWatchStatus(status)) {
+    return FLIPWATCH_LEGACY_PILL_TOOLTIP;
+  }
+  return FLIPWATCH_PILL_TOOLTIP;
 }
 
 /**
@@ -1190,16 +1215,25 @@ export function formatFlipWatchLabel(flipWatch: string | null | undefined): stri
 }
 
 /**
- * Friendly label for regime flip confirmation chip. Returns null when off or NONE.
+ * Friendly label for Flip Watch regime-transition chip. Returns null when off or NONE.
+ * Legacy pre-R4 statuses remain readable without implying the engine is waiting.
  */
-export function formatRegimeConfirmationDisplay(flipWatch: string | null | undefined): string | null {
+export function formatRegimeTransitionDisplay(flipWatch: string | null | undefined): string | null {
   if (!flipWatch || flipWatch === 'NONE') return null;
   const labels: Record<string, string> = {
-    BREWING: 'Brewing',
-    PENDING_CONFIRMATION: 'Pending confirmation',
+    REGIME_CHANGE: 'Regime change',
     STRONG_FLIP: 'Strong flip',
+    BREWING: 'Legacy transition status',
+    PENDING_CONFIRMATION: 'Legacy transition status',
   };
   return labels[flipWatch] ?? flipWatch;
+}
+
+/** @deprecated R4: use formatRegimeTransitionDisplay */
+export function formatRegimeConfirmationDisplay(
+  flipWatch: string | null | undefined
+): string | null {
+  return formatRegimeTransitionDisplay(flipWatch);
 }
 
 /**
@@ -1523,7 +1557,7 @@ export function buildActionableReadLine(params: {
   }
   
   if (params.flipWatch && params.flipWatch !== 'NONE') {
-    parts.push('Regime confirmation: active');
+    parts.push('Regime transition: active');
   }
   
   if (parts.length === 0) {

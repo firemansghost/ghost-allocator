@@ -9,7 +9,24 @@ export type RiskRegime = 'RISK ON' | 'RISK OFF';
 
 export type VamsState = -2 | 0 | 2;
 
-export type FlipWatchStatus = 'NONE' | 'BREWING' | 'PENDING_CONFIRMATION' | 'STRONG_FLIP';
+/**
+ * Flip Watch transition telemetry.
+ * New R4 compute emits only CurrentFlipWatchStatus.
+ * LegacyFlipWatchStatus values are pre-R4 persisted labels.
+ * New R4 compute must not emit them.
+ */
+export type CurrentFlipWatchStatus =
+  | 'NONE'
+  | 'REGIME_CHANGE'
+  | 'STRONG_FLIP';
+
+export type LegacyFlipWatchStatus =
+  | 'BREWING'
+  | 'PENDING_CONFIRMATION';
+
+export type FlipWatchStatus =
+  | CurrentFlipWatchStatus
+  | LegacyFlipWatchStatus;
 
 export type SourceType = 'replay' | 'computed';
 

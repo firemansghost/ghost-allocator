@@ -26,7 +26,7 @@ The seed CSV file `ghostregime_replay_history.csv` should contain historical Gho
 - `gold_actual`: Number (0-1)
 - `btc_actual`: Number (0-1)
 - `cash`: Number (0-1)
-- `flip_watch_status`: One of "NONE", "BREWING", "PENDING_CONFIRMATION", "STRONG_FLIP"
+- `flip_watch_status`: One of "NONE", "REGIME_CHANGE", "STRONG_FLIP" (new R4 compute). Historical rows may also contain "BREWING" or "PENDING_CONFIRMATION".
 - `source`: "replay" (for seed data)
 
 ## Optional Columns
