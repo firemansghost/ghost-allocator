@@ -1,5 +1,36 @@
 ﻿# STATUS
 
+## Current State (GhostRegime — 2026-08-31 R3 C1 live rollout)
+R3 merge: PR **#170** → `c19ccdcad4934d635fd39dc3d8b2708dc0e03ce0` (`main`). Production deployment was verified on that exact merge commit.
+
+**R3 C1 LIVE — merged, deployed, persisted, and healthy**
+
+- Repository / effective model version: `ghostregime-v1.0.3`.
+- Stale Vercel override `NEXT_PUBLIC_GHOSTREGIME_MODEL_VERSION = ghostregime-v1` was removed; production was redeployed afterward.
+- Blob keys are prefixed with `MODEL_VERSION`. The new `ghostregime-v1.0.3` namespace initially had no latest (temporary `/today` and `/health` NOT_READY). That is expected namespacing, not data loss. The old `ghostregime-v1` namespace was **not** deleted. No historical backfill.
+- Authorized force refresh: GitHub Actions run [33393949114](https://github.com/firemansghost/ghost-allocator/actions/runs/33393949114) (`workflow_dispatch`, `main`, `head_sha = c19ccdc…`, `force=1`, success).
+- Refresh: `date 2026-08-28`, `regime INFLATION`, `refresh_outcome computed_and_persisted`, `data_source computed_forced`.
+- Independently verified persisted `/today` (HTTP 200): `row_engine_version = ghostregime-v1.0.3`, `engine_version = ghostregime-v1.0.3`, `row_build_commit` / `build_commit = c19ccdc…`, `data_source = persisted`, `regime = INFLATION`, `risk_regime = RISK OFF`, `risk_score = -1`, `infl_core_score = 0`, `infl_sat_score = +1`, `infl_score = +1`.
+- Live C1 receipts: PDBC +1 Inflation; TIP/IEF −1 Disinflation; TLT +1 Inflation; UUP −1 Disinflation; satellite +1 Inflation. Matches the R0 live-like C1 expectation; final August 28 regime remains INFLATION.
+- `/health`: `ok true`, `status OK`, `engine_version ghostregime-v1.0.3`, `latest_date 2026-08-28`, `age_days 3`, `max_age_days 4`, `is_fresh true`.
+- Providers: Stooq browser challenge; Yahoo fallback for all eight core ETFs; Marketstack **not** used.
+- Observation only (R4, not this closeout): new namespace currently reports `flip_watch_status = NONE`. Do not reinterpret; Flip Watch belongs to R4.
+- Allocations, VAMS, satellites, risk logic, and **60/30/10** unchanged.
+
+Decision already recorded: [DECISIONS.md](./DECISIONS.md) entry **2026-08-30 — GhostRegime inflation vote sign convention (R3 C1)**. This checkpoint records rollout facts, not a new decision.
+
+This workstream is independent of GhostFlow source monitoring below.
+
+## Recommended next work (GhostRegime)
+1. **R4 — Flip Watch product gate** (product/model decision, not coding). **R4 is NOT yet authorized for implementation.**
+2. Do **not** begin R4–R8 unless Bobby expands scope
+3. Do **not** change 60/30/10 or VAMS formulas/thresholds
+4. GhostFlow ordinary source monitoring remains a separate workstream (below)
+
+Last updated: 2026-08-31
+
+---
+
 ## Current State (GhostRegime — 2026-08-30 R3 C1 inflation semantics)
 R3 baseline: `b8b1bf6d71f5f661a91403560b728222916e9b0e` (`main` after PR **#169**). Bobby **explicitly authorized R3 C1**. Implementation PR: **#170**.
 
