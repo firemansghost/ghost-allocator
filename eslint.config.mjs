@@ -2,7 +2,7 @@ import js from '@eslint/js';
 import next from 'eslint-config-next-flat';
 
 export default [
-  { ignores: ['.next/**', 'node_modules/**'] },
+  { ignores: ['.next/**', 'node_modules/**', '.local/**', 'tmp/**'] },
   js.configs.recommended,
   next,
 ];
