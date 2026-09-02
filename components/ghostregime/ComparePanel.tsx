@@ -90,7 +90,9 @@ export function ComparePanel({
     : currentRow.risk_score;
   const riskConvictionCurr = computeConviction(
     riskNetVoteCurr,
-    riskStatsCurr.totalSignals || (currentRow.risk_receipts?.length ?? null)
+    currentRow.risk_receipts && currentRow.risk_receipts.length > 0
+      ? riskStatsCurr.totalSignals
+      : null
   );
   
   const inflAxisCurr = currentRow.infl_axis === 'Inflation' ? 'Inflation' : 'Disinflation';
@@ -100,7 +102,9 @@ export function ComparePanel({
     : currentRow.infl_score;
   const inflConvictionCurr = computeConviction(
     inflNetVoteCurr,
-    inflStatsCurr.totalSignals || (currentRow.inflation_receipts?.length ?? null)
+    currentRow.inflation_receipts && currentRow.inflation_receipts.length > 0
+      ? inflStatsCurr.totalSignals
+      : null
   );
   
   const regimeConvictionCurr = computeRegimeConvictionIndex(riskConvictionCurr.index, inflConvictionCurr.index);
@@ -113,7 +117,9 @@ export function ComparePanel({
     : prevRow.risk_score;
   const riskConvictionPrev = computeConviction(
     riskNetVotePrev,
-    riskStatsPrev.totalSignals || (prevRow.risk_receipts?.length ?? null)
+    prevRow.risk_receipts && prevRow.risk_receipts.length > 0
+      ? riskStatsPrev.totalSignals
+      : null
   );
   
   const inflAxisPrev = prevRow.infl_axis === 'Inflation' ? 'Inflation' : 'Disinflation';
@@ -123,7 +129,9 @@ export function ComparePanel({
     : prevRow.infl_score;
   const inflConvictionPrev = computeConviction(
     inflNetVotePrev,
-    inflStatsPrev.totalSignals || (prevRow.inflation_receipts?.length ?? null)
+    prevRow.inflation_receipts && prevRow.inflation_receipts.length > 0
+      ? inflStatsPrev.totalSignals
+      : null
   );
   
   const regimeConvictionPrev = computeRegimeConvictionIndex(riskConvictionPrev.index, inflConvictionPrev.index);

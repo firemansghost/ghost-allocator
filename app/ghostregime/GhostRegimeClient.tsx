@@ -62,6 +62,9 @@ import {
   formatRegimeTransitionDisplay,
   flipWatchPillTooltip,
   computeAxisNetVote,
+  getEvidenceReceipts,
+  formatResolvedByLine,
+  isAxisCrowded,
   buildActionableReadLine,
   computeAxisStatDeltas,
   buildCopySnapshotText,
@@ -92,8 +95,7 @@ import {
   AGREEMENT_HISTORY_HINT,
   AGREEMENT_HISTORY_INSUFFICIENT_HINT,
   CONFIDENCE_LABEL_PREFIX,
-  CONFIDENCE_TOOLTIP,
-  COVERAGE_TOOLTIP,
+  PARTICIPATION_TOOLTIP,
   REGIME_OVERVIEW_TITLE,
   POSTURE_HOLD_NOW_LABEL,
   POSTURE_STARTING_POINT_LABEL,
@@ -119,11 +121,12 @@ import {
   COPY_SNAPSHOT_DISABLED_TOOLTIP,
   LEGEND_TITLE,
   LEGEND_AGREEMENT,
-  LEGEND_COVERAGE,
+  LEGEND_PARTICIPATION,
   LEGEND_CONFIDENCE,
   LEGEND_CONVICTION,
   LEGEND_CROWDED,
   LEGEND_NET_VOTE,
+  EVIDENCE_NET_LABEL_PREFIX,
   LEGEND_DELTA,
   VIEW_RECEIPTS_LINK,
   VIEWING_SNAPSHOT_LABEL,
@@ -611,7 +614,7 @@ export function GhostRegimeClient({
         : data.risk_score;
     const riskConviction = computeConviction(
       riskNetVote,
-      riskStats.totalSignals || (data.risk_receipts?.length ?? null)
+      data.risk_receipts && data.risk_receipts.length > 0 ? riskStats.totalSignals : null
     );
     const inflAxis = data.infl_axis === 'Inflation' ? 'Inflation' : 'Disinflation';
     const inflStats = computeAxisStats(data.inflation_receipts, inflAxis);
@@ -621,7 +624,7 @@ export function GhostRegimeClient({
         : data.infl_score;
     const inflConviction = computeConviction(
       inflNetVote,
-      inflStats.totalSignals || (data.inflation_receipts?.length ?? null)
+      data.inflation_receipts && data.inflation_receipts.length > 0 ? inflStats.totalSignals : null
     );
 
     const regimeConvictionIndex = computeRegimeConvictionIndex(riskConviction.index, inflConviction.index);
@@ -954,13 +957,19 @@ export function GhostRegimeClient({
             const riskNetVote = data.risk_receipts && data.risk_receipts.length > 0
               ? computeAxisNetVote(data.risk_receipts, 'risk').net
               : data.risk_score;
-            const riskConviction = computeConviction(riskNetVote, riskStats.totalSignals || (data.risk_receipts?.length ?? null));
+            const riskConviction = computeConviction(
+              riskNetVote,
+              data.risk_receipts && data.risk_receipts.length > 0 ? riskStats.totalSignals : null
+            );
             const inflAxis = data.infl_axis === 'Inflation' ? 'Inflation' : 'Disinflation';
             const inflStats = computeAxisStats(data.inflation_receipts, inflAxis);
             const inflNetVote = data.inflation_receipts && data.inflation_receipts.length > 0
               ? computeAxisNetVote(data.inflation_receipts, 'inflation').net
               : data.infl_score;
-            const inflConviction = computeConviction(inflNetVote, inflStats.totalSignals || (data.inflation_receipts?.length ?? null));
+            const inflConviction = computeConviction(
+              inflNetVote,
+              data.inflation_receipts && data.inflation_receipts.length > 0 ? inflStats.totalSignals : null
+            );
             const regimeConvictionIndex = computeRegimeConvictionIndex(riskConviction.index, inflConviction.index);
             const regimeConfidenceLabel = computeRegimeConfidenceLabel(riskStats.confidence.label, inflStats.confidence.label);
             const cashSources = getCashSources(data);
@@ -989,18 +998,9 @@ export function GhostRegimeClient({
                 })()
               : null;
             
-            // Check if regime is crowded (both axes need to meet criteria)
-            const riskAgreement = computeAxisAgreement(data.risk_receipts, riskAxisDirection);
-            const inflAgreement = computeAxisAgreement(data.inflation_receipts, inflAxis);
-            const riskCrowded = riskConviction.index !== null && riskConviction.index >= 76 &&
-                               riskStats.confidence.label === 'High' &&
-                               riskAgreement.pct !== null && riskAgreement.pct >= 80 &&
-                               (riskStats.totalSignals || 0) > 0 && (riskStats.nonNeutral / (riskStats.totalSignals || 1)) >= 0.5;
-            const inflCrowded = inflConviction.index !== null && inflConviction.index >= 76 &&
-                               inflStats.confidence.label === 'High' &&
-                               inflAgreement.pct !== null && inflAgreement.pct >= 80 &&
-                               (inflStats.totalSignals || 0) > 0 && (inflStats.nonNeutral / (inflStats.totalSignals || 1)) >= 0.5;
-            const isCrowded = riskCrowded && inflCrowded;
+            const isCrowded =
+              isAxisCrowded(riskStats, riskConviction.index) &&
+              isAxisCrowded(inflStats, inflConviction.index);
             
             const copyText = buildCopySnapshotText(data, actionableRead);
             
@@ -1431,21 +1431,26 @@ export function GhostRegimeClient({
         {(() => {
           const riskDrivers = pickTopDrivers(data.risk_receipts, 2);
           const inflationDrivers = pickTopDrivers(data.inflation_receipts, 2);
+          const riskEvidence = getEvidenceReceipts(data.risk_receipts);
+          const inflationEvidence = getEvidenceReceipts(data.inflation_receipts);
+          const riskResolvedBy = formatResolvedByLine(data.risk_receipts);
+          const inflResolvedBy = formatResolvedByLine(data.inflation_receipts);
           const hasReceipts = (data.risk_receipts && data.risk_receipts.length > 0) || 
                               (data.inflation_receipts && data.inflation_receipts.length > 0);
-          const allVotesZero = hasReceipts && 
-            (!data.risk_receipts || data.risk_receipts.every(r => r.vote === 0)) &&
-            (!data.inflation_receipts || data.inflation_receipts.every(r => r.vote === 0));
+          const allVotesZero = hasReceipts &&
+            riskEvidence.every((r) => r.vote === 0) &&
+            inflationEvidence.every((r) => r.vote === 0);
 
           return (
             <GlassCard className="p-5">
               <h2 className="text-sm font-semibold text-zinc-50 mb-2.5">{TOP_DRIVERS_TITLE}</h2>
               {!hasReceipts ? (
                 <p className="text-xs text-zinc-400 mb-2">{TOP_DRIVERS_OLD_DATA_HINT}</p>
-              ) : allVotesZero ? (
-                <p className="text-xs text-zinc-400 mb-2">{TOP_DRIVERS_NO_STRONG_DRIVERS}</p>
               ) : (
                 <div className="space-y-4">
+                  {allVotesZero && (
+                    <p className="text-xs text-zinc-400">{TOP_DRIVERS_NO_STRONG_DRIVERS}</p>
+                  )}
                   <div>
                     <div className="flex items-baseline justify-between gap-2 mb-1.5">
                       <div className="flex items-center gap-2 min-w-0">
@@ -1487,10 +1492,13 @@ export function GhostRegimeClient({
                       const netVote = computeAxisNetVote(data.risk_receipts, 'risk');
                       return (
                         <p className="text-[10px] text-zinc-500 mb-1">
-                          Net vote: {netVote.label}
+                          {EVIDENCE_NET_LABEL_PREFIX} {netVote.label}
                         </p>
                       );
                     })()}
+                    {riskResolvedBy && (
+                      <p className="text-[10px] text-zinc-500 mb-1">{riskResolvedBy}</p>
+                    )}
                     {riskDrivers.length > 0 ? (
                       <ul className="space-y-2 text-xs text-zinc-300">
                         {riskDrivers.map((driver, idx) => {
@@ -1570,10 +1578,13 @@ export function GhostRegimeClient({
                       const netVote = computeAxisNetVote(data.inflation_receipts, 'inflation');
                       return (
                         <p className="text-[10px] text-zinc-500 mb-1">
-                          Net vote: {netVote.label}
+                          {EVIDENCE_NET_LABEL_PREFIX} {netVote.label}
                         </p>
                       );
                     })()}
+                    {inflResolvedBy && (
+                      <p className="text-[10px] text-zinc-500 mb-1">{inflResolvedBy}</p>
+                    )}
                     {inflationDrivers.length > 0 ? (
                       <ul className="space-y-2 text-xs text-zinc-300">
                         {inflationDrivers.map((driver, idx) => {
@@ -1689,7 +1700,7 @@ export function GhostRegimeClient({
               : data.risk_score;
           const riskConviction = computeConviction(
             riskNetVote,
-            riskStats.totalSignals || (data.risk_receipts?.length ?? null)
+            data.risk_receipts && data.risk_receipts.length > 0 ? riskStats.totalSignals : null
           );
           const inflAxis = data.infl_axis === 'Inflation' ? 'Inflation' : 'Disinflation';
           const inflStats = computeAxisStats(data.inflation_receipts, inflAxis);
@@ -1699,7 +1710,7 @@ export function GhostRegimeClient({
               : data.infl_score;
           const inflConviction = computeConviction(
             inflNetVote,
-            inflStats.totalSignals || (data.inflation_receipts?.length ?? null)
+            data.inflation_receipts && data.inflation_receipts.length > 0 ? inflStats.totalSignals : null
           );
 
           const allRows = data ? [data, ...historyRows] : historyRows;
@@ -1729,6 +1740,7 @@ export function GhostRegimeClient({
                         agreementSeries={riskSeries.length >= 2 ? riskSeries : undefined}
                         deltaLine={riskDelta}
                         axisName="Risk"
+                        resolvedByLine={formatResolvedByLine(data.risk_receipts)}
                       />
                       <AxisStatsBlock
                         axisLine={axisDesc.inflationLine.replace(/\*\*/g, '')}
@@ -1737,6 +1749,7 @@ export function GhostRegimeClient({
                         agreementSeries={inflSeries.length >= 2 ? inflSeries : undefined}
                         deltaLine={inflDelta}
                         axisName="Inflation"
+                        resolvedByLine={formatResolvedByLine(data.inflation_receipts)}
                       />
                     </div>
                   );
@@ -1769,13 +1782,13 @@ export function GhostRegimeClient({
                       <span>{LEGEND_AGREEMENT}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <strong className="text-zinc-400">Coverage:</strong>
-                      <Tooltip content={COVERAGE_TOOLTIP}>
-                        <span className="cursor-help opacity-70 hover:opacity-100" aria-label={COVERAGE_TOOLTIP}>
+                      <strong className="text-zinc-400">Participation:</strong>
+                      <Tooltip content={PARTICIPATION_TOOLTIP}>
+                        <span className="cursor-help opacity-70 hover:opacity-100" aria-label={PARTICIPATION_TOOLTIP}>
                           ⓘ
                         </span>
                       </Tooltip>
-                      <span>{LEGEND_COVERAGE}</span>
+                      <span>{LEGEND_PARTICIPATION}</span>
                     </div>
                     <div>
                       <strong className="text-zinc-400">Confidence:</strong> {LEGEND_CONFIDENCE}
@@ -1787,7 +1800,7 @@ export function GhostRegimeClient({
                       <strong className="text-zinc-400">Crowded:</strong> {LEGEND_CROWDED}
                     </div>
                     <div>
-                      <strong className="text-zinc-400">Net vote:</strong> {LEGEND_NET_VOTE}
+                      <strong className="text-zinc-400">Evidence net:</strong> {LEGEND_NET_VOTE}
                     </div>
                     <div>
                       <strong className="text-zinc-400">Δ since last:</strong> {LEGEND_DELTA}
