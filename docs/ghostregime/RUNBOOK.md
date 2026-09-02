@@ -287,7 +287,7 @@ curl https://ghost-allocator.vercel.app/api/ghostregime/health
 | `STOOQ_API_KEY` | Stooq CSV download API key (required when Stooq serves the captcha/API-key gate instead of CSV for `/q/d/l/`). Append to requests server-side; do not expose as `NEXT_PUBLIC_*`. |
 | `MARKETSTACK_ACCESS_KEY` | Optional paid Marketstack fallback for core ETF symbols when Stooq fails. Required in Vercel Production for the live API used by the daily workflow. GitHub Actions secrets alone do not provide this env var to the deployed Vercel function. After adding/changing this env var, redeploy Production. |
 | `NEXT_PUBLIC_GHOSTREGIME_CUTOVER_DATE_UTC` | (Optional) Cutover date for seed vs persistence; default `2025-11-28T00:00:00Z`. |
-| `NEXT_PUBLIC_GHOSTREGIME_MODEL_VERSION` | (Optional) Overrides the repository default model version (`ghostregime-v1.0.3` in source). If production is pinned to an older value, a new deploy will **not** show the repository default until this env var is updated. Do not assume the live effective version equals the repo default. |
+| `NEXT_PUBLIC_GHOSTREGIME_MODEL_VERSION` | (Optional) Overrides the repository default model version (`ghostregime-v1.0.4` in source). If production is pinned to an older value, a new deploy will **not** show the repository default until this env var is updated. Do not assume the live effective version equals the repo default. |
 
 Seed presence is not an env var: the app expects the seed file at `data/ghostregime/seed/ghostregime_replay_history.csv` in the repo. If missing or empty, today/explain/history return 503 NOT_SEEDED and the daily workflow skips.
 
@@ -376,7 +376,7 @@ curl -H "x-ghostregime-cron: YOUR_SECRET" \
 
 **If history or latest appears corrupted**:
 1. Check Blob storage directly (Vercel Dashboard)
-2. Verify the **effective** model version (repository default `ghostregime-v1.0.3`, unless `NEXT_PUBLIC_GHOSTREGIME_MODEL_VERSION` overrides it)
+2. Verify the **effective** model version (repository default `ghostregime-v1.0.4`, unless `NEXT_PUBLIC_GHOSTREGIME_MODEL_VERSION` overrides it)
 3. If needed, bump model version to start fresh (in `lib/ghostregime/config.ts`)
 
 ### R3 post-deployment rollout (C1 inflation semantics)
@@ -393,6 +393,28 @@ After the R3 merge is deployed (do not run this from a local implementation bran
 6. Verify `/api/ghostregime/health` is healthy
 
 Do not force-refresh before the new deployment is live. Do not rely on the next scheduled refresh to pick up C1.
+
+### R5B post-deployment rollout (v1.0.4 namespace)
+
+Do **not** run this from a local implementation branch. Deployment is a separate authorized operator event.
+
+v1.0.4 uses a new, initially empty Blob namespace (`ghostregime-v1.0.4/...`) via existing `MODEL_VERSION` prefixing. After a future production deploy, public GhostRegime may correctly report `NOT_READY` until the authorized controlled first refresh seeds v1.0.4.
+
+Do not:
+- read v1.0.3 as v1.0.4
+- copy historical latest into the new namespace
+- silently fall back across model versions
+- rewrite Blob keys
+- change fail-closed behavior to avoid the empty-namespace window
+
+Before the first refresh:
+
+1. Confirm no stale Vercel `NEXT_PUBLIC_GHOSTREGIME_MODEL_VERSION` masks the repository default `ghostregime-v1.0.4`
+2. Deploy the merged R5B commit to production
+3. Perform **one** authenticated force refresh (`?force=1` with `GHOSTREGIME_CRON_SECRET`)
+4. Verify `row_engine_version` / `engine_version` = `ghostregime-v1.0.4`
+5. Verify public `/today` and `/health` against the new namespace
+6. Leave the old `ghostregime-v1.0.3` namespace untouched
 
 ## Quick Reference
 

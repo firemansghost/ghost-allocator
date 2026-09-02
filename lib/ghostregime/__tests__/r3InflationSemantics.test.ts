@@ -13,7 +13,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert';
 import type { MarketDataPoint } from '../types';
 import { classifyRegime, computeOptionBVotes } from '../regimeCore';
-import { MARKET_SYMBOLS, MODEL_VERSION, VOTE_THRESHOLDS } from '../config';
+import { MARKET_SYMBOLS, VOTE_THRESHOLDS } from '../config';
 
 function createMockData(symbol: string, closes: number[]): MarketDataPoint[] {
   const baseDate = new Date('2025-01-01');
@@ -277,18 +277,11 @@ describe('R3 C1 — live-like 2026-08-28 inflation fixture', () => {
     assert.strictEqual(result.debug_votes?.inflation.tlt.vote, 1, 'falling TLT is C1 Inflation +1 (was C0 −1)');
     assert.strictEqual(result.debug_votes?.inflation.uup.vote, -1, 'rising UUP is C1 Disinflation −1 (was C0 +1)');
     assert.strictEqual(result.infl_score, 0, 'core remains 0 under C1, matching R0 live-day finding');
+    // Former P2 satellite +1 on this live-like vote pattern is documented historically.
+    // Production v1.0.4 scoring of that day is P3 (r5bPdbcRole.test.ts), not this hardcoded sat.
     const satellite = 1;
     const finalInfl = result.infl_score + satellite;
     assert.strictEqual(finalInfl, 1);
     assert.strictEqual(classifyRegime(-1, finalInfl), 'INFLATION');
-  });
-});
-
-describe('R3 model version default', () => {
-  it('repository default is ghostregime-v1.0.3 when env override is unset', () => {
-    if (process.env.NEXT_PUBLIC_GHOSTREGIME_MODEL_VERSION) {
-      return;
-    }
-    assert.strictEqual(MODEL_VERSION, 'ghostregime-v1.0.3');
   });
 });

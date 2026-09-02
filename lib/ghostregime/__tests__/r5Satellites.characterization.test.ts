@@ -1,8 +1,10 @@
 /**
- * R5 CHARACTERIZATION — unresolved Commodity / PDBC model behavior (R5B)
+ * R5 CHARACTERIZATION — legacy M0 / catalog Commodity scoring
  *
- * Diagnostic only. R5A corrected the false Freight alias; do not treat remaining
- * PDBC TR21 Commodity-as-satellite behavior as a desired invariant. That is R5B.
+ * Diagnostic only. Catalog SATELLITE_CONFIGS still includes PDBC TR21 Commodity
+ * so historical characterization and R5A provenance tests can address that lane.
+ * Production v1.0.4 scoring uses ACTIVE_SATELLITE_CONFIGS (P2 removed); see
+ * r5bPdbcRole.test.ts. Do not treat these cases as production invariants.
  */
 
 import { describe, it } from 'node:test';
@@ -27,7 +29,7 @@ function config(series: string) {
   return found;
 }
 
-describe('R5 CHARACTERIZATION — current commodity vote (R5B model, unchanged)', () => {
+describe('R5 CHARACTERIZATION — legacy M0 catalog commodity vote (not production v1.0.4)', () => {
   it('commodity satellite votes +1 when TR_21 is at/above its inflation threshold', () => {
     const score = processSatellites(
       [

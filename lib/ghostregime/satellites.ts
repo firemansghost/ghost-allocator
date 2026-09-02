@@ -270,6 +270,18 @@ export const SATELLITE_CONFIGS: SatelliteConfig[] = [
 ];
 
 /**
+ * Production v1.0.4 score-fed satellites.
+ *
+ * SATELLITE_CONFIGS remains the full catalog (historical characterization,
+ * R5A provenance, research diagnostics). Commodity Nowcast / PDBC TR21 is
+ * catalog-only: it is no longer an active score-fed lane (R5B / P2 removed).
+ * Remaining catalog entries are unresolved stubs under the default provider.
+ */
+export const ACTIVE_SATELLITE_CONFIGS: SatelliteConfig[] = SATELLITE_CONFIGS.filter(
+  (config) => config.series !== COMMODITY_NOWCAST_SERIES
+);
+
+/**
  * Default satellite data provider (stub implementation)
  * Commodity Nowcast Basket is always available (derived from market data)
  */
