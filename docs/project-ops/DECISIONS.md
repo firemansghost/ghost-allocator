@@ -1,5 +1,37 @@
 # DECISIONS
 
+## 2026-09-02 — GhostRegime R7 allocation study preregistered before outcomes
+Choice:
+- The R7 allocation-research sequence through **R7B1** is complete and preregistered **before any real candidate outcomes have been viewed**.
+- Frozen private snapshot: **`r7b0-20260902-210842Z`**. Manifest SHA-256: `bb68cdfbbfa854bfa7edeed226e42d2e5a1328e201bc821efcb43a274a63ca00`. Research window `2016-01-01` → `2026-09-01`. Snapshot remains gitignored / uncommitted.
+- Two-panel design is frozen: **SIGNAL** = production-compatible raw closes / VIX index; **RETURN** = adjusted / total-return ETF series plus session-aligned BTC. Return data never feeds GhostRegime signals. Raw signal data is never the primary ETF performance series.
+- Execution is the one-session lag: after close T compute `A_T`; T → T+1 previously executed holdings earn the return; execute pending `A_T` at close T+1 if required; `A_T` first earns T+1 → T+2. No same-close executable result.
+- Portfolio is self-financing. Dynamic strategies rebalance only when the published target changes beyond `ALLOCATION_TOLERANCE`. Drift alone does not trigger a rebalance. Inception is initial establishment, not a rebalance: turnover 0, cost 0, `rebalanced = false`.
+- Every economically held asset requires an explicit finite interval return `>= -100%`. Missing held-asset returns are errors, not zero fills.
+- Primary cash / risk-free is **BIL adjusted return**. Raw BIL is prohibited as the primary cash-return series. Required later sensitivity: `ZERO_CASH_ZERO_RF`.
+- Performance metrics for a selected cost scenario use **after-cost `netPortfolioReturn`**, not pre-cost `marketReturn`. Primary cost is **0 bps**. Frozen future sensitivities: **5 bps** and **10 bps**. No extra cash transaction leg.
+- Primary static benchmarks: `STATIC_601030` (SPY 60 / GLD 30 / BTC 10), `STATIC_6040` (SPY 60 / IEF 40), `SPY_100`. Primary static rebalance is the first eligible XNYS session of each calendar year. Monthly first-session rebalance is a frozen sensitivity. `SPY_100` has no scheduled rebalance.
+- Primary candidate family is frozen as **P0–P6** only: `P0_CURRENT` (RO 60/30/10, Infl 30/15/5, Defl 30/30/5), `P1_LESS_BTC` (60/35/5, 30/20/5, 30/35/5), `P2_MORE_EQUITY` (70/25/5, 30/15/5, 30/30/5), `P3_MORE_GOLD_RO` (55/35/10, 30/15/5, 30/30/5), `P4_INFL_GOLD_30` (60/30/10, 30/30/5, 30/30/5), `P5_DEEPER_OFF` (60/30/10, 20/15/5, 20/30/5), `P6_HOUSE_601525` (60/25/15, 30/15/5, 30/30/5). No additional primary candidates may be added after results are viewed. **No-BTC remains a required sensitivity / attribution analysis, not an eighth primary candidate.**
+- Frozen ablations: `STATIC_601030`, `REGIME_ONLY`, `VAMS_ONLY`, `COMBINED`, `SPY_100`.
+- Calendar holdout is frozen: **`2024-09-01` → `2026-09-01`**. First eligible XNYS performance session: **`2024-09-03`**. Do not move this boundary after seeing outcomes. Walk-forward / endpoint checks are robustness tests, not candidate-selection tools.
+- Production **60/30/10 remains live policy**. This preregistration does **not** change allocations, `MODEL_VERSION`, or GhostRegime runtime.
+
+Why:
+- Candidate evaluation must be genuinely prospective relative to a frozen study contract. Viewing real-panel CAGR / drawdown / Sharpe / rankings before locking the contract would invite hindsight-tuning.
+- Signal semantics (votes, VAMS, published targets) are not the same as investable performance returns. Mixing raw closes into performance, or adjusted closes into votes, would leak or misstate both.
+- Fail-closed missing-return handling and after-cost net returns prevent silent zero-fills and cost-blind rankings.
+- The one-session lag and event-driven rebalance prevent lookahead and daily implicit rebalancing that the model does not actually do.
+
+Consequences:
+- **R7C is the first authorized real frozen-panel outcome run.** As of PR **#185** merge, no real candidate CAGR, drawdown, Sharpe, Sortino, ranking, or winner has been viewed.
+- **R7C does not authorize a production allocation change.**
+- **R7D remains the product/model decision gate.**
+- Production **60/30/10** remains unchanged until an explicit later decision.
+- No `MODEL_VERSION` change. Repository default remains `ghostregime-v1.0.4`.
+- No GhostRegime refresh, no Blob write, no provider fetch, and no GhostFlow change are authorized by this checkpoint.
+
+---
+
 ## 2026-09-02 — GhostRegime R6 product gate: GO WITH CHANGES — Option B
 Choice:
 - Bobby approved the R6 UI-truth audit recommendation: **GO WITH CHANGES — Option B (Evidence / Resolution Separation)**.
