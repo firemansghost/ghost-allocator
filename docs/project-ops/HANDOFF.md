@@ -1,5 +1,24 @@
 ﻿# HANDOFF
 
+## Last Session Summary (2026-09-02 — GhostRegime R7B1 merged / preregistration checkpoint)
+R7A, R7A.1, R7B0, and R7B1 are complete. PR **#185** reviewed head `7ff4e1d5e3c3fdbb5f1b1488f8595b1b797c063a` merged as `fa139ac94507b7c86a88932023045e987b0c933a`. Research harness only. Production engine / 60/30/10 / `ghostregime-v1.0.4` unchanged. No refresh. No production writes.
+
+**No candidate outcomes have been viewed.** No real frozen-panel CAGR, drawdown, Sharpe, Sortino, ranking, or winner exists. The study contract is preregistered before R7C.
+
+Private snapshot `r7b0-20260902-210842Z` (manifest `bb68cdfbbfa854bfa7edeed226e42d2e5a1328e201bc821efcb43a274a63ca00`) remains gitignored. Validate-only evidence: hashes pass; 32 VIX extras preserved; BTC stale exactly `2017-02-28` / 1h; post-cutover parity **189 / 0 mismatches**; `infl_sat_score` nonzero = 0.
+
+## Priority for Next Session (GhostRegime)
+1. Do **not** reopen R7A / R7A.1 / R7B0 / R7B1 without real evidence of a defect
+2. Do **not** alter the preregistered contract after viewing outcomes
+3. No candidate outcomes have been viewed
+4. Next substantive work is **R7C** — may run the preregistered frozen study once, when separately authorized
+5. **R7C does not authorize production changes**
+6. **R7D remains the explicit model/product gate**
+7. Separate site-wide product-copy truth audit remains unrelated backlog
+8. No model / persistence / providers / VAMS / allocation / workflow / GhostFlow changes from this checkpoint
+
+---
+
 ## Last Session Summary (2026-09-02 — GhostRegime R6 final live closeout)
 R6 is finished. R6A, R6B, and R6C are merged, deployed, and independently live-verified. Do not reopen R6A / R6B / R6C unless new evidence shows a real defect. Do not start R7 in this docs PR. Do not perform the separate site-wide product-copy truth audit here.
 

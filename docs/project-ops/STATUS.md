@@ -1,5 +1,36 @@
 ﻿# STATUS
 
+## Current State (GhostRegime — 2026-09-02 R7B1 merged / preregistered)
+**R7B1 HARNESS COMPLETE — MERGED**
+
+R7A architecture, R7A.1 methodology correction, R7B0 frozen research-data capture, and R7B1 deterministic research harness are complete. PR **#185** (`research(ghostregime): add R7 allocation study harness`, reviewed final head `7ff4e1d5e3c3fdbb5f1b1488f8595b1b797c063a`) merged as `fa139ac94507b7c86a88932023045e987b0c933a`. Research harness / tests / validate-only tooling only. Production engine semantics were not changed.
+
+**NO REAL CANDIDATE PERFORMANCE HAS BEEN VIEWED.** No frozen-panel CAGR, drawdown, Sharpe, Sortino, ranking, or winner exists. That preregistration boundary is the point of this checkpoint.
+
+- Private snapshot **`r7b0-20260902-210842Z`** (gitignored / uncommitted). Manifest SHA-256 `bb68cdfbbfa854bfa7edeed226e42d2e5a1328e201bc821efcb43a274a63ca00`. Validation-report SHA-256 `397712e67a72500badd705bc369105f82bb52ba3fc7af6ff016821000abbcf22`. Window `2016-01-01` → `2026-09-01`.
+- Hashes verified. Return panels and ordinary ETF signal panels exactly aligned to XNYS. Known warnings: 32 VIX non-XNYS weekday extras preserved (0 weekend extras); BTC return mark stale exactly once on **2017-02-28** (1 hour, non-leaky); no missing ETF-session BTC marks.
+- Post-cutover model-state parity vs production `computeGhostRegime()`: **189** dates (`2025-12-01` → `2026-09-01`), **0** allocation-relevant mismatches, **0** non-zero `infl_sat_score` dates. Cutover remains intact; the research adapter uses lower-level production functions rather than a production bypass.
+- Frozen contract: T/T+1/T+2 execution; self-financing drift; event-driven rebalance; inception free of turnover/cost (`rebalanced = false`); fail-closed held-asset returns; after-cost `netPortfolioReturn` for metrics; BIL adjusted cash; 0 bps primary / 5 and 10 bps sensitivities; annual static benchmarks; P0–P6 only; ablations `STATIC_601030` / `REGIME_ONLY` / `VAMS_ONLY` / `COMBINED` / `SPY_100`; holdout `2024-09-01` → `2026-09-01` (first eligible session `2024-09-03`).
+- Model remains `ghostregime-v1.0.4`. **60/30/10 unchanged.** No refresh. No production writes. No GhostFlow change.
+- Decision recorded: [DECISIONS.md](./DECISIONS.md) entry **2026-09-02 — GhostRegime R7 allocation study preregistered before outcomes**.
+
+**R7B1 is complete.** Next substantive work is **R7C — first eligible real frozen-panel study run, pending separate authorization**. R7C does **not** authorize a production allocation change. **R7D remains the product/model decision gate.** Do not reopen R7A / R7A.1 / R7B0 / R7B1 without real evidence of a defect. Do not alter the preregistered contract after viewing outcomes.
+
+This workstream is independent of GhostFlow source monitoring below.
+
+## Recommended next work (GhostRegime)
+1. **R7C — designated first real frozen-panel study run; separately gated** (does **not** authorize live allocation changes)
+2. **R7D — product/model decision gate** after R7C evidence (not authorized by R7C)
+3. Do **not** reopen R7A / R7A.1 / R7B0 / R7B1 unless new evidence shows a real defect
+4. Do **not** change the preregistered contract, holdout, P0–P6 family, or costs after outcomes are viewed
+5. Separate non-R7 backlog: **site-wide product-copy truth audit** (do not perform it here)
+6. Do **not** change VAMS, allocation formulas, provider routing, workflows, P1/P2/P3, or R4
+7. GhostFlow remains a separate workstream
+
+Last updated: 2026-09-02
+
+---
+
 ## Current State (GhostRegime — 2026-09-02 R6 final closeout)
 **R6 UI TRUTH COMPLETE — LIVE / VERIFIED**
 
