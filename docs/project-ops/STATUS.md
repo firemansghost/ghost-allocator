@@ -1,5 +1,42 @@
 ﻿# STATUS
 
+## Current State (GhostRegime — 2026-09-02 R6B live closeout)
+R6B merge: PR **#180** (`fix(ghostregime): separate evidence from tie resolution`, reviewed head `8eaeb966eae5765d9005acfcb5a1cda96d4ec76f`) → `ac76f49899e8e6aa57df5aa66cd0e1d6215de729` (`main`, merged 2026-09-02). Production Vercel deployment was verified READY on that exact merge commit (`target = production`). No manual deployment.
+
+**R6B COMPLETE — MERGED / DEPLOYED / LIVE-VERIFIED**
+
+- Display-only. Model remains `ghostregime-v1.0.4`. No `MODEL_VERSION` bump, no Blob namespace change, no persisted-row rewrite, no force refresh, no provider call.
+- Serving UI/build is `ac76f498…`. The persisted model row was **not** recomputed. `row_build_commit` remains `7e1bce227878e0901f4241a9c955e1d25bdeaf6b` (the R5B compute that created the v1.0.4 snapshot). R6B reinterprets existing receipts at display time only.
+- Public `/api/ghostregime/today` after deploy (HTTP 200): `date = 2026-09-01`, `regime = REFLATION`, `risk_regime = RISK ON`, `risk_score = +1`, `infl_score = +1`, `risk_axis = RiskOn`, `infl_axis = Inflation`, `engine_version` / `row_engine_version = ghostregime-v1.0.4`, `build_commit = ac76f498…`, `row_build_commit = 7e1bce227…`, `data_source = persisted`. Serve metadata: `refresh_attempt = read`, `refresh_outcome = served_persisted_snapshot`, `persisted_snapshot_preserved = true`.
+- Live evidence / resolution split on that persisted row. Risk receipts remain `spy 0`, `hyg_ief +1`, `vix 0`, `eem_spy -1`, `risk_tiebreak +1`. Evidence-only UI: Agreement **1/2 (50%)**, Participation **2/4**, Confidence **Low**, Conviction **0**, Evidence net **0/4 (Neutral)**, **Resolved by SPY TR21 tie-break**. Final `risk_score` remains **+1**.
+- Inflation receipts remain `pdbc +1`, `tip_ief -1`, `tlt +1`, `uup -1`, `infl_tiebreak +1`. Evidence-only UI: Agreement **2/4 (50%)**, Participation **4/4**, Confidence **Medium**, Conviction **0**, Evidence net **0/4 (Neutral)**, **Resolved by PDBC TR21 tie-break**. Final `infl_score` remains **+1**.
+- Regime-level live proof: REFLATION / RISK ON / Inflation; Regime Confidence **Low**; Regime Conviction **0**; Primary driver **Tie** (`Tie: both axes weak`); Crowded **false**. No model classification changed.
+- Top Drivers are evidence-only: Risk shows EM vs US → Risk Off (−1) and Credit vs Treasuries → Risk On (+1); Inflation shows Commodities → Inflation (+1) and TIP/IEF ratio → Disinflation (−1). Neither `risk_tiebreak` nor `infl_tiebreak` is a Top Driver. Public footnote: “Biggest evidence votes today. Tie-break resolution is shown separately when used.” Nerd Mode / persisted API provenance remains intact; tie-break receipts were not deleted.
+- Participation is non-neutral evidence receipts / present evidence receipts. Tie-breaks are excluded. Public legend: “Tie-breaks are resolution, not evidence.” Participation is not Availability; no expected-feed denominator was invented.
+- Inflation Confidence **Medium** is the correct `>= 0.65` bucket for `0.7 × 0.50 + 0.3 × 1.00 = 0.65`. No threshold retuning. The original R6 audit replay classified many exact-boundary cases Low because binary float produced ~`0.649999…`. R6B uses numerically stable evaluation of the same 70/30 formula. Resulting T0 → T2 confidence-label changes: Infl **2**, Risk **7**, Overall **9**; Compare kind changes **213** (original audit 142 / 252 / 349 confidence and 220 compare). The gap is the repaired 0.65 numeric boundary, not threshold optimization.
+- Replay (2017-08-03 through 2026-08-28, n = 2,280; no market-data refresh): Infl Participation 123; Risk Participation 238; Infl Agreement 263; Risk Agreement 483; Infl Conviction 263; Risk Conviction 483; Overall Regime Conviction 679; Infl Top Drivers 263; Risk Top Drivers 223; Primary Driver label/why 211 / 211; Crowded 0; no-tie-break parity mismatches 0; model-field differences 0.
+- `/api/ghostregime/health` (HTTP 200): `ok true`, `status OK`, `latest_date 2026-09-01`, `age_days 1`, `max_age_days 4`, `is_fresh true`, `engine_version ghostregime-v1.0.4`, `build_commit = ac76f498…`. No refresh was required or performed.
+- Brief post-deploy observation only: public `/today` and `/health` already reported serving build `ac76f498…`, while the first server-rendered `/ghostregime` payload briefly embedded prior serving-build metadata `9eb143d5…`. Visible R6B semantics were already correct and the persisted model row was unchanged. The page server fetch uses `next: { revalidate: 60 }`; a later request after revalidation embedded `ac76f498…`. Treat as brief server-rendered data-cache / stale-while-revalidate behavior. Not model staleness, not data loss, not a permanent fix, and not a code change in this docs PR.
+- **R6C copy intentionally unchanged** (Hold now / Actionable read / What to do now / “what you should actually hold” / contribution-rebalance guidance / train-wreck wording remain).
+- R4, P1/P2/P3, VAMS, allocation formulas, 60/30/10, provider routing, workflows, and GhostFlow unchanged by R6B.
+
+**R6B is complete.** Next is **R6C — educational / advice-like copy cleanup**. R6C implementation is **still separately gated** and must **not** begin in this docs PR.
+
+Decision already recorded: [DECISIONS.md](./DECISIONS.md) entry **2026-09-02 — GhostRegime R6 product gate: GO WITH CHANGES — Option B**. This checkpoint records rollout facts, not a new decision.
+
+This workstream is independent of GhostFlow source monitoring below.
+
+## Recommended next work (GhostRegime)
+1. **R6C — educational / advice-like copy cleanup** (implementation is **separately gated** and is **not** authorized by this closeout)
+2. Do **not** change R6A/R6B display-truth or evidence/resolution semantics
+3. Do **not** change VAMS, allocation formulas, or **60/30/10**
+4. Do **not** change provider routing, workflows, P1/P2/P3, or R4
+5. GhostFlow remains a separate workstream
+
+Last updated: 2026-09-02
+
+---
+
 ## Current State (GhostRegime — 2026-09-02 R6A live closeout)
 R6A merge: PR **#178** (`fix(ghostregime): make R6A display semantics truthful`, reviewed final head `45becfdb7746a64dcd79649979085b9bed3b4ce4`) → `9eb143d5bdb58e3be2ade694efb4019b29a149eb` (`main`, merged 2026-09-02). Production Vercel deployment was verified READY on that exact merge commit (`target = production`). No manual deployment.
 
