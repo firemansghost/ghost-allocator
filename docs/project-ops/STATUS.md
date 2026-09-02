@@ -1,5 +1,47 @@
 ﻿# STATUS
 
+## Current State (GhostRegime — 2026-09-02 R5A live closeout)
+R5A merge: PR **#174** (`fix(ghostregime): contain satellite fallback provenance`, reviewed head `76422e861000fc6c568607ac5245a9af82256aa7`) → `f03c20b6707f61f7af842c28ecb01afb6f29a785` (`main`, merged 2026-08-31). Production deployment was verified READY on that exact merge commit.
+
+**R5A COMPLETE — MERGED / DEPLOYED / NATURAL SCHEDULED COMPUTE VERIFIED**
+
+- Model remains `ghostregime-v1.0.3`. No `MODEL_VERSION` bump, no new Blob namespace, no historical Blob rewrite.
+- No forced refresh was used to obtain the final R5A production proof.
+- September 1 scheduled run [33488935024](https://github.com/firemansghost/ghost-allocator/actions/runs/33488935024) succeeded, but no market compute occurred because the persisted `2026-08-28` snapshot was still inside the freshness window: `refresh_attempt = scheduled`, `refresh_outcome = scheduled_served_persisted_no_fetch`, `persisted_snapshot_preserved = true`, `latest_snapshot_date = 2026-08-28`, `market_snapshot_lag_days = 4`. That proved the post-R5A scheduled no-fetch path. It is **not** the final R5A compute proof.
+- September 2 scheduled run [33606515025](https://github.com/firemansghost/ghost-allocator/actions/runs/33606515025) (`schedule`, head `f03c20b…`, success) was the first genuine natural post-R5A recompute: `refresh_attempt = scheduled`, `refresh_outcome = scheduled_recomputed_and_persisted`, `persisted_snapshot_preserved = false`, `market_snapshot_lag_days = 1`. Compute-path `data_source = computed`.
+- Persisted row: `date = 2026-09-01`, `run_date_utc = 2026-09-02`, `regime = REFLATION`, `risk_regime = RISK ON`, `risk_score = +1`, `infl_core_score = 0`, `infl_sat_score = +1`, `infl_score = +1`, `row_build_commit = f03c20b…`, `row_engine_version = ghostregime-v1.0.3`.
+- R5A provenance on that new compute: receipt key remains `satellite_commodity_nowcast_basket_(energy+metals)`; display label `Commodity proxy (PDBC TR21)`; vote `+1` Inflation; note includes `source: PDBC TR21`. This remains a PDBC TR21 proxy under v1.0.3, not an independent Commodity feed.
+- No Freight receipt was sourced from Commodity/PDBC. The invalid Freight → Commodity alias did not appear. Fallback containment survived real production computation.
+- R5A did **not** change provider routing. The September 2 compute hit a Stooq browser challenge; all eight core ETFs (SPY, GLD, HYG, IEF, EEM, TIP, TLT, UUP) routed to Yahoo. Verified: `stooq_browser_challenge_detected = true`, `yahoo_etf_fallback_used = true`, `marketstack_used = false`.
+- Immediate post-write workflow health step briefly read the prior `2026-08-28` snapshot and emitted `WARN LATEST_ROW_OLD` (`age_days = 5`, `max_age_days = 4`). Production endpoints later resolved to the newly persisted `2026-09-01` row and were independently verified healthy. Characterize as an observed post-write/read timing or consistency wrinkle — **not** a production failure. No fix is authorized here.
+- Independently verified `/api/ghostregime/today` (HTTP 200): `date = 2026-09-01`, `regime = REFLATION`, `risk_regime = RISK ON`, `data_source = persisted`, `row_build_commit` / `build_commit = f03c20b…`, `row_engine_version` / `engine_version = ghostregime-v1.0.3`.
+- `/api/ghostregime/health` (HTTP 200): `ok true`, `status OK`, `latest_date 2026-09-01`, `age_days 1`, `max_age_days 4`, `is_fresh true`, `engine_version ghostregime-v1.0.3`, `build_commit = f03c20b…`.
+- Allocations, VAMS, provider routing, workflows, GhostFlow, and **60/30/10** unchanged by R5A.
+
+**R5B AUTHORIZED / IMPLEMENTED LOCALLY — not pushed, no PR, not deployed.** Do not describe R5B as live.
+
+Bobby explicitly authorized R5B. Local branch `model/ghostregime-r5b-remove-p2`, commit `75be5228c7fe60d255ecb05afb5ec57b7c080177`.
+
+Authorized contract: P1 PDBC TR63 core remains; P2 PDBC TR21 Commodity satellite removed from active scoring; P3 PDBC TR21 tie-break retained with ordinary `infl_tiebreak` provenance; target repository `MODEL_VERSION = ghostregime-v1.0.4` (new Blob namespace when deployed). R4, R6 formulas, VAMS, allocation formulas, 60/30/10, provider routing, workflows, and GhostFlow unchanged. The R5B model decision is recorded on that local branch and will arrive with the coherent model PR.
+
+Decision already recorded: [DECISIONS.md](./DECISIONS.md) entry **2026-08-31 — GhostRegime R5A satellite correctness/provenance containment authorized**. This checkpoint records rollout facts, not a new decision.
+
+This workstream is independent of GhostFlow source monitoring below.
+
+## Recommended next work (GhostRegime)
+1. Merge this R5A closeout docs PR
+2. Update/rebase the local R5B branch onto the new main
+3. Rerun R5B validation
+4. Push / open the R5B PR for review
+5. Do **not** deploy `ghostregime-v1.0.4` until PR review and an explicit rollout step (new empty namespace requires a controlled first refresh after deployment)
+6. R6 is **not** authorized
+7. Do **not** change 60/30/10 or VAMS formulas/thresholds
+8. Future operational observation only (no fix authorized): post-write `/health` briefly reading the prior snapshot (`WARN LATEST_ROW_OLD` on the September 2 workflow)
+
+Last updated: 2026-09-02
+
+---
+
 ## Current State (GhostRegime — 2026-08-31 R5A satellite containment)
 **R5A AUTHORIZED / IMPLEMENTED LOCALLY — PR review pending.** Not live.
 
