@@ -1,5 +1,40 @@
 ﻿# STATUS
 
+## Current State (GhostRegime — 2026-09-02 R6 final closeout)
+**R6 UI TRUTH COMPLETE — LIVE / VERIFIED**
+
+R6 is finished: **R6A**, **R6B**, and **R6C** are all merged, deployed, and independently live-verified. Do not reopen R6A / R6B / R6C unless new evidence shows a real defect. Do not begin R7 in this docs PR. Do not perform the separate site-wide product-copy truth audit in this docs PR.
+
+- **R6A — factual display correctness:** PR **#178** → `9eb143d5bdb58e3be2ade694efb4019b29a149eb`. Half vs off sleeve-brake truth; BTC half → +5% cash; Gold half → +15% cash; shared allocation formatting; primary-driver percentage units; Neutral display treatment; Exposure primary; Vs 60/30/10 secondary. No model change.
+- **R6B — evidence / resolution separation:** PR **#180** → `ac76f49899e8e6aa57df5aa66cd0e1d6215de729`. Evidence receipts separate from procedural resolution; `risk_tiebreak` / `infl_tiebreak` excluded from evidence statistics; Coverage renamed Participation; Agreement / Participation / Confidence / Conviction / Crowded / Primary Driver / Top Drivers / Compare are evidence-only; separate **Resolved by…** provenance; persisted resolver receipts retained; final scores/axes unchanged. No model change.
+- **R6C — educational / advice-like copy truth:** main PR **#182** → `cbf2b15ad79f022c1c47448c102e7fb4ad54c989`. Residual shared-component repair PR **#183** → `bac20952d43480e138de01586e2a296000d7bfdc` (current production serving build). Public vocabulary: Hold now → **Model mix**; Actionable read → **Model read**; What to do now → **How to use this**. Removed “should actually hold,” crash-avoidance / re-entry claims, sell-near-top / buy-near-bottom claims, and recommended rebalance cadence. Cash now became factual cash terminology. How It Works / glossary / share / copied output aligned. GrayGhost voice and educational usefulness retained. No model change.
+- PR **#183** removed the last live full-variant Drawdown Reality Check claim (“That's why GhostRegime exists: not to be 'right' — to keep you from getting wrecked.”). Live replacement: “Large drawdowns can take years to recover from. That is why GhostRegime makes its exposure rules explicit instead of pretending it can call the exact top or bottom.”
+- Display/copy-only across R6. Model remains `ghostregime-v1.0.4`. No `MODEL_VERSION` bump, no Blob namespace change, no persisted-row rewrite, no force refresh, no provider call.
+- Serving UI/build is `bac20952d43480e138de01586e2a296000d7bfdc`. The persisted model row was **not** recomputed. `row_build_commit` remains `7e1bce227878e0901f4241a9c955e1d25bdeaf6b` (the R5B compute that created the v1.0.4 snapshot).
+- Public `/api/ghostregime/today` after the final R6C residual deploy (HTTP 200): `date = 2026-09-01`, `regime = REFLATION`, `risk_regime = RISK ON`, `risk_score = +1`, `infl_score = +1`, `risk_axis = RiskOn`, `infl_axis = Inflation`, `engine_version` / `row_engine_version = ghostregime-v1.0.4`, `build_commit = bac20952…`, `row_build_commit = 7e1bce227…`, `data_source = persisted`. Serve metadata: `refresh_attempt = read`, `refresh_outcome = served_persisted_snapshot`, `persisted_snapshot_preserved = true`.
+- Live fixture unchanged: allocation **60 / 15 / 5 + 20 cash**; scales Stocks **1.0** / Gold **0.5** / BTC **0.5**. Risk: Agreement **1/2**, Participation **2/4**, Confidence **Low**, Conviction **0**, Evidence net **0/4**, **Resolved by SPY TR21 tie-break**, final score **+1**. Inflation: Agreement **2/4**, Participation **4/4**, Confidence **Medium**, Conviction **0**, Evidence net **0/4**, **Resolved by PDBC TR21 tie-break**, final score **+1**. Regime Conviction **0**; Primary Driver **Tie / both axes weak**.
+- `/api/ghostregime/health` (HTTP 200): `ok true`, `status OK`, `latest_date 2026-09-01`, `age_days 1`, `max_age_days 4`, `is_fresh true`, `engine_version ghostregime-v1.0.4`, `build_commit = bac20952…`. No refresh was required or performed.
+- Brief post-deploy observation only: after PR **#183**, the first server-rendered `/ghostregime` payload briefly carried prior serving-build metadata `cbf2b15…` while `/today` and `/health` already reported `bac20952…`. Visible model semantics were already correct and the persisted model row was unchanged. A subsequent request converged to `bac20952…`. Treat as observed server-rendered cache / revalidation behavior. Not model staleness, not data loss, not a resolved bug, and not a reason to refresh. No code fix is authorized by this docs PR.
+- Future **non-R6** cleanup (not started): **Site-wide product-copy truth audit**. R6 live verification observed older product-positioning / efficacy language outside the tightly scoped GhostRegime R6 surfaces (homepage examples include capture-upside / limit-downside, catching most of a bull market, and broader drawdown-protection framing). This is not a GhostRegime model defect. Do not rewrite Builder or other module copy here. Preserve educational usefulness and GrayGhost voice. Separate future product/copy workstream.
+- R4, P1/P2/P3, VAMS, allocation formulas, **60/30/10**, provider routing, workflows, and GhostFlow unchanged by R6.
+
+**R6 is complete.** Next substantive GhostRegime work is **R7 — allocation research harness**. R7 does **not** automatically authorize allocation changes. Preserve **60 / 30 / 10** until research evidence and an explicit product/model decision support a change. Do **not** start R7 in this docs PR.
+
+Decision already recorded: [DECISIONS.md](./DECISIONS.md) entry **2026-09-02 — GhostRegime R6 product gate: GO WITH CHANGES — Option B**. This checkpoint records completion evidence, not a new product decision.
+
+This workstream is independent of GhostFlow source monitoring below.
+
+## Recommended next work (GhostRegime)
+1. **R7 — allocation research harness** (research only; **not** authorized to change live allocations or **60/30/10**)
+2. Do **not** reopen R6A / R6B / R6C unless new evidence shows a real defect
+3. Separate non-R6 backlog: **site-wide product-copy truth audit** (do not perform it here)
+4. Do **not** change VAMS, allocation formulas, provider routing, workflows, P1/P2/P3, or R4
+5. GhostFlow remains a separate workstream
+
+Last updated: 2026-09-02
+
+---
+
 ## Current State (GhostRegime — 2026-09-02 R6B live closeout)
 R6B merge: PR **#180** (`fix(ghostregime): separate evidence from tie resolution`, reviewed head `8eaeb966eae5765d9005acfcb5a1cda96d4ec76f`) → `ac76f49899e8e6aa57df5aa66cd0e1d6215de729` (`main`, merged 2026-09-02). Production Vercel deployment was verified READY on that exact merge commit (`target = production`). No manual deployment.
 
