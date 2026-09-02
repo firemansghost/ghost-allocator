@@ -114,10 +114,16 @@ Validate-only mode may use the real snapshot for:
 
 It must not compute real-panel CAGR, drawdown, Sharpe, or P0–P6 rankings. Portfolio/metrics code is unit-tested on synthetic fixtures only. R7C is the first real performance run.
 
-## Command
+## R7C real study
+
+R7C executes the preregistered frozen study once against the private snapshot. The runner must be sealed (committed) before the first real run. Results are written only under untracked `tmp/ghostregime-r7/r7c-<UTCSTAMP>/`.
+
+Plan-only reports snapshot identity, the study matrix, and known data warnings. It does not compute candidate NAV, CAGR, drawdown, Sharpe, Sortino, or rankings.
 
 ```bash
 npm run ghostregime:r7:validate -- --snapshot .local/ghostregime-r7/r7b0-20260902-210842Z
+npm run ghostregime:r7:study -- --snapshot .local/ghostregime-r7/r7b0-20260902-210842Z --plan-only
+npm run ghostregime:r7:study -- --snapshot .local/ghostregime-r7/r7b0-20260902-210842Z
 ```
 
-There is no `ghostregime:r7:study` command in R7B1.
+The real study command is one-shot. Do not rerun it under this authorization. R7C does not change production 60/30/10 or authorize an R7D product decision.

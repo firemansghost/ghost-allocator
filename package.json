@@ -32,6 +32,7 @@
     "ghostregime:btc-attribution": "tsx scripts/ghostregime/btc-mismatch-attribution.ts",
     "ghostregime:btc-parameter-scan": "tsx scripts/ghostregime/btc-parameter-scan.ts",
     "ghostregime:r7:validate": "tsx scripts/ghostregime/research/validate-snapshot.ts",
+    "ghostregime:r7:study": "tsx scripts/ghostregime/research/run-study.ts",
     "audit:models": "tsx scripts/audit-models.ts",
     "check:ghostregime-copy": "node scripts/check-ghostregime-builder-copy.mjs",
     "check:ghostregime-legend": "node scripts/check-ghostregime-regime-legend-drift.mjs",
