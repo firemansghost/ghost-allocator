@@ -1,5 +1,24 @@
 ﻿# HANDOFF
 
+## Last Session Summary (2026-09-02 — GhostRegime R6 final live closeout)
+R6 is finished. R6A, R6B, and R6C are merged, deployed, and independently live-verified. Do not reopen R6A / R6B / R6C unless new evidence shows a real defect. Do not start R7 in this docs PR. Do not perform the separate site-wide product-copy truth audit here.
+
+- **R6A** PR **#178** → `9eb143d5bdb58e3be2ade694efb4019b29a149eb` (display truth: half vs off, shared allocation formatting, Exposure / Vs 60/30/10).
+- **R6B** PR **#180** → `ac76f49899e8e6aa57df5aa66cd0e1d6215de729` (evidence vs procedural resolution; Participation; evidence-only metrics; Resolved by… provenance).
+- **R6C** PR **#182** → `cbf2b15ad79f022c1c47448c102e7fb4ad54c989`; residual PR **#183** → current production serving build `bac20952d43480e138de01586e2a296000d7bfdc` (Model mix / Model read / How to use this; mechanism language; final Drawdown Reality Check repair).
+
+Model remains `ghostregime-v1.0.4`. The persisted row was **not** recomputed: `row_build_commit` is still `7e1bce227878e0901f4241a9c955e1d25bdeaf6b`. Public `/today` served the existing snapshot (`refresh_attempt = read`, `refresh_outcome = served_persisted_snapshot`, `persisted_snapshot_preserved = true`). Date `2026-09-01`, REFLATION, RISK ON, `risk_score +1`, `infl_score +1`, allocation **60/15/5 + 20 cash**, scales 1.0 / 0.5 / 0.5. Health OK and fresh (`age_days 1`). No R6 refresh.
+
+Live evidence fixture unchanged from R6B. After PR **#183**, first SSR `/ghostregime` briefly embedded `cbf2b15…` while APIs already reported `bac20952…`; a later request converged. Observed server-rendered cache/revalidation behavior — not model staleness, not data loss, not a resolved bug, not a reason to refresh.
+
+## Priority for Next Session (GhostRegime)
+1. Next substantive GhostRegime work: **R7 — allocation research harness** (do not start it in this closeout; do not change **60/30/10** without research evidence and an explicit product/model decision)
+2. Do **not** reopen R6A / R6B / R6C unless new evidence shows a real defect
+3. Separate non-R6 backlog: **site-wide product-copy truth audit** (homepage / shared positioning; not a GhostRegime model defect; not this PR)
+4. No model / persistence / providers / VAMS / allocation / workflow / GhostFlow changes from this closeout
+
+---
+
 ## Last Session Summary (2026-09-02 — GhostRegime R6B live closeout)
 R6B is complete: merged, deployed, and independently live-verified. PR **#180** (`fix(ghostregime): separate evidence from tie resolution`) reviewed head `8eaeb966eae5765d9005acfcb5a1cda96d4ec76f` → merge / production serving build `ac76f49899e8e6aa57df5aa66cd0e1d6215de729`. Production READY on that commit. No manual deploy. No GhostRegime refresh.
 
