@@ -42,7 +42,7 @@ export default function HowItWorksPage() {
         <h2 className="text-sm font-semibold text-zinc-50 mb-3">What GhostRegime Is</h2>
         <div className="space-y-3 text-xs text-zinc-300 leading-relaxed">
           <p>
-            GhostRegime is a portfolio &quot;weather report&quot; that helps you decide how much risk to carry right now — 
+            GhostRegime is a portfolio &quot;weather report&quot; that shows how much risk the model is carrying from published rules —
             based on what markets are actually doing, not what some guy on YouTube &quot;feels in his bones.&quot;
             Targets follow a KISS-style regime map; the Brake uses our own proxy-VAMS signals (SPY, GLD, BTC-USD)—not copied daily sleeve labels from elsewhere.
           </p>
@@ -81,8 +81,7 @@ export default function HowItWorksPage() {
           <li className="flex items-start gap-2">
             <span className="text-red-400 mt-0.5">•</span>
             <span>
-              <strong>Not designed to save you from every 2–5% wobble.</strong> Those happen. A lot. This is built to help reduce exposure 
-              during the bigger ~20% gut-punch corrections — based on how this kind of trend system has behaved in historical testing. (No, it's not magic.)
+              <strong>Not designed to react to every 2–5% wobble.</strong> Those happen. A lot. Exposure changes only when the published regime or sleeve-brake rules change. (No, it&apos;s not magic.)
             </span>
           </li>
           <li className="flex items-start gap-2">
@@ -114,7 +113,7 @@ export default function HowItWorksPage() {
         <h2 className="text-sm font-semibold text-zinc-50 mb-3">Step 1: Max targets and Before the brake</h2>
         <div className="space-y-3 text-xs text-zinc-300 leading-relaxed">
           <p>
-            <strong>Max targets</strong> are your full-risk baseline by regime (often 60/30/10 in calm regimes; INFLATION and others shift—see Methodology). First, GhostRegime classifies the market into one of four regimes:
+            <strong>Max targets</strong> are the full-risk baseline by regime (often 60/30/10 in calm regimes; INFLATION and others shift—see Methodology). First, GhostRegime classifies the market into one of four regimes:
           </p>
           <ul className="list-disc list-inside space-y-1 ml-2">
             <li><strong>GOLDILOCKS</strong> (Risk On)</li>
@@ -136,9 +135,9 @@ export default function HowItWorksPage() {
         </div>
       </GlassCard>
 
-      {/* Step 2 — Brake / Hold now */}
+      {/* Step 2 — Brake / Model mix */}
       <GlassCard className="p-6">
-        <h2 className="text-sm font-semibold text-zinc-50 mb-3">Step 2: Brake (VAMS) and Hold now</h2>
+        <h2 className="text-sm font-semibold text-zinc-50 mb-3">Step 2: Brake (VAMS) and Model mix</h2>
         <div className="space-y-3 text-xs text-zinc-300 leading-relaxed">
           <p>
             Next, the <strong>brake</strong> (proxy-VAMS — volatility-adjusted momentum on SPY, GLD, BTC-USD) looks at each sleeve&apos;s trend signal and can cut exposure:
@@ -149,7 +148,7 @@ export default function HowItWorksPage() {
             <li><strong>Bearish</strong> → hold 0% (yes, cash is a position)</li>
           </ul>
           <p>
-            <strong>Hold now</strong> is what you should actually hold after the brake is applied — the practical instruction.
+            <strong>Model mix</strong> is the model&apos;s published mix after the brake is applied.
           </p>
           <p className="italic">
             &quot;Is the trend still working… and is it getting dangerously choppy?&quot;
@@ -165,14 +164,14 @@ export default function HowItWorksPage() {
         <h2 className="text-sm font-semibold text-zinc-50 mb-3">What You Do With the Signal</h2>
         <div className="space-y-3 text-xs text-zinc-300 leading-relaxed">
           <p>
-            GhostRegime publishes <strong>Hold now</strong> (what to hold) and <strong>Cash now</strong> (base cash plus anything the brake kicked out). Your job is simple:
+            GhostRegime publishes a <strong>Model mix</strong> (the after-brake allocation) and <strong>Cash in model mix</strong> (base cash plus anything the brake kicked out).
           </p>
           <ul className="list-disc list-inside space-y-1 ml-2">
-            <li>If exposures increase, you DCA in (calmly, like an adult)</li>
-            <li>If exposures decrease, you cut risk quickly (because drawdowns don't care about your feelings)</li>
+            <li>Compare that published mix with your own plan and constraints</li>
+            <li>Account rules, taxes, time horizon, and risk tolerance still decide whether anything changes</li>
           </ul>
           <p>
-            This is how you sell near the top and buy near the bottom — not perfectly, but well enough to matter.
+            The rules scale exposure down when the published trend rules weaken and restore it when they recover.
           </p>
         </div>
       </GlassCard>
@@ -182,20 +181,20 @@ export default function HowItWorksPage() {
         <h2 className="text-sm font-semibold text-zinc-50 mb-3">Rebalancing (There's No One Right Way)</h2>
         <div className="space-y-3 text-xs text-zinc-300 leading-relaxed">
           <p>
-            Because prices move, your portfolio will drift. Rebalancing keeps you close to the published exposures.
+            Because prices move, a live portfolio can drift away from any published mix. There is no required rebalance schedule.
           </p>
-          <p className="font-semibold text-amber-300 mb-2">Pick one of these approaches:</p>
+          <p className="font-semibold text-amber-300 mb-2">If someone chooses to use the model, two common examples are:</p>
           <div className="space-y-3">
             <div className="p-3 rounded-md border border-amber-400/30 bg-amber-400/10">
-              <h3 className="text-xs font-semibold text-amber-300 mb-1">Option A: Rebalance on signal changes (recommended)</h3>
+              <h3 className="text-xs font-semibold text-amber-300 mb-1">Example A: Compare on model changes</h3>
               <p className="text-[11px] text-zinc-300">
-                When GhostRegime changes Hold now, you rebalance to match.
+                A model change gives you a new published mix to compare with your existing plan.
               </p>
             </div>
             <div className="p-3 rounded-md border border-amber-400/30 bg-amber-400/10">
-              <h3 className="text-xs font-semibold text-amber-300 mb-1">Option B: Rebalance on a calendar</h3>
+              <h3 className="text-xs font-semibold text-amber-300 mb-1">Example B: Compare on a calendar you already follow</h3>
               <p className="text-[11px] text-zinc-300">
-                Weekly, monthly, or quarterly. Boring, consistent, effective.
+                Weekly, monthly, or quarterly — whatever you can actually stick to.
               </p>
             </div>
           </div>
@@ -216,7 +215,7 @@ export default function HowItWorksPage() {
             Ghost Allocator helps you map these exposures to your actual 457 plan menu (Voya core funds + optional Schwab ETFs).
           </p>
           <p>
-            <strong>GhostRegime</strong> tells you how much to hold.
+            <strong>GhostRegime</strong> publishes the model mix.
           </p>
           <p>
             <strong>Ghost Allocator</strong> helps you decide what to hold inside the plan.
@@ -232,12 +231,12 @@ export default function HowItWorksPage() {
         <h2 className="text-sm font-semibold text-zinc-50 mb-3">The Promise</h2>
         <div className="space-y-3 text-xs text-zinc-300 leading-relaxed">
           <p>
-            GhostRegime isn't trying to win every day. It's trying to win the war:
+            GhostRegime isn&apos;t trying to win every day. It publishes a mix from regime rules and sleeve brakes:
           </p>
           <ul className="list-disc list-inside space-y-1 ml-2">
-            <li>avoid the worst of bear markets</li>
-            <li>participate in most of bull markets</li>
-            <li>keep turnover low enough that you don't hate your life</li>
+            <li>scale exposure down when the published rules turn defensive</li>
+            <li>scale it back up when they improve</li>
+            <li>keep turnover low enough that you don&apos;t hate your life</li>
           </ul>
           <p className="text-[10px] text-zinc-400 mt-4 leading-relaxed">
             <strong className="text-zinc-300">GhostRegime is for educational purposes only and does not provide personalized investment advice.</strong> Example funds/ETFs are illustrations, not recommendations.

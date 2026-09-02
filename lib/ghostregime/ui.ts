@@ -402,7 +402,7 @@ function getStatusLabelForSummary(status: string): string {
 
 /**
  * Build share summary string for clipboard
- * Format: Hold now, Starting point, Brake, Max targets
+ * Format: Model mix, Starting point, Brake, Max targets
  */
 export function buildShareSummary(
   data: GhostRegimeRow,
@@ -419,7 +419,7 @@ export function buildShareSummary(
   const lines = [
     header,
     `Regime: ${data.regime} | Risk: ${data.risk_regime}`,
-    `Hold now (Actual): ${blocks.actual}`,
+    `Model mix: ${blocks.actual}`,
     `Before the brake (FYI): ${blocks.targets}`,
     `Brake (VAMS): ${blocks.scales}`,
     `Max targets: ${formatMaxTargets()}`,
@@ -429,8 +429,7 @@ export function buildShareSummary(
 }
 
 /**
- * Build micro-flow line: Starting point → Brake → Hold now
- * Avoids "Targets" wording; Hold now is the instruction.
+ * Build micro-flow line: Starting point → Brake → Model mix
  */
 export function buildMicroFlowLine(data: GhostRegimeRow | null): string | null {
   if (!data) return null;
@@ -459,7 +458,7 @@ export function buildMicroFlowLine(data: GhostRegimeRow | null): string | null {
     ? `${stocksActual}/${goldActual}/${btcActual} + ${cash} cash`
     : `${stocksActual}/${goldActual}/${btcActual}`;
 
-  return `Starting point (${startingPoint}) → Brake (${brake}) → Hold now (${holdNowPart})`;
+  return `Starting point (${startingPoint}) → Brake (${brake}) → Model mix (${holdNowPart})`;
 }
 
 /**
@@ -1700,7 +1699,7 @@ export function buildActionableReadLine(params: {
 }
 
 /**
- * Build copy snapshot text (date + actionable read)
+ * Build copy snapshot text (date + model read)
  */
 export function buildCopySnapshotText(
   row: GhostRegimeRow,

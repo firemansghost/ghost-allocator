@@ -97,12 +97,23 @@ import {
   CONFIDENCE_LABEL_PREFIX,
   PARTICIPATION_TOOLTIP,
   REGIME_OVERVIEW_TITLE,
-  POSTURE_HOLD_NOW_LABEL,
+  POSTURE_MODEL_MIX_LABEL,
+  POSTURE_MODEL_MIX_TOOLTIP,
   POSTURE_STARTING_POINT_LABEL,
   POSTURE_BRAKE_LABEL,
   POSTURE_BASELINE_LABEL,
   POSTURE_WHY_CASH_LABEL,
   GLOSSARY_HOLD_BRAKE_MAX_LINK,
+  HOW_TO_USE_THIS_TITLE,
+  HOW_TO_USE_THIS_LINES,
+  HOW_IT_WORKS_MODEL_MIX_TERM,
+  HOW_IT_WORKS_MODEL_MIX_DEFINITION,
+  HOW_IT_WORKS_CASH_TERM,
+  HOW_IT_WORKS_CASH_DEFINITION,
+  HOW_IT_WORKS_REALITY_CHECK,
+  HOW_IT_WORKS_ALLOCATIONS_TOOLTIP,
+  HOW_IT_WORKS_DEBUG_HINT,
+  CASH_NOW_PILL_TOOLTIP,
   SINCE_LAST_UPDATE_PREFIX,
   SINCE_LAST_UPDATE_NO_CHANGE,
   PRESSURE_WATCH_TITLE,
@@ -113,7 +124,7 @@ import {
   REGIME_CONFIDENCE_TOOLTIP,
   PRIMARY_DRIVER_PREFIX,
   PRIMARY_DRIVER_TOOLTIP,
-  ACTIONABLE_READ_PREFIX,
+  MODEL_READ_PREFIX,
   CROWDED_LABEL,
   CROWDED_TOOLTIP,
   COPY_SNAPSHOT_BUTTON,
@@ -211,7 +222,7 @@ function CashNowBar({ pct }: { pct: number }) {
   return (
     <div className="space-y-1 pt-1 border-t border-zinc-800/80">
       <div className="flex items-center justify-between text-xs">
-        <span className="text-zinc-400 font-medium">Cash now</span>
+        <span className="text-zinc-400 font-medium">Cash</span>
         <span className="font-semibold text-zinc-300">{formatAllocPct(pct / 100)}%</span>
       </div>
       <div className="relative h-3 rounded-full bg-zinc-800/50 overflow-hidden border border-zinc-700/40">
@@ -898,7 +909,7 @@ export function GhostRegimeClient({
         <div className="rounded-xl border border-zinc-800/50 bg-zinc-950/30 p-3 sm:p-4">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
             <div className="min-w-0 shrink-0 lg:max-w-[min(100%,22rem)]">
-              <p className="text-[10px] text-zinc-500 uppercase tracking-wide mb-1">{POSTURE_HOLD_NOW_LABEL}</p>
+              <p className="text-[10px] text-zinc-500 uppercase tracking-wide mb-1">{POSTURE_MODEL_MIX_LABEL}</p>
               <p className="text-2xl font-mono text-zinc-50 tabular-nums tracking-tight leading-tight">{blocks.actual}</p>
             </div>
             <div className="grid grid-cols-2 gap-x-3 gap-y-2.5 sm:grid-cols-4 sm:gap-x-4 flex-1 min-w-0 text-xs items-start">
@@ -1008,7 +1019,7 @@ export function GhostRegimeClient({
               <div className="mt-3 pt-2.5 border-t border-zinc-800/30 bg-zinc-950/40 -mx-3 px-3 sm:-mx-4 sm:px-4">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 py-0.5">
                   <div className="flex-1 min-w-0">
-                    <div className="text-[10px] text-zinc-500 mb-1">{ACTIONABLE_READ_PREFIX}</div>
+                    <div className="text-[10px] text-zinc-500 mb-1">{MODEL_READ_PREFIX}</div>
                     <ActionableReadPills
                       regime={data.regime}
                       riskRegime={data.risk_regime}
@@ -1283,7 +1294,7 @@ export function GhostRegimeClient({
         <GlassCard className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold text-zinc-50">
-                <Tooltip content="Before the brake = Risk On/Off targets. Max = full baseline. Hold now = what we hold after the sleeve brake.">
+                <Tooltip content={HOW_IT_WORKS_ALLOCATIONS_TOOLTIP}>
                   Allocations
                 </Tooltip>
               </h2>
@@ -1824,14 +1835,14 @@ export function GhostRegimeClient({
                 <Tooltip content="Full-risk baseline: 60% stocks, 30% gold, 10% BTC.">
                   Max targets
                 </Tooltip>
-              </strong>: Your full-risk baseline (60/30/10).
+              </strong>: The full-risk baseline (60/30/10).
             </span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-amber-400 mt-0.5">•</span>
             <span>
               <strong className="text-zinc-200">
-                <Tooltip content="Risk On/Off targets before the sleeve brake scales them. Your starting point.">
+                <Tooltip content="Risk On/Off targets before the sleeve brake scales them. The starting point.">
                   Before the brake
                 </Tooltip>
               </strong>: What the regime would allow before any safety cuts.
@@ -1841,37 +1852,40 @@ export function GhostRegimeClient({
             <span className="text-amber-400 mt-0.5">•</span>
             <span>
               <strong className="text-zinc-200">
-                <Tooltip content="What you hold after the sleeve brake is applied—the practical instruction.">
-                  Hold now
+                <Tooltip content={POSTURE_MODEL_MIX_TOOLTIP}>
+                  {HOW_IT_WORKS_MODEL_MIX_TERM}
                 </Tooltip>
-              </strong>: What you should actually hold after the brake is applied.
+              </strong>: {HOW_IT_WORKS_MODEL_MIX_DEFINITION}
             </span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-amber-400 mt-0.5">•</span>
             <span>
               <strong className="text-zinc-200">
-                <Tooltip content="Base cash from the starting point plus whatever the brake released from risk assets.">
-                  Cash now
+                <Tooltip content={CASH_NOW_PILL_TOOLTIP}>
+                  {HOW_IT_WORKS_CASH_TERM}
                 </Tooltip>
-              </strong>: Base cash plus anything the brake kicked out of risk assets.
+              </strong>: {HOW_IT_WORKS_CASH_DEFINITION}
             </span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-amber-400 mt-0.5">•</span>
-            <span>Reality check: This won&apos;t save you from every 2–5% wobble. It&apos;s built to help sidestep the bigger train wrecks and get you back in when the trend turns.</span>
+            <span>Reality check: {HOW_IT_WORKS_REALITY_CHECK}</span>
           </li>
         </ul>
       </GlassCard>
 
       {/* Use This Signal - Posture guidance */}
       <GlassCard className="p-6 border-amber-400/30 bg-amber-400/5">
-        <h2 className="text-sm font-semibold text-zinc-50 mb-3">What to do now</h2>
+        <h2 className="text-sm font-semibold text-zinc-50 mb-3">{HOW_TO_USE_THIS_TITLE}</h2>
         <p className="text-xs text-zinc-300 leading-relaxed mb-3">
-          For now: use GhostRegime as a posture check.
+          {HOW_TO_USE_THIS_LINES[0]}
+        </p>
+        <p className="text-xs text-zinc-300 leading-relaxed mb-3">
+          {HOW_TO_USE_THIS_LINES[1]}
         </p>
         <p className="text-xs text-zinc-300 leading-relaxed mb-4">
-          If it flips Risk Off, consider applying it to new contributions before making big rebalance moves.
+          {HOW_TO_USE_THIS_LINES[2]}
         </p>
         <div className="flex flex-wrap gap-2">
           <Link
@@ -2098,10 +2112,10 @@ export function GhostRegimeClient({
           {/* Advanced: Allocations */}
           <GlassCard className="p-4 sm:p-5 space-y-3">
             <p className="text-xs text-zinc-500">
-              Debug view. Use &quot;Hold now&quot; above for the practical instruction.
+              {HOW_IT_WORKS_DEBUG_HINT}
             </p>
             <h2 className="text-sm font-semibold text-zinc-50">
-              <Tooltip content="Starting point = before the sleeve brake (Risk On/Off targets). Max = full baseline. Hold now = actual after the brake.">
+              <Tooltip content={HOW_IT_WORKS_ALLOCATIONS_TOOLTIP}>
                 Allocations
               </Tooltip>
             </h2>

@@ -85,12 +85,16 @@ export const REGIME_OVERVIEW_TITLE = 'Regime overview';
 export const REGIME_SUMMARY_TITLE = REGIME_OVERVIEW_TITLE;
 
 /** Posture snapshot band (hero) */
-export const POSTURE_HOLD_NOW_LABEL = 'Hold now';
+export const POSTURE_MODEL_MIX_LABEL = 'Model mix';
+/** @deprecated Public wording is Model mix. */
+export const POSTURE_HOLD_NOW_LABEL = POSTURE_MODEL_MIX_LABEL;
+export const POSTURE_MODEL_MIX_TOOLTIP =
+  "The model's published mix after regime targets and sleeve brakes are applied.";
 export const POSTURE_STARTING_POINT_LABEL = 'Starting point';
 export const POSTURE_BRAKE_LABEL = 'Sleeve brake';
 export const POSTURE_BASELINE_LABEL = 'Full-risk baseline';
 export const POSTURE_WHY_CASH_LABEL = 'Why cash';
-export const GLOSSARY_HOLD_BRAKE_MAX_LINK = 'What do Hold now / Brake / Max targets mean?';
+export const GLOSSARY_HOLD_BRAKE_MAX_LINK = 'What do Model mix / Brake / Max targets mean?';
 export const SINCE_LAST_UPDATE_PREFIX = 'Since last update:';
 export const SINCE_LAST_UPDATE_NO_CHANGE =
   'No change since the last update. Markets were boring. (Enjoy it.)';
@@ -105,7 +109,9 @@ export const FLIPWATCH_PILL_TOOLTIP =
   'Flip Watch flags regime transitions. The current regime and allocations are already active. Different from Pressure Watch (distance to signal flips).';
 export const FLIPWATCH_LEGACY_PILL_TOOLTIP =
   'Older snapshot using the pre-R4 Flip Watch label. That status did not delay the regime or allocations.';
-export const ACTIONABLE_READ_PREFIX = 'Actionable read:';
+export const MODEL_READ_PREFIX = 'Model read:';
+/** @deprecated Public wording is Model read. */
+export const ACTIONABLE_READ_PREFIX = MODEL_READ_PREFIX;
 export const CROWDED_LABEL = 'Crowded';
 export const CROWDED_TOOLTIP = 'Signals are piling onto one side. Could be clarity… or everyone running through the same door.';
 export const COPY_SNAPSHOT_BUTTON = 'Copy';
@@ -150,8 +156,14 @@ export const COMPARE_RESET_TOOLTIP = 'Close compare panel and reset to default v
 export const COPY_BIGGEST_CHANGE_TOOLTIP = 'Copy biggest change';
 export const COPY_BIGGEST_CHANGE_COPIED = 'Copied';
 export const PREV_NOT_FOUND_INFO_TOOLTIP = 'Requested prev snapshot wasn\'t found. Using the nearest previous snapshot instead.';
-export const ACTIONABLE_CASH_PILL_TOOLTIP = 'Cash = leftover after scaling targets down; it sits unallocated until rebalance. Not cash "held in" the asset.';
-export const CASH_NOW_PILL_TOOLTIP = "Total cash in 'Hold now' (base cash + cash released by the brake).";
+export const ACTIONABLE_CASH_PILL_TOOLTIP =
+  'Cash = leftover after scaling targets down; it sits unallocated. Not cash "held in" the asset.';
+export const CASH_IN_MODEL_MIX_LABEL = 'Cash in model mix';
+export const CASH_PILL_LABEL_PREFIX = 'Cash';
+export const CASH_NOW_PILL_TOOLTIP =
+  'Total cash in the model mix (base cash + cash released by the brake).';
+/** @deprecated Public wording is Cash / Cash in model mix. */
+export const CASH_NOW_LABEL = CASH_IN_MODEL_MIX_LABEL;
 export const THROTTLE_OFF_PILL_TOOLTIP =
   'Cash released because the sleeve brake cut this sleeve from its starting point. The label (full / half / off) comes from the actual scale, not from the cash amount.';
 export const ALLOCATION_VIEW_EXPOSURE_LABEL = 'Exposure';
@@ -256,4 +268,24 @@ export const REGIME_TRANSITION_CHIP_PREFIX = 'Regime transition:';
 export const REGIME_CONFIRMATION_STATUS_LABEL = REGIME_TRANSITION_STATUS_LABEL;
 /** @deprecated R4: use REGIME_TRANSITION_CHIP_PREFIX */
 export const REGIME_CONFIRMATION_CHIP_PREFIX = REGIME_TRANSITION_CHIP_PREFIX;
+
+export const HOW_TO_USE_THIS_TITLE = 'How to use this';
+export const HOW_TO_USE_THIS_LINES = [
+  'Use GhostRegime as a research posture, not an instruction.',
+  'Compare the model mix with your own plan and constraints before deciding whether anything should change.',
+  'Account rules, taxes, time horizon, and risk tolerance still matter.',
+] as const;
+
+export const HOW_IT_WORKS_MODEL_MIX_TERM = 'Model mix';
+export const HOW_IT_WORKS_MODEL_MIX_DEFINITION =
+  "The model's published mix after the brake is applied.";
+export const HOW_IT_WORKS_CASH_TERM = 'Cash in model mix';
+export const HOW_IT_WORKS_CASH_DEFINITION =
+  'Base cash plus anything the brake kicked out of risk assets.';
+export const HOW_IT_WORKS_REALITY_CHECK =
+  'This is not designed to react to every 2–5% move. Exposure changes only when the published regime or sleeve-brake rules change.';
+export const HOW_IT_WORKS_ALLOCATIONS_TOOLTIP =
+  'Before the brake = Risk On/Off targets. Max = full baseline. Model mix = the after-brake published mix.';
+export const HOW_IT_WORKS_DEBUG_HINT =
+  'Debug view. Use "Model mix" above for the published after-brake allocation.';
 
