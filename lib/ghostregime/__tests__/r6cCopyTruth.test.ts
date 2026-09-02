@@ -73,6 +73,7 @@ const PUBLIC_SURFACES = [
   'app/ghostregime/how-it-works/page.tsx',
   'lib/content/glossary.ts',
   'components/ghostregime/ActionableReadPills.tsx',
+  'components/learn/DrawdownRealityCheck.tsx',
 ];
 
 function publicSource(): string {
@@ -156,7 +157,18 @@ describe('R6C public vocabulary', () => {
     assert.doesNotMatch(src, /sell near the top/i);
     assert.doesNotMatch(src, /buy near the bottom/i);
     assert.doesNotMatch(src, /Cash now/);
+    assert.doesNotMatch(src, /keep you from getting wrecked/i);
     assert.match(HOW_IT_WORKS_REALITY_CHECK, /Exposure changes only when the published regime or sleeve-brake rules change/);
+  });
+
+  it('locks DrawdownRealityCheck full-variant wording to factual drawdown / rules language', () => {
+    const src = readFileSync(join(ROOT, 'components/learn/DrawdownRealityCheck.tsx'), 'utf8');
+    assert.doesNotMatch(src, /keep you from getting wrecked/i);
+    assert.doesNotMatch(src, /That's why GhostRegime exists: not to be 'right'/);
+    assert.match(
+      src,
+      /Large drawdowns can take years to recover from\. That is why GhostRegime makes its exposure rules explicit instead of pretending it can call the exact top or bottom\./
+    );
   });
 
   it('rejects leftover How It Works outcome / cadence / hold-instruction copy', () => {

@@ -31,7 +31,7 @@ export default function DrawdownRealityCheck({ variant = 'full' }: DrawdownReali
       </ul>
       {variant === 'full' && (
         <p className="text-xs text-amber-300 italic mt-3 pt-3 border-t border-zinc-700">
-          That's why GhostRegime exists: not to be 'right' — to keep you from getting wrecked.
+          Large drawdowns can take years to recover from. That is why GhostRegime makes its exposure rules explicit instead of pretending it can call the exact top or bottom.
         </p>
       )}
     </div>
