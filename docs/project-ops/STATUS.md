@@ -14,12 +14,12 @@ R7A architecture, R7A.1 methodology correction, R7B0 frozen research-data captur
 - Model remains `ghostregime-v1.0.4`. **60/30/10 unchanged.** No refresh. No production writes. No GhostFlow change.
 - Decision recorded: [DECISIONS.md](./DECISIONS.md) entry **2026-09-02 — GhostRegime R7 allocation study preregistered before outcomes**.
 
-**R7B1 is complete.** Next substantive work is **R7C — first authorized real frozen-panel study run**, separately authorized. R7C does **not** authorize a production allocation change. **R7D remains the product/model decision gate.** Do not reopen R7A / R7A.1 / R7B0 / R7B1 without real evidence of a defect. Do not alter the preregistered contract after viewing outcomes.
+**R7B1 is complete.** Next substantive work is **R7C — first eligible real frozen-panel study run, pending separate authorization**. R7C does **not** authorize a production allocation change. **R7D remains the product/model decision gate.** Do not reopen R7A / R7A.1 / R7B0 / R7B1 without real evidence of a defect. Do not alter the preregistered contract after viewing outcomes.
 
 This workstream is independent of GhostFlow source monitoring below.
 
 ## Recommended next work (GhostRegime)
-1. **R7C — first authorized real frozen-panel candidate study** (separately gated; does **not** authorize live allocation changes)
+1. **R7C — designated first real frozen-panel study run; separately gated** (does **not** authorize live allocation changes)
 2. **R7D — product/model decision gate** after R7C evidence (not authorized by R7C)
 3. Do **not** reopen R7A / R7A.1 / R7B0 / R7B1 unless new evidence shows a real defect
 4. Do **not** change the preregistered contract, holdout, P0–P6 family, or costs after outcomes are viewed

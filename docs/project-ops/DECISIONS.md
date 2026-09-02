@@ -23,7 +23,7 @@ Why:
 - The one-session lag and event-driven rebalance prevent lookahead and daily implicit rebalancing that the model does not actually do.
 
 Consequences:
-- **R7C is the first authorized real frozen-panel outcome run.** As of PR **#185** merge, no real candidate CAGR, drawdown, Sharpe, Sortino, ranking, or winner has been viewed.
+- **R7C is designated as the first real frozen-panel outcome run and requires separate authorization before execution.** As of PR **#185** merge, no real candidate CAGR, drawdown, Sharpe, Sortino, ranking, or winner has been viewed.
 - **R7C does not authorize a production allocation change.**
 - **R7D remains the product/model decision gate.**
 - Production **60/30/10** remains unchanged until an explicit later decision.
