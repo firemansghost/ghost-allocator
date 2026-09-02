@@ -1,5 +1,38 @@
 ﻿# STATUS
 
+## Current State (GhostRegime — 2026-09-02 R6A live closeout)
+R6A merge: PR **#178** (`fix(ghostregime): make R6A display semantics truthful`, reviewed final head `45becfdb7746a64dcd79649979085b9bed3b4ce4`) → `9eb143d5bdb58e3be2ade694efb4019b29a149eb` (`main`, merged 2026-09-02). Production Vercel deployment was verified READY on that exact merge commit (`target = production`). No manual deployment.
+
+**R6A COMPLETE — MERGED / DEPLOYED / LIVE-VERIFIED**
+
+- Display-only. Model remains `ghostregime-v1.0.4`. No `MODEL_VERSION` bump, no Blob namespace change, no persisted-row rewrite, no force refresh, no provider call.
+- Serving UI/build is `9eb143d5…`. The persisted model row was **not** recomputed. `row_build_commit` remains `7e1bce227878e0901f4241a9c955e1d25bdeaf6b` (the R5B compute that created the v1.0.4 snapshot). Do not imply R6A recomputed the model.
+- Public `/api/ghostregime/today` after deploy (HTTP 200): `date = 2026-09-01`, `regime = REFLATION`, `risk_regime = RISK ON`, `engine_version` / `row_engine_version = ghostregime-v1.0.4`, `build_commit = 9eb143d5…`, `row_build_commit = 7e1bce227…`, `data_source = persisted`. Serve metadata: `refresh_attempt = read`, `refresh_outcome = served_persisted_snapshot`, `persisted_snapshot_preserved = true`.
+- Allocations / VAMS unchanged on that row: targets 60/30/10; scales 1.0 / 0.5 / 0.5; actuals 60/15/5 + 20 cash.
+- Independently inspected rendered production HTML at `/ghostregime`. Live R6A proof: sleeve brake **Stocks full / Gold half / BTC half**; Actionable Read throttle pill **BTC half → +5% cash • Gold half → +15% cash** (the prior false `BTC off → +5% cash` is gone); allocation card default **Exposure** (Stocks 60%, Gold 15%, Bitcoin 5%, Cash 20%) with Gold and Bitcoin still identified as half size; secondary toggle **Vs 60/30/10**; displayed mix remains coherent **60/15/5 + 20 cash**.
+- R6A live for: (1) sleeve brake-state truth — half is not off; (2) shared one-decimal-only-when-needed allocation formatting; (3) primary-driver agreement thresholds 75 / 50 on the 0–100 scale (latent correctness; current row unchanged); (4) vote=0 user display Neutral where direction is rendered — persisted `direction` not rewritten; (5) Exposure primary, Vs 60/30/10 secondary full-risk comparison.
+- `/api/ghostregime/health` (HTTP 200): `ok true`, `status OK`, `latest_date 2026-09-01`, `age_days 1`, `max_age_days 4`, `is_fresh true`, `engine_version ghostregime-v1.0.4`, `build_commit = 9eb143d5…`. No refresh was required or performed.
+- **R6B semantics intentionally unchanged** on this live row: Risk Agreement 2/3, Coverage 3/5, Confidence Low, Conviction 20; Inflation Agreement 3/5, Coverage 5/5, Confidence Medium, Conviction 20; Inflation Top Drivers still includes Inflation tie-breaker (PDBC TR21). That is expected pre-R6B behavior, not a new R6A defect.
+- **R6C copy intentionally unchanged** (Hold now / Actionable read / What to do now remain).
+- R4, P1/P2/P3, VAMS, allocation formulas, 60/30/10, provider routing, workflows, and GhostFlow unchanged by R6A.
+
+**R6A is complete.** Next is **R6B — evidence / resolution separation**. R6B implementation is **still separately gated** and must **not** begin in this docs PR.
+
+Decision already recorded: [DECISIONS.md](./DECISIONS.md) entry **2026-09-02 — GhostRegime R6 product gate: GO WITH CHANGES — Option B**. This checkpoint records rollout facts, not a new decision.
+
+This workstream is independent of GhostFlow source monitoring below.
+
+## Recommended next work (GhostRegime)
+1. **R6B — evidence / resolution separation** (implementation is **separately gated** and is **not** authorized by this closeout)
+2. Do **not** start R6C copy work
+3. Do **not** change VAMS, allocation formulas, or **60/30/10**
+4. Do **not** change provider routing, workflows, P1/P2/P3, or R4
+5. GhostFlow remains a separate workstream
+
+Last updated: 2026-09-02
+
+---
+
 ## Current State (GhostRegime — 2026-09-02 R5B live closeout)
 R5B merge: PR **#176** (`feat(ghostregime): remove duplicate PDBC TR21 satellite`, reviewed head `9107a6e68adf0ef2c91f7540cf7f2db6cdb075f7`) → `7e1bce227878e0901f4241a9c955e1d25bdeaf6b` (`main`, merged 2026-09-02). Production deployment was verified READY on that exact merge commit.
 
