@@ -12,6 +12,7 @@ import {
   REGIME_CONVICTION_TOOLTIP,
   CROWDED_TOOLTIP,
   CASH_NOW_PILL_TOOLTIP,
+  CASH_PILL_LABEL_PREFIX,
   THROTTLE_OFF_PILL_TOOLTIP,
 } from '@/lib/ghostregime/ghostregimePageCopy';
 import {
@@ -31,7 +32,7 @@ interface ActionableReadPillsProps {
   stocksScale: number;
   goldScale: number;
   btcScale: number;
-  /** Cash breakdown for throttle pills (e.g. "BTC half → +5% cash") and Cash now pill */
+  /** Cash breakdown for throttle pills (e.g. "BTC half → +5% cash") and cash-in-mix pill */
   cashBreakdown?: CashBreakdown | null;
 }
 
@@ -82,10 +83,10 @@ export function ActionableReadPills({
     });
   }
 
-  // 6) Cash now X% (actual/hold-now cash; show when >= 1%)
+  // 6) Cash X% (cash in the published model mix; show when >= 1%)
   if (cashBreakdown && cashBreakdown.cashTotal >= 0.01) {
     pills.push({
-      label: `Cash now ${formatAllocPct(cashBreakdown.cashTotal)}%`,
+      label: `${CASH_PILL_LABEL_PREFIX} ${formatAllocPct(cashBreakdown.cashTotal)}%`,
       tooltip: CASH_NOW_PILL_TOOLTIP,
     });
   }

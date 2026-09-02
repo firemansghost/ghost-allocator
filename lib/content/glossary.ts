@@ -348,11 +348,11 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
   },
   {
     id: 'targets-scales-actual',
-    term: 'Hold now / Brake / Max targets',
+    term: 'Model mix / Brake / Max targets',
     category: 'GhostRegime',
     short:
-      'Max targets: KISS-style baseline by regime. Before the brake: what the regime allows. Hold now: after proxy-VAMS scaling. Cash now: base cash + what the brake kicked out.',
-    why: 'Hold now is the practical instruction. The Brake uses independently computed proxy-VAMS sleeve signals.',
+      'Max targets: KISS-style full-risk baseline by regime. Starting point: what the regime allows before the sleeve brake. Model mix: the published mix after the brake. Cash in model mix: base cash + what the brake released.',
+    why: "Model mix is the model's published after-brake allocation. The Brake uses independently computed proxy-VAMS sleeve signals.",
     related: ['kiss-aligned-targets', 'regime', 'vams'],
   },
   {
