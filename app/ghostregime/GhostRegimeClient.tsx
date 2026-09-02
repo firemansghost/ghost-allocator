@@ -33,6 +33,9 @@ import {
   getMaxTargets,
   formatMaxTargets,
   pctOfMax,
+  formatAllocPct,
+  DEFAULT_ALLOCATION_VIEW,
+  type AllocationView,
   buildTodaySnapshotBlocks,
   buildShareSummary,
   buildMicroFlowLine,
@@ -160,6 +163,10 @@ import {
   REGIME_MAP_METHODOLOGY_LINK_TEXT,
   GHOSTREGIME_METHODOLOGY_PILL_LABEL,
   GHOSTREGIME_METHODOLOGY_PILL_TOOLTIP,
+  ALLOCATION_VIEW_EXPOSURE_LABEL,
+  ALLOCATION_VIEW_FULL_RISK_LABEL,
+  ALLOCATION_VIEW_FULL_RISK_HINT,
+  ALLOCATION_VIEW_FULL_RISK_BAR_SUFFIX,
 } from '@/lib/ghostregime/ghostregimePageCopy';
 import { GHOSTREGIME_PRODUCT_TAGLINE } from '@/lib/ghostregime/productPositioning';
 import Link from 'next/link';
@@ -183,7 +190,7 @@ function KissBar({
     <div className="space-y-1">
       <div className="flex items-center justify-between text-xs">
         <span className="text-zinc-300 font-medium">{label}</span>
-        <span className="font-semibold text-zinc-200">{pct.toFixed(0)}% of max</span>
+        <span className="font-semibold text-zinc-200">{pct.toFixed(0)}% {ALLOCATION_VIEW_FULL_RISK_BAR_SUFFIX}</span>
       </div>
       <div className="relative h-3 rounded-full bg-zinc-800/50 overflow-hidden">
         <div
@@ -202,7 +209,7 @@ function CashNowBar({ pct }: { pct: number }) {
     <div className="space-y-1 pt-1 border-t border-zinc-800/80">
       <div className="flex items-center justify-between text-xs">
         <span className="text-zinc-400 font-medium">Cash now</span>
-        <span className="font-semibold text-zinc-300">{pct.toFixed(0)}%</span>
+        <span className="font-semibold text-zinc-300">{formatAllocPct(pct / 100)}%</span>
       </div>
       <div className="relative h-3 rounded-full bg-zinc-800/50 overflow-hidden border border-zinc-700/40">
         <div
@@ -277,7 +284,7 @@ export function GhostRegimeClient({
   const compareTriggerRef = useRef<HTMLButtonElement | null>(null);
   const [showParity, setShowParity] = useState(false);
   const [parityEnabled, setParityEnabled] = useState(false);
-  const [allocationView, setAllocationView] = useState<'exposure' | 'pctOfMax'>('pctOfMax');
+  const [allocationView, setAllocationView] = useState<AllocationView>(DEFAULT_ALLOCATION_VIEW);
 
   // Check if parity is enabled (client-side only)
   useEffect(() => {
@@ -1010,6 +1017,8 @@ export function GhostRegimeClient({
                       regimeConvictionIndex={regimeConvictionIndex}
                       regimeConvictionLabel={regimeConvictionLabel}
                       isCrowded={isCrowded}
+                      stocksScale={data.stocks_scale}
+                      goldScale={data.gold_scale}
                       btcScale={data.btc_scale}
                       cashBreakdown={cashBreakdown}
                     />
@@ -1288,7 +1297,7 @@ export function GhostRegimeClient({
                       : 'text-zinc-400 hover:text-zinc-300 border border-zinc-700 hover:border-zinc-600'
                   }`}
                 >
-                  Exposure
+                  {ALLOCATION_VIEW_EXPOSURE_LABEL}
                 </button>
                 <button
                   type="button"
@@ -1299,7 +1308,7 @@ export function GhostRegimeClient({
                       : 'text-zinc-400 hover:text-zinc-300 border border-zinc-700 hover:border-zinc-600'
                   }`}
                 >
-                  % of Max
+                  {ALLOCATION_VIEW_FULL_RISK_LABEL}
                 </button>
               </div>
             </div>
@@ -1340,7 +1349,7 @@ export function GhostRegimeClient({
             ) : (
             <div className="space-y-4">
               <p className="text-[10px] text-zinc-500">
-                Risk sleeves: % of max (60/30/10 baseline). Cash now: actual % held.
+                {ALLOCATION_VIEW_FULL_RISK_HINT}
               </p>
               {(() => {
                 const max = getMaxTargets();
@@ -1360,9 +1369,9 @@ export function GhostRegimeClient({
                           <CashNowBar pct={cashPct} />
                           {(breakdown.cashTarget > 0.005 || breakdown.cashFromThrottles > 0.005) && (
                             <p className="text-[10px] text-zinc-500 mt-1 pl-0.5">
-                              {breakdown.cashTarget > 0.005 && `${(breakdown.cashTarget * 100).toFixed(0)}% from starting point`}
+                              {breakdown.cashTarget > 0.005 && `${formatAllocPct(breakdown.cashTarget)}% from starting point`}
                               {breakdown.cashTarget > 0.005 && breakdown.cashFromThrottles > 0.005 && ' + '}
-                              {breakdown.cashFromThrottles > 0.005 && `${(breakdown.cashFromThrottles * 100).toFixed(0)}% from brake`}
+                              {breakdown.cashFromThrottles > 0.005 && `${formatAllocPct(breakdown.cashFromThrottles)}% from brake`}
                             </p>
                           )}
                         </>
@@ -1376,8 +1385,8 @@ export function GhostRegimeClient({
             {allocationView === 'exposure' && data.cash > 0.01 && (() => {
               const breakdown = computeCashBreakdown(data);
               const lines: string[] = [];
-              const cashTargetPct = (breakdown.cashTarget * 100).toFixed(1);
-              const cashFromThrottlesPct = (breakdown.cashFromThrottles * 100).toFixed(1);
+              const cashTargetPct = formatAllocPct(breakdown.cashTarget);
+              const cashFromThrottlesPct = formatAllocPct(breakdown.cashFromThrottles);
               if (breakdown.cashTarget > 0.005) {
                 lines.push(`Base cash (from starting point): ${cashTargetPct}%.`);
               }

@@ -3,6 +3,8 @@
  * No external chart libraries - pure CSS
  */
 
+import { formatAllocPct } from '@/lib/ghostregime/ui';
+
 interface AllocationBarProps {
   label: string;
   target: number; // 0-1
@@ -37,6 +39,8 @@ export function AllocationBar({
   const targetPct = Math.round(target * 100);
   const actualPct = Math.round(actual * 100);
   const scalePct = scale ? Math.round(scale * 100) : null;
+  const actualLabel = formatAllocPct(actual);
+  const targetLabel = formatAllocPct(target);
 
   return (
     <div className="space-y-1.5">
@@ -44,7 +48,7 @@ export function AllocationBar({
         <span className="text-zinc-300 font-medium">{label}</span>
         {showValues && (
           <div className="flex items-center gap-2 text-zinc-200">
-            <span className="font-semibold">{actualPct}%</span>
+            <span className="font-semibold">{actualLabel}%</span>
             {bucketScaleLine && (
               <span className="text-zinc-400 text-[10px]">({bucketScaleLine})</span>
             )}
@@ -52,7 +56,7 @@ export function AllocationBar({
               <span className="text-zinc-400 text-[10px]">(scale: {scalePct}%)</span>
             )}
             {!isCash && targetPct !== actualPct && !bucketScaleLine && (
-              <span className="text-zinc-500 text-[10px]">target: {targetPct}%</span>
+              <span className="text-zinc-500 text-[10px]">target: {targetLabel}%</span>
             )}
           </div>
         )}

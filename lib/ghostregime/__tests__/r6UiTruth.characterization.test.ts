@@ -1,11 +1,17 @@
 /**
- * R6 CHARACTERIZATION — current product-truth behavior, not desired permanent contract
+ * R6 CHARACTERIZATION — remaining product-truth behavior, not desired permanent contract
  *
- * Deferred desired behavior (do not encode as R1 invariants):
- *   - neutral receipts render Neutral
- *   - coverage means data availability
+ * R6A repaired (see r6aUiTruth.test.ts):
  *   - VAMS half-size is never described as off
+ *   - vote=0 user display is Neutral (persisted direction may still store a side)
  *   - rounded headline totals remain coherent
+ *   - primary-driver agreement thresholds use 0–100 units
+ *   - allocation default is Exposure
+ *
+ * R6B deferred (do not encode the future contract here):
+ *   - coverage means non-neutral participation, not data availability
+ *   - tie-break receipts currently enter evidence statistics
+ *   - Confidence / Conviction / Crowded / Top Drivers / Compare still use T0 formulas
  */
 
 import { describe, it } from 'node:test';
@@ -44,8 +50,8 @@ function flatMarket(): MarketDataPoint[] {
   return out;
 }
 
-describe('R6 CHARACTERIZATION — current receipt / coverage / scale labels', () => {
-  it('vote-0 inflation receipts currently render a side, not Neutral', () => {
+describe('R6 CHARACTERIZATION — deferred receipt / coverage behavior', () => {
+  it('vote-0 inflation receipts are still persisted with a side, not Neutral', () => {
     const result = computeOptionBVotes(flatMarket(), undefined, true);
     const pdbc = result.inflation_receipts.find((r) => r.key === 'pdbc');
     assert.ok(pdbc);
@@ -54,7 +60,7 @@ describe('R6 CHARACTERIZATION — current receipt / coverage / scale labels', ()
     assert.ok(pdbc.direction === 'Inflation' || pdbc.direction === 'Disinflation');
   });
 
-  it('coverage currently uses non-neutral count, not mere availability', () => {
+  it('coverage currently uses non-neutral count, not mere availability (R6B deferred)', () => {
     const receipts: SignalReceipt[] = [
       { key: 'a', label: 'A', vote: 0, direction: 'Disinflation' },
       { key: 'b', label: 'B', vote: 1, direction: 'Inflation' },
@@ -66,7 +72,7 @@ describe('R6 CHARACTERIZATION — current receipt / coverage / scale labels', ()
     assert.ok(stats.coverageLabel.includes('2/3'));
   });
 
-  it('formatScaleLabel currently maps 0.5 → half size and 0 → off (helper only)', () => {
+  it('formatScaleLabel maps 0.5 → half size and 0 → off (helper contract)', () => {
     assert.strictEqual(formatScaleLabel(1), 'full size');
     assert.strictEqual(formatScaleLabel(0.5), 'half size');
     assert.strictEqual(formatScaleLabel(0), 'off');
