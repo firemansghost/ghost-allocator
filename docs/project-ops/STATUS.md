@@ -1,5 +1,53 @@
 ﻿# STATUS
 
+## Current State (GhostRegime — 2026-09-02 R7C complete / evidence reviewed)
+**R7C COMPLETE — VALID FROZEN STUDY**
+
+R7C executed the preregistered frozen-panel allocation study **exactly once** from the sealed runner. PR **#187** (`research(ghostregime): add R7C frozen study runner`) merged as `04eff53e576d572b3e06b9c29c47173fbdf0c8a5`. Sealed runner head: `8c33c028b67b7b2bdbe97db07dc44d6781f5074b`. The runner was committed and pushed before outcomes were viewed. There were no post-result runner changes.
+
+Private snapshot **`r7b0-20260902-210842Z`**. Manifest SHA-256 `bb68cdfbbfa854bfa7edeed226e42d2e5a1328e201bc821efcb43a274a63ca00`. Validation-report SHA-256 `397712e67a72500badd705bc369105f82bb52ba3fc7af6ff016821000abbcf22`. Result directory (untracked): `tmp/ghostregime-r7/r7c-20260902-231435Z/`. Started `2026-09-02T23:13:49.459Z`, completed `2026-09-02T23:14:35.535Z`. Receipt status **VALID**. RUN_RECEIPT SHA-256 `766d0c7418da5051c46538230504da09a10f09f45351eea30bbc1c6115d47af6`. Result hashes verified. No private result artifact was committed.
+
+Common dates: S0 `2017-08-03`, S1 `2017-08-04`, S2 `2017-08-07`. Full `2017-08-04` → `2026-09-01`. Development `2017-08-04` → `2024-08-30`. Holdout calendar `2024-09-01` → `2026-09-01` (first session `2024-09-03`). Holdout was a continuing-path slice, not a restart.
+
+**P0_CURRENT full (historical, not a forecast):** CAGR 16.74%; vol 9.89%; Sharpe 1.37; Sortino 1.99; max DD −12.79%; Calmar 1.31; final NAV 4.08; worst complete year 2018 −9.34%; approx. avg exposure SPY 41% / GLD 21% / BTC 5.8% / BIL 32%; one-way turnover 110.66; rebalances 477. **Holdout:** CAGR 20.47%; vol 10.65%; Sharpe 1.43; Sortino 2.02; max DD −5.38%; Calmar 3.81.
+
+**Benchmarks (full):** STATIC_601030 CAGR 23.43% / Sharpe 1.18 / max DD −26.39%. STATIC_6040 9.45% / 0.66 / −21.32%. SPY_100 14.95% / 0.71 / −33.72%. P0 did not maximize return versus static 60/30/10. In this sample P0 materially reduced historical drawdown and improved risk-adjusted return versus static 60/30/10 and SPY. That does **not** prove future superiority.
+
+**Candidates (evidence only; no ranking / no winner):** P1 full CAGR 14.60%, max DD −11.15%, full return lag vs P0, holdout CAGR +0.61pp vs P0 (holdout reversal). P2 full CAGR 14.42%, Sharpe 1.27, max DD −12.15%, lagged P0 at every expanding checkpoint. P3 full CAGR 16.73%, Sharpe 1.37, max DD −12.54%, effectively indistinguishable from P0. P4 full CAGR 16.57%, Sharpe 1.34, max DD −13.18%, holdout CAGR 19.67% / max DD −7.61%, did not improve the P0 tradeoff. P5 full CAGR 16.57%, Sharpe 1.39, max DD −12.12%, Calmar 1.37, modest risk-adjusted improvement, higher turnover, no material return improvement. P6 full CAGR 18.99%, Sharpe 1.39, max DD −16.21%, +2.24pp CAGR vs P0, materially higher BTC, return edge did not repeat in holdout (holdout CAGR ≈ P0), deeper drawdown.
+
+**P0-family ablations (diagnostic, not causal):** REGIME_ONLY 18.62% / 1.20 / −23.56%. VAMS_ONLY 18.88% / 1.29 / −17.02%. COMBINED P0 16.74% / 1.37 / −12.79%. STATIC_601030 23.43% / 1.18 / −26.39%. SPY_100 14.95% / 0.71 / −33.72%. VAMS appears to contribute substantial drawdown control. Regime-only also reduces static drawdown but less than VAMS-only. Combined regime + VAMS produced the shallowest P0-family drawdown and highest Sharpe.
+
+**BTC dependence:** P0 NO_BTC_TO_CASH ΔCAGR −6.17pp, ΔSharpe −0.35, ΔmaxDD +3.60pp shallower. P6 NO_BTC_TO_CASH ΔCAGR −8.74pp, ΔmaxDD +6.95pp shallower. P0 arithmetic BTC contribution +0.527 full / +0.493 development / +0.034 holdout. Most measured BTC benefit occurred before the holdout. P6’s higher full-period return is strongly BTC-dependent. No-BTC remains a sensitivity, not a candidate.
+
+**Cost:** P0 0 bps CAGR 16.74% / NAV 4.076; 5 bps 15.33% / 3.649; 10 bps 13.93% / 3.266. Static 60/30/10 cost impact is very small because turnover is low. High event-driven turnover materially reduces dynamic-strategy performance under positive cost assumptions. These bps are study assumptions, not measured implementation costs.
+
+**Holdout / stability:** Holdout is roughly two years. P6 full-period return edge did not repeat. P1 holdout improvement reverses its full-period lag. P3 remains near P0. P4 remains weak. P5 remains a small tradeoff change. END_MINUS_3M preserved the same broad candidate directions. END_PLUS_3M was unavailable under the frozen snapshot. No extra provider fetch.
+
+**Inflation regime diagnostic (P0 executed regime):** REFLATION 939 intervals, positive conditional; GOLDILOCKS 513, positive; DEFLATION 551, positive; INFLATION 277, average net ≈ −0.014%/session, conditional compounded ≈ −4.0%. Diagnostic only. It does **not** prove the Inflation policy should change. P4’s higher Inflation gold target did not improve the overall or holdout tradeoff.
+
+**Warnings:** one BTC return mark stale 1 hour on 2017-02-28; no BTC post-close leakage; 32 VIX non-XNYS weekday extras preserved; full current-model sample ~9 years; holdout ~2 years; meaningful BTC path dependence; high event-driven turnover; historical backtest, not a forecast; one frozen data path only.
+
+**Reporting caveat:** R7C `allocationChangeCount` is computed over the full study session range and reused in FULL, DEVELOPMENT, HOLDOUT, and endpoint bundles. The FULL count is a valid full-period count. Development / holdout / endpoint `allocation_change_count` fields must **not** be interpreted as window-specific. This does **not** affect NAV, CAGR, vol, Sharpe, Sortino, drawdown, Calmar, TUW, turnover, rebalance count, exposures, or reported candidate evidence. Do not patch the sealed runner. Do not rerun R7C. Exclude subwindow allocation-change-count fields from R7D evidence.
+
+Model remains `ghostregime-v1.0.4`. **60/30/10 unchanged.** No refresh. No production writes. No GhostFlow change. **No R7D KEEP / MODIFY / REDESIGN decision has been made.** R7C is evidence complete and does **not** authorize changing 60/30/10, BTC weight, Inflation gold, risk-off equity, VAMS, regime math, or `MODEL_VERSION`.
+
+**R7C is complete.** Next is **R7D — product/model decision gate**, a decision exercise using this existing evidence. R7D does not require a new backtest by default. Do not reopen R7A–R7C without a demonstrated defect. Do not rerun R7C.
+
+This workstream is independent of GhostFlow source monitoring below.
+
+## Recommended next work (GhostRegime)
+1. **R7D — product/model decision gate** using existing R7C evidence (does **not** authorize live allocation changes until an explicit R7D decision)
+2. Do **not** rerun R7C
+3. Do **not** reopen R7A / R7A.1 / R7B0 / R7B1 / R7C unless new evidence shows a real defect
+4. Exclude subwindow `allocation_change_count` fields from R7D evidence
+5. Separate non-R7 backlog: **site-wide product-copy truth audit** (do not perform it here)
+6. Do **not** change VAMS, allocation formulas, provider routing, workflows, P1/P2/P3, or R4
+7. GhostFlow remains a separate workstream
+
+Last updated: 2026-09-02
+
+---
+
 ## Current State (GhostRegime — 2026-09-02 R7B1 merged / preregistered)
 **R7B1 HARNESS COMPLETE — MERGED**
 
