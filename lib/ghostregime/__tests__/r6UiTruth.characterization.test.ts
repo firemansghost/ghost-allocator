@@ -1,5 +1,5 @@
 /**
- * R6 CHARACTERIZATION — remaining product-truth behavior, not desired permanent contract
+ * R6 CHARACTERIZATION — remaining product-truth behavior
  *
  * R6A repaired (see r6aUiTruth.test.ts):
  *   - VAMS half-size is never described as off
@@ -8,10 +8,15 @@
  *   - primary-driver agreement thresholds use 0–100 units
  *   - allocation default is Exposure
  *
- * R6B deferred (do not encode the future contract here):
- *   - coverage means non-neutral participation, not data availability
- *   - tie-break receipts currently enter evidence statistics
- *   - Confidence / Conviction / Crowded / Top Drivers / Compare still use T0 formulas
+ * Historical T0 (pre-R6B, characterized then deferred):
+ *   - "Coverage" public label
+ *   - tie-break receipts entered Agreement / Coverage / Confidence / Conviction /
+ *     Crowded / Top Drivers / Compare
+ *
+ * R6B approved contract (this file now locks the desired behavior):
+ *   - public name is Participation, not Coverage
+ *   - formula remains non-neutral evidence / present evidence
+ *   - tie-breaks are resolution, not evidence
  */
 
 import { describe, it } from 'node:test';
@@ -20,6 +25,7 @@ import type { MarketDataPoint, SignalReceipt } from '../types';
 import { computeOptionBVotes } from '../regimeCore';
 import { computeAxisStats, formatScaleLabel } from '../ui';
 import { MARKET_SYMBOLS } from '../config';
+import { PARTICIPATION_TOOLTIP } from '../ghostregimePageCopy';
 
 function createMockData(symbol: string, closes: number[]): MarketDataPoint[] {
   const baseDate = new Date('2025-01-01');
@@ -50,7 +56,7 @@ function flatMarket(): MarketDataPoint[] {
   return out;
 }
 
-describe('R6 CHARACTERIZATION — deferred receipt / coverage behavior', () => {
+describe('R6 CHARACTERIZATION — R6B participation / receipt contract', () => {
   it('vote-0 inflation receipts are still persisted with a side, not Neutral', () => {
     const result = computeOptionBVotes(flatMarket(), undefined, true);
     const pdbc = result.inflation_receipts.find((r) => r.key === 'pdbc');
@@ -60,7 +66,7 @@ describe('R6 CHARACTERIZATION — deferred receipt / coverage behavior', () => {
     assert.ok(pdbc.direction === 'Inflation' || pdbc.direction === 'Disinflation');
   });
 
-  it('coverage currently uses non-neutral count, not mere availability (R6B deferred)', () => {
+  it('Participation uses non-neutral evidence / present evidence (historical Coverage formula, new name)', () => {
     const receipts: SignalReceipt[] = [
       { key: 'a', label: 'A', vote: 0, direction: 'Disinflation' },
       { key: 'b', label: 'B', vote: 1, direction: 'Inflation' },
@@ -69,7 +75,10 @@ describe('R6 CHARACTERIZATION — deferred receipt / coverage behavior', () => {
     const stats = computeAxisStats(receipts, 'Inflation');
     assert.strictEqual(stats.totalSignals, 3);
     assert.strictEqual(stats.nonNeutral, 2);
-    assert.ok(stats.coverageLabel.includes('2/3'));
+    assert.ok(stats.participationLabel.includes('2/3'));
+    assert.ok(stats.participationLabel.startsWith('Participation:'));
+    assert.doesNotMatch(stats.participationLabel, /Coverage/);
+    assert.match(PARTICIPATION_TOOLTIP, /evidence/i);
   });
 
   it('formatScaleLabel maps 0.5 → half size and 0 → off (helper contract)', () => {

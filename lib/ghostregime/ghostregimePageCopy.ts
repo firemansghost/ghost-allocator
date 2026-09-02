@@ -43,12 +43,12 @@ export const TOP_DRIVERS_TITLE = 'Top drivers today';
 export const TOP_DRIVERS_RISK_HEADER = 'Risk axis';
 export const TOP_DRIVERS_INFLATION_HEADER = 'Inflation axis';
 export const TOP_DRIVERS_FALLBACK = 'Driver list unavailable for this snapshot (older data).';
-export const TOP_DRIVERS_FOOTNOTE = "These are the two biggest signal votes feeding today's scores. Full receipts live in Nerd Mode.";
+export const TOP_DRIVERS_FOOTNOTE = 'Biggest evidence votes today. Tie-break resolution is shown separately when used.';
 export const TOP_DRIVERS_NO_STRONG_DRIVERS = 'No strong drivers today. The model is basically shrugging.';
 
 // Agreement/Confidence
 export const AGREEMENT_LABEL_PREFIX = 'Agreement:';
-export const AGREEMENT_TOOLTIP = 'How many available signals vote the same way today.';
+export const AGREEMENT_TOOLTIP = 'Non-neutral evidence votes agreeing with the final axis direction.';
 export const AGREEMENT_TOOLTIP_NA = 'All signals were neutral today.';
 
 // Agreement Trend
@@ -67,13 +67,16 @@ export const AGREEMENT_HISTORY_INSUFFICIENT_HINT = 'Agreement history will appea
 
 // Confidence
 export const CONFIDENCE_LABEL_PREFIX = 'Confidence:';
-export const CONFIDENCE_TOOLTIP = 'Heuristic: agreement + breadth (coverage). Not a probability.';
-export const COVERAGE_TOOLTIP = 'Signals available / signals expected (some can be missing).';
+export const CONFIDENCE_TOOLTIP = 'Heuristic: agreement + participation. Not a probability.';
+export const PARTICIPATION_TOOLTIP =
+  'Non-neutral evidence receipts / present evidence receipts. Tie-breaks are resolution, not evidence. Not availability.';
+/** @deprecated Internal alias. Public wording is Participation. */
+export const COVERAGE_TOOLTIP = PARTICIPATION_TOOLTIP;
 
 // Conviction
 export const CONVICTION_LABEL_PREFIX = 'Conviction:';
-export const CONVICTION_TOOLTIP = '|net vote| per available signals. Not a probability or forecast.';
-export const CONVICTION_TOOLTIP_SPICY = '|net vote| per available signals. Not a probability or forecast. High conviction = signals piling onto one side today. Could be clarity… or a crowded trade.';
+export const CONVICTION_TOOLTIP = '|evidence net| per present evidence receipts. Not a probability or forecast.';
+export const CONVICTION_TOOLTIP_SPICY = '|evidence net| per present evidence receipts. Not a probability or forecast. High conviction = signals piling onto one side today. Could be clarity… or a crowded trade.';
 export const CONVICTION_TOOLTIP_NA = 'Conviction is unavailable when net vote or signal count is missing.';
 
 // Regime overview (merged classification + summary chips)
@@ -95,7 +98,7 @@ export const SINCE_LAST_UPDATE_NO_CHANGE =
 export const REGIME_CONVICTION_LABEL_PREFIX = 'Regime Conviction:';
 export const REGIME_CONVICTION_TOOLTIP = 'Combined strength of today\'s Risk + Inflation signals. Not a forecast.';
 export const REGIME_CONFIDENCE_LABEL_PREFIX = 'Regime Confidence:';
-export const REGIME_CONFIDENCE_TOOLTIP = 'Heuristic from signal agreement + coverage. Not a probability.';
+export const REGIME_CONFIDENCE_TOOLTIP = 'Heuristic from signal agreement + participation. Not a probability.';
 export const PRIMARY_DRIVER_PREFIX = 'Primary driver:';
 export const PRIMARY_DRIVER_TOOLTIP = 'Which axis (Risk or Inflation) has the stronger signal today.';
 export const FLIPWATCH_PILL_TOOLTIP =
@@ -113,12 +116,17 @@ export const SHOW_ALL_TOGGLE = 'Show all';
 
 // Legend
 export const LEGEND_TITLE = 'What do these mean?';
-export const LEGEND_AGREEMENT = 'How many available signals vote the same way today.';
-export const LEGEND_COVERAGE = 'Signals available / signals expected (some can be missing).';
-export const LEGEND_CONFIDENCE = 'Confidence: Heuristic combining agreement + coverage. Not a probability.';
-export const LEGEND_CONVICTION = 'Conviction: |net vote| per available signals. Strength indicator, not a forecast.';
+export const LEGEND_AGREEMENT = 'Non-neutral evidence votes agreeing with the final axis direction.';
+export const LEGEND_PARTICIPATION =
+  'Non-neutral evidence receipts / present evidence receipts. Tie-breaks are resolution, not evidence.';
+/** @deprecated Internal alias. Public wording is Participation. */
+export const LEGEND_COVERAGE = LEGEND_PARTICIPATION;
+export const LEGEND_CONFIDENCE = 'Confidence: Heuristic combining agreement + participation. Not a probability.';
+export const LEGEND_CONVICTION = 'Conviction: |evidence net| per present evidence receipts. Strength indicator, not a forecast.';
 export const LEGEND_CROWDED = 'Crowded: Extreme conviction + high agreement. Could be clarity… or a crowded trade.';
-export const LEGEND_NET_VOTE = 'Net vote: Sum of all signal votes for this axis. Shows push direction.';
+export const LEGEND_NET_VOTE =
+  'Evidence net: Sum of evidence votes for this axis. Separate from the final model score when a tie-break resolved the axis.';
+export const EVIDENCE_NET_LABEL_PREFIX = 'Evidence net:';
 export const LEGEND_DELTA = 'Δ since last: Change in key metrics compared to the previous snapshot.';
 
 // View receipts

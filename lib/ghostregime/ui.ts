@@ -106,6 +106,7 @@ import {
   CONVICTION_TOOLTIP,
   CONVICTION_TOOLTIP_SPICY,
   CONVICTION_TOOLTIP_NA,
+  CONFIDENCE_TOOLTIP,
 } from './ghostregimePageCopy';
 
 /**
@@ -718,20 +719,65 @@ export function flipWatchPillTooltip(status: string | null | undefined): string 
   return FLIPWATCH_PILL_TOOLTIP;
 }
 
+/** Procedural resolution receipts — provenance only, never independent evidence. */
+export const RESOLUTION_RECEIPT_KEYS = new Set(['risk_tiebreak', 'infl_tiebreak']);
+
+export function isResolutionReceipt(receipt: Pick<SignalReceipt, 'key'>): boolean {
+  return RESOLUTION_RECEIPT_KEYS.has(receipt.key);
+}
+
+/** Score-fed receipts only. Tie-breaks stay visible as resolution, not evidence. */
+export function getEvidenceReceipts(receipts: SignalReceipt[] | undefined): SignalReceipt[] {
+  if (!receipts || receipts.length === 0) {
+    return [];
+  }
+  return receipts.filter((r) => !isResolutionReceipt(r));
+}
+
+export function getResolutionReceipt(receipts: SignalReceipt[] | undefined): SignalReceipt | undefined {
+  return (receipts ?? []).find(isResolutionReceipt);
+}
+
+function normalizeResolutionHorizon(raw: string): string {
+  return raw.replace(/TR_(\d+)/g, 'TR$1').trim();
+}
+
+function deriveResolutionSource(receipt: SignalReceipt): string | null {
+  const note = receipt.note ?? '';
+  const sourceMatch = note.match(/source:\s*([^;]+)/i);
+  if (sourceMatch) {
+    return normalizeResolutionHorizon(sourceMatch[1]);
+  }
+  const paren = receipt.label.match(/\(([^)]+)\)/);
+  if (paren) {
+    return normalizeResolutionHorizon(paren[1]);
+  }
+  return null;
+}
+
+/** Compact provenance when a tie-break receipt is present. Absent otherwise. */
+export function formatResolvedByLine(receipts: SignalReceipt[] | undefined): string | null {
+  const receipt = getResolutionReceipt(receipts);
+  if (!receipt) return null;
+  const source = deriveResolutionSource(receipt);
+  return source ? `Resolved by ${source} tie-break` : `Resolved by ${receipt.label}`;
+}
+
 /**
- * Pick top N drivers from receipts
+ * Pick top N drivers from evidence receipts
  * Sorting rules (deterministic):
  * - Prefer non-zero votes
  * - Higher absolute vote first
  * - Tie-break by stable key order (alphabetical) so it doesn't flicker
  */
 export function pickTopDrivers(receipts: SignalReceipt[] | undefined, n: number = 2): SignalReceipt[] {
-  if (!receipts || receipts.length === 0) {
+  const evidence = getEvidenceReceipts(receipts);
+  if (evidence.length === 0) {
     return [];
   }
 
   // Filter to non-zero votes, then sort by absolute vote (descending), then by key (ascending)
-  const nonZero = receipts.filter((r) => r.vote !== 0);
+  const nonZero = evidence.filter((r) => r.vote !== 0);
   const sorted = nonZero.sort((a, b) => {
     const absA = Math.abs(a.vote);
     const absB = Math.abs(b.vote);
@@ -774,14 +820,15 @@ export function groupDriversByAxis(
   pushingThisWay: SignalReceipt[];
   pushingOtherWay: SignalReceipt[];
 } {
-  if (!receipts || receipts.length === 0) {
+  const evidence = getEvidenceReceipts(receipts);
+  if (evidence.length === 0) {
     return { pushingThisWay: [], pushingOtherWay: [] };
   }
 
   const pushingThisWay: SignalReceipt[] = [];
   const pushingOtherWay: SignalReceipt[] = [];
 
-  for (const receipt of receipts) {
+  for (const receipt of evidence) {
     if (receipt.direction === currentAxis) {
       pushingThisWay.push(receipt);
     } else {
@@ -793,8 +840,8 @@ export function groupDriversByAxis(
 }
 
 /**
- * Compute axis agreement from receipts
- * Returns how many non-zero votes align with the current axis direction
+ * Compute axis agreement from evidence receipts (tie-breaks excluded).
+ * Aligns non-zero evidence votes with the FINAL persisted axis direction.
  */
 export function computeAxisAgreement(
   receipts: SignalReceipt[] | undefined,
@@ -805,12 +852,13 @@ export function computeAxisAgreement(
   disagree: number;
   pct: number | null;
 } {
-  if (!receipts || receipts.length === 0) {
+  const evidence = getEvidenceReceipts(receipts);
+  if (evidence.length === 0) {
     return { agree: 0, total: 0, disagree: 0, pct: null };
   }
 
   // Filter to non-zero votes only
-  const nonZero = receipts.filter((r) => r.vote !== 0);
+  const nonZero = evidence.filter((r) => r.vote !== 0);
   const total = nonZero.length;
 
   if (total === 0) {
@@ -920,8 +968,8 @@ export function computeConviction(
 }
 
 /**
- * Compute axis statistics: agreement + coverage + confidence
- * Returns comprehensive stats for an axis including confidence heuristic
+ * Compute axis statistics from evidence receipts: agreement + participation + confidence.
+ * Tie-breaks are excluded. coverage* fields are deprecated aliases of participation*.
  */
 export function computeAxisStats(
   receipts: SignalReceipt[] | undefined,
@@ -932,8 +980,12 @@ export function computeAxisStats(
   agree: number;
   disagree: number;
   agreementPct: number | null;
+  participationPct: number | null;
+  /** @deprecated Use participationPct. Same 0–100 evidence participation ratio. */
   coveragePct: number | null;
   agreementLabel: string;
+  participationLabel: string;
+  /** @deprecated Use participationLabel. */
   coverageLabel: string;
   confidence: {
     label: 'High' | 'Medium' | 'Low' | 'n/a';
@@ -941,47 +993,50 @@ export function computeAxisStats(
     tooltip: string;
   };
 } {
-  if (!receipts || receipts.length === 0) {
+  const emptyConfidence = {
+    label: 'n/a' as const,
+    score: null,
+    tooltip: CONFIDENCE_TOOLTIP,
+  };
+  const evidence = getEvidenceReceipts(receipts);
+  if (evidence.length === 0) {
     return {
       totalSignals: 0,
       nonNeutral: 0,
       agree: 0,
       disagree: 0,
       agreementPct: null,
+      participationPct: null,
       coveragePct: null,
       agreementLabel: 'Agreement: n/a',
-      coverageLabel: 'Coverage: n/a',
-      confidence: {
-        label: 'n/a',
-        score: null,
-        tooltip: 'Heuristic: agreement + breadth (coverage). Not a probability.',
-      },
+      participationLabel: 'Participation: n/a',
+      coverageLabel: 'Participation: n/a',
+      confidence: emptyConfidence,
     };
   }
 
-  const totalSignals = receipts.length;
-  const nonZero = receipts.filter((r) => r.vote !== 0);
+  const totalSignals = evidence.length;
+  const nonZero = evidence.filter((r) => r.vote !== 0);
   const nonNeutral = nonZero.length;
 
   if (nonNeutral === 0) {
+    const participationLabel = `Participation: 0/${totalSignals} signals`;
     return {
       totalSignals,
       nonNeutral: 0,
       agree: 0,
       disagree: 0,
       agreementPct: null,
+      participationPct: 0,
       coveragePct: 0,
       agreementLabel: 'Agreement: n/a',
-      coverageLabel: `Coverage: 0/${totalSignals} signals`,
-      confidence: {
-        label: 'n/a',
-        score: null,
-        tooltip: 'Heuristic: agreement + breadth (coverage). Not a probability.',
-      },
+      participationLabel,
+      coverageLabel: participationLabel,
+      confidence: emptyConfidence,
     };
   }
 
-  // Count votes that align with axis direction
+  // Count votes that align with the FINAL persisted axis direction
   let agree = 0;
   for (const receipt of nonZero) {
     const isAgreeing =
@@ -996,20 +1051,15 @@ export function computeAxisStats(
 
   const disagree = nonNeutral - agree;
   const agreementPct = nonNeutral > 0 ? (agree / nonNeutral) * 100 : null;
-  const coveragePct = totalSignals > 0 ? (nonNeutral / totalSignals) * 100 : null;
+  const participationPct = totalSignals > 0 ? (nonNeutral / totalSignals) * 100 : null;
 
-  // Confidence heuristic: 0.7 * agreement + 0.3 * coverage (both 0..1)
+  // Confidence heuristic: 0.7 * agreement + 0.3 * participation (both 0..1). Thresholds unchanged.
   let confidence: { label: 'High' | 'Medium' | 'Low' | 'n/a'; score: number | null; tooltip: string };
-  if (agreementPct === null || coveragePct === null) {
-    confidence = {
-      label: 'n/a',
-      score: null,
-      tooltip: 'Heuristic: agreement + breadth (coverage). Not a probability.',
-    };
+  if (agreementPct === null || participationPct === null) {
+    confidence = emptyConfidence;
   } else {
-    const agreementNorm = agreementPct / 100;
-    const coverageNorm = coveragePct / 100;
-    const score = 0.7 * agreementNorm + 0.3 * coverageNorm;
+    // Same 0.7 / 0.3 mix; integer percents avoid 0.65 → Low from binary float.
+    const score = (7 * agreementPct + 3 * participationPct) / 1000;
     
     let label: 'High' | 'Medium' | 'Low';
     if (score >= 0.85) {
@@ -1023,13 +1073,13 @@ export function computeAxisStats(
     confidence = {
       label,
       score,
-      tooltip: 'Heuristic: agreement + breadth (coverage). Not a probability.',
+      tooltip: CONFIDENCE_TOOLTIP,
     };
   }
 
   const agreementPctStr = agreementPct !== null ? ` (${agreementPct.toFixed(0)}%)` : '';
   const agreementLabel = `Agreement: ${agree}/${nonNeutral}${agreementPctStr}`;
-  const coverageLabel = `Coverage: ${nonNeutral}/${totalSignals} signals`;
+  const participationLabel = `Participation: ${nonNeutral}/${totalSignals} signals`;
 
   return {
     totalSignals,
@@ -1037,9 +1087,11 @@ export function computeAxisStats(
     agree,
     disagree,
     agreementPct,
-    coveragePct,
+    participationPct,
+    coveragePct: participationPct,
     agreementLabel,
-    coverageLabel,
+    participationLabel,
+    coverageLabel: participationLabel,
     confidence,
   };
 }
@@ -1309,14 +1361,15 @@ export function computeAxisNetVote(
   receipts: SignalReceipt[] | undefined,
   axisType: 'risk' | 'inflation'
 ): { net: number; totalNonZero: number; totalSignals: number; directionLabel: string; label: string } {
-  if (!receipts || receipts.length === 0) {
+  const evidence = getEvidenceReceipts(receipts);
+  if (evidence.length === 0) {
     return { net: 0, totalNonZero: 0, totalSignals: 0, directionLabel: 'Neutral', label: '0 (Neutral)' };
   }
   
-  // Sum all votes (including zeros)
-  const net = receipts.reduce((sum, r) => sum + r.vote, 0);
-  const totalNonZero = receipts.filter(r => r.vote !== 0).length;
-  const totalSignals = receipts.length;
+  // Sum evidence votes (including zeros). Tie-breaks are not evidence.
+  const net = evidence.reduce((sum, r) => sum + r.vote, 0);
+  const totalNonZero = evidence.filter(r => r.vote !== 0).length;
+  const totalSignals = evidence.length;
   
   if (net === 0) {
     return { net: 0, totalNonZero, totalSignals, directionLabel: 'Neutral', label: totalSignals > 0 ? `0/${totalSignals} (Neutral)` : '0 (Neutral)' };
@@ -1346,10 +1399,13 @@ export function computeCrowdingTag(params: {
   convictionIndex: number | null;
   confidenceLabel: string | null;
   agreementPct: number | null;
-  coveragePct: number | null;
+  participationPct?: number | null;
+  /** @deprecated Use participationPct. Same 0–1 evidence participation fraction. */
+  coveragePct?: number | null;
 }): boolean {
-  const { convictionIndex, confidenceLabel, agreementPct, coveragePct } = params;
-  
+  const { convictionIndex, confidenceLabel, agreementPct } = params;
+  const coveragePct = params.participationPct ?? params.coveragePct ?? null;
+
   if (convictionIndex === null || convictionIndex === undefined || convictionIndex < 76) {
     return false;
   }
@@ -1367,6 +1423,26 @@ export function computeCrowdingTag(params: {
   }
   
   return true;
+}
+
+/**
+ * Shared crowded contract for axis stats. Same thresholds as computeCrowdingTag.
+ */
+export function isAxisCrowded(
+  stats: {
+    confidence: { label: string };
+    agreementPct: number | null;
+    totalSignals: number;
+    nonNeutral: number;
+  },
+  convictionIndex: number | null
+): boolean {
+  return computeCrowdingTag({
+    convictionIndex,
+    confidenceLabel: stats.confidence.label,
+    agreementPct: stats.agreementPct,
+    participationPct: stats.totalSignals > 0 ? stats.nonNeutral / stats.totalSignals : null,
+  });
 }
 
 /**
@@ -1876,15 +1952,12 @@ export function computeCompareBiggestChange(
     : currentRow.risk_score;
   const riskConvictionCurr = computeConviction(
     riskNetVoteCurr,
-    riskStatsCurr.totalSignals || (currentRow.risk_receipts?.length ?? null)
+    currentRow.risk_receipts && currentRow.risk_receipts.length > 0
+      ? riskStatsCurr.totalSignals
+      : null
   );
   const riskAgreementCurr = computeAxisAgreement(currentRow.risk_receipts, riskAxisDirectionCurr);
-  const riskCrowdedCurr = computeCrowdingTag({
-    convictionIndex: riskConvictionCurr.index,
-    confidenceLabel: riskStatsCurr.confidence.label,
-    agreementPct: riskAgreementCurr.pct,
-    coveragePct: riskStatsCurr.totalSignals > 0 ? (riskStatsCurr.nonNeutral / riskStatsCurr.totalSignals) : null,
-  });
+  const riskCrowdedCurr = isAxisCrowded(riskStatsCurr, riskConvictionCurr.index);
 
   const inflAxisCurr = currentRow.infl_axis === 'Inflation' ? 'Inflation' : 'Disinflation';
   const inflStatsCurr = computeAxisStats(currentRow.inflation_receipts, inflAxisCurr);
@@ -1893,15 +1966,12 @@ export function computeCompareBiggestChange(
     : currentRow.infl_score;
   const inflConvictionCurr = computeConviction(
     inflNetVoteCurr,
-    inflStatsCurr.totalSignals || (currentRow.inflation_receipts?.length ?? null)
+    currentRow.inflation_receipts && currentRow.inflation_receipts.length > 0
+      ? inflStatsCurr.totalSignals
+      : null
   );
   const inflAgreementCurr = computeAxisAgreement(currentRow.inflation_receipts, inflAxisCurr);
-  const inflCrowdedCurr = computeCrowdingTag({
-    convictionIndex: inflConvictionCurr.index,
-    confidenceLabel: inflStatsCurr.confidence.label,
-    agreementPct: inflAgreementCurr.pct,
-    coveragePct: inflStatsCurr.totalSignals > 0 ? (inflStatsCurr.nonNeutral / inflStatsCurr.totalSignals) : null,
-  });
+  const inflCrowdedCurr = isAxisCrowded(inflStatsCurr, inflConvictionCurr.index);
 
   const riskAxisDirectionPrev = prevRow.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
   const riskStatsPrev = computeAxisStats(prevRow.risk_receipts, riskAxisDirectionPrev);
@@ -1910,15 +1980,12 @@ export function computeCompareBiggestChange(
     : prevRow.risk_score;
   const riskConvictionPrev = computeConviction(
     riskNetVotePrev,
-    riskStatsPrev.totalSignals || (prevRow.risk_receipts?.length ?? null)
+    prevRow.risk_receipts && prevRow.risk_receipts.length > 0
+      ? riskStatsPrev.totalSignals
+      : null
   );
   const riskAgreementPrev = computeAxisAgreement(prevRow.risk_receipts, riskAxisDirectionPrev);
-  const riskCrowdedPrev = computeCrowdingTag({
-    convictionIndex: riskConvictionPrev.index,
-    confidenceLabel: riskStatsPrev.confidence.label,
-    agreementPct: riskAgreementPrev.pct,
-    coveragePct: riskStatsPrev.totalSignals > 0 ? (riskStatsPrev.nonNeutral / riskStatsPrev.totalSignals) : null,
-  });
+  const riskCrowdedPrev = isAxisCrowded(riskStatsPrev, riskConvictionPrev.index);
 
   const inflAxisPrev = prevRow.infl_axis === 'Inflation' ? 'Inflation' : 'Disinflation';
   const inflStatsPrev = computeAxisStats(prevRow.inflation_receipts, inflAxisPrev);
@@ -1927,15 +1994,12 @@ export function computeCompareBiggestChange(
     : prevRow.infl_score;
   const inflConvictionPrev = computeConviction(
     inflNetVotePrev,
-    inflStatsPrev.totalSignals || (prevRow.inflation_receipts?.length ?? null)
+    prevRow.inflation_receipts && prevRow.inflation_receipts.length > 0
+      ? inflStatsPrev.totalSignals
+      : null
   );
   const inflAgreementPrev = computeAxisAgreement(prevRow.inflation_receipts, inflAxisPrev);
-  const inflCrowdedPrev = computeCrowdingTag({
-    convictionIndex: inflConvictionPrev.index,
-    confidenceLabel: inflStatsPrev.confidence.label,
-    agreementPct: inflAgreementPrev.pct,
-    coveragePct: inflStatsPrev.totalSignals > 0 ? (inflStatsPrev.nonNeutral / inflStatsPrev.totalSignals) : null,
-  });
+  const inflCrowdedPrev = isAxisCrowded(inflStatsPrev, inflConvictionPrev.index);
 
   // Check for crowded toggles
   if (riskCrowdedCurr !== riskCrowdedPrev) {
@@ -1981,10 +2045,7 @@ export function computeCompareBiggestChange(
     const sign = delta >= 0 ? '+' : '';
     let headline = `${axisName} conviction ${sign}${delta}`;
     // Check if new conviction is extreme and meets crowding criteria
-    if (convictionCurr.index !== null && convictionCurr.index >= 76 &&
-        statsCurr.confidence.label === 'High' &&
-        agreementCurr.pct !== null && agreementCurr.pct >= 80 &&
-        statsCurr.totalSignals > 0 && (statsCurr.nonNeutral / statsCurr.totalSignals) >= 0.5) {
+    if (isAxisCrowded(statsCurr, convictionCurr.index)) {
       headline += ' (crowding risk ↑)';
     }
     

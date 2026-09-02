@@ -269,8 +269,8 @@ describe('R6A allocation card default is Exposure', () => {
   });
 });
 
-describe('R6A does not change R6B-deferred metric formulas', () => {
-  it('Coverage remains non-neutral / total receipts', () => {
+describe('R6A no-tie receipt formula is unchanged under R6B Participation rename', () => {
+  it('Participation remains non-neutral / present evidence receipts', () => {
     const receipts: SignalReceipt[] = [
       { key: 'a', label: 'A', vote: 0, direction: 'Disinflation' },
       { key: 'b', label: 'B', vote: 1, direction: 'Inflation' },
@@ -279,6 +279,7 @@ describe('R6A does not change R6B-deferred metric formulas', () => {
     const stats = computeAxisStats(receipts, 'Inflation');
     assert.strictEqual(stats.totalSignals, 3);
     assert.strictEqual(stats.nonNeutral, 2);
+    assert.ok(stats.participationLabel.includes('2/3'));
     assert.ok(stats.coverageLabel.includes('2/3'));
   });
 });

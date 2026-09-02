@@ -9,11 +9,11 @@
 import { Tooltip } from '@/components/Tooltip';
 import { AgreementChipStrip } from '@/components/ghostregime/AgreementChipStrip';
 import type { AgreementSeriesItem } from '@/components/ghostregime/AgreementChipStrip';
+import { isAxisCrowded } from '@/lib/ghostregime/ui';
 import {
   AGREEMENT_TOOLTIP,
-  COVERAGE_TOOLTIP,
+  PARTICIPATION_TOOLTIP,
   CONFIDENCE_LABEL_PREFIX,
-  CONVICTION_LABEL_PREFIX,
   CROWDED_LABEL,
   CROWDED_TOOLTIP,
   AGREEMENT_HISTORY_LABEL,
@@ -22,9 +22,12 @@ import {
 interface AxisStatsBlockProps {
   axisLine: string; // e.g., "Risk axis: RISK ON (risk score: +2)"
   stats: {
+    totalSignals: number;
     nonNeutral: number;
+    agreementPct: number | null;
     agreementLabel: string;
-    coverageLabel: string;
+    participationLabel: string;
+    coverageLabel?: string;
     confidence: {
       label: string;
       tooltip: string;
@@ -38,6 +41,7 @@ interface AxisStatsBlockProps {
   agreementSeries?: AgreementSeriesItem[];
   deltaLine?: string | null;
   axisName?: string; // "Risk" or "Inflation" for chip strip
+  resolvedByLine?: string | null;
 }
 
 export function AxisStatsBlock({
@@ -47,35 +51,27 @@ export function AxisStatsBlock({
   agreementSeries,
   deltaLine,
   axisName,
+  resolvedByLine,
 }: AxisStatsBlockProps) {
-  // Extract agreement percentage from label (e.g., "Agreement: 3/4 (75%)")
-  const agreementMatch = stats.agreementLabel.match(/\((\d+)%\)/);
-  const agreementPct = agreementMatch ? parseInt(agreementMatch[1]) : null;
-  
-  // Extract coverage percentage (e.g., "Coverage: 2/4 signals")
-  const coverageMatch = stats.coverageLabel.match(/(\d+)\/(\d+)/);
-  const coveragePct = coverageMatch ? parseInt(coverageMatch[1]) / parseInt(coverageMatch[2]) : null;
-  
-  // Compute crowding tag
-  const showCrowded = conviction.index !== null && 
-                      conviction.index >= 76 && 
-                      stats.confidence.label === 'High' &&
-                      agreementPct !== null && agreementPct >= 80 &&
-                      coveragePct !== null && coveragePct >= 0.5;
+  const showCrowded = isAxisCrowded(stats, conviction.index);
+  const participationLabel = stats.participationLabel || stats.coverageLabel || 'Participation: n/a';
 
   return (
     <div>
       <p>{axisLine}</p>
+      {resolvedByLine && (
+        <p className="text-[10px] text-zinc-500 mt-1">{resolvedByLine}</p>
+      )}
       {stats.nonNeutral > 0 && (
         <>
-          {/* Line A: Agreement + Coverage */}
+          {/* Line A: Agreement + Participation */}
           <div className="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-zinc-400">
             <Tooltip content={AGREEMENT_TOOLTIP}>
               <span>{stats.agreementLabel}</span>
             </Tooltip>
             <span>•</span>
-            <Tooltip content={COVERAGE_TOOLTIP}>
-              <span>{stats.coverageLabel}</span>
+            <Tooltip content={PARTICIPATION_TOOLTIP}>
+              <span>{participationLabel}</span>
             </Tooltip>
           </div>
           
@@ -131,4 +127,3 @@ export function AxisStatsBlock({
     </div>
   );
 }
-
