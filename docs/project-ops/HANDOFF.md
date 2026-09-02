@@ -1,5 +1,25 @@
 ﻿# HANDOFF
 
+## Last Session Summary (2026-09-02 — GhostRegime R5B live closeout)
+R5B is fully complete and closed. PR **#176** merged as `7e1bce227878e0901f4241a9c955e1d25bdeaf6b` (reviewed head `9107a6e…`). Production is READY on that exact commit. Effective model is `ghostregime-v1.0.4`.
+
+The new v1.0.4 namespace began empty. Immediately after deploy, `/today` and `/health` were `NOT_READY` by design (fail-closed, not data loss). The engine was already `ghostregime-v1.0.4` before seeding, so no stale Vercel model-version override was masking the repo default. Exactly one controlled first refresh: [33652482469](https://github.com/firemansghost/ghost-allocator/actions/runs/33652482469) (`computed_and_persisted`). No historical rewrite and no v1.0.3 → v1.0.4 copy.
+
+Persisted row: `date 2026-09-01`, `run_date_utc 2026-09-02`, `regime REFLATION`, `risk_regime RISK ON`, `risk_score +1`, `infl_core_score 0`, `infl_sat_score 0`, `infl_total_score_pre_tiebreak 0`, `infl_tiebreaker_used true`, `infl_score +1`. **P1** present (`pdbc` +1). **P2** absent (no Commodity satellite receipt). **P3** fired and emitted truthful ordinary `infl_tiebreak` (`Inflation tie-breaker (PDBC TR21)`, +1, `source: PDBC TR21; rule: GTE_ZERO`). Allocations / VAMS / 60/30/10 unchanged. Flip Watch `NONE` is expected on the first v1.0.4 row. Yahoo handled the Stooq browser challenge for all eight core ETFs; Marketstack unused. Public `/today` persisted 200; `/health` OK and fresh (`age_days 1`). Immediate workflow health check was clean.
+
+**Next: R6 — UI truth READ-ONLY PRODUCT AUDIT / DECISION GATE.** R6 implementation is **not** authorized.
+
+## Priority for Next Session (GhostRegime)
+1. R6 UI truth — READ-ONLY PRODUCT AUDIT / DECISION GATE
+2. Inspect actual live UI and current `ui.ts` / page-copy / components
+3. Quantify each known R6 issue before authorizing implementation
+4. Separate source facts, UI semantics, model inputs, and presentation choices
+5. Do not alter model, thresholds, R4, P1/P2/P3, VAMS, allocations, providers, workflows, or GhostFlow
+6. Do not change 60/30/10
+7. Only after Bobby explicitly approves an R6 option should implementation begin
+
+---
+
 ## Last Session Summary (2026-09-02 — GhostRegime R5A live closeout)
 R5A is fully complete and closed. PR **#174** merged as `f03c20b6707f61f7af842c28ecb01afb6f29a785`. Production is READY on that exact commit. Model remains `ghostregime-v1.0.3`. No model-version bump, no new Blob namespace, no historical rewrite, no forced refresh.
 

@@ -1,5 +1,45 @@
 ﻿# STATUS
 
+## Current State (GhostRegime — 2026-09-02 R5B live closeout)
+R5B merge: PR **#176** (`feat(ghostregime): remove duplicate PDBC TR21 satellite`, reviewed head `9107a6e68adf0ef2c91f7540cf7f2db6cdb075f7`) → `7e1bce227878e0901f4241a9c955e1d25bdeaf6b` (`main`, merged 2026-09-02). Production deployment was verified READY on that exact merge commit.
+
+**R5B COMPLETE — MERGED / DEPLOYED / v1.0.4 SEEDED / HEALTHY**
+
+- Effective model is `ghostregime-v1.0.4`. The existing `MODEL_VERSION/` Blob prefix created a new, initially empty namespace. `BLOB_KEYS` and the persistence mechanism were unchanged. No historical rewrite and no copy from v1.0.3 into v1.0.4.
+- Immediately after deploy and **before** the controlled refresh, public endpoints were fail-closed as expected: `/today` HTTP 503 `GHOSTREGIME_NOT_READY` / `NO_PERSISTED_SNAPSHOT`; `/health` HTTP 503 `ok false` / `NOT_READY` with `engine_version = ghostregime-v1.0.4` and `build_commit = 7e1bce227…`. That is not a failure and not data loss.
+- The effective production engine was already `ghostregime-v1.0.4` before seeding, so no stale Vercel `NEXT_PUBLIC_GHOSTREGIME_MODEL_VERSION` override was masking the repository default.
+- One controlled first refresh: GitHub Actions run [33652482469](https://github.com/firemansghost/ghost-allocator/actions/runs/33652482469) (`GhostRegime Daily Refresh` #232, `workflow_dispatch`, head `7e1bce227…`, success). `force_refresh = true`, request mode `manual_force`, query `force=1`. Serve metadata: `run_date_utc = 2026-09-02`, `latest_snapshot_date = 2026-09-01`, `market_snapshot_lag_days = 1`, `refresh_attempt = force`, `refresh_outcome = computed_and_persisted`, `persisted_snapshot_preserved = false`. Compute-path `data_source = computed_forced`. No second force refresh.
+- Persisted v1.0.4 row: `date = 2026-09-01`, `run_date_utc = 2026-09-02`, `regime = REFLATION`, `risk_regime = RISK ON`, `risk_score = +1`, `infl_core_score = 0`, `infl_sat_score = 0`, `infl_total_score_pre_tiebreak = 0`, `infl_tiebreaker_used = true`, `infl_score = +1`, `infl_axis = Inflation`. Live proof: P2 contributes zero, core ties at zero, P3 resolves to +1.
+- **P1 retained:** receipt `pdbc` / `Commodities` / vote `+1` Inflation / `>= 0.02 (Inflation)`.
+- **P2 removed from active scoring:** `infl_sat_score = 0`; no `satellite_commodity_nowcast_basket_(energy+metals)` receipt; no PDBC TR21 Commodity satellite contribution. The satellite framework remains; only the Commodity lane is not production-scored.
+- **P3 used and truthful:** receipt `infl_tiebreak` / `Inflation tie-breaker (PDBC TR21)` / vote `+1` Inflation / `Tie-breaker applied; source: PDBC TR21; rule: GTE_ZERO`. P3 is the zero-score inflation tie-break, not a satellite.
+- Persistence: `row_computed_at_utc = 2026-09-02T16:03:18Z`, `row_build_commit = 7e1bce227…`, `row_engine_version = ghostregime-v1.0.4`. Public serve: `engine_version = ghostregime-v1.0.4`, `build_commit = 7e1bce227…`, `data_source = persisted`.
+- Allocations / VAMS unchanged: stocks 0.60 / gold 0.30 / BTC 0.10 targets; scales 1 / 0.5 / 0.5; actuals 0.60 / 0.15 / 0.05; cash 0.20; VAMS states 2 / 0 / 0. **60/30/10** remains frozen.
+- Flip Watch `NONE` on the first v1.0.4 row is expected (no prior unique v1.0.4 persisted trading snapshot). Not an R4 logic change.
+- R5B did **not** change provider routing. Stooq browser challenge; all eight core ETFs routed to Yahoo (`yahoo:<symbol>`). Verified: `stooq_browser_challenge_detected = true`, `yahoo_etf_fallback_used = true`, `marketstack_used = false`.
+- Workflow immediate health check succeeded (latest `2026-09-01`, age 1 day) and did **not** emit the prior R5A post-write `WARN LATEST_ROW_OLD`. Do not conclude that wrinkle is permanently fixed; record only that this controlled rollout's immediate health check was clean.
+- Independently verified `/api/ghostregime/today` (HTTP 200): `date = 2026-09-01`, `regime = REFLATION`, `risk_regime = RISK ON`, `data_source = persisted`, `row_engine_version` / `engine_version = ghostregime-v1.0.4`, `row_build_commit` / `build_commit = 7e1bce227…`.
+- `/api/ghostregime/health` (HTTP 200): `ok true`, `status OK`, `latest_date 2026-09-01`, `age_days 1`, `max_age_days 4`, `is_fresh true`, `engine_version ghostregime-v1.0.4`, `build_commit = 7e1bce227…`.
+- R4, R6 formulas, VAMS, allocation formulas, 60/30/10, provider routing, workflows, and GhostFlow unchanged by R5B.
+
+**R5 is complete.** Next is **R6 — UI truth PRODUCT GATE / READ-ONLY AUDIT FIRST**. R6 implementation is **NOT authorized**.
+
+Known R6 items for audit only (do not fix here): prescriptive “Hold now” language; confusing `% of Max`; rounded headline can show 101%; BTC half-scale can read as “off”; Coverage measures non-neutral receipts rather than source availability; vote=0 receipt direction is shown as a side rather than Neutral; confidence/conviction/crowding/primary-driver depend on receipt structure; P3 ordinary receipts changed denominators by design in R5B and must be interpreted correctly before any UI change.
+
+Decision already recorded: [DECISIONS.md](./DECISIONS.md) entry **2026-08-31 — GhostRegime R5B removes duplicate PDBC TR21 satellite role**. This checkpoint records rollout facts, not a new decision.
+
+This workstream is independent of GhostFlow source monitoring below.
+
+## Recommended next work (GhostRegime)
+1. **R6 — UI truth: READ-ONLY PRODUCT AUDIT / DECISION GATE** (implementation is **NOT authorized**)
+2. Do **not** change VAMS, allocation formulas, or **60/30/10**
+3. Do **not** change provider routing, workflows, P1/P2/P3, or R4
+4. GhostFlow remains a separate workstream
+
+Last updated: 2026-09-02
+
+---
+
 ## Current State (GhostRegime — 2026-09-02 R5A live closeout)
 R5A merge: PR **#174** (`fix(ghostregime): contain satellite fallback provenance`, reviewed head `76422e861000fc6c568607ac5245a9af82256aa7`) → `f03c20b6707f61f7af842c28ecb01afb6f29a785` (`main`, merged 2026-08-31). Production deployment was verified READY on that exact merge commit.
 
