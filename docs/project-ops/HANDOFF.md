@@ -1,5 +1,25 @@
 ﻿# HANDOFF
 
+## Last Session Summary (2026-09-02 — GhostRegime R6A live closeout)
+R6A is complete: merged, deployed, and independently live-verified. PR **#178** (`fix(ghostregime): make R6A display semantics truthful`) reviewed final head `45becfdb7746a64dcd79649979085b9bed3b4ce4` → merge / production serving build `9eb143d5bdb58e3be2ade694efb4019b29a149eb`. Production READY on that commit. No manual deploy. No GhostRegime refresh.
+
+Model remains `ghostregime-v1.0.4`. The persisted row was **not** recomputed: `row_build_commit` is still `7e1bce227878e0901f4241a9c955e1d25bdeaf6b`. Public `/today` served the existing snapshot (`refresh_attempt = read`, `refresh_outcome = served_persisted_snapshot`, `persisted_snapshot_preserved = true`). Date `2026-09-01`, REFLATION, RISK ON, targets 60/30/10, scales 1.0 / 0.5 / 0.5, actuals 60/15/5 + 20 cash.
+
+Live UI: sleeve brake Stocks full / Gold half / BTC half; Actionable Read `BTC half → +5% cash • Gold half → +15% cash` (false `BTC off` gone); Exposure is the default allocation view; Vs 60/30/10 is the secondary full-risk toggle; mix stays coherent. `/health` OK and fresh (`age_days 1`). **R6B and R6C were not implemented.** Coverage / tie-break-as-evidence / Hold now copy remain the approved later scope.
+
+## Priority for Next Session (GhostRegime)
+1. R6B product implementation gate
+2. Evidence vs procedural resolution separation
+3. Rename Coverage → Participation
+4. Exclude both tie-break receipts from evidence metrics
+5. Retain tie-break provenance as a separate “Resolved by…” presentation
+6. Update Agreement / Participation / Confidence / Conviction / Crowded / Primary Driver / Top Drivers / Compare consistently
+7. No threshold retuning
+8. No model / persistence / version / provider / VAMS / allocation changes
+9. R6C remains later
+
+---
+
 ## Last Session Summary (2026-09-02 — GhostRegime R5B live closeout)
 R5B is fully complete and closed. PR **#176** merged as `7e1bce227878e0901f4241a9c955e1d25bdeaf6b` (reviewed head `9107a6e…`). Production is READY on that exact commit. Effective model is `ghostregime-v1.0.4`.
 
