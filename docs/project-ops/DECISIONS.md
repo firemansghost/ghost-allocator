@@ -4,10 +4,10 @@
 Choice:
 - Bobby approved the R6 UI-truth audit recommendation: **GO WITH CHANGES — Option B (Evidence / Resolution Separation)**.
 - Approved sequence: **R6A** factual display correctness → **R6B** evidence / resolution separation → **R6C** educational copy / posture.
-- This decision authorizes R6A implementation. R6B and R6C remain separately sequenced and are **not** implemented by R6A.
+- This decision authorizes R6A implementation. R6B and R6C product direction is approved, but their implementation remains separately gated and is not yet authorized.
 
 Locked product decisions:
-- Procedural `risk_tiebreak` and `infl_tiebreak` remain the final axis-resolution mechanisms. In R6B they will not be treated as independent evidence in Agreement / Participation / Confidence / Conviction / Crowded / Top Drivers / Compare. R6A does not change those formulas.
+- Procedural `risk_tiebreak` and `infl_tiebreak` remain the final axis-resolution mechanisms. In R6B they will not be treated as independent evidence in Agreement / Participation / Confidence / Conviction / Crowded / Primary Driver / Top Drivers / Compare. R6A does not change those formulas.
 - The existing Coverage formula (non-neutral / receipt count) will be treated as **Participation** in R6B. Do not invent an Availability denominator from the satellite catalog or tie-breaks.
 - Allocation card **Exposure** is the primary default. The global 60/30/10 comparison is a secondary research toggle only (label: Vs 60/30/10), not VAMS brake utilization.
 - Displayed allocation mixes use one-decimal-only-when-needed formatting. Underlying model values are not altered and mass is not shifted across sleeves.
