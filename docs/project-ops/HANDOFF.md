@@ -1,5 +1,28 @@
 ﻿# HANDOFF
 
+## Last Session Summary (2026-09-02 — GhostRegime R5A live closeout)
+R5A is fully complete and closed. PR **#174** merged as `f03c20b6707f61f7af842c28ecb01afb6f29a785`. Production is READY on that exact commit. Model remains `ghostregime-v1.0.3`. No model-version bump, no new Blob namespace, no historical rewrite, no forced refresh.
+
+September 1 scheduled run [33488935024](https://github.com/firemansghost/ghost-allocator/actions/runs/33488935024) succeeded on the no-fetch path (`scheduled_served_persisted_no_fetch`, still-fresh `2026-08-28` snapshot). September 2 scheduled run [33606515025](https://github.com/firemansghost/ghost-allocator/actions/runs/33606515025) was the first genuine natural post-R5A recompute (`scheduled_recomputed_and_persisted`). Persisted row: `date 2026-09-01`, `run_date_utc 2026-09-02`, `regime REFLATION`, `risk_regime RISK ON`, `risk_score +1`, `infl_core_score 0`, `infl_sat_score +1`, `infl_score +1`, `row_build_commit` / `row_engine_version` = `f03c20b…` / `ghostregime-v1.0.3`.
+
+Truthful Commodity receipt: key `satellite_commodity_nowcast_basket_(energy+metals)`, label `Commodity proxy (PDBC TR21)`, vote +1 Inflation, note includes `source: PDBC TR21`. No fake Freight alias. Yahoo handled the Stooq browser challenge for all eight core ETFs; Marketstack unused. Current public `/today` is persisted `2026-09-01` REFLATION; `/health` OK and fresh (`age_days 1`). Immediate post-write `WARN LATEST_ROW_OLD` is an observed timing/consistency wrinkle, not a production failure.
+
+Bobby **explicitly authorized R5B**. It is already implemented locally on `model/ghostregime-r5b-remove-p2` (`75be5228c7fe60d255ecb05afb5ec57b7c080177`). **NOT pushed. NO PR. NOT deployed.** Do not describe R5B as live.
+
+## Priority for Next Session (GhostRegime)
+1. Merge this R5A docs closeout
+2. Update the local R5B branch onto the new main
+3. Confirm no conflict / unexpected diff
+4. Rerun appropriate validation
+5. Push / open the R5B PR
+6. Independently review the actual GitHub diff
+7. Only then consider `ghostregime-v1.0.4` rollout
+8. v1.0.4 new namespace requires a controlled first refresh after deployment
+9. R6 remains gated
+10. 60/30/10 and VAMS remain frozen
+
+---
+
 ## Last Session Summary (2026-08-31 — GhostRegime R5A satellite containment)
 Bobby **explicitly authorized R5A only**. Implemented locally on `fix/ghostregime-r5a-satellite-containment`. **R5A AUTHORIZED / IMPLEMENTED LOCALLY — PR review pending.** Not live.
 
