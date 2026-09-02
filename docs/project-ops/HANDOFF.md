@@ -1,5 +1,25 @@
 ﻿# HANDOFF
 
+## Last Session Summary (2026-09-02 — GhostRegime R6B live closeout)
+R6B is complete: merged, deployed, and independently live-verified. PR **#180** (`fix(ghostregime): separate evidence from tie resolution`) reviewed head `8eaeb966eae5765d9005acfcb5a1cda96d4ec76f` → merge / production serving build `ac76f49899e8e6aa57df5aa66cd0e1d6215de729`. Production READY on that commit. No manual deploy. No GhostRegime refresh.
+
+Model remains `ghostregime-v1.0.4`. The persisted row was **not** recomputed: `row_build_commit` is still `7e1bce227878e0901f4241a9c955e1d25bdeaf6b`. Public `/today` served the existing snapshot (`refresh_attempt = read`, `refresh_outcome = served_persisted_snapshot`, `persisted_snapshot_preserved = true`). Date `2026-09-01`, REFLATION, RISK ON, `risk_score +1`, `infl_score +1`.
+
+Live UI: evidence vs procedural resolution is split. Risk Agreement 1/2, Participation 2/4, Confidence Low, Conviction 0, Evidence net 0/4, Resolved by SPY TR21 tie-break. Inflation Agreement 2/4, Participation 4/4, Confidence Medium (exact 0.65), Conviction 0, Evidence net 0/4, Resolved by PDBC TR21 tie-break. Regime Conviction 0; Primary driver Tie / both axes weak; Crowded false. Top Drivers are evidence-only; tie-breaks remain in Nerd Mode / persisted provenance. `/health` OK and fresh (`age_days 1`). Replay model-field diffs 0; no-tie parity 0. Brief SSR revalidation wrinkle: first `/ghostregime` HTML briefly embedded prior serving-build `9eb143d5…` while `/today` already reported `ac76f498…`; later request after `revalidate: 60` was correct. Not model staleness. **R6C was not implemented.**
+
+## Priority for Next Session (GhostRegime)
+1. R6C product implementation gate
+2. Replace Hold now vocabulary
+3. Replace Actionable read vocabulary
+4. Replace What to do now vocabulary
+5. Remove “should actually hold”
+6. Remove unsupported train-wreck / market-timing efficacy claims
+7. Align page / How It Works / glossary / share-copy terminology
+8. Preserve R6A/R6B semantics
+9. No model / persistence / providers / VAMS / allocations / 60/30/10 changes
+
+---
+
 ## Last Session Summary (2026-09-02 — GhostRegime R6A live closeout)
 R6A is complete: merged, deployed, and independently live-verified. PR **#178** (`fix(ghostregime): make R6A display semantics truthful`) reviewed final head `45becfdb7746a64dcd79649979085b9bed3b4ce4` → merge / production serving build `9eb143d5bdb58e3be2ade694efb4019b29a149eb`. Production READY on that commit. No manual deploy. No GhostRegime refresh.
 
