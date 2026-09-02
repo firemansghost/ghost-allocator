@@ -158,6 +158,25 @@ describe('R6C public vocabulary', () => {
     assert.doesNotMatch(src, /Cash now/);
     assert.match(HOW_IT_WORKS_REALITY_CHECK, /Exposure changes only when the published regime or sleeve-brake rules change/);
   });
+
+  it('rejects leftover How It Works outcome / cadence / hold-instruction copy', () => {
+    const howItWorks = readFileSync(join(ROOT, 'app/ghostregime/how-it-works/page.tsx'), 'utf8');
+    assert.doesNotMatch(howItWorks, /you win by/i);
+    assert.doesNotMatch(howItWorks, /captures upside and limits downside/i);
+    assert.doesNotMatch(howItWorks, /fewer faceplants during bear markets/i);
+    assert.doesNotMatch(howItWorks, /solid participation during bull markets/i);
+    assert.doesNotMatch(howItWorks, /What You Do With the Signal/);
+    assert.doesNotMatch(howItWorks, /hold 100% of the starting point/i);
+    assert.doesNotMatch(howItWorks, /hold 50% of the starting point/i);
+    assert.doesNotMatch(howItWorks, /hold 0%/i);
+    assert.doesNotMatch(howItWorks, /monthly calendar reminder/i);
+    assert.doesNotMatch(howItWorks, /helps you decide what to hold inside the plan/i);
+    assert.doesNotMatch(howItWorks, /The Promise/);
+    assert.match(howItWorks, /How to use the model mix/);
+    assert.match(howItWorks, /Design intent/);
+    assert.match(howItWorks, /100% of the sleeve starting point/);
+    assert.match(howItWorks, /maps the published exposures into the supported plan \/ ETF lineup/);
+  });
 });
 
 describe('R6C does not change R6B live-fixture metrics', () => {

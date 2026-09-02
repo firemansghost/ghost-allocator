@@ -31,7 +31,7 @@ export default function HowItWorksPage() {
         <h2 className="text-sm font-semibold text-zinc-50 mb-3">Why a rules-based process exists</h2>
         <div className="space-y-3 text-xs text-zinc-300 leading-relaxed">
           <p>
-            Disciplined risk management isn't optional. If we're in an era of monetary debasement and financial repression, you don't win by predicting headlines — you win by following a data-driven process that captures upside and limits downside when the inevitable secular bear shows up.
+            A rules-based process makes changes explicit and repeatable instead of relying on headlines or gut feel. GhostRegime uses published regime and sleeve-brake rules so the same inputs lead to the same model response. No crystal ball. No &quot;I feel it in my bones.&quot;
           </p>
           <DrawdownRealityCheck variant="full" />
         </div>
@@ -50,8 +50,8 @@ export default function HowItWorksPage() {
             It's built for long-term investors who want:
           </p>
           <ul className="list-disc list-inside space-y-1 ml-2">
-            <li>fewer faceplants during bear markets, and</li>
-            <li>solid participation during bull markets</li>
+            <li>a repeatable way to vary exposure as conditions change, and</li>
+            <li>clear rules for when the model scales sleeves up or down</li>
           </ul>
           <p>
             …without day-trading their retirement like it's a side quest.
@@ -143,9 +143,9 @@ export default function HowItWorksPage() {
             Next, the <strong>brake</strong> (proxy-VAMS — volatility-adjusted momentum on SPY, GLD, BTC-USD) looks at each sleeve&apos;s trend signal and can cut exposure:
           </p>
           <ul className="list-disc list-inside space-y-1 ml-2">
-            <li><strong>Bullish</strong> → hold 100% of the starting point</li>
-            <li><strong>Neutral</strong> → hold 50% of the starting point</li>
-            <li><strong>Bearish</strong> → hold 0% (yes, cash is a position)</li>
+            <li><strong>Bullish</strong> → 100% of the sleeve starting point</li>
+            <li><strong>Neutral</strong> → 50% of the sleeve starting point</li>
+            <li><strong>Bearish</strong> → 0% of the sleeve starting point (yes, cash is a position)</li>
           </ul>
           <p>
             <strong>Model mix</strong> is the model&apos;s published mix after the brake is applied.
@@ -159,9 +159,9 @@ export default function HowItWorksPage() {
         </div>
       </GlassCard>
 
-      {/* What You Actually Do With It */}
+      {/* How to use the model mix */}
       <GlassCard className="p-6">
-        <h2 className="text-sm font-semibold text-zinc-50 mb-3">What You Do With the Signal</h2>
+        <h2 className="text-sm font-semibold text-zinc-50 mb-3">How to use the model mix</h2>
         <div className="space-y-3 text-xs text-zinc-300 leading-relaxed">
           <p>
             GhostRegime publishes a <strong>Model mix</strong> (the after-brake allocation) and <strong>Cash in model mix</strong> (base cash plus anything the brake kicked out).
@@ -192,17 +192,14 @@ export default function HowItWorksPage() {
               </p>
             </div>
             <div className="p-3 rounded-md border border-amber-400/30 bg-amber-400/10">
-              <h3 className="text-xs font-semibold text-amber-300 mb-1">Example B: Compare on a calendar you already follow</h3>
+              <h3 className="text-xs font-semibold text-amber-300 mb-1">Example B: Compare on an existing review schedule</h3>
               <p className="text-[11px] text-zinc-300">
-                Weekly, monthly, or quarterly — whatever you can actually stick to.
+                Some people review allocations on a regular calendar. GhostRegime itself does not require or recommend a specific schedule.
               </p>
             </div>
           </div>
           <p className="text-[11px] text-zinc-400 italic mt-3">
-            Taxes, time, and patience vary by person. Choose what you can actually stick to.
-          </p>
-          <p className="text-[11px] text-amber-300 mt-3">
-            <strong>Adulting tip:</strong> Set a monthly calendar reminder to check your allocations. The market doesn't care that you were busy.
+            Taxes, account rules, time, and implementation constraints vary.
           </p>
         </div>
       </GlassCard>
@@ -218,7 +215,7 @@ export default function HowItWorksPage() {
             <strong>GhostRegime</strong> publishes the model mix.
           </p>
           <p>
-            <strong>Ghost Allocator</strong> helps you decide what to hold inside the plan.
+            <strong>Ghost Allocator</strong> maps the published exposures into the supported plan / ETF lineup.
           </p>
           <p>
             Together, they turn "strategy talk" into something you can actually implement without needing an MBA or a therapist.
@@ -226,17 +223,17 @@ export default function HowItWorksPage() {
         </div>
       </GlassCard>
 
-      {/* The Promise */}
+      {/* Design intent */}
       <GlassCard className="p-6 border-amber-400/30 bg-amber-400/5">
-        <h2 className="text-sm font-semibold text-zinc-50 mb-3">The Promise</h2>
+        <h2 className="text-sm font-semibold text-zinc-50 mb-3">Design intent</h2>
         <div className="space-y-3 text-xs text-zinc-300 leading-relaxed">
           <p>
-            GhostRegime isn&apos;t trying to win every day. It publishes a mix from regime rules and sleeve brakes:
+            GhostRegime publishes a mix from regime rules and sleeve brakes. The design intent is simple:
           </p>
           <ul className="list-disc list-inside space-y-1 ml-2">
             <li>scale exposure down when the published rules turn defensive</li>
             <li>scale it back up when they improve</li>
-            <li>keep turnover low enough that you don&apos;t hate your life</li>
+            <li>change exposure only when those published rules change</li>
           </ul>
           <p className="text-[10px] text-zinc-400 mt-4 leading-relaxed">
             <strong className="text-zinc-300">GhostRegime is for educational purposes only and does not provide personalized investment advice.</strong> Example funds/ETFs are illustrations, not recommendations.
