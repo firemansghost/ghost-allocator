@@ -4,6 +4,7 @@
  * what "stocks" or "gold" mean.
  */
 
+import { NUMERIC_TOLERANCE } from './study-contract';
 import type { AssetId, Weights } from './types';
 
 export function unionAssetIds(...weightSets: Array<Weights | undefined>): AssetId[] {
@@ -19,19 +20,52 @@ export function weightOf(weights: Weights, assetId: AssetId): number {
   return weights[assetId] ?? 0;
 }
 
-export function portfolioReturn(held: Weights, assetReturns: Weights): number {
+export function isEconomicallyHeld(weight: number): boolean {
+  return Math.abs(weight) > NUMERIC_TOLERANCE;
+}
+
+/**
+ * Fail closed: every economically held asset must have an own-key finite return >= -1.
+ * Missing held returns are never defaulted to 0.
+ */
+export function requireHeldAssetReturns(held: Weights, assetReturns: Weights): void {
+  for (const id of Object.keys(held)) {
+    if (!isEconomicallyHeld(weightOf(held, id))) continue;
+    if (!Object.hasOwn(assetReturns, id)) {
+      throw new Error(`MISSING_HELD_ASSET_RETURN: ${id}`);
+    }
+    const assetReturn = assetReturns[id];
+    if (!Number.isFinite(assetReturn)) {
+      throw new Error(`NON_FINITE_ASSET_RETURN: ${id}`);
+    }
+    if (assetReturn < -1) {
+      throw new Error(`INVALID_ASSET_RETURN: ${id}`);
+    }
+  }
+}
+
+export function marketReturnFromHoldings(held: Weights, assetReturns: Weights): number {
+  requireHeldAssetReturns(held, assetReturns);
   let total = 0;
-  for (const id of unionAssetIds(held, assetReturns)) {
-    total += weightOf(held, id) * weightOf(assetReturns, id);
+  for (const id of Object.keys(held)) {
+    const weight = weightOf(held, id);
+    if (!isEconomicallyHeld(weight)) continue;
+    total += weight * assetReturns[id];
   }
   return total;
 }
 
-export function driftWeights(held: Weights, assetReturns: Weights, portReturn: number): Weights {
-  const denom = 1 + portReturn;
+export function driftWeights(held: Weights, assetReturns: Weights, marketReturn: number): Weights {
+  requireHeldAssetReturns(held, assetReturns);
+  const denom = 1 + marketReturn;
   const next: Weights = {};
-  for (const id of unionAssetIds(held, assetReturns)) {
-    next[id] = denom === 0 ? 0 : (weightOf(held, id) * (1 + weightOf(assetReturns, id))) / denom;
+  for (const id of Object.keys(held)) {
+    const weight = weightOf(held, id);
+    if (!isEconomicallyHeld(weight)) {
+      next[id] = 0;
+      continue;
+    }
+    next[id] = denom === 0 ? 0 : (weight * (1 + assetReturns[id])) / denom;
   }
   return next;
 }
@@ -39,9 +73,9 @@ export function driftWeights(held: Weights, assetReturns: Weights, portReturn: n
 export function applyIntervalReturn(
   held: Weights,
   assetReturns: Weights
-): { portfolioReturn: number; pretrade: Weights } {
-  const r = portfolioReturn(held, assetReturns);
-  return { portfolioReturn: r, pretrade: driftWeights(held, assetReturns, r) };
+): { marketReturn: number; pretrade: Weights } {
+  const marketReturn = marketReturnFromHoldings(held, assetReturns);
+  return { marketReturn, pretrade: driftWeights(held, assetReturns, marketReturn) };
 }
 
 export function grossTwoSidedNotional(pretrade: Weights, target: Weights): number {
@@ -62,12 +96,13 @@ export function costFraction(costBps: number, grossTwoSided: number): number {
 
 export function applyNavPath(
   navBefore: number,
-  portReturn: number,
+  marketReturn: number,
   costFrac: number
-): { navAfterMarket: number; navAfterCost: number } {
-  const navAfterMarket = navBefore * (1 + portReturn);
+): { navAfterMarket: number; navAfterCost: number; netPortfolioReturn: number } {
+  const navAfterMarket = navBefore * (1 + marketReturn);
   const navAfterCost = navAfterMarket * (1 - costFrac);
-  return { navAfterMarket, navAfterCost };
+  const netPortfolioReturn = (1 + marketReturn) * (1 - costFrac) - 1;
+  return { navAfterMarket, navAfterCost, netPortfolioReturn };
 }
 
 export interface RebalanceResult {
@@ -90,7 +125,7 @@ export function rebalanceToTarget(
       grossTwoSided: 0,
       oneWayTurnover: 0,
       costFraction: 0,
-      rebalanced: Boolean(options?.inception),
+      rebalanced: false,
     };
   }
 

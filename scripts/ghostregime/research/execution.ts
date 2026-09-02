@@ -61,7 +61,10 @@ export function publishedTargetChanged(
 export interface ExecutionStep {
   session: DateKey;
   inception: boolean;
-  portfolioReturn: number;
+  /** Pre-cost interval return: Σ held_i × asset_return_i */
+  marketReturn: number;
+  /** After-cost interval return: (1 + marketReturn) × (1 - costFraction) - 1 */
+  netPortfolioReturn: number;
   pretrade: Weights;
   held: Weights;
   executedPublishedTarget: Weights | null;
@@ -70,6 +73,7 @@ export interface ExecutionStep {
   grossTwoSided: number;
   oneWayTurnover: number;
   costFraction: number;
+  navAfterMarket: number;
   nav: number;
 }
 
@@ -121,15 +125,17 @@ export function stepSessionClose(args: {
     return {
       session,
       inception: true,
-      portfolioReturn: 0,
+      marketReturn: 0,
+      netPortfolioReturn: 0,
       pretrade: { ...established.held },
       held: { ...state.held },
       executedPublishedTarget: { ...state.lastExecutedPublishedTarget },
       pendingPublishedTarget: state.pendingPublishedTarget ? { ...state.pendingPublishedTarget } : null,
-      rebalanced: true,
+      rebalanced: false,
       grossTwoSided: 0,
       oneWayTurnover: 0,
       costFraction: 0,
+      navAfterMarket: state.nav,
       nav: state.nav,
     };
   }
@@ -138,7 +144,7 @@ export function stepSessionClose(args: {
     throw new Error(`MISSING_INTERVAL_RETURNS: ${session}`);
   }
 
-  const { portfolioReturn, pretrade } = applyIntervalReturn(state.held, intervalReturns);
+  const { marketReturn, pretrade } = applyIntervalReturn(state.held, intervalReturns);
   const eventRebalance =
     rebalanceMode === 'event' && publishedTargetChanged(pending ?? {}, state.lastExecutedPublishedTarget, tolerance);
   const scheduledRebalance = rebalanceMode === 'scheduled' && Boolean(scheduled) && pending != null;
@@ -148,7 +154,12 @@ export function stepSessionClose(args: {
     ? rebalanceToTarget(pretrade, pending as Weights, costBps)
     : rebalanceToTarget(pretrade, pending ?? pretrade, costBps, { skip: true });
 
-  const { navAfterCost } = applyNavPath(state.nav, portfolioReturn, trade.costFraction);
+  const navBefore = state.nav;
+  const { navAfterMarket, navAfterCost, netPortfolioReturn } = applyNavPath(
+    navBefore,
+    marketReturn,
+    trade.costFraction
+  );
   state.nav = navAfterCost;
   state.held = trade.held;
   if (trade.rebalanced && pending) {
@@ -158,7 +169,8 @@ export function stepSessionClose(args: {
   return {
     session,
     inception: false,
-    portfolioReturn,
+    marketReturn,
+    netPortfolioReturn,
     pretrade,
     held: { ...state.held },
     executedPublishedTarget: state.lastExecutedPublishedTarget
@@ -169,6 +181,7 @@ export function stepSessionClose(args: {
     grossTwoSided: trade.grossTwoSided,
     oneWayTurnover: trade.oneWayTurnover,
     costFraction: trade.costFraction,
+    navAfterMarket,
     nav: state.nav,
   };
 }

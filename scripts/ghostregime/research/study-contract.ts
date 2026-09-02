@@ -38,7 +38,9 @@ export const INCEPTION_CONVENTION = {
   initial_transaction_cost: 0,
   first_portfolio_return: 'S1 → S2',
   shared_primary_inception: true,
-  note: 'All primary strategies begin from newly supplied research capital at the same S1.',
+  inception_is_not_a_rebalance: true,
+  rebalanced_flag_at_inception: false,
+  note: 'Initial funding is portfolio establishment, not a model rebalance. All primary strategies begin from newly supplied research capital at the same S1.',
 } as const;
 
 export const CASH_CONVENTION = {
@@ -56,6 +58,9 @@ export const COST_CONVENTION = {
   one_way_turnover: '0.5 * gross_two_sided_traded_notional',
   nav_after_cost: 'NAV_after_market * (1 - cost_fraction)',
   extra_cash_transaction_leg: false,
+  reported_metrics_use: 'netPortfolioReturn',
+  at_zero_bps: 'netPortfolioReturn == marketReturn',
+  at_positive_bps: 'netPortfolioReturn includes the NAV haircut',
 } as const;
 
 export const STATIC_REBALANCE_CONVENTION = {
@@ -68,9 +73,22 @@ export const STATIC_REBALANCE_CONVENTION = {
 export const NUMERIC_TOLERANCE = ALLOCATION_TOLERANCE;
 export const METRIC_UNDEFINED_POLICY = 'return null and emit a warning when a denominator is undefined or zero';
 
+export const PERFORMANCE_METRICS_CONVENTION = {
+  daily_input: 'netPortfolioReturn',
+  note: 'All reported performance metrics use after-cost daily portfolio returns for the selected cost scenario.',
+} as const;
+
+export const TUW_CONVENTION = {
+  tuw_maxdd_field: 'tuwMaxDdCalendarDays',
+  tuw_longest_field: 'tuwLongestCalendarDays',
+  unit: 'calendar_days',
+  not_trading_days: true,
+} as const;
+
 export const REQUIRED_WARNING_POLICY = {
   btc_stale_session_count: 1,
   btc_stale_session_date: '2017-02-28',
+  btc_stale_max_hours: 1,
   btc_stale_disposition: 'accept_with_warning_do_not_repair',
   btc_post_close_leak: 'reject',
   unexpected_nonzero_infl_sat_score: 'stop',
@@ -95,6 +113,19 @@ export const SIGNAL_SYMBOLS = [
 ] as const;
 
 export const RETURN_SYMBOLS = ['SPY', 'GLD', 'IEF', 'BIL', 'BTC-USD'] as const;
+
+/** Ordinary ETF signal series that must match the frozen XNYS session calendar. */
+export const ORDINARY_ETF_SIGNAL_SYMBOLS = [
+  'SPY',
+  'GLD',
+  'HYG',
+  'IEF',
+  'EEM',
+  'PDBC',
+  'TIP',
+  'TLT',
+  'UUP',
+] as const;
 
 export const CANDIDATE_IDS: readonly CandidateId[] = [
   'P0_CURRENT',

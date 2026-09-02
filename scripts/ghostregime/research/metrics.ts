@@ -11,7 +11,8 @@ export interface EquityPoint {
 
 export interface DailyReturnPoint {
   date: DateKey;
-  portfolioReturn: number;
+  /** After-cost daily portfolio return for the selected cost scenario. */
+  netPortfolioReturn: number;
   rfReturn: number;
 }
 
@@ -43,22 +44,28 @@ export function cagr(
 }
 
 export function annualizedVolatility(
-  dailyReturns: number[]
+  dailyNetReturns: number[]
 ): { value: number | null; warnings: ResearchWarning[] } {
-  const sd = sampleStdev(dailyReturns);
+  const sd = sampleStdev(dailyNetReturns);
   if (sd == null) {
     return {
       value: null,
-      warnings: [{ code: 'VOL_UNDEFINED', message: 'Annualized volatility undefined: need at least 2 daily returns' }],
+      warnings: [{ code: 'VOL_UNDEFINED', message: 'Annualized volatility undefined: need at least 2 daily net returns' }],
     };
   }
   return { value: sd * Math.sqrt(252), warnings: [] };
 }
 
+export function annualizedNetVolatility(
+  points: DailyReturnPoint[]
+): { value: number | null; warnings: ResearchWarning[] } {
+  return annualizedVolatility(points.map((p) => p.netPortfolioReturn));
+}
+
 export function sharpe(
   points: DailyReturnPoint[]
 ): { value: number | null; warnings: ResearchWarning[] } {
-  const excess = points.map((p) => p.portfolioReturn - p.rfReturn);
+  const excess = points.map((p) => p.netPortfolioReturn - p.rfReturn);
   if (excess.length < 2) {
     return {
       value: null,
@@ -84,7 +91,7 @@ export function downsideDeviation(excess: number[]): number | null {
 export function sortino(
   points: DailyReturnPoint[]
 ): { value: number | null; warnings: ResearchWarning[] } {
-  const excess = points.map((p) => p.portfolioReturn - p.rfReturn);
+  const excess = points.map((p) => p.netPortfolioReturn - p.rfReturn);
   if (excess.length === 0) {
     return {
       value: null,

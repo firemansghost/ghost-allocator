@@ -9,6 +9,7 @@ import { parse } from 'csv-parse/sync';
 import type { MarketDataPoint } from '../../../lib/ghostregime/types';
 import {
   MANIFEST_SHA256,
+  ORDINARY_ETF_SIGNAL_SYMBOLS,
   REQUIRED_WARNING_POLICY,
   RESEARCH_END,
   RESEARCH_START,
@@ -242,18 +243,15 @@ export function parseBtcReturnCsv(rows: Record<string, string>[]): {
     const staleHours = (equityMs - endMs) / 3_600_000;
     const stale = staleHours > 0;
     if (stale) {
+      if (staleHours > REQUIRED_WARNING_POLICY.btc_stale_max_hours) {
+        throw new Error(`BTC_STALE_EXCEEDS_ONE_HOUR: ${dateKey} lagH=${staleHours}`);
+      }
       staleSessions.push(dateKey);
       warnings.push({
         code: 'BTC_STALE_MARK',
         message: `BTC mark is ${staleHours}h early vs equity close`,
         date: dateKey,
       });
-      if (
-        dateKey !== REQUIRED_WARNING_POLICY.btc_stale_session_date &&
-        staleHours > 1
-      ) {
-        throw new Error(`UNEXPECTED_BTC_STALE_MARK: ${dateKey} lagH=${staleHours}`);
-      }
     }
     out.push({
       asset_id: 'BTC-USD',
@@ -339,6 +337,16 @@ function rejectRawBilAsPrimary(rows: ReturnObservation[]): void {
   }
 }
 
+export function assertDateSequenceEquals(
+  dates: DateKey[],
+  expected: DateKey[],
+  errorCode: string
+): void {
+  if (dates.length !== expected.length || dates.join(',') !== expected.join(',')) {
+    throw new Error(errorCode);
+  }
+}
+
 export function loadResearchSnapshot(root: string): LoadedSnapshot {
   const warnings: ResearchWarning[] = [];
   const hashes = verifySnapshotHashes(root);
@@ -386,9 +394,13 @@ export function loadResearchSnapshot(root: string): LoadedSnapshot {
   const vixAudit = auditVixExtraDates(vixDates, xnys);
   warnings.push(...vixAudit.warnings);
 
-  const spySignal = signalRows.filter((r) => r.symbol === 'SPY').map((r) => r.date_key);
-  if (spySignal.join(',') !== xnys.join(',')) {
-    throw new Error('SPY_SIGNAL_XNYS_MISMATCH');
+  for (const symbol of ORDINARY_ETF_SIGNAL_SYMBOLS) {
+    const dates = signalRows.filter((r) => r.symbol === symbol).map((r) => r.date_key);
+    assertDateSequenceEquals(dates, xnys, `SIGNAL_XNYS_MISMATCH: ${symbol}`);
+  }
+  for (const symbol of RETURN_SYMBOLS) {
+    const dates = returnRows.filter((r) => r.asset_id === symbol).map((r) => r.date_key);
+    assertDateSequenceEquals(dates, xnys, `RETURN_XNYS_MISMATCH: ${symbol}`);
   }
 
   return {

@@ -8,6 +8,9 @@ import {
   CANDIDATE_IDS,
   CASH_CONVENTION,
   COST_CONVENTION,
+  INCEPTION_CONVENTION,
+  PERFORMANCE_METRICS_CONVENTION,
+  TUW_CONVENTION,
   HOLDOUT_CALENDAR_END,
   HOLDOUT_CALENDAR_START,
   HOLDOUT_FIRST_ELIGIBLE_SESSION_EXPECTED,
@@ -45,6 +48,11 @@ describe('R7B1 study contract', () => {
     assert.strictEqual(COST_CONVENTION.primary_bps, 0);
     assert.deepStrictEqual([...COST_CONVENTION.sensitivity_bps], [5, 10]);
     assert.strictEqual(STATIC_REBALANCE_CONVENTION.run_monthly_sensitivity_in_r7b1, false);
+    assert.strictEqual(INCEPTION_CONVENTION.inception_is_not_a_rebalance, true);
+    assert.strictEqual(INCEPTION_CONVENTION.rebalanced_flag_at_inception, false);
+    assert.strictEqual(PERFORMANCE_METRICS_CONVENTION.daily_input, 'netPortfolioReturn');
+    assert.strictEqual(TUW_CONVENTION.unit, 'calendar_days');
+    assert.strictEqual(TUW_CONVENTION.not_trading_days, true);
   });
 
   it('freezes exactly P0–P6 and does not add a no-BTC primary candidate', () => {

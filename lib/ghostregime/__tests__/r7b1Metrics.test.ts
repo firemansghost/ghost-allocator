@@ -1,6 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
 import {
+  annualizedNetVolatility,
   annualizedVolatility,
   calmar,
   cagr,
@@ -35,9 +36,9 @@ describe('R7B1 frozen metrics', () => {
 
   it('J. Sharpe and Sortino use daily excess vs the cash series', () => {
     const points = [
-      { date: '2024-01-02', portfolioReturn: 0.01, rfReturn: 0 },
-      { date: '2024-01-03', portfolioReturn: -0.02, rfReturn: 0 },
-      { date: '2024-01-04', portfolioReturn: 0.03, rfReturn: 0 },
+      { date: '2024-01-02', netPortfolioReturn: 0.01, rfReturn: 0 },
+      { date: '2024-01-03', netPortfolioReturn: -0.02, rfReturn: 0 },
+      { date: '2024-01-04', netPortfolioReturn: 0.03, rfReturn: 0 },
     ];
     const excess = [0.01, -0.02, 0.03];
     const sh = sharpe(points);
@@ -67,6 +68,8 @@ describe('R7B1 frozen metrics', () => {
     assert.strictEqual(dd.recoveredDate, '2024-01-05');
     assert.strictEqual(dd.tuwMaxDdCalendarDays, 3);
     assert.ok((dd.tuwLongestCalendarDays ?? 0) >= 2);
+    assert.ok('tuwMaxDdCalendarDays' in dd);
+    assert.ok('tuwLongestCalendarDays' in dd);
     const c = calmar(0.1, dd.maxDrawdown);
     assert.ok(c.value != null);
     assert.ok(Math.abs(c.value - 0.1 / 0.25) < TOL);
@@ -86,11 +89,39 @@ describe('R7B1 frozen metrics', () => {
     assert.ok(Math.abs(worst.value - -0.1) < TOL);
   });
 
+  it('Sharpe, Sortino, and study vol consume netPortfolioReturn, not market return', () => {
+    const netPoints = [
+      { date: '2024-01-02', netPortfolioReturn: 0.001, rfReturn: 0 },
+      { date: '2024-01-03', netPortfolioReturn: -0.001, rfReturn: 0 },
+      { date: '2024-01-04', netPortfolioReturn: 0.002, rfReturn: 0 },
+    ];
+    const marketAsIfNet = [
+      { date: '2024-01-02', netPortfolioReturn: 0.05, rfReturn: 0 },
+      { date: '2024-01-03', netPortfolioReturn: -0.04, rfReturn: 0 },
+      { date: '2024-01-04', netPortfolioReturn: 0.08, rfReturn: 0 },
+    ];
+    const shNet = sharpe(netPoints);
+    const shMarket = sharpe(marketAsIfNet);
+    const soNet = sortino(netPoints);
+    const soMarket = sortino(marketAsIfNet);
+    const volNet = annualizedNetVolatility(netPoints);
+    const volMarket = annualizedVolatility(marketAsIfNet.map((p) => p.netPortfolioReturn));
+    assert.ok(shNet.value != null && shMarket.value != null);
+    assert.ok(soNet.value != null && soMarket.value != null);
+    assert.ok(volNet.value != null && volMarket.value != null);
+    assert.ok(Math.abs(shNet.value - shMarket.value) > 1e-8);
+    assert.ok(Math.abs(soNet.value - soMarket.value) > 1e-8);
+    assert.ok(Math.abs(volNet.value - volMarket.value) > 1e-8);
+    assert.ok(!('portfolioReturn' in netPoints[0]));
+    assert.ok(!('marketReturn' in netPoints[0]));
+    assert.ok('netPortfolioReturn' in netPoints[0]);
+  });
+
   it('returns null plus warning for undefined denominators', () => {
     assert.strictEqual(cagr(0, 1, '2024-01-01', '2025-01-01').value, null);
     assert.strictEqual(annualizedVolatility([0.01]).value, null);
-    assert.strictEqual(sharpe([{ date: '2024-01-02', portfolioReturn: 0.01, rfReturn: 0.01 }, { date: '2024-01-03', portfolioReturn: 0.02, rfReturn: 0.02 }]).value, null);
-    assert.strictEqual(sortino([{ date: '2024-01-02', portfolioReturn: 0.01, rfReturn: 0 }]).value, null);
+    assert.strictEqual(sharpe([{ date: '2024-01-02', netPortfolioReturn: 0.01, rfReturn: 0.01 }, { date: '2024-01-03', netPortfolioReturn: 0.02, rfReturn: 0.02 }]).value, null);
+    assert.strictEqual(sortino([{ date: '2024-01-02', netPortfolioReturn: 0.01, rfReturn: 0 }]).value, null);
     assert.strictEqual(calmar(0.1, 0).value, null);
     assert.strictEqual(worstCompleteCalendarYear([{ date: '2024-06-01', nav: 1 }]).value, null);
   });

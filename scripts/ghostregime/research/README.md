@@ -46,9 +46,24 @@ Post-cutover parity (every eligible SPY session after `2025-11-28` through `2026
 
 ## Self-financing drift
 
-`w_pre_i = w_held_i * (1 + r_i) / (1 + portfolio_return)`
+`w_pre_i = w_held_i * (1 + r_i) / (1 + marketReturn)`
 
 If there is no rebalance, next held weights are `w_pre`.
+
+A missing return for any economically held asset is a hard error (`MISSING_HELD_ASSET_RETURN`). Held returns are never defaulted to zero.
+
+## Market return vs net return
+
+- `marketReturn = Σ held_i × asset_return_i`
+- `NAV_after_market = NAV_before × (1 + marketReturn)`
+- `NAV_after_cost = NAV_after_market × (1 - costFraction)`
+- `netPortfolioReturn = NAV_after_cost / NAV_before - 1`
+
+All reported performance metrics use after-cost daily portfolio returns (`netPortfolioReturn`) for the selected cost scenario. At 0 bps, `netPortfolioReturn == marketReturn`. At 5/10 bps, `netPortfolioReturn` includes the NAV haircut.
+
+## Panel alignment
+
+Ordinary ETF signal series (SPY, GLD, HYG, IEF, EEM, PDBC, TIP, TLT, UUP) and every return series (SPY, GLD, IEF, BIL, BTC-USD) must match the frozen XNYS session calendar exactly. BTC signal remains calendar-daily. VIX preserves its documented extra source observations.
 
 ## Event-driven GhostRegime rebalance
 
@@ -74,7 +89,11 @@ Primary static benchmarks rebalance on the first eligible XNYS session close of 
 
 ## Initial allocation
 
-First valid model signal is S0. The first executable close is the next XNYS session S1. The initial target is established at S1 with turnover = 0 and transaction cost = 0. The first portfolio return is S1 → S2. All primary comparisons share that inception. Longer standalone benchmark histories may be labeled separately later.
+First valid model signal is S0. The first executable close is the next XNYS session S1. The initial target is established at S1 with turnover = 0 and transaction cost = 0. Inception is portfolio establishment, not a model rebalance (`inception = true`, `rebalanced = false`). The first portfolio return is S1 → S2. All primary comparisons share that inception. Longer standalone benchmark histories may be labeled separately later.
+
+## Time under water
+
+`TUW_maxDD` and `TUW_longest` are reported in **calendar days** (`tuwMaxDdCalendarDays`, `tuwLongestCalendarDays`). Do not later label them trading days.
 
 ## Candidate preregistration
 
