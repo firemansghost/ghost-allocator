@@ -1,6 +1,6 @@
 /**
  * Actionable Read Pills
- * 
+ *
  * Renders actionable read information as a compact pill strip instead of a long sentence
  */
 
@@ -14,7 +14,11 @@ import {
   CASH_NOW_PILL_TOOLTIP,
   THROTTLE_OFF_PILL_TOOLTIP,
 } from '@/lib/ghostregime/ghostregimePageCopy';
-import type { CashBreakdown } from '@/lib/ghostregime/ui';
+import {
+  formatAllocPct,
+  formatThrottleCashPart,
+  type CashBreakdown,
+} from '@/lib/ghostregime/ui';
 
 interface ActionableReadPillsProps {
   regime: string;
@@ -24,16 +28,12 @@ interface ActionableReadPillsProps {
   regimeConvictionIndex: number | null;
   regimeConvictionLabel?: string | null; // Optional bucket label
   isCrowded?: boolean;
+  stocksScale: number;
+  goldScale: number;
   btcScale: number;
-  /** Cash breakdown for throttle pills (e.g. "BTC off → +5% cash") and Cash now pill */
+  /** Cash breakdown for throttle pills (e.g. "BTC half → +5% cash") and Cash now pill */
   cashBreakdown?: CashBreakdown | null;
 }
-
-const THROTTLE_LABELS: Record<string, string> = {
-  Stocks: 'Stocks',
-  Gold: 'Gold',
-  Bitcoin: 'BTC',
-};
 
 export function ActionableReadPills({
   regime,
@@ -43,6 +43,8 @@ export function ActionableReadPills({
   regimeConvictionIndex,
   regimeConvictionLabel,
   isCrowded,
+  stocksScale,
+  goldScale,
   btcScale,
   cashBreakdown,
 }: ActionableReadPillsProps) {
@@ -82,25 +84,19 @@ export function ActionableReadPills({
 
   // 6) Cash now X% (actual/hold-now cash; show when >= 1%)
   if (cashBreakdown && cashBreakdown.cashTotal >= 0.01) {
-    const pct = (cashBreakdown.cashTotal * 100).toFixed(0);
     pills.push({
-      label: `Cash now ${pct}%`,
+      label: `Cash now ${formatAllocPct(cashBreakdown.cashTotal)}%`,
       tooltip: CASH_NOW_PILL_TOOLTIP,
     });
   }
 
-  // 7) Throttle pills: "BTC off → +5% cash" (explanatory)
+  // 7) Throttle pills from actual sleeve scale (never infer off from cash)
   if (cashBreakdown && cashBreakdown.cashFromThrottles > 0.005) {
-    const parts: string[] = [];
-    if (cashBreakdown.cashFromBtc > 0.001) {
-      parts.push(`${THROTTLE_LABELS.Bitcoin} off → +${(cashBreakdown.cashFromBtc * 100).toFixed(0)}% cash`);
-    }
-    if (cashBreakdown.cashFromStocks > 0.001) {
-      parts.push(`${THROTTLE_LABELS.Stocks} → +${(cashBreakdown.cashFromStocks * 100).toFixed(0)}% cash`);
-    }
-    if (cashBreakdown.cashFromGold > 0.001) {
-      parts.push(`${THROTTLE_LABELS.Gold} → +${(cashBreakdown.cashFromGold * 100).toFixed(0)}% cash`);
-    }
+    const parts = [
+      formatThrottleCashPart('BTC', btcScale, cashBreakdown.cashFromBtc),
+      formatThrottleCashPart('Stocks', stocksScale, cashBreakdown.cashFromStocks),
+      formatThrottleCashPart('Gold', goldScale, cashBreakdown.cashFromGold),
+    ].filter((part): part is string => part !== null);
     if (parts.length > 0) {
       pills.push({
         label: parts.join(' • '),
@@ -108,11 +104,11 @@ export function ActionableReadPills({
       });
     }
   }
-  
+
   if (pills.length === 0) {
     return null;
   }
-  
+
   const pillPrimary =
     'px-2.5 py-1 rounded-md border border-amber-400/22 bg-amber-400/[0.06] text-amber-200/80 text-xs';
   const pillSecondary =
@@ -123,7 +119,7 @@ export function ActionableReadPills({
       {pills.map((pill, idx) => {
         const tierClass = idx < 2 ? pillPrimary : pillSecondary;
         const content = <span className={tierClass}>{pill.label}</span>;
-        
+
         return pill.tooltip ? (
           <Tooltip key={idx} content={pill.tooltip}>
             {content}
@@ -135,4 +131,3 @@ export function ActionableReadPills({
     </div>
   );
 }
-

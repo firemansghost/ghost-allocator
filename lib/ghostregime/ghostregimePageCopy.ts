@@ -144,7 +144,13 @@ export const COPY_BIGGEST_CHANGE_COPIED = 'Copied';
 export const PREV_NOT_FOUND_INFO_TOOLTIP = 'Requested prev snapshot wasn\'t found. Using the nearest previous snapshot instead.';
 export const ACTIONABLE_CASH_PILL_TOOLTIP = 'Cash = leftover after scaling targets down; it sits unallocated until rebalance. Not cash "held in" the asset.';
 export const CASH_NOW_PILL_TOOLTIP = "Total cash in 'Hold now' (base cash + cash released by the brake).";
-export const THROTTLE_OFF_PILL_TOOLTIP = 'Brake reduced this sleeve from starting point to 0%, so that % becomes cash.';
+export const THROTTLE_OFF_PILL_TOOLTIP =
+  'Cash released because the sleeve brake cut this sleeve from its starting point. The label (full / half / off) comes from the actual scale, not from the cash amount.';
+export const ALLOCATION_VIEW_EXPOSURE_LABEL = 'Exposure';
+export const ALLOCATION_VIEW_FULL_RISK_LABEL = 'Vs 60/30/10';
+export const ALLOCATION_VIEW_FULL_RISK_HINT =
+  'Compares actual exposure with the 60/30/10 full-risk baseline. Not VAMS brake utilization.';
+export const ALLOCATION_VIEW_FULL_RISK_BAR_SUFFIX = 'vs 60/30/10';
 export const COMPARE_CONTEXT_LABEL = 'Context:';
 export const COMPARE_CONTEXT_VIEWING = 'Viewing';
 export const COMPARE_CONTEXT_COMPARING = 'Comparing to';

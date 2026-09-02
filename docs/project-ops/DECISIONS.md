@@ -1,5 +1,29 @@
 # DECISIONS
 
+## 2026-09-02 — GhostRegime R6 product gate: GO WITH CHANGES — Option B
+Choice:
+- Bobby approved the R6 UI-truth audit recommendation: **GO WITH CHANGES — Option B (Evidence / Resolution Separation)**.
+- Approved sequence: **R6A** factual display correctness → **R6B** evidence / resolution separation → **R6C** educational copy / posture.
+- This decision authorizes R6A implementation. R6B and R6C remain separately sequenced and are **not** implemented by R6A.
+
+Locked product decisions:
+- Procedural `risk_tiebreak` and `infl_tiebreak` remain the final axis-resolution mechanisms. In R6B they will not be treated as independent evidence in Agreement / Participation / Confidence / Conviction / Crowded / Top Drivers / Compare. R6A does not change those formulas.
+- The existing Coverage formula (non-neutral / receipt count) will be treated as **Participation** in R6B. Do not invent an Availability denominator from the satellite catalog or tie-breaks.
+- Allocation card **Exposure** is the primary default. The global 60/30/10 comparison is a secondary research toggle only (label: Vs 60/30/10), not VAMS brake utilization.
+- Displayed allocation mixes use one-decimal-only-when-needed formatting. Underlying model values are not altered and mass is not shifted across sleeves.
+- Preferred future R6C vocabulary is **Model mix / Model read / How to use this**. R6A does not change Hold now / Actionable read / What to do now copy except where a tooltip was factually false (half labeled as off).
+- R6 does **not** authorize model-math, `MODEL_VERSION`, Blob namespace, persisted-row rewrite, force refresh, provider, workflow, VAMS, allocation-formula, 60/30/10, or GhostFlow changes. Expected model remains `ghostregime-v1.0.4`.
+
+Why:
+- Live v1.0.4 display contradicted stored scales (BTC half shown as off), independent `toFixed(0)` could read 101%, primary-driver thresholds used 0–1 units against 0–100 agreement, and `% of Max` as the default conflated a regime starting-point cut with a full brake.
+- Option B is the approved destination because, after R5B, ordinary tie-break receipts make Inflation look like a fifth evidence vote. That semantics change is R6B, not R6A.
+
+Consequences:
+- R6A is display-only. Persisted `receipt.direction` on vote=0 may still store a side; user display must show Neutral.
+- STATUS.md and HANDOFF.md wait for merged / live R6A verification. They are not updated by the R6A PR.
+
+---
+
 ## 2026-08-31 — GhostRegime R5B removes duplicate PDBC TR21 satellite role
 Choice:
 - Bobby explicitly authorized **R5B**.

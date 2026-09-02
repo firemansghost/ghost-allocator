@@ -29,10 +29,27 @@ export function getMaxTargets(): { stocks: number; gold: number; btc: number } {
   };
 }
 
+/**
+ * Display an allocation weight (0–1) as a percentage string.
+ * Integers stay integers; half-points get one decimal. No trailing .0.
+ * Display-only — does not change stored values or shift mass across sleeves.
+ */
+export function formatAllocPct(value: number): string {
+  const pct = Math.round(value * 1000) / 10;
+  if (Number.isInteger(pct)) {
+    return String(pct);
+  }
+  return pct.toFixed(1);
+}
+
+/** Default allocation-card view: actual exposure, not vs-60/30/10. */
+export const DEFAULT_ALLOCATION_VIEW = 'exposure' as const;
+export type AllocationView = typeof DEFAULT_ALLOCATION_VIEW | 'pctOfMax';
+
 /** Format max targets as "60/30/10" */
 export function formatMaxTargets(): string {
   const m = getMaxTargets();
-  return `${(m.stocks * 100).toFixed(0)}/${(m.gold * 100).toFixed(0)}/${(m.btc * 100).toFixed(0)}`;
+  return `${formatAllocPct(m.stocks)}/${formatAllocPct(m.gold)}/${formatAllocPct(m.btc)}`;
 }
 
 /** Percent of max exposure: actual / maxTarget, clamped 0–100 */
@@ -92,13 +109,39 @@ import {
 } from './ghostregimePageCopy';
 
 /**
+ * Short brake-state label from the actual sleeve scale.
+ * Never infer full / half / off from rounded cash.
+ */
+export function formatBrakeStateLabel(scale: number): 'full' | 'half' | 'off' | string {
+  if (scale === 1.0) return 'full';
+  if (scale === 0.5) return 'half';
+  if (scale === 0.0) return 'off';
+  return `${formatAllocPct(scale)}%`;
+}
+
+/**
+ * Throttle/cash pill for one sleeve. Scale 1.0 never implies throttle cash.
+ * Half-size sleeves are labeled half, never off.
+ */
+export function formatThrottleCashPart(
+  sleeve: 'Stocks' | 'Gold' | 'BTC',
+  scale: number,
+  cashFromSleeve: number
+): string | null {
+  if (scale === 1.0 || cashFromSleeve <= 0.001) {
+    return null;
+  }
+  return `${sleeve} ${formatBrakeStateLabel(scale)} → +${formatAllocPct(cashFromSleeve)}% cash`;
+}
+
+/**
  * Format scale value to human-readable label
  */
 export function formatScaleLabel(scale: number): 'full size' | 'half size' | 'off' | string {
   if (scale === 1.0) return 'full size';
   if (scale === 0.5) return 'half size';
   if (scale === 0.0) return 'off';
-  return `${(scale * 100).toFixed(0)}%`;
+  return `${formatAllocPct(scale)}%`;
 }
 
 /**
@@ -134,8 +177,8 @@ export function formatSleeveLine(
   maxTarget: number,
   scale: number
 ): string {
-  const startPct = (startingPointTarget * 100).toFixed(0);
-  const maxPct = (maxTarget * 100).toFixed(0);
+  const startPct = formatAllocPct(startingPointTarget);
+  const maxPct = formatAllocPct(maxTarget);
   const scaleLabel = formatScaleLabel(scale);
   const parts = [`Starting point ${startPct}%`, `Max ${maxPct}%`, `Brake ${scale.toFixed(1)}`];
   if (scale < 1) {
@@ -277,14 +320,14 @@ export function summarizeGhostRegimeChange(
 export function buildTodaySnapshotLine(data: GhostRegimeRow | null): string | null {
   if (!data) return null;
   
-  const stocksTarget = (data.stocks_target * 100).toFixed(0);
-  const goldTarget = (data.gold_target * 100).toFixed(0);
-  const btcTarget = (data.btc_target * 100).toFixed(0);
+  const stocksTarget = formatAllocPct(data.stocks_target);
+  const goldTarget = formatAllocPct(data.gold_target);
+  const btcTarget = formatAllocPct(data.btc_target);
   
-  const stocksActual = (data.stocks_actual * 100).toFixed(0);
-  const goldActual = (data.gold_actual * 100).toFixed(0);
-  const btcActual = (data.btc_actual * 100).toFixed(0);
-  const cash = (data.cash * 100).toFixed(0);
+  const stocksActual = formatAllocPct(data.stocks_actual);
+  const goldActual = formatAllocPct(data.gold_actual);
+  const btcActual = formatAllocPct(data.btc_actual);
+  const cash = formatAllocPct(data.cash);
   
   const stocksScale = formatScaleLabel(data.stocks_scale);
   const goldScale = formatScaleLabel(data.gold_scale);
@@ -297,17 +340,14 @@ export function buildTodaySnapshotLine(data: GhostRegimeRow | null): string | nu
   ].join(', ');
   
   const actuals = `${stocksActual}/${goldActual}/${btcActual}`;
-  const cashPart = parseFloat(cash) > 0.1 ? ` + ${cash} cash` : '';
+  const cashPart = data.cash > 0.001 ? ` + ${cash} cash` : '';
   
   return `Today: Targets ${stocksTarget}/${goldTarget}/${btcTarget}. Scales: ${scales} → Actual ${actuals}${cashPart}.`;
 }
 
 /** Short scale label for compact display: full, half, off */
 function formatScaleShort(scale: number): string {
-  if (scale === 1.0) return 'full';
-  if (scale === 0.5) return 'half';
-  if (scale === 0.0) return 'off';
-  return `${(scale * 100).toFixed(0)}%`;
+  return formatBrakeStateLabel(scale);
 }
 
 /**
@@ -322,17 +362,17 @@ export function buildTodaySnapshotBlocks(data: GhostRegimeRow | null): {
 } | null {
   if (!data) return null;
 
-  const stocksTarget = (data.stocks_target * 100).toFixed(0);
-  const goldTarget = (data.gold_target * 100).toFixed(0);
-  const btcTarget = (data.btc_target * 100).toFixed(0);
+  const stocksTarget = formatAllocPct(data.stocks_target);
+  const goldTarget = formatAllocPct(data.gold_target);
+  const btcTarget = formatAllocPct(data.btc_target);
 
-  const stocksActual = (data.stocks_actual * 100).toFixed(0);
-  const goldActual = (data.gold_actual * 100).toFixed(0);
-  const btcActual = (data.btc_actual * 100).toFixed(0);
-  const cash = (data.cash * 100).toFixed(0);
+  const stocksActual = formatAllocPct(data.stocks_actual);
+  const goldActual = formatAllocPct(data.gold_actual);
+  const btcActual = formatAllocPct(data.btc_actual);
+  const cash = formatAllocPct(data.cash);
 
   const breakdown = computeCashBreakdown(data);
-  const cashTargetPct = (breakdown.cashTarget * 100).toFixed(0);
+  const cashTargetPct = formatAllocPct(breakdown.cashTarget);
   const targets =
     breakdown.cashTarget >= 0.005
       ? `${stocksTarget}/${goldTarget}/${btcTarget} + ${cashTargetPct} cash`
@@ -343,7 +383,7 @@ export function buildTodaySnapshotBlocks(data: GhostRegimeRow | null): {
     `Gold ${formatScaleShort(data.gold_scale)}`,
     `BTC ${formatScaleShort(data.btc_scale)}`,
   ].join(' • ');
-  const cashPart = parseFloat(cash) > 0.1 ? ` + ${cash} cash` : '';
+  const cashPart = data.cash > 0.001 ? ` + ${cash} cash` : '';
   const actual = `${stocksActual}/${goldActual}/${btcActual}${cashPart}`;
 
   return { targets, scales, actual };
@@ -395,15 +435,15 @@ export function buildMicroFlowLine(data: GhostRegimeRow | null): string | null {
   if (!data) return null;
 
   const breakdown = computeCashBreakdown(data);
-  const stocksTarget = (data.stocks_target * 100).toFixed(0);
-  const goldTarget = (data.gold_target * 100).toFixed(0);
-  const btcTarget = (data.btc_target * 100).toFixed(0);
-  const cashTargetPct = (breakdown.cashTarget * 100).toFixed(0);
+  const stocksTarget = formatAllocPct(data.stocks_target);
+  const goldTarget = formatAllocPct(data.gold_target);
+  const btcTarget = formatAllocPct(data.btc_target);
+  const cashTargetPct = formatAllocPct(breakdown.cashTarget);
 
-  const stocksActual = (data.stocks_actual * 100).toFixed(0);
-  const goldActual = (data.gold_actual * 100).toFixed(0);
-  const btcActual = (data.btc_actual * 100).toFixed(0);
-  const cash = (data.cash * 100).toFixed(0);
+  const stocksActual = formatAllocPct(data.stocks_actual);
+  const goldActual = formatAllocPct(data.gold_actual);
+  const btcActual = formatAllocPct(data.btc_actual);
+  const cash = formatAllocPct(data.cash);
 
   const stocksScale = formatScaleShort(data.stocks_scale);
   const goldScale = formatScaleShort(data.gold_scale);
@@ -414,7 +454,7 @@ export function buildMicroFlowLine(data: GhostRegimeRow | null): string | null {
       ? `${stocksTarget}/${goldTarget}/${btcTarget} + ${cashTargetPct} cash`
       : `${stocksTarget}/${goldTarget}/${btcTarget}`;
   const brake = `${stocksScale}/${goldScale}/${btcScale}`;
-  const holdNowPart = parseFloat(cash) > 0.1
+  const holdNowPart = data.cash > 0.001
     ? `${stocksActual}/${goldActual}/${btcActual} + ${cash} cash`
     : `${stocksActual}/${goldActual}/${btcActual}`;
 
@@ -429,10 +469,10 @@ export function buildWhyCashLine(data: GhostRegimeRow): string {
   const breakdown = computeCashBreakdown(data);
   const riskLabel = data.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
 
-  const stocksTarget = (data.stocks_target * 100).toFixed(0);
-  const goldTarget = (data.gold_target * 100).toFixed(0);
-  const btcTarget = (data.btc_target * 100).toFixed(0);
-  const cashTargetPct = (breakdown.cashTarget * 100).toFixed(0);
+  const stocksTarget = formatAllocPct(data.stocks_target);
+  const goldTarget = formatAllocPct(data.gold_target);
+  const btcTarget = formatAllocPct(data.btc_target);
+  const cashTargetPct = formatAllocPct(breakdown.cashTarget);
   const startingPoint =
     breakdown.cashTarget >= 0.005
       ? `${stocksTarget}/${goldTarget}/${btcTarget} + ${cashTargetPct} cash`
@@ -449,7 +489,7 @@ export function buildWhyCashLine(data: GhostRegimeRow): string {
   }
 
   if (breakdown.cashFromThrottles > 0.005 && breakdown.throttleSourceNames.length > 0) {
-    const brakePct = (breakdown.cashFromThrottles * 100).toFixed(0);
+    const brakePct = formatAllocPct(breakdown.cashFromThrottles);
     return `${riskLabel} regime starting point: ${startingPoint}. VAMS brake (${brakeParts}) scales sleeves down from those targets, so about ${brakePct}% ends up as cash on top of the ${cashTargetPct}% already implied by the target mix.`;
   }
 
@@ -463,10 +503,10 @@ export function buildPostureWhyCashBrief(data: GhostRegimeRow): string {
   const breakdown = computeCashBreakdown(data);
   const riskLabel = data.risk_regime === 'RISK ON' ? 'Risk On' : 'Risk Off';
 
-  const stocksTarget = (data.stocks_target * 100).toFixed(0);
-  const goldTarget = (data.gold_target * 100).toFixed(0);
-  const btcTarget = (data.btc_target * 100).toFixed(0);
-  const cashTargetPct = (breakdown.cashTarget * 100).toFixed(0);
+  const stocksTarget = formatAllocPct(data.stocks_target);
+  const goldTarget = formatAllocPct(data.gold_target);
+  const btcTarget = formatAllocPct(data.btc_target);
+  const cashTargetPct = formatAllocPct(breakdown.cashTarget);
   const startingPoint =
     breakdown.cashTarget >= 0.005
       ? `${stocksTarget}/${goldTarget}/${btcTarget} + ${cashTargetPct} cash`
@@ -483,7 +523,7 @@ export function buildPostureWhyCashBrief(data: GhostRegimeRow): string {
   }
 
   if (breakdown.cashFromThrottles > 0.005 && breakdown.throttleSourceNames.length > 0) {
-    const brakePct = (breakdown.cashFromThrottles * 100).toFixed(0);
+    const brakePct = formatAllocPct(breakdown.cashFromThrottles);
     return `${riskLabel}, ${startingPoint}. Brake: ${brakeParts}. ~${brakePct}% extra cash (on top of ${cashTargetPct}% mix).`;
   }
 
@@ -706,12 +746,21 @@ export function pickTopDrivers(receipts: SignalReceipt[] | undefined, n: number 
 }
 
 /**
+ * User-visible receipt direction. Vote sign is canonical.
+ * Persisted `direction` on vote=0 may still store a side — do not rewrite rows.
+ */
+export function displayReceiptDirection(receipt: Pick<SignalReceipt, 'vote' | 'direction'>): string {
+  if (receipt.vote === 0) return 'Neutral';
+  return receipt.direction;
+}
+
+/**
  * Format a driver line for display
  * e.g. "Credit vs Treasuries → Risk On (+1)"
  */
 export function formatDriverLine(item: SignalReceipt): string {
   const voteStr = formatSignedNumber(item.vote);
-  return `${item.label} → ${item.direction} (${voteStr})`;
+  return `${item.label} → ${displayReceiptDirection(item)} (${voteStr})`;
 }
 
 /**
@@ -1127,6 +1176,13 @@ export function computeRegimeConfidenceLabel(
 }
 
 /**
+ * Agreement % units for primary-driver clean/mixed checks.
+ * Same 0–100 scale as computeAxisAgreement().pct — not 0–1 fractions.
+ */
+export const PRIMARY_DRIVER_CLEAN_AGREEMENT_PCT = 75;
+export const PRIMARY_DRIVER_MIXED_AGREEMENT_PCT = 50;
+
+/**
  * Compute primary driver from Risk and Inflation scores/conviction
  * Returns which axis has the stronger signal and a short "why it won" reason
  */
@@ -1165,10 +1221,10 @@ export function computePrimaryDriver(
         return { label: 'Tie', whyReason: 'Tie: both axes weak' };
       } else {
         // Check if signals are clean or mixed using agreement/confidence
-        const riskClean = (riskAgreementPct !== null && riskAgreementPct !== undefined && riskAgreementPct >= 0.75) || riskConfidenceLabel === 'High';
-        const inflClean = (inflAgreementPct !== null && inflAgreementPct !== undefined && inflAgreementPct >= 0.75) || inflConfidenceLabel === 'High';
-        const riskMixed = (riskAgreementPct !== null && riskAgreementPct !== undefined && riskAgreementPct <= 0.5) || riskConfidenceLabel === 'Low';
-        const inflMixed = (inflAgreementPct !== null && inflAgreementPct !== undefined && inflAgreementPct <= 0.5) || inflConfidenceLabel === 'Low';
+        const riskClean = (riskAgreementPct !== null && riskAgreementPct !== undefined && riskAgreementPct >= PRIMARY_DRIVER_CLEAN_AGREEMENT_PCT) || riskConfidenceLabel === 'High';
+        const inflClean = (inflAgreementPct !== null && inflAgreementPct !== undefined && inflAgreementPct >= PRIMARY_DRIVER_CLEAN_AGREEMENT_PCT) || inflConfidenceLabel === 'High';
+        const riskMixed = (riskAgreementPct !== null && riskAgreementPct !== undefined && riskAgreementPct <= PRIMARY_DRIVER_MIXED_AGREEMENT_PCT) || riskConfidenceLabel === 'Low';
+        const inflMixed = (inflAgreementPct !== null && inflAgreementPct !== undefined && inflAgreementPct <= PRIMARY_DRIVER_MIXED_AGREEMENT_PCT) || inflConfidenceLabel === 'Low';
         
         if (riskMixed && inflMixed) {
           return { label: 'Tie', whyReason: 'Tie: mixed signals' };
