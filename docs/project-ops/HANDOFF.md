@@ -1,5 +1,23 @@
 ﻿# HANDOFF
 
+## Last Session Summary (2026-09-02 — GhostRegime R7C complete / evidence reviewed)
+R7C is complete. PR **#187** sealed runner `8c33c028b67b7b2bdbe97db07dc44d6781f5074b` merged as `04eff53e576d572b3e06b9c29c47173fbdf0c8a5`. The study was executed **exactly once** from that sealed commit. Result status **VALID**. Receipt SHA-256 `766d0c7418da5051c46538230504da09a10f09f45351eea30bbc1c6115d47af6`. Private results remain untracked. No result artifacts were committed.
+
+R7C is evidence, not a product decision. Production **60/30/10** and `ghostregime-v1.0.4` are unchanged. No refresh. No production writes. No KEEP / MODIFY / REDESIGN.
+
+## Priority for Next Session (GhostRegime)
+1. Do **not** rerun R7C
+2. Do **not** change candidates or methodology
+3. Do **not** reopen R7A–R7C without a demonstrated defect
+4. Subwindow `allocation_change_count` values are **not** window-specific and must be excluded from R7D
+5. Next is **R7D** — a decision exercise using existing evidence
+6. R7D does **not** require a new backtest by default
+7. No production change has been authorized
+8. Separate site-wide product-copy truth audit remains unrelated backlog
+9. No model / persistence / providers / VAMS / allocation / workflow / GhostFlow changes from this checkpoint
+
+---
+
 ## Last Session Summary (2026-09-02 — GhostRegime R7B1 merged / preregistration checkpoint)
 R7A, R7A.1, R7B0, and R7B1 are complete. PR **#185** reviewed head `7ff4e1d5e3c3fdbb5f1b1488f8595b1b797c063a` merged as `fa139ac94507b7c86a88932023045e987b0c933a`. Research harness only. Production engine / 60/30/10 / `ghostregime-v1.0.4` unchanged. No refresh. No production writes.
 
