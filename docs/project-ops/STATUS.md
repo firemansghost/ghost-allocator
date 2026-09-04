@@ -1,5 +1,57 @@
 ﻿# STATUS
 
+## Current State (GhostRegime — 2026-09-03 R7D complete / KEEP CURRENT)
+**R7 COMPLETE — KEEP CURRENT**
+
+Confidence: **MODERATE**.
+
+R7A → R7D are complete. R7C produced one VALID preregistered frozen-panel study (receipt SHA-256 `766d0c7418da5051c46538230504da09a10f09f45351eea30bbc1c6115d47af6`). R7D completed a read-only product/model decision audit against the preregistered hierarchy and closed R7.
+
+**Final decision: KEEP CURRENT.** R7 did not produce sufficiently robust evidence to justify displacing `P0_CURRENT`. KEEP CURRENT does **not** mean P0 is proven optimal. It means the evidence for a production change did not clear the preregistered burden of proof. Raw CAGR was not treated as the sole objective.
+
+**Hierarchy used:** (1) avoid catastrophic drawdown deterioration; (2) preserve or improve risk-adjusted return; (3) avoid excessive turnover / implementation burden; (4) avoid dependence on one asset or one subperiod; (5) prefer `P0_CURRENT` when differences are small or ambiguous.
+
+**P0 preserved (historical frozen-sample facts, not a forecast):** full CAGR 16.74% / Sharpe 1.37 / max DD −12.79% / Calmar 1.31; holdout CAGR 20.47% / Sharpe 1.43 / max DD −5.38%. Versus STATIC_601030 (23.43% / 1.18 / −26.39%) and SPY_100 (14.95% / 0.71 / −33.72%), P0 gave up historical CAGR versus static 60/30/10 while materially reducing drawdown and improving Sharpe in-sample. That is consistent with GhostRegime’s intended risk-control role and is **not** proof of future superiority.
+
+**Candidate dispositions (all DO NOT ADOPT):**
+- **P1_LESS_BTC** — shallower full-period drawdown, but materially lower full-period return and Sharpe; holdout reverses the full-period return relationship rather than confirming robust superiority.
+- **P2_MORE_EQUITY** — P2 max DD −12.15% versus P0 −12.79% (slightly shallower; **not** a drawdown FAIL; PASS or MIXED — small improvement). Still lower CAGR, lower Sharpe, lagged P0 at every expanding checkpoint, weaker holdout. Correction does **not** change KEEP CURRENT.
+- **P3_MORE_GOLD_RO** — effectively indistinguishable from P0; preregistered tie rule favors P0.
+- **P4_INFL_GOLD_30** — did not improve full-period or holdout tradeoff; no evidence supporting Inflation gold 15% → 30%.
+- **P5_DEEPER_OFF** — small full-period Sharpe / Calmar / drawdown improvement, slightly lower CAGR, higher turnover, no meaningful holdout confirmation; not material enough to overcome P0 tie preference.
+- **P6_HOUSE_601525** — higher full-period CAGR but materially deeper drawdown, greater BTC exposure/dependence, and return advantage did not repeat in holdout.
+
+**Architecture (diagnostic, not causal):** STATIC_601030 23.43% / 1.18 / −26.39%; REGIME_ONLY 18.62% / 1.20 / −23.56%; VAMS_ONLY 18.88% / 1.29 / −17.02%; COMBINED P0 16.74% / 1.37 / −12.79%. Evidence supports retaining VAMS; regime + VAMS still appears functionally coherent; evidence does **not** meet REDESIGN threshold. **R8 is not triggered.**
+
+**BTC:** P0 has meaningful historical BTC dependence (`NO_BTC_TO_CASH` ≈ −6.17pp CAGR, shallower DD; most measured arithmetic BTC contribution before holdout). Evidence does **not** justify increasing BTC and does **not** robustly justify reducing BTC. Risk-On BTC target remains **10%**. BTC dependence → **FUTURE RESEARCH** (not an allocation change).
+
+**Turnover:** P0 one-way turnover 110.66; cost sensitivity 0 bps 16.74% / 5 bps 15.33% / 10 bps 13.93%. Legitimate architecture weakness; does not establish that a different P1–P6 allocation is superior. Turnover / execution efficiency → **FUTURE RESEARCH**. No execution changes authorized.
+
+**Inflation:** P0 Inflation-regime conditional diagnostic was weak/negative. P4’s higher Inflation gold did not improve overall or holdout tradeoff. Do **not** change Inflation gold now. Inflation-regime weakness → **MONITOR**.
+
+**Secondary research classifications only (no implementation authorized):** turnover / execution efficiency **FUTURE RESEARCH**; BTC dependence **FUTURE RESEARCH**; Inflation-regime weakness **MONITOR**; VAMS contribution **MONITOR**; regime-target contribution **MONITOR**.
+
+**Reporting caveat (preserved):** R7C subwindow `allocation_change_count` fields are not window-specific. Exclude them from future interpretation. Do **not** patch or rerun R7C.
+
+**Production remains unchanged.** Model: `ghostregime-v1.0.4`. Risk On **60 / 30 / 10**. Inflation **30 / 15 / 5** plus existing cash residual. Deflation **30 / 30 / 5** plus existing cash residual. Existing VAMS unchanged. No allocation implementation PR. No `MODEL_VERSION` bump. No refresh. No production write. No deployment required.
+
+**R7 is closed.** Do not reopen R7A–R7D without demonstrated new evidence. **R8 redesign is NOT triggered by R7** and is not authorized.
+
+This workstream is independent of GhostFlow source monitoring below.
+
+## Recommended next work (GhostRegime)
+1. Do **not** reopen R7 without demonstrated new evidence
+2. Do **not** rerun R7C
+3. Do **not** begin R8 unless a new explicit product gate is authorized
+4. Secondary research classifications remain research-only (turnover / BTC FUTURE RESEARCH; Inflation / VAMS / regime-target MONITOR)
+5. Separate non-R7 backlog: **site-wide product-copy truth audit** (do not perform it here)
+6. Do **not** change VAMS, allocation formulas, provider routing, workflows, P1/P2/P3, or R4
+7. GhostFlow remains a separate workstream
+
+Last updated: 2026-09-03
+
+---
+
 ## Current State (GhostRegime — 2026-09-02 R7C complete / evidence reviewed)
 **R7C COMPLETE — VALID FROZEN STUDY**
 

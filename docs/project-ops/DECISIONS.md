@@ -1,5 +1,31 @@
 # DECISIONS
 
+## 2026-09-03 — GhostRegime R7D allocation decision: KEEP CURRENT
+Choice:
+- **KEEP CURRENT** with **MODERATE** confidence.
+- Production **P0_CURRENT** is retained. Risk On remains **60 / 30 / 10**. Inflation remains **30 / 15 / 5** plus existing cash residual. Deflation remains **30 / 30 / 5** plus existing cash residual.
+- Existing **VAMS** remains unchanged. Repository / production model remains **`ghostregime-v1.0.4`**.
+- No primary candidate **P1–P6** is adopted.
+- **R8 redesign is not triggered** by R7. KEEP CURRENT means R7 did not produce sufficiently robust evidence to justify displacing P0_CURRENT; it does **not** mean P0 is proven optimal.
+
+Why:
+- R7D applied the preregistered hierarchy: (1) avoid catastrophic drawdown deterioration; (2) preserve or improve risk-adjusted return; (3) avoid excessive turnover / implementation burden; (4) avoid dependence on one asset or one subperiod; (5) prefer P0_CURRENT when differences are small or ambiguous. Raw CAGR was not the sole objective.
+- No frozen candidate robustly dominates P0 under that hierarchy.
+- P0 retains strong drawdown / risk-adjusted behavior versus static 60/30/10 and SPY in the frozen sample (P0 full Sharpe 1.37 / max DD −12.79%; STATIC_601030 Sharpe 1.18 / max DD −26.39%; SPY Sharpe 0.71 / max DD −33.72%), while giving up historical CAGR versus static 60/30/10.
+- P3 is effectively tie-level with P0; the preregistered tie rule favors P0.
+- P5’s full-period Sharpe / Calmar / drawdown improvements are marginal, turnover is higher, and holdout does not confirm a material edge.
+- P6’s higher full-period CAGR is accompanied by materially deeper drawdown, greater BTC exposure / dependence, and a return advantage that did not repeat in holdout.
+- P4 does not support changing Inflation gold from 15% to 30%.
+- P1 and P2 do not clear the displacement threshold (P1: full-period return/Sharpe lag with holdout reversal; P2: lower CAGR and Sharpe, lagged at every expanding checkpoint, weaker holdout — even though P2’s max DD −12.15% was slightly shallower than P0’s −12.79%).
+
+Consequences:
+- No production code change. No allocation implementation PR. No `MODEL_VERSION` change. No GhostRegime refresh. No Blob write. No provider fetch. No deployment required.
+- Do **not** rerun R7C. Do **not** patch the sealed runner over the known subwindow `allocation_change_count` reporting caveat.
+- **R7 is closed.** Future turnover / execution-efficiency and BTC-dependence work remains research-only classifications; they do not authorize implementation here.
+- Future redesign requires a **new explicit product gate**. R8 is not authorized by this decision.
+
+---
+
 ## 2026-09-02 — GhostRegime R7 allocation study preregistered before outcomes
 Choice:
 - The R7 allocation-research sequence through **R7B1** is complete and preregistered **before any real candidate outcomes have been viewed**.

@@ -1,5 +1,24 @@
 ﻿# HANDOFF
 
+## Last Session Summary (2026-09-03 — GhostRegime R7D complete / KEEP CURRENT)
+**R7 is closed.** Final R7D decision: **KEEP CURRENT** (confidence **MODERATE**). Production **P0_CURRENT** / **60/30/10** remains policy. Model remains `ghostregime-v1.0.4`. Existing VAMS unchanged. No allocation implementation is pending from R7D. No `MODEL_VERSION` bump. No refresh. No production write. No deployment required.
+
+R7A → R7D complete. R7C evidence remains VALID (receipt SHA-256 `766d0c7418da5051c46538230504da09a10f09f45351eea30bbc1c6115d47af6`). Private results remain untracked. **R8 is not authorized** and was not triggered by R7.
+
+Secondary future research only: turnover / execution efficiency; BTC dependence. Monitor only: Inflation regime; VAMS contribution; regime-target contribution. These classifications do **not** authorize implementation. Separate site-wide product-copy truth audit remains unrelated backlog.
+
+## Priority for Next Session (GhostRegime)
+1. Do **not** reopen R7 without demonstrated new evidence
+2. Do **not** rerun R7C
+3. Do **not** begin R8 unless a new explicit product gate is authorized
+4. P0 remains production policy; model remains `ghostregime-v1.0.4`
+5. No implementation is pending from R7D
+6. Secondary research (turnover / BTC) and monitors (Inflation / VAMS / regime-target) remain research-only
+7. Separate site-wide product-copy truth audit remains unrelated backlog
+8. No model / persistence / providers / VAMS / allocation / workflow / GhostFlow changes from this checkpoint
+
+---
+
 ## Last Session Summary (2026-09-02 — GhostRegime R7C complete / evidence reviewed)
 R7C is complete. PR **#187** sealed runner `8c33c028b67b7b2bdbe97db07dc44d6781f5074b` merged as `04eff53e576d572b3e06b9c29c47173fbdf0c8a5`. The study was executed **exactly once** from that sealed commit. Result status **VALID**. Receipt SHA-256 `766d0c7418da5051c46538230504da09a10f09f45351eea30bbc1c6115d47af6`. Private results remain untracked. No result artifacts were committed.
 
