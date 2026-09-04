@@ -64,7 +64,7 @@ export default function HomePage() {
             <p className="text-[11px] font-semibold text-amber-300 uppercase tracking-wide">Step 2</p>
             <h3 className="mt-2 text-sm font-semibold text-zinc-50">Get your allocation</h3>
             <p className="mt-2 text-xs text-zinc-300 leading-relaxed">
-              Ghost Allocator designs a post-60/40 Ghost sleeve allocation tailored to your risk band and regime.
+              Ghost Allocator builds a post-60/40 sleeve allocation from your risk band and implementation choices.
             </p>
           </GlassCard>
           <GlassCard className="p-4 sm:p-5 transition transform hover:-translate-y-1 hover:border-amber-400/60 hover:shadow-[0_20px_60px_rgba(0,0,0,0.9)]">
@@ -82,7 +82,7 @@ export default function HomePage() {
           </GlassCard>
         </div>
         <p className="mt-3 text-center text-[11px] text-zinc-500">
-          Alerts are coming. For now: check GhostRegime weekly.
+          For now, GhostRegime is a manual check-in.
         </p>
       </section>
 
@@ -131,7 +131,7 @@ export default function HomePage() {
           <GlassCard className="p-4 sm:p-5 transition transform hover:-translate-y-1 hover:border-amber-400/60 hover:shadow-[0_20px_60px_rgba(0,0,0,0.9)]">
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="text-sm font-semibold text-zinc-50">GhostFlow</h3>
-              <span className="text-[10px] font-semibold uppercase tracking-wide text-amber-300">Static preview</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-amber-300">Research gauge</span>
             </div>
             <p className="mt-2 text-xs text-zinc-300 leading-relaxed">
               A passive pressure and market-structure fragility dashboard watching ETF flows, passive share, index
@@ -175,7 +175,7 @@ export default function HomePage() {
           </summary>
           <div className="mt-4 space-y-4 text-xs text-zinc-300 leading-relaxed">
             <p>
-              Disciplined risk management isn't optional. A rules-based process helps capture upside and limit downside when markets inevitably get ugly.
+              Rules make exposure changes explicit before markets get stressful. They do not eliminate losses or guarantee better outcomes.
             </p>
             <DrawdownRealityCheck variant="compact" />
             <div className="pt-2">
@@ -194,8 +194,7 @@ export default function HomePage() {
       <GlassCard className="p-6 border-amber-400/30 bg-amber-400/5">
         <p className="text-sm text-zinc-200 leading-relaxed">
           <span className="font-semibold text-amber-300">Not a crystal ball.</span>{' '}
-          We're not trying to nail the exact top or bottom. Also: this isn't designed to save you from every little 2–5% market faceplant. 
-          It's built for the bigger stuff — the 20% corrections — and to help you catch most of the bull market with rules-based trend signals.
+          GhostRegime is designed to make risk posture and sleeve exposure rules explicit as market conditions change. It does not call tops, bottoms, or guarantee protection from drawdowns.
         </p>
       </GlassCard>
     </div>

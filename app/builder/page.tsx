@@ -1300,7 +1300,7 @@ export default function Builder() {
           </Link>
         </div>
         <p className="text-xs text-zinc-500">
-          Alerts are coming later. For now: weekly manual check.
+          Use GhostRegime as a periodic market-regime check.
         </p>
       </GlassCard>
     </div>
