@@ -13,7 +13,7 @@ import { GhostFlowWatchlist } from './GhostFlowWatchlist';
 import { buildTreasuryPlumbingDisplay } from '@/lib/ghostflow/treasuryPlumbingDisplay';
 import { GhostFlowTreasuryPlumbing } from './GhostFlowTreasuryPlumbing';
 
-const HEADER_BADGES = ['Static preview', 'Research only', 'Not a forecast', 'Not financial advice'] as const;
+const HEADER_BADGES = ['Research gauge', 'Research only', 'Not a forecast', 'Not financial advice'] as const;
 
 export function GhostFlowDashboard() {
   const { raw, meta } = buildGhostFlowSnapshot();
