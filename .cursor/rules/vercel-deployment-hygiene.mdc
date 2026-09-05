@@ -1,0 +1,49 @@
+---
+description: Enforce conservative Vercel deployment hygiene for Ghost Allocator.
+alwaysApply: true
+---
+
+# Ghost Allocator — Vercel Deployment Hygiene
+
+Read `docs/VERCEL_DEPLOYMENT_POLICY.md` before changing Vercel deployment filtering or deployment-related configuration.
+
+## Mandatory behavior
+
+- Preserve the principle: **Deploy runtime changes. Do not deploy bookkeeping.**
+- Never use `[skip ci]`, `docs:`, `chore:`, `research:`, `artifact:`, or other commit-message text as Vercel deployment authority.
+- BUILD/SKIP decisions must be based on changed paths and documented dependency truth.
+- If any changed path is unknown, ambiguous, runtime-relevant, or outside the approved allowlist, classify as **BUILD**.
+- Never broaden the allowlist without explicit dependency review.
+- Never disable Preview or Production deployments globally as a shortcut.
+- Never weaken tests, model contracts, production writer controls, artifact validation, or workflow safety to reduce Vercel usage.
+- Changes to `scripts/vercel-ignore-build.sh`, `app/**`, `components/**`, `lib/**`, `data/**`, `public/**`, `scripts/**`, package/lock/config files, or deployment configuration must BUILD.
+- When preparing or reviewing a PR, report:
+  - `Vercel expected: BUILD` and why, or
+  - `Vercel expected: SKIP` and the exact allowlisted paths involved.
+- If classification cannot be proven, use **BUILD**.
+
+## Initial V1 safe-skip set
+
+A build may be skipped only if every changed file is one of:
+
+- Markdown anywhere under `docs/**`
+- `README.md`
+- `LICENSE`
+- `reports/**`
+- `.github/workflows/**`
+- `.cursor/rules/**`
+
+Non-Markdown files under `docs/**` are NOT allowlisted.
+
+`data/**` is always BUILD.
+
+`scripts/**` is always BUILD in V1 because project TypeScript configuration includes repo-wide `**/*.ts` / `**/*.tsx`, preserving Vercel's current type-check safety net.
+
+## Implementation invariant
+
+Vercel Ignored Build Step:
+
+- exit `0` = SKIP
+- exit `1` = BUILD
+
+The script must use `git diff --no-renames` and fail open to BUILD on missing SHAs, Git errors, empty/ambiguous diffs, or unknown paths.
