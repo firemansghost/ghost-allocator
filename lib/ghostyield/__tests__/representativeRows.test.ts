@@ -64,15 +64,14 @@ function row(ticker: string) {
 }
 
 // JAAA — missing NAV; stale distribution/quarterly lineage still present in warnings
+// Status precedence remains `missing` even while stale lineage warnings coexist.
 {
   const c = row('JAAA');
   assert.equal(c.nav, null);
   assert.equal(c.freshness.status, 'missing');
-  assert.ok(
-    c.freshness.warnings.some((w) => /90 days \(stale\)/i.test(w)) ||
-      c.freshness.warnings.some((w) => /Quarterly fundamentals/i.test(w)) ||
-      c.freshness.warnings.some((w) => /Missing NAV/i.test(w))
-  );
+  assert.ok(c.freshness.warnings.some((w) => /Missing NAV/i.test(w)));
+  assert.ok(c.freshness.warnings.some((w) => /90 days \(stale\)/i.test(w)));
+  assert.ok(c.freshness.warnings.some((w) => /Quarterly fundamentals/i.test(w)));
   assert.ok(c.fitScore >= 85);
 }
 
