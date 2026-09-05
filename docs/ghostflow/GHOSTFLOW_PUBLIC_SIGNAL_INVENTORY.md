@@ -1,4 +1,4 @@
-# GhostFlow Public Signal Inventory — v1.9d
+# GhostFlow Public Signal Inventory
 
 **GhostFlow docs:** [README](./README.md) · [Current state](./GHOSTFLOW_CURRENT_STATE.md) · [Roadmap](./DATA_ROADMAP.md)
 
@@ -80,7 +80,7 @@ Display order follows [`GhostFlowSignalGrid.tsx`](../../components/ghostflow/Gho
 | Tail Skew Context | **No** score path — [v1.9e.5 mapping](./TAIL_SKEW_MAPPING_DECISION.md) display-only by default; VIX remains score-fed vol input |
 | Composite / Passive / Structural | **60 / 53 / 67** (current production after v1.15) |
 
-**Score integrity (v1.10):** Three MOCK passive score inputs (`systematicStrategyPressure` **62**, `retirementFlowPressureProxy` **58**, `leveredEtfRebalancePressure` **55**) live in [`mockGhostflowSnapshot.ts`](../../data/ghostflow/mockGhostflowSnapshot.ts) — **outside** the 12 equity public signal cards. Display-only cards for systematic, retirement, and levered ETF refresh dashboard context only. Retirement requirements and gate ladder: [MOCK_SCORE_RETIREMENT_ROADMAP.md](./MOCK_SCORE_RETIREMENT_ROADMAP.md). **v1.10c production baseline:** [SCORE_REPRODUCTION_BASELINE.md](./SCORE_REPRODUCTION_BASELINE.md) — canonical score math, ten production score-input values, and MOCK/public contribution tables.
+**Score integrity (v1.10):** Three MOCK passive score inputs (`systematicStrategyPressure` **62**, `retirementFlowPressureProxy` **58**, `leveredEtfRebalancePressure` **55**) live in [`mockGhostflowSnapshot.ts`](../../data/ghostflow/mockGhostflowSnapshot.ts) — **outside** the equity public-signal set counted by `publicSignalCount`. Display-only cards for systematic, retirement, and levered ETF refresh dashboard context only. Retirement requirements and gate ladder: [MOCK_SCORE_RETIREMENT_ROADMAP.md](./MOCK_SCORE_RETIREMENT_ROADMAP.md). **v1.10c production baseline:** [SCORE_REPRODUCTION_BASELINE.md](./SCORE_REPRODUCTION_BASELINE.md) — canonical score math, ten production score-input values, and MOCK/public contribution tables.
 
 Display-only card refreshes update dashboard cards only. They do **not** change Research Composite scores unless a future product gate explicitly approves score wiring (all current gates discouraged / not approved).
 
