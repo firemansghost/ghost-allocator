@@ -1,21 +1,22 @@
-# GhostFlow Current State (v1.12)
+# GhostFlow Current State
 
 **GhostFlow docs:** [README](./README.md) · [Current state](./GHOSTFLOW_CURRENT_STATE.md) · [Public signal inventory](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md) · [Roadmap](./DATA_ROADMAP.md)
 
-Canonical inventory after Tail Skew **v1.9e.4** (production card) and **v1.9e.5** (mapping decision), aligned by **v1.12** public signal integrity checkpoint. Theme through v1.9: **Passive Supply & Concentration Research** with display-only defaults and operator doc discipline.
+Canonical inventory for the **current production** GhostFlow dashboard after **v1.15**. Signal architecture (13 equity public signals + 2 Treasury display cards + MOCK passive inputs) was locked through the v1.12 integrity checkpoint and later research phases; **headline scores and reference date** were updated by the v1.15 refresh sequence.
 
-**Related:** [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md) (canonical **13-signal** table) · [GHOSTFLOW_PUBLIC_SIGNAL_INTEGRITY_CHECKPOINT.md](./GHOSTFLOW_PUBLIC_SIGNAL_INTEGRITY_CHECKPOINT.md) (v1.12 audit) · [CURRENT_DATA_READINESS_AUDIT.md](./CURRENT_DATA_READINESS_AUDIT.md) (v1.13 operating readiness — audit date **2026-06-22**) · [REFERENCE_DATE_AND_OPERATOR_POLICY.md](./REFERENCE_DATE_AND_OPERATOR_POLICY.md) (v1.14 reference bump gates) · [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md) (canonical operator workflow) · [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) (field quick reference) · [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) (freshness & `dataQuality` policy)
+**Related:** [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md) (canonical **13-signal** table) · [GHOSTFLOW_V115_REFRESH_CHECKPOINT.md](./GHOSTFLOW_V115_REFRESH_CHECKPOINT.md) (authoritative v1.15 refresh history) · [GHOSTFLOW_PUBLIC_SIGNAL_INTEGRITY_CHECKPOINT.md](./GHOSTFLOW_PUBLIC_SIGNAL_INTEGRITY_CHECKPOINT.md) (v1.12 audit — historical) · [CURRENT_DATA_READINESS_AUDIT.md](./CURRENT_DATA_READINESS_AUDIT.md) (v1.13 — historical audit date **2026-06-22**) · [REFERENCE_DATE_AND_OPERATOR_POLICY.md](./REFERENCE_DATE_AND_OPERATOR_POLICY.md) (v1.14 gates; pre-v1.15 baseline language is historical) · [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md) · [MANUAL_REFRESH_CHECKLIST.md](./MANUAL_REFRESH_CHECKLIST.md) · [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md)
 
 ---
 
 ## Status
 
-- **Current as of:** v1.14 — [reference-date & operator policy](./REFERENCE_DATE_AND_OPERATOR_POLICY.md) (dashboard reference **2026-05-22** until v1.15; no refresh performed).
-- **Document type:** Documentation inventory — v1.12 docs/UI-copy alignment only; no score, artifact, or runtime changes.
-- **Baseline reference:** [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) = `2026-05-22` (production composite snapshot).
+- **Current as of:** post-**v1.15** production — reference **`2026-07-01`**; Composite / Passive / Structural **60 / 53 / 67**; band *Elevated Flow Pressure*. Refresh history: [GHOSTFLOW_V115_REFRESH_CHECKPOINT.md](./GHOSTFLOW_V115_REFRESH_CHECKPOINT.md).
+- **Document type:** Current-state inventory (architecture + live headline values). Lower sections labeled v1.8 / v1.9 preserve **historical** phase records and must not be read as today’s scoreboard.
+- **Baseline reference:** [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) = **`2026-07-01`**.
 - **Canonical 13-signal table:** [GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md](./GHOSTFLOW_PUBLIC_SIGNAL_INVENTORY.md).
-- **GhostRegime boundary:** GhostRegime (including BTC provider work) is a separate product lane — not in GhostFlow v1.9 scope.
-- **Freshness & dataQuality policy:** [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md) — cadence thresholds and label definitions; inventory counts governed by v1.12 checkpoint and public signal inventory.
+- **GhostRegime boundary:** GhostRegime is a separate product lane — not in GhostFlow scope.
+- **Freshness & dataQuality policy:** [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md).
+- **Open blocker (WAITING FOR SOURCE DATA):** score-fed `indexConcentration` remains based on the **2026-03-31** SSGA SPY observation until an acceptable newer canonical source/document exists. Gate C does **not** authorize casually bumping the daily reference around that blocker.
 
 ---
 
@@ -48,13 +49,17 @@ Derived context card `distance-65` appears in the grid but is **not** counted in
 
 | Item | Value |
 |------|--------|
-| **Composite** | **62** |
-| **Passive Pressure** | **58** |
-| **Structural Fragility** | **66** |
-| **Band** | *Crowded / Reflexive* |
+| **Reference** | **`2026-07-01`** |
+| **Composite** | **60** |
+| **Passive Pressure** | **53** |
+| **Structural Fragility** | **67** |
+| **Band** | *Elevated Flow Pressure* |
 | **`publicSignalCount`** | **13** (equity only) |
 | **Treasury cards** | **2** separate display-only cards |
 | **Treasury scored** | **No** — does not affect Composite / Passive / Structural |
+| **MOCK passive inputs (unchanged)** | **62 / 58 / 55** (`systematicStrategyPressure` / `retirementFlowPressureProxy` / `leveredEtfRebalancePressure`) |
+
+Do **not** confuse headline Composite / Passive / Structural (**60 / 53 / 67**) with MOCK inputs (**62 / 58 / 55**). Pre-v1.15 production was **62 / 58 / 66** at reference **2026-05-22** (band *Crowded / Reflexive*) — that is **historical**, not current.
 
 ---
 
@@ -68,7 +73,7 @@ Six artifacts merge into the Research Composite via `buildSnapshot`. All in `gho
 | `etf-flow` | ICI domestic equity ETF estimated net issuance | `verified_manual` | Passive 25% — `etfFundFlowImpulse` | Weekly | Production | Weekly freshness caution bands (7–14 days) |
 | `passive-share` | ICI fund/ETF domestic equity **index asset share** | `verified_manual` | Structural 30% — `passiveShareProxy` | Monthly | Production | Public **proxy** — not market-wide passive share |
 | `active-index-flow` | ICI active vs index **monthly net flows** | `verified_manual` | Structural 20% — `activeShareOffsetProxy` | Monthly | Production | Same ICI release; flows vs assets table discipline |
-| `concentration` | SSGA SPY monthly fact sheet top-10 weight | `verified_manual` | Structural 20% — `indexConcentration` | Monthly | Production | PDF month-end `asOf` vs control `publishedAt` |
+| `concentration` | SSGA SPY monthly fact sheet top-10 weight | `verified_manual` | Structural 20% — `indexConcentration` | Monthly | Production | **WAITING FOR SOURCE DATA** — artifact `asOf` still **2026-03-31**; Gate C / casual reference bump not permitted around this blocker |
 | `breadth` | StockCharts `$SPXA50R` (% above 50-day MA) | `manual_unverified` | Structural 15% — `breadthWeakness` | Daily | Production | Barchart `$S5FI` cross-check gap ~1.2 pp |
 
 ---

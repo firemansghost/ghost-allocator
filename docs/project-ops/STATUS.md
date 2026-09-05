@@ -1,5 +1,22 @@
 ﻿# STATUS
 
+## Current State (Project ops — 2026-09-05 documentation truth + Vercel hygiene)
+**ACTIVE CHECKPOINT (non-model)**
+
+Completed since R7D closeout:
+
+- **PR #190** — site-wide product-copy truth Pass 1 (homepage / shared claims) merged.
+- **PR #191** — Vercel deployment-hygiene guard merged; Ignored Build Step **ACTIVE V1** after live smoke tests (docs Markdown → SKIP; `app/**` → BUILD). Policy: [VERCEL_DEPLOYMENT_POLICY.md](../VERCEL_DEPLOYMENT_POLICY.md).
+- **This workstream:** documentation truth cleanup Pass 2 (GhostFlow current snapshot, Builder/Models sleeve docs, Convex Equity removal from current docs, Vercel activation record).
+
+**Next (authorized separately):** GhostYield honesty / freshness-semantics workstream. Do not mix into docs-only PRs.
+
+GhostRegime production remains **KEEP CURRENT** / `ghostregime-v1.0.4` / Risk On **60 / 30 / 10**. R7 remains closed. No model change from this checkpoint.
+
+Last updated: 2026-09-05
+
+---
+
 ## Current State (GhostRegime — 2026-09-03 R7D complete / KEEP CURRENT)
 **R7 COMPLETE — KEEP CURRENT**
 

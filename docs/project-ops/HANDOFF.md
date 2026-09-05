@@ -1,5 +1,24 @@
 ﻿# HANDOFF
 
+## Last Session Summary (2026-09-05 — docs truth cleanup Pass 2 + Vercel ACTIVE)
+Documentation-only truth cleanup after:
+
+- PR **#190** product-copy truth Pass 1 (complete)
+- PR **#191** Vercel deployment hygiene (merged; Ignored Build Step **ACTIVE V1**; live SKIP/BUILD smokes passed 2026-09-05)
+
+Pass 2 targets: GhostFlow current-state docs (**60 / 53 / 67** @ **2026-07-01**), Builder/Models sleeve docs (no active `convex_equity`), gold/commodities/USFR parity, Vercel policy activation wording, project-ops checkpoint.
+
+**Vercel expected** reporting is required on every PR (`BUILD` or `SKIP`) per [CHECKS.md](./CHECKS.md) and [VERCEL_DEPLOYMENT_POLICY.md](../VERCEL_DEPLOYMENT_POLICY.md).
+
+## Priority for Next Session
+1. Finish / merge docs truth cleanup Pass 2 if still open
+2. Next substantive product workstream: **GhostYield honesty / freshness semantics** (separate PR; not docs-only GhostFlow score edits)
+3. Do **not** reopen GhostRegime R7 / R8 without a new gate
+4. Do **not** change GhostFlow scores, artifacts, reference date, or Gate C casually
+5. Keep Vercel V1 allowlist conservative (`scripts/**` BUILD; unknown → BUILD)
+
+---
+
 ## Last Session Summary (2026-09-03 — GhostRegime R7D complete / KEEP CURRENT)
 **R7 is closed.** Final R7D decision: **KEEP CURRENT** (confidence **MODERATE**). Production **P0_CURRENT** / **60/30/10** remains policy. Model remains `ghostregime-v1.0.4`. Existing VAMS unchanged. No allocation implementation is pending from R7D. No `MODEL_VERSION` bump. No refresh. No production write. No deployment required.
 

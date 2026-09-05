@@ -6,18 +6,23 @@ Entrypoint for GhostFlow docs under `docs/ghostflow/`. For live dashboard invent
 
 ## Current canonical snapshot
 
+Production snapshot after **v1.15** (authoritative refresh record: [GHOSTFLOW_V115_REFRESH_CHECKPOINT.md](./GHOSTFLOW_V115_REFRESH_CHECKPOINT.md)). Detailed inventory: [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md).
+
 | Item | Value |
 |------|--------|
-| **Composite** | **62** |
-| **Passive Pressure** | **58** |
-| **Structural Fragility** | **66** |
-| **Band** | *Crowded / Reflexive* |
+| **Reference** | [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) = **`2026-07-01`** |
+| **Composite** | **60** |
+| **Passive Pressure** | **53** |
+| **Structural Fragility** | **67** |
+| **Band** | *Elevated Flow Pressure* |
 | **Equity `publicSignalCount`** | **13** |
 | **Treasury Plumbing** | **2** separate display-only cards |
 
 Treasury is **outside** the equity Research Composite, `buildSnapshot`, `raw.signals`, `meta.publicSignals`, [`PUBLIC_ARTIFACT_SIGNAL_IDS`](../../lib/ghostflow/signalPresentation.ts), and `publicSignalCount`. Do **not** combine equity **13** + Treasury **2** into 15.
 
-Three **MOCK** passive score inputs (`systematicStrategyPressure` **62**, `retirementFlowPressureProxy` **58**, `leveredEtfRebalancePressure` **55**) remain unchanged unless a separate product-approved score gate opens.
+Three **MOCK** passive score inputs (`systematicStrategyPressure` **62**, `retirementFlowPressureProxy` **58**, `leveredEtfRebalancePressure` **55**) remain unchanged unless a separate product-approved score gate opens. Do **not** confuse Composite / Passive / Structural (**60 / 53 / 67**) with those MOCK inputs (**62 / 58 / 55**).
+
+**Freshness blocker (WAITING FOR SOURCE DATA):** score-fed `indexConcentration` remains on the **2026-03-31** SSGA SPY observation until an acceptable newer canonical source/document is available. Gate C does **not** permit casually bumping the daily reference around that blocker.
 
 ---
 

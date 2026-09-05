@@ -84,9 +84,10 @@ For Voya-only users:
 
 ### Schwab Implementation (Growth Bucket)
 
-- **Computation**: `lib/portfolioEngine.ts` → `suggestExampleEtfs(modelPortfolio)`
-  - Returns example ETFs grouped by sleeve (SPYV/QUAL for Core Equity, SPYC for Convex Equity, GLD/DBC for Real Assets, etc.)
-  - These are displayed in the "Schwab ETF sleeve lineup" card
+- **Computation**: `lib/portfolioEngine.ts` / `lib/schwabLineups.ts` — example ETFs grouped by **active** sleeves (illustrations only)
+  - Standard examples include SPYV/QUAL (core equity), **GLDM** (gold), **DBC** (commodities), DBMF/KMLM (managed futures), SHV/BIL (T-bills), AGG (core bonds), SHY (rate hedge), **USFR** (cash / cash-equivalent parking)
+  - There is **no** active `convex_equity` sleeve in current models
+  - Displayed in the "Schwab ETF sleeve lineup" card
 
 ### OKC 457 Reality: Contributions → Voya First
 

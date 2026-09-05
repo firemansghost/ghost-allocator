@@ -18,22 +18,22 @@ A GrayGhost Labs **multi-tool** web app for OKC firefighters and first responder
 Ghost Allocator translates conceptual "Ghost sleeve" allocations:
 
 - Core Equity
-- Convex Equity
-- Real Assets
+- Gold
+- Commodities
 - Managed Futures
 - T-Bills / Short Duration
 - Core Bonds
 - Rate Hedge / Crisis Protection
-- Cash
+- Cash / cash-equivalent (Voya Stable Value Option · Schwab example **USFR**)
 
 …into actionable fund selections from the OKC 457 plan menu.
 
 **Two user paths:**
 
-- **Voya-only:** uses the Voya core fund menu exclusively (index equity, international, real assets, core bonds, etc.).  
-- **Voya + Schwab:** targets a roughly **50/50 balance split** between:
-  - **Voya:** defensive + inflation bucket  
-  - **Schwab BrokerageLink:** growth/equity sleeves via example ETFs (illustrations only)
+- **Voya-only:** uses the Voya core fund menu exclusively (index equity, international, inflation/real-asset-oriented funds, core bonds, etc.).
+- **Voya + Schwab:** targets a platform split between:
+  - **Voya:** defensive + inflation bucket
+  - **Schwab BrokerageLink:** growth/alts sleeves via example ETFs (illustrations only; e.g. GLDM for gold, DBC for commodities, USFR for cash-equivalent parking)
 
 ### GhostRegime
 
@@ -67,10 +67,14 @@ The builder calls this out in the action plan so users don't "set it and forget 
 See [`docs/README.md`](docs/README.md) for the full docs index.
 
 Quick links:
-- [Ghost Allocator flows](docs/flows.md)  
-- [Ghost sleeve overview](docs/ghost-sleeve-overview.md)  
-- [GhostRegime runbook](docs/ghostregime/RUNBOOK.md)  
-- [GhostRegime seed data](data/ghostregime/seed/README.md)  
+- [Ghost Allocator flows](docs/flows.md)
+- [Ghost sleeve overview](docs/ghost-sleeve-overview.md)
+- [Model portfolios](docs/model-portfolios.md)
+- [Vercel deployment hygiene](docs/VERCEL_DEPLOYMENT_POLICY.md)
+- [GhostRegime runbook](docs/ghostregime/RUNBOOK.md)
+- [GhostRegime seed data](data/ghostregime/seed/README.md)
+- [GhostFlow docs](docs/ghostflow/README.md)
+
 
 ## Getting Started
 

@@ -1,7 +1,8 @@
 # Ghost Allocator Vercel Deployment Hygiene Policy
 
-**Status:** Proposed V1 source-of-truth policy  
-**Created:** 2026-09-05  
+**Status:** ACTIVE V1
+**Created:** 2026-09-05
+**Activated / observed:** 2026-09-05
 **Project:** `firemansghost/ghost-allocator`
 
 ## 1. Purpose
@@ -204,18 +205,29 @@ Do not use commit-message-only filtering.
 
 ## 12. Rollout sequence
 
-1. Add this policy.
-2. Add `.cursor/rules/vercel-deployment-hygiene.mdc`.
-3. Add `scripts/vercel-ignore-build.sh`.
-4. Review in a normal PR.
-5. The implementation PR itself must BUILD.
-6. Merge only after independent QA.
-7. Confirm the Vercel Root Directory in the dashboard.
-8. Configure the Ignored Build Step.
-9. Test docs-only change -> SKIP.
-10. Test harmless runtime-path change -> BUILD.
-11. Delete the temporary test branch.
-12. Do not broaden the allowlist until live behavior is confirmed.
+1. Add this policy. **Done** (PR **#191**).
+2. Add `.cursor/rules/vercel-deployment-hygiene.mdc`. **Done**.
+3. Add `scripts/vercel-ignore-build.sh`. **Done**.
+4. Review in a normal PR. **Done**.
+5. The implementation PR itself must BUILD. **Done** (contains `scripts/**`).
+6. Merge only after independent QA. **Done** — merge commit `54ec99162c11a020e14c61276d6230ec5fdd15ee`.
+7. Confirm the Vercel Root Directory in the dashboard. **Done** (repository root).
+8. Configure the Ignored Build Step. **Done** — command: `bash scripts/vercel-ignore-build.sh`.
+9. Test docs-only Markdown change -> SKIP. **Passed** (2026-09-05 live smoke).
+10. Test harmless runtime-path change (`app/**`) -> BUILD. **Passed** (2026-09-05 live smoke).
+11. Delete the temporary test branch. **Done**.
+12. Do not broaden the allowlist until live behavior is confirmed. **Still in force** — V1 allowlist remains intentionally conservative; `scripts/**` remains BUILD; uncertainty fails open to BUILD.
+
+### Live activation record (2026-09-05)
+
+| Item | Result |
+|------|--------|
+| Ignored Build Step | **Live** |
+| Command | `bash scripts/vercel-ignore-build.sh` |
+| Docs-only Markdown smoke | **SKIP** |
+| Runtime `app/**` smoke | **BUILD** |
+| Temporary smoke-test branch | **Deleted** |
+| Allowlist / script | **Unchanged** after activation |
 
 ---
 

@@ -6,25 +6,25 @@ Living roadmap for GhostFlow score-input sourcing, phase history, and open quest
 
 **Canonical inventory (detailed tables):** [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) — score-fed, display-only, MOCK, derived, and Treasury lanes after v1.7. **Doc index:** [README.md](./README.md).
 
-**Baseline reference date:** [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) = `2026-05-22`.
+**Baseline reference date:** [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) = **`2026-07-01`**.
 
 **Operator refresh:** [OPERATOR_REFRESH_DISCIPLINE.md](./OPERATOR_REFRESH_DISCIPLINE.md) (canonical workflow) · [`MANUAL_REFRESH_CHECKLIST.md`](./MANUAL_REFRESH_CHECKLIST.md) (field quick reference) · per-artifact runbooks at the bottom of the checklist.
 
-**Current research composite (production snapshot, reference 2026-05-22):** Composite **62** · Passive Pressure **58** · Structural Fragility **66** · band *Crowded / Reflexive*.
+**Current research composite (production snapshot, reference 2026-07-01):** Composite **60** · Passive Pressure **53** · Structural Fragility **67** · band *Elevated Flow Pressure*. MOCK passive inputs remain **62 / 58 / 55**. Authoritative refresh record: [GHOSTFLOW_V115_REFRESH_CHECKPOINT.md](./GHOSTFLOW_V115_REFRESH_CHECKPOINT.md). (Pre-v1.15 historical snapshot was **62 / 58 / 66** at **2026-05-22** / *Crowded / Reflexive*.)
 
 **v1.8 theme:** GhostFlow **Data Quality & Mock Score Discipline** — see [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) § v1.8 recommendation. **v1.8b** formalized keep-MOCK decisions — [MOCK_SCORE_RETIREMENT_PLAN.md](./MOCK_SCORE_RETIREMENT_PLAN.md). **v1.8c** standardized freshness and `dataQuality` policy — [ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md](./ARTIFACT_FRESHNESS_DATAQUALITY_AUDIT.md); no artifact JSON, score, UI, runtime, or count changes; **v1.8c.1** metadata cleanup **Done**.
 
 **v1.9 theme:** GhostFlow **Passive Supply & Concentration Research** — [PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md](./PASSIVE_SUPPLY_AND_CONCENTRATION_BACKLOG.md). Future feasibility candidates only; no implementation, scores, artifacts, UI cards, or `publicSignalCount` changes approved.
 
-### Current dashboard state (v1.12 — after v1.9e.5)
+### Current dashboard state (post-v1.15)
 
-Release checkpoint summary (detail in [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) · [integrity checkpoint](./GHOSTFLOW_PUBLIC_SIGNAL_INTEGRITY_CHECKPOINT.md)). Treasury Plumbing is a **separate** display-only lane — **not** included in `publicSignalCount` (do **not** combine equity **13** + Treasury **2** into 15).
+Release checkpoint summary (detail in [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_CURRENT_STATE.md) · [v1.15 refresh](./GHOSTFLOW_V115_REFRESH_CHECKPOINT.md) · [integrity checkpoint](./GHOSTFLOW_PUBLIC_SIGNAL_INTEGRITY_CHECKPOINT.md) for historical v1.12 structure). Treasury Plumbing is a **separate** display-only lane — **not** included in `publicSignalCount` (do **not** combine equity **13** + Treasury **2** into 15).
 
 #### Equity Research Composite (`buildSnapshot` lane)
 
 | Layer | Count | Notes |
 |-------|-------|--------|
-| **Composite / Passive / Structural** | **62 / 58 / 66** | Band *Crowded / Reflexive* |
+| **Composite / Passive / Structural** | **60 / 53 / 67** | Band *Elevated Flow Pressure* · reference **`2026-07-01`** |
 | **PUBLIC score artifacts** | **6** | vol-regime, etf-flow, passive-share, active-index-flow, concentration, breadth — merged into composite |
 | **DERIVED score input** | **1** | `modelZoneProximity` (from ICI index share) |
 | **MOCK score inputs** | **3** | `systematicStrategyPressure` **62**, `retirementFlowPressureProxy` **58**, `leveredEtfRebalancePressure` **55** |
@@ -32,6 +32,7 @@ Release checkpoint summary (detail in [GHOSTFLOW_CURRENT_STATE.md](./GHOSTFLOW_C
 | **PLACEHOLDER cards** | **0** | When production artifacts validate; see retired `odte-options` note below |
 | **`publicSignalCount`** | **13** | Six score-fed public cards + seven display-only public signals in `meta.publicSignals` (plus derived context card `distance-65`, separate from this count) |
 | **Score-wiring gates** | — | **v1.0c** (CFTC), **v1.1f** (levered ETF), **v1.2f** (retirement), **v1.4f** (options), **v1.9e.6** (Tail Skew) — product-approved only; discouraged by default |
+| **Open blocker** | — | `indexConcentration` still **2026-03-31** SSGA observation — **WAITING FOR SOURCE DATA**; Gate C casual bump not permitted |
 
 #### Treasury Plumbing (separate lane — outside composite)
 
