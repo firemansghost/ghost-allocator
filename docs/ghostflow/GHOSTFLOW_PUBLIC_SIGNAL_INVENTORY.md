@@ -1,4 +1,4 @@
-# GhostFlow Public Signal Inventory — v1.9d
+# GhostFlow Public Signal Inventory
 
 **GhostFlow docs:** [README](./README.md) · [Current state](./GHOSTFLOW_CURRENT_STATE.md) · [Roadmap](./DATA_ROADMAP.md)
 
@@ -8,14 +8,13 @@
 
 ## Status
 
-| Item | v1.9d posture |
-|------|---------------|
-| Document type | **Canonical public signal inventory memo** |
-| Scope | **Docs-only** |
-| Runtime change | **None** |
-| Score change | **None** — Composite **62** / Passive **58** / Structural **66** |
-| Artifact change | **None** |
-| UI change | **None** |
+| Item | Posture |
+|------|---------|
+| Document type | **Canonical public signal inventory memo** (structure locked at v1.9d+) |
+| Scope | **Docs** — inventory of live equity/Treasury signals |
+| Runtime change | **None** (this memo does not change code) |
+| **Current production scores** | Composite **60** / Passive **53** / Structural **67** · band *Elevated Flow Pressure* · reference **`2026-07-01`** (after [v1.15](./GHOSTFLOW_V115_REFRESH_CHECKPOINT.md)) |
+| Artifact / UI change from this memo | **None** |
 
 ---
 
@@ -27,13 +26,16 @@
 | **Score-fed equity/public artifacts** | **6** |
 | **Display-only equity/public artifacts** | **7** |
 | **Treasury lane** | **2** separate display-only cards — **not** counted in equity `publicSignalCount` |
-| **Composite** | **62** |
-| **Passive Pressure** | **58** |
-| **Structural Fragility** | **66** |
-| **Band** | *Crowded / Reflexive* |
-| **Reference date** | [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) = `2026-05-22` |
+| **Composite** | **60** |
+| **Passive Pressure** | **53** |
+| **Structural Fragility** | **67** |
+| **Band** | *Elevated Flow Pressure* |
+| **Reference date** | [`GHOSTFLOW_REFERENCE_AS_OF`](../../lib/ghostflow/reference.ts) = **`2026-07-01`** |
+| **MOCK passive inputs (unchanged)** | **62 / 58 / 55** |
 
 **Counting rule:** Equity `publicSignalCount` = **13**. Treasury display lane = **2** cards. **Do not** combine into 15.
+
+Historical note: before v1.15 the production snapshot was **62 / 58 / 66** at reference **2026-05-22** (band *Crowded / Reflexive*). That baseline remains correct **history**; it is not the current dashboard.
 
 ---
 
@@ -76,9 +78,9 @@ Display order follows [`GhostFlowSignalGrid.tsx`](../../components/ghostflow/Gho
 | Index Inclusion Event Proxy | **No** score path — [v1.9c.5 mapping](./INDEX_INCLUSION_EVENT_MAPPING_DECISION.md) display-only by default |
 | Cap-Weight Premium Proxy | **No** score path — [v1.9b.5 mapping](./CAP_WEIGHT_PREMIUM_MAPPING_DECISION.md) display-only by default |
 | Tail Skew Context | **No** score path — [v1.9e.5 mapping](./TAIL_SKEW_MAPPING_DECISION.md) display-only by default; VIX remains score-fed vol input |
-| Composite / Passive / Structural | **62 / 58 / 66** — **unchanged** |
+| Composite / Passive / Structural | **60 / 53 / 67** (current production after v1.15) |
 
-**Score integrity (v1.10):** Three MOCK passive score inputs (`systematicStrategyPressure` **62**, `retirementFlowPressureProxy` **58**, `leveredEtfRebalancePressure` **55**) live in [`mockGhostflowSnapshot.ts`](../../data/ghostflow/mockGhostflowSnapshot.ts) — **outside** the 12 equity public signal cards. Display-only cards for systematic, retirement, and levered ETF refresh dashboard context only. Retirement requirements and gate ladder: [MOCK_SCORE_RETIREMENT_ROADMAP.md](./MOCK_SCORE_RETIREMENT_ROADMAP.md). **v1.10c production baseline:** [SCORE_REPRODUCTION_BASELINE.md](./SCORE_REPRODUCTION_BASELINE.md) — canonical score math, ten production score-input values, and MOCK/public contribution tables.
+**Score integrity (v1.10):** Three MOCK passive score inputs (`systematicStrategyPressure` **62**, `retirementFlowPressureProxy` **58**, `leveredEtfRebalancePressure` **55**) live in [`mockGhostflowSnapshot.ts`](../../data/ghostflow/mockGhostflowSnapshot.ts) — **outside** the equity public-signal set counted by `publicSignalCount`. Display-only cards for systematic, retirement, and levered ETF refresh dashboard context only. Retirement requirements and gate ladder: [MOCK_SCORE_RETIREMENT_ROADMAP.md](./MOCK_SCORE_RETIREMENT_ROADMAP.md). **v1.10c production baseline:** [SCORE_REPRODUCTION_BASELINE.md](./SCORE_REPRODUCTION_BASELINE.md) — canonical score math, ten production score-input values, and MOCK/public contribution tables.
 
 Display-only card refreshes update dashboard cards only. They do **not** change Research Composite scores unless a future product gate explicitly approves score wiring (all current gates discouraged / not approved).
 

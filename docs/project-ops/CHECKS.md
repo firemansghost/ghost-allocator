@@ -1,5 +1,16 @@
 # CHECKS
 
+## Vercel classification (every PR)
+
+Before opening or merging a PR, report exactly one of:
+
+- `Vercel expected: BUILD` — at least one changed path is outside the V1 safe-skip allowlist (or classification is unclear)
+- `Vercel expected: SKIP` — every changed path is in the approved allowlist
+
+Authority: changed paths + [VERCEL_DEPLOYMENT_POLICY.md](../VERCEL_DEPLOYMENT_POLICY.md). Do not use commit-message tokens as skip authority.
+
+---
+
 ## Verification Steps (Windows/PowerShell friendly)
 
 ### 1) Install + run (local sanity)

@@ -1,5 +1,26 @@
 # DECISIONS
 
+## 2026-09-05 — Vercel deployment hygiene V1 ACTIVE (path-based ignore-build)
+Choice:
+- Ghost Allocator uses a **path-based** Vercel Ignored Build Step (`bash scripts/vercel-ignore-build.sh`) as **ACTIVE V1**.
+- Changed paths are the authority. Commit-message tokens (`[skip ci]`, `docs:`, `chore:`, `research:`, `artifact:`, etc.) are **not** deployment authority.
+- Safe-skip allowlist is intentionally conservative: Markdown under `docs/**`, `README.md`, `LICENSE`, `reports/**`, `.github/workflows/**`, `.cursor/rules/**` only when **every** changed file matches.
+- Non-Markdown under `docs/**`, entire `data/**`, entire `scripts/**` (V1 — TypeScript project includes `**/*.ts` / `**/*.tsx`), runtime/app/lib/components/public, and package/config paths **BUILD**.
+- Uncertainty, missing/invalid SHAs, empty diffs, and unknown paths **fail open to BUILD**.
+- Live smoke tests on **2026-09-05** confirmed docs Markdown → **SKIP** and `app/**` → **BUILD**.
+
+Why:
+- Redundant Vercel deployments from bookkeeping PRs were consuming capacity without changing the Next.js web artifact.
+- Ghost Allocator’s committed runtime data and broad TS include surface require a stricter filter than “skip anything that looks like docs/research.”
+
+Consequences:
+- Policy source of truth: [VERCEL_DEPLOYMENT_POLICY.md](../VERCEL_DEPLOYMENT_POLICY.md). Agent rule: `.cursor/rules/vercel-deployment-hygiene.mdc`.
+- Do **not** broaden the allowlist without dependency review.
+- Do **not** edit the ignore-build script or Vercel dashboard from routine docs PRs.
+- Every PR should report `Vercel expected: BUILD` or `Vercel expected: SKIP`.
+
+---
+
 ## 2026-09-03 — GhostRegime R7D allocation decision: KEEP CURRENT
 Choice:
 - **KEEP CURRENT** with **MODERATE** confidence.
