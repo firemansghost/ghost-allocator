@@ -29,14 +29,20 @@ export function DataFreshnessPanel({
       <div>
         <h2 className="text-xs font-semibold uppercase tracking-wide text-amber-400/90">Source & data quality</h2>
         <p className="text-[11px] text-zinc-500 mt-1 leading-snug">
-          Data quality reflects how complete and fresh the sourced snapshot is. It is not an investment-risk rating.
-          Missing data does not automatically mean a bad fund; fresh data does not automatically mean a safe fund.
+          Data QA describes snapshot quality; it is not itself an investment-risk rating. The current Risk and Fit
+          formulas do include selected confidence, freshness, and missing-data adjustments. Missing data does not
+          automatically mean a bad fund; fresh-in-snapshot does not automatically mean a safe fund.
         </p>
       </div>
-      <p className="text-[11px] text-zinc-500">
-        Reference as of (static):{' '}
-        <span className="font-mono text-zinc-300">{referenceAsOf}</span>
-      </p>
+      <div className="space-y-1">
+        <p className="text-[11px] text-zinc-500">
+          Snapshot reference date:{' '}
+          <span className="font-mono text-zinc-300">{referenceAsOf}</span>
+        </p>
+        <p className="text-[11px] text-zinc-500 leading-snug">
+          Fresh / caution / stale labels are measured against this reference date, not today&apos;s date.
+        </p>
+      </div>
       <dl className="grid gap-2 text-xs sm:text-sm sm:grid-cols-2">
         <div>
           <dt className="text-zinc-500">Latest NAV as-of (sample universe)</dt>

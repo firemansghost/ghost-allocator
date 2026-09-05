@@ -7,7 +7,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = buildMetadata({
   title: 'GhostYield Methodology - Ghost Allocator',
   description:
-    'How GhostYield works: Risk Score and Fit Score bands, Data QA vs investment risk, yield display order, NAV and premium/discount, CEF and BDC metrics, score drivers, and manual snapshot limitations.',
+    'How GhostYield works: Risk Score and Fit Score bands, Data QA as a snapshot-quality layer, how v0.1 scores also include selected data-quality adjustments, yield display order, NAV and premium/discount, CEF and BDC metrics, score drivers, and manual snapshot limitations.',
   path: '/income-factory/methodology',
 });
 
@@ -94,8 +94,15 @@ export default function GhostYieldMethodologyPage() {
       <Section id="risk-score" title="Risk Score">
         <p>
           <strong className="text-zinc-200">Risk Score</strong> runs from <strong className="text-zinc-200">0–100</strong>.
-          Higher means the model sees <strong className="text-zinc-200">riskier sleeve characteristics</strong> for that
-          row—not a prediction of the future, and not the same as Data QA.
+          Higher means riskier under the <strong className="text-zinc-200">current v0.1 rules</strong>—not a prediction of
+          the future.
+        </p>
+        <p className="text-zinc-300 border-l-2 border-amber-500/35 pl-3">
+          In v0.1, Data QA is displayed separately, but selected Data QA conditions also affect Risk and Fit numerically.
+        </p>
+        <p>
+          The current formula includes economic / structural sleeve factors <strong className="text-zinc-200">and</strong>{' '}
+          selected data-confidence, freshness, and missing-data adjustments.
         </p>
         <p>The model considers factors such as:</p>
         <ul className="list-disc list-inside space-y-1 text-zinc-300">
@@ -118,7 +125,7 @@ export default function GhostYieldMethodologyPage() {
         <p>
           Risk Score is <strong className="text-zinc-200">not a forecast</strong>. Think of it as a structured warning
           system: a way to sort sleeves by how much structural and payout stress the current GhostYield rules associate
-          with the row.
+          with the row—plus the snapshot-quality adjustments listed above.
         </p>
       </Section>
 
@@ -128,6 +135,10 @@ export default function GhostYieldMethodologyPage() {
           Higher means a <strong className="text-zinc-200">cleaner fit as a satellite yield sleeve</strong> under this
           model—not &ldquo;you should buy this.&rdquo;
         </p>
+        <p>
+          The current formula includes yield-sleeve fit factors <strong className="text-zinc-200">and</strong> selected
+          confidence and freshness adjustments.
+        </p>
         <p>The model nudges fit up or down based on things like:</p>
         <ul className="list-disc list-inside space-y-1 text-zinc-300">
           <li>Clarity / simplicity of the yield story (within the row text)</li>
@@ -136,6 +147,7 @@ export default function GhostYieldMethodologyPage() {
           <li>Stable or positive NAV trend where NAV is available</li>
           <li>Discount/premium context for sleeves that price off NAV</li>
           <li>Expense ratio and data confidence</li>
+          <li>Snapshot freshness (including bonuses for fresh+high-confidence rows and penalties for stale/missing)</li>
           <li>Sleeve role (e.g. cash-like ballast vs more complex sleeves)</li>
           <li>BDC dividend coverage and first-lien tilt when structured metrics exist</li>
           <li>
@@ -154,22 +166,29 @@ export default function GhostYieldMethodologyPage() {
 
       <Section id="data-qa" title="Data QA / source and data quality">
         <p>
-          <strong className="text-zinc-200">Data QA is not investment risk.</strong> It describes how complete and fresh
-          the <em>manual row</em> is: lineage dates, missing fields, illustrative rows, and similar flags.
+          <strong className="text-zinc-200">Data QA</strong> is a separate displayed snapshot-quality layer. It describes
+          how complete and fresh the <em>manual row</em> is: lineage dates, missing fields, illustrative rows, and similar
+          flags. It is <strong className="text-zinc-200">not itself</strong> an investment-risk rating.
+        </p>
+        <p className="text-zinc-300 border-l-2 border-amber-500/35 pl-3">
+          In v0.1, Data QA is displayed separately, but selected Data QA conditions also affect Risk and Fit numerically.
         </p>
         <p>It reflects things like:</p>
         <ul className="list-disc list-inside space-y-1 text-zinc-300">
           <li>How complete the keyed fields are for that ticker in the snapshot</li>
-          <li>How fresh NAV and distribution as-of dates are versus the dashboard reference date</li>
+          <li>
+            How fresh NAV and distribution as-of dates are versus the static snapshot reference date (not today&apos;s
+            date)
+          </li>
           <li>Whether a source URL and source label are present</li>
           <li>Whether values are tied to cited sources (fields stay null when not verifiable)</li>
         </ul>
         <p className="text-zinc-200 border-l-2 border-zinc-600 pl-3">
-          Fresh data does not mean a safe investment. Data gaps do not mean a bad fund.
+          Fresh-in-snapshot does not mean a safe investment. Data gaps do not mean a bad fund.
         </p>
         <p>
-          Use Data QA together with Risk Score—they answer different questions. One is snapshot hygiene; the other is
-          modeled sleeve stress.
+          Use Data QA together with Risk and Fit—they answer related but different questions. One is snapshot hygiene; the
+          others are modeled sleeve scores that currently also absorb selected snapshot-quality adjustments.
         </p>
       </Section>
 
@@ -267,17 +286,19 @@ export default function GhostYieldMethodologyPage() {
       <Section id="score-drivers" title="Score drivers">
         <p>
           The candidate detail panel lists <strong className="text-zinc-200">Score drivers</strong>: short explanations
-          of the largest contributors to Risk Score and Fit Score for that row under the current rules.
+          of selected contributors to Risk Score and Fit Score for that row under the current rules.
         </p>
         <p className="text-zinc-200 border-l-2 border-amber-500/35 pl-3">
-          These drivers explain the model score. They are not buy/sell signals.
+          These drivers explain the model score. They are not buy/sell signals. Displayed drivers may not list every
+          adjustment applied to the final score, including snapshot-quality adjustments.
         </p>
       </Section>
 
       <Section id="manual-snapshot" title="Manual research snapshot">
         <p>
           GhostYield v0.1 ships with manually maintained rows in{' '}
-          <code className="text-amber-400/90 text-xs">data/ghostyield/candidates.manual.json</code>.
+          <code className="text-amber-400/90 text-xs">data/ghostyield/candidates.manual.json</code>. Freshness labels are
+          evaluated against a frozen snapshot reference date—not today&apos;s date or a live feed.
         </p>
         <ul className="list-disc list-inside space-y-2 text-zinc-300">
           <li>Live price feeds and automated scraping are not part of this release.</li>

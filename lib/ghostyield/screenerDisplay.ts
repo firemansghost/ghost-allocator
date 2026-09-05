@@ -5,7 +5,7 @@
 import type { GhostYieldFreshnessStatus } from './types';
 
 export const FRESHNESS_STATUS_LABEL: Record<GhostYieldFreshnessStatus, string> = {
-  fresh: 'Fresh Data',
+  fresh: 'Fresh in snapshot',
   caution: 'Data Caution',
   stale: 'Stale Data',
   missing: 'Data Gaps',
@@ -14,7 +14,7 @@ export const FRESHNESS_STATUS_LABEL: Record<GhostYieldFreshnessStatus, string> =
 
 /** Column header `title` / tooltip for the Data QA badges. */
 export const DATA_QA_COLUMN_TOOLTIP =
-  'Source and data-quality status for this row in the manual snapshot (freshness and field completeness). These labels are not investment-risk ratings. Missing fields do not automatically mean a bad fund; fresh data does not automatically mean a safe fund.';
+  'Snapshot quality for this manual row (freshness and field completeness). Freshness is measured against the manual snapshot reference date, not today\'s date or a live feed. Data QA itself is not an investment-risk rating—but the current Risk and Fit formulas also include selected confidence, freshness, and missing-data adjustments. Missing fields do not automatically mean a bad fund; fresh-in-snapshot does not automatically mean a safe fund.';
 
 /** Tooltip on individual freshness badges (redundant with column but helps mobile). */
 export function freshnessBadgeTitle(status: GhostYieldFreshnessStatus): string {
@@ -64,7 +64,7 @@ export function riskScoreBandShort(score: number): string {
 
 export function riskScoreTooltip(score: number): string {
   const w = riskScoreBandWord(score);
-  return `Risk Score ${score} — ${w}. Scale 0–100 (higher = riskier). Bands: 0–24 Low, 25–49 Moderate, 50–69 Elevated, 70–84 High, 85–100 Extreme. Separate from Data QA (source snapshot quality on the row).`;
+  return `Risk Score ${score} — ${w}. Scale 0–100 (higher = riskier). Bands: 0–24 Low, 25–49 Moderate, 50–69 Elevated, 70–84 High, 85–100 Extreme. Current score includes sleeve/investment factors plus selected data-confidence, freshness, and missing-data adjustments.`;
 }
 
 export type FitBandId = 'strong' | 'good' | 'watchlist' | 'weak';
@@ -101,5 +101,5 @@ export function fitScoreBandShort(score: number): string {
 
 export function fitScoreTooltip(score: number): string {
   const w = fitScoreBandWord(score);
-  return `Fit Score ${score} — ${w}. Scale 0–100 (higher = better fit in the static GhostYield rules, not data QA). Bands: 85–100 Strong Fit, 70–84 Good Fit, 50–69 Watchlist Fit, below 50 Weak Fit.`;
+  return `Fit Score ${score} — ${w}. Scale 0–100 (higher = better fit under the static GhostYield rules; not a recommendation). Bands: 85–100 Strong Fit, 70–84 Good Fit, 50–69 Watchlist Fit, below 50 Weak Fit. Current score includes yield-sleeve fit factors plus selected confidence and freshness adjustments.`;
 }
