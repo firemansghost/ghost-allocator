@@ -123,13 +123,13 @@ export function CandidateTable({
               </th>
               <th
                 className={`${CELL} min-w-[6rem] font-medium whitespace-nowrap`}
-                title="GhostYield risk score 0–100 — higher is riskier (investment / sleeve risk, not data freshness)."
+                title="GhostYield Risk Score 0–100 — higher is riskier under the current rules. The score includes sleeve/investment factors plus selected snapshot-quality penalties."
               >
                 Risk Score
               </th>
               <th
                 className={`${CELL} min-w-[6rem] font-medium whitespace-nowrap`}
-                title="Fit score 0–100 — higher is a better fit as a yield sleeve under the static GhostYield scoring rules (not a data-QA grade)."
+                title="GhostYield Fit Score 0–100 — higher is a cleaner model fit under the current rules. The score also includes selected confidence/freshness adjustments. Not a recommendation."
               >
                 Fit Score
               </th>

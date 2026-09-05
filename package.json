@@ -40,7 +40,7 @@
     "check:no-reference-data": "node scripts/check-no-reference-data.mjs",
     "check:no-reference-history": "node scripts/check-no-reference-history.mjs",
     "verify:reference-clean": "npm run check:no-reference-data && npm run check:no-reference-history && npm run check:parity-names",
-    "test:ghostyield": "tsx lib/ghostyield/__tests__/dataFreshness.test.ts && tsx lib/ghostyield/__tests__/staticReference.test.ts && tsx lib/ghostyield/__tests__/jepiCharacterization.test.ts && tsx lib/ghostyield/__tests__/representativeRows.test.ts && tsx lib/ghostyield/__tests__/riskDataPenalties.test.ts && tsx lib/ghostyield/__tests__/fitDataPenalties.test.ts && tsx lib/ghostyield/__tests__/nullHandling.test.ts && tsx lib/ghostyield/__tests__/cefBdcStructured.test.ts",
+    "test:ghostyield": "tsx lib/ghostyield/__tests__/dataFreshness.test.ts && tsx lib/ghostyield/__tests__/staticReference.test.ts && tsx lib/ghostyield/__tests__/jepiCharacterization.test.ts && tsx lib/ghostyield/__tests__/representativeRows.test.ts && tsx lib/ghostyield/__tests__/riskDataPenalties.test.ts && tsx lib/ghostyield/__tests__/fitDataPenalties.test.ts && tsx lib/ghostyield/__tests__/nullHandling.test.ts && tsx lib/ghostyield/__tests__/cefBdcStructured.test.ts && tsx lib/ghostyield/__tests__/screenerDisplay.test.ts",
     "ghostyield:validate": "tsx scripts/ghostyield/validate-candidates.ts",
     "ghostflow:validate-artifacts": "tsx scripts/ghostflow/validate-artifacts.ts",
     "ghostflow:refresh-report": "tsx scripts/ghostflow/refresh-report.ts",

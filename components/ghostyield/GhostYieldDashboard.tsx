@@ -37,13 +37,22 @@ export function GhostYieldDashboard() {
             Not live data
           </span>
         </div>
+        <p className="text-xs text-zinc-400 max-w-2xl leading-relaxed font-mono sm:text-[13px]">
+          Snapshot reference:{' '}
+          <span className="text-zinc-200">{GHOSTYIELD_REFERENCE_AS_OF}</span>
+          <span className="text-zinc-600"> · </span>
+          Manual research snapshot
+          <span className="text-zinc-600"> · </span>
+          Not live data
+        </p>
         <p className="text-sm text-zinc-300 max-w-2xl leading-relaxed">
           GhostYield is a yield sleeve research dashboard for comparing income-producing funds around an existing
           portfolio. It looks at yield source, NAV behavior, payout quality, data freshness, and sleeve risk — not just
           headline yield. Not a model portfolio and not a recommendation engine.
         </p>
         <p className="text-xs text-zinc-500 max-w-2xl leading-relaxed">
-          Current snapshot: v0.1 manual research data. Live feeds and automated source validation are not active yet.
+          v0.1 manual research data keyed to the snapshot reference above. Live feeds and automated source validation
+          are not active.
         </p>
       </header>
 
@@ -97,15 +106,22 @@ export function GhostYieldDashboard() {
         <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
           Candidate screener (v0.1 manual research snapshot)
         </h2>
+        <p className="text-xs text-zinc-500 max-w-4xl">
+          Snapshot reference: <span className="font-mono text-zinc-300">{GHOSTYIELD_REFERENCE_AS_OF}</span>
+          <span className="text-zinc-600"> · </span>
+          Manual research snapshot
+          <span className="text-zinc-600"> · </span>
+          Not live data
+        </p>
         <p className="text-xs text-zinc-400 leading-relaxed max-w-4xl border-l-2 border-zinc-700 pl-3">
           <span className="text-zinc-300">Screener guide:</span> Yield uses the best available sourced metric on each row:
           current yield, then distribution rate, then SEC yield. <span className="text-zinc-300">Payout</span> reflects
-          distribution quality from the snapshot. <span className="text-zinc-300">Data QA</span> reflects source-data
-          freshness and completeness — <span className="text-zinc-200">not investment risk</span> (gaps don&apos;t
-          automatically mean a bad fund; fresh doesn&apos;t automatically mean safe).{' '}
-          <span className="text-zinc-300">Risk Score</span> is 0–100 where higher is riskier (sleeve and structure risk).
-          <span className="text-zinc-300"> Fit Score</span> is 0–100 where higher is a cleaner fit as a yield sleeve. Hover
-          column headers or scores for band definitions.
+          distribution quality from the snapshot. <span className="text-zinc-300">Data QA</span> describes freshness and
+          completeness of the manual row. It is not itself an investment-risk rating, although the current Risk and Fit
+          formulas include selected confidence, freshness, and missing-data adjustments.{' '}
+          <span className="text-zinc-300">Risk Score</span> is 0–100 where higher is riskier under the current sleeve /
+          structure rules. <span className="text-zinc-300">Fit Score</span> is 0–100 where higher is a cleaner model fit
+          as a yield sleeve (not a recommendation). Hover column headers or scores for band definitions.
         </p>
         <CandidateTable
           candidates={GHOSTYIELD_SCORED_CANDIDATES}
@@ -139,11 +155,11 @@ export function GhostYieldDashboard() {
         </div>
         <div className="text-sm text-zinc-400 leading-relaxed space-y-3 max-w-4xl">
           <p className="text-zinc-300">
-            <span className="text-zinc-200">Risk Score</span> is GhostYield&apos;s sleeve / investment risk estimate
-            (structure, leverage, distribution stress signals, etc.).{' '}
-            <span className="text-zinc-200">Data QA</span> (the Source & data quality column and badges) is only about how
-            complete and fresh the manual snapshot is for that row. Read them together — they answer different questions —
-            and do not treat one as a substitute for the other.
+            <span className="text-zinc-200">Data QA</span> (the Source & data quality column and badges) describes how
+            complete and fresh the manual snapshot is for that row. <span className="text-zinc-200">Risk Score</span> and{' '}
+            <span className="text-zinc-200">Fit Score</span> remain separate displayed concepts for sleeve/structure risk
+            and model fit—but in v0.1 the formulas also include selected confidence, freshness, and missing-data
+            adjustments. Read them together; do not treat Data QA badges as a substitute for Risk/Fit, or vice versa.
           </p>
           <p className="text-zinc-300">
             This v0.1 snapshot uses manually maintained JSON rows — not live pricing or feeds. Some values were sourced from
@@ -165,8 +181,8 @@ export function GhostYieldDashboard() {
             chain. <span className="text-zinc-300">No automated source validation.</span>
           </p>
           <p>
-            In the screener, <span className="text-zinc-300">Data QA</span> (source snapshot completeness) is labeled
-            separately from <span className="text-zinc-300">Risk Score</span> (investment / sleeve risk). Rows in{' '}
+            Snapshot quality labels are measured against the static reference{' '}
+            <span className="font-mono text-zinc-300">{GHOSTYIELD_REFERENCE_AS_OF}</span>, not today&apos;s date. Rows in{' '}
             <code className="text-amber-400/90">data/ghostyield/candidates.manual.json</code> carry{' '}
             <span className="text-zinc-300">sourceUrl</span>, <span className="text-zinc-300">sourceLabel</span>, and
             lineage as-of fields — scoring in{' '}

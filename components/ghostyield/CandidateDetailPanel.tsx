@@ -111,13 +111,16 @@ export function CandidateDetailPanel({ candidate }: { candidate: GhostYieldCandi
               {candidate.riskScore} ({riskScoreBandWord(candidate.riskScore)})
             </span>
             {' — '}
-            sleeve / investment risk in this model (not the same as Data QA on the snapshot).
+            sleeve / investment risk under the current model; selected snapshot-quality penalties also affect this score.
           </p>
-          <p className="text-xs text-zinc-500 mt-1">
+          <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
             <span className="text-zinc-200">Fit Score</span>:{' '}
             <span className="text-zinc-300 font-medium" title={fitScoreTooltip(candidate.fitScore)}>
               {candidate.fitScore} ({fitScoreBandWord(candidate.fitScore)})
             </span>
+            {' — '}
+            model yield-sleeve fit under the current rules; selected confidence and freshness adjustments also affect
+            this score. Not a recommendation.
           </p>
         </div>
         <div className="grid gap-2 text-xs sm:text-sm sm:grid-cols-2">
@@ -132,7 +135,9 @@ export function CandidateDetailPanel({ candidate }: { candidate: GhostYieldCandi
 
       <DetailSection title="Score drivers">
         <p className="text-[10px] text-zinc-500 leading-relaxed">
-          These drivers explain the current GhostYield model score. They are not buy/sell signals.
+          These drivers explain the current GhostYield model score. They are not buy/sell signals. Displayed drivers
+          highlight selected contributors and may not list every adjustment applied to the final score, including
+          snapshot-quality adjustments.
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
