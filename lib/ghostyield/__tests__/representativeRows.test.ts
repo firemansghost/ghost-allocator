@@ -38,7 +38,7 @@ function row(ticker: string) {
   assert.ok(c.cefMetrics);
   assert.equal(c.freshness.status, 'fresh');
   assert.equal(c.evidenceGate, 'qualified');
-  assert.equal(c.riskScore, 85);
+  assert.equal(c.riskScore, 97);
 }
 
 // ARCC — stale BDC → Qualified
@@ -60,14 +60,44 @@ function row(ticker: string) {
   assert.equal(c.riskScore, 92);
 }
 
+// BXSL — listed BDC NAV-quoted dist must not become headline-yield Risk
+{
+  const c = row('BXSL');
+  assert.ok(c.bdcMetrics);
+  assert.equal(c.currentYield, null);
+  assert.ok(c.distributionRate != null);
+  assert.equal(c.evidenceGate, 'qualified');
+  assert.equal(c.riskScore, 38);
+  assert.equal(c.fitScore, 89);
+}
+
+// BRW — CEF Dist fallback; Extreme
+{
+  const c = row('BRW');
+  assert.equal(c.structureLabel, 'CEF');
+  assert.equal(c.currentYield, null);
+  assert.equal(c.evidenceGate, 'qualified');
+  assert.equal(c.riskScore, 95);
+}
+
 // JEPI — missing NAV → Insufficient; Fit withheld
 {
   const c = row('JEPI');
   assert.equal(c.nav, null);
   assert.equal(c.freshness.status, 'missing');
   assert.equal(c.evidenceGate, 'insufficient');
-  assert.equal(c.riskScore, 28);
+  assert.equal(c.riskScore, 34);
   assert.equal(c.fitScore, 100);
+  assert.equal(isFitDisplaySuppressed(c.evidenceGate), true);
+}
+
+// JEPQ — option-income Dist fallback; Elevated
+{
+  const c = row('JEPQ');
+  assert.equal(c.sleeveType, 'option_income');
+  assert.equal(c.currentYield, null);
+  assert.equal(c.evidenceGate, 'insufficient');
+  assert.equal(c.riskScore, 60);
   assert.equal(isFitDisplaySuppressed(c.evidenceGate), true);
 }
 

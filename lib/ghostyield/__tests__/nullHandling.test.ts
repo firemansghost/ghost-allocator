@@ -1,6 +1,7 @@
 /**
  * CHARACTERIZATION — null handling after economic separation.
- * currentYield-null vs distributionRate/SEC headline-yield Risk skip remains a SEPARATE known defect.
+ * Headline-yield Risk uses currentYield first; cash/credit/preferred ETFs still
+ * have no Dist/SEC fallback (authorized exclusion).
  */
 
 import assert from 'node:assert/strict';
@@ -78,10 +79,8 @@ const fresh = {
 }
 
 /**
- * KNOWN SEPARATE DEFECT (out of scope for evidence-gate PR):
- * yieldRiskPoints uses currentYield only. When currentYield is null but
- * distributionRate / secYield are populated, generic headline-yield Risk
- * contribution remains absent.
+ * Authorized exclusion: cash/credit/preferred (this fixture is credit_income ETF)
+ * do not use distributionRate / secYield as headline-yield Risk when currentYield is null.
  */
 {
   const withCurrent = baseCandidate({
@@ -98,7 +97,7 @@ const fresh = {
   const rNull = computeGhostYieldRiskScore(nullCurrent, fresh);
   assert.ok(
     rCurrent > rNull,
-    'currentYield=0.12 adds yieldRiskPoints; null currentYield does not use distributionRate/secYield for that term'
+    'credit_income: currentYield=0.12 adds yieldRiskPoints; Dist/SEC are not a fallback'
   );
   assert.ok(rCurrent - rNull >= 12);
 }
