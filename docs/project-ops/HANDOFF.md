@@ -1,5 +1,44 @@
 ﻿# HANDOFF
 
+## Last Session Summary (2026-09-06 — GhostYield evidence-gate activation complete)
+GhostYield semantic / model architecture sequence is **complete**:
+
+- **PR #193** — deterministic semantic baseline characterization.
+- **PR #194** — truthful snapshot / score disclosure (reference prominence; honesty about then-blended QA in Risk/Fit).
+- **PR #195** — economic Risk/Fit + Evidence gate activation (merge `e05ee2e9b327d52a9e85c87237e27304d36ce2f3`).
+
+**Current GhostYield contract**
+
+- **Risk** = economic sleeve / investment risk only.
+- **Fit** = economic model fit only (not a recommendation).
+- **Evidence** = Clear / Qualified / Insufficient (deterministic from existing snapshot fields).
+- **Insufficient** → Fit withheld from display; Risk remains visible with Evidence qualifier.
+- **Data QA** remains separate snapshot-quality display.
+- Static reference = **2026-05-08**; no live feeds; no candidate refresh in this sequence.
+
+**Representative outputs (approved snapshot)**
+
+| Ticker | Risk | Fit (computed) | Evidence | Display |
+|--------|------|----------------|----------|---------|
+| SGOV | 4 | 100 | Clear | Fit shown |
+| JEPI | 28 | 100 internal | Insufficient | Fit — |
+| JAAA | 30 | 94 internal | Insufficient | Fit — |
+| ARDC | 85 | 64 | Qualified | Risk · Qual. |
+| KIO | 92 | 64 | Qualified | Risk · Qual. |
+
+**Deployment:** merged to `main`; Vercel **success** for `e05ee2e…`; live production `/income-factory` independently verified 2026-09-06 (Evidence column; JEPI Insufficient / Risk 28 / Fit —; reference 2026-05-08).
+
+## Priority for Next Session
+1. GhostYield evidence-gate architecture is **COMPLETE** unless a defect is found — do not reopen casually.
+2. Next GhostYield **model** issue (OPEN / **UNAUTHORIZED** here): `currentYield == null` while `distributionRate` / `secYield` exist can skip headline-yield Risk contribution. Requires dedicated impact audit + explicit model decision + separate PR. **Do not implement in a docs or opportunistic PR.**
+3. Possible later operational work (not this PR): consider wiring `test:ghostyield` into default CI; separate validator guardrails if warranted.
+4. Separate future GhostYield **data** refresh: sponsor docs / filings preferred; preserve nulls when unverified; secondary sources clearly labeled; **do not** combine with model changes.
+5. GhostRegime R7 remains closed / **KEEP CURRENT** — do not reopen without a new gate.
+6. GhostFlow score model remains untouched; do not change scores, artifacts, reference date, or Gate C casually.
+7. Keep Vercel V1 allowlist conservative (`scripts/**` BUILD; unknown → BUILD). Report `Vercel expected: BUILD|SKIP` on every PR.
+
+---
+
 ## Last Session Summary (2026-09-05 — docs truth cleanup Pass 2 + Vercel ACTIVE)
 Documentation-only truth cleanup after:
 
@@ -8,14 +47,9 @@ Documentation-only truth cleanup after:
 
 Pass 2 targets: GhostFlow current-state docs (**60 / 53 / 67** @ **2026-07-01**), Builder/Models sleeve docs (no active `convex_equity`), gold/commodities/USFR parity, Vercel policy activation wording, project-ops checkpoint.
 
-**Vercel expected** reporting is required on every PR (`BUILD` or `SKIP`) per [CHECKS.md](./CHECKS.md) and [VERCEL_DEPLOYMENT_POLICY.md](../VERCEL_DEPLOYMENT_POLICY.md).
+GhostYield honesty / freshness-semantics that was “next” here is **closed** by PR **#193–#195** (see 2026-09-06 summary above).
 
-## Priority for Next Session
-1. Finish / merge docs truth cleanup Pass 2 if still open
-2. Next substantive product workstream: **GhostYield honesty / freshness semantics** (separate PR; not docs-only GhostFlow score edits)
-3. Do **not** reopen GhostRegime R7 / R8 without a new gate
-4. Do **not** change GhostFlow scores, artifacts, reference date, or Gate C casually
-5. Keep Vercel V1 allowlist conservative (`scripts/**` BUILD; unknown → BUILD)
+**Vercel expected** reporting is required on every PR (`BUILD` or `SKIP`) per [CHECKS.md](./CHECKS.md) and [VERCEL_DEPLOYMENT_POLICY.md](../VERCEL_DEPLOYMENT_POLICY.md).
 
 ---
 

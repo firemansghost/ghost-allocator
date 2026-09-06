@@ -1,17 +1,60 @@
 ﻿# STATUS
 
+## Current State (GhostYield — 2026-09-06 evidence-gate activation complete)
+**ACTIVE CHECKPOINT (GhostYield semantic / model architecture)**
+
+GhostYield semantic workstream **#193 → #194 → #195** is **COMPLETE**.
+
+- **PR #193** — deterministic GhostYield semantic baseline characterization (`test:ghostyield` characterization locks).
+- **PR #194** — snapshot / score truth display repair (reference prominence; Risk/Fit disclosure that then still blended evidence — superseded by #195).
+- **PR #195** — economic Risk/Fit + categorical Evidence gate activation (merge `e05ee2e9b327d52a9e85c87237e27304d36ce2f3`).
+
+**Current GhostYield contract**
+
+| Layer | Meaning |
+|-------|---------|
+| **Risk Score** | Economic sleeve / investment risk only (0–100). |
+| **Fit Score** | Economic yield-sleeve fit only (0–100; not a recommendation). |
+| **Evidence** | Categorical gate: **Clear** / **Qualified** / **Insufficient**. |
+| **Data QA** | Separate snapshot freshness/completeness badges (not an investment-risk rating). |
+
+**Presentation**
+
+- Risk remains numeric and is visibly qualified when Evidence is not Clear.
+- Fit is **withheld** from user-facing display when Evidence is **Insufficient**.
+- Evidence quality (confidence, freshness, missing expected NAV) is **not** numerically blended into Risk/Fit.
+
+**Determinism / snapshot**
+
+- No `Date.now()`-driven scoring.
+- Static reference-date policy unchanged; current reference remains **2026-05-08**.
+- No candidate refresh, null filling, or source refresh in this workstream.
+
+**Deployment**
+
+- Merged to `main` at `e05ee2e…`. Vercel status for that commit: **success**.
+- Live production `/income-factory` independently verified 2026-09-06: Evidence column; Clear / Qualified / Insufficient; JEPI Insufficient / Risk 28 / Fit —; reference **2026-05-08**.
+
+**Open (separate; NOT resolved by #195):** when `currentYield == null` but `distributionRate` / `secYield` exist, headline-yield Risk contribution can be skipped. Requires dedicated impact audit + explicit model decision + separate PR. **Do not treat as fixed.**
+
+GhostRegime remains **KEEP CURRENT** / `ghostregime-v1.0.4` / Risk On **60 / 30 / 10**. R7 closed. GhostFlow score model untouched.
+
+Last updated: 2026-09-06
+
+---
+
 ## Current State (Project ops — 2026-09-05 documentation truth + Vercel hygiene)
-**ACTIVE CHECKPOINT (non-model)**
+**CHECKPOINT (non-model; superseded for GhostYield next-work wording)**
 
 Completed since R7D closeout:
 
 - **PR #190** — site-wide product-copy truth Pass 1 (homepage / shared claims) merged.
 - **PR #191** — Vercel deployment-hygiene guard merged; Ignored Build Step **ACTIVE V1** after live smoke tests (docs Markdown → SKIP; `app/**` → BUILD). Policy: [VERCEL_DEPLOYMENT_POLICY.md](../VERCEL_DEPLOYMENT_POLICY.md).
-- **This workstream:** documentation truth cleanup Pass 2 (GhostFlow current snapshot, Builder/Models sleeve docs, Convex Equity removal from current docs, Vercel activation record).
+- Documentation truth cleanup Pass 2 (GhostFlow current snapshot, Builder/Models sleeve docs, Convex Equity removal from current docs, Vercel activation record).
 
-**Next (authorized separately):** GhostYield honesty / freshness-semantics workstream. Do not mix into docs-only PRs.
+GhostYield honesty / freshness-semantics workstream that was “next” here is **closed** by PR **#193–#195** (see checkpoint above).
 
-GhostRegime production remains **KEEP CURRENT** / `ghostregime-v1.0.4` / Risk On **60 / 30 / 10**. R7 remains closed. No model change from this checkpoint.
+GhostRegime production remains **KEEP CURRENT** / `ghostregime-v1.0.4` / Risk On **60 / 30 / 10**. R7 remains closed. No model change from this 2026-09-05 checkpoint.
 
 Last updated: 2026-09-05
 
