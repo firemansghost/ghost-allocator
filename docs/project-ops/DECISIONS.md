@@ -1,5 +1,31 @@
 # DECISIONS
 
+## 2026-09-06 — GhostYield Risk uses structure-aware headline-yield resolution
+Choice:
+- `currentYield` remains first-choice Risk headline-yield input.
+- CEF rows may use indicated `distributionRate` when `currentYield` is absent.
+- `option_income` rows may use `distributionRate` when `currentYield` is absent.
+- Listed / structured BDC rows must **not** use NAV-quoted `distributionRate` as generic headline Risk.
+- SEC yield is **not** a generic Risk fallback.
+- Cash / credit / preferred ETF SEC-yield behavior remains intentionally unmodeled here.
+- Display-yield hierarchy and Risk-yield hierarchy remain **separate**.
+
+Why:
+- The pre-#197 implementation inconsistently gave **KIO** headline-yield Risk points while peer CEFs with the same economic payout concept stored as `distributionRate` received none.
+- A broad display-precedence fallback (`currentYield → Dist → SEC`) would incorrectly elevate **BXSL** because its `distributionRate` is NAV-quoted listed-BDC yield, not market headline yield.
+- Option-income `distributionRate` is a better payout-level signal than SEC yield for **JEPI / JEPQ**.
+- Conservative structure-aware resolution fixes the observed inconsistency without treating all yield fields as interchangeable.
+
+Consequences:
+- **PR #197** implements this resolver (merge `6db31a86d8f65e26fc6bab1df9bb261ec5b680dc`).
+- Material Risk changes include ARDC **97**, BRW **95**, JEPI **34**, JEPQ **60**.
+- BXSL remains **38**. KIO remains **92**.
+- No Fit changes. No Evidence-gate changes. No Risk tier / band changes. No SEC fallback.
+- No data refresh or null filling. Static reference remains **2026-05-08**.
+- Future expansion of SEC-yield fallback for cash / credit / preferred requires a **new explicit** model decision and is **not** authorized here.
+
+---
+
 ## 2026-09-06 — GhostYield separates economic scores from Evidence quality
 Choice:
 - GhostYield **Risk Score** is an economic / sleeve-risk score only.
@@ -24,7 +50,7 @@ Why:
 Consequences:
 - **PR #195** implements the approved architecture (preceded by baseline **#193** and truth-copy **#194**).
 - No candidate data refresh, null fills, reference-date change, Risk/Fit band-threshold change, or wall-clock scoring from this decision.
-- The separate **`currentYield` null vs distributionRate / secYield Risk-fallback** defect remains **open** and is **not** authorized by this decision.
+- The separate **`currentYield` null vs distributionRate / secYield Risk-fallback** defect remained **open** after this decision and was **not** authorized here. It was later resolved by the 2026-09-06 structure-aware headline-yield decision (**PR #197**).
 - Future changes to gate semantics or Risk/Fit definitions require a **new explicit** model / product decision.
 
 ---

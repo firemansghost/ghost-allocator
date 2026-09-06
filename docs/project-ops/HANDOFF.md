@@ -1,5 +1,46 @@
 ﻿# HANDOFF
 
+## Last Session Summary (2026-09-06 — GhostYield headline-yield resolver complete)
+**PR #197** merged as `6db31a86d8f65e26fc6bab1df9bb261ec5b680dc`. The previously open `currentYield` headline-yield Risk fallback defect is **RESOLVED**.
+
+**Current headline-yield Risk contract**
+
+- `currentYield` first when present.
+- CEF Dist fallback when `currentYield` is absent.
+- Option-income Dist fallback when `currentYield` is absent.
+- No listed / structured BDC Dist or SEC fallback.
+- No generic SEC fallback (cash / credit / preferred SEC-yield remains unmodeled).
+- Display-yield hierarchy and Risk-yield hierarchy remain **separate**.
+
+**Representative outputs (post-#197 snapshot, reference 2026-05-08)**
+
+| Ticker | Risk | Notes |
+|--------|------|-------|
+| SGOV | 4 | unchanged |
+| BXSL | 38 | BDC NAV Dist excluded |
+| KIO | 92 | `currentYield` still wins |
+| ARDC | 97 | CEF Dist |
+| BRW | 95 | CEF Dist |
+| JEPI | 34 | option Dist; Fit withheld |
+| JEPQ | 60 | option Dist; Fit withheld |
+
+Fit / Evidence presentation **unchanged from PR #195**. Static reference **2026-05-08**. No data refresh.
+
+**Deployment:** merged to `main`; Vercel **success** for `6db31a8…`; live production `/income-factory` independently verified 2026-09-06 (scores above; JEPI/JEPQ Fit —; Evidence Clear/Qualified/Insufficient as before).
+
+## Priority for Next Session
+1. GhostYield evidence-gate architecture is **COMPLETE**.
+2. Headline-yield resolver defect is **RESOLVED**.
+3. GhostYield is in a **stability checkpoint** — do **not** initiate another scoring change without new evidence.
+4. Possible later operational work (not this PR): consider wiring `test:ghostyield` into default CI; separate validator guardrails if warranted.
+5. Future GhostYield **data** refresh remains a separate source / provenance workstream — do not combine with model changes.
+6. SEC-yield fallback for cash / credit / preferred remains intentionally **not implemented and not authorized**.
+7. GhostRegime R7 remains closed / **KEEP CURRENT** — do not reopen without a new gate.
+8. GhostFlow score model remains untouched; do not change scores, artifacts, reference date, or Gate C casually.
+9. Keep Vercel V1 allowlist conservative (`scripts/**` BUILD; unknown → BUILD). Report `Vercel expected: BUILD|SKIP` on every PR.
+
+---
+
 ## Last Session Summary (2026-09-06 — GhostYield evidence-gate activation complete)
 GhostYield semantic / model architecture sequence is **complete**:
 
@@ -30,7 +71,7 @@ GhostYield semantic / model architecture sequence is **complete**:
 
 ## Priority for Next Session
 1. GhostYield evidence-gate architecture is **COMPLETE** unless a defect is found — do not reopen casually.
-2. Next GhostYield **model** issue (OPEN / **UNAUTHORIZED** here): `currentYield == null` while `distributionRate` / `secYield` exist can skip headline-yield Risk contribution. Requires dedicated impact audit + explicit model decision + separate PR. **Do not implement in a docs or opportunistic PR.**
+2. The `currentYield` headline-yield Risk fallback that was still open after #195 was later **resolved by PR #197** (see active 2026-09-06 closeout above).
 3. Possible later operational work (not this PR): consider wiring `test:ghostyield` into default CI; separate validator guardrails if warranted.
 4. Separate future GhostYield **data** refresh: sponsor docs / filings preferred; preserve nulls when unverified; secondary sources clearly labeled; **do not** combine with model changes.
 5. GhostRegime R7 remains closed / **KEEP CURRENT** — do not reopen without a new gate.
