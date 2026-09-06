@@ -2,7 +2,8 @@
  * GhostYield screener UI copy — labels and tooltips only (no scoring logic).
  */
 
-import type { GhostYieldFreshnessStatus } from './types';
+import type { GhostYieldEvidenceGate, GhostYieldFreshnessStatus } from './types';
+import { isFitDisplaySuppressed } from './evidenceGate';
 
 export const FRESHNESS_STATUS_LABEL: Record<GhostYieldFreshnessStatus, string> = {
   fresh: 'Fresh in snapshot',
@@ -12,14 +13,34 @@ export const FRESHNESS_STATUS_LABEL: Record<GhostYieldFreshnessStatus, string> =
   illustrative: 'Sample Data',
 };
 
+export const EVIDENCE_GATE_LABEL: Record<GhostYieldEvidenceGate, string> = {
+  clear: 'Clear',
+  qualified: 'Qualified',
+  insufficient: 'Insufficient',
+};
+
+export const EVIDENCE_GATE_SHORT: Record<GhostYieldEvidenceGate, string> = {
+  clear: 'Clear',
+  qualified: 'Qual.',
+  insufficient: 'Insuff.',
+};
+
 /** Column header `title` / tooltip for the Data QA badges. */
 export const DATA_QA_COLUMN_TOOLTIP =
-  'Snapshot quality for this manual row (freshness and field completeness). Freshness is measured against the manual snapshot reference date, not today\'s date or a live feed. Data QA itself is not an investment-risk rating—but the current Risk and Fit formulas also include selected confidence, freshness, and missing-data adjustments. Missing fields do not automatically mean a bad fund; fresh-in-snapshot does not automatically mean a safe fund.';
+  "Snapshot freshness/completeness for this manual row. Measured against the snapshot reference date, not today's date. Data QA badges are not investment-risk ratings. Risk and Fit are economic scores; Evidence (Clear / Qualified / Insufficient) gates how they are presented.";
+
+/** Column tooltip for Evidence gate. */
+export const EVIDENCE_COLUMN_TOOLTIP =
+  'Evidence posture derived from snapshot confidence, freshness, and critical expected fields (such as NAV for ETF/CEF wrappers). Clear = adequate; Qualified = usable with caution; Insufficient = Fit withheld and Risk shown with a warning. Not an investment-risk rating.';
 
 /** Tooltip on individual freshness badges (redundant with column but helps mobile). */
 export function freshnessBadgeTitle(status: GhostYieldFreshnessStatus): string {
   const base = FRESHNESS_STATUS_LABEL[status];
   return `${base} — ${DATA_QA_COLUMN_TOOLTIP}`;
+}
+
+export function evidenceGateTitle(gate: GhostYieldEvidenceGate): string {
+  return `Evidence: ${EVIDENCE_GATE_LABEL[gate]} — ${EVIDENCE_COLUMN_TOOLTIP}`;
 }
 
 function clampScore(n: number): number {
@@ -62,9 +83,11 @@ export function riskScoreBandShort(score: number): string {
   return RISK_BAND_SHORT[riskScoreBand(score)];
 }
 
-export function riskScoreTooltip(score: number): string {
+export function riskScoreTooltip(score: number, gate?: GhostYieldEvidenceGate): string {
   const w = riskScoreBandWord(score);
-  return `Risk Score ${score} — ${w}. Scale 0–100 (higher = riskier). Bands: 0–24 Low, 25–49 Moderate, 50–69 Elevated, 70–84 High, 85–100 Extreme. Current score includes sleeve/investment factors plus selected data-confidence, freshness, and missing-data adjustments.`;
+  const base = `Risk Score ${score} — ${w}. Scale 0–100 (higher = riskier). Bands: 0–24 Low, 25–49 Moderate, 50–69 Elevated, 70–84 High, 85–100 Extreme. Economic sleeve/investment factors only — evidence quality is not blended into this number.`;
+  if (!gate || gate === 'clear') return base;
+  return `${base} Evidence: ${EVIDENCE_GATE_LABEL[gate]} — interpret with the snapshot-quality caveat.`;
 }
 
 export type FitBandId = 'strong' | 'good' | 'watchlist' | 'weak';
@@ -99,7 +122,14 @@ export function fitScoreBandShort(score: number): string {
   return FIT_BAND_SHORT[fitScoreBand(score)];
 }
 
-export function fitScoreTooltip(score: number): string {
+export function fitScoreTooltip(score: number, gate?: GhostYieldEvidenceGate): string {
+  if (gate && isFitDisplaySuppressed(gate)) {
+    return `Fit Score withheld — Evidence: Insufficient. Critical snapshot gaps (for example missing expected NAV) prevent showing Model Fit. Economic fit is still computed internally but not displayed.`;
+  }
   const w = fitScoreBandWord(score);
-  return `Fit Score ${score} — ${w}. Scale 0–100 (higher = better fit under the static GhostYield rules; not a recommendation). Bands: 85–100 Strong Fit, 70–84 Good Fit, 50–69 Watchlist Fit, below 50 Weak Fit. Current score includes yield-sleeve fit factors plus selected confidence and freshness adjustments.`;
+  const base = `Fit Score ${score} — ${w}. Scale 0–100 (higher = better economic fit under GhostYield rules; not a recommendation). Bands: 85–100 Strong Fit, 70–84 Good Fit, 50–69 Watchlist Fit, below 50 Weak Fit. Economic fit factors only — evidence quality is not blended into this number.`;
+  if (!gate || gate === 'clear') return base;
+  return `${base} Evidence: ${EVIDENCE_GATE_LABEL[gate]}.`;
 }
+
+export { isFitDisplaySuppressed };

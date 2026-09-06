@@ -10,13 +10,19 @@ import {
 } from '@/lib/ghostyield/candidateFields';
 import {
   DATA_QA_COLUMN_TOOLTIP,
+  EVIDENCE_COLUMN_TOOLTIP,
+  EVIDENCE_GATE_LABEL,
+  EVIDENCE_GATE_SHORT,
   FRESHNESS_STATUS_LABEL,
+  evidenceGateTitle,
   fitScoreBandShort,
   fitScoreTooltip,
   freshnessBadgeTitle,
+  isFitDisplaySuppressed,
   riskScoreBandShort,
   riskScoreTooltip,
 } from '@/lib/ghostyield/screenerDisplay';
+import type { GhostYieldEvidenceGate } from '@/lib/ghostyield/types';
 
 function pct(y: number | null | undefined) {
   if (y == null) return '—';
@@ -65,6 +71,24 @@ function FreshnessBadge({ status }: { status: GhostYieldCandidate['freshness']['
   );
 }
 
+function EvidenceBadge({ gate }: { gate: GhostYieldEvidenceGate }) {
+  const cls =
+    gate === 'clear'
+      ? 'bg-emerald-950/50 text-emerald-300/95 border-emerald-500/30'
+      : gate === 'qualified'
+        ? 'bg-amber-950/45 text-amber-200/95 border-amber-500/35'
+        : 'bg-red-950/40 text-red-200/95 border-red-500/35';
+  return (
+    <span
+      className={`inline-block rounded border px-1.5 py-0.5 text-[10px] font-medium sm:text-xs whitespace-nowrap ${cls}`}
+      title={evidenceGateTitle(gate)}
+    >
+      <span className="sm:hidden">{EVIDENCE_GATE_SHORT[gate]}</span>
+      <span className="hidden sm:inline">{EVIDENCE_GATE_LABEL[gate]}</span>
+    </span>
+  );
+}
+
 export function CandidateTable({
   candidates,
   selectedTicker,
@@ -78,7 +102,7 @@ export function CandidateTable({
     <>
       <p className="mb-1.5 text-[11px] text-zinc-500 md:hidden">Scroll sideways to see all columns.</p>
       <div className="overflow-x-auto overscroll-x-contain touch-pan-x rounded-xl border border-zinc-800/80 bg-zinc-950/40">
-        <table className="w-full min-w-[920px] text-left text-xs sm:text-sm">
+        <table className="w-full min-w-[980px] text-left text-xs sm:text-sm">
           <thead>
             <tr className="border-b border-zinc-800/90 text-zinc-500">
               <th
@@ -122,14 +146,20 @@ export function CandidateTable({
                 Data QA
               </th>
               <th
-                className={`${CELL} min-w-[6rem] font-medium whitespace-nowrap`}
-                title="GhostYield Risk Score 0–100 — higher is riskier under the current rules. The score includes sleeve/investment factors plus selected snapshot-quality penalties."
+                className={`${CELL} min-w-[5.5rem] font-medium whitespace-nowrap`}
+                title={EVIDENCE_COLUMN_TOOLTIP}
+              >
+                Evidence
+              </th>
+              <th
+                className={`${CELL} min-w-[6.5rem] font-medium whitespace-nowrap`}
+                title="GhostYield Risk Score 0–100 — higher is riskier under economic sleeve/investment rules. Evidence quality is not blended into the number; Qualified/Insufficient evidence is shown beside the score."
               >
                 Risk Score
               </th>
               <th
                 className={`${CELL} min-w-[6rem] font-medium whitespace-nowrap`}
-                title="GhostYield Fit Score 0–100 — higher is a cleaner model fit under the current rules. The score also includes selected confidence/freshness adjustments. Not a recommendation."
+                title="GhostYield Fit Score 0–100 — higher is a cleaner economic model fit. Withheld when Evidence is Insufficient. Not a recommendation."
               >
                 Fit Score
               </th>
@@ -140,6 +170,7 @@ export function CandidateTable({
               const sel = row.ticker === selectedTicker;
               const nav1y = effectiveNavPerformance1Y(row);
               const dy = effectiveDisplayYield(row);
+              const fitSuppressed = isFitDisplaySuppressed(row.evidenceGate);
               const stickyTickerBg = sel
                 ? 'bg-amber-950/40'
                 : 'bg-zinc-950/95 group-hover:bg-zinc-900/50';
@@ -196,23 +227,37 @@ export function CandidateTable({
                   <td className={`${CELL} min-w-[8rem] whitespace-nowrap`}>
                     <FreshnessBadge status={row.freshness.status} />
                   </td>
+                  <td className={`${CELL} min-w-[5.5rem] whitespace-nowrap`}>
+                    <EvidenceBadge gate={row.evidenceGate} />
+                  </td>
                   <td
-                    className={`${CELL} min-w-[6rem] text-zinc-300 tabular-nums whitespace-nowrap`}
-                    title={riskScoreTooltip(row.riskScore)}
+                    className={`${CELL} min-w-[6.5rem] text-zinc-300 tabular-nums whitespace-nowrap`}
+                    title={riskScoreTooltip(row.riskScore, row.evidenceGate)}
                   >
                     <span>{row.riskScore}</span>
                     <span className="ml-1 text-[9px] text-zinc-500 sm:text-[10px] whitespace-nowrap">
                       {riskScoreBandShort(row.riskScore)}
                     </span>
+                    {row.evidenceGate !== 'clear' ? (
+                      <span className="ml-1 text-[9px] text-amber-400/80 whitespace-nowrap">
+                        · {EVIDENCE_GATE_SHORT[row.evidenceGate]}
+                      </span>
+                    ) : null}
                   </td>
                   <td
                     className={`${CELL} min-w-[6rem] text-zinc-300 tabular-nums whitespace-nowrap`}
-                    title={fitScoreTooltip(row.fitScore)}
+                    title={fitScoreTooltip(row.fitScore, row.evidenceGate)}
                   >
-                    <span>{row.fitScore}</span>
-                    <span className="ml-1 text-[9px] text-zinc-500 sm:text-[10px] whitespace-nowrap">
-                      {fitScoreBandShort(row.fitScore)}
-                    </span>
+                    {fitSuppressed ? (
+                      <span className="text-zinc-500">—</span>
+                    ) : (
+                      <>
+                        <span>{row.fitScore}</span>
+                        <span className="ml-1 text-[9px] text-zinc-500 sm:text-[10px] whitespace-nowrap">
+                          {fitScoreBandShort(row.fitScore)}
+                        </span>
+                      </>
+                    )}
                   </td>
                 </tr>
               );

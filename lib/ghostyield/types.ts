@@ -30,6 +30,12 @@ export type DistributionFrequency = 'weekly' | 'monthly' | 'quarterly' | 'semian
 /** Roll-up for badges and scoring penalties. */
 export type GhostYieldFreshnessStatus = 'fresh' | 'caution' | 'stale' | 'missing' | 'illustrative';
 
+/**
+ * Categorical evidence posture for Risk/Fit presentation.
+ * Derived from freshness status, confidence, and critical expected fields — not a 0–100 score.
+ */
+export type GhostYieldEvidenceGate = 'clear' | 'qualified' | 'insufficient';
+
 export interface CandidateFreshnessResult {
   status: GhostYieldFreshnessStatus;
   warnings: string[];
@@ -179,6 +185,8 @@ export interface GhostYieldCandidate extends GhostYieldCandidateRaw {
   riskScore: number;
   fitScore: number;
   freshness: CandidateFreshnessResult;
+  /** Categorical evidence posture; Fit display is suppressed when `insufficient`. */
+  evidenceGate: GhostYieldEvidenceGate;
   riskDrivers: GhostYieldScoreDriver[];
   fitDrivers: GhostYieldScoreDriver[];
 }

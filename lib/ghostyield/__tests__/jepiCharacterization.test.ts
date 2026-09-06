@@ -1,13 +1,13 @@
 /**
- * CURRENT BEHAVIOR CHARACTERIZATION — not desired behavior.
+ * DESIRED BEHAVIOR after economic Risk/Fit separation + Evidence gate.
  *
- * Documents committed JEPI on the static snapshot: missing NAV → Data Gaps,
- * Risk 56, Fit 100 (Strong Fit band). Future confidence-gate / semantic work
- * is expected to change this result; do not treat these asserts as product goals.
+ * JEPI: missing expected NAV → Evidence Insufficient.
+ * Economic Risk ≈ 28 (Moderate); Fit computed internally but display withheld.
  */
 
 import assert from 'node:assert/strict';
 import { GHOSTYIELD_SCORED_CANDIDATES } from '../sampleCandidates';
+import { isFitDisplaySuppressed } from '../evidenceGate';
 import { fitScoreBand, fitScoreBandWord } from '../screenerDisplay';
 
 const jepi = GHOSTYIELD_SCORED_CANDIDATES.find((c) => c.ticker === 'JEPI');
@@ -21,21 +21,23 @@ assert.equal(jepi.freshness.status, 'missing');
 assert.equal(jepi.freshness.applyScoringPenalty, true);
 assert.ok(jepi.freshness.warnings.some((w) => /Missing NAV/i.test(w)));
 
-assert.equal(jepi.riskScore, 56);
-assert.equal(jepi.fitScore, 100);
+assert.equal(jepi.evidenceGate, 'insufficient');
+assert.equal(isFitDisplaySuppressed(jepi.evidenceGate), true);
+
+assert.equal(jepi.riskScore, 28);
+assert.equal(jepi.fitScore, 100); // economic Fit still computed
 assert.equal(fitScoreBand(jepi.fitScore), 'strong');
 assert.equal(fitScoreBandWord(jepi.fitScore), 'Strong Fit');
 
 const riskLabels = jepi.riskDrivers.map((d) => d.label);
-assert.ok(riskLabels.includes('Missing NAV'));
-assert.ok(riskLabels.includes('Stale or incomplete snapshot'));
+assert.ok(riskLabels.includes('Sleeve category risk'));
+assert.ok(!riskLabels.includes('Missing NAV'));
+assert.ok(!riskLabels.includes('Stale or incomplete snapshot'));
 
 const fitLabels = jepi.fitDrivers.map((d) => d.label);
 assert.ok(fitLabels.includes('Distribution quality'));
-assert.ok(fitLabels.includes('NAV trend'));
-assert.ok(fitLabels.includes('Data confidence'));
-// CURRENT BEHAVIOR: applied freshness/missing Fit penalty is not among top Fit drivers.
+assert.ok(!fitLabels.includes('Data confidence'));
 assert.ok(!fitLabels.includes('Snapshot freshness'));
 assert.ok(!fitLabels.includes('Fresh snapshot'));
 
-console.log('ghostyield/jepiCharacterization.test.ts: ok (CURRENT BEHAVIOR — Fit 100 + missing NAV)');
+console.log('ghostyield/jepiCharacterization.test.ts: ok (Evidence Insufficient; Fit withheld; Risk 28)');

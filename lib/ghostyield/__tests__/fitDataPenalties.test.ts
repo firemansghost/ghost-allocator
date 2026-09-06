@@ -1,6 +1,5 @@
 /**
- * CHARACTERIZATION — documents current Fit Score confidence/freshness adjustments.
- * Not desired semantics; locks current blend before confidence-gate work.
+ * DESIRED BEHAVIOR: Fit no longer includes confidence/freshness numeric adjustments.
  */
 
 import assert from 'node:assert/strict';
@@ -11,7 +10,6 @@ import { baseCandidate, TEST_REFERENCE_AS_OF } from './fixtures';
 const REF = TEST_REFERENCE_AS_OF;
 
 {
-  // Keep scores away from the 0–100 clamp so confidence weights are visible.
   const shared = {
     currentYield: 0.04,
     distributionQuality: 'mixed' as const,
@@ -21,18 +19,16 @@ const REF = TEST_REFERENCE_AS_OF;
   };
   const rowHigh = baseCandidate({ ...shared, dataConfidence: 'high', confidence: 'high' });
   const rowLow = baseCandidate({ ...shared, dataConfidence: 'low', confidence: 'low' });
-  // Hold freshness constant so only confidence weights differ.
-  // Note: fresh+high also gets +4 freshness bonus; fresh+low gets no freshness term.
   const fresh = {
     status: 'fresh' as const,
     warnings: [] as string[],
     applyScoringPenalty: false,
   };
-  const fitHigh = computeGhostYieldFitScore(rowHigh, fresh);
-  const fitLow = computeGhostYieldFitScore(rowLow, fresh);
-  // Current: high +6 and fresh+high +4; low -8 and fresh+low +0 → delta 18
-  assert.equal(fitHigh - fitLow, 18);
-  assert.ok(fitHigh < 100 && fitLow > 0, 'scores must be unclamped for this characterization');
+  assert.equal(
+    computeGhostYieldFitScore(rowHigh, fresh),
+    computeGhostYieldFitScore(rowLow, fresh),
+    'confidence must not change economic Fit'
+  );
 }
 
 {
@@ -60,20 +56,10 @@ const REF = TEST_REFERENCE_AS_OF;
     warnings: ['forced'],
     applyScoringPenalty: true,
   });
-  const cautionFit = computeGhostYieldFitScore(row, {
-    status: 'caution',
-    warnings: ['forced'],
-    applyScoringPenalty: true,
-  });
-
-  // Current: fresh+high +4; missing/stale -10; caution -4
-  assert.equal(freshFit - missingFit, 14);
-  assert.equal(freshFit - staleFit, 14);
-  assert.equal(freshFit - cautionFit, 8);
-  assert.ok(freshFit < 100 && missingFit > 0);
+  assert.equal(freshFit, missingFit);
+  assert.equal(freshFit, staleFit);
 }
 
-// End-to-end: missing NAV path reduces Fit vs identical row with NAV (current rules)
 {
   const withNav = baseCandidate({ nav: 100, navDataAsOf: '2026-05-07' });
   const noNav = baseCandidate({ nav: null, navDataAsOf: undefined });
@@ -81,9 +67,11 @@ const REF = TEST_REFERENCE_AS_OF;
   const fMissing = evaluateCandidateFreshness(noNav, REF);
   assert.equal(fNav.status, 'fresh');
   assert.equal(fMissing.status, 'missing');
-  const fitNav = computeGhostYieldFitScore(withNav, fNav);
-  const fitMissing = computeGhostYieldFitScore(noNav, fMissing);
-  assert.ok(fitNav > fitMissing);
+  assert.equal(
+    computeGhostYieldFitScore(withNav, fNav),
+    computeGhostYieldFitScore(noNav, fMissing),
+    'missing NAV must not change economic Fit'
+  );
 }
 
-console.log('ghostyield/fitDataPenalties.test.ts: ok (CHARACTERIZATION of current blend)');
+console.log('ghostyield/fitDataPenalties.test.ts: ok (evidence no longer in Fit)');

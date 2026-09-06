@@ -29,9 +29,10 @@ export function DataFreshnessPanel({
       <div>
         <h2 className="text-xs font-semibold uppercase tracking-wide text-amber-400/90">Source & data quality</h2>
         <p className="text-[11px] text-zinc-500 mt-1 leading-snug">
-          Data QA describes snapshot quality; it is not itself an investment-risk rating. The current Risk and Fit
-          formulas do include selected confidence, freshness, and missing-data adjustments. Missing data does not
-          automatically mean a bad fund; fresh-in-snapshot does not automatically mean a safe fund.
+          Data QA describes snapshot freshness and completeness. It is not itself an investment-risk rating. Risk and Fit
+          are economic scores; Evidence (Clear / Qualified / Insufficient) gates how they are presented — Fit is withheld
+          when Evidence is Insufficient. Missing data does not automatically mean a bad fund; fresh-in-snapshot does not
+          automatically mean a safe fund.
         </p>
       </div>
       <div className="space-y-1">

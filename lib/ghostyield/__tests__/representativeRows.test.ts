@@ -1,10 +1,10 @@
 /**
- * CHARACTERIZATION: representative committed rows and their semantic edge conditions.
- * Not a full 20-row snapshot freeze.
+ * CHARACTERIZATION: representative committed rows after evidence-gate activation.
  */
 
 import assert from 'node:assert/strict';
 import { GHOSTYIELD_SCORED_CANDIDATES } from '../sampleCandidates';
+import { isFitDisplaySuppressed } from '../evidenceGate';
 
 function row(ticker: string) {
   const c = GHOSTYIELD_SCORED_CANDIDATES.find((x) => x.ticker === ticker);
@@ -12,67 +12,76 @@ function row(ticker: string) {
   return c;
 }
 
-// SGOV — high-confidence / complete
+// SGOV — high-confidence / complete control
 {
   const c = row('SGOV');
   assert.equal(c.dataConfidence, 'high');
   assert.equal(c.freshness.status, 'fresh');
-  assert.equal(c.freshness.applyScoringPenalty, false);
-  assert.notEqual(c.nav, null);
+  assert.equal(c.evidenceGate, 'clear');
+  assert.equal(c.riskScore, 4);
   assert.equal(c.fitScore, 100);
+  assert.equal(isFitDisplaySuppressed(c.evidenceGate), false);
 }
 
-// HYG — caution (missing distribution source fields on otherwise usable row)
+// HYG — caution → Qualified
 {
   const c = row('HYG');
   assert.equal(c.freshness.status, 'caution');
-  assert.equal(c.freshness.applyScoringPenalty, true);
+  assert.equal(c.evidenceGate, 'qualified');
+  assert.equal(c.riskScore, 31);
 }
 
-// ARDC — CEF with structured cefMetrics
+// ARDC — CEF structured metrics; medium conf → Qualified; Extreme economic Risk retained
 {
   const c = row('ARDC');
   assert.equal(c.structureLabel, 'CEF');
   assert.ok(c.cefMetrics);
-  assert.notEqual(c.cefMetrics?.effectiveLeverage, null);
   assert.equal(c.freshness.status, 'fresh');
+  assert.equal(c.evidenceGate, 'qualified');
+  assert.equal(c.riskScore, 85);
 }
 
-// ARCC — listed BDC with stale lineage vs static reference
+// ARCC — stale BDC → Qualified
 {
   const c = row('ARCC');
   assert.equal(c.sleeveType, 'bdc_income');
   assert.ok(c.bdcMetrics);
   assert.equal(c.freshness.status, 'stale');
-  assert.equal(c.freshness.applyScoringPenalty, true);
+  assert.equal(c.evidenceGate, 'qualified');
+  assert.equal(c.riskScore, 36);
 }
 
-// KIO — stale NAV lineage / high structural risk
+// KIO — stale CEF; Extreme economic Risk retained without freshness penalty
 {
   const c = row('KIO');
   assert.equal(c.structureLabel, 'CEF');
   assert.equal(c.freshness.status, 'stale');
-  assert.equal(c.riskScore, 100);
+  assert.equal(c.evidenceGate, 'qualified');
+  assert.equal(c.riskScore, 92);
 }
 
-// JEPI — missing NAV with extreme Fit (see dedicated characterization file)
+// JEPI — missing NAV → Insufficient; Fit withheld
 {
   const c = row('JEPI');
   assert.equal(c.nav, null);
   assert.equal(c.freshness.status, 'missing');
+  assert.equal(c.evidenceGate, 'insufficient');
+  assert.equal(c.riskScore, 28);
   assert.equal(c.fitScore, 100);
+  assert.equal(isFitDisplaySuppressed(c.evidenceGate), true);
 }
 
-// JAAA — missing NAV; stale distribution/quarterly lineage still present in warnings
-// Status precedence remains `missing` even while stale lineage warnings coexist.
+// JAAA — missing NAV + stale lineage warnings; Insufficient
 {
   const c = row('JAAA');
   assert.equal(c.nav, null);
   assert.equal(c.freshness.status, 'missing');
+  assert.equal(c.evidenceGate, 'insufficient');
   assert.ok(c.freshness.warnings.some((w) => /Missing NAV/i.test(w)));
   assert.ok(c.freshness.warnings.some((w) => /90 days \(stale\)/i.test(w)));
   assert.ok(c.freshness.warnings.some((w) => /Quarterly fundamentals/i.test(w)));
-  assert.ok(c.fitScore >= 85);
+  assert.equal(c.riskScore, 30);
+  assert.equal(isFitDisplaySuppressed(c.evidenceGate), true);
 }
 
 console.log('ghostyield/representativeRows.test.ts: ok');

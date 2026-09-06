@@ -9,8 +9,10 @@ import {
   isListedBdcStock,
 } from '@/lib/ghostyield/candidateFields';
 import {
+  EVIDENCE_GATE_LABEL,
   fitScoreBandWord,
   fitScoreTooltip,
+  isFitDisplaySuppressed,
   riskScoreBandWord,
   riskScoreTooltip,
 } from '@/lib/ghostyield/screenerDisplay';
@@ -96,6 +98,7 @@ export function CandidateDetailPanel({ candidate }: { candidate: GhostYieldCandi
   const legacyOnly3y = candidate.navPerformance3Y == null && candidate.navTrend3Y != null;
   const dc = effectiveDataConfidence(candidate);
   const tableYield = effectiveDisplayYield(candidate);
+  const fitSuppressed = isFitDisplaySuppressed(candidate.evidenceGate);
 
   return (
     <GlassCard className="p-4 sm:p-5 space-y-4">
@@ -106,21 +109,43 @@ export function CandidateDetailPanel({ candidate }: { candidate: GhostYieldCandi
             <span className="text-zinc-500 font-normal text-sm font-mono">— {candidate.name}</span>
           </h2>
           <p className="text-xs text-zinc-500 mt-1.5 leading-relaxed">
+            <span className="text-zinc-200">Evidence</span>:{' '}
+            <span className="text-zinc-300 font-medium">{EVIDENCE_GATE_LABEL[candidate.evidenceGate]}</span>
+            {' — '}
+            snapshot confidence posture (Clear / Qualified / Insufficient). Separate from economic Risk/Fit numbers.
+          </p>
+          <p className="text-xs text-zinc-500 mt-1.5 leading-relaxed">
             <span className="text-zinc-200">Risk Score</span>{' '}
-            <span className="text-zinc-300 font-medium" title={riskScoreTooltip(candidate.riskScore)}>
+            <span
+              className="text-zinc-300 font-medium"
+              title={riskScoreTooltip(candidate.riskScore, candidate.evidenceGate)}
+            >
               {candidate.riskScore} ({riskScoreBandWord(candidate.riskScore)})
             </span>
             {' — '}
-            sleeve / investment risk under the current model; selected snapshot-quality penalties also affect this score.
+            economic sleeve / investment risk only. Evidence is not blended into this number
+            {candidate.evidenceGate !== 'clear'
+              ? `; treat as ${EVIDENCE_GATE_LABEL[candidate.evidenceGate].toLowerCase()} evidence.`
+              : '.'}
           </p>
           <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
             <span className="text-zinc-200">Fit Score</span>:{' '}
-            <span className="text-zinc-300 font-medium" title={fitScoreTooltip(candidate.fitScore)}>
-              {candidate.fitScore} ({fitScoreBandWord(candidate.fitScore)})
-            </span>
+            {fitSuppressed ? (
+              <span className="text-zinc-300 font-medium" title={fitScoreTooltip(candidate.fitScore, candidate.evidenceGate)}>
+                — (withheld)
+              </span>
+            ) : (
+              <span
+                className="text-zinc-300 font-medium"
+                title={fitScoreTooltip(candidate.fitScore, candidate.evidenceGate)}
+              >
+                {candidate.fitScore} ({fitScoreBandWord(candidate.fitScore)})
+              </span>
+            )}
             {' — '}
-            model yield-sleeve fit under the current rules; selected confidence and freshness adjustments also affect
-            this score. Not a recommendation.
+            {fitSuppressed
+              ? 'Model Fit is withheld when Evidence is Insufficient (critical snapshot gaps). Not a recommendation.'
+              : 'economic model yield-sleeve fit only. Evidence is not blended into this number. Not a recommendation.'}
           </p>
         </div>
         <div className="grid gap-2 text-xs sm:text-sm sm:grid-cols-2">
@@ -135,9 +160,11 @@ export function CandidateDetailPanel({ candidate }: { candidate: GhostYieldCandi
 
       <DetailSection title="Score drivers">
         <p className="text-[10px] text-zinc-500 leading-relaxed">
-          These drivers explain the current GhostYield model score. They are not buy/sell signals. Displayed drivers
-          highlight selected contributors and may not list every adjustment applied to the final score, including
-          snapshot-quality adjustments.
+          These drivers explain economic Risk/Fit contributors under the current GhostYield rules. They are not buy/sell
+          signals. Evidence gaps are handled by the Evidence gate, not by blending into these scores.
+          {fitSuppressed
+            ? ' Fit drivers below describe the internal economic Fit calculation even though Fit is withheld from display.'
+            : ''}
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
