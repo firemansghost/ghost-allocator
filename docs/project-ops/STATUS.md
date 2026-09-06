@@ -1,7 +1,55 @@
 ﻿# STATUS
 
+## Current State (GhostYield — 2026-09-06 headline-yield resolver complete)
+**ACTIVE CHECKPOINT (GhostYield)**
+
+GhostYield semantic / model sequence **#193 → #194 → #195 → #197** is **COMPLETE**. Evidence-gate architecture remains as approved in **PR #195**. The previously open **`currentYield` headline-yield Risk fallback** defect is **RESOLVED** by **PR #197** (merge `6db31a86d8f65e26fc6bab1df9bb261ec5b680dc`).
+
+**Headline-yield Risk contract (PR #197)**
+
+- `currentYield` remains authoritative when present.
+- Listed / structured BDC rows do **not** fall back to Dist or SEC.
+- CEF-style rows may use the CEF indicated distribution rate when `currentYield` is absent.
+- `option_income` rows may use `distributionRate` when `currentYield` is absent.
+- Cash / credit / preferred rows do **not** use an SEC-yield fallback.
+- SEC yield is **not** a generic Risk fallback.
+- Display-yield hierarchy and Risk-yield hierarchy remain **separate**.
+
+**Unchanged from PR #195**
+
+- Risk = economic sleeve / investment risk only; Fit = economic yield-sleeve fit only.
+- Evidence = Clear / Qualified / Insufficient; Fit withheld when Insufficient.
+- Data QA remains separate snapshot freshness/completeness.
+- Risk thresholds / bands unchanged. Fit unchanged. Evidence gate unchanged.
+- Static reference remains **2026-05-08**. No candidate data refresh / null fill.
+
+**Representative post-#197 Risk**
+
+| Ticker | Risk | Notes |
+|--------|------|-------|
+| SGOV | 4 | control; no SEC fallback |
+| BXSL | 38 | listed BDC NAV Dist excluded |
+| KIO | 92 | `currentYield` still wins |
+| ARDC | 97 | CEF Dist fallback |
+| BRW | 95 | CEF Dist fallback |
+| JEPI | 34 | option Dist fallback; Fit still withheld |
+| JEPQ | 60 | option Dist fallback; Fit still withheld |
+
+**Deployment**
+
+- Merged to `main` at `6db31a8…`. Vercel status for that commit: **success**.
+- Live production `/income-factory` independently verified 2026-09-06: SGOV 4, BXSL 38, KIO 92, ARDC 97, BRW 95, JEPI 34 / Fit —, JEPQ 60 / Fit —; Evidence presentation unchanged from #195; reference **2026-05-08**.
+
+GhostYield is in a **stability checkpoint** — do not initiate another scoring change without new evidence. SEC-yield fallback for cash/credit/preferred remains **not implemented and not authorized**.
+
+GhostRegime remains **KEEP CURRENT** / `ghostregime-v1.0.4` / Risk On **60 / 30 / 10**. R7 closed. GhostFlow score model untouched.
+
+Last updated: 2026-09-06
+
+---
+
 ## Current State (GhostYield — 2026-09-06 evidence-gate activation complete)
-**ACTIVE CHECKPOINT (GhostYield semantic / model architecture)**
+**CHECKPOINT (architecture history; superseded for next-work / currentYield wording)**
 
 GhostYield semantic workstream **#193 → #194 → #195** is **COMPLETE**.
 
@@ -35,7 +83,7 @@ GhostYield semantic workstream **#193 → #194 → #195** is **COMPLETE**.
 - Merged to `main` at `e05ee2e…`. Vercel status for that commit: **success**.
 - Live production `/income-factory` independently verified 2026-09-06: Evidence column; Clear / Qualified / Insufficient; JEPI Insufficient / Risk 28 / Fit —; reference **2026-05-08**.
 
-**Open (separate; NOT resolved by #195):** when `currentYield == null` but `distributionRate` / `secYield` exist, headline-yield Risk contribution can be skipped. Requires dedicated impact audit + explicit model decision + separate PR. **Do not treat as fixed.**
+**Later:** the `currentYield` headline-yield Risk fallback that was still open after #195 is **resolved by PR #197** (see active checkpoint above).
 
 GhostRegime remains **KEEP CURRENT** / `ghostregime-v1.0.4` / Risk On **60 / 30 / 10**. R7 closed. GhostFlow score model untouched.
 
