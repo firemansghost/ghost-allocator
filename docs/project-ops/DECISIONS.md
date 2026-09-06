@@ -1,5 +1,34 @@
 # DECISIONS
 
+## 2026-09-06 — GhostYield separates economic scores from Evidence quality
+Choice:
+- GhostYield **Risk Score** is an economic / sleeve-risk score only.
+- GhostYield **Fit Score** is an economic yield-sleeve-fit score only.
+- Data-confidence, freshness, and missing expected NAV are **no longer** numerically blended into Risk/Fit.
+- Evidence quality is represented categorically as **Clear** / **Qualified** / **Insufficient**.
+- Risk remains visible when Evidence is Qualified or Insufficient, but must carry the Evidence qualifier.
+- Fit is **withheld** from user-facing display when Evidence is Insufficient.
+- Missing expected NAV belongs in the Evidence gate rather than as automatic numeric Risk points.
+- The Evidence gate is deterministic from existing snapshot fields (no new invented precision scores; no wall-clock).
+- Static reference-date policy remains unchanged (current reference **2026-05-08**).
+
+Why:
+- Prior blended scoring conflated investment risk with evidence quality, so UI claims that “Data QA ≠ investment risk” were numerically false.
+- JEPI demonstrated the failure mode: user-facing Fit **100** (Strong) could coexist with missing NAV / Data Gaps while Risk was inflated by QA penalties.
+- Full numeric separation alone was insufficient for presentation: JEPI’s economic Fit remained **100**, so a categorical gate was required to withhold Fit when evidence is Insufficient.
+- Categorical gating fixed the presentation problem without treating unknown or incomplete data as additional investment risk points.
+- SGOV remained a clean control (Clear / Risk 4 / Fit 100).
+- Structurally risky CEFs such as ARDC / KIO remained highly risky economically after removing QA penalties (Qualified Evidence with Extreme Risk retained).
+- Therefore **economic score + Evidence gate** preserved meaningful model information while separating confidence from risk.
+
+Consequences:
+- **PR #195** implements the approved architecture (preceded by baseline **#193** and truth-copy **#194**).
+- No candidate data refresh, null fills, reference-date change, Risk/Fit band-threshold change, or wall-clock scoring from this decision.
+- The separate **`currentYield` null vs distributionRate / secYield Risk-fallback** defect remains **open** and is **not** authorized by this decision.
+- Future changes to gate semantics or Risk/Fit definitions require a **new explicit** model / product decision.
+
+---
+
 ## 2026-09-05 — Vercel deployment hygiene V1 ACTIVE (path-based ignore-build)
 Choice:
 - Ghost Allocator uses a **path-based** Vercel Ignored Build Step (`bash scripts/vercel-ignore-build.sh`) as **ACTIVE V1**.
