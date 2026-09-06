@@ -7,7 +7,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = buildMetadata({
   title: 'GhostYield Methodology - Ghost Allocator',
   description:
-    'How GhostYield works: Risk Score and Fit Score bands, Data QA as a snapshot-quality layer, how v0.1 scores also include selected data-quality adjustments, yield display order, NAV and premium/discount, CEF and BDC metrics, score drivers, and manual snapshot limitations.',
+    'How GhostYield works: economic Risk and Fit scores, Evidence gate (Clear / Qualified / Insufficient), Data QA freshness, yield display order, NAV and premium/discount, CEF and BDC metrics, score drivers, and manual snapshot limitations.',
   path: '/income-factory/methodology',
 });
 
@@ -94,27 +94,23 @@ export default function GhostYieldMethodologyPage() {
       <Section id="risk-score" title="Risk Score">
         <p>
           <strong className="text-zinc-200">Risk Score</strong> runs from <strong className="text-zinc-200">0–100</strong>.
-          Higher means riskier under the <strong className="text-zinc-200">current v0.1 rules</strong>—not a prediction of
-          the future.
+          Higher means riskier under the <strong className="text-zinc-200">economic sleeve / investment rules</strong>
+          —not a prediction of the future.
         </p>
         <p className="text-zinc-300 border-l-2 border-amber-500/35 pl-3">
-          In v0.1, Data QA is displayed separately, but selected Data QA conditions also affect Risk and Fit numerically.
+          Evidence quality (confidence, freshness, missing expected NAV) is <strong className="text-zinc-200">not</strong>{' '}
+          blended into Risk. It is shown separately as Evidence: Clear / Qualified / Insufficient. When Evidence is not
+          Clear, Risk is still displayed with that qualifier.
         </p>
-        <p>
-          The current formula includes economic / structural sleeve factors <strong className="text-zinc-200">and</strong>{' '}
-          selected data-confidence, freshness, and missing-data adjustments.
-        </p>
-        <p>The model considers factors such as:</p>
+        <p>The model considers economic / structural factors such as:</p>
         <ul className="list-disc list-inside space-y-1 text-zinc-300">
-          <li>Headline yield / distribution level (where keyed)</li>
+          <li>Headline yield / distribution level (where keyed as currentYield)</li>
           <li>Sleeve type and structural complexity</li>
           <li>NAV trend versus distributions</li>
           <li>Leverage (including structured BDC debt/equity and CEF effective leverage where present)</li>
           <li>Premium or discount to NAV where applicable</li>
           <li>Payout quality label from the snapshot</li>
           <li>Expense burden (including CEF expense ratio total when structured)</li>
-          <li>Data confidence and source complexity cues</li>
-          <li>Missing NAV, stale lineage, or other snapshot penalties</li>
           <li>Optional <code className="text-amber-400/90 text-xs">cefMetrics</code> and{' '}
             <code className="text-amber-400/90 text-xs">bdcMetrics</code> when present on a row</li>
         </ul>
@@ -124,20 +120,20 @@ export default function GhostYieldMethodologyPage() {
         </p>
         <p>
           Risk Score is <strong className="text-zinc-200">not a forecast</strong>. Think of it as a structured warning
-          system: a way to sort sleeves by how much structural and payout stress the current GhostYield rules associate
-          with the row—plus the snapshot-quality adjustments listed above.
+          system for sleeve and payout stress under the current GhostYield economic rules.
         </p>
       </Section>
 
       <Section id="fit-score" title="Fit Score">
         <p>
           <strong className="text-zinc-200">Fit Score</strong> runs from <strong className="text-zinc-200">0–100</strong>.
-          Higher means a <strong className="text-zinc-200">cleaner fit as a satellite yield sleeve</strong> under this
-          model—not &ldquo;you should buy this.&rdquo;
+          Higher means a <strong className="text-zinc-200">cleaner economic fit as a satellite yield sleeve</strong> under
+          this model—not &ldquo;you should buy this.&rdquo;
         </p>
-        <p>
-          The current formula includes yield-sleeve fit factors <strong className="text-zinc-200">and</strong> selected
-          confidence and freshness adjustments.
+        <p className="text-zinc-300 border-l-2 border-amber-500/35 pl-3">
+          Evidence quality is not blended into Fit. When Evidence is <strong className="text-zinc-200">Insufficient</strong>,
+          Fit is <strong className="text-zinc-200">withheld</strong> from display (shown as —) even though an internal
+          economic Fit may still be computed.
         </p>
         <p>The model nudges fit up or down based on things like:</p>
         <ul className="list-disc list-inside space-y-1 text-zinc-300">
@@ -146,8 +142,7 @@ export default function GhostYieldMethodologyPage() {
           <li>Stronger distribution quality labels</li>
           <li>Stable or positive NAV trend where NAV is available</li>
           <li>Discount/premium context for sleeves that price off NAV</li>
-          <li>Expense ratio and data confidence</li>
-          <li>Snapshot freshness (including bonuses for fresh+high-confidence rows and penalties for stale/missing)</li>
+          <li>Expense ratio</li>
           <li>Sleeve role (e.g. cash-like ballast vs more complex sleeves)</li>
           <li>BDC dividend coverage and first-lien tilt when structured metrics exist</li>
           <li>
@@ -160,35 +155,40 @@ export default function GhostYieldMethodologyPage() {
         </p>
         <p>
           <strong className="text-zinc-200">High fit does not mean &ldquo;buy.&rdquo;</strong> It means the row has a
-          cleaner profile under the current GhostYield rules and cited snapshot—not a verdict on your personal situation.
+          cleaner economic profile under the current GhostYield rules and cited snapshot—not a verdict on your personal
+          situation.
         </p>
       </Section>
 
-      <Section id="data-qa" title="Data QA / source and data quality">
+      <Section id="data-qa" title="Data QA / Evidence">
         <p>
-          <strong className="text-zinc-200">Data QA</strong> is a separate displayed snapshot-quality layer. It describes
-          how complete and fresh the <em>manual row</em> is: lineage dates, missing fields, illustrative rows, and similar
-          flags. It is <strong className="text-zinc-200">not itself</strong> an investment-risk rating.
+          <strong className="text-zinc-200">Data QA</strong> is the freshness/completeness badge for the manual row
+          (fresh / caution / stale / missing / sample), measured against the static snapshot reference date—not
+          today&apos;s date.
         </p>
-        <p className="text-zinc-300 border-l-2 border-amber-500/35 pl-3">
-          In v0.1, Data QA is displayed separately, but selected Data QA conditions also affect Risk and Fit numerically.
+        <p>
+          <strong className="text-zinc-200">Evidence</strong> is a separate categorical gate derived from existing
+          snapshot fields:
         </p>
-        <p>It reflects things like:</p>
         <ul className="list-disc list-inside space-y-1 text-zinc-300">
-          <li>How complete the keyed fields are for that ticker in the snapshot</li>
           <li>
-            How fresh NAV and distribution as-of dates are versus the static snapshot reference date (not today&apos;s
-            date)
+            <strong className="text-zinc-200">Clear</strong> — fresh + high confidence, no critical expected-field gaps
           </li>
-          <li>Whether a source URL and source label are present</li>
-          <li>Whether values are tied to cited sources (fields stay null when not verifiable)</li>
+          <li>
+            <strong className="text-zinc-200">Qualified</strong> — stale, caution, or medium confidence (usable with
+            caveat)
+          </li>
+          <li>
+            <strong className="text-zinc-200">Insufficient</strong> — missing expected NAV, low/illustrative confidence,
+            or missing/illustrative freshness status
+          </li>
         </ul>
+        <p className="text-zinc-300 border-l-2 border-amber-500/35 pl-3">
+          Data QA and Evidence are not investment-risk ratings. They answer snapshot-hygiene questions. Risk and Fit
+          answer economic sleeve questions.
+        </p>
         <p className="text-zinc-200 border-l-2 border-zinc-600 pl-3">
           Fresh-in-snapshot does not mean a safe investment. Data gaps do not mean a bad fund.
-        </p>
-        <p>
-          Use Data QA together with Risk and Fit—they answer related but different questions. One is snapshot hygiene; the
-          others are modeled sleeve scores that currently also absorb selected snapshot-quality adjustments.
         </p>
       </Section>
 
@@ -286,11 +286,11 @@ export default function GhostYieldMethodologyPage() {
       <Section id="score-drivers" title="Score drivers">
         <p>
           The candidate detail panel lists <strong className="text-zinc-200">Score drivers</strong>: short explanations
-          of selected contributors to Risk Score and Fit Score for that row under the current rules.
+          of selected economic contributors to Risk Score and Fit Score for that row under the current rules.
         </p>
         <p className="text-zinc-200 border-l-2 border-amber-500/35 pl-3">
-          These drivers explain the model score. They are not buy/sell signals. Displayed drivers may not list every
-          adjustment applied to the final score, including snapshot-quality adjustments.
+          These drivers explain the model score. They are not buy/sell signals. Evidence gaps are handled by the Evidence
+          gate, not by blending into Risk/Fit drivers.
         </p>
       </Section>
 

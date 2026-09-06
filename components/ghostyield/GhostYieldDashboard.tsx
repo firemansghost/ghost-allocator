@@ -117,11 +117,11 @@ export function GhostYieldDashboard() {
           <span className="text-zinc-300">Screener guide:</span> Yield uses the best available sourced metric on each row:
           current yield, then distribution rate, then SEC yield. <span className="text-zinc-300">Payout</span> reflects
           distribution quality from the snapshot. <span className="text-zinc-300">Data QA</span> describes freshness and
-          completeness of the manual row. It is not itself an investment-risk rating, although the current Risk and Fit
-          formulas include selected confidence, freshness, and missing-data adjustments.{' '}
-          <span className="text-zinc-300">Risk Score</span> is 0–100 where higher is riskier under the current sleeve /
-          structure rules. <span className="text-zinc-300">Fit Score</span> is 0–100 where higher is a cleaner model fit
-          as a yield sleeve (not a recommendation). Hover column headers or scores for band definitions.
+          completeness of the manual row. <span className="text-zinc-300">Evidence</span> (Clear / Qualified /
+          Insufficient) is the confidence gate for presentation. <span className="text-zinc-300">Risk Score</span> is
+          0–100 economic sleeve risk (shown with an Evidence qualifier when not Clear).{' '}
+          <span className="text-zinc-300">Fit Score</span> is 0–100 economic model fit and is withheld when Evidence is
+          Insufficient. Not a recommendation. Hover headers for band definitions.
         </p>
         <CandidateTable
           candidates={GHOSTYIELD_SCORED_CANDIDATES}
@@ -155,11 +155,11 @@ export function GhostYieldDashboard() {
         </div>
         <div className="text-sm text-zinc-400 leading-relaxed space-y-3 max-w-4xl">
           <p className="text-zinc-300">
-            <span className="text-zinc-200">Data QA</span> (the Source & data quality column and badges) describes how
-            complete and fresh the manual snapshot is for that row. <span className="text-zinc-200">Risk Score</span> and{' '}
-            <span className="text-zinc-200">Fit Score</span> remain separate displayed concepts for sleeve/structure risk
-            and model fit—but in v0.1 the formulas also include selected confidence, freshness, and missing-data
-            adjustments. Read them together; do not treat Data QA badges as a substitute for Risk/Fit, or vice versa.
+            <span className="text-zinc-200">Data QA</span> describes snapshot freshness and completeness.{' '}
+            <span className="text-zinc-200">Evidence</span> (Clear / Qualified / Insufficient) is the presentation gate.{' '}
+            <span className="text-zinc-200">Risk</span> and <span className="text-zinc-200">Fit</span> are economic
+            scores only — evidence quality is not blended into those numbers. Fit is withheld when Evidence is
+            Insufficient; Risk remains visible with an Evidence qualifier when not Clear.
           </p>
           <p className="text-zinc-300">
             This v0.1 snapshot uses manually maintained JSON rows — not live pricing or feeds. Some values were sourced from

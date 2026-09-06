@@ -1,8 +1,11 @@
 /**
- * GhostYield deterministic scoring (Phase 2 + Phase 5.2 structured metrics).
+ * GhostYield deterministic scoring (Phase 2 + Phase 5.2 structured metrics + evidence gate).
  *
- * Risk score 0–100: higher = riskier sleeve characteristics.
- * Fit score 0–100: higher = better fit as a satellite yield sleeve around a core portfolio.
+ * Risk score 0–100: higher = riskier sleeve / investment characteristics (economic factors only).
+ * Fit score 0–100: higher = better economic fit as a satellite yield sleeve.
+ *
+ * Evidence quality (confidence, freshness, missing expected NAV) is NOT blended into Risk/Fit.
+ * It is exposed separately via `deriveEvidenceGate` (Clear / Qualified / Insufficient).
  *
  * Phase 5.2: optional `cefMetrics` / `bdcMetrics` add modest, transparent adjustments. CEF blocks focus on structural
  * leverage (asset-based %), premium-to-NAVrichness, expense burden, and payout/coverage stress. BDC blocks focus on
@@ -14,7 +17,6 @@
 
 import type {
   CandidateFreshnessResult,
-  Confidence,
   DistributionQuality,
   GhostYieldCandidate,
   GhostYieldCandidateRaw,
@@ -23,11 +25,10 @@ import type {
   YieldSleeveCategory,
 } from './types';
 import { evaluateCandidateFreshness } from './dataFreshness';
+import { deriveEvidenceGate } from './evidenceGate';
 import {
-  effectiveDataConfidence,
   effectiveNavPerformance1Y,
   effectiveNavPerformance3Y,
-  expectsNavQuote,
 } from './candidateFields';
 
 function clampInt(n: number, lo: number, hi: number): number {
@@ -46,21 +47,6 @@ function distributionQualityWeight(q: DistributionQuality): number {
       return 28;
     default:
       return 15;
-  }
-}
-
-function confidencePenalty(c: Confidence): number {
-  switch (c) {
-    case 'high':
-      return 0;
-    case 'medium':
-      return 5;
-    case 'low':
-      return 12;
-    case 'illustrative':
-      return 18;
-    default:
-      return 10;
   }
 }
 
@@ -311,26 +297,6 @@ function payoutVersusNavTrendPoints(row: GhostYieldCandidateRaw): number {
   return 0;
 }
 
-function missingNavPoints(row: GhostYieldCandidateRaw): number {
-  return expectsNavQuote(row) && row.nav == null ? 14 : 0;
-}
-
-function freshnessDataPenalty(f: CandidateFreshnessResult): number {
-  if (!f.applyScoringPenalty) return 0;
-  switch (f.status) {
-    case 'illustrative':
-      return 6;
-    case 'missing':
-      return 14;
-    case 'stale':
-      return 12;
-    case 'caution':
-      return 7;
-    default:
-      return 4;
-  }
-}
-
 /** Categories whose distributions are often quoted vs NAV (CEFs, many levered closed-end structures, BDC stock premiums). */
 export function usesNavPremiumSchedule(sleeve?: YieldSleeveCategory): boolean {
   return (
@@ -368,14 +334,14 @@ function yieldSourceComplexityPoints(yieldSource: string): number {
 
 export function computeGhostYieldRiskScore(
   row: GhostYieldCandidateRaw,
-  freshness: CandidateFreshnessResult
+  _freshness?: CandidateFreshnessResult
 ): number {
-  const dc = effectiveDataConfidence(row);
   const nav1y = effectiveNavPerformance1Y(row);
   const nav3y = effectiveNavPerformance3Y(row);
   const cefAdj = scoreCefMetricAdjustments(row);
   const bdcAdj = scoreBdcMetricAdjustments(row);
 
+  // Economic / sleeve risk only — evidence quality is handled by evidenceGate, not numeric Risk.
   let score =
     categoryBaseRisk(row.sleeveType) +
     yieldRiskPoints(row.currentYield) +
@@ -383,22 +349,21 @@ export function computeGhostYieldRiskScore(
     navTrendRiskPoints(nav1y, nav3y) +
     premiumScheduleRiskPoints(row) +
     distributionQualityWeight(row.distributionQuality) +
-    confidencePenalty(dc) +
     yieldSourceComplexityPoints(row.yieldSource) +
     highYieldNegativeNavPoints(row) +
     rocNavStressPoints(row) +
     distributionVersusSecPoints(row) +
     payoutVersusNavTrendPoints(row) +
-    missingNavPoints(row) +
-    freshnessDataPenalty(freshness) +
     cefAdj.risk +
     bdcAdj.risk;
 
   return clampInt(score, 0, 100);
 }
 
-export function computeGhostYieldFitScore(row: GhostYieldCandidateRaw, freshness: CandidateFreshnessResult): number {
-  const dc = effectiveDataConfidence(row);
+export function computeGhostYieldFitScore(
+  row: GhostYieldCandidateRaw,
+  _freshness?: CandidateFreshnessResult
+): number {
   let fit = 72;
   const cefAdj = scoreCefMetricAdjustments(row);
   const bdcAdj = scoreBdcMetricAdjustments(row);
@@ -461,22 +426,7 @@ export function computeGhostYieldFitScore(row: GhostYieldCandidateRaw, freshness
     if (expenseForFit >= 0.025) fit -= 8;
   }
 
-  switch (dc) {
-    case 'high':
-      fit += 6;
-      break;
-    case 'medium':
-      fit += 2;
-      break;
-    case 'low':
-      fit -= 8;
-      break;
-    case 'illustrative':
-      fit -= 12;
-      break;
-    default:
-      break;
-  }
+  // Evidence confidence/freshness adjustments removed — see evidenceGate.
 
   const simpleSource =
     row.yieldSource.length < 90 &&
@@ -497,11 +447,6 @@ export function computeGhostYieldFitScore(row: GhostYieldCandidateRaw, freshness
     default:
       break;
   }
-
-  if (freshness.status === 'fresh' && dc === 'high') fit += 4;
-  else if (freshness.status === 'fresh' && dc === 'medium') fit += 2;
-  else if (freshness.status === 'stale' || freshness.status === 'missing') fit -= 10;
-  else if (freshness.status === 'caution' || freshness.status === 'illustrative') fit -= 4;
 
   const dRate = row.distributionRate;
   const sec = row.secYield;
@@ -584,12 +529,11 @@ function cefPayoutStressExplanation(row: GhostYieldCandidateRaw): string {
   return `The model adds stress because ${parts.join('; ')}.`;
 }
 
-/** Deterministic drivers aligned with existing scoring helpers — does not change numeric scores. */
+/** Deterministic drivers aligned with economic scoring helpers — does not change numeric scores. */
 export function buildGhostYieldScoreDrivers(
   row: GhostYieldCandidateRaw,
-  freshness: CandidateFreshnessResult
+  _freshness?: CandidateFreshnessResult
 ): { riskDrivers: GhostYieldScoreDriver[]; fitDrivers: GhostYieldScoreDriver[] } {
-  const dc = effectiveDataConfidence(row);
   const nav1y = effectiveNavPerformance1Y(row);
   const nav3y = effectiveNavPerformance3Y(row);
 
@@ -671,18 +615,6 @@ export function buildGhostYieldScoreDrivers(
     });
   }
 
-  const confPts = confidencePenalty(dc);
-  if (confPts > 0) {
-    risks.push({
-      driver: riskDriver(
-        'Data confidence',
-        confPts,
-        'Lower data confidence on the manual row increases modeled uncertainty and a small risk penalty.'
-      ),
-      points: confPts,
-    });
-  }
-
   const ysc = yieldSourceComplexityPoints(row.yieldSource);
   if (ysc > 0) {
     risks.push({
@@ -742,30 +674,6 @@ export function buildGhostYieldScoreDrivers(
         'Payout appears high relative to recent NAV performance, which the model treats as sustainability risk.'
       ),
       points: pvn,
-    });
-  }
-
-  const mnav = missingNavPoints(row);
-  if (mnav > 0) {
-    risks.push({
-      driver: riskDriver(
-        'Missing NAV',
-        mnav,
-        'The row expects a NAV-style quote for this structure but none is keyed, so the model applies a data-risk penalty.'
-      ),
-      points: mnav,
-    });
-  }
-
-  const freshPts = freshnessDataPenalty(freshness);
-  if (freshPts > 0) {
-    risks.push({
-      driver: riskDriver(
-        'Stale or incomplete snapshot',
-        freshPts,
-        'Freshness or missing snapshot fields trigger a conservative scoring penalty, not a verdict on fund quality.'
-      ),
-      points: freshPts,
     });
   }
 
@@ -990,38 +898,7 @@ export function buildGhostYieldScoreDrivers(
     }
   }
 
-  switch (dc) {
-    case 'high':
-      fits.push({
-        driver: fitDriver('Data confidence', 6, 'High confidence on the cited snapshot improves fit in the model.'),
-        delta: 6,
-        positive: true,
-      });
-      break;
-    case 'medium':
-      fits.push({
-        driver: fitDriver('Data confidence', 2, 'Medium confidence is a small positive in the model.'),
-        delta: 2,
-        positive: true,
-      });
-      break;
-    case 'low':
-      fits.push({
-        driver: fitDriver('Data confidence', -8, 'Low data confidence trims fit.'),
-        delta: -8,
-        positive: false,
-      });
-      break;
-    case 'illustrative':
-      fits.push({
-        driver: fitDriver('Data confidence', -12, 'Illustrative rows are heavily discounted for fit.'),
-        delta: -12,
-        positive: false,
-      });
-      break;
-    default:
-      break;
-  }
+  // Evidence confidence no longer adjusts Fit Score — see evidenceGate.
 
   const simpleSource =
     row.yieldSource.length < 90 &&
@@ -1054,31 +931,7 @@ export function buildGhostYieldScoreDrivers(
       break;
   }
 
-  if (freshness.status === 'fresh' && dc === 'high') {
-    fits.push({
-      driver: fitDriver('Fresh snapshot', 4, 'Fresh data with high confidence adds a small fit bonus.'),
-      delta: 4,
-      positive: true,
-    });
-  } else if (freshness.status === 'fresh' && dc === 'medium') {
-    fits.push({
-      driver: fitDriver('Fresh snapshot', 2, 'Fresh data with medium confidence helps a little.'),
-      delta: 2,
-      positive: true,
-    });
-  } else if (freshness.status === 'stale' || freshness.status === 'missing') {
-    fits.push({
-      driver: fitDriver('Snapshot freshness', -10, 'Stale or missing lineage fields reduce fit until the row is refreshed.'),
-      delta: -10,
-      positive: false,
-    });
-  } else if (freshness.status === 'caution' || freshness.status === 'illustrative') {
-    fits.push({
-      driver: fitDriver('Snapshot freshness', -4, 'Caution or illustrative freshness trims fit slightly.'),
-      delta: -4,
-      positive: false,
-    });
-  }
+  // Snapshot freshness no longer adjusts Fit Score — see evidenceGate.
 
   const dRate = row.distributionRate;
   const sec = row.secYield;
@@ -1183,10 +1036,12 @@ export function scoreCandidates(
 ): GhostYieldCandidate[] {
   return raw.map((r) => {
     const freshness = evaluateCandidateFreshness(r, referenceAsOf);
+    const evidenceGate = deriveEvidenceGate(r, freshness);
     const { riskDrivers, fitDrivers } = buildGhostYieldScoreDrivers(r, freshness);
     return {
       ...r,
       freshness,
+      evidenceGate,
       riskScore: computeGhostYieldRiskScore(r, freshness),
       fitScore: computeGhostYieldFitScore(r, freshness),
       riskDrivers,

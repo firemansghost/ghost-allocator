@@ -1,5 +1,6 @@
 /**
- * CHARACTERIZATION — current null handling in Risk/Fit (not a fix).
+ * CHARACTERIZATION — null handling after economic separation.
+ * currentYield-null vs distributionRate/SEC headline-yield Risk skip remains a SEPARATE known defect.
  */
 
 import assert from 'node:assert/strict';
@@ -14,13 +15,17 @@ const fresh = {
   applyScoringPenalty: false,
 };
 
-// NAV null (ETF) — Risk rises via missing-NAV + freshness path
+// NAV null (ETF) — economic Risk/Fit unchanged; Evidence gate handles presentation
 {
   const withNav = baseCandidate({ nav: 100 });
   const noNav = baseCandidate({ nav: null, navDataAsOf: undefined });
   const r1 = computeGhostYieldRiskScore(withNav, evaluateCandidateFreshness(withNav, REF));
   const r0 = computeGhostYieldRiskScore(noNav, evaluateCandidateFreshness(noNav, REF));
-  assert.ok(r0 > r1);
+  assert.equal(r0, r1);
+  assert.equal(
+    computeGhostYieldFitScore(withNav, fresh),
+    computeGhostYieldFitScore(noNav, fresh)
+  );
 }
 
 // marketPrice null — no direct Risk/Fit change when premium already null
@@ -73,7 +78,7 @@ const fresh = {
 }
 
 /**
- * CURRENT BEHAVIOR (evidence for later scoring decision — do not "fix"):
+ * KNOWN SEPARATE DEFECT (out of scope for evidence-gate PR):
  * yieldRiskPoints uses currentYield only. When currentYield is null but
  * distributionRate / secYield are populated, generic headline-yield Risk
  * contribution remains absent.
@@ -95,8 +100,7 @@ const fresh = {
     rCurrent > rNull,
     'currentYield=0.12 adds yieldRiskPoints; null currentYield does not use distributionRate/secYield for that term'
   );
-  // Isolate: only currentYield differs
   assert.ok(rCurrent - rNull >= 12);
 }
 
-console.log('ghostyield/nullHandling.test.ts: ok (CHARACTERIZATION)');
+console.log('ghostyield/nullHandling.test.ts: ok');
