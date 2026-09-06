@@ -2,7 +2,8 @@
  * DESIRED BEHAVIOR after economic Risk/Fit separation + Evidence gate.
  *
  * JEPI: missing expected NAV → Evidence Insufficient.
- * Economic Risk ≈ 28 (Moderate); Fit computed internally but display withheld.
+ * Economic Risk 34 (Moderate) after authorized option-income distributionRate
+ * headline-yield fallback; Fit computed internally but display withheld.
  */
 
 import assert from 'node:assert/strict';
@@ -24,15 +25,20 @@ assert.ok(jepi.freshness.warnings.some((w) => /Missing NAV/i.test(w)));
 assert.equal(jepi.evidenceGate, 'insufficient');
 assert.equal(isFitDisplaySuppressed(jepi.evidenceGate), true);
 
-assert.equal(jepi.riskScore, 28);
+assert.equal(jepi.riskScore, 34);
 assert.equal(jepi.fitScore, 100); // economic Fit still computed
 assert.equal(fitScoreBand(jepi.fitScore), 'strong');
 assert.equal(fitScoreBandWord(jepi.fitScore), 'Strong Fit');
 
 const riskLabels = jepi.riskDrivers.map((d) => d.label);
 assert.ok(riskLabels.includes('Sleeve category risk'));
+assert.ok(riskLabels.includes('Headline yield level'));
 assert.ok(!riskLabels.includes('Missing NAV'));
 assert.ok(!riskLabels.includes('Stale or incomplete snapshot'));
+assert.match(
+  jepi.riskDrivers.find((d) => d.label === 'Headline yield level')?.explanation ?? '',
+  /option-income distribution rate/i
+);
 
 const fitLabels = jepi.fitDrivers.map((d) => d.label);
 assert.ok(fitLabels.includes('Distribution quality'));
@@ -40,4 +46,4 @@ assert.ok(!fitLabels.includes('Data confidence'));
 assert.ok(!fitLabels.includes('Snapshot freshness'));
 assert.ok(!fitLabels.includes('Fresh snapshot'));
 
-console.log('ghostyield/jepiCharacterization.test.ts: ok (Evidence Insufficient; Fit withheld; Risk 28)');
+console.log('ghostyield/jepiCharacterization.test.ts: ok (Evidence Insufficient; Fit withheld; Risk 34)');

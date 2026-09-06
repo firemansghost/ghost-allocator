@@ -29,6 +29,8 @@ import { deriveEvidenceGate } from './evidenceGate';
 import {
   effectiveNavPerformance1Y,
   effectiveNavPerformance3Y,
+  isCefStructure,
+  isListedBdcStock,
 } from './candidateFields';
 
 function clampInt(n: number, lo: number, hi: number): number {
@@ -79,13 +81,41 @@ function categoryBaseRisk(cat: YieldSleeveCategory): number {
   }
 }
 
+/**
+ * Risk-only headline carry / payout input. Intentionally separate from display-yield
+ * precedence (`effectiveDisplayYield`). SEC yield is never a fallback here.
+ *
+ * currentYield always wins. When it is null:
+ * - listed / structured BDC rows fail closed (NAV-quoted dist is not market headline yield)
+ * - CEF-style rows may use cefMetrics.distributionRate ?? distributionRate
+ * - option_income may use distributionRate only
+ * - cash / credit / preferred and all other structures: no fallback
+ *
+ * This absolute level term may coexist with CEF payout-stress (quality / coverage / UNII).
+ */
+export function effectiveRiskHeadlineYield(row: GhostYieldCandidateRaw): number | null {
+  if (row.currentYield != null) return row.currentYield;
+
+  if (row.bdcMetrics != null || isListedBdcStock(row)) return null;
+
+  if (isCefStructure(row) || row.cefMetrics != null) {
+    return row.cefMetrics?.distributionRate ?? row.distributionRate ?? null;
+  }
+
+  if (row.sleeveType === 'option_income') {
+    return row.distributionRate ?? null;
+  }
+
+  return null;
+}
+
 /** Yield level contribution: very high headline yield adds risk points */
-function yieldRiskPoints(currentYield: number | null | undefined): number {
-  if (currentYield == null) return 0;
-  if (currentYield >= 0.14) return 28;
-  if (currentYield >= 0.11) return 20;
-  if (currentYield >= 0.085) return 12;
-  if (currentYield >= 0.065) return 6;
+function yieldRiskPoints(headlineYield: number | null | undefined): number {
+  if (headlineYield == null) return 0;
+  if (headlineYield >= 0.14) return 28;
+  if (headlineYield >= 0.11) return 20;
+  if (headlineYield >= 0.085) return 12;
+  if (headlineYield >= 0.065) return 6;
   return 0;
 }
 
@@ -134,6 +164,7 @@ function cefExpenseBurdenRiskPoints(expenseRatioTotal: number): number {
 /**
  * CEF payout stress: high stated distribution rate with weak quality, thin coverage, or negative UNII.
  * Adjustment weights `cefMetrics.distributionRate` when present.
+ * Distinct from `yieldRiskPoints` (absolute headline payout magnitude). Both may apply.
  */
 function cefPayoutStressRiskPoints(row: GhostYieldCandidateRaw): number {
   const cef = row.cefMetrics;
@@ -344,7 +375,7 @@ export function computeGhostYieldRiskScore(
   // Economic / sleeve risk only — evidence quality is handled by evidenceGate, not numeric Risk.
   let score =
     categoryBaseRisk(row.sleeveType) +
-    yieldRiskPoints(row.currentYield) +
+    yieldRiskPoints(effectiveRiskHeadlineYield(row)) +
     structuralLeverageRiskPoints(row) +
     navTrendRiskPoints(nav1y, nav3y) +
     premiumScheduleRiskPoints(row) +
@@ -507,6 +538,21 @@ function fitDriver(
   };
 }
 
+function headlineYieldRiskDriverExplanation(row: GhostYieldCandidateRaw): string {
+  const base =
+    'Resolved headline carry / payout level is high enough to add modeled risk under the current GhostYield tier schedule.';
+  if (row.currentYield != null) {
+    return `${base} Uses keyed current yield.`;
+  }
+  if (isCefStructure(row) || row.cefMetrics != null) {
+    return `${base} Uses the CEF indicated distribution rate (not SEC yield).`;
+  }
+  if (row.sleeveType === 'option_income') {
+    return `${base} Uses the option-income distribution rate (not SEC yield).`;
+  }
+  return base;
+}
+
 /** Mirrors reasons encoded in cefPayoutStressRiskPoints (same thresholds, plain English). */
 function cefPayoutStressExplanation(row: GhostYieldCandidateRaw): string {
   const cef = row.cefMetrics;
@@ -549,13 +595,13 @@ export function buildGhostYieldScoreDrivers(
     risks.push({ driver: d, points: cat });
   }
 
-  const yp = yieldRiskPoints(row.currentYield);
+  const yp = yieldRiskPoints(effectiveRiskHeadlineYield(row));
   if (yp > 0) {
     risks.push({
       driver: riskDriver(
         'Headline yield level',
         yp,
-        'Very high quoted current yield lifts modeled risk because extreme carry often pairs with credit, leverage, or decay risk.'
+        headlineYieldRiskDriverExplanation(row)
       ),
       points: yp,
     });

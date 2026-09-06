@@ -104,7 +104,10 @@ export default function GhostYieldMethodologyPage() {
         </p>
         <p>The model considers economic / structural factors such as:</p>
         <ul className="list-disc list-inside space-y-1 text-zinc-300">
-          <li>Headline yield / distribution level (where keyed as currentYield)</li>
+          <li>
+            Headline payout level, using current yield when keyed and approved structure-specific
+            distribution-rate fallbacks for CEF and option-income rows
+          </li>
           <li>Sleeve type and structural complexity</li>
           <li>NAV trend versus distributions</li>
           <li>Leverage (including structured BDC debt/equity and CEF effective leverage where present)</li>
