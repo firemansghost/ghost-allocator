@@ -5,12 +5,14 @@
 
 Vercel Ignored Build Step **V1 filter: WORKING AS DESIGNED**. The defect repaired here is **post-merge verification/reporting semantics**, not the allowlist or script.
 
-| SHA | Role |
-|-----|------|
-| GitHub `main` | `9fc69bd804c9ccb87480f271455ed04148a1c41d` (PR **#198** docs closeout) |
+**Observed baseline after PR #198 and before this verification-semantics PR.** These SHAs are historical observation context, not a permanent “current `main`” assertion. Exact current `main` must be verified at execution time.
+
+| Role | Observed SHA / detail |
+|------|------------------------|
+| GitHub `main` after #198 | `9fc69bd804c9ccb87480f271455ed04148a1c41d` (PR **#198** docs closeout) |
 | Production serving runtime commit | `6db31a86d8f65e26fc6bab1df9bb261ec5b680dc` (PR **#197** runtime) |
 
-Reason for the difference: PR **#198** was docs-only Markdown under `docs/**` and was skipped by the Ignored Build Step. `main` ahead of the serving runtime commit is **normal**, not stale production.
+Reason for the difference: PR **#198** was docs-only Markdown under `docs/**` and was skipped by the Ignored Build Step. After a safe docs-only skip, `main` may be ahead of the serving runtime commit; that is **normal**, not stale production.
 
 **Observed outcomes**
 

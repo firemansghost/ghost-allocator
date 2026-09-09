@@ -37,7 +37,7 @@ Observed result: DEPLOYED | SKIPPED AS EXPECTED | FAIL-OPEN BUILD AS DESIGNED | 
 Rules:
 
 - **Expected BUILD:** require READY production deployment + matching commit + production alias.
-- **Expected SKIP:** require skip evidence (Ignored Build Step classified SKIP and Vercel canceled because exit `0`, or equivalent) + unchanged prior production serving deployment. `main` may legitimately be ahead of the production serving commit.
+- **Expected SKIP:** require skip evidence (Ignored Build Step classified SKIP and Vercel canceled because exit `0`, or equivalent). Confirm the skipped merge did **not** become the production serving artifact. Normally confirm the prior serving deployment remained. Alternatively accept a newer valid superseding production deployment if its commit/deployment provenance is verified. `main` may legitimately be ahead of the production serving commit. CANCELED alone is not enough.
 - **User-facing runtime BUILDs:** verify the relevant live route or endpoint after deployment when practical.
 - **CANCELED:** not automatically a skip. Investigate if ignored-build evidence is missing.
 - **Preview:** useful QA; not proof of production. First Preview may BUILD when `VERCEL_GIT_PREVIOUS_SHA` is unavailable (**FAIL-OPEN BUILD AS DESIGNED**).

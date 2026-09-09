@@ -7,7 +7,7 @@ Vercel V1 Ignored Build Step remains **WORKING AS DESIGNED**. Reporting contract
 - After merge, verify deployment state / commit / target / production alias (and ignored-build logs when needed).
 - Observed outcomes: **DEPLOYED** | **SKIPPED AS EXPECTED** | **FAIL-OPEN BUILD AS DESIGNED** | **STOP — DEPLOYMENT MISMATCH**.
 - First Preview may fail-open BUILD when `VERCEL_GIT_PREVIOUS_SHA` is unavailable. Do not change the script to suppress that.
-- Production serving commit may lag `main` after a docs-only skip. Current: GitHub `main` `9fc69bd…` (#198); serving runtime `6db31a8…` (#197). That is correct.
+- Production serving commit may lag `main` after a docs-only skip. Exact current `main` must be verified at execution time. Historical #198 evidence (not a permanent current-state assertion): after #198, GitHub `main` was `9fc69bd…` while the production serving runtime remained `6db31a8…` (#197). That lag was correct because #198 was a docs-only SKIP.
 
 No change to `scripts/vercel-ignore-build.sh`, allowlist, exit codes, or Vercel dashboard.
 
