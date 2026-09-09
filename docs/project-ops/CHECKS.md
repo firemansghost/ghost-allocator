@@ -9,6 +9,42 @@ Before opening or merging a PR, report exactly one of:
 
 Authority: changed paths + [VERCEL_DEPLOYMENT_POLICY.md](../VERCEL_DEPLOYMENT_POLICY.md). Do not use commit-message tokens as skip authority.
 
+This is **expected classification only**. It is not proof that production was rebuilt.
+
+---
+
+## Vercel post-merge verification
+
+After merge, verify what Vercel actually did. Do **not** infer deployment from a green GitHub `Vercel: success` check.
+
+Required fields:
+
+```
+Vercel expected: BUILD | SKIP
+Merge SHA:
+Ignored Build Step: BUILD | SKIP | FAIL-OPEN | UNKNOWN
+Deployment ID:
+Deployment state: READY | CANCELED | ERROR | OTHER
+Deployment target: production | preview | none
+Deployment commit:
+Production serving deployment:
+Production serving commit:
+Production alias match: yes | no | not applicable
+Live route verification: PASS | FAIL | NOT REQUIRED | NOT CHECKED
+Observed result: DEPLOYED | SKIPPED AS EXPECTED | FAIL-OPEN BUILD AS DESIGNED | STOP — DEPLOYMENT MISMATCH
+```
+
+Rules:
+
+- **Expected BUILD:** require READY production deployment + matching commit + production alias.
+- **Expected SKIP:** require skip evidence (Ignored Build Step classified SKIP and Vercel canceled because exit `0`, or equivalent). Confirm the skipped merge did **not** become the production serving artifact. Normally confirm the prior serving deployment remained. Alternatively accept a newer valid superseding production deployment if its commit/deployment provenance is verified. `main` may legitimately be ahead of the production serving commit. CANCELED alone is not enough.
+- **User-facing runtime BUILDs:** verify the relevant live route or endpoint after deployment when practical.
+- **CANCELED:** not automatically a skip. Investigate if ignored-build evidence is missing.
+- **Preview:** useful QA; not proof of production. First Preview may BUILD when `VERCEL_GIT_PREVIOUS_SHA` is unavailable (**FAIL-OPEN BUILD AS DESIGNED**).
+- **Production serving commit** is the Git commit of the READY deployment currently holding `ghost-allocator.vercel.app`.
+
+Definitions: [VERCEL_DEPLOYMENT_POLICY.md](../VERCEL_DEPLOYMENT_POLICY.md) §15.
+
 ---
 
 ## Verification Steps (Windows/PowerShell friendly)

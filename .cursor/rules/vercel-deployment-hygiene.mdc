@@ -21,6 +21,13 @@ Read `docs/VERCEL_DEPLOYMENT_POLICY.md` before changing Vercel deployment filter
   - `Vercel expected: BUILD` and why, or
   - `Vercel expected: SKIP` and the exact allowlisted paths involved.
 - If classification cannot be proven, use **BUILD**.
+- Never infer that a deployment occurred from a green GitHub `Vercel: success` check alone. That check means the GitHub/Vercel integration completed; it does not prove a build ran, READY was reached, production changed, the alias moved, or the merge commit is serving.
+- Distinguish **expected classification** (`Vercel expected: BUILD|SKIP`) from **observed deployment**.
+- After merge, inspect deployment state, deployment commit, target, and production alias. Inspect ignored-build logs when needed.
+- Classify observed results using exactly one of: **DEPLOYED**, **SKIPPED AS EXPECTED**, **FAIL-OPEN BUILD AS DESIGNED**, **STOP — DEPLOYMENT MISMATCH**. Definitions live in `docs/VERCEL_DEPLOYMENT_POLICY.md`.
+- A first-preview fail-open BUILD is allowed when `VERCEL_GIT_PREVIOUS_SHA` is unavailable. Do not change the ignore-build script merely to suppress fail-open preview builds.
+- Do not call CANCELED a skip without ignored-build evidence (script classified SKIP and Vercel canceled because exit `0`, or equivalent).
+- Do not assume the current `main` SHA must equal the production serving commit after a safe docs-only skip. That lag is normal.
 
 ## Initial V1 safe-skip set
 
