@@ -1,5 +1,31 @@
 ﻿# STATUS
 
+## Current State (Project ops — 2026-09-08 Vercel verification semantics)
+**ACTIVE CHECKPOINT (non-model)**
+
+Vercel Ignored Build Step **V1 filter: WORKING AS DESIGNED**. The defect repaired here is **post-merge verification/reporting semantics**, not the allowlist or script.
+
+| SHA | Role |
+|-----|------|
+| GitHub `main` | `9fc69bd804c9ccb87480f271455ed04148a1c41d` (PR **#198** docs closeout) |
+| Production serving runtime commit | `6db31a86d8f65e26fc6bab1df9bb261ec5b680dc` (PR **#197** runtime) |
+
+Reason for the difference: PR **#198** was docs-only Markdown under `docs/**` and was skipped by the Ignored Build Step. `main` ahead of the serving runtime commit is **normal**, not stale production.
+
+**Observed outcomes**
+
+- **#197** runtime merge (`dpl_CjB4bQi1CduEdgpSwsB9RjGAiat5`, production READY, alias includes `ghost-allocator.vercel.app`): **DEPLOYED**
+- **#198** docs merge (`dpl_B77Qqy8S4377jRgMFuc9pF1vC2zd`, production CANCELED because exit `0`; alias stayed on #197): **SKIPPED AS EXPECTED** (GitHub still showed `Vercel: success`)
+- **#198** first branch Preview (`dpl_Gqyfth8vvnssaLweTWwr9e4CZ5qq`, READY; previous SHA unavailable): **FAIL-OPEN BUILD AS DESIGNED**
+
+GitHub `Vercel: success` alone is **not** deployment proof. Policy: [VERCEL_DEPLOYMENT_POLICY.md](../VERCEL_DEPLOYMENT_POLICY.md) §15–16. No change to `scripts/vercel-ignore-build.sh`, allowlist, exit-code contract, or Vercel dashboard.
+
+GhostYield model status is **unchanged** (STABLE / OBSERVE after #197). GhostRegime remains **KEEP CURRENT**. GhostFlow score model untouched.
+
+Last updated: 2026-09-08
+
+---
+
 ## Current State (GhostYield — 2026-09-06 headline-yield resolver complete)
 **ACTIVE CHECKPOINT (GhostYield)**
 

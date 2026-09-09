@@ -173,6 +173,8 @@ If unclear:
 
 This classification never replaces normal tests, review, workflow safety checks, data validation, or production writer controls.
 
+`Vercel expected: BUILD|SKIP` is a **path classification**. It predicts what the Ignored Build Step should decide when valid comparison context is available. It is **not** a claim that production was rebuilt or that the GitHub Vercel check proves deployment.
+
 ---
 
 ## 11. Implementation pattern
@@ -265,3 +267,96 @@ The repair is successful when:
 - unknown paths build
 - rename/move edge cases cannot hide a runtime deletion
 - the filter fails safely on missing Git/Vercel context
+
+---
+
+## 15. Post-merge deployment verification
+
+Pre-merge **expected classification** and post-merge **observed deployment** are distinct facts.
+
+### Expected classification (pre-merge)
+
+- `Vercel expected: BUILD`
+- `Vercel expected: SKIP`
+
+Path-based. Requires a usable previous SHA to skip. Fail-open BUILD when comparison context is missing is **by design**.
+
+### Observed outcomes (post-merge)
+
+Use exactly one:
+
+| Outcome | Meaning |
+|---------|---------|
+| **DEPLOYED** | Expected BUILD actually ran: ignored-build = BUILD; Vercel build ran; state = READY; target = production; deployment commit SHA matches the intended main/merge SHA; production alias (`ghost-allocator.vercel.app`) points to that READY deployment. For user-facing/runtime changes, also verify the affected live route or endpoint when practical. |
+| **SKIPPED AS EXPECTED** | Expected SKIP actually skipped: ignored-build = SKIP; Vercel canceled/ignored the build because the command returned exit `0`; production alias remains on the previous valid READY deployment; no runtime artifact change was expected. `main` may now be ahead of the production serving commit. That is **normal** after a docs-only skipped merge. Do **not** label that as stale production. |
+| **FAIL-OPEN BUILD AS DESIGNED** | A change classified as expected SKIP still built because the ignore script could not safely establish comparison context (known example: `VERCEL_GIT_PREVIOUS_SHA` unavailable). A first branch Preview may therefore BUILD even for docs-only changes. Do **not** weaken the script to prevent this. |
+| **STOP — DEPLOYMENT MISMATCH** | Actual behavior conflicts with policy and cannot be explained by an intentional fail-open or a newer superseding deployment. Examples: expected BUILD but the latest relevant main deployment is skipped/canceled with no newer valid superseding deployment; expected SKIP but valid comparison context exists and the ignore script incorrectly chooses BUILD; production alias does not point where expected; deployment commit does not match the intended runtime merge; deployment state is failed/error; state is ambiguous and logs do not establish what happened. |
+
+### GitHub status is not deployment proof
+
+A green GitHub check **`Vercel: success`** means the GitHub/Vercel integration check completed successfully.
+
+It does **not** by itself prove:
+
+- a build ran
+- a deployment reached READY
+- production changed
+- the production alias moved
+- the merge commit is the currently serving artifact
+
+Never use that check alone as deployment verification.
+
+### CANCELED is not automatically a skip
+
+Do **not** define every CANCELED deployment as a successful skip. A deployment may be canceled for other reasons.
+
+To report **SKIPPED AS EXPECTED**, require evidence such as the build log showing:
+
+- Ignored Build Step ran
+- script classified SKIP
+- Vercel canceled because the command returned exit code `0`
+
+or equivalent authoritative evidence.
+
+If the CANCELED reason is unknown: investigate; do not guess.
+
+### Preview vs production
+
+Preview deployment behavior is useful QA but is **not** proof of production state.
+
+A first branch Preview may fail open to BUILD because `VERCEL_GIT_PREVIOUS_SHA` is unavailable.
+
+Production verification after merge must evaluate the **main-branch deployment** and **production alias** separately.
+
+Do not call a READY Preview a production deployment.
+
+### Production serving commit
+
+**Production serving commit** is the Git commit associated with the READY deployment currently holding `ghost-allocator.vercel.app`.
+
+It may legitimately differ from current GitHub `main` after a docs-only SKIP.
+
+Example after PR **#198**:
+
+- GitHub `main`: `9fc69bd804c9ccb87480f271455ed04148a1c41d`
+- Production serving runtime commit: `6db31a86d8f65e26fc6bab1df9bb261ec5b680dc`
+
+This is correct because #198 changed only documentation and was skipped.
+
+After merge, inspect: deployment state, deployment commit, target, production alias, and ignored-build logs when needed.
+
+---
+
+## 16. 2026-09-08 production observation record
+
+V1 Ignored Build Step behavior is **working as designed**. The defect repaired here is **verification/reporting semantics**, not the filter.
+
+| Event | Expected | Ignored Build Step | Deployment | Alias | Observed |
+|-------|----------|--------------------|------------|-------|----------|
+| **#197** runtime merge `6db31a8…` | BUILD | BUILD (runtime/build-relevant paths) | Production READY `dpl_CjB4bQi1CduEdgpSwsB9RjGAiat5`; `vercel build` ran; SHA `6db31a8…` | Alias includes `ghost-allocator.vercel.app` | **DEPLOYED** (live `/income-factory` served post-#197 GhostYield values) |
+| **#198** docs merge `9fc69bd…` | SKIP | SKIP: every changed file in approved V1 non-runtime allowlist (`docs/project-ops/{DECISIONS,HANDOFF,STATUS}.md`) | Production `dpl_B77Qqy8S4377jRgMFuc9pF1vC2zd` **CANCELED** because Ignored Build Step returned exit `0` | Alias stayed on prior READY #197 deployment | **SKIPPED AS EXPECTED** (GitHub still showed `Vercel: success`) |
+| **#198** first branch Preview `50ad1f8…` | SKIP path classification | BUILD: `VERCEL_GIT_PREVIOUS_SHA` is unavailable | Preview READY `dpl_Gqyfth8vvnssaLweTWwr9e4CZ5qq` (target preview / null production) | Not production | **FAIL-OPEN BUILD AS DESIGNED** |
+
+Do not rewrite historical V1 activation evidence in §12.
+
+A path classification of `Vercel expected: SKIP` does **not** guarantee that a first branch Preview will skip when Vercel lacks a usable previous SHA. That fail-open is intentional. Do not “fix” it.

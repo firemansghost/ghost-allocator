@@ -1,5 +1,27 @@
 ﻿# HANDOFF
 
+## Last Session Summary (2026-09-08 — Vercel deployment verification semantics repaired)
+Vercel V1 Ignored Build Step remains **WORKING AS DESIGNED**. Reporting contract repaired: expected path classification is not observed deployment.
+
+- GitHub `Vercel: success` **alone is not** proof of a production build, READY, alias move, or serving artifact.
+- After merge, verify deployment state / commit / target / production alias (and ignored-build logs when needed).
+- Observed outcomes: **DEPLOYED** | **SKIPPED AS EXPECTED** | **FAIL-OPEN BUILD AS DESIGNED** | **STOP — DEPLOYMENT MISMATCH**.
+- First Preview may fail-open BUILD when `VERCEL_GIT_PREVIOUS_SHA` is unavailable. Do not change the script to suppress that.
+- Production serving commit may lag `main` after a docs-only skip. Current: GitHub `main` `9fc69bd…` (#198); serving runtime `6db31a8…` (#197). That is correct.
+
+No change to `scripts/vercel-ignore-build.sh`, allowlist, exit codes, or Vercel dashboard.
+
+## Priority for Next Session
+1. Keep current V1 allowlist and ignore-build script.
+2. Always report `Vercel expected: BUILD` or `Vercel expected: SKIP`.
+3. After merge, verify actual deployment state — do not equate a green Vercel check with production deployment.
+4. `main` may be ahead of the serving runtime commit after a docs-only skip; do not call that stale production.
+5. GhostYield remains **STABLE / OBSERVE** — do not initiate another scoring change without new evidence.
+6. GhostRegime R7 remains closed / **KEEP CURRENT**.
+7. GhostFlow score model remains unchanged.
+
+---
+
 ## Last Session Summary (2026-09-06 — GhostYield headline-yield resolver complete)
 **PR #197** merged as `6db31a86d8f65e26fc6bab1df9bb261ec5b680dc`. The previously open `currentYield` headline-yield Risk fallback defect is **RESOLVED**.
 

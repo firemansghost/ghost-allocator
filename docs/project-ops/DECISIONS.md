@@ -1,5 +1,28 @@
 # DECISIONS
 
+## 2026-09-08 — Vercel green status is not deployment proof
+Choice:
+- Retain current V1 path-based Ignored Build Step **unchanged**.
+- Pre-merge `BUILD` / `SKIP` remains path classification.
+- Post-merge deployment verification requires actual Vercel deployment evidence (state, commit, target, production alias, and ignored-build logs when needed).
+- GitHub `Vercel: success` alone is **insufficient**.
+- Production serving commit may legitimately lag `main` after safe-skip merges.
+- Use standardized observed outcomes: **DEPLOYED**, **SKIPPED AS EXPECTED**, **FAIL-OPEN BUILD AS DESIGNED**, **STOP — DEPLOYMENT MISMATCH**.
+
+Why:
+- PR **#198** produced GitHub success while its production deployment was intentionally CANCELED by the Ignored Build Step (`dpl_B77Qqy8S4377jRgMFuc9pF1vC2zd`, exit `0`).
+- PR **#197** (`6db31a8…`, `dpl_CjB4bQi1CduEdgpSwsB9RjGAiat5`) remained the serving READY runtime deployment.
+- PR **#198** Preview (`50ad1f8…`, `dpl_Gqyfth8vvnssaLweTWwr9e4CZ5qq`) built because `VERCEL_GIT_PREVIOUS_SHA` was unavailable, correctly exercising fail-open behavior.
+- Therefore green GitHub status, deployment state, and serving artifact are **distinct facts**.
+
+Consequences:
+- No filter / allowlist / script / dashboard change.
+- Future post-merge reviews must verify deployment state + commit + production alias.
+- User-facing runtime changes should receive live route verification when practical.
+- Do not treat `main` ahead of the production serving commit as stale production after a documented docs-only skip.
+
+---
+
 ## 2026-09-06 — GhostYield Risk uses structure-aware headline-yield resolution
 Choice:
 - `currentYield` remains first-choice Risk headline-yield input.
